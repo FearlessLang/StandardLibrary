@@ -1,0 +1,5 @@
+package base.caps
+
+RandomSeed: ToIso[RandomSeed]{
+  mut #: Nat,
+  }

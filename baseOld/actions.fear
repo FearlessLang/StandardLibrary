@@ -1,0 +1,31 @@
+package base;
+
+// TODO: should actions be flowable? It seems like it's just a way to swallow errors?
+
+Actions: {
+  .lazy[T:*](f: mut MF[T]): mut Action[T] -> {m -> m.ok(f#)};
+  .ok[T:*](x: T): mut Action[T] -> {m -> m.ok(x)};
+  .info[T:*](info: Info): mut Action[T] -> {m -> m.info(info)};
+  }
+Action[T:*]: {
+  mut .run[R:*](m: mut ActionMatch[T,R]): R;
+  mut .map[R:*](f: mut MF[T,R]): mut Action[R] -> {m -> this.run{
+    .ok(x) -> m.ok(f#x);
+    .info(i) -> m.info(i);
+    }},
+  mut .andThen[R:*](f: mut MF[T,mut Action[R]]): mut Action[R] -> {m -> this.run{
+    .ok(x) -> f#x.run(m);
+    .info(i) -> m.info(i);
+    }};
+  mut .mapInfo(f: mut MF[Info,Info]): mut Action[T] -> {m -> this.run{
+    .ok(x) -> m.ok(x);
+    .info(i) -> m.info(f#i);
+    }};
+  mut !: T -> this.run{.ok(x) -> x, .info(i) -> Error!i};
+  mut .ok: mut Opt[T] -> this.run{.ok(x) -> Opts#x, .info(_) -> {}};
+  mut .info: Opt[Info] -> this.run{.ok(_) -> {}, .info(i) -> Opts#i};
+  }
+ActionMatch[T:*,R:*]: {
+  mut .ok(x: T): R;
+  mut .info(info: Info): R;
+  }

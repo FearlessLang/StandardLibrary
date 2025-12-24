@@ -1,0 +1,43 @@
+package base.flows
+
+_Map: {
+  #[E:*,R:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], f: read F[E, R]): mut FlowOp[R] -> Block#
+    .let sink = {Slots#[mut _Sink[E]]}
+    .return{{
+      .step(downstream) ->
+        upstream.step(sink.getOrFill{this.impl(downstream, f, sinkDecorator)}),
+      .for(downstream) ->
+        upstream.for(sink.getOrFill{this.impl(downstream, f, sinkDecorator)}),
+      .stopUp -> upstream.stopUp,
+      .isRunning -> upstream.isRunning,
+      .split -> upstream.split.map{right -> this#[E,R](sinkDecorator, right, f)},
+      .canSplit -> upstream.canSplit,
+      .isFinite -> upstream.isFinite,
+      }},
+  .impl[E:*,R:*](downstream: mut _Sink[R], f: read F[E, R], sinkDecorator: _SinkDecorator): mut _Sink[E] -> sinkDecorator#{
+    #(e) -> downstream#(f#e),
+    .stopDown -> downstream.stopDown,
+    .pushError(info) -> downstream.pushError(info),
+    },
+
+  #[C,E:*,R:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], ctx: iso ToIso[C], f: read F[iso C, E, R]): mut FlowOp[R] -> Block#
+    .openIso ctx' = ctx
+    .let sink = {Slots#[mut _Sink[E]]}
+    .return{{
+      .step(downstream) ->
+        upstream.step(sink.getOrFill{this.impl(downstream, ctx', f, sinkDecorator)}),
+      .for(downstream) ->
+        upstream.for(sink.getOrFill{this.impl(downstream, ctx', f, sinkDecorator)}),
+      .stopUp -> upstream.stopUp,
+      .isRunning -> upstream.isRunning,
+      .split -> upstream.split.map{right -> this#[C,E,R](sinkDecorator, right, ctx'.iso, f)},
+      .canSplit -> upstream.canSplit,
+      .isFinite -> upstream.isFinite,
+      }},
+  .impl[C,E:*,R:*](downstream: mut _Sink[R], ctx: mut ToIso[C], f: read F[iso C, E, R], sinkDecorator: _SinkDecorator): mut _Sink[E] ->
+    sinkDecorator#{
+      #(e) -> downstream#(f#(ctx.iso.self, e)),
+      .stopDown -> downstream.stopDown,
+      .pushError(info) -> downstream.pushError(info),
+      },
+  }

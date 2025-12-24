@@ -1,0 +1,38 @@
+package base.flows
+
+_FlatMap: {
+  #[E:*,R:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], f: read F[E, mut Flow[R]]): mut FlowOp[R] -> Block#
+    .let sink = {Slots#[mut _Sink[E]]}
+    .var[Bool] isRunning = {True}
+    .return {{'op
+      // technically this .step implementation violates the contract of FlowOp because it
+      // will call downstream multiple times per step. We could buffer things to follow the contract,
+      // but we control all consumers of .flatMap so we can just document this behavior here instead.
+      .step(downstream) -> upstream.step(sink.getOrFill{this.impl(downstream, f, op, isRunning, sinkDecorator)}),
+      .for(downstream) -> upstream.for(sink.getOrFill{this.impl(downstream, f, op, isRunning, sinkDecorator)}),
+      .stopUp -> upstream.stopUp,
+      .isRunning -> isRunning.get,
+      .split -> upstream.split.map{right -> this#(sinkDecorator, right, f)},
+      .canSplit -> upstream.canSplit,
+      .isFinite -> upstream.isFinite,
+      }},
+
+  .impl[E:*,R:*](downstream: mut _Sink[R], f: read F[E, mut Flow[R]], op: mut FlowOp[R], isRunning: mut Var[Bool], sinkDecorator: _SinkDecorator): mut _Sink[E] ->
+    sinkDecorator#{
+      #(e) -> this.flatten(
+        f#e.unwrapOp(mut _UnwrapFlowToken),
+        downstream,
+        op,
+        sinkDecorator
+        ),
+      .stopDown -> Block#(isRunning := False, downstream.stopDown),
+      .pushError(info) -> downstream.pushError(info),
+      },
+
+  .flatten[R:*](toFlatten: mut FlowOp[R], downstream: mut _Sink[R], op: mut FlowOp[R], sinkDecorator: _SinkDecorator): Void ->
+    toFlatten.for(sinkDecorator#[R]{
+      #(e) -> op.isRunning ? {.then -> downstream#e, .else -> toFlatten.stopUp},
+      .stopDown -> toFlatten.stopUp,
+      .pushError(info) -> downstream.pushError(info),
+      }),
+  }

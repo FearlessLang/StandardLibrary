@@ -1,0 +1,11 @@
+package base.caps.net
+alias base.Magic as Magic,
+alias base.Sealed as Sealed,
+
+//WebSocketServer: {}
+//
+//FWebSocketServer: F[mut System, mut WebSocketServer],Sealed{
+//  #(s) -> {},
+//  .io(io: mut IO): mut WebSocketServer
+//  }
+// https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_a_WebSocket_server_in_Java#socket_methods

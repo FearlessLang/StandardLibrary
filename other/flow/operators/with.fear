@@ -1,0 +1,33 @@
+package base.flows
+
+alias base.Debug as D,
+
+// TODO: .with is currently broken in a few different cases see the "zipLimit" test in Ex17FlowsTest.
+
+_With: {
+  #[A,B](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[A], other: mut FlowOp[B]): mut FlowOp[mut Pair[A,B]] -> Block#
+    .let sink = {Slots#[mut _Sink[A]]}
+    .var[Bool] isRunning = {True}
+    .return {{'op
+      .step(downstream) -> upstream.step(sink.getOrFill{this.impl(downstream, op, other, sinkDecorator)}),
+      .stopUp -> Block#(isRunning := False, other.stopUp, upstream.stopUp),
+      .isRunning -> isRunning.get,
+      .split -> Block#
+        .if {upstream.canSplit.not} .return {{}}
+        .if {other.canSplit.not} .return {{}}
+        .return {Opts#(this#[A,B](sinkDecorator, upstream.split!, other.split!))},
+      .canSplit -> upstream.canSplit,
+      }},
+
+  .impl[A,B](downstream: mut _Sink[mut Pair[A,B]], op: mut FlowOp[mut Pair[A,B]], other: mut FlowOp[B], sinkDecorator: _SinkDecorator): mut _Sink[A] ->
+    sinkDecorator#[A]{
+      .stopDown -> Block#(op.stopUp, downstream.stopDown),
+      .pushError(info) -> downstream.pushError(info),
+      // Note that we don't decorate the sink below. This is because we intentionally want sequential semantics for it.
+      #(a) -> other.step(sinkDecorator#[B]{
+        .stopDown -> Block#(op.stopUp, downstream.stopDown),
+        .pushError(info) -> downstream.pushError(info),
+        #(b) -> downstream#{.a -> a, .b -> b},
+        }),
+      }
+  }

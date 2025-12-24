@@ -1,0 +1,16 @@
+package base.flows
+
+_LazyFlowDuplicators: {
+  #[E:*](flow: mut Flow[E]): mut _LazyFlowDuplicator[E] -> Block#
+    .var[mut Opt[mut List[E]]] collected = {mut Opt[mut List[E]]}
+    .return {mut _LazyFlowDuplicator[E:*]: MF[mut Flow[E]]{
+      # -> collected.get.match{
+        .some(collected') -> collected'.flow,
+        .empty -> Block#
+          .let collected' = {flow.list}
+          .do {collected := (Opts#collected')}
+          .return {collected'.flow}
+        },
+      mut .collected: mut Opt[mut List[E]] -> collected*,
+      }}
+  }

@@ -1,0 +1,11 @@
+package base;
+
+Block: Sealed{
+  #[X:**, R:**](X, res: R): R -> res;
+  #[X1:**, X2:**, R:**](X1, X2, res: R): R -> res;
+  #[X1:**, X2:**, X3:**, R:**](X1, X2, X3, res: R): R -> res;
+  #[X1:**, X2:**, X3:**, X4:**, R:**](X1, X2, X3, X4, res: R): R -> res;
+  #[X1:**, X2:**, X3:**, X4:**, X5:**, R:**](X1, X2, X3, X4, X5, res: R): R -> res;
+
+  //#[R:*]: mut Block[R] -> {};
+  }

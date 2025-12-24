@@ -1,0 +1,22 @@
+package base.flows
+
+_OnePerStepSinks: _SinkDecorator{#[E:*](sink: mut _Sink[E]): mut _Sink[E] -> Block#
+  .let buffer = {List#[mut _OnePerStepElement[E]]}
+  .return {mut _OnePerStepSink[E:*]: _Sink[E]{
+    #(e) -> buffer.add{m -> m.element(e)},
+    .stopDown -> buffer.add{m -> m.stop},
+    .pushError(info) -> buffer.add{m -> m.error(info)},
+    read .isEmpty: Bool -> buffer.isEmpty,
+    mut .stepOnce: Void -> buffer.takeFirst.ifSome{e -> e.match{
+      .element(e') -> sink#e',
+      .stop -> sink.stopDown,
+      .error(info) -> sink.pushError(info),
+      }},
+    }}
+  }
+_OnePerStepElement[E:*]: {mut .match[R](m: mut _OnePerStepElementMatch[E,R]): R}
+_OnePerStepElementMatch[E:*,R:*]: {
+  mut .element(e: E): R,
+  mut .stop: R,
+  mut .error(info: Info): R,
+  }

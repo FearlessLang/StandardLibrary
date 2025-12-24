@@ -1,0 +1,11 @@
+package base.flows
+
+_AssumeFinite[E:*]: F[mut FlowOp[E], mut FlowOp[E]]{upstream -> {
+  .step(downstream) -> upstream.step(downstream),
+  .for(downstream) -> upstream.for(downstream),
+  .stopUp -> upstream.stopUp,
+  .isRunning -> upstream.isRunning,
+  .isFinite -> True,
+  .split -> upstream.split.map{right -> this#(right)},
+  .canSplit -> upstream.canSplit,
+  }}

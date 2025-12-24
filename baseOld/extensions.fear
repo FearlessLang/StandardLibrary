@@ -1,0 +1,13 @@
+package base;
+
+Extensible[S:*]:{
+  mut  .self: mut  S;
+  read .self: read S;
+  imm  .self: imm  S;
+
+  mut  #[R:*](ext: mut Extension[mut  S, R]): R -> ext#(this.self);
+  read #[R:*](ext: mut Extension[read S, R]): R -> ext#(this.self);
+  imm  #[R:*](ext: mut Extension[imm  S, R]): R -> ext#(this.self);
+  }
+Extension[S:*,R:*]:{ mut #(self: S): R }
+

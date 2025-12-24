@@ -1,0 +1,19 @@
+package base;
+
+Str:Sealed,DataType[Str]{
+  .asDataType->::;
+  +(x: ToStr): Str;
+  |(x: ToStr): Str;          // like + but inserts newline between
+  ^(x: ToStr): Str;        // concat with backticks around x.str
+  ^^(x: ToStr): Str;       // concat with double quotes around x.str
+  |:Str;//adds \n
+  ^:Str;//adds `
+  ^^:Str;//adds "
+  .hash(h) -> h.str(this.imm);
+  //.ieeeFloat:Opt[Float];
+  //.float:Opt[Float];
+  //.int:Opt[Int];
+  //.num:Opt[Num];
+  //.nat:Opt[Nat];
+  //.byte:Opt[Byte];  
+}

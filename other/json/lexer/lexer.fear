@@ -1,0 +1,186 @@
+package base.json
+
+// Follows ECMA-404 https://www.json.org/json-en.html
+// and the identical RFC 8259 https://tools.ietf.org/html/rfc8259
+LexJson: Actor[mut _LexerCtx,Str,Token]{downstream, ctx, e -> e == "\u{3}" ? {
+  .then -> Block#
+    .if {ctx.str.isEmpty.not} .do {downstream#(Tokens.unknownFragment(ctx.line.get, ctx.col.get, ctx.str))}
+    .return {ActorRes.continue},
+  .else -> ctx.mode.match{
+    .value -> Block#
+     .do {e == "\n" ? {
+       .then -> Block#(ctx.line++, ctx.col := 1),
+       .else -> Block#(ctx.col++)
+       }}
+     .if {ctx.isWhitespace(e)} .return {ActorRes.continue}
+     .if {ctx.isEmpty} .return {_LexStartingToken#(downstream, ctx, e)}
+     .do {ctx.write(e)}
+     // this will technically match on `truesefsf` but that's fine because we'll error later
+     .if {ctx.str == "true"} .return {Block#(downstream#(Tokens.true(ctx.line.get, ctx.col.get)), ctx.clear, ActorRes.continue)}
+     .if {ctx.str == "false"} .return {Block#(downstream#(Tokens.false(ctx.line.get, ctx.col.get)), ctx.clear, ActorRes.continue)}
+     .if {ctx.str == "null"} .return {Block#(downstream#(Tokens.null(ctx.line.get, ctx.col.get)), ctx.clear, ActorRes.continue)}
+     // if we have something in our buffer greater than the length of our longest token-- it's an error
+     .if {ctx.str.size > 5} .return {Block#(
+       downstream#(Tokens.unknownFragment(ctx.line.get, ctx.col.get, ctx.str)),
+       ActorRes.stop
+       )}
+     .return {ActorRes.continue},
+    //    .do {downstream#(Tokens.unknownFragment(ctx.line.get, ctx.col.get, ctx.str))}
+    //    .return {ActorRes.stop},
+    .string -> LexString#(downstream, ctx, e),
+    .stringEscape -> LexStringEscapes#(downstream, ctx, e),
+    .unicodeEscape(buf) -> LexUnicodeEscapes#(ctx, buf, e),
+    .digits -> LexNum#(downstream, ctx, e, mut LexJson),
+    }
+  }}
+
+_LexerCtxs: {#: mut _LexerCtx -> Block#
+  .let buffer = {mut ""}
+  .let mode = {Vars#[mut _LexerMode](_LexerModes.value)}
+  .let isDigit = {Regexs#"[0-9eE\\-+\\.]"}
+  .let isNumberStart = {Regexs#"[\\-0-9]"}
+  .let isWhitespace = {Regexs#"[ \\n\\r\\t]"}
+  .let isChar = {Regexs#"[\\U{0020}-\\U{10FFFF}]"}
+  .let unpairedSurrogate = {List.withCapacity[Nat](1)}
+  .let line = {Count.nat(1)}
+  .let col = {Count.nat(1)}
+  .return {mut _LexerCtx: Stringable{'ctx
+    read .isEmpty: Bool -> buffer.isEmpty,
+    mut .write(e: Str): Void -> buffer.append(e),
+    mut .clear: Void -> buffer.clear,
+    .str -> buffer.str,
+    mut .mode: mut _LexerMode -> mode.get,
+    mut .mode(next: mut _LexerMode): Void -> mode.set(next),
+    read .isDigit(ch: Str): Bool -> isDigit.isMatch(ch),
+    read .isNumberStart(ch: Str): Bool -> isNumberStart.isMatch(ch),
+    read .isWhitespace(ch: Str): Bool -> isWhitespace.isMatch(ch),
+    read .isChar(ch: Str): Bool -> isChar.isMatch(ch),
+    mut .unpairedSurrogate: mut List[Nat] -> unpairedSurrogate,
+    mut .line: mut Count[Nat] -> line,
+    mut .col: mut Count[Nat] -> col,
+    }}
+  }
+
+_LexStartingToken: Actor[mut _LexerCtx,Str,Token]{downstream, ctx, e -> Block#
+  .if {ctx.isNumberStart(e)}
+    .return {Block#(
+      ctx.write(e),
+      ctx.mode(_LexerModes.digits),
+      ActorRes.continue
+      )}
+  // TODO: this is broken because we could have `"<joining char>"` which would make `"<joining char>` the first
+  // item in our list. JSON spec requires us to parse as UTF8 chars not as grapheme clusters, so we need to add a
+  // .utf8 method to Str which returns a Bytes or List[Byte] or something like that.
+  .if {e == "\""} .return {Block#(
+    ctx.mode(_LexerModes.string),
+    ActorRes.continue
+    )}
+  .if {e == "["} .return {Block#(downstream#(Tokens.os(ctx.line.get, ctx.col.get)), ActorRes.continue)}
+  .if {e == "]"} .return {Block#(downstream#(Tokens.cs(ctx.line.get, ctx.col.get)), ActorRes.continue)}
+  .if {e == "{"} .return {Block#(downstream#(Tokens.oc(ctx.line.get, ctx.col.get)), ActorRes.continue)}
+  .if {e == "}"} .return {Block#(downstream#(Tokens.cc(ctx.line.get, ctx.col.get)), ActorRes.continue)}
+  .if {e == ","} .return {Block#(downstream#(Tokens.comma(ctx.line.get, ctx.col.get)), ActorRes.continue)}
+  .if {e == ":"} .return {Block#(downstream#(Tokens.colon(ctx.line.get, ctx.col.get)), ActorRes.continue)}
+  .do {ctx.write(e)}
+  .return {ActorRes.continue}
+  }
+
+TokenMatch[R:**]: {
+  mut .true: R,
+  mut .false: R,
+  mut .null: R,
+  mut .quoted(chars: Str): R,
+  mut .numeric(num: Float): R,
+
+  mut .os: R,
+  mut .cs: R,
+  mut .oc: R,
+  mut .cc: R,
+  mut .comma: R,
+  mut .colon: R,
+
+  // The error case:
+//  mut .unknownFragment(bufferContents: Str): R,
+  }
+Tokens: {
+  .true(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.true,
+    .line -> line,
+    .col -> col,
+    },
+  .false(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.false,
+    .line -> line,
+    .col -> col,
+    },
+  .null(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.null,
+    .line -> line,
+    .col -> col,
+    },
+  .os(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.os,
+    .line -> line,
+    .col -> col,
+    },
+  .cs(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.cs,
+    .line -> line,
+    .col -> col,
+    },
+  .oc(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.oc,
+    .line -> line,
+    .col -> col,
+    },
+  .cc(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.cc,
+    .line -> line,
+    .col -> col,
+    },
+  .comma(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.comma,
+    .line -> line,
+    .col -> col,
+    },
+  .colon(line: Nat, col: Nat): Token -> {
+    .match(m) -> m.colon,
+    .line -> line,
+    .col -> col,
+    },
+  .quoted(line:Nat, col:Nat, chars: Str): Token -> {
+    .match(m) -> m.quoted(chars),
+    .line -> line,
+    .col -> col,
+    },
+  .numeric(line: Nat, col: Nat, num: Float): Token -> {
+    .match(m) -> m.numeric(num),
+    .line -> line,
+    .col -> col,
+    },
+//  .unknownFragment(bufferContents: Str): Token -> {m -> m.unknownFragment(bufferContents)},
+  .unknownFragment(line: Nat, col: Nat, bufferContents: Str): Token -> Error.msg (mut "Unknown fragment in JSON code:\n" + bufferContents + " at " + (line.str) + ":" + (col.str)),
+  }
+Token: {
+  read .match[R:**](m: mut TokenMatch[R]): R,
+  read .line: Nat,
+  read .col: Nat,
+  }
+
+_LexerModeMatch[R:**]: {
+  mut .value: R,
+  mut .string: R,
+  mut .stringEscape: R,
+  mut .unicodeEscape(buffer: mut List[Str]): R,
+  mut .digits: R,
+  }
+_LexerModes: {
+  .value: mut _LexerMode -> {m -> m.value},
+  .string: mut _LexerMode -> {m -> m.string},
+  .stringEscape: mut _LexerMode -> {m -> m.stringEscape},
+  .unicodeEscape: mut _LexerMode -> Block#
+    .let[mut List[Str]] buffer = {List.withCapacity(4)}
+    .return {{m -> m.unicodeEscape(buffer)}},
+  .digits: mut _LexerMode -> {m -> m.digits},
+  }
+_LexerMode: {mut .match[R:**](m: mut _LexerModeMatch[R]): R}

@@ -1,0 +1,9 @@
+package base.json
+
+ValidateInput: {#(input: Str): mut Action[Str] -> Block#
+  .let invalidChars = {Regexs#"[[^\\U{1F}-\\U{10FFFF}]&&[^\\U{20}\\U{A}\\U{D}\\U{9}]]"}
+  .return {{res -> invalidChars.isMatch(input) ? {
+    .then -> res.info(Infos.msg("JSON may not contain any non-whitespace control characters.")),
+    .else -> res.ok(input + "\u{3}"), // append END OF TEXT character for the lexer
+    }}}
+  }

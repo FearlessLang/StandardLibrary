@@ -1,0 +1,38 @@
+package base.flows
+
+// I could have .step with a read sink (so we know that sink operation can be parallelised) _and_ a .step with a mut sink
+// which must be sequential. However, this adds implementation burden for people making flowable data structures and introduces
+// new sources of runtime exceptions (i.e. accidentally calling the non .seq and it throwing because it would have to be
+// unimplemented). Because _Sink/2 is a private trait, we can just manually make sure that a _Sink that would be unsafe
+// to parallelise never runs in parallel. This should be easy because basically all parallel implementations of _Sink
+// will be Magic!.
+
+FlowOp[E:*]: {
+  mut .step(sink: mut _Sink[E]): Void,
+  mut .stopUp: Void,
+  mut .isRunning: Bool,
+  mut .for(downstream: mut _Sink[E]): Void -> Block#
+    .loop {Block#
+      .if {this.isRunning.not} .return {Block#(downstream.stopDown, ControlFlow.break)}
+      .do {this.step(downstream)}
+      .return {ControlFlow.continue}
+      }
+    .return {Void},
+  mut .isFinite: Bool -> True,
+  /// Mutates the data source for this flow to be a sub-section of the original input. This is useful for fork-join
+  /// data-parallelism. Returning an empty optional either means that there is no data left to split, the
+  /// data source does not think splitting further would be beneficial for parallelism, or that the data source
+  /// does not wish to be run in data parallel. On the other side, implementing this method does not guarantee that
+  /// this flow operator will be run in data parallel. That decision is up to the compiler and runtime.
+  mut .split: mut Opt[mut FlowOp[E]] -> {},
+  read .canSplit: Bool -> False,
+  }
+
+
+// IMPORTANT NOTE: REUSE SINK OBJECTS! THE IDENTITY IS IMPORTANT FOR WHEN THEY ARE RAN IN PARALLEL!!!!!
+_SinkDecorator: {#[E:*](sink: mut _Sink[E]): mut _Sink[E]}
+_Sink[T:*]: {
+  mut #(x: T): Void,
+  mut .pushError(info: Info): Void,
+  mut .stopDown: Void,
+  }

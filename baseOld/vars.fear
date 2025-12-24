@@ -1,0 +1,66 @@
+package base
+
+Vars: {
+  #[X:*](x: X): mut Var[X] -> Block#
+    .let[mut _MagicVarImpl[X]] inner = {_MagicVarImpl#x}
+    .return {{
+      .get -> inner.get,
+      .swap(x') -> inner.swap(x'),
+      }},
+  }
+Var: Vars{}
+Var[X:*]: Sealed{
+  mut  .get: X,
+  read .get: read/imm X,
+  mut  *: X -> this.get,
+  read *: read/imm X -> this.get,
+
+  mut .swap(x: X): X,
+  mut :=(x: X): Void -> Block#(this.swap(x)),
+  mut .set(x: X): Void -> this := x,
+  mut <-(f: mut UpdateVar[X]): X -> this.swap(f#(this*)),
+  mut .update(f: mut UpdateVar[X]): X -> this <- f,
+  }
+UpdateVar[X:*]: { mut #(x: X): X }
+
+Count[N]: Var[N]{
+  mut ++: Void,
+  mut --: Void,
+  mut +=(n: N): Void,
+  mut -=(n: N): Void,
+  mut *=(n: N): Void,
+  }
+Count:{
+  #(n: Int): mut Count[Int] -> this.int(n),
+  .int(n: Int): mut Count[Int] -> Block#
+    .var[Int] c = {n}
+    .return {{
+      .get -> c.get,
+      .swap(x) -> c.swap(x),
+      ++ -> c := (c.get + +1),
+      -- -> c := (c.get - +1),
+      +=(n2) -> c := (c.get + n2),
+      -=(n2) -> c := (c.get - n2),
+      *=(n2) -> c := (c.get * n2),
+      }},
+  .nat(n: Nat): mut Count[Nat] -> Block#
+    .var[Nat] c = {n}
+    .return {{
+      .get -> c.get,
+      .swap(x) -> c.swap(x),
+      ++ -> c := (c.get + 1),
+      -- -> c := (c.get - 1),
+      +=(n2) -> c := (c.get + n2),
+      -=(n2) -> c := (c.get - n2),
+      *=(n2) -> c := (c.get * n2),
+      }}
+  }
+
+// Var as defined in the formal reduction of Fearless.
+// We capture this in the richer Var.
+_MagicVarImpl: {#[X:*](x: X): mut _MagicVarImpl[X] -> Magic!}
+_MagicVarImpl[X:*]: {
+  mut  .get: X,
+  read .get: read/imm X,
+  mut .swap(x: X): X,
+  }

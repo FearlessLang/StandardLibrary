@@ -1,0 +1,23 @@
+package base.json
+
+LexNum: {#(
+  downstream: mut Sink[Token],
+  ctx: mut _LexerCtx,
+  e: Str,
+  parent: mut Actor[mut _LexerCtx,Str,Token]
+  ): ActorRes -> Block#
+    .do {Block#(ctx.col++)}
+    .if {ctx.isDigit(e)} .return {Block#(ctx.write(e), ActorRes.continue)}
+    .return {ctx.str.float.run{
+      .ok(f) -> Block#(
+        downstream#(Tokens.numeric(ctx.line.get, ctx.col.get, f)),
+        ctx.clear,
+        ctx.mode(_LexerModes.value),
+        parent#(downstream, ctx, e)
+        ),
+      .info(i) -> Block#(
+        downstream#(Tokens.unknownFragment(ctx.line.get, ctx.col.get, ctx.str)),
+        ActorRes.stop
+        ),
+      }}
+  }

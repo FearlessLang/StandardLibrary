@@ -1,0 +1,128 @@
+package base.flows
+
+// This could be implemented as an actor, but I have it special cased because it forces a Flow to be finite and gives
+// it a static size, which is more info than we could get if this was just an ActorImpl.
+_Limit: {
+  #[E:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], n: Nat): mut FlowOp[E] -> Block#
+    .let[mut Count[Nat]] remaining = {Count.nat(n)}
+    .let[mut Var[mut Opt[mut _Sink[E]]]] sink = {Vars#{}}
+    .return {{ 'runner
+      .stopUp -> Block#(remaining := 0, upstream.stopUp),
+      .isRunning -> remaining* > 0 & (upstream.isRunning),
+//      .stopDown -> upstream.stop,
+//      .isRunning -> upstream.isRunning,
+      .isFinite -> True,
+      .step(downstream) -> sink.get.match{
+        .some(sink') -> upstream.step(sink'),
+        .empty -> Block#
+          .if {n == 0} .return {runner.stopUp}
+          .do {sink := (Opts#(sinkDecorator#[E]{
+            .stopDown -> downstream.stopDown,
+            #(e) -> Block#
+              .if {remaining.get <= 0} .return {runner.stopUp}
+              .do {downstream#e}
+              .if {remaining.update{r -> r - 1} <= 1} .return {runner.stopUp}
+              .return {{}},
+            .pushError(info) -> remaining.get == 0 ? {
+              .then -> {},
+              .else -> downstream.pushError(info),
+              },
+            }))}
+          .return {upstream.step(sink.get!)}
+        },
+//      mut .for[R](sink: mut _Sink[E]): Void -> Block#
+//        .if {n == 0} .return {ControlFlow.break[R]}
+//        .return {upstream.for{e -> Block#
+//          .if {remaining-- == 0} .return {ControlFlow.break[R]}
+//          .return {sink#e}
+//          }}
+      }},
+  }
+
+_Actor: {
+  // Delegates to _InternalActor to unwrap the iso state so it can be captured as whatever the user wants.
+  #[S:*,E:*,R:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], state: iso S, f: read ActorImpl[S,E,R]): mut FlowOp[imm R] ->
+    _InternalActor#[S,E,R](sinkDecorator, upstream, state, f),
+
+  .anyRet[S:*,E:*,R:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], state: iso S, f: read ActorImplMut[S,E,R]): mut FlowOp[R] ->
+    _InternalActor.anyRet[S,E,R](sinkDecorator, upstream, state, f),
+  }
+_InternalActor: {
+  #[S:*,E:*,R:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], state: S, f: read ActorImpl[S,E,R]): mut FlowOp[imm R] -> Block#
+    .let[mut Var[Bool]] isRunning = {Vars#[Bool]True}
+    .let[mut Var[mut Opt[mut _Sink[E]]]] sink = {Vars#{}}
+    .return {{'op
+      .stopUp -> op.isRunning ? {
+       .then -> Block#(isRunning := False, upstream.stopUp),
+       .else -> {}
+       },
+      .isRunning -> isRunning*,
+      .isFinite -> upstream.isFinite,
+      .step(downstream) -> sink.get.match{
+        .some(sink') -> upstream.step(sink'),
+        .empty -> Block#
+          .let[mut _ActorSink[imm R]] actorSink = {_ActorSinks#downstream}
+          .do {sink := (Opts#(sinkDecorator#[E]{
+            .stopDown -> Block#(downstream.stopDown, op.stopUp),
+            #(e) -> isRunning.get ? {
+              .then -> f#(actorSink, state, e).match{
+                .continue -> {},
+                .stop -> Block#(downstream.stopDown, isRunning := False),
+                },
+              .else -> op.stopUp,
+              },
+            .pushError(info) -> isRunning.get ? {
+              .then -> downstream.pushError(info),
+              .else -> {},
+              },
+            }))}
+          .return {upstream.step(sink.get!)}
+        },
+      }},
+
+  .anyRet[S:*,E:*,R:*](sinkDecorator: _SinkDecorator, upstream: mut FlowOp[E], state: mut S, f: read ActorImplMut[S,E,R]): mut FlowOp[R] -> Block#
+    .let[mut Var[Bool]] isRunning = {Vars#[Bool]True}
+    .let[mut Var[mut Opt[mut _Sink[E]]]] sink = {Vars#{}}
+    .return {{'op
+      .stopUp -> op.isRunning ? {
+       .then -> Block#(isRunning := False, upstream.stopUp),
+       .else -> {}
+       },
+      .isRunning -> isRunning*,
+      .step(downstream) -> sink.get.match{
+        .some(sink') -> upstream.step(sink'),
+        .empty -> Block#
+          .do {sink := (Opts#(sinkDecorator#[E]{
+            .stopDown -> Block#(downstream.stopDown, op.stopUp),
+            #(e) -> f#(_ActorSinks#downstream, state, e).match{
+              .continue -> {},
+              .stop -> Block#(downstream.stopDown, isRunning := False),
+              },
+            .pushError(info) -> isRunning.get ? {
+              .then -> downstream.pushError(info),
+              .else -> {},
+              },
+            }))}
+          .return {upstream.step(sink.get!)}
+        },
+      }},
+  }
+
+ActorImpl[S:*,E:*,R:*]: { read #(downstream: mut _ActorSink[imm R], state: S, e: E): ActorRes }
+ActorImplMut[S:*,E:*,R:*]: { read #(downstream: mutH _ActorSink[R], state: mutH S, e: E): ActorRes }
+// Alternatively, we could use an isopod and check if the isopod still has content before/after running
+// the actor. Of course, the actor could send the isopod downstream, which would enable parallelism to be observed
+// by virtue of it crashing. This could happen anyway in parallel so I think it'd be fine.
+//ActorImplMut[S:*,E:*,R:*]: { read #(downstream: mut _Sink[R], state: mut IsoPod[S], e: E): ActorRes }
+
+ActorRes: Sealed{
+  .match[R:*](m: mut ActorResMatch[R]): R -> m.continue,
+  .continue: ActorRes -> {.match(m) -> m.continue},
+  .stop: ActorRes -> {.match(m) -> m.stop},
+  }
+ActorResMatch[R:*]: { mut .continue: R, mut .stop: R, }
+
+_ActorSinks: {#[T:*](sink: mut _Sink[T]): mut _ActorSink[T] -> mut _ActorSink[T:*]: {
+  mut #(x: T): Void -> sink#x,
+  mut .pushError(info: Info): Void -> sink.pushError(info),
+  }}

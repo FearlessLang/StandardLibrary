@@ -1,0 +1,84 @@
+package base
+Str: Sealed,Stringable,base.flows.Joinable[Str],ToHash{
+  read .isEmpty: Bool,
+  .size: Nat,
+  +(other: read Stringable): Str,
+  ==(other: Str): Bool,
+  !=(other: Str): Bool,
+  .startsWith(other: Str): Bool,
+  .assertEq(other: Str): Void,
+  .assertEq(message: Str, other: Str): Void,
+  .substring(start: Nat, end: Nat): Str,
+  .charAt(index: Nat): Str,
+  /// Normalise using NFC. See https://www.unicode.org/reports/tr15/ for more information.
+  .normalise: Str,
+  mut .append(other: read Stringable): Void,
+  mut +(other: read Stringable): mut Str,
+  mut .clear: Void,
+  .flow: mut Flow[Str],
+
+  // Conversions
+  .float: mut Action[Float],
+  .utf8: List[Byte],
+  }
+
+Stringable: {
+  read .str: Str,
+  }
+
+UTF16: Sealed{
+  .fromCodePoint(codePoint: Nat): Str -> Magic!,
+  .isSurrogate(codePoint: Nat): Bool -> codePoint >= 55296 & (codePoint < 57344),
+  .fromSurrogatePair(high: Nat, low: Nat): Str -> Magic!,
+  }
+
+UTF8: Sealed{
+  .fromBytes(utf8Bytes: read List[Byte]): mut Action[Str] -> Magic!,
+  }
+
+AtomiseStr: {
+  /// Go through a unicode string byte-by-byte splitting it into a flow of the smallest possible character groupings
+  /// that make up one valid unicode codepoint. This is useful for tokenising unicode strings where you do not want
+  /// joining characters to be significant.
+  #(raw: Str): mut Flow[Str] -> raw.utf8.flow
+    .actor[mut List[Byte], Str](List#, {downstream, buffer, byte -> Block#
+      .do {buffer.add(byte)}
+      .return {UTF8.fromBytes(buffer).run{
+        .ok(str) -> Block#(buffer.clear, downstream#str, {}),
+        .info(_) -> {},
+        }}
+      }),
+  }
+
+SimpleStr: Str{}
+
+StrMap[V:*]: LinkedLens[Str, V]{k1, k2 -> k1 == k2}
+
+_StrInstance: Str{
+  .size -> Magic!,
+  .isEmpty -> Magic!,
+  +(other) -> Magic!,
+  ==(other) -> Magic!,
+  !=(other) -> Magic!,
+  .startsWith(other) -> Magic!,
+  .assertEq(other) -> Magic!,
+  .assertEq(other, message) -> Magic!,
+  .str -> Magic!,
+  .substring(_,_) -> Magic!,
+  .charAt(_) -> Magic!,
+  .normalise -> Magic!,
+  .append(_) -> Magic!,
+  .clear -> Magic!,
+  .flow -> Magic!,
+  .join(_) -> Magic!,
+  .hash(h) -> Magic!,
+  .float -> Magic!,
+  .utf8 -> Magic!,
+  }
+
+_StrHelpers: {
+  .assertEq(expected: Str, actual: Str): Void ->
+    Assert!(expected == actual, "Expected: "+expected+"\nActual: "+actual, {{}}),
+  .assertEq(expected: Str, actual: Str, message: Str): Void ->
+    Assert!(expected == actual, message+"\nExpected: "+expected+"\nActual: "+actual, {{}}),
+  }

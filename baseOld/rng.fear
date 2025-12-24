@@ -1,0 +1,35 @@
+package base.rng
+alias base.Block as Block,
+alias base.Nat as Nat, alias base.Float as Float,
+alias base.F as F,
+alias base.Infos as Infos,
+alias base.Sealed as Sealed,
+
+/// https://en.wikipedia.org/wiki/Linear_congruential_generator,
+/// parameters from musl (https://git.musl-libc.org/cgit/musl/tree/src/prng/rand.c)
+/// We actually only take the highest half of the bits because the low order bits have poor randomness
+FRandom: F[Nat, mut Random]{seed -> Block#
+  .if {seed == 0} .error {Infos.msg "Seed may not be zero"}
+  .var[Nat] prev = {seed}
+  .return {{'self
+    .nat -> Block#
+      .do {prev := ((prev.get) * 6364136223846793005 + 1 .shiftRight 33)}
+      .return {prev.get},
+
+    .self -> self,
+    .iso -> FRandom#(prev.get),
+    }}
+  }
+Random: base.ToIso[Random]{
+  /// Generate a random number between zero and 2147483647 (2^32)
+  mut .nat: Nat,
+  /// Generate a random float in the range. This is a simple approach, and may have some bias. A more
+  /// accurate approach with a rejection loop may be used in the future.
+  mut .nat(minInclusive: Nat, maxExclusive: Nat): Nat -> Block#
+     .assert({minInclusive <= maxExclusive}, "Cannot generate a random number, "+(minInclusive.str)+" is greater than "+(maxExclusive.str))
+     .return {(this.float * (maxExclusive.float - (minInclusive.float)) + (minInclusive.float)).floor.nat},
+
+  /// Generate a random number between zero and one (inclusive)
+  mut .float: Float -> this.nat.float / 2147483647.0,
+  mut .iso: iso Random,
+  }

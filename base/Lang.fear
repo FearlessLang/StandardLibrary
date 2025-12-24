@@ -1,0 +1,63 @@
+package base;
+
+Main: { .main(s: mut System): Void }
+Sealed: {}
+Void: Sealed{}
+WidenTo[T]:{}
+InferUnknown:Sealed{}
+InferErr:Sealed{}
+
+Abort: Sealed{![R:**]: R -> this!} // can be optimised to just terminate (goes stuck)
+Magic: Sealed{
+  ![R:**]: R -> this!; // magic'd out to tell us what we forgot to implement
+  ![R:**](_: mut _System): R -> this!;
+  }
+Debug: Sealed{
+  #[T:*](x: T, f:F[T,Str]): T -> Block#(this#(f#x),x);
+  #(x: read ToStr): Void -> Magic!;
+  .identify[T](x: read T): Str -> Magic!;//TODO: can this break observability?
+  }
+As[X:*]: Sealed{ #(x: X): X -> x }
+
+Let: {
+  #[V:*,R:*](l: mut Let[V, R]): R -> l.in(l.var);
+  }
+Let[V:*,R:*]: { mut .var: V; mut .in(v: V): R }
+
+F[R:**]: { read #: R; }
+F[A:**,R:**]: { read #(a: A): R }
+F[A:**, B:**, R:**]: { read #(a: A, b: B): R }
+F[A:**, B:**, C:**, R:**]: { read #(a: A, b: B, c: C): R }
+F[A:**, B:**, C:**, D:**, R:**]: { read #(a: A, b: B, c: C, d: D): R }
+
+MF[R:**]: { mut #: R }
+MF[A:**,R:**]: { mut #(a: A): R }
+MF[A:**, B:**, R:**]: { mut #(a: A, b: B): R }
+MF[A:**, B:**, C:**, R:**]: { mut #(a: A, b: B, c: C): R }
+MF[A:**, B:**, C:**, D:**, R:**]: { mut #(a: A, b: B, c: C, d: D): R }
+  
+//To slowly move to other files
+
+UStr:Sealed,WidenTo[UStr]{}
+ToUStr:{ read .uStr: UStr }
+
+StrProcs:{
+  imm .add(a:Str,b:ToStr): mut StrProc -> this.add(a,b);
+  }
+StrProc:{
+  mut .add(a:Str,b:ToStr): mut StrProc -> this.add(a,b);
+  mut .build(a:Str): Str-> a;
+  }
+UStrProcs:{
+  imm .add(a:UStr,b:ToUStr): mut UStrProc -> this.add(a,b);
+  }
+UStrProc:{
+  mut .add(a:UStr,b:ToUStr): mut UStrProc -> this.add(a,b);
+  mut .build(a:UStr): UStr-> a;
+  }
+//----To eventually delete
+Box[T:*]: {
+  mut  .get: T;
+  read .get: read/imm T;
+  imm  .get: imm T;
+  }  

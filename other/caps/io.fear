@@ -1,0 +1,36 @@
+package base.caps
+alias base.List[base.Str] as Path,
+
+/// Capability for reading and writing to files and devices, including stdout and stderr.
+/// This capability is for local IO, there is a different capability for network IO and IPC IO.
+IO: ToIso[IO]{
+  mut .print(msg: Str): Void,
+  mut .println(msg: Str): Void,
+  mut .printErr(msg: Str): Void,
+  mut .printlnErr(msg: Str): Void,
+  mut .accessR(path: Path): mut ReadPath,
+  mut .accessW(path: Path): mut WritePath,
+  mut .accessRW(path: Path): mut ReadWritePath,
+  mut .env: mut Env,
+  mut .iso: iso IO,
+  }
+UnrestrictedIO: F[mut System, mut IO],Sealed{sys -> sys.io}
+
+ReadPath: _ReadPath,ToIso[ReadPath]{}
+_ReadPath: {
+  mut .accessR(path: Path): mut ReadPath,
+//  mut .lines: mut Action[mut Flow[Str]],
+  mut .readStr: mut Action[Str],
+  }
+WritePath: _WritePath,ToIso[WritePath]{}
+_WritePath: {
+  mut .accessW(path: Path): mut WritePath,
+  }
+ReadWritePath: _ReadPath,_WritePath,ToIso[ReadWritePath]{
+  mut .accessRW(path: Path): mut ReadWritePath,
+  }
+
+FileHandleMode:Stringable,Sealed{}
+Read:FileHandleMode{ "r" }
+Write:FileHandleMode{ "r+" }
+Create:FileHandleMode{ "w+" }

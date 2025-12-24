@@ -1,0 +1,16 @@
+package base.test
+
+alias base.Block as Block,
+alias base.Sealed as Sealed,
+alias base.Void as Void,
+alias base.Bool as Bool, alias base.True as True, alias base.False as False,
+alias base.Nat as Nat, alias base.Int as Int, alias base.Float as Float,
+alias base.Str as Str,
+alias base.F as F, alias base.Consumer as Consumer,
+alias base.Main as AppMain, alias base.caps.System as System,
+alias base.List as List,
+alias base.caps.UnrestrictedIO as UnrestrictedIO, alias base.caps.IO as IO,
+alias base.Opt as Opt,
+alias base.Info as Info,
+alias base.flows.Flow as Flow,
+alias base.caps.CapTrys as CapTrys, alias base.caps.CapTry as CapTry,

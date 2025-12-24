@@ -1,0 +1,12 @@
+package base;
+
+//Either:{}
+Either[A:*,B:*]:{
+  mut  .match[R:**](m: mut EitherMatch[A, B, R]): R;
+  read .match[R:**](m: mut EitherMatch[read A, read B, R]): R;
+  imm  .match[R:**](m: mut EitherMatch[imm A, imm B, R]): R;
+  }
+EitherMatch[A:*,B:*,R:**]:{
+  mut .a(x: A): R;
+  mut .b(x: B): R;
+  }

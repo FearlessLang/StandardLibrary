@@ -1,0 +1,52 @@
+package base
+
+Res:{
+  #[T:*](x: T): mut Res[T] -> { .match(m) -> m.a(x), },
+  .ok[T:*,E:*](x: T): mut Res[T, E] -> { .match(m) -> m.a(x), },
+  .err[T:*,E:*](x: E): mut Res[T, E] -> { .match(m) -> m.b(x), },
+  }
+Res[T:*]:Res[T, Info]{}
+Res[T:*,E:*]:Either[T, E]{
+  mut  .resMatch[R:**](m: mut ResMatch[T, E, R]): R -> this.match(m),
+  read .resMatch[R:*](m: mut ResMatch[read T, read E, R]): R -> this.match(m),
+  imm  .resMatch[R:*](m: mut ResMatch[imm T, imm E, R]): R -> this.match(m),
+
+  mut  !: T -> this.resMatch[T]{ .ok(x) -> x, .err(_) -> Error.msg "Res was not ok" },
+  read !: read T -> this.resMatch[read T]{ .ok(x) -> x, .err(_) -> Error.msg "Res was not ok" },
+  imm  !: imm T -> this.resMatch[imm T]{ .ok(x) -> x, .err(_) -> Error.msg "Res was not ok" },
+
+  mut  .map[R:*](f: mut ResMap[T, E, R]): mut Res[R, E] -> this.match(f),
+  read .map[R:*](f: mut ResMap[read T, read E, R]): mut Res[R, read E] -> this.match(f),
+  imm  .map[R:*](f: mut ResMap[imm T, imm E, R]): mut Res[R, imm E] -> this.match(f),
+
+  mut  .mapErr[R:*](f: mut ResMapErr[T, E, R]): mut Res[T, R] -> this.match(f),
+  read .mapErr[R:*](f: mut ResMapErr[read T, read E, R]): mut Res[read T, R] -> this.match(f),
+  imm  .mapErr[R:*](f: mut ResMapErr[imm T, imm E, R]): mut Res[imm T, R] -> this.match(f),
+
+  mut  .ok: mut Opt[T] -> this.resMatch{ .ok(x) -> Opts#x, .err(_) -> {} },
+  read .ok: mut Opt[read T] -> this.resMatch{ .ok(x) -> Opts#x, .err(_) -> {} },
+  imm  .ok: imm Opt[imm T] -> this.resMatch{ .ok(x) -> Opts#x, .err(_) -> {} },
+
+  mut  .err: mut Opt[E] -> this.resMatch{ .ok(_) -> {}, .err(e) -> Opts#e },
+  read .err: mut Opt[read E] -> this.resMatch{ .ok(_) -> {}, .err(e) -> Opts#e },
+  imm  .err: imm Opt[imm E] -> this.resMatch[mut Opt[imm E]]{ .ok(_) -> {}, .err(e) -> Opts#e },
+
+  read .isErr: Bool -> this.resMatch{ .err(_) -> True, .ok(_) -> False },
+  read .isOk: Bool -> this.resMatch{ .err(_) -> False, .ok(_) -> True },
+  }
+
+ResMatch[T:*,E:*,R:**]:EitherMatch[T, E, R]{
+  .a(x) -> this.ok(x), .b(x) -> this.err(x),
+  mut .ok(x: T): R,
+  mut .err(x: E): R
+  }
+ResMap[T:*,E:*,R:*]:ResMatch[T, E, mut Res[R, E]]{
+  mut #(x: T): R,
+  .ok(x) -> Res.ok[R, E](this#x),
+  .err(x) -> Res.err[R, E](x),
+  }
+ResMapErr[T:*,E:*,R:*]:ResMatch[T, E, mut Res[T, R]]{
+  mut #(x: E): R,
+  .ok(x) -> Res.ok[T, R](x),
+  .err(x) -> Res.err[T, R](this#x),
+  }

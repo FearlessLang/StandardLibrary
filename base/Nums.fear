@@ -1,0 +1,240 @@
+package base;
+
+_RangeOps[T]:{
+  .inRange(lo:T, hi:T):Bool;        /// true iff this in [lo,hi]; throws if lo>hi or lo/hi are NaN
+  .inRangeOpen(lo:T, hi:T):Bool;    /// true iff this in (lo,hi); throws if lo>hi or lo/hi are NaN
+  .inRangeLoOpen(lo:T, hi:T):Bool;  /// true iff this in (lo,hi]; throws if lo>hi or lo/hi are NaN
+  .inRangeHiOpen(lo:T, hi:T):Bool;  /// true iff this in [lo,hi); throws if lo>hi or lo/hi are NaN
+  .clamp(lo:T, hi:T):T;             /// clamp into [lo,hi]; throws if lo>hi
+}
+// Num: unlimited-precision rational (exact arithmetic).
+Num:Sealed,DataType[Num],_RangeOps[Num],_AssertEq[Num],_AssertOrd[Num],_AssertApprox[Num],_AssertRange[Num]{
+  +(x:Num):Num;                     /// exact add
+  -(x:Num):Num;                     /// exact sub
+  *(x:Num):Num;                     /// exact mul
+  /(x:Num):Num;                     /// exact div; throws iff x==0
+  .abs:Num;                         /// exact abs
+  .sqrt:Float;                      /// approximate sqrt;s NaN iff this is negative
+  .floor:Num;                       /// floor(this);
+  .ceil:Num;                        /// ceil(this);
+  .trunc0:Num;                      /// trunc toward 0;
+  .round:Num;                       /// round-to-nearest;
+  .isInteger:Bool;                  /// true iff denominator == 1
+
+  read .int:Int;                    /// clamp to [minInt,maxInt] after trunc0 (never throws)
+  read .nat:Nat;                    /// clamp to [0,maxNat] after trunc0 (never throws)
+  read .byte:Byte;                  /// clamp to [0,maxByte] after trunc0 (never throws)
+  read .float:Float;                /// approximate; (never throws)
+
+  read .intExact:Opt[Int];          /// .some if integer and in [minInt,maxInt]; .empty otherwise
+  read .natExact:Opt[Nat];          /// .some if integer and in [0,maxNat]; .empty otherwise
+  read .byteExact:Opt[Byte];        /// .some if integer and in [0,maxByte]; .empty otherwise
+
+  .hash(h) -> h.num(this.imm);      /// hash via hasher
+  .asDataType->::;                  /// DataType witness
+}
+
+/// Float: 64 bits IEEE values. Note: ==/order instead follow the usual rules:
+/// - NaN == NaN (all different NaNs equal)
+/// - -0.0 == +0.0
+/// Method Hasher.float(Float) must respect this ordering
+Float:Sealed,DataType[Float],_RangeOps[Float],_AssertEq[Float],_AssertOrd[Float],_AssertApprox[Float]{
+  +(x:Float):Float;                 /// IEEE add
+  -(x:Float):Float;                 /// IEEE sub
+  *(x:Float):Float;                 /// IEEE mul
+  /(x:Float):Float;                 /// IEEE div: 0 yields +/-Inf or NaN (never throws)
+  .abs:Float;                       /// IEEE abs
+  .sqrt:Float;                      /// IEEE sqrt; returns NaN iff this is negative (excluding -0)
+  .floor:Int;                       /// floor(this) after handling NaN/Inf (policy: clamp+trunc0 into Int)
+  .ceil:Int;                        /// ceil(this)  (policy: clamp+trunc0 into Int)
+  .trunc0:Int;                      /// trunc toward 0 (policy: clamp+trunc0 into Int)
+  .round:Int;                       /// round-to-nearest (policy: clamp into Int)
+  **(x:Float):Float;                /// IEEE pow
+  .isNaN:Bool;                      /// true iff NaN (any payload)
+  .isInfinite:Bool;                 /// true iff +/-Inf
+  .isPosInfinity:Bool;              /// true iff +Inf
+  .isNegInfinity:Bool;              /// true iff -Inf
+  .isNegZero:Bool;                  /// true iff raw bits are -0.0
+  .isPosZero:Bool;                  /// true iff raw bits are +0.0
+
+  .ieeeEq(x:Float):Bool;            /// IEEE == (NaN != NaN), but still +0.0 == -0.0
+  .ieeeSameBits(x:Float):Bool;      /// raw bits compare: it distinguishes NaN payloads and signed zero
+  .ieeeStr:Str;                     /// IEEE 754 round-trip decimal string for this Float (includes NaN/Inf)
+  .ieeeRemainder(d:Float):Float;    /// IEEE remainder r = x - n*d with n nearest integer to x/d (ties-to-even)
+
+  read .int:Int;                    /// clamp+trunc0; NaN->0; +Inf->maxInt; -Inf->minInt (never throws)
+  read .nat:Nat;                    /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
+  read .byte:Byte;                  /// clamp+trunc0; NaN->0; +Inf->maxByte; -Inf->0 (never throws)
+  read .numExact:Opt[Num];          /// .some if finite (and convertible under chosen policy); .empty on NaN/Inf
+
+  read .intExact:Opt[Int];          /// .some if finite, integral, in [minInt,maxInt]; .empty otherwise
+  read .natExact:Opt[Nat];          /// .some if finite, integral, in [0,maxNat]; .empty otherwise
+  read .byteExact:Opt[Byte];        /// .some if finite, integral, in [0,maxByte]; .empty otherwise
+  .hash(h) -> h.float(this.imm)
+  .asDataType->::;                  /// DataType witness
+}
+
+// Int: signed 32-bit.
+// Note: / is not provided; use div/rem (divisor is Nat).
+Int:Sealed,DataType[Int],_RangeOps[Int],_AssertEq[Int],_AssertOrd[Int],_AssertRange[Int]{
+  +(x:Int):Int;                     /// checked add; throws on overflow/underflow
+  -(x:Int):Int;                     /// checked sub; throws on overflow/underflow
+  *(x:Int):Int;                     /// checked mul; throws on overflow/underflow
+
+  .div(d:Nat):Int;                  /// trunc toward 0; throws iff d==0
+  .rem(d:Nat):Int;                  /// r = this - (this.div(d))*d; throws iff d==0;
+  .divExact(d:Nat):Opt[Int];        /// .some if d!=0 and this.rem(d)==0; .empty otherwise
+
+  .abs:Int;                         /// abs; throws on overflow for minInt
+  .sqrt:Float;                      /// approximate sqrt; returns NaN iff this is negative
+  .wrapIndex(len:Nat):Nat;          /// normalize into [0,len-1]; throws iff len==0; example: -1.wrapIndex(7) == 6
+  read .nat:Nat;                    /// clamp to [0,maxNat] (that is, just clamp negatives to 0)
+  read .byte:Byte;                  /// clamp to [0,maxByte]
+  read .float:Float;                /// converts to Float (note: Float can represent exactly all Int values)
+  read .num:Num;                    /// converts to Num (note: Num can represent exactly all Int values)
+  read .natExact:Opt[Nat];          /// .some if this >= 0; .empty otherwise
+  read .byteExact:Opt[Byte];        /// .some if this in [0,maxByte]; .empty otherwise
+  .aluAddWrap(x:Int):Int;           /// i32 wraparound add (mod 2^32)
+  .aluSubWrap(x:Int):Int;           /// i32 wraparound sub (mod 2^32)
+  .aluMulWrap(x:Int):Int;           /// i32 wraparound mul (mod 2^32)
+  .aluDiv(x:Int):Int;               /// i32 trunc division; throws iff x == 0; Note: negative divisor allowed here
+  .aluRem(x:Int):Int;               /// paired with aluDiv; sign follows dividend; throws iff x == 0
+  .aluShiftLeft(bits:Nat):Int;      /// i32 shift-left; effective shift = bits & 31.
+  .aluShiftRight(bits:Nat):Int;     /// i32 arithmetic shift-right (sign-ext); effective shift = bits & 31.  
+  .aluXor(x:Int):Int;               /// i32 xor
+  .aluAnd(x:Int):Int;               /// i32 and
+  .aluOr(x:Int):Int;                /// i32 or
+  read .aluNat:Nat;                 /// reinterpret i32 bits as u32 Nat (bit-cast)
+  read .aluByte:Byte;               /// low 8 bits (wrap), not clamp
+  .hash(h) -> h.int(this.imm);      /// hash via hasher
+  .asDataType->::;                  /// DataType witness
+}
+// Nat: 32-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
+// Note: / is not provided; use div/rem (divisor is Nat).
+Nat:Sealed,DataType[Nat],_RangeOps[Nat],_AssertEq[Nat],_AssertOrd[Nat],_AssertRange[Nat]{
+  +(x:Nat):Nat;                     /// checked add; throws on overflow (past maxNat)
+  -(x:Nat):Nat;                     /// checked sub; throws on underflow (below 0)
+  *(x:Nat):Nat;                     /// checked mul; throws on overflow
+  .div(d:Nat):Nat;                  /// trunc toward 0; throws iff d == 0 (Note: Nat trunc and Nat floor are the same concept)
+  .rem(d:Nat):Nat;                  /// r = this - (this.div(d))*d;  r in 0..d-1; throws iff d == 0;
+  .divExact(d:Nat):Opt[Nat];        /// .some if d != 0 and this.rem(d) == 0; .empty otherwise
+  .sqrt:Float;                      /// approximate sqrt
+  .indexOffset(delta:Int):Nat;      /// index helper: this + delta; throws on under/overflow
+  read .int:Int;                    /// clamp to [0,maxInt]
+  read .byte:Byte;                  /// clamp to [0,maxByte]
+  read .float:Float;                /// converts to Float (note: Float can represent exactly all Nat values)
+  read .num:Num;                    /// converts to Float (note: Num can represent exactly all Nat values)
+  read .intExact:Opt[Int];          /// .some if this <= maxInt; .empty otherwise
+  read .byteExact:Opt[Byte];        /// .some if this <= maxByte; .empty otherwise
+  .aluAddWrap(x:Nat):Nat;           /// u32 wraparound add (mod 2^32)
+  .aluSubWrap(x:Nat):Nat;           /// u32 wraparound sub (mod 2^32)
+  .aluMulWrap(x:Nat):Nat;           /// u32 wraparound mul (mod 2^32)
+  .aluDiv(x:Nat):Nat;               /// u32 trunc division; throws iff x == 0
+  .aluRem(x:Nat):Nat;               /// paired with aluDiv; throws iff x == 0
+  .aluShiftLeft(bits:Nat):Nat;      /// u32 shift-left; effective shift = bits & 31 (i.e., modulo 32).
+  .aluShiftRight(bits:Nat):Nat;     /// u32 logical shift-right; effective shift = bits & 31.  
+  .aluXor(x:Nat):Nat;               /// u32 xor
+  .aluAnd(x:Nat):Nat;               /// u32 and
+  .aluOr(x:Nat):Nat;                /// u32 or
+  read .aluInt:Int;                 /// reinterpret u32 bits as i32 Int (bit-cast)
+  read .aluByte:Byte;               /// low 8 bits (wrap), not clamp
+  .hash(h) -> h.nat(this.imm);      /// hash via hasher
+  .asDataType->::;                  /// DataType witness
+}
+
+// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
+// Note: / is not provided; use div/rem (divisor is Nat).
+Byte:Sealed,DataType[Byte],_RangeOps[Byte],_AssertEq[Byte],_AssertOrd[Byte],_AssertRange[Byte]{
+  +(x:Byte):Byte;                   /// checked add; throws on overflow (past 255)
+  -(x:Byte):Byte;                   /// checked sub; throws on underflow (below 0)
+  *(x:Byte):Byte;                   /// checked mul; throws on overflow
+  .div(d:Nat):Byte;                 /// trunc toward 0; throws iff d == 0
+  .rem(d:Nat):Byte;                 /// r = this - (this.div(d))*d; throws iff d == 0
+  .divExact(d:Nat):Opt[Byte];       /// .some if d != 0 and this.rem(d) == 0; .empty otherwise
+  .sqrt:Float;                      /// approximate sqrt
+  read .nat:Nat;                    /// exact widen
+  read .int:Int;                    /// exact widen
+  read .float:Float;                /// exact widen
+  read .num:Num;                    /// exact widen to rational
+  .aluAddWrap(x:Byte):Byte;         /// u8 wraparound add (mod 256)
+  .aluSubWrap(x:Byte):Byte;         /// u8 wraparound sub (mod 256)
+  .aluMulWrap(x:Byte):Byte;         /// u8 wraparound mul (mod 256)
+  .aluDiv(x:Byte):Byte;             /// u8 trunc division; throws iff x == 0
+  .aluRem(x:Byte):Byte;             /// paired with aluDiv; throws iff x == 0
+  .aluShiftLeft(bits:Nat):Byte;     /// u8 shift-left; effective shift = bits & 7 (i.e., modulo 8).
+  .aluShiftRight(bits:Nat):Byte;    /// u8 logical shift-right; effective shift = bits & 7.
+  .aluXor(x:Byte):Byte;             /// u8 xor
+  .aluAnd(x:Byte):Byte;             /// u8 and
+  .aluOr(x:Byte):Byte;              /// u8 or
+  .hash(h) -> h.byte(this.imm);     /// hash via hasher
+  .asDataType->::;                  /// DataType witness
+}
+_AssertEq[T]:DataType[T]{
+  .assertEq(expected:T):Void -> Assert!(
+    this == expected,
+    { `Expected: `+(this.asDataType(expected)) | `Actual: `+this });
+  .assertEq(expected:T, msg:F[Str]):Void -> Assert!(
+    this == expected,
+    { msg# | `Expected: `+(this.asDataType(expected)) | `Actual: `+this });
+  .assertNe(expected:T):Void -> Assert!(
+    this != expected,
+    { `Unexpected: `+(this.asDataType(expected)) | `Actual: `+this });
+  .assertNe(expected:T, msg:F[Str]):Void -> Assert!(
+    this != expected,
+    { msg# | `Unexpected: `+(this.asDataType(expected)) | `Actual: `+this });
+}
+_AssertOrd[T]:DataType[T]{
+  .assertLt(x:T):Void -> Assert!(
+    this < x,
+    { `Expected: `+this | ` < `+(this.asDataType(x)) });
+  .assertLe(x:T):Void -> Assert!(
+    this <= x,
+    { `Expected: `+this | ` <= `+(this.asDataType(x)) });
+  .assertGt(x:T):Void -> Assert!(
+    this > x,
+    { `Expected: `+this | ` > `+(this.asDataType(x)) });
+  .assertGe(x:T):Void -> Assert!(
+    this >= x,
+    { `Expected: `+this | ` >= `+(this.asDataType(x)) });
+}
+_AssertRange[T]:DataType[T],_RangeOps[T]{
+  .assertInRange(lo:T, hi:T):Void -> Assert!(
+    this.inRange(lo,hi),
+    { `Expected in [lo,hi]`
+      | `lo: `+(this.asDataType(lo))
+      | `hi: `+(this.asDataType(hi))
+      | `actual: `+this });
+  .assertInRangeOpen(lo:T, hi:T):Void -> Assert!(
+    this.inRangeOpen(lo,hi),
+    { `Expected in (lo,hi)`
+      | `lo: `+(this.asDataType(lo))
+      | `hi: `+(this.asDataType(hi))
+      | `actual: `+this });
+  .assertInRangeLoOpen(lo:T, hi:T):Void -> Assert!(
+    this.inRangeLoOpen(lo,hi),
+    { `Expected in (lo,hi]`
+      | `lo: `+(this.asDataType(lo))
+      | `hi: `+(this.asDataType(hi))
+      | `actual: `+this });
+  .assertInRangeHiOpen(lo:T, hi:T):Void -> Assert!(
+    this.inRangeHiOpen(lo,hi),
+    { `Expected in [lo,hi)`
+      | `lo: `+(this.asDataType(lo))
+      | `hi: `+(this.asDataType(hi))
+      | `actual: `+this });
+}
+_AssertApprox[T]:DataType[T]{
+  .eqDelta(n:T, delta:T):Bool;
+  .assertEqDelta(expected:T, delta:T):Void -> Assert!(
+    this.eqDelta(expected,delta),
+    { `Expected within delta`
+      | `expected: `+(this.asDataType(expected))
+      | `delta: `+(this.asDataType(delta))
+      | `actual: `+this });
+  .assertEqDelta(expected:T, delta:T, msg:F[Str]):Void -> Assert!(
+    this.eqDelta(expected,delta),
+    { msg#
+      | `expected: `+(this.asDataType(expected))
+      | `delta: `+(this.asDataType(delta))
+      | `actual: `+this });
+  }

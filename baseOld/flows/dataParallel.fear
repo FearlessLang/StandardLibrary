@@ -1,0 +1,30 @@
+package base.flows
+
+_DataParallelFlow: _FlowFactory{
+  .fromOp[E:*](source: mut FlowOp[E], size: Opt[Nat]): mut Flow[E] -> Magic!,
+//  .fromOp[E:*](source: mut FlowOp[E], size: Opt[Nat]): mut Flow[E] -> {'self
+//    .unwrapOp(_) -> source,
+//
+//    // non-terminals
+//    .filter(p) -> this.fromOp(_Filter#(_Sink, source, p), {}),
+//    .map(f) -> this.fromOp(_Map#(_Sink, source, f), size),
+//    .flatMap(f) -> this.fromOp(_FlatMap#(_Sink, source, f), {}),
+//    mut .actor[S:*,R:*](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R] -> _DataParallelInvalidStateful!,
+//    mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R] -> _DataParallelInvalidStateful!,
+//    .limit(n) -> _DataParallelInvalidStateful!,
+//
+//    // terminals
+//    mut .first: mut Opt[E] -> base.Todo!,
+//    mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R] -> _SeqFlow.fromOp(source, size).findMap(f),
+//    mut .fold[S:*](acc: S, f: read F[S,E,S]): S -> base.Todo!,
+//    mut .fold[S:*](acc: S, f: read F[S,E,S], combine: read F[S, S, S]): S -> base.Todo!,
+//    .size -> size.match{
+//      .some(n) -> n,
+//      .empty -> self.fold[Nat]({0}, {acc, _ -> acc + 1}, {a, b -> a + b}),
+//      },
+//    },
+  }
+
+_DataParallelInvalidStateful: {![R:*]: R ->
+  Error.msg "Stateful operators are invalid in data-parallel flows. If you see this, there is a bug in the Fearless compiler."
+  }

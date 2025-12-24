@@ -1,0 +1,78 @@
+package base;
+/*
+Opt[T:*]: _Opt[T], Sealed, ToStr[T], ToInfo[T], OrderHash[Opt[T],T]{
+  .match(m)   -> m.empty,
+
+  .isEmpty    -> this.match{.some(_)  -> False, .empty -> True},
+  .isSome     -> this.match{.some(_) -> True, .empty -> False},
+  
+  !           -> this.match{.some(x) -> x, .empty -> Error.msg "Opt was empty"},
+  
+  .or(default)-> this.match{.some(x) -> x, .empty -> default},
+  |(default)-> this.or(default),
+  ||(default) -> this.match{.some(x) -> x, .empty -> default#},
+  
+  .flow       -> this.match{.empty -> Flow#, .some(x) -> Flow#x},
+
+  .as(f)      -> this.match{.some(x)->f#x .empty->{}},
+  
+  .ifSome(f)  -> this.match{.some(x) -> f#x, .empty -> {}},
+  .ifEmpty(f) -> this.match{.some(_) -> {}, .empty -> f#},
+
+  .str(f) -> this.match{ .some(x) -> `Opt[`+f#x+`]`, .empty -> `Opt[]` },
+  .info(f) -> this.match{ .some(x) -> Infos.list(f#x), .empty -> Infos.empty },
+  .order(f) -> { 
+    .hash(h) -> this.match{ .some(x)-> f#(x).hash(h) + 1, .empty -> 0 },
+    <=>(other) -> this.match{
+      .some(x) -> other.match{.some(y)-> f#(x) <=> y, .empty -> OrderGt },
+      .empty   -> other.match{ .some(y)-> OrderLt, .empty -> OrderEq },
+      },
+    },
+  }
+  
+  _Opt[T:*]:{
+  mut  .match[R:**](m: mut OptMatch[T, R]): R,
+  read .match[R:*](m: mut OptMatch[read/imm T, R]): R,
+  imm  .match[R:*](m: mut OptMatch[imm T, R]): R,
+
+  mut  .map[R:*](f: mut OptMap[T, R]): mut Opt[R],
+  read .map[R:*](f: mut OptMap[read/imm T, R]): mut Opt[R],
+  imm  .map[R:*](f: mut OptMap[imm T, R]): mut Opt[R],
+
+  mut  .flatMap[R:*](f: mut OptFlatMap[T, R]): mut Opt[R],
+  read .flatMap[R:*](f: mut OptFlatMap[read/imm T, R]): mut Opt[R],
+  imm  .flatMap[R:*](f: mut OptFlatMap[imm T, R]): mut Opt[R],
+
+  mut  .or(default: T): T,
+  read .or(default: read/imm T): read/imm T,
+  imm  .or(default: imm T): imm T,
+
+  mut  |(default: T): T,
+  read |(default: read/imm T): read/imm T,
+  imm  |(default: imm T): imm T,
+
+  mut  ||(default: mut MF[T]): T,
+  read ||(default: mut MF[read/imm T]): read/imm T,
+  imm  ||(default: mut MF[imm T]): imm T,
+
+  mut  !: T,
+  read !: read/imm T,
+  imm  !: imm T,
+
+  mut  .flow: mut Flow[T],
+  read .flow: mut Flow[read/imm T],
+  imm  .flow: mut Flow[imm T],
+
+  mut  .ifSome(f: mut MF[T, Void]): Void,
+  read .ifSome(f: mut MF[read/imm T, Void]): Void,
+  imm  .ifSome(f: mut MF[imm T, Void]): Void,
+
+  read .isEmpty: Bool,
+  read .isSome: Bool,
+  read .ifEmpty(f: mut MF[Void]): Void,
+  read .as[R:imm](f: mut MF[read/imm E, R]): Opt[R],  
+  }
+*/
+Opt[T:*]:{}
+Opts: { #[T:*](x: T): mut Opt[T] -> { /*.match(m) -> m.some(x)*/ } }
+Flow[T:*]:{}//TODO:

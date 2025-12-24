@@ -1,0 +1,104 @@
+package base.test
+
+Main: AppMain{
+  #(sys) -> Block#
+    .do {Block#(this.testMain(sys.iso.self, FTestRunner#(sys.iso.self)))}
+    .return {Void},
+  .testMain(system: iso System, runner: iso TestRunner): List[read TestResults]
+  }
+
+// TODO: When we have maps support nested test suites
+FTestRunner: F[mut System, mut TestRunner]{sys -> Block#
+  .let[mut List[Test]] tests = {List#}
+  .let[mut List[mut TestSuite]] suites = {List#}
+  .let[mut List[mut ResultReporter]] reporters = {List#}
+  .let[mut CapTry] try = {sys.try}
+  .return {{'self
+    .suite(title, registerTests) -> Block#
+      .do {suites.add({.title -> title, .runner -> registerTests#(FTestRunner#sys)})}
+      .return {self},
+
+    .test(title, impl) -> Block#
+      .do {tests.add({.title -> title, .impl -> impl})}
+      .return {self},
+
+    .withReporter(reporter) -> Block#
+      .do {reporters.add(reporter)}
+      .return {self},
+
+    .run -> Block#
+      .let[mut List[read TestResults]] results = {List#[read TestResults](FTestResults#("<unnamed>", self.runDirectTests[], self.runSuiteTests[]))}
+      .do {reporters.iter.for{reporter -> reporter#results}}
+      .return {results},
+    mut .runDirectTests: mut List[TestResult] -> tests.iter
+      .map{test -> Block#
+        .return {FTestResult#(test.title, try#(sys.iso.self, {sys' -> test.impl#sys'}).run{
+          .ok(_) -> FTestResultKind.passed,
+          .info(info) -> FTestResultKind.errored(info.str)
+          })}
+        }
+      .list,
+    mut .runSuiteTests: mut List[read TestResults] -> suites.flow
+      .map[read TestResults]{suite -> Block#
+        .let[read List[read TestResults]] suiteResults = {suite.runner.run}
+        .return {FTestResults#(
+          suite.title,
+          suiteResults.flow
+           .flatMap{subSuite->subSuite.results.flow}
+           .list,
+          suiteResults.flow
+            .flatMap{subSuite->subSuite.nestedResults.flow}
+            .list
+          )}
+        }
+      .list,
+    }}
+  }
+TestRunner: {
+  mut .suite(title: Str, registerTests: F[mut TestRunner, mut TestRunner]): mut TestRunner,
+  mut .test(title: Str, impl: AppMain): mut TestRunner,
+  mut .withReporter(reporter: mut ResultReporter): mut TestRunner,
+  mut .run: read List[read TestResults],
+  }
+
+TestSuite: {read .title: Str, mut .runner: mut TestRunner}
+Test: {read .title: Str, read .impl: AppMain}
+FTestResults: F[Str, read List[TestResult], read List[read TestResults], read TestResults]{suiteTitle, results, nested -> mut TestResults: {
+  read .suiteTitle: Str -> suiteTitle,
+  read .results: read List[TestResult] -> results,
+  read .nestedResults: read List[read TestResults] -> nested,
+  }}
+FTestResult: F[Str, TestResultKind, TestResult]{
+  #(title, kind) -> {
+    .title -> title,
+    .kind -> kind,
+    },
+  .withInfo(title: Str, kind: TestResultKind, info: Opt[Info]): TestResult -> {
+    .title -> title,
+    .kind -> kind,
+    .info -> info,
+    },
+  }
+TestResult: {
+  read .title: Str,
+  read .kind: TestResultKind,
+  read .info: Opt[Info] -> {},
+  }
+
+TestResultKind: Sealed{.match[R:*](m: mut TestResultKindMatcher[R]): R}
+FTestResultKind: {
+  .passed: TestResultKind -> {.match(m) -> m.passed},
+  .skipped: TestResultKind -> {.match(m) -> m.skipped},
+  .failed(details: Str): TestResultKind -> {.match(m) -> m.failed(details)},
+  .errored(details: Str): TestResultKind -> {.match(m) -> m.errored(details)},
+  }
+TestResultKindMatcher[R:*]: {
+  mut .passed: R,
+  mut .skipped: R,
+  mut .failed(details: Str): R,
+  mut .errored(details: Str): R,
+  }
+
+ResultReporter: {
+  mut #(results: read List[read TestResults]): Void,
+  }

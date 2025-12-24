@@ -1,0 +1,34 @@
+package base;
+
+Ordering: {
+  .match[R:*](m: mut OrderingMatch[R]): R;
+  }
+FOrdering: {
+  .less: Ordering -> {m -> m.less};
+  .equal: Ordering -> {m -> m.equal};
+  .greater: Ordering -> {m -> m.greater};
+  }
+OrderingMatch[R:*]: {
+  mut .less: R;
+  mut .equal: R;
+  mut .greater: R;
+  }
+
+CompareInts: F[Int, Int, Ordering]{
+  a, b -> Block#
+    .if {a > b} .return {FOrdering.greater}
+    .if {a < b} .return {FOrdering.less}
+    .return {FOrdering.equal}
+  }
+CompareNats: F[Nat, Nat, Ordering]{
+  a, b -> Block#
+    .if {a > b} .return {FOrdering.greater}
+    .if {a < b} .return {FOrdering.less}
+    .return {FOrdering.equal}
+  }
+CompareFloats: F[Float, Float, Ordering]{
+  a, b -> Block#
+    .if {a > b} .return {FOrdering.greater}
+    .if {a < b} .return {FOrdering.less}
+    .return {FOrdering.equal}
+  }

@@ -1,0 +1,12 @@
+package base.caps
+
+/// This try-catch will catch non-deterministic errors.
+CapTry: ToIso[CapTry]{
+  /// This method upholds strong exception safety, so you can observe changes to the program state
+  /// from any exception-causing code.
+  mut #[R:*](try: read F[R]): mut Action[R],
+  /// This method gets the system object capability, however any violations of strong exception safety
+  /// can only be observed with an object capability because System is the only external mutable reference.
+  mut #[T:**,R:*](data: iso T, try: read F[iso T,R]): mut Action[R],
+  }
+CapTrys: F[mut System, mut CapTry]{sys -> sys.try}

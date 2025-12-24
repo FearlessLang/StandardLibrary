@@ -1,0 +1,73 @@
+package base;
+
+Error: {
+  ![R:**](info: Info): R -> Magic!;
+  .msg[R:**](msg: Str): R -> this!(Infos.msg msg);
+  }
+
+Todo: {
+  ![R:**]: R -> Error.msg[R] "TODO: Implement this code";
+  ![R:**](msg: Str): R -> Error.msg[R]("TODO: " + msg);
+  }
+
+Unreachable: {
+  ![R:**]: R -> Error.msg[R] "Unreachable code reached";
+  ![R:**](msg: Str): R -> Error.msg[R]("Unreachable code reached: " + msg);
+  }
+
+/// Strong exception safety is upheld:
+/// The operation has either completed successfully or thrown an exception,
+// leaving the program state exactly as it was before the operation started.
+Try: {
+  #[R:*](try: read F[R]): mut Action[R] -> Magic!;
+  #[T:iso,imm,mut,read,R](data: iso T, try: read F[iso T, R]): mut Action[R] -> Magic!;
+  }
+Try[R:*]:{ read #: R }
+
+Info: Sealed{
+  .msg: Str;
+  .map: LinkedHashMap[Str, Info];
+  .list: List[Info];
+  .accept[R](visitor: InfoVisitor[R]): R;
+  .str: Str -> this.accept[Json](_InfoToJson).str;
+  }
+Infos: {
+  .msg(msg: Str): Info -> {'info
+    .msg -> msg;
+    .list -> List#;
+    .map -> Maps.hashMap({k1, k2 -> k1 == k2}, {::});
+    .accept(visitor) -> visitor.msg(info);
+    };
+  .list(list: List[Info]): Info -> {'info
+    .msg -> "";
+    .list -> list;
+    .map -> Maps.hashMap({k1, k2 -> k1 == k2}, {::});
+    .accept(visitor) -> visitor.list(info);
+    };
+  .map(map: LinkedHashMap[Str, Info]): Info -> {'info
+    .msg -> "";
+    .list -> List#;
+    .map -> map;
+    .accept(visitor) -> visitor.map(info);
+    };
+  }
+InfoVisitor[R]: {
+  .msg(info: Info): R;
+  .list(info: Info): R;
+  .map(info: Info): R;
+  }
+
+_InfoToJson: InfoVisitor[Json]{
+  .msg(info) -> Jsons.string(info.msg);
+  .list(info) -> Jsons.array(info.list.flow.map{info' -> info'.accept(this)}.list);
+  .map(info) -> Jsons.object(info.map.flow
+    .map{kv -> Entry[Str,Json]{
+      .key -> kv.key;
+      .value -> kv.value.accept(this);
+      }}
+    .fold(
+      {Maps.hashMap[Str,Json]({k1, k2 -> k1 == k2}, {::})};
+      {acc, kv -> acc + (kv.key, kv.value)}
+      )
+    );
+  }

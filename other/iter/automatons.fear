@@ -1,0 +1,28 @@
+package base.iter.automatons
+alias base.F as F,
+alias base.Opt as Opt,
+alias base.Void as Void,
+alias base.Bool as Bool, alias base.True as True, alias base.False as False,
+alias base.Let as Let,
+alias base.Block as Block,
+//alias base.LList as LList,
+
+
+//Output[A,R]:{
+//  imm  .next: mut Auto[A, R],
+//  mut  .next: mut Auto[A, R],
+//  read .next: mut Auto[read A, R],
+//
+//  imm  .result: R,
+//  mut  .result: R,
+//  read .result: read R,
+//
+//  read .completed: Bool -> False,
+//  }
+//
+//Auto:{
+//
+//  }
+//Auto[A,R]:{
+//  imm .step(a: A): mut Opt[mut Output[A,R]],
+//  }

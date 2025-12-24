@@ -1,0 +1,115 @@
+package base
+
+Map[K:imm,V:*]: {
+  read .keyEq(k1: K, k2: K): Bool,
+  imm  .get(k: K): mut Opt[imm V] -> {},
+  read .get(k: K): mut Opt[read/imm V] -> {},
+  read .isEmpty: Bool -> True,
+  }
+
+EmptyMap[K:imm,V:*]: Map[K,V]{
+  .keyEq(k1, k2) -> False,
+  .get(k) -> {},
+  }
+
+Maps: Sealed{
+  .hashMap[K:imm,V:*](keyEq: read F[K,K,Bool], hash: F[K,read ToHash]): mut LinkedHashMap[K,V] -> Magic!,
+  }
+LinkedHashMap[K:imm,V:*]: Map[K,V]{
+  mut  .get(k: K): mut Opt[V],
+  imm  .get(k: K): mut Opt[imm V],
+  read .get(k: K): mut Opt[read/imm V],
+
+  mut .remove(k: K): mut Opt[V],
+  mut .clear: Void,
+  mut +(k: K, v: V): mut LinkedHashMap[K,V],
+  mut .put(k: K, v: V): Void -> Block#(this + (k,v)),
+
+  read .keys: mut Flow[imm K],
+
+  mut  .values: mut Flow[V],
+  imm  .values: mut Flow[imm V],
+  read .values: mut Flow[read/imm V],
+
+  mut  .flowMut: mut Flow[mut Entry[K,V]],
+  imm  .flow: mut Flow[imm Entry[K,V]],
+  read .flow: mut Flow[read Entry[K,V]],
+  }
+Entry[K, V:*]: {
+  read .key: K,
+  mut  .value: V,
+  read .value: read/imm V,
+  }
+
+/// A linked map that upholds the lens laws:
+/// 1. set l (view l s) s = s
+/// 2. view l (set l s a) = a
+/// 3. set l (set l s a) b = set l s b
+Lens[K, V]: Map[K, imm V]{
+  .put(k: K, v: imm V): mut Lens[K, V] -> {'next
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k': K): mut Opt[imm V] -> next.keyEq(k, k') ? {.then -> Opts#v, .else -> this.get(k')},
+    read .get(k': K): mut Opt[imm V] -> next.keyEq(k, k') ? {.then -> Opts#v, .else -> this.get(k')},
+    .isEmpty -> False,
+    },
+  .map[R:*](f: MapMapImm[K, imm V, imm R]): Lens[K, imm R] -> {
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k: K): mut Opt[imm R] -> this.get(k).map{res -> f#(k, res)},
+    read .get(k: K): mut Opt[imm R] -> this.get(k).map{res -> f#(k, res)},
+    .isEmpty -> this.isEmpty,
+    },
+  }
+
+/// A Lens that supports mutable and readable data
+LinkedLens[K, V:*]: Map[K, V]{
+  imm  .get(k: K): mut Opt[imm V] -> {},
+  mut  .get(k: K): mut Opt[V] -> {},
+  read .get(k: K): mut Opt[read/imm V] -> {},
+
+  imm  .put(k: K, v: imm V): imm LinkedLens[K, V] -> {'next
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k': K): mut Opt[imm V] -> next.keyEq(k, k') ? {.then -> Opts#[imm V]v, .else -> this.get(k')},
+    read .get(k': K): mut Opt[read/imm V] -> next.keyEq(k, k') ? {
+      .then -> Opts#[read/imm V]v,
+      .else -> this.get(k').match{.some(v') -> Opts#[read/imm V]v', .empty -> mut Opt[read/imm V]},
+      },
+    .isEmpty -> False,
+    },
+  mut  .put(k: K, v: V): mut LinkedLens[K, V] -> {'next
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k': K): mut Opt[imm V] -> next.keyEq(k, k') ? {.then -> Opts#[imm V]v, .else -> this.get(k')},
+    mut  .get(k': K): mut Opt[V] -> next.keyEq(k, k') ? {.then -> Opts#v, .else -> this.get(k')},
+    read .get(k': K): mut Opt[read/imm V] -> next.keyEq(k, k') ? {.then -> Opts#[read/imm V]v, .else -> this.get(k')},
+    .isEmpty -> False,
+    },
+  read .put(k: K, v: V): read LinkedLens[K, V] -> {'next
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k': K): mut Opt[imm V] -> next.keyEq(k, k') ? {.then -> Opts#[imm V]v, .else -> this.get(k')},
+    read .get(k': K): mut Opt[read/imm V] -> next.keyEq(k, k') ? {.then -> Opts#[read/imm V]v, .else -> this.get(k')},
+    .isEmpty -> False,
+    },
+
+  imm .map[R:*](fImm: MapMapImm[K, imm V, imm R], fRead: MapMapRead[K, V, R]): LinkedLens[K, R] -> {
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k: K): mut Opt[imm R] ->  As[mut Opt[imm V]]#(this.get(k)).map{res -> fImm#(k, res)},
+    read .get(k: K): mut Opt[read/imm R] -> this.get(k).map{res -> fRead#(k, res)},
+    .isEmpty -> this.isEmpty,
+    },
+  mut .map[R:*](fImm: MapMapImm[K, imm V, imm R], fMut: mut MapMapMut[K, V, R], fRead: read MapMapRead[K, V, R]): mut LinkedLens[K, R] -> {
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k: K): mut Opt[imm R] ->  As[mut Opt[imm V]]#(this.get(k)).map{res -> fImm#(k, res)},
+    mut  .get(k: K): mut Opt[R] ->      this.get(k).map{res -> fMut#(k, res)},
+    read .get(k: K): mut Opt[read/imm R] -> this.get(k).map mut OptMap[read/imm V, read/imm R]{res -> fRead#(k, res)},
+    .isEmpty -> this.isEmpty,
+    },
+  read .map[R:*](fImm: MapMapImm[K, imm V, imm R], fRead: read MapMapRead[K, V, R]): read LinkedLens[K, R] -> {
+    .keyEq(k1, k2) -> this.keyEq(k1, k2),
+    imm  .get(k: K): mut Opt[imm R] ->  As[mut Opt[imm V]]#(this.get(k)).map{res -> fImm#(k, res)},
+    read .get(k: K): mut Opt[read/imm R] -> this.get(k).map{res -> fRead#(k, res)},
+    .isEmpty -> this.isEmpty,
+    },
+  }
+
+MapMapImm[K:imm,V:*,R:*]:{ #(k: K, v: imm V): R }
+MapMapMut[K:imm,V:*,R:*]:{ mut #(k: K, v: V): R }
+MapMapRead[K:imm,V:*,R:*]:{ read #(k: K, v: read/imm V): R }

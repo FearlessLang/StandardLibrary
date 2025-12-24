@@ -1,0 +1,60 @@
+package base.json
+
+alias base.Todo as Todo,
+
+JsonMatch[R:**]: {
+  mut .string(s: Str): R,
+  mut .number(n: Float): R,
+  mut .bool(b: Bool): R,
+  mut .object(o: LinkedHashMap[Str,Json]): R,
+  mut .array(a: List[Json]): R,
+  mut .null: R,
+  }
+Jsons: {
+  .string(s: Str): Json -> {m -> m.string(s)},
+  .number(n: Float): Json -> {m -> m.number(n)},
+  .bool(b: Bool): Json -> {m -> m.bool(b)},
+  .object(o: LinkedHashMap[Str, Json]): Json -> {m -> m.object(o)},
+  .array(a: List[Json]): Json -> {m -> m.array(a)},
+  .null: Json -> {m -> m.null},
+  }
+Json: {
+  read .match[R:**](m: mut JsonMatch[R]): R,
+  .str: Str -> _JsonToStr#this,
+  }
+
+_JsonToStr: {
+  #(json: Json): Str -> json.match{
+    .string(s) -> mut "\"" + (this.escape(s)) + "\"",
+    .number(n) -> n.str,
+    .bool(b)   -> b ? {.then -> "true", .else -> "false"},
+    .object(o) -> "{"+(this.object(o))+"}",
+    .array(a)  -> "["+(this.array(a))+"]",
+    .null      -> "null",
+    },
+
+  .array(a: List[Json]): Str -> a.flow
+    .map{json->this#json}
+    .join ", ",
+  .object(o: LinkedHashMap[Str,Json]): Str -> o.flow
+    .map[Str]{kv -> mut "\""+(this.escape(kv.key))+"\": " + (this#(kv.value))}
+    .join ", ",
+  .escape(s: Str): Str -> Block#
+    .let[Regex] mustEscape = {Regexs#"[\\U{0000}-\\U{001F}]"} // unicode control characters
+    .return {AtomiseStr#s
+      .map{ch -> Block#
+        .if {ch == "\\"} .return {"\\\\"}
+        .if {ch == "\n"} .return {"\\n"}
+        .if {ch == "\b"} .return {"\\b"}
+        .if {ch == "\f"} .return {"\\f"}
+        .if {ch == "\n"} .return {"\\n"}
+        .if {ch == "\r"} .return {"\\r"}
+        .if {ch == "\t"} .return {"\\t"}
+        .if {ch == "\""} .return {"\\\""}
+        .if {mustEscape.isMatch(ch)}
+          .error {Infos.msg ("Unexpected special character sequence: "+(ch.utf8.flow.map{b -> b.str}.join ","))}
+        .return {ch}
+        }
+      .join ""
+      },
+  }

@@ -1,0 +1,6 @@
+package base
+
+Regexs: Sealed{#(pattern: Str): Regex -> Regex: Stringable{
+  .str -> Magic!,
+  .isMatch(haystack: Str): Bool -> Magic!,
+  }}

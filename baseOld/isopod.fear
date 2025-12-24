@@ -1,0 +1,67 @@
+package base;
+
+IsoPod:{
+  #[T:**](val: iso T): mut IsoPod[imm T] -> _MagicIsoPodImpl.toIsoPod[imm T](_MagicIsoPodImpl#[T](val));
+  }
+IsoPod[T]: {
+  read .isAlive: Bool;
+  read .peek[R:iso,imm,mut,read,mutH](f: mut IsoViewer[T, R]): R;
+  read .look[R:*](f: mut IsoViewer'[T, R]): mut Action[R] -> {m -> this.peek{
+    .some(x) -> m.ok(f#x);
+    .empty -> m.info(Infos.msg "The IsoPod was empty");
+    }};
+  mut !: iso T;
+  mut .next(val: iso T): Void;
+  read .isDead: Bool -> this.isAlive.not;
+  mut .consume[R:**](f: mut IsoConsumer[T, R]): R -> this.isAlive ? { .then -> f.some(this!), .else -> f.empty };
+  mut :=(val: iso T): Void -> this.next(val);
+  mut .mutate(f: F[mut T, Void]): mut Action[Void] ->
+    {m -> this.consume{
+      .some(x) -> Block#(this.next(_IsoMutator#(f, x)), m.ok{});
+      .empty -> m.info(Infos.msg "The IsoPod was empty");
+      }}
+  }
+IsoConsumer[T, R:**]:{
+  mut .some(x: iso T): R;
+  mut .empty: R;
+  }
+IsoViewer[T, R:iso,imm,mut,read,mutH]:{//crucially readH not allowed
+  mut .some(x: readH T): R;
+  mut .empty: R;
+  }
+IsoViewer'[T, R:iso,imm,mut,read,mutH]:{
+  mut #(x: readH T): R;
+  }
+_IsoMutator:{ #[T:**](f: F[mut T, Void], val: mut T): mut T -> Block#(f#val, val) }
+
+_MagicIsoPodImpl: {
+  #[T:**](val: iso T): mut _MagicIsoPodImpl[imm T] -> Magic!;
+  .toIsoPod[T:**](inner: mut _MagicIsoPodImpl[imm T]): mut IsoPod[imm T] -> {
+    read .isAlive: Bool -> inner.isAlive;
+    read .peek[R:iso,imm,mut,read,mutH](f: mut IsoViewer[imm T, R]): R -> inner.peek[R](f);
+    mut !: iso T -> inner!;
+    mut .next(val: iso T): Void -> inner.next(val);
+    };
+  }
+_MagicIsoPodImpl[T]: {
+  read .isAlive: Bool -> Magic!;
+  read .peek[R:iso,imm,mut,read,mutH](f: mut IsoViewer[T, R]): R -> Magic!;
+  mut !: iso T -> Magic!;
+  mut .next(val: iso T): Void -> Magic!;
+  }
+
+// TODO The idea:
+//IsoPod[T:iso,imm]:{//both so that we can also instantiate with X where X is an iso Foo
+//  mut .consume:iso T,
+//  mut .update(val: iso T):Void,
+//  readH .observe[R:*](obs:mut Observer[T,R]):R->..,
+//  mut .change[R:*](f:F[mut T, R]):imm R->consume, call f, update back
+//  readH .spawn(f:F[readOnly T,R])->Node[??]{f=ff, self=this} + add a
+//ref to the result to a list of spawn
+//   //every time we call update OR change we do something for all the
+//spowened: lazy/now/eager
+//
+//  }
+//Observer[T,R]:{ mut #(content:readOnly T):R }
+//F[readOnly T]
+//Node[T,R]:{ }

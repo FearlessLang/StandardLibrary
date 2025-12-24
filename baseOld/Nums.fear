@@ -1,0 +1,94 @@
+package base;
+
+DataType[T]:ToStr,ToInfo,WidenTo[T],ToImm[T],OrderHash[T]{}
+Num:Sealed,DataType[Num]{ +(Num):Num->Magic!; *(Num):Num->Magic!/*TODO: still in progress*/ }
+
+Int:Sealed,DataType[Int],_MathOps[Int],_IntOps[Int]/*,_IntAssertionHelper*/{
+  .assertEq(actual) -> Void;//will use Error.of when we enable it
+  .assertEq(actual, message) -> Void;//will use Error.of when we enable it
+  .hash(h) -> h.int(this.imm);
+  }
+Nat:Sealed,DataType[Nat],_MathOps[Nat],_IntOps[Nat],_UnsignOps[Nat]{ }
+Byte: Sealed,DataType[Byte],_MathOps[Byte],_IntOps[Byte],_UnsignOps[Byte]{}
+Float: Sealed,DataType[Float],_MathOps[Float]{
+  .round: Int;
+  .ceil: Int;
+  .floor: Int;
+  **(n: Float): Float; // pow
+  .isNaN: Bool;
+  .isInfinite: Bool;
+  .isPosInfinity: Bool;
+  .isNegInfinity: Bool;
+  }
+_MathOps[T]: Sealed{
+  read .int: Int;
+  read .nat: Nat;
+  read .float: Float;
+  read .byte: Byte;
+  read .str: Str;
+  +(n: T): T;
+  -(n: T): T;
+  *(n: T): T;
+  /(n: T): T;
+  %(n: T): T;
+  .abs: T;
+  .sqrt: T;
+  .assertEq(actual: T): Void;
+  .assertEq(actual: T, message: Str): Void;
+  }
+_IntOps[T]: Sealed{
+  // bitwise
+  .shiftLeft(n: T): T;
+  .shiftRight(n: T): T;
+  .xor(n: T): T;
+  .bitwiseAnd(n: T): T;
+  .bitwiseOr(n: T): T;
+  **(n: Nat): T; // pow
+  }
+_UnsignOps[T]:{
+  .offset(delta: Int): T /// Take an offset int and apply it to this number. Will throw if this overflows.  
+  }
+// Fake concrete type for all numbers. The real implementation is generated at code-gen.
+//_IntInstance: Int removed
+//_NatInstance: Nat removed
+//_ByteInstance: Byte removed
+//_FloatInstance: Float removed
+
+/* This will be enabled later when we have Assert!
+_NumsAssertionHelper[T]: {
+  .assertEq(expected: T, actual: T): Void,
+  .assertEq(expected: T, actual: T, message: Str): Void,
+  }
+_IntAssertionHelper: _NumsAssertionHelper[Int]{
+  .assertEq(expected, actual) ->
+    Assert!(expected == actual, "Expected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  .assertEq(expected, actual, message) ->
+    Assert!(expected == actual, message+"\nExpected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  }
+_NatAssertionHelper: _NumsAssertionHelper[Nat]{
+  .assertEq(expected, actual) ->
+    Assert!(expected == actual, "Expected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  .assertEq(expected, actual, message) ->
+    Assert!(expected == actual, message+"\nExpected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  }
+_ByteAssertionHelper: _NumsAssertionHelper[Byte]{
+  .assertEq(expected, actual) ->
+    Assert!(expected == actual, "Expected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  .assertEq(expected, actual, message) ->
+    Assert!(expected == actual, message+"\nExpected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  }
+_FloatAssertionHelper: _NumsAssertionHelper[Float]{
+  .assertEq(expected, actual) ->
+    Assert!(expected == actual, "Expected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  .assertEq(expected, actual, message) ->
+    Assert!(expected == actual, message+"\nExpected: "+(expected.str)+"\nActual: "+(actual.str), {{}}),
+  }
+*/
+/*They come from Order, and can be overridden with magic
+  >(n: T): Bool;
+  <(n: T): Bool;
+  >=(n: T): Bool;
+  <=(n: T): Bool;
+  ==(n: T): Bool;
+  !=(n: T): Bool;
+*/

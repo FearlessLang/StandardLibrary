@@ -1,0 +1,112 @@
+package base;
+
+DataType[T]:ToStr,ToInfo,WidenTo[T],ToImm[T],OrderHash[T]{
+  .asDataType(x:T):DataType[T];
+}
+
+ToIso[R]: {mut .iso: iso ToIso[R]; mut .self: mut R;}
+ToImm[R]:{ read .imm: R }
+ToStr:{ read .str: Str }
+ToStrVia[A:**]:F[A,read ToStr]{}
+ToStr[A:**]:{ read .str(via: ToStrVia[A]): Str }
+ToInfo:{ read .info: Info }
+FromInfo[T]:{ .fromInfo(i: Info): T }
+ToInfoVia[A:**]:F[A,read ToInfo]{}
+ToInfo[A:**]:{ read .info(via: ToInfoVia[A]): Info }
+Info:{  }//TODO: later
+
+Ordering:Sealed, WidenTo[Ordering]{
+  .match[R:**](m: OrderingMatch[R]): R;
+  &&(o: mut MF[Ordering]): Ordering -> this;
+  .and(o: Ordering): Ordering -> this;
+  }
+OrderingMatch[R:**]: { .lt: R; .eq: R; .gt: R }
+OrderingLt:Ordering{::.lt }
+OrderingEq:Ordering{::.eq; &&(o)-> o#; .and(o)->o }
+OrderingGt:Ordering{::.gt }
+Orderings:{/*..consistend with other enums contains list of elements etc..*/}
+
+Order[T]: {
+  <=>(other: T): Ordering; //only abstract method for this < other, this == other, this > other
+   ==(other: T): Bool -> this <=> other .match{ .lt->False; .eq->True; .gt->False};
+   <=(other: T): Bool -> this <=> other .match{ .lt->True;  .eq->True; .gt->False};
+   >=(other: T): Bool -> this <=> other .match{ .lt->False; .eq->True; .gt->True };
+    <(other: T): Bool -> this <=> other .match{ .lt->True;  .eq->False;.gt->False};
+    >(other: T): Bool -> this <=> other .match{ .lt->False; .eq->False;.gt->True };
+   !=(other: T): Bool -> this <=> other .match{ .lt->True;  .eq->False;.gt->True };
+  }
+  OrderBy[T]:F[T,read Order[T]]{
+    &&(other: OrderBy[T]): OrderBy[T] ->
+      {a-> {b-> this#a <=> b && { other#a <=> b } } };
+    .and(other: OrderBy[T]): OrderBy[T] ->
+      {a-> {b-> this#a <=> b .and (other#a <=> b) } };
+    .view[A](f: F[A,read T]): OrderBy[A] ->
+      {a-> {b-> this#(f#a) <=> (f#b) } };
+   //TODO: this above cause assertion error.
+   //In tests: replicate this structure (Order+OrderBy)
+   //and then check that if we put the types explicitly we do get an error.
+   //this may be a missing type error instead of just an inference bug
+   //TODO: when sorted, also add implements F[T,T,Bool]; this is the opposite 'direction' of the old Comparators
+  }
+Order[T,E]:{ .order(by: OrderBy[E]): Order[T] }//for ordering lists
+
+Hasher: {
+  mut #[A,B](a: OrderHash[A], b: OrderHash[B]): Nat -> a.hash(this) * 31 + (b.hash(this));
+  //#[A,B,C](a: OrderHash[A], b: OrderHash[B], c: OrderHash[C]): Nat -> ...;
+  //...//more overloads to compose more values
+  mut .nat(v: Nat): Nat->v;
+  mut .int(v: Int): Nat->this.int(v);//TODO fix when int is done
+  mut .num(v: Num): Nat->this.num(v);//TODO fix when is done
+  mut .float(v: Float): Nat->this.float(v);//TODO fix when is done
+  mut .byte(v: Byte): Nat->this.byte(v);//TODO fix when is done
+  mut .bool(v: Bool): Nat->v?{.then->0; .else->1};
+  
+  mut .str(v: Str): Nat->this.str(v);//TODO fix when str is done  
+  //...//more methods for directly hashable types
+  //.list[E](l: List[E], f: F[E,OrderHash[E]])->..;
+  //.opt[E](o: Opt[E], f: F[E,OrderHash[E]])->..;
+  //..//more methods for collections
+  }
+OrderHashBy[T]:F[T,read OrderHash[T]]{}
+OrderHash[T]: Order[T]{ .hash(h: mut Hasher): Nat }//can we get a && for OrderHash too?
+OrderHash[T,E]:{ .orderH(by: OrderHashBy[T]): OrderHash[T] }
+
+/*Comparators is now dead!
+We can now do
+Ints.orderBy.view{::.age} && (Strs.orderBy.view{::.name})
+and get an OrderBy[Person]
+We can avoid view and overload orderBy:
+Ints.orderBy{::.age} && (Strs.orderBy{::.name})
+This is still sad, since we need Ints,Strs; we can not expect
+user defined types to follow the pattern.
+Instead the below should work (basically what Java does)
+.max(Orders#{::.age} && { ::.name})
+.max(Older && { ::.name})//works too
+.max(Older && Taller)//works too
+OlderAndTaller:OrderBy[Person]{a->{b->{Older && Taller #(a,b)}}
+Orders:{#[T](t:OrderBy[T]):OrderBy[T]->t}
+We can, for simplicity, also have
+Orders:{
+  #[T](t:OrderBy[T]):OrderBy[T]->t
+  #[T](t1:OrderBy[T],t2:OrderBy[T]):OrderBy[T]->t1 && t2... but why?
+  }
+Or, we improve inference with guessing:
+if e.m({..}.foo) and {..} does not declare a .foo method with type,
+currently this is going to fail.
+We can instead guess that {..} has the type needed by .m arg 1.
+With this guessing, all the .andThen patterns would work
+e.max({::.name} && {::.age})
+No need of `Orders#` with this inference.
+*/
+
+//---tests
+/*Persons:{#(name:Str, age:Nat):Person -> Person:{.name: Str -> name,  .age: Nat -> age }}
+Older:OrderBy[Person]{ p1->{p2 -> p1.age <=> (p2.age) } }
+//Yes inferred Older:OrderBy[Person]{ p1-> Order[Person]{p2 -> p1.age <=> (p2.age) } }
+
+Persons:{#(name:Str, age:Num):Person -> Person:Order[Person]{
+  .name: Str -> name,
+  .age: Nat -> age,
+  <=>(other)->this.age <=> (other.age) && {this.name <=> (other.name)},
+  }}
+*/

@@ -1,0 +1,45 @@
+package base.flows
+
+_First[E:*]: F[mut FlowOp[E], _SinkDecorator, mut Opt[E]]{upstream, sinkDecorator -> Block#
+  .if {upstream.isFinite.not} .error {TerminalOnInfiniteError#}
+  .let res = {Slots#[E]}
+  .var[Bool] stopped = {False}
+  .do {upstream.for(sinkDecorator#{'runner
+    .stopDown -> Block#(stopped := True, upstream.stopUp),
+    .pushError(info) -> stopped.get ? {.then -> {}, .else -> Error!info},
+    #(e) -> Block#
+      .do {res.ensureFull{e}}
+      .return {runner.stopDown},
+    })}
+  .do {upstream.stopUp}
+  .return {res.opt}
+  }
+
+_FindMap[E:*,R:*]: F[mut FlowOp[E], read F[E, mut Opt[R]], _SinkDecorator, mut Opt[R]]{upstream, f, sinkDecorator -> Block#
+  .if {upstream.isFinite.not} .error {TerminalOnInfiniteError#}
+  .let res = {Slots#[R]}
+  .var[Bool] stopped = {False}
+  .do {upstream.for(sinkDecorator#{'runner
+    .stopDown -> Block#(stopped := True, upstream.stopUp),
+    .pushError(info) -> stopped.get ? {.then -> {}, .else -> Error!info},
+    #(e) -> f#e.match{
+      .some(e') -> Block#(res.ensureFull{e'}, runner.stopDown),
+      .empty -> {},
+      },
+    })}
+  .do {upstream.stopUp}
+  .return {res.opt}
+  }
+
+_Fold[S:*,E:*]: F[mut FlowOp[E], S, read F[S,E,S], _SinkDecorator, S]{upstream, acc, f, sinkDecorator -> Block#
+  .if {upstream.isFinite.not} .error {TerminalOnInfiniteError#}
+  .var[S] res = {acc}
+  .var[Bool] stopped = {False}
+  .do {upstream.for(sinkDecorator#[E]{'runner
+    .stopDown -> Block#(stopped := True, upstream.stopUp),
+    .pushError(info) -> stopped.get ? {.then -> {}, .else -> Error!info},
+    #(e) -> res := (f#(res.get, e)),
+    })}
+  .do {upstream.stopUp}
+  .return {res.get}
+  }

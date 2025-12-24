@@ -1,0 +1,159 @@
+package base.flows
+
+Joinable[T:*,R:**]: {.join(flow: mut Flow[T]): R}
+Joinable[T:*]: Joinable[T,T]{}
+
+_RestrictFlowReuse: {
+  #[E:*](flow: mut Flow[E]): mut Flow[E] -> Block#
+    .var[Bool] isTail = {True}
+    .return {{
+      .size -> flow.size,
+      .unwrapOp(token) -> flow.unwrapOp(token),
+      mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R] ->
+        Block#(_CheckFlowReuse#isTail, flow.actorMut[S,R](state, f)),
+      mut .actor[S:*,R:*](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R] ->
+        Block#(_CheckFlowReuse#isTail, flow.actor[S,R](state, f)),
+      .first -> Block#(_CheckFlowReuse#isTail, flow.first),
+      .any(p) -> Block#(_CheckFlowReuse#isTail, flow.any(p)),
+      .all(p) -> Block#(_CheckFlowReuse#isTail, flow.all(p)),
+      .filter(predicate) -> Block#(_CheckFlowReuse#isTail, flow.filter(predicate)),
+      .findMap(f) -> Block#(_CheckFlowReuse#isTail, flow.findMap(f)),
+      .flatMap(f) -> Block#(_CheckFlowReuse#isTail, flow.flatMap(f)),
+      .fold(acc, f) -> Block#(_CheckFlowReuse#isTail, flow.fold(acc, f)),
+      .limit(n) -> Block#(_CheckFlowReuse#isTail, flow.limit(n)),
+      .map(f) -> Block#(_CheckFlowReuse#isTail, flow.map(f)),
+      .map(ctx, f) -> Block#(_CheckFlowReuse#isTail, flow.map(ctx, f)),
+      .assumeFinite -> Block#(_CheckFlowReuse#isTail, flow.assumeFinite),
+//      .with(other) -> Block#(_CheckFlowReuse#isTail, flow.with(other)),
+      .count -> Block#(_CheckFlowReuse#isTail, flow.count),
+    }},
+  }
+_CheckFlowReuse: {
+  #(isTail: mut Var[Bool]): Void -> isTail.get ? {
+    .then -> isTail := False,
+    .else -> Error.msg "This flow cannot be reused. Consider collecting it to a list first.",
+    },
+  }
+
+// Prevents any issues arising from someone mutating the thing the flow is going over
+// from within the flow itself. This is prevented by collecting the flow-source into a list and then
+// flowing on that instead.
+_MutSourceCollection[E:*]: {
+  #(source: mut FlowOp[E]): mut Flow[E] -> Flow.fromOp(this.wrap(source)),
+  #(source: mut FlowOp[E], size: Nat): mut Flow[E] -> Flow.fromOp(this.wrap(source), size),
+  .wrap(source: mut FlowOp[E]): mut FlowOp[E] -> Block#
+    .var[mut Opt[mut FlowOp[E]]] cloned = {{}}
+    .return{{
+      .isRunning -> this.get(cloned, source).isRunning,
+      .stopUp -> this.get(cloned, source).stopUp,
+      .step(downstream) -> this.get(cloned, source).step(downstream),
+      }},
+  .get(cloned: mut Var[mut Opt[mut FlowOp[E]]], original: mut FlowOp[E]): mut FlowOp[E] -> cloned.get.match{
+     .some(cloned') -> cloned',
+     .empty -> Block#
+       .let[mut List[E]] dup = {Flow.fromOp(original).list}
+       .do {cloned := (Opts#(Block#[mut FlowOp[E]]
+         .let[mut Count[Nat]] cursor = {Count.nat(0)}
+         .return {{'self
+           .isRunning -> cursor.get < (dup.size),
+           .stopUp -> cursor := (dup.size),
+           .step(downstream) -> Block#
+             .let[Nat] cursor' = {cursor.get}
+             .if {self.isRunning.not} .return{downstream.stopDown}
+             .do {downstream#(dup.get(cursor'))}
+             .do {cursor++}
+             .if {self.isRunning.not} .return{downstream.stopDown}
+             .return {{}},
+           .for(downstream) -> Block#[Void]
+             .loop {Block#
+               .let[Nat] cursor' = {cursor.get}
+               .if {self.isRunning.not} .return {Block#(downstream.stopDown, ControlFlow.break)}
+               .do {downstream#(dup.get(cursor'))}
+               .do {cursor++}
+               .if {self.isRunning.not} .return {Block#(downstream.stopDown, ControlFlow.break)}
+               .return {ControlFlow.continue}
+               }.return {{}},
+           }}
+         ))}
+       .return{cloned.get!},
+     },
+  }
+
+_FlowConverters: Sealed{
+  .range(start: Int, end: Int): mut Flow[Int] -> _FlowRange#(start, end),
+  .range(start: Int): mut Flow[Int] -> _FlowRange#start,
+//  .range(start: Int, end: Int): mut Flow[Int] -> _PipelineParallelFlow.fromOp[Int](this.range'(start, end), Opts#((end - start).nat)),
+//  .range'(start: Int, end: Int): mut FlowOp[Int] -> Block#
+//    .let cursor = {Count.int(start)}
+//    .return {{'self
+//      .isRunning -> cursor* < end,
+//      .stop -> cursor := end,
+//      .step(downstream) -> Block#
+//        .do {downstream#(cursor <- {n -> n + +1})}
+//        .if {cursor* >= end} .do {Block#(downstream.stopDown, self.stop)}
+//        .return {{}},
+//      .for(downstream) -> Block#
+//        .loop {Block#
+//          .if {cursor* >= end} .return {Block#(downstream.stopDown, self.stop, ControlFlow.break)}
+//          .do {downstream#(cursor <- {n -> n + +1})}
+//          .return {ControlFlow.continue}
+//          }
+//        .return {{}},
+//      }}
+  }
+_FlowRange: {
+  #(start: Int, end: Int): mut Flow[Int] -> Magic!,
+  #(start: Int): mut Flow[Int] -> Magic!,
+  }
+
+// Variants of the converter methods that do not clone if is safe to do so. Invoked by magic
+_SafeSource: {
+//  .fromIter[E:*](iter: mut base.iter.Iter[E]): mut Flow[E] -> Flow.fromOp[E](this.fromIter'[E](iter)),
+//  .fromIter'[E:*](iter: mut base.iter.Iter[E]): mut FlowOp[E] -> Block#
+//    .let[mut Var[Bool]] isRunning = {Vars#[Bool]True}
+//    .return {{'op
+//      .stop -> isRunning := False,
+//      .isRunning -> isRunning*,
+//      .step(downstream) -> isRunning* ? {
+//        .then -> iter.next.match{
+//          .some(x) -> downstream#x,
+//          .empty -> Block#(downstream.stopDown, op.stop),
+//          },
+//        .else -> op.stop,
+//        }
+//      }},
+
+  .fromList[E:*](list: mut List[E]): mut Flow[E] -> Flow.fromOp[E](this.fromList'[E](list, 0, list.size), list.size),
+  .fromList'[E:*](list: mut List[E], start: Nat, end: Nat): mut FlowOp[E] -> Block#
+    .let[mut Count[Nat]] cursor = {Count.nat(start)}
+    .let[mut Count[Nat]] endCursor = {Count.nat(end)}
+    .return {{'self
+      .isRunning -> cursor.get < (endCursor.get),
+      .stopUp -> cursor := (endCursor.get),
+      .step(downstream) -> Block#
+        .let[Nat] cursor' = {cursor.get}
+        .if {self.isRunning.not} .return{downstream.stopDown}
+        .do {downstream#(list.get(cursor'))}
+        .do {cursor++}
+        .if {self.isRunning.not} .return{downstream.stopDown}
+        .return {{}},
+      .for(downstream) -> Block#[Void]
+        .loop {Block#
+          .let[Nat] cursor' = {cursor.get}
+          .if {self.isRunning.not} .return {Block#(downstream.stopDown, ControlFlow.break)}
+          .do {downstream#(list.get(cursor'))}
+          .do {cursor++}
+          .if {self.isRunning.not} .return {Block#(downstream.stopDown, ControlFlow.break)}
+          .return {ControlFlow.continue}
+          }.return {{}},
+      .split -> self.canSplit ? {
+        .else -> {},
+        .then -> Block#
+          .let cur = {cursor.get}
+          .let[Nat] mid = {cur + ((endCursor.get - cur) / 2)}
+          .let[Nat] end' = {endCursor.swap(mid)}
+          .return {Opts#(this.fromList'(list, mid, end'))},
+        },
+      .canSplit -> endCursor.get - (cursor.get) > 1,
+      }},
+  }

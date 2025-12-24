@@ -1,0 +1,14 @@
+package base.caps
+
+System: ToIso[System]{
+  mut .io: mut IO,
+  mut .rng: mut RandomSeed,
+  mut .try: mut CapTry,
+  }
+_System: Sealed,System{
+  .iso -> iso _System,
+  .self -> this,
+  .io -> Magic!this,
+  .rng -> Magic!this,
+  .try -> Magic!this,
+  }

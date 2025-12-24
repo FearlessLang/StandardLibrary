@@ -1,0 +1,40 @@
+package base.repr
+
+alias base.Str as Str,
+alias base.F as F,//check if we can 'import F[T]'
+alias base.Block as Block,
+alias base.Void as Void,
+alias base.Error as Error,
+alias base.Bool as Bool,
+
+FRepr[T:imm]:F[iso T, F[read T,Bool], mut Repr[T]]{
+  _x,_inv->Block#
+   .openIso x = _x
+   .let[mut Repr[T]] res= {mut Repr[T:imm]:{'repr
+    read .look[R:*](f:read F[read T,imm R]): imm R ->f#x,
+    mut  .mutate[R:*](f:read F[mut T,imm R]): imm R -> Block#
+      .let[imm R] res={f#x}
+      .do{repr.reset}
+      .return {res},
+    mut  .reset:Void->_inv#x?{.then->Void,.else->Error.msg "AAAH",},
+    read .cached[R:*](f:F[read T,imm R]): imm R ->f#x, //magic
+    //read .cached[R:*](f:RepeatableF[read T,imm R]): imm R ->f#x, //magic
+    //read .derived[R:*](f:F[read T,imm R]): imm R ->f#x, //magic
+     }}
+   .do {res.reset}
+   .return {res}
+  }
+
+//TODO: add .repr to block with .invariant?
+//RepeatableF could be a magic type that give extra type errors if it captures badly
+
+  //489 errors: comma after methods
+  // colon (:) for inline declarations, (:) after implements
+  // missing return type
+
+
+  //inference bug: why Block#.let[imm R] res={f#x} .do{repr.reset} .return {res}, requires imm R
+
+
+
+  //FRepr[T:imm]:F[iso T, List[F[read T,Bool]], mut Repr[T]]{
