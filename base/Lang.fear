@@ -5,7 +5,9 @@ Sealed: {}
 Void: Sealed{}
 WidenTo[T]:{}
 InferUnknown:Sealed{}
-InferErr:Sealed{}
+InferErr[A,B]:Sealed{}
+InferErr[A,B,C]:Sealed{}
+InferErr[A,B,C,D]:Sealed{}
 
 Abort: Sealed{![R:**]: R -> this!} // can be optimised to just terminate (goes stuck)
 Magic: Sealed{

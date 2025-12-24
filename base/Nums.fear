@@ -29,13 +29,12 @@ Num:Sealed,DataType[Num],_RangeOps[Num],_AssertEq[Num],_AssertOrd[Num],_AssertAp
   read .intExact:Opt[Int];          /// .some if integer and in [minInt,maxInt]; .empty otherwise
   read .natExact:Opt[Nat];          /// .some if integer and in [0,maxNat]; .empty otherwise
   read .byteExact:Opt[Byte];        /// .some if integer and in [0,maxByte]; .empty otherwise
-
   .hash(h) -> h.num(this.imm);      /// hash via hasher
   .asDataType->::;                  /// DataType witness
 }
 
 /// Float: 64 bits IEEE values. Note: ==/order instead follow the usual rules:
-/// - NaN == NaN (all different NaNs equal)
+/// - NaN == NaN (all different NaNs equal); NaN is greater than everything else including +Inf
 /// - -0.0 == +0.0
 /// Method Hasher.float(Float) must respect this ordering
 Float:Sealed,DataType[Float],_RangeOps[Float],_AssertEq[Float],_AssertOrd[Float],_AssertApprox[Float]{
@@ -70,7 +69,7 @@ Float:Sealed,DataType[Float],_RangeOps[Float],_AssertEq[Float],_AssertOrd[Float]
   read .intExact:Opt[Int];          /// .some if finite, integral, in [minInt,maxInt]; .empty otherwise
   read .natExact:Opt[Nat];          /// .some if finite, integral, in [0,maxNat]; .empty otherwise
   read .byteExact:Opt[Byte];        /// .some if finite, integral, in [0,maxByte]; .empty otherwise
-  .hash(h) -> h.float(this.imm)
+  .hash(h) -> h.float(this.imm);    /// hash via hasher
   .asDataType->::;                  /// DataType witness
 }
 

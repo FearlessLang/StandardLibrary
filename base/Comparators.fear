@@ -42,11 +42,8 @@ Order[T]: {
       {a-> {b-> this#a <=> b .and (other#a <=> b) } };
     .view[A](f: F[A,read T]): OrderBy[A] ->
       {a-> {b-> this#(f#a) <=> (f#b) } };
-   //TODO: this above cause assertion error.
-   //In tests: replicate this structure (Order+OrderBy)
-   //and then check that if we put the types explicitly we do get an error.
-   //this may be a missing type error instead of just an inference bug
-   //TODO: when sorted, also add implements F[T,T,Bool]; this is the opposite 'direction' of the old Comparators
+      //Wrong alternative impl that 'feels right' //{a-> this#(f#a) };
+    #(a:T,b:T):Ordering->this#a <=> b;
   }
 Order[T,E]:{ .order(by: OrderBy[E]): Order[T] }//for ordering lists
 
@@ -67,9 +64,28 @@ Hasher: {
   //.opt[E](o: Opt[E], f: F[E,OrderHash[E]])->..;
   //..//more methods for collections
   }
-OrderHashBy[T]:F[T,read OrderHash[T]]{}
-OrderHash[T]: Order[T]{ .hash(h: mut Hasher): Nat }//can we get a && for OrderHash too?
+OrderHash[T]: Order[T]{ .hash(h: mut Hasher): Nat }
 OrderHash[T,E]:{ .orderH(by: OrderHashBy[T]): OrderHash[T] }
+
+_OrderHashAnd[T]:{
+  &&(a: OrderHash[T], b: OrderHash[T]): OrderHash[T] -> {
+    <=>(other: T): Ordering -> (a <=> other) && { b <=> other };
+    .hash(h: mut Hasher): Nat -> h#(a,b);
+    };
+  .and(a: read OrderHash[T], b: read OrderHash[T]): read OrderHash[T] -> {
+    <=>(other: T): Ordering -> (a <=> other).and(b <=> other);
+    .hash(h: mut Hasher): Nat -> h#(a,b);
+    };
+  }
+OrderHashBy[T]:F[T,read OrderHash[T]]{
+  &&  (other: OrderHashBy[T]): OrderHashBy[T] ->{x-> _OrderHashAnd[T] && (this#x, other#x) };
+  .and(other: OrderHashBy[T]): OrderHashBy[T] ->{x-> _OrderHashAnd[T].and(this#x, other#x) };
+  .view[A](f: F[A,read T]): OrderHashBy[A] -> {a->{
+    <=> b -> this#(f#a) <=> (f#b);
+    .hash(h) -> (this#(f#a)).hash(h);
+    }};
+  #(a:T,b:T): Ordering->this#a <=> b;
+  }
 
 /*Comparators is now dead!
 We can now do
