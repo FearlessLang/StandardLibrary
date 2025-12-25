@@ -6,5 +6,8 @@ public class Util{
     return c < 0 ? OrderingLt$0.instance
       : c == 0 ? OrderingEq$0.instance
       : OrderingGt$0.instance;
-  }  
+  }
+  public static Opt$1 optEmpty(){ return Opt$1.instance; }
+  public static Object optSome(Object x){ return Opts$0.instance.imm$$hash$1(x); }
+  public static Error err(String msg){ return new Error(msg); }
 }

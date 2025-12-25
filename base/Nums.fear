@@ -18,7 +18,7 @@ Num:Sealed,DataType[Num],_RangeOps[Num],_AssertEq[Num],_AssertOrd[Num],_AssertAp
   .floor:Num;                       /// floor(this);
   .ceil:Num;                        /// ceil(this);
   .trunc0:Num;                      /// trunc toward 0;
-  .round:Num;                       /// round-to-nearest;
+  .round:Num;                       /// round-to-nearest integer, ties-to-even (exact on rationals); result is an integer (denominator == 1)
   .isInteger:Bool;                  /// true iff denominator == 1
 
   read .int:Int;                    /// clamp to [minInt,maxInt] after trunc0 (never throws)
@@ -47,7 +47,7 @@ Float:Sealed,DataType[Float],_RangeOps[Float],_AssertEq[Float],_AssertOrd[Float]
   .floor:Int;                       /// floor(this) after handling NaN/Inf (policy: clamp+trunc0 into Int)
   .ceil:Int;                        /// ceil(this)  (policy: clamp+trunc0 into Int)
   .trunc0:Int;                      /// trunc toward 0 (policy: clamp+trunc0 into Int)
-  .round:Int;                       /// round-to-nearest (policy: clamp into Int)
+  .round:Int;                       /// clamp into Int range, round-to-nearest integer, ties-to-even; NaN->0; +Inf->maxInt; -Inf->minInt (never throws)
   **(x:Float):Float;                /// IEEE pow
   .isNaN:Bool;                      /// true iff NaN (any payload)
   .isInfinite:Bool;                 /// true iff +/-Inf
