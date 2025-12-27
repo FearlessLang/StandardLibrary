@@ -2,18 +2,19 @@ package base;
 
 DataType[T]: ToStr, ToInfo, WidenTo[T], ToImm[T], OrderHash[T], _AssertEq[T]{
   .close(x:T):DataType[T];
+  .close:T;
 }
 GenDataType[T,E]: ToStr[E], ToInfo[E], WidenTo[T], ToImm[T,E], OrderHash[T,E], _AssertEqGen[T,E]{
   .close(x:T):GenDataType[T,E];
   .close:T;
   .dataType(by: DataTypeBy[E]): DataType[T] -> {'self
-    .close x -> this.close(x).dataType(by);
-    .close   -> this.close;
-    .str     -> this.str(by);
-    .info    -> this.info(by);
-    .imm     -> this.imm(by);
-    .hash h  -> this.orderH(by).hash(h);
-    .cmp a,b,lt,eq,gt -> this.orderH(by).cmp(a,b,lt,eq,gt);
+    .close(x:T): DataType[T] -> this.close(x).dataType(by);
+    .close: T -> this.close;
+    .str: Str -> this.str(by);
+    .info: Info -> this.info(by);
+    .imm: T -> this.imm(by);
+    .cmp(a:Order[T],b:Order[T]): Ordering -> this.orderH(by).cmp(a,b);
+    .hash(h: mut Hasher): Nat -> this.orderH(by).hash(h);
   };
 }
 DataTypeBy[E]:ToStrVia[E],ToInfoVia[E],ToImmVia[E],OrderHashBy[E]{
@@ -31,32 +32,48 @@ FromInfo[T]:{ .fromInfo(i: Info): T }
 ToInfoVia[A:**]:{#(A):ToInfo}
 ToInfo[A:**]:{ read .info(via: ToInfoVia[A]): Info }
 
+Ordering:Sealed, WidenTo[Ordering]{
+  .match[R:**](m: OrderingMatch[R]): R;
+  &&(o: mut MF[Ordering]): Ordering -> this;
+  .and(o: Ordering): Ordering -> this;
+  }
+OrderingMatch[R:**]: { .lt: R; .eq: R; .gt: R }
+OrderingLt: Ordering{::.lt }
+OrderingEq: Ordering{::.eq; &&(o)-> o#; .and(o)->o }
+OrderingGt: Ordering{::.gt }
+Orderings:{/*..consistend with other enums contains list of elements etc..*/}
+
+.cmp(a,b,lt,eq,gt)->
+  o1.cmp(a,b,{lt},{o2.cmp(a,b,lt,eq,gt)},{gt})#;
 Order[T]: {
-  .close:T;
-  .cmp[R](a:T,b:T,lt:R,eq:R,gt:R): R;
-  ==  (other: T): Bool -> this.cmp(this.close, other, False,True, False);
-  <=  (other: T): Bool -> this.cmp(this.close, other, True, True, False);
-  >=  (other: T): Bool -> this.cmp(this.close, other, False,True, True);
-  <   (other: T): Bool -> this.cmp(this.close, other, True, False,False);
-  >   (other: T): Bool -> this.cmp(this.close, other, False,False,True);
-  !=  (other: T): Bool -> this.cmp(this.close, other, True, False,True);
-  .inRange      (lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >= lo && { this <= hi }); /// true iff this in [lo,hi]; throws if lo>hi or lo/hi are NaN
-  .inRangeOpen  (lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >  lo && { this <  hi }); /// true iff this in (lo,hi); throws if lo>hi or lo/hi are NaN
-  .inRangeLoOpen(lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >  lo && { this <= hi }); /// true iff this in (lo,hi]; throws if lo>hi or lo/hi are NaN
-  .inRangeHiOpen(lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >= lo && { this <  hi }); /// true iff this in [lo,hi); throws if lo>hi or lo/hi are NaN
+  .cmp(a:Order[T], b:Order[T]): Ordering; //only abstract method used to implement all the others
+  <=> (other: Order[T]): Ordering -> this.cmp(this, other);
+  ==  (other: Order[T]): Bool -> this <=> other .match{ .lt->False; .eq->True; .gt->False};
+  <=  (other: Order[T]): Bool -> this <=> other .match{ .lt->True;  .eq->True; .gt->False};
+  >=  (other: Order[T]): Bool -> this <=> other .match{ .lt->False; .eq->True; .gt->True };
+  <   (other: Order[T]): Bool -> this <=> other .match{ .lt->True;  .eq->False;.gt->False};
+  >   (other: Order[T]): Bool -> this <=> other .match{ .lt->False; .eq->False;.gt->True };
+  !=  (other: Order[T]): Bool -> this <=> other .match{ .lt->True;  .eq->False;.gt->True };
+  .inRange(lo:Order[T], hi:Order[T]):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this >= lo  &&{ this <= hi });        /// true iff this in [lo,hi]; throws if lo>hi or lo/hi are NaN
+  .inRangeOpen(lo:Order[T], hi:Order[T]):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this > lo  &&{ this < hi });      /// true iff this in (lo,hi); throws if lo>hi or lo/hi are NaN
+  .inRangeLoOpen(lo:Order[T], hi:Order[T]):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this > lo  &&{ this <= hi });   /// true iff this in (lo,hi]; throws if lo>hi or lo/hi are NaN
+  .inRangeHiOpen(lo:Order[T], hi:Order[T]):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this >= lo  &&{ this < hi });   /// true iff this in [lo,hi); throws if lo>hi or lo/hi are NaN
   }
-_RangeTest:{#[T](o:Order[T],lo:T,hi:T,res:Bool):Bool->
-  Block#(Assert!(o.cmp(lo,hi, True, True, False)),res);
-  }
+_LE:{ #[T](o:Order[T],a:Order[T], b:Order[T]): Bool ->
+  o.cmp(a,b).match{ .lt->True; .eq->True; .gt->False }; }
 OrderBy[T]:{
-  #(T):Order[T];
-  &&(other:OrderBy[T]):OrderByCmp[T] -> { .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[F[RR]](a,b,{lt},{ other#a.cmp(a,b,lt,eq,gt) },{gt})#};
-  .and(other:OrderBy[T]):OrderByCmp[T] -> {a,b,lt,eq,gt-> this#a.cmp(a,b,lt,other#a.cmp(a,b,lt,eq,gt),gt)};
-  .view[A](f:F[A,Order[T]]):OrderByCmp[A] -> {a,b,lt,eq,gt-> f#a.cmp(f#a.close,f#b.close,lt,eq,gt)};
+  #(Order[T]):Order[T];
+  .cmp(a:Order[T],b:Order[T]):Ordering -> this#a <=> b;
+  &&(other:OrderBy[T]):OrderByCmp[T] -> { a,b-> this.cmp(a,b) && { other.cmp(a,b) }};
+  .and(other:OrderBy[T]):OrderByCmp[T] -> {a,b-> this.cmp(a,b).and(other.cmp(a,b))};
+  .view[A](f:F[Order[A],Order[T]]):OrderByCmp[A] -> {a,b-> this.cmp(f#a,f#b)};
 }
 OrderByCmp[T]:OrderBy[T]{
-  .cmp[R](a:T,b:T,lt:R,eq:R,gt:R): R;
-  # a0 -> { .close -> a0; .cmp a,b,lt,eq,gt -> this.cmp(a,b,lt,eq,gt) };
+  .cmp(a:Order[T],b:Order[T]):Ordering;//sets this as abstract
+  # a0 -> {
+     <=> b   -> this.cmp(a0,b);
+    .cmp a,b -> this.cmp(a,b);
+    };
   }
 Order[T,E]:{ .order(by: OrderBy[E]): Order[T] }//for ordering lists
 
@@ -80,27 +97,29 @@ OrderHash[T]:Order[T]{ .hash(h: mut Hasher): Nat }
 OrderHash[T,E]:{ .orderH(by: OrderHashBy[E]): OrderHash[T] }
 OrderHashBy[T]:{
   #(x:T):OrderHash[T];
+  .cmp(a:OrderHash[T],b:OrderHash[T]):Ordering -> a <=> b;
+  .hash(a:OrderHash[T],h: mut Hasher):Nat -> a.hash(h);
   &&(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
-    .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[F[RR]](a,b,{lt},{ other#a.cmp(a,b,lt,eq,gt) },{gt})#;
+    .cmp(a,b)-> this.cmp(a,b) && { other.cmp(a,b) };
     .hash(a,h)-> h#(this#a, other#a);
   };
   .and(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
-    .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[RR](a,b,lt, other#a.cmp(a,b,lt,eq,gt),gt);
+    .cmp(a,b)-> this.cmp(a,b).and(other.cmp(a,b));
     .hash(a,h)-> h#(this#a, other#a);
   };
-  .view[A](f:F[A,OrderHash[T]]):OrderHashByCmp[A] -> {
-    .cmp(a,b,lt,eq,gt)-> f#a.cmp(f#a.close,f#b.close,lt,eq,gt);
-    .hash(a,h)-> f#a.hash(h);
+  .view[A](f:F[OrderHash[A],OrderHash[T]]):OrderHashByCmp[A] -> {
+    .cmp(a,b)-> this.cmp(f#a,f#b);
+    .hash(a,h)-> this.hash(f#a,h);
   };
 }
 OrderHashByCmp[T]:OrderHashBy[T]{
-  .cmp[R](a:T,b:T,lt:R,eq:R,gt:R): R;
-  .hash(a:T,h: mut Hasher):Nat;
-  # a0 -> {
-    .close -> a0;
-    .cmp a,b,lt,eq,gt -> this.cmp(a,b,lt,eq,gt);
-    .hash h -> this.hash(a0,h);
-    };
+  .cmp(a:OrderHash[T],b:OrderHash[T]):Ordering;      
+  .hash(a:OrderHash[T],h: mut Hasher):Nat;
+  #(x:T):OrderHash[T] -> {
+    <=> (other:OrderHash[T]):Ordering -> this.cmp(x,other);
+    .cmp(a,b):Ordering -> this.cmp(a,b);
+    .hash(h):Nat -> this.hash(x,h);
+  };
 }
 
 /*Comparators is now dead!

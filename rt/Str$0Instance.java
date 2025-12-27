@@ -18,4 +18,11 @@ public record Str$0Instance(String val) implements Str$0{
   @Override public Object imm$$or$0(){ return instance(val+"\n"); }
   @Override public Object imm$$xor$0(){ return instance(val+"`"); }
   @Override public Object imm$$xor_xor$0(){ return instance(val+"\""); }
+  
+  @Override public Object imm$isEmpty$0(){ return bool(val.isEmpty()); }
+  @Override public Object imm$escape$0(){
+    var res= val.replace("`", "`^`").replace("\n", "`|`");
+    return instance("`"+res+"`");
+  }
+
 }

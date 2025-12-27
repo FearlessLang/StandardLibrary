@@ -1,0 +1,29 @@
+package base;
+
+_Throw:{
+  .deterministic[R:**](info:Info):R ->Magic!;
+  .nonDeterministic[R:**](info:Info):R ->Magic!;
+  .stackTrace:Info->Magic!
+  }
+
+Error: {
+  ![R:**](info: Info): R -> _Throw.deterministic(info);
+  .msg[R:**](msg: Str): R -> _Throw.deterministic(Infos.msg msg + (_Throw.stackTrace));
+  .nonDeterministic[R:**](msg: Str): R -> _Throw.nonDeterministic(Infos.msg msg + (_Throw.stackTrace));
+  }
+Todo: {
+  ![R:**]: R -> Error.msg `TODO: Implement this code.`;
+  ![R:**](msg: Str): R -> Error.msg[R](`TODO: ` + msg);
+  }
+Unreachable: {
+  ![R:**]: R -> Error.msg `This code was flagged as unreachable, but it has been reached.`;
+  ![R:**](msg: Str): R -> Error.msg(`This code was flagged as unreachable as `+msg+`, but it has been reached.`);
+  }
+/// Strong exception safety is upheld:
+/// The operation has either completed successfully or thrown an exception,
+// leaving the program state exactly as it was before the operation started.
+Try: {
+  #[R:*](try: read F[R]): mut Action[R] -> Magic!;
+  #[T:iso,imm,mut,read,R](data: iso T, try: read F[iso T, R]): mut Action[R] -> Magic!;
+  }
+Try[R:*]:{ read #: R }

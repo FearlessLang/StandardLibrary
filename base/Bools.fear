@@ -15,9 +15,9 @@ Bool: Sealed,DataType[Bool]{
   .if[R:**](f: mut ThenElse[R]): R;
   ?[R:**](f: mut ThenElse[R]): R -> this.if(f);
   .match[R](m: mut BoolMatch[R]): R -> this?{.then->m.true; .else->m.false};
-  <=>other->Abort!;//TODO:
-  .info->Abort!;//TODO:
-  .asDataType->::;
+  .cmp(a,b,lt,eq,gt)->Todo!;
+  .info->Todo!;
+  .close->::; .close->this;
   .hash(h)->h.bool(this);
   }
 True: Bool{

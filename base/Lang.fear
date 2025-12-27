@@ -9,6 +9,8 @@ InferErr[A,B]:Sealed{}
 InferErr[A,B,C]:Sealed{}
 InferErr[A,B,C,D]:Sealed{}
 
+ToIso[R]: {mut .iso: iso ToIso[R]; mut .self: mut R;}
+
 Abort: Sealed{![R:**]: R -> this!} // can be optimised to just terminate (goes stuck)
 Magic: Sealed{
   ![R:**]: R -> this!; // magic'd out to tell us what we forgot to implement
@@ -21,10 +23,8 @@ Debug: Sealed{
   }
 As[X:*]: Sealed{ #(x: X): X -> x }
 
-Let: {
-  #[V:*,R:*](l: mut Let[V, R]): R -> l.in(l.var);
-  }
-Let[V:*,R:*]: { mut .var: V; mut .in(v: V): R }
+Let: { #[A:*,R:**](l: mut Let[A, R]): R -> l.in(l.let); }
+Let[A:*,R:**]: { mut .let: A; mut .in(a: A): R }
 
 F[R:**]: { read #: R; }
 F[A:**,R:**]: { read #(a: A): R }

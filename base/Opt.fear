@@ -73,9 +73,29 @@ Opt[T:*]: _Opt[T], Sealed, ToStr[T], ToInfo[T], OrderHash[Opt[T],T]{
   read .as[R:imm](f: mut MF[read/imm E, R]): Opt[R],  
   }
 */
-Opt[T:*]:{}
+Opt[E:*]:GenDataType[Opt[E],E]{
+  .close->::; .close->this;         /// fixpoint type closed
+  .str via->this.match{
+    .empty->`{}`;
+    .some e->`{`+via#e+`}`;
+    };
+  .info via->this.match{
+    .empty->{};
+    .some e->Infos.map(`.some`,via#e);
+    };
+  .imm via->this.match{
+    .empty->{};
+    .some e->Opts#(via#e);
+    };
+  .orderH by->OrderHashByCmp[Opt[E]]{
+    .hash(a,h)->by#a.hash(h);
+    .cmp(a,b,lt,eq,gt)->a.match{
+      .empty->b.match{ .empty->eq; .some _->lt};
+      .some ea->b.match{ .empty->gt; .some eb->by#ea.cmp(ea,eb,lt,eq,gt)};
+      };
+    }
+  }
 Opts: { #[T:*](x: T): mut Opt[T] -> { /*.match(m) -> m.some(x)*/ } }
-Flow[T:*]:{}//TODO:
 
 //TODO: introduce a concept of GenDataType[T,E] and Opt will implement it.
 //GenDataType[T,E] will include all the .assertEq etc methods!
