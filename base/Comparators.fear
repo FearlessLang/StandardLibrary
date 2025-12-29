@@ -3,33 +3,33 @@ package base;
 DataType[T]: ToStr, ToInfo, WidenTo[T], ToImm[T], OrderHash[T], _AssertEq[T]{
   .close(x:T):DataType[T];
 }
-GenDataType[T,E]: ToStr[E], ToInfo[E], WidenTo[T], ToImm[T,E], OrderHash[T,E], _AssertEqGen[T,E]{
-  .close(x:T):GenDataType[T,E];
+DataType[T,E:*]: ToStr[E], ToInfo[E], WidenTo[T], ToImm[T,E], OrderHash[T,E], _AssertEqGen[T,E]{
+  .close(x:T):DataType[T,E];
   .close:T;
-  .dataType(by: DataTypeBy[E]): DataType[T] -> {'self
+  .dataType(by: DataTypeBy[imm E]): DataType[T] -> {
     .close x -> this.close(x).dataType(by);
     .close   -> this.close;
     .str     -> this.str(by);
     .info    -> this.info(by);
     .imm     -> this.imm(by);
-    .hash h  -> this.orderH(by).hash(h);
-    .cmp a,b,lt,eq,gt -> this.orderH(by).cmp(a,b,lt,eq,gt);
+    .hash h  -> this.hash(by,h);
+    .cmp a,b,lt,eq,gt -> this.cmp(by,a,b,lt,eq,gt);
   };
 }
-DataTypeBy[E]:ToStrVia[E],ToInfoVia[E],ToImmVia[E],OrderHashBy[E]{
+DataTypeBy[E]:ToStrBy[E],ToInfoBy[E],ToImmBy[E],OrderHashBy[E]{
   #(e:E): DataType[E];
 }
-ToImm[R]:{ read .imm: R }
-ToImmVia[A]:{#(A):ToImm[A]}
-ToImm[T,E]:{ read .imm(ToImmVia[E]): T }
+ToImm[T]:{ read .imm: T }
+ToImmBy[T]:{#(read T):read ToImm[T]}
+ToImm[T,E:*]:{ read .imm(ToImmBy[imm E]): T }
 
 ToStr:{ read .str: Str }
-ToStrVia[A:**]:{#(A):ToStr}
-ToStr[A:**]:{ read .str(ToStrVia[A]): Str }
+ToStrBy[T]:{#(read T):read ToStr}
+ToStr[E:*]:{ read .str(ToStrBy[imm E]): Str }
 ToInfo:{ read .info: Info }
 FromInfo[T]:{ .fromInfo(i: Info): T }
-ToInfoVia[A:**]:{#(A):ToInfo}
-ToInfo[A:**]:{ read .info(via: ToInfoVia[A]): Info }
+ToInfoBy[T]:{#(read T):read ToInfo}
+ToInfo[E:*]:{ read .info(by: ToInfoBy[imm E]): Info }
 
 Order[T]: {
   .close:T;
@@ -50,7 +50,7 @@ _RangeTest:{#[T](o:Order[T],lo:T,hi:T,res:Bool):Bool->
   }
 OrderBy[T]:{
   #(T):Order[T];
-  &&(other:OrderBy[T]):OrderByCmp[T] -> { .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[F[RR]](a,b,{lt},{ other#a.cmp(a,b,lt,eq,gt) },{gt})#};
+  .then(other:OrderBy[T]):OrderByCmp[T] -> { .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[F[RR]](a,b,{lt},{ other#a.cmp(a,b,lt,eq,gt) },{gt})#};
   .and(other:OrderBy[T]):OrderByCmp[T] -> {a,b,lt,eq,gt-> this#a.cmp(a,b,lt,other#a.cmp(a,b,lt,eq,gt),gt)};
   .view[A](f:F[A,Order[T]]):OrderByCmp[A] -> {a,b,lt,eq,gt-> f#a.cmp(f#a.close,f#b.close,lt,eq,gt)};
 }
@@ -58,9 +58,17 @@ OrderByCmp[T]:OrderBy[T]{
   .cmp[R](a:T,b:T,lt:R,eq:R,gt:R): R;
   # a0 -> { .close -> a0; .cmp a,b,lt,eq,gt -> this.cmp(a,b,lt,eq,gt) };
   }
-Order[T,E]:{ .order(by: OrderBy[E]): Order[T] }//for ordering lists
+Order[T,E:*]:{
+  .close:T;
+  .cmp[R](by: OrderBy[imm E], a:T,b:T, lt:R,eq:R,gt:R): R;
+  .order(by: OrderBy[imm E]): Order[T] -> {
+    .close -> this.close;
+    .cmp a,b,lt,eq,gt -> this.cmp(by,a,b,lt,eq,gt);
+    };
+  }
 
 Hasher: {
+  //Note that his can be overridden in other hashes, so that #(a,b) just calls Block#(a.hash(this),b.hash(this)) while this accumulates on mut state
   mut #[A,B](a: OrderHash[A], b: OrderHash[B]): Nat -> a.hash(this) * 31 + (b.hash(this));
   //#[A,B,C](a: OrderHash[A], b: OrderHash[B], c: OrderHash[C]): Nat -> ...;
   //...//more overloads to compose more values
@@ -77,18 +85,25 @@ Hasher: {
   mut .map[K,E](f: OrderHashBy[E], m: Map[K,E]):Nat->Todo!;
   }
 OrderHash[T]:Order[T]{ .hash(h: mut Hasher): Nat }
-OrderHash[T,E]:{ .orderH(by: OrderHashBy[E]): OrderHash[T] }
-OrderHashBy[T]:{
+OrderHash[T,E:*]:Order[T,E]{
+  .hash(by: OrderHashBy[imm E], h: mut Hasher): Nat;
+  .orderH(by: OrderHashBy[imm E]): OrderHash[T] -> {'self
+    .close -> this.close;
+    .cmp a,b,lt,eq,gt -> this.cmp(by,a,b,lt,eq,gt);
+    .hash h -> this.hash(by,h);
+  };
+}
+OrderHashBy[T]:OrderBy[T]{
   #(x:T):OrderHash[T];
-  &&(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
+  .thenHash(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
     .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[F[RR]](a,b,{lt},{ other#a.cmp(a,b,lt,eq,gt) },{gt})#;
     .hash(a,h)-> h#(this#a, other#a);
   };
-  .and(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
+  .andHash(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
     .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[RR](a,b,lt, other#a.cmp(a,b,lt,eq,gt),gt);
     .hash(a,h)-> h#(this#a, other#a);
   };
-  .view[A](f:F[A,OrderHash[T]]):OrderHashByCmp[A] -> {
+  .viewHash[A](f:F[A,OrderHash[T]]):OrderHashByCmp[A] -> {
     .cmp(a,b,lt,eq,gt)-> f#a.cmp(f#a.close,f#b.close,lt,eq,gt);
     .hash(a,h)-> f#a.hash(h);
   };

@@ -72,21 +72,7 @@ Opt[T:*]: _Opt[T], Sealed, ToStr[T], ToInfo[T], OrderHash[Opt[T],T]{
   read .ifEmpty(f: mut MF[Void]): Void,
   read .as[R:imm](f: mut MF[read/imm E, R]): Opt[R],  
   }
-*/
-Opt[E:*]:GenDataType[Opt[E],E]{
-  .close->::; .close->this;         /// fixpoint type closed
-  .str via->this.match{
-    .empty->`{}`;
-    .some e->`{`+via#e+`}`;
-    };
-  .info via->this.match{
-    .empty->{};
-    .some e->Infos.map(`.some`,via#e);
-    };
-  .imm via->this.match{
-    .empty->{};
-    .some e->Opts#(via#e);
-    };
+
   .orderH by->OrderHashByCmp[Opt[E]]{
     .hash(a,h)->by#a.hash(h);
     .cmp(a,b,lt,eq,gt)->a.match{
@@ -94,8 +80,38 @@ Opt[E:*]:GenDataType[Opt[E],E]{
       .some ea->b.match{ .empty->gt; .some eb->by#ea.cmp(ea,eb,lt,eq,gt)};
       };
     }
-  }
-Opts: { #[T:*](x: T): mut Opt[T] -> { /*.match(m) -> m.some(x)*/ } }
-
-//TODO: introduce a concept of GenDataType[T,E] and Opt will implement it.
-//GenDataType[T,E] will include all the .assertEq etc methods!
+*/
+Opt[E:*]:DataType[Opt[E],E]{
+  .match[R:**](m: mut OptMatch[E,R]): R -> m.empty;
+  .close->::; .close->this;         /// fixpoint type closed
+  .str by->this.match{
+    .empty->`()`;
+    .some e->`(`+by#e+`)`;
+    };
+  .info by->this.match{
+    .empty->{};
+    .some e->Infos.map(`.some`,by#e);
+    };
+  .imm by->this.match{
+    .empty->{};
+    .some e->Opts#(by#e);
+    };
+  .cmp(by, a, b, lt,eq,gt) -> a.match{
+    .empty -> b.match{ .empty -> eq; .some _ -> lt; };
+    .some ea -> b.match{
+      .empty   -> gt;
+      .some eb -> (by#ea).cmp(ea, eb, lt, eq, gt);
+      }
+    };
+  .hash(by, h) -> this.match{
+    .empty  -> 0;
+    .some e -> h#(1, by#e);
+    };
+}
+Opts:{
+  #[T:*](x: T): mut Opt[T] -> { .match(m) -> m.some(x) };
+}
+OptMatch[T:*, R:**]:{
+  mut .some(x: T): R;
+  mut .empty: R;
+}

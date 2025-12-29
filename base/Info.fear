@@ -12,8 +12,14 @@ Maps:Sealed{//No need of empty, just use {}
   #[K,E](OrderHashBy[K], K,E,K,E,K,E):Map[K,E]->{};
   #[K,E](OrderHashBy[K], K,E,K,E,K,E,K,E):Map[K,E]->{};
   }
-List[E]:Sealed,ToInfo[E]{
+List[E]:Sealed,DataType[List[E],E]{
   .isEmpty:Bool->True;
+  .close->{};
+  .close->::;
+  .imm by->{};
+  .str by->`[]`;
+  .hash by, h->h.list(by,this);
+  .cmp(by,a,b,lt,eq,gt)->Todo!;
   ++ (List[E]):List[E]->this;
   <+ (E):List[E]->this;//add to left
   +> (E):List[E]->this;//add to right  
@@ -26,15 +32,26 @@ List[E]:Sealed,ToInfo[E]{
     };
   read .flow:Flow[E]->Todo!;
   }
-Map[K,E]:Sealed,ToInfo[E]{
-  .isEmpty:Bool->True;
-  .merge(merge:F[E,E,E],other:Map[K,E]):Map[K,E]->this;
-  .info by-> Let#{
-    .let->this.flow.mapping[KeyElem[Str,Info],Str,Info]({::},{
-      .key(e)->e.key;
-      .elem(e)->by#(e.elem);
+_MapInfo:{#[K,E](dtK:DataTypeBy[K], by:ToInfoBy[E], map:read Map[K,E]):Map[Str,Info]->
+   map.flow.mapping[Str,Info]({::},{
+      .key(e)->dtK#(e.key).str;
+      .elem(e)->by#(e.elem).info;
       });
-    .in a-> {'i .match->::.map i; .map -> a};
+  }
+Map[K,E]:Sealed,DataType[Map[K,E],E]{
+  read .keyDataType:DataTypeBy[K]->{k->Unreachable!};
+  .isEmpty:Bool->True;
+  .close->{};
+  .close->::;
+  .imm by->{};
+  .str by->`{}`;
+  .hash by, h->h.map(by,this);
+  .cmp(by,a,b,lt,eq,gt)->Todo!;
+  
+  .merge(merge:F[E,E,E],other:Map[K,E]):Map[K,E]->this;
+  .info by-> Let#{//TODO: eventualy use Block
+    .let->_MapInfo#(this.keyDataType,by,this);
+    .in a-> {.match->::.map a; .map -> a};
     };
   read .flow:Flow[KeyElem[K,E]]->Todo!;
   //read .flow[R](f:F[K,E,R]):Flow[R]->Todo!;
@@ -42,10 +59,10 @@ Map[K,E]:Sealed,ToInfo[E]{
 KeyElem[K,E]:{.key:K;.elem:E;}
 KeyElemMapper[A,K,E]:{.key(A):K;.elem(A):E;}
 
-Flow[T]:{
-  .map[R](F[T,R]):Flow[R];
-  .list:List[T];
-  .mapping[K,E](OrderBy[K],KeyElemMapper[T,K,E]):Map[K,E];
+Flow[TTT]:{
+  .map[R](F[TTT,R]):Flow[R];
+  .list:List[TTT];
+  .mapping[K,E](OrderBy[K],KeyElemMapper[TTT,K,E]):Map[K,E];
   }
 
 Infos:Sealed {
@@ -106,7 +123,7 @@ InfoMatch[R]:{
   }
 _InfoToStr: InfoMatch[Str]{
   .msg(msg) -> msg.escape;
-  .list(list) -> list.toStr{::};
-  .map(map) -> map.toStr{::};
+  .list(list) -> list.str{::};
+  .map(map) -> map.str{::};
   }
 //Infos.map(`heading`,`North`,  `aiming`,`East`,  `point`,Infos.map(`x`,`10`,  `y`,`5`))

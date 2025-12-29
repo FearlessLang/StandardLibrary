@@ -66,7 +66,7 @@ _AssertApprox[T]:DataType[T]{
       | `delta: `+(this.close(delta))
       | `actual: `+this });
   }
-_AssertEqGen[T,E]:{
+_AssertEqGen[T,E:*]:{
   .dataType(by: DataTypeBy[E]): DataType[T];
   .assertEq(by: DataTypeBy[E], expected:T): Void -> this.dataType(by).assertEq(expected);
   .assertEq(by: DataTypeBy[E], expected:T, msg:F[Str]): Void -> this.dataType(by).assertEq(expected,msg);
