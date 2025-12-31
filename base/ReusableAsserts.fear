@@ -1,57 +1,6 @@
 package base;
 
-_AssertEq[T]:OrderHash[T],ToStr{
-  .close(x:T):DataType[T];
-  .assertEq(expected:T):Void -> Assert!(
-    this == expected,
-    { `Expected: `+(this.close(expected)) | `Actual: `+this });
-  .assertEq(expected:T, msg:F[Str]):Void -> Assert!(
-    this == expected,
-    { msg# | `Expected: `+(this.close(expected)) | `Actual: `+this });
-  .assertNe(expected:T):Void -> Assert!(
-    this != expected,
-    { `Unexpected: `+(this.close(expected)) | `Actual: `+this });
-  .assertNe(expected:T, msg:F[Str]):Void -> Assert!(
-    this != expected,
-    { msg# | `Unexpected: `+(this.close(expected)) | `Actual: `+this });
-  .assertLt(x:T):Void -> Assert!(
-    this < x,
-    { `Expected: `+this | ` < `+(this.close(x)) });
-  .assertLe(x:T):Void -> Assert!(
-    this <= x,
-    { `Expected: `+this | ` <= `+(this.close(x)) });
-  .assertGt(x:T):Void -> Assert!(
-    this > x,
-    { `Expected: `+this | ` > `+(this.close(x)) });
-  .assertGe(x:T):Void -> Assert!(
-    this >= x,
-    { `Expected: `+this | ` >= `+(this.close(x)) });
-  .assertInRange(lo:T, hi:T):Void -> Assert!(
-    this.inRange(lo,hi),
-    { `Expected in [lo,hi]`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this });
-  .assertInRangeOpen(lo:T, hi:T):Void -> Assert!(
-    this.inRangeOpen(lo,hi),
-    { `Expected in (lo,hi)`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this });
-  .assertInRangeLoOpen(lo:T, hi:T):Void -> Assert!(
-    this.inRangeLoOpen(lo,hi),
-    { `Expected in (lo,hi]`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this });
-  .assertInRangeHiOpen(lo:T, hi:T):Void -> Assert!(
-    this.inRangeHiOpen(lo,hi),
-    { `Expected in [lo,hi)`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this });
-}
-_AssertApprox[T]:DataType[T]{
+_AssertApprox[T]:DataType[T,T]{
   .eqDelta(n:T, delta:T):Bool;
   .assertEqDelta(expected:T, delta:T):Void -> Assert!(
     this.eqDelta(expected,delta),
@@ -66,21 +15,3 @@ _AssertApprox[T]:DataType[T]{
       | `delta: `+(this.close(delta))
       | `actual: `+this });
   }
-_AssertEqGen[T,E:*]:{
-  .dataType(by: DataTypeBy[E]): DataType[T];
-  .assertEq(by: DataTypeBy[E], expected:T): Void -> this.dataType(by).assertEq(expected);
-  .assertEq(by: DataTypeBy[E], expected:T, msg:F[Str]): Void -> this.dataType(by).assertEq(expected,msg);
-
-  .assertNe(by: DataTypeBy[E], expected:T): Void -> this.dataType(by).assertNe(expected);
-  .assertNe(by: DataTypeBy[E], expected:T, msg:F[Str]): Void -> this.dataType(by).assertNe(expected,msg);
-
-  .assertLt(by: DataTypeBy[E], x:T): Void -> this.dataType(by).assertLt(x);
-  .assertLe(by: DataTypeBy[E], x:T): Void -> this.dataType(by).assertLe(x);
-  .assertGt(by: DataTypeBy[E], x:T): Void -> this.dataType(by).assertGt(x);
-  .assertGe(by: DataTypeBy[E], x:T): Void -> this.dataType(by).assertGe(x);
-
-  .assertInRange(by: DataTypeBy[E], lo:T, hi:T): Void -> this.dataType(by).assertInRange(lo,hi);
-  .assertInRangeOpen(by: DataTypeBy[E], lo:T, hi:T): Void -> this.dataType(by).assertInRangeOpen(lo,hi);
-  .assertInRangeLoOpen(by: DataTypeBy[E], lo:T, hi:T): Void -> this.dataType(by).assertInRangeLoOpen(lo,hi);
-  .assertInRangeHiOpen(by: DataTypeBy[E], lo:T, hi:T): Void -> this.dataType(by).assertInRangeHiOpen(lo,hi);
-}

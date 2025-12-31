@@ -1,0 +1,102 @@
+package base;
+
+FloatArith:F[Tests,Tests]{::
+  .test((+1.0 + +2.0) .assertEq +3.0)
+  .test((+5.0 - +2.0) .assertEq +3.0)
+  .test((+3.0 * +4.0) .assertEq +12.0)
+  .test((+7.0 / +2.0) .assertEq +3.5)
+  .test((-3.0).abs .assertEq +3.0)
+  .test((+9.0).sqrt .assertEq +3.0)
+  .test((-1.0).sqrt.isNaN .assertEq True)
+  .test((+2.0 ** +3.0) .assertEq +8.0)
+  .test((+1.0).assertEqDelta(+1.0,+0.0))
+}
+
+FloatRound:F[Tests,Tests]{::
+  .test(+0.5.round .assertEq +0)
+  .test(+1.5.round .assertEq +2)
+  .test(+2.5.round .assertEq +2)
+  .test(-0.5.round .assertEq +0)
+  .test(-1.5.round .assertEq -2)
+  .test(-2.5.round .assertEq -2)
+
+  // Near 1.5, eps = 1/64 = 0.015625 (exact)
+  .test((+1.5 - (+1.0 / +64.0)).round .assertEq +1)
+  .test((+1.5 + (+1.0 / +64.0)).round .assertEq +2)
+  .test((-1.5 - (+1.0 / +64.0)).round .assertEq -2)
+
+  .test((+1.5).floor .assertEq +1)
+  .test((+1.5).ceil  .assertEq +2)
+  .test((+1.5).trunc0 .assertEq +1)
+  .test((-1.5).floor .assertEq -2)
+  .test((-1.5).ceil  .assertEq -1)
+  .test((-1.5).trunc0 .assertEq -1)
+
+  // NaN/Inf policy for round
+  .test((+0.0 / +0.0).round .assertEq +0)
+  .test((+1.0 / +0.0).round .assertEq +2147483647)
+  .test((-1.0 / +0.0).round .assertEq -2147483648)
+}
+
+FloatPred:F[Tests,Tests]{::
+  .test((+0.0 / +0.0).isNaN .assertEq True)
+  .test((+1.0 / +0.0).isInfinite .assertEq True)
+  .test((+1.0 / +0.0).isPosInfinity .assertEq True)
+  .test((+1.0 / +0.0).isNegInfinity .assertEq False)
+  .test((-1.0 / +0.0).isNegInfinity .assertEq True)
+
+  .test((-0.0).isNegZero .assertEq True)
+  .test((-0.0).isPosZero .assertEq False)
+  .test((+0.0).isPosZero .assertEq True)
+  .test((+0.0).isNegZero .assertEq False)
+
+  // Float == semantics: -0.0 == +0.0 ; NaN == NaN
+  .test((-0.0) .assertEq +0.0)
+  .test((+0.0 / +0.0) .assertEq (+0.0 / +0.0))
+
+  // Ordering semantics: NaN is greater than everything
+  .test((+0.0 / +0.0) .assertGt +1.0)
+}
+
+FloatIeee:F[Tests,Tests]{::
+  .test((+0.0).ieeeEq(-0.0) .assertEq True)
+  .test((+0.0).ieeeSameBits(-0.0) .assertEq False)
+  .test((+0.0 / +0.0).ieeeEq(+0.0 / +0.0) .assertEq False)
+
+  // IEEE remainder (ties-to-even)
+  .test((+5.0).ieeeRemainder(+2.0) .assertEq +1.0)
+  .test((+7.0).ieeeRemainder(+2.0) .assertEq -1.0)
+}
+
+FloatConv:F[Tests,Tests]{::
+  .test((+1.5).int .assertEq +1)
+  .test((-1.5).int .assertEq -1)
+  .test((+1.5).nat .assertEq 1)
+  .test((-1.5).nat .assertEq 0)
+  .test((+300.0).byte .assertEq (+255.byte))
+  .test((-1.0).byte .assertEq (+0.byte))
+
+  .test((+0.0 / +0.0).int .assertEq +0)
+  .test((+1.0 / +0.0).int .assertEq +2147483647)
+  .test((-1.0 / +0.0).int .assertEq -2147483648)
+  .test((+1.0 / +0.0).nat .assertEq (4294967295.aluInt.aluNat)) // avoid giant Nat literal: (maxInt).aluNat would not be maxNat
+
+  // Exact conversions to Opt (assuming Opt is empty and Opts#(x) is some)
+  .test((+3.0).intExact .assertEq ({::},Opts#(+3)))
+  .test((+3.0).natExact .assertEq ({::},Opts#(3)))
+  .test((+3.0).byteExact .assertEq ({::},Opts#(+3.byte)))
+  .test((+1.5).intExact .assertEq ({::},Opt[Int]))
+  .test((-1.0).natExact .assertEq ({::},Opt[Nat]))
+  .test((+0.0 / +0.0).intExact .assertEq({::},Opt[Int]))
+  .test((+1.0 / +0.0).byteExact .assertEq({::},Opt[Byte]))
+}
+
+FloatRange:F[Tests,Tests]{::
+  .test((+3.0).assertInRange(+1.0,+5.0))
+  .test((+3.0).assertInRangeOpen(+1.0,+5.0))
+  .test((+3.0).assertInRangeLoOpen(+1.0,+3.0))
+  .test((+3.0).assertInRangeHiOpen(+3.0,+5.0))
+  .test((+0.0).clamp(+1.0,+5.0) .assertEq +1.0)
+  .test((+6.0).clamp(+1.0,+5.0) .assertEq +5.0)
+  .test((+3.0).clamp(+1.0,+5.0) .assertEq +3.0)
+}

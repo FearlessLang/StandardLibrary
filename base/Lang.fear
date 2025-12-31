@@ -57,9 +57,3 @@ UStrProc:{
   mut .add(a:UStr,b:ToUStr): mut UStrProc -> this.add(a,b);
   mut .build(a:UStr): UStr-> a;
   }
-//----To eventually delete
-Box[T:*]: {
-  mut  .get: T;
-  read .get: read/imm T;
-  imm  .get: imm T;
-  }  

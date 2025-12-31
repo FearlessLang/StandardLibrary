@@ -1,0 +1,23 @@
+package base;
+
+Box[E:*]: OrderHash[Box[E],E]{            /// wrapper: ordering/hash/str delegate to the element via by
+  mut  .get: E;
+  read .get: read/imm E;
+  imm  .get: imm E;
+
+  .close->this;                           /// closed fixpoint (typical case)
+
+  .cmp by, t0, t1, m-> by#(t0.get)<=>(by#(t1.get),m); /// compare elements (closed orders) via by
+  .hash by, h -> by#(this.get).hash h;                 /// hash element via by
+  .str by->by#(this.get).str;                          /// print element via by
+
+  .proofConcrete(s:Str):Box[Str]->Box[Str]{ .get->s; };// tests RC overloading + concreteness
+}
+
+A1:OrderHash[A1]{                         /// tiny concrete sample (always eq; constant hash; empty str)
+  .close -> this;
+  .cmp t0, t1, m -> m.eq;
+  .hash h -> 0;
+  .str ->Str;
+  .proofConcrete:A1->A1;
+}

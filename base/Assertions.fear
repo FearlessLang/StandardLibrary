@@ -2,12 +2,12 @@ package base;
 
 Assert:Sealed{
   !(assertion: Bool): Void -> this!(assertion,{``}, { Void });
-  !(assertion: Bool, msg: F[Str]): Void -> this!(assertion, msg, { Void });
+  !(assertion: Bool, msg: read F[Str]): Void -> this!(assertion, msg, { Void });
   /*![R:*](assertion: Bool, cont: mut MF[R]): R -> assertion ? {
     .then -> cont#;//No because of missing overloading
     .else -> this._fail;
     };*/
-  ![R:*](assertion: Bool, msg: F[Str], cont: mut MF[R]): R -> assertion ? {
+  ![R:*](assertion: Bool, msg: read F[Str], cont: mut MF[R]): R -> assertion ? {
       .then -> cont#;
       .else -> this._fail(msg#);
       };

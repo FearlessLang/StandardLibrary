@@ -1,76 +1,89 @@
 package base;
 
-DataType[T]: ToStr, ToInfo, WidenTo[T], ToImm[T], OrderHash[T], _AssertEq[T]{
-  .close(x:T):DataType[T];
+/// Ordering + hashing via "closed fixpoints".
+/// Intuition:
+/// - An Order[T] is a comparator that is also a *closed* value: .close: T.
+/// - Most concrete T implement Order[T] with .close->this.
+/// - OrderBy[T,K] is a projection: given t:T, build a closed Order[K] for its key.
+/// - OrderHash adds hashing and ToStr. This is all the Maps/Set may need.
+
+ToStr:{ read .str: Str }            /// string representation
+
+ToStrBy[T]:{                        /// per-value printer: given x:T, produce a ToStr for x
+  #(read T):read ToStr
 }
-DataType[T,E:*]: ToStr[E], ToInfo[E], WidenTo[T], ToImm[T,E], OrderHash[T,E], _AssertEqGen[T,E]{
-  .close(x:T):DataType[T,E];
-  .close:T;
-  .dataType(by: DataTypeBy[imm E]): DataType[T] -> {
-    .close x -> this.close(x).dataType(by);
-    .close   -> this.close;
-    .str     -> this.str(by);
-    .info    -> this.info(by);
-    .imm     -> this.imm(by);
-    .hash h  -> this.hash(by,h);
-    .cmp a,b,lt,eq,gt -> this.cmp(by,a,b,lt,eq,gt);
+
+ToStr[E:*]:{                        /// ToStr that may mention values of E (printer strategy passed explicitly)
+  read .str(ToStrBy[imm E]): Str
+}
+
+OrderMatch[R:**]:{                  /// compare result carrier: cmp selects exactly one of lt/eq/gt
+  mut .lt:R;
+  mut .eq:R;
+  mut .gt:R;
+}
+
+Order[T]:{
+  read .close: read T;              /// close fixpoint: the underlying value being ordered
+  read .cmp[R:**](t0: read T, t1: read T, m: mut OrderMatch[R]): R; /// compare t0 vs t1 in this ordering
+
+  // Derived relational ops: compare this.close against other (as a raw value).
+  read ==  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->False;.eq ->True; .gt -> False});
+  read <=  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->True;.eq ->True; .gt -> False});
+  read >=  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->False;.eq ->True; .gt -> True});
+  read <   (other: read T): Bool -> this.cmp(this.close, other,{.lt ->True;.eq ->False; .gt -> False});
+  read >   (other: read T): Bool -> this.cmp(this.close, other,{.lt ->False;.eq ->False; .gt -> True});
+  read !=  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->True;.eq ->False; .gt -> True});
+
+  read .inRange(lo: read T, hi: read T):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this >= lo  &&{ this <= hi });        /// true iff this in [lo,hi]; throws if lo>hi. For Float also throws if lo/hi are NaN
+  read .inRangeOpen(lo: read T, hi: read T):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this > lo  &&{ this < hi });      /// true iff this in (lo,hi); throws if lo>hi. For Float also throws if lo/hi are NaN
+  read .inRangeLoOpen(lo: read T, hi: read T):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this > lo  &&{ this <= hi });   /// true iff this in (lo,hi]; throws if lo>hi. For Float also throws if lo/hi are NaN
+  read .inRangeHiOpen(lo: read T, hi: read T):Bool-> Block#(Assert!(_LE#(this,lo,hi)), this >= lo  &&{ this < hi });   /// true iff this in [lo,hi); throws if lo>hi. For Float also throws if lo/hi are NaN
+
+  read <=>[R:**](other: read Order[T], m: mut OrderMatch[R]): R ->  /// compare two closed Orders
+    this.cmp(this.close, other.close, m);
+}
+_LE:{ #[T](o: read Order[T], a: read T, b: read T): Bool -> o.cmp(a,b,{ .lt->True; .eq->True; .gt->False }) }
+
+
+OrderBy[T,K]:{                       /// order values of T by a component/key K
+  #(read T): read Order[K];          /// build a closed Order[K] for t's key (key is .close of the result)
+
+  .then[K0](next: OrderBy[T,K0]): OrderBy[T] -> {  /// lexicographic: first this-key, then next-key
+    .cmp(t0,t1,m)-> this#t0 <=>(
+      this#t1, {
+        .lt->m.lt;
+        .gt->m.gt;
+        .eq->next#t0<=>(next#t1,m);
+      })
+  };
+
+  .view[A](f:F[read A,read T]):OrderBy[A] ->       /// contramap: order A by mapping into T
+    {a0,a1,m-> this#(f#a0)<=>(this#(f#a1),m)};
+}
+
+OrderBy[T]:OrderBy[T,T]{            /// produces an ordering via .cmp
+  .cmp[R:**](t0:read T,t1:read T,m:mut OrderMatch[R]): R;
+  # t -> { .close -> t; .cmp t0,t1,m -> this.cmp(t0,t1,m) }; /// close->t; compare uses this.cmp
+}
+
+Order[T,E:*]:{                      /// environment-dependent ordering of T (E supplies per-value orders)
+  read .close:read T;
+
+  read .cmp[K,R:**](by: OrderBy[imm E,K], t0: read T, t1: read T, m: mut OrderMatch[R]): R; /// compare using by
+
+  read .order[K](by: OrderBy[imm E,K]): read Order[T] -> {  /// freeze by into a plain Order[T]
+    .close -> this.close;
+    .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
   };
 }
-DataTypeBy[E]:ToStrBy[E],ToInfoBy[E],ToImmBy[E],OrderHashBy[E]{
-  #(e:E): DataType[E];
-}
-ToImm[T]:{ read .imm: T }
-ToImmBy[T]:{#(read T):read ToImm[T]}
-ToImm[T,E:*]:{ read .imm(ToImmBy[imm E]): T }
 
-ToStr:{ read .str: Str }
-ToStrBy[T]:{#(read T):read ToStr}
-ToStr[E:*]:{ read .str(ToStrBy[imm E]): Str }
-ToInfo:{ read .info: Info }
-FromInfo[T]:{ .fromInfo(i: Info): T }
-ToInfoBy[T]:{#(read T):read ToInfo}
-ToInfo[E:*]:{ read .info(by: ToInfoBy[imm E]): Info }
-
-Order[T]: {
-  .close:T;
-  .cmp[R](a:T,b:T,lt:R,eq:R,gt:R): R;
-  ==  (other: T): Bool -> this.cmp(this.close, other, False,True, False);
-  <=  (other: T): Bool -> this.cmp(this.close, other, True, True, False);
-  >=  (other: T): Bool -> this.cmp(this.close, other, False,True, True);
-  <   (other: T): Bool -> this.cmp(this.close, other, True, False,False);
-  >   (other: T): Bool -> this.cmp(this.close, other, False,False,True);
-  !=  (other: T): Bool -> this.cmp(this.close, other, True, False,True);
-  .inRange      (lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >= lo && { this <= hi }); /// true iff this in [lo,hi]; throws if lo>hi or lo/hi are NaN
-  .inRangeOpen  (lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >  lo && { this <  hi }); /// true iff this in (lo,hi); throws if lo>hi or lo/hi are NaN
-  .inRangeLoOpen(lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >  lo && { this <= hi }); /// true iff this in (lo,hi]; throws if lo>hi or lo/hi are NaN
-  .inRangeHiOpen(lo:T, hi:T): Bool-> _RangeTest#(this,lo,hi, this >= lo && { this <  hi }); /// true iff this in [lo,hi); throws if lo>hi or lo/hi are NaN
-  }
-_RangeTest:{#[T](o:Order[T],lo:T,hi:T,res:Bool):Bool->
-  Block#(Assert!(o.cmp(lo,hi, True, True, False)),res);
-  }
-OrderBy[T]:{
-  #(T):Order[T];
-  .then(other:OrderBy[T]):OrderByCmp[T] -> { .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[F[RR]](a,b,{lt},{ other#a.cmp(a,b,lt,eq,gt) },{gt})#};
-  .and(other:OrderBy[T]):OrderByCmp[T] -> {a,b,lt,eq,gt-> this#a.cmp(a,b,lt,other#a.cmp(a,b,lt,eq,gt),gt)};
-  .view[A](f:F[A,Order[T]]):OrderByCmp[A] -> {a,b,lt,eq,gt-> f#a.cmp(f#a.close,f#b.close,lt,eq,gt)};
-}
-OrderByCmp[T]:OrderBy[T]{
-  .cmp[R](a:T,b:T,lt:R,eq:R,gt:R): R;
-  # a0 -> { .close -> a0; .cmp a,b,lt,eq,gt -> this.cmp(a,b,lt,eq,gt) };
-  }
-Order[T,E:*]:{
-  .close:T;
-  .cmp[R](by: OrderBy[imm E], a:T,b:T, lt:R,eq:R,gt:R): R;
-  .order(by: OrderBy[imm E]): Order[T] -> {
-    .close -> this.close;
-    .cmp a,b,lt,eq,gt -> this.cmp(by,a,b,lt,eq,gt);
-    };
-  }
-
-Hasher: {
+Hasher:{                            /// stateful hasher for composite structures
+  mut #[A,B](a: read OrderHash[A], b: read OrderHash[B]): Nat ->  /// mix two already-hashable values
+    a.hash(this) * 31 + (b.hash(this));
   //Note that his can be overridden in other hashes, so that #(a,b) just calls Block#(a.hash(this),b.hash(this)) while this accumulates on mut state
-  mut #[A,B](a: OrderHash[A], b: OrderHash[B]): Nat -> a.hash(this) * 31 + (b.hash(this));
-  //#[A,B,C](a: OrderHash[A], b: OrderHash[B], c: OrderHash[C]): Nat -> ...;
+  
+  //#[A,A0,B,B0,C,C0](a: read OrderHash[A,A0], b: read OrderHash[B,B0], c: read OrderHash[C,C0]): Nat -> ...;
   //...//more overloads to compose more values
   mut .nat(v: Nat): Nat->v;
   mut .int(v: Int): Nat->Todo!;
@@ -80,80 +93,145 @@ Hasher: {
   mut .bool(v: Bool): Nat->v?{.then->0; .else->1};
   mut .info(i: Info): Nat->this.str(i.str); 
   mut .str(v: Str): Nat->Todo!;  
-  mut .list[E](f: OrderHashBy[E],l: List[E]):Nat->Todo!;
-  mut .opt[E](f: OrderHashBy[E], o: Opt[E]):Nat->Todo!;
-  mut .map[K,E](f: OrderHashBy[E], m: Map[K,E]):Nat->Todo!;
+  mut .list[E:*,E0](f: OrderHashBy[imm E,E0],l: read List[E]):Nat->Todo!;
+  mut .opt[E:*,E0](f: OrderHashBy[imm E,E0], o: read Opt[E]):Nat->Todo!;
+  mut .map[K,E:*,E0](f: OrderHashBy[imm E,E0], m: read Map[K,E]):Nat->Todo!;
   }
-OrderHash[T]:Order[T]{ .hash(h: mut Hasher): Nat }
-OrderHash[T,E:*]:Order[T,E]{
-  .hash(by: OrderHashBy[imm E], h: mut Hasher): Nat;
-  .orderH(by: OrderHashBy[imm E]): OrderHash[T] -> {'self
+
+OrderHash[T]:Order[T],ToStr{            /// OrderHash adds hashing and ToStr. This is all the Maps/Set may need.
+  read .hash(h: mut Hasher): Nat;
+  read .close(t: read T): read OrderHash[T];
+  
+  read .assertEq(expected: read T):Void -> this.assertEq(expected,{``});
+  read .assertEq(expected: read T, msg:F[Str]):Void -> Assert!(
+    this == expected,
+    { msg# | `Expected: `+(this.close(expected)) | `Actual: `+this });
+
+  read .assertNe(expected: read T):Void -> this.assertNe(expected,{``});
+  read .assertNe(expected: read T, msg:F[Str]):Void -> Assert!(
+    this != expected,
+    { msg# | `Unexpected: `+(this.close(expected)) | `Actual: `+this });
+
+  read .assertLt(x: read T):Void -> this.assertLt(x,{``});
+  read .assertLt(x: read T, msg:F[Str]):Void -> Assert!(
+    this < x,
+    { msg# | `Expected: `+this | ` < `+(this.close[read](x)) });
+    
+  read .assertLe(x: read T):Void -> this.assertLe(x,{``});
+  read .assertLe(x: read T, msg:F[Str]):Void -> Assert!(
+    this <= x,
+    { msg# | `Expected: `+this | ` <= `+(this.close[read](x)) });
+
+  read .assertGt(x: read T):Void -> this.assertGt(x,{``});
+  read .assertGt(x: read T, msg:F[Str]):Void -> Assert!(
+    this > x,
+    { msg# | `Expected: `+this | ` > `+(this.close[read](x)) });
+
+  read .assertGe(x: read T):Void -> this.assertGe(x,{``});
+  read .assertGe(x: read T, msg:F[Str]):Void -> Assert!(
+    this >= x,
+    { msg# | `Expected: `+this | ` >= `+(this.close[read](x)) });
+        
+  read .assertInRange(lo: read T, hi: read T):Void -> this.assertInRange(lo,hi,{``});
+  read .assertInRange(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
+    this.inRange(lo,hi),
+    { msg# | `Expected in [lo,hi]`
+      | `lo: `+(this.close[read](lo))
+      | `hi: `+(this.close[read](hi))
+      | `actual: `+this });
+  
+  read .assertInRangeOpen(lo: read T, hi: read T):Void -> this.assertInRangeOpen(lo,hi,{``});
+  read .assertInRangeOpen(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
+    this.inRangeOpen(lo,hi),
+    { msg# | `Expected in (lo,hi)`
+      | `lo: `+(this.close[read](lo))
+      | `hi: `+(this.close[read](hi))
+      | `actual: `+this });
+      
+  read .assertInRangeLoOpen(lo: read T, hi: read T):Void -> this.assertInRangeLoOpen(lo,hi,{``});
+  read .assertInRangeLoOpen(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
+    this.inRangeLoOpen(lo,hi),
+    { msg# | `Expected in (lo,hi]`
+      | `lo: `+(this.close[read](lo))
+      | `hi: `+(this.close[read](hi))
+      | `actual: `+this });
+      
+  read .assertInRangeHiOpen(lo: read T, hi: read T):Void -> this.assertInRangeHiOpen(lo,hi,{``});
+  read .assertInRangeHiOpen(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
+    this.inRangeHiOpen(lo,hi),
+    { msg# | `Expected in [lo,hi)`
+      | `lo: `+(this.close[read](lo))
+      | `hi: `+(this.close[read](hi))
+      | `actual: `+this });
+}
+
+OrderHash[T,E:*]:Order[T,E],ToStr[E]{   /// env-dependent ordered+hashable+printable
+  read .hash[K](by: OrderHashBy[imm E,K], h: mut Hasher): Nat; /// hash using by
+  read .close(t: read T): read OrderHash[T,E];
+  
+  read .orderHash[K](by: OrderHashBy[imm E,K]): read OrderHash[T] -> { /// freeze by into plain OrderHash[T]
     .close -> this.close;
-    .cmp a,b,lt,eq,gt -> this.cmp(by,a,b,lt,eq,gt);
+    .close t -> this.close(t).orderHash(by);
+    .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
     .hash h -> this.hash(by,h);
+    .str  -> this.str by;
   };
-}
-OrderHashBy[T]:OrderBy[T]{
-  #(x:T):OrderHash[T];
-  .thenHash(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
-    .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[F[RR]](a,b,{lt},{ other#a.cmp(a,b,lt,eq,gt) },{gt})#;
-    .hash(a,h)-> h#(this#a, other#a);
-  };
-  .andHash(other:OrderHashBy[T]):OrderHashByCmp[T] -> {
-    .cmp[RR](a,b,lt,eq,gt)-> this#a.cmp[RR](a,b,lt, other#a.cmp(a,b,lt,eq,gt),gt);
-    .hash(a,h)-> h#(this#a, other#a);
-  };
-  .viewHash[A](f:F[A,OrderHash[T]]):OrderHashByCmp[A] -> {
-    .cmp(a,b,lt,eq,gt)-> f#a.cmp(f#a.close,f#b.close,lt,eq,gt);
-    .hash(a,h)-> f#a.hash(h);
-  };
-}
-OrderHashByCmp[T]:OrderHashBy[T]{
-  .cmp[R](a:T,b:T,lt:R,eq:R,gt:R): R;
-  .hash(a:T,h: mut Hasher):Nat;
-  # a0 -> {
-    .close -> a0;
-    .cmp a,b,lt,eq,gt -> this.cmp(a,b,lt,eq,gt);
-    .hash h -> this.hash(a0,h);
-    };
+  read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertEq(expected);
+  read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T, msg: F[Str]): Void -> this.orderHash(by).assertEq(expected,msg);
+
+  read .assertNe[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertNe(expected);
+  read .assertNe[K](by: OrderHashBy[imm E,K], expected: read T, msg: F[Str]): Void -> this.orderHash(by).assertNe(expected,msg);
+
+  read .assertLt[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertLt(x);
+  read .assertLt[K](by: OrderHashBy[imm E,K], x: read T, msg: F[Str]): Void -> this.orderHash(by).assertLt(x,msg);
+
+  read .assertLe[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertLe(x);
+  read .assertLe[K](by: OrderHashBy[imm E,K], x: read T, msg: F[Str]): Void -> this.orderHash(by).assertLe(x,msg);
+
+  read .assertGt[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertGt(x);
+  read .assertGt[K](by: OrderHashBy[imm E,K], x: read T, msg: F[Str]): Void -> this.orderHash(by).assertGt(x,msg);
+
+  read .assertGe[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertGe(x);
+  read .assertGe[K](by: OrderHashBy[imm E,K], x: read T, msg: F[Str]): Void -> this.orderHash(by).assertGe(x,msg);
+
+  read .assertInRange[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRange(lo,hi);
+  read .assertInRange[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: F[Str]): Void -> this.orderHash(by).assertInRange(lo,hi,msg);
+
+  read .assertInRangeOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRangeOpen(lo,hi);
+  read .assertInRangeOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: F[Str]): Void -> this.orderHash(by).assertInRangeOpen(lo,hi,msg);
+      
+  read .assertInRangeLoOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRangeLoOpen(lo,hi);
+  read .assertInRangeLoOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: F[Str]): Void -> this.orderHash(by).assertInRangeLoOpen(lo,hi,msg);
+     
+  read .assertInRangeHiOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRangeHiOpen(lo,hi);
+  read .assertInRangeHiOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: F[Str]): Void -> this.orderHash(by).assertInRangeHiOpen(lo,hi,msg);  
 }
 
-/*Comparators is now dead!
-We can now do
-Ints.orderBy.view{::.age} && (Strs.orderBy.view{::.name})
-and get an OrderBy[Person]
-We can avoid view and overload orderBy:
-Ints.orderBy{::.age} && (Strs.orderBy{::.name})
-This is still sad, since we need Ints,Strs; we can not expect
-user defined types to follow the pattern.
-Instead the below should work (basically what Java does)
-.max(Orders#{::.age} && { ::.name})
-.max(Older && { ::.name})//works too
-.max(Older && Taller)//works too
-OlderAndTaller:OrderBy[Person]{a->{b->{Older && Taller #(a,b)}}
-Orders:{#[T](t:OrderBy[T]):OrderBy[T]->t}
-We can, for simplicity, also have
-Orders:{
-  #[T](t:OrderBy[T]):OrderBy[T]->t
-  #[T](t1:OrderBy[T],t2:OrderBy[T]):OrderBy[T]->t1 && t2... but why?
-  }
-Or, we improve inference with guessing:
-if e.m({..}.foo) and {..} does not declare a .foo method with type,
-currently this is going to fail.
-We can instead guess that {..} has the type needed by .m arg 1.
-With this guessing, all the .andThen patterns would work
-e.max({::.name} && {::.age})
-No need of `Orders#` with this inference.
-*/
+OrderHashBy[T,K]:OrderBy[T,K],ToStrBy[T]{  /// order+hash by key K, plus per-value printing of T
+  #(t:read T): read OrderHash[K];          /// build closed OrderHash[K] for t's key
 
-//---tests
-/*Persons:{#(name:Str, age:Nat):Person -> Person:{.name: Str -> name,  .age: Nat -> age }}
-Older:OrderBy[Person]{ p1->{p2 -> p1.age <=> (p2.age) } }
-//Yes inferred Older:OrderBy[Person]{ p1-> Order[Person]{p2 -> p1.age <=> (p2.age) } }
+  .thenHash[K0](next: OrderHashBy[T,K0]): OrderHashBy[T] -> {  /// lexicographic order; hash mixes both keys
+    .cmp t0,t1,m -> this#t0<=>(this#t1,{
+      .lt ->m.lt;
+      .eq ->next#t0<=>(next#t1,m);
+      .gt ->m.gt});
+    .hash t,h -> h#(this#t, next#t);
+  };
 
-Persons:{#(name:Str, age:Num):Person -> Person:Order[Person]{
-  .name: Str -> name,
-  .age: Nat -> age,
-  <=>(other)->this.age <=> (other.age) && {this.name <=> (other.name)},
-  }}
-*/
+  .viewHash[A](f:F[read A,read T]):OrderHashBy[A] -> {         /// contramap for both cmp and hash
+    .cmp a0,a1,m -> this#(f#a0)<=>(this#(f#a1),m);
+    .hash a,h -> this#(f#a).hash(h);
+  };
+}
+
+OrderHashBy[T]:OrderHashBy[T,T]{          /// direct order+hash for T
+  .cmp[R:**](t0:read T,t1:read T,m:mut OrderMatch[R]): R;
+  .hash(t: read T,h: mut Hasher):Nat;
+
+  # t -> {                                /// close->t; compare/hash delegate to this.cmp/this.hash
+    .close -> t; .close t0 -> this#t0; 
+    .cmp t0,t1,m -> this.cmp(t0,t1,m);
+    .hash h -> this.hash(t,h);
+    .str -> this#t.str;
+  };
+}

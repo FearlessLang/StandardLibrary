@@ -1,7 +1,7 @@
 package base;
 
 // Num: unlimited-precision rational (exact arithmetic).
-Num:Sealed,DataType[Num],_AssertApprox[Num]{
+Num:Sealed,DataType[Num,Num],_AssertApprox[Num]{
   +(x:Num):Num;                     /// exact add
   -(x:Num):Num;                     /// exact sub
   *(x:Num):Num;                     /// exact mul
@@ -31,7 +31,7 @@ Num:Sealed,DataType[Num],_AssertApprox[Num]{
 /// - NaN == NaN (all different NaNs equal); NaN is greater than everything else including +Inf
 /// - -0.0 == +0.0
 /// Method Hasher.float(Float) must respect this ordering
-Float:Sealed,DataType[Float],_AssertApprox[Float]{
+Float:Sealed,DataType[Float,Float],_AssertApprox[Float]{
   +(x:Float):Float;                 /// IEEE add
   -(x:Float):Float;                 /// IEEE sub
   *(x:Float):Float;                 /// IEEE mul
@@ -70,7 +70,7 @@ Float:Sealed,DataType[Float],_AssertApprox[Float]{
 
 // Int: signed 32-bit.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Int:Sealed,DataType[Int]{
+Int:Sealed,DataType[Int,Int]{
   +(x:Int):Int;                     /// checked add; throws on overflow/underflow
   -(x:Int):Int;                     /// checked sub; throws on overflow/underflow
   *(x:Int):Int;                     /// checked mul; throws on overflow/underflow
@@ -106,7 +106,7 @@ Int:Sealed,DataType[Int]{
 }
 // Nat: 32-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Nat:Sealed,DataType[Nat]{
+Nat:Sealed,DataType[Nat,Nat]{
   +(x:Nat):Nat;                     /// checked add; throws on overflow (past maxNat)
   -(x:Nat):Nat;                     /// checked sub; throws on underflow (below 0)
   *(x:Nat):Nat;                     /// checked mul; throws on overflow
@@ -140,7 +140,7 @@ Nat:Sealed,DataType[Nat]{
 
 // Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Byte:Sealed,DataType[Byte]{
+Byte:Sealed,DataType[Byte,Byte]{
   +(x:Byte):Byte;                   /// checked add; throws on overflow (past 255)
   -(x:Byte):Byte;                   /// checked sub; throws on underflow (below 0)
   *(x:Byte):Byte;                   /// checked mul; throws on overflow

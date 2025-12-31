@@ -1,11 +1,11 @@
 package base;
 
-Str:Sealed,DataType[Str]{
+Str:Sealed,DataType[Str,Str]{
   .close->::; .close->this;         /// fixpoint type closed
-  +(x: ToStr): Str;          ///string concatenation; throws on result size > maxInt
-  |(x: ToStr): Str;          /// like + but inserts newline between
-  ^(x: ToStr): Str;          /// concat with backticks around x.str
-  ^^(x: ToStr): Str;         /// concat with double quotes around x.str
+  +(x: read ToStr): Str;          ///string concatenation; throws on result size > maxInt
+  |(x: read ToStr): Str;          /// like + but inserts newline between
+  ^(x: read ToStr): Str;          /// concat with backticks around x.str
+  ^^(x: read ToStr): Str;         /// concat with double quotes around x.str
   |:Str;//adds \n
   ^:Str;//adds `
   ^^:Str;//adds "

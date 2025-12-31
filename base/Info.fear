@@ -7,111 +7,110 @@ Lists:Sealed{//No need of empty, just use {}
   #[E](E,E,E,E):List[E]->{};
   }
 Maps:Sealed{//No need of empty, just use {}
-  #[K,E](OrderHashBy[K], K,E):Map[K,E]->{};
-  #[K,E](OrderHashBy[K], K,E,K,E):Map[K,E]->{};
-  #[K,E](OrderHashBy[K], K,E,K,E,K,E):Map[K,E]->{};
-  #[K,E](OrderHashBy[K], K,E,K,E,K,E,K,E):Map[K,E]->{};
+  #[K,K0,E](OrderHashBy[K,K0], K,E):Map[K,E]->{};
+  #[K,K0,E](OrderHashBy[K,K0], K,E,K,E):Map[K,E]->{};
+  #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E):Map[K,E]->{};
+  #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E,K,E):Map[K,E]->{};
   }
-List[E]:Sealed,DataType[List[E],E]{
+List[E:*]:Sealed,DataType[List[E],E,List[imm E]]{
   .isEmpty:Bool->True;
   .close->{};
   .close->::;
   .imm by->{};
   .str by->`[]`;
   .hash by, h->h.list(by,this);
-  .cmp(by,a,b,lt,eq,gt)->Todo!;
+  .cmp by, a, b, m->Todo!;
   ++ (List[E]):List[E]->this;
   <+ (E):List[E]->this;//add to left
   +> (E):List[E]->this;//add to right  
-  .info by-> Let#{
+  .info by-> Todo!;/*Let#{
     .let->this.flow.map {e->by#e.info} .list;
-    .in a-> {'i
+    .in a-> {
       .match->::.list a;
       .list -> a;
       };
-    };
+    };*/
   read .flow:Flow[E]->Todo!;
   }
-_MapInfo:{#[K,E](dtK:DataTypeBy[K], by:ToInfoBy[E], map:read Map[K,E]):Map[Str,Info]->
-   map.flow.mapping[Str,Info]({::},{
-      .key(e)->dtK#(e.key).str;
-      .elem(e)->by#(e.elem).info;
-      });
-  }
-Map[K,E]:Sealed,DataType[Map[K,E],E]{
-  read .keyDataType:DataTypeBy[K]->{k->Unreachable!};
-  .isEmpty:Bool->True;
-  .close->{};
-  .close->::;
+_MapInfo:{#[K,E](oh:OrderHashBy[K], by:ToInfoBy[E], map:read Map[K,E]):Map[Str,Info]->
+  map.flow.mapping[Str,Info]({::},{
+    .key(e)->oh#(e.key).str;
+    .elem(e)->by#(e.elem).info;
+  });
+}
+Map[K,E:*]:Sealed,DataType[Map[K,E],E,Map[K,imm E]]{
+  //read .keyOh:OrderHash[K,K]->{k->Unreachable!};//not sure what to do here for empty maps
+  read .isEmpty:Bool->True;
+  .close->{}; .close->::;
   .imm by->{};
   .str by->`{}`;
   .hash by, h->h.map(by,this);
-  .cmp(by,a,b,lt,eq,gt)->Todo!;
+  .cmp by,a,b,m -> Todo!;
   
   .merge(merge:F[E,E,E],other:Map[K,E]):Map[K,E]->this;
-  .info by-> Let#{//TODO: eventualy use Block
+  .info by-> Todo!;/*Let#{//TODO: eventualy use Block
     .let->_MapInfo#(this.keyDataType,by,this);
     .in a-> {.match->::.map a; .map -> a};
-    };
+    };*/
   read .flow:Flow[KeyElem[K,E]]->Todo!;
   //read .flow[R](f:F[K,E,R]):Flow[R]->Todo!;
   }
-KeyElem[K,E]:{.key:K;.elem:E;}
-KeyElemMapper[A,K,E]:{.key(A):K;.elem(A):E;}
+KeyElem[K,E:*]:{.key:K;.elem:E;}
+KeyElemMapper[A:*,K,E:*]:{.key(A):K;.elem(A):E;}
 
-Flow[TTT]:{
-  .map[R](F[TTT,R]):Flow[R];
-  .list:List[TTT];
-  .mapping[K,E](OrderBy[K],KeyElemMapper[TTT,K,E]):Map[K,E];
+Flow[T:*]:{
+  .map[R:*](F[T,R]):Flow[R];
+  .list:mut List[T];
+  .mapping[K,E:*](OrderBy[K,K],KeyElemMapper[T,K,E]):mut Map[K,E];
   }
 
 Infos:Sealed {
   .msg(str: Str): Info -> str.isEmpty?{
     .then->{};
-    .else->{'i
+    .else->{
       .match->::.msg str;
       .msg -> str;
       }};
   .list(i1: ToInfo): Info -> Lists#(i1.info).info{::};
   .list(i1: ToInfo, i2: ToInfo): Info -> Lists#(i1.info,i2.info).info{::};
-  .map(k1:Str,e1:ToInfo): Info-> Maps#[Str,ToInfo]({::},k1,e1.info).info{::};//without explicit [Str,ToInfo] got infinit type
-  .map(k1:Str,e1:ToInfo,k2:Str,e2:ToInfo): Info-> Maps#[Str,ToInfo]({::},k1,e1.info,k2,e2.info).info{::};
+  .map(k1:Str,e1:ToInfo): Info-> Maps#({::},k1,e1.info).info{::};
+  .map(k1:Str,e1:ToInfo,k2:Str,e2:ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info).info{::};
   }
 //To make an info from arbitrary map/list, just do myList.info{::} myMap.info{::}
 //how to turn keys into string is part of the key is datatype of map
 //will have to syntetize fresh key pedex if the str is already in there.
 
-Info:Sealed,DataType[Info]{
+Info:Sealed,DataType[Info,Info]{
   .close->::; .close->this;
   .info->{};
   .imm->{};
-  .hash->::.info this;
-  .cmp(a,b,lt,eq,gt)->Todo!;
+  .hash->::.info (this.imm);
+  .cmp a,b,m ->Todo!;
   .msg:Str->``;
   .list:List[Info]->{};
   .map:Map[Str,Info]->{};
   .isEmpty:Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
   .match[R](m: InfoMatch[R]): R->m.empty;
-  .str -> this.accept(_InfoToStr);
+  .str -> this.imm.match(_InfoToStr);
   +(other:Info) : Info -> this.match{
     .empty -> other;
     .msg(s1) -> other.match{
       .empty   -> this;
       .msg(s2) -> Infos.msg(s1|s2);
-      .list(l2)-> Infos.map(`msg`,s1,`list`,l2);
+      .list(l2)-> Infos.map(`msg`,s1,`list`,l2.info{::});
       .map(_)  -> Infos.map(`msg`,s1)+other
       };
     .list(l1) -> other.match{
       .empty   -> this;
-      .msg(s2) -> Infos.map(`msg`,s2,`list`,l1);
-      .list(l2)-> l1 ++ l2 .info;
-      .map(_)  -> Infos.map(`list`,l1) + other;
+      .msg(s2) -> Infos.map(`msg`,s2,`list`,l1.info{::});
+      .list(l2)-> l1 ++ l2 .info{::};
+      .map(_)  -> Infos.map(`list`,l1.info{::}) + other;
       };
     .map(m1) -> other.match{
       .empty   -> this;
-      .msg(s2) -> m1 .merge ({a,b->a+b},Infos.map(`msg`,s2).map) .info;
-      .list(l2)-> m1 .merge ({a,b->a+b},Infos.map(`list`,l2).map) .info;
-      .map(m2)  -> m1 .merge ({a,b->a+b},m2) .info;
+      .msg(s2) -> m1 .merge ({a,b->a+b},Infos.map(`msg`,s2).map) .info{::};
+      .list(l2)-> m1 .merge ({a,b->a+b},Infos.map(`list`,l2.info{::}).map) .info{::};
+      .map(m2)  -> m1 .merge ({a,b->a+b},m2) .info{::};
       };
     };
   }
@@ -122,6 +121,7 @@ InfoMatch[R]:{
   .map(Map[Str,Info]): R;
   }
 _InfoToStr: InfoMatch[Str]{
+  .empty ->`EmptyInfo`;
   .msg(msg) -> msg.escape;
   .list(list) -> list.str{::};
   .map(map) -> map.str{::};

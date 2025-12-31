@@ -1,0 +1,49 @@
+package base;
+
+ByteArith:F[Tests,Tests]{::
+  .test((+1.byte + (+2.byte)) .assertEq (+3.byte))
+  .test((+5.byte - (+2.byte)) .assertEq (+3.byte))
+  .test((+3.byte * (+4.byte)) .assertEq (+12.byte))
+  .test(+9.byte.sqrt .assertEq +3.0)
+
+  // Unsigned ordering
+  .test(+255.byte .assertGt (+0.byte))
+}
+
+ByteDivRem:F[Tests,Tests]{::
+  .test(+7.byte.div 3 .assertEq (+2.byte))
+  .test(+7.byte.rem 3 .assertEq (+1.byte))
+  .test(+6.byte.divExact 3 .assertEq ({::},Opts#(+2.byte)))
+  .test(+7.byte.divExact 3 .assertEq ({::},Opt[Byte]))
+  .test(+7.byte.divExact 0 .assertEq ({::},Opt[Byte]))
+}
+
+ByteConv:F[Tests,Tests]{::
+  .test(+255.byte.nat .assertEq 255)
+  .test(+255.byte.int .assertEq +255)
+  .test(+5.byte.float .assertEq +5.0)
+  .test(+5.byte.num .assertEq (+5.num))
+}
+
+ByteAlu:F[Tests,Tests]{::
+  .test(+250.byte.aluAddWrap(+10.byte) .assertEq (+4.byte))
+  .test(+0.byte.aluSubWrap(+1.byte) .assertEq (+255.byte))
+  .test(+16.byte.aluMulWrap(+16.byte) .assertEq (+0.byte))
+
+  .test(+1.byte.aluShiftLeft 8 .assertEq (+1.byte))
+  .test(+128.byte.aluShiftRight 1 .assertEq (+64.byte))
+
+  .test(+5.byte.aluXor(+3.byte) .assertEq (+6.byte))
+  .test(+5.byte.aluAnd(+3.byte) .assertEq (+1.byte))
+  .test(+5.byte.aluOr(+2.byte) .assertEq (+7.byte))
+}
+
+ByteRange:F[Tests,Tests]{::
+  .test(+3.byte.assertInRange(+1.byte,+5.byte))
+  .test(+3.byte.assertInRangeOpen(+1.byte,+5.byte))
+  .test(+3.byte.assertInRangeLoOpen(+1.byte,+3.byte))
+  .test(+3.byte.assertInRangeHiOpen(+3.byte,+5.byte))
+  .test(+0.byte.clamp(+1.byte,+5.byte) .assertEq (+1.byte))
+  .test(+6.byte.clamp(+1.byte,+5.byte) .assertEq (+5.byte))
+  .test(+3.byte.clamp(+1.byte,+5.byte) .assertEq (+3.byte))
+}

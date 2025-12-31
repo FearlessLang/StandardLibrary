@@ -81,9 +81,9 @@ Opt[T:*]: _Opt[T], Sealed, ToStr[T], ToInfo[T], OrderHash[Opt[T],T]{
       };
     }
 */
-Opt[E:*]:DataType[Opt[E],E]{
+Opt[E:*]:DataType[Opt[E],E,Opt[imm E]]{
   .match[R:**](m: mut OptMatch[E,R]): R -> m.empty;
-  .close->::; .close->this;         /// fixpoint type closed
+  .close->::; .close:read Opt[E]->this;        /// fixpoint type closed
   .str by->this.match{
     .empty->`()`;
     .some e->`(`+by#e+`)`;
@@ -96,11 +96,11 @@ Opt[E:*]:DataType[Opt[E],E]{
     .empty->{};
     .some e->Opts#(by#e);
     };
-  .cmp(by, a, b, lt,eq,gt) -> a.match{
-    .empty -> b.match{ .empty -> eq; .some _ -> lt; };
+  .cmp by, a, b, m -> a.match{
+    .empty -> b.match{ .empty -> m.eq; .some _ -> m.lt; };
     .some ea -> b.match{
-      .empty   -> gt;
-      .some eb -> (by#ea).cmp(ea, eb, lt, eq, gt);
+      .empty   -> m.gt;
+      .some eb -> by#ea<=>(eb, m);
       }
     };
   .hash(by, h) -> this.match{
