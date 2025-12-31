@@ -49,34 +49,14 @@ public record Byte$0Instance(byte val) implements Byte$0{
     return optSome(instance((byte)(x / d)));
   }
   @Override public Object imm$sqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)u8(val))); }
-  @Override public Object read$nat$0(){ return Nat$0Instance.instance(u8(val)); }
-  @Override public Object read$int$0(){ return Int$0Instance.instance(u8(val)); }
-  @Override public Object read$float$0(){ return Float$0Instance.instance((double)u8(val)); }
-  @Override public Object read$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(u8(val)),BigInteger.ONE); }
+  @Override public Object imm$nat$0(){ return Nat$0Instance.instance(u8(val)); }
+  @Override public Object imm$int$0(){ return Int$0Instance.instance(u8(val)); }
+  @Override public Object imm$float$0(){ return Float$0Instance.instance((double)u8(val)); }
+  @Override public Object imm$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(u8(val)),BigInteger.ONE); }
+
   @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toString(u8(val))); }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$$lt_eq_gt$1(Object p0){ return ord(Integer.compare(u8(val),u8(p0))); }
-  @Override public Object imm$inRange$2(Object p0, Object p1){
-    int lo= u8(p0), hi= u8(p1), x= u8(val);
-    if (lo > hi){ throw err("Byte.inRange: lo>hi"); }
-    return bool(lo <= x && x <= hi);
-  }
-  @Override public Object imm$inRangeOpen$2(Object p0, Object p1){
-    int lo= u8(p0), hi= u8(p1), x= u8(val);
-    if (lo > hi){ throw err("Byte.inRangeOpen: lo>hi"); }
-    return bool(lo < x && x < hi);
-  }
-  @Override public Object imm$inRangeLoOpen$2(Object p0, Object p1){
-    int lo= u8(p0), hi= u8(p1), x= u8(val);
-    if (lo > hi){ throw err("Byte.inRangeLoOpen: lo>hi"); }
-    return bool(lo < x && x <= hi);
-  }
-  @Override public Object imm$inRangeHiOpen$2(Object p0, Object p1){
-    int lo= u8(p0), hi= u8(p1), x= u8(val);
-    if (lo > hi){ throw err("Byte.inRangeHiOpen: lo>hi"); }
-    return bool(lo <= x && x < hi);
-  }
   @Override public Object imm$clamp$2(Object p0, Object p1){
     int lo= u8(p0), hi= u8(p1), x= u8(val);
     if (lo > hi){ throw err("Byte.clamp: lo>hi"); }
@@ -108,4 +88,6 @@ public record Byte$0Instance(byte val) implements Byte$0{
   @Override public Object imm$aluXor$1(Object p0){ return instance((byte)(val ^ b(p0))); }
   @Override public Object imm$aluAnd$1(Object p0){ return instance((byte)(val & b(p0))); }
   @Override public Object imm$aluOr$1(Object p0){ return instance((byte)(val | b(p0))); }
+
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Integer.compare(u8(p0),u8(p1)),p2); }
 }

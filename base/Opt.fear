@@ -84,29 +84,29 @@ Opt[T:*]: _Opt[T], Sealed, ToStr[T], ToInfo[T], OrderHash[Opt[T],T]{
 Opt[E:*]:DataType[Opt[E],E,Opt[imm E]]{
   .match[R:**](m: mut OptMatch[E,R]): R -> m.empty;
   .close->::; .close:read Opt[E]->this;        /// fixpoint type closed
-  .str by->this.match{
+  .str by->Todo!;/*this.match{//needs proper 3 versions of match
     .empty->`()`;
     .some e->`(`+by#e+`)`;
-    };
-  .info by->this.match{
+    };*/
+  .info by->Todo!;/*this.match{
     .empty->{};
     .some e->Infos.map(`.some`,by#e);
-    };
-  .imm by->this.match{
+    };*/
+  .imm by->Todo!;/*this.match{
     .empty->{};
     .some e->Opts#(by#e);
-    };
-  .cmp by, a, b, m -> a.match{
+    };*/
+  .cmp by, a, b, m -> Todo!;/*a.match{
     .empty -> b.match{ .empty -> m.eq; .some _ -> m.lt; };
     .some ea -> b.match{
       .empty   -> m.gt;
       .some eb -> by#ea<=>(eb, m);
       }
-    };
-  .hash(by, h) -> this.match{
+    };*/
+  .hash(by, h) -> Todo!;/*this.match{
     .empty  -> 0;
     .some e -> h#(1, by#e);
-    };
+    };*/
 }
 Opts:{
   #[T:*](x: T): mut Opt[T] -> { .match(m) -> m.some(x) };
