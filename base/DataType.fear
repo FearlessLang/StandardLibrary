@@ -11,12 +11,12 @@ package base;
 /// - OrderHash[T] already provides the closed value .close:T allowing to this this as a T
 /// - DataType adds the opposide direction .close(t:T):DataType[...] allowing to this T as DataType[T]
 
-ToImm[T0]:{ read .imm: T0 }                     /// deep immutable representation (may change type)
-ToImmBy[T,T0]:{#(t: read T):read ToImm[T0]}       /// per-value ToImm dictionary
-ToImm[T,E:*,T0]:{ read .imm(by: ToImmBy[imm E,T0]): T0 }  /// env-dependent deep imm
+ToImm[T0]:{ read .imm: T0 }                               /// deep immutable representation (may change type)
+ToImmBy[E,E0]:{#(t: read E):read ToImm[E0]}               /// per-value ToImm dictionary
+ToImm[E:*,E0,T0]:{ read .imm(by: ToImmBy[imm E,E0]): T0 } /// env-dependent deep imm
 
 ToInfo:{ read .info: Info }                     /// structured diagnostics info
-ToInfoBy[T]:{#(t: read T):read ToInfo}            /// per-value Info dictionary
+ToInfoBy[E]:{#(t: read E):read ToInfo}            /// per-value Info dictionary
 ToInfo[E:*]:{ read .info(by: ToInfoBy[imm E]): Info }     /// env-dependent Info
 
 FromInfo[T]:{ .fromInfo(i: Info): T }            /// parse/decode from Info
@@ -25,13 +25,13 @@ DataType[T,T0]:ToInfo,ToImm[T0],WidenTo[T],OrderHash[T]{
   read .close(t: read T): read DataType[T,T0];                    /// close on t (often implemented as .close->:: when T:DataType)
 }
 /// Env-dependent DataType for T (contains E); imm rep is still T0.
-DataType[T,E:*,T0]:ToInfo[E],ToImm[T,E,T0],WidenTo[T],OrderHash[T,E]{
-  read .close(t: read T): read DataType[T,E,T0];             /// close on t in this env-dependent instance
+DataType[T,T0,E:*,E0]:ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E]{
+  read .close(t: read T): read DataType[T,T0,E,E0];          /// close on t in this env-dependent instance
   .close: read T;                                            /// closed fixpoint value
 
   /// Freeze the env by capturing element dictionaries in "by".
   /// Note: by may be a true dictionary supplier ({::}) or a projection ({::.key}).
-  read .dataType[K](by: DataTypeBy[imm E,K,T0]): read DataType[T,T0] -> {
+  read .dataType[K](by: DataTypeBy[imm E,K,E0]): read DataType[T,T0] -> {
     .close t -> this.close(t).dataType(by);
     .close   -> this.close;
     .str     -> this.str(by);
@@ -47,21 +47,22 @@ DataType[T,E:*,T0]:ToInfo[E],ToImm[T,E,T0],WidenTo[T],OrderHash[T,E]{
 /// Examples:
 /// - If Key implements DataType[Key,Key0], then {::.key} : DataTypeBy[Foo,Key,Key0].
 /// - {::} is the identity-by when T itself implements DataType[T,T0] (see DataTypeBy[T,T0] below).
-DataTypeBy[T,K,K0]:ToInfoBy[T],ToImmBy[T,K0],OrderHashBy[T,K]{
-  #(t: read T): read DataType[K,K0];
-  .viewData[A](f:F[read A,read T]): DataTypeBy[A,K,K0] -> { # a -> this#(f#a) };
+DataTypeBy[E,K,K0]:ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K]{
+  #(e: read E): read DataType[K,K0];
+
+  .viewData[A](f:F[read A,read E]): DataTypeBy[A,K,K0] -> { # a -> this#(f#a) };
 
   /// Lexicographic composition on keys; you choose how to merge imm reps.
-  /// Str merge is by ", " concat; Info merge uses Info.+ (you said it exists).
-  .thenData[K1,K10,T0](next: DataTypeBy[T,K1,K10], mergeImm: F[K0,K10,T0]): DataTypeBy[T,T0] -> {
-    .cmp t0,t1,m -> (this#t0) <=> (
-      this#t1, {
+  /// Str merge is by ", " concat; Info merge uses Info+
+  .thenData[K1,K10,E0](next: DataTypeBy[E,K1,K10], mergeImm: F[K0,K10,E0]): DataTypeBy[E,E0] -> {
+    .cmp e0,e1,m -> (this#e0) <=> (
+      this#e1, {
         .lt->m.lt;
         .gt->m.gt;
-        .eq->(next#t0) <=>(next#t1,m);
+        .eq->(next#e0) <=>(next#e1,m);
       });
 
-    .hash t,h -> h#(this#t, next#t);
+    .hash e,h -> h#(this#e, next#e);
 
     .str  t -> this#t.str + `, ` + (next#t.str);
     .info t -> this#t.info + (next#t.info);
@@ -70,7 +71,7 @@ DataTypeBy[T,K,K0]:ToInfoBy[T],ToImmBy[T,K0],OrderHashBy[T,K]{
   };
 
   /// Convenience: keep left imm rep (often fine for "by key then tie-breaker").
-  .thenDataLeft[K1,K10](next: DataTypeBy[T,K1,K10]): DataTypeBy[T,K0] ->
+  .thenDataLeft[K1,K10](next: DataTypeBy[E,K1,K10]): DataTypeBy[E,K0] ->
     this.thenData(next,{k0,k10->k0});
 }
 

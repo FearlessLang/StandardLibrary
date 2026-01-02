@@ -1,0 +1,65 @@
+package base;
+
+Maps:Sealed{
+  #[K,K0,E](OrderHashBy[K,K0]):mut Map[K,E]->Magic!;
+  #[K,K0,E](OrderHashBy[K,K0], K,E):mut Map[K,E]->Magic!;
+  #[K,K0,E](OrderHashBy[K,K0], K,E,K,E):mut Map[K,E]->Magic!;
+  #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E):mut Map[K,E]->Magic!;
+  #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
+  .singletonRead[K,K0,E:*](OrderHashBy[K,K0], K, read E): read Map[K,E]->Magic!;
+  .singletonImm[K,K0,E:*](OrderHashBy[K,K0], K, imm E): imm Map[K,E]->Magic!;
+  }
+
+/// Map[K,E] is the standard persistent key/value dictionary.
+/// Keys are treated as imm and compared/hashed using the map's stored OrderHashBy[K,...].
+/// The flow order, .str order etc all respect/follow the map insertion order.
+Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E]{
+
+  read .size: Nat;                 /// number of elements
+  read .isEmpty: Bool;             /// True iff size == 0
+
+  read .keyOh: OrderHashBy[K];     /// key comparator+hash used by this map;
+
+  mut  .get(k: K): E;              /// value for k; throws iff k absent
+  read .get(k: K): read/imm E;     /// value for k; throws iff k absent
+  imm  .get(k: K): imm E;          /// value for k; throws iff k absent
+
+  mut  .opt(k: K): mut Opt[E];           /// .some(get(k)) if present; .empty otherwise
+  read .opt(k: K): mut Opt[read/imm E];  /// .some(get(k)) if present; .empty otherwise
+  imm  .opt(k: K): mut Opt[imm E];       /// .some(get(k)) if present; .empty otherwise
+
+  read .containsKey(k: K): Bool;         /// true iff k present
+
+  mut  .with(k: K, e: E): mut Map[K,E];           /// insert/replace binding for k
+  read .with(k: K, e: read E): read Map[K,E];     /// insert/replace binding for k
+  imm  .with(k: K, e: imm E): Map[K,E];           /// insert/replace binding for k
+
+  mut  .without(k: K): mut Map[K,E];       /// remove binding for k; throws iff k absent
+  read .without(k: K): read Map[K,E];      /// remove binding for k; throws iff k absent
+  imm  .without(k: K): Map[K,E];           /// remove binding for k; throws iff k absent
+
+  mut  ++ (other: mut Map[K,E]): mut Map[K,E];    /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
+  read ++ (other: read Map[K,E]): read Map[K,E];  /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
+  imm  ++ (other: Map[K,E]): Map[K,E];            /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
+
+//  TODO: for the future, but there are big questions about the exact type signature(s)
+//  mut  .merge(merge: mut F[E,E,E], other: mut Map[K,E]): mut Map[K,E];
+
+  mut  .flow: mut Flow[KeyElem[K,E]];              /// entries as a flow (The flow order follows the map insertion order)
+  read .flow: mut Flow[KeyElem[K,read/imm E]];     /// entries as a flow (The flow order follows the map insertion order)
+  imm  .flow: mut Flow[KeyElem[K,imm E]];          /// entries as a flow (The flow order follows the map insertion order)
+
+  // Optional but commonly useful conveniences (still consistent with List style):
+  read .keys: mut Flow[K];               /// keys as a flow (same iteration order as .flow)
+  read .elems: mut Flow[read/imm E];     /// values as a flow (same iteration order as .flow)
+
+  mut  .as[R:imm](f: mut MF[E,R]): Map[K,R];          /// map elements to an imm map with same keys
+  read .as[R:imm](f: mut MF[read/imm E,R]): Map[K,R]; /// map elements to an imm map with same keys
+  imm  .as[R:imm](f: mut MF[imm E,R]): Map[K,R];      /// map elements to an imm map with same keys
+
+  //TODO: for the future, we need to consider the variants of this (update, computeIfAbsent, etc)
+  //mut  .update(k: K, f: mut MF[E,E]): mut Map[K,E];        /// replace value at k with f(get(k)); throws iff absent
+}
+
+KeyElem[K,E:*]:{.key:K;.elem:E;}
+KeyElemMapper[A:*,K,E:*]:{.key(A):K;.elem(A):E;}//needed in Flow.mapping

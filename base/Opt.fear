@@ -1,117 +1,81 @@
 package base;
-/*
-Opt[T:*]: _Opt[T], Sealed, ToStr[T], ToInfo[T], OrderHash[Opt[T],T]{
-  .match(m)   -> m.empty,
 
-  .isEmpty    -> this.match{.some(_)  -> False, .empty -> True},
-  .isSome     -> this.match{.some(_) -> True, .empty -> False},
+Opt[E:*]: _Opt[E]{
+  .close->this; .close->::;
+  .match(m)   -> m.empty;
+  .imm by     -> this.match[Opt[imm E]]{.some x -> Opts#(by#x.imm); .empty->{} };
+  .isEmpty    -> this.match{.some _ -> False; .empty -> True};
+  .isSome     -> this.match{.some _ -> True; .empty -> False};  
+  !           -> this.match{.some x -> x; .empty -> Error.msg `Opt was empty`};  
+
+  .or default -> this.match{.some x -> x; .empty -> default};
   
-  !           -> this.match{.some(x) -> x, .empty -> Error.msg "Opt was empty"},
+  |   default -> this.or(default);
+  ||  default -> this.match{.some x -> x; .empty -> default#};
   
-  .or(default)-> this.match{.some(x) -> x, .empty -> default},
-  |(default)-> this.or(default),
-  ||(default) -> this.match{.some(x) -> x, .empty -> default#},
+  .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
+
+  .as[R](f)   -> this.match[Opt[R]]{.some x->Opts#(f#x); .empty->{}};
   
-  .flow       -> this.match{.empty -> Flow#, .some(x) -> Flow#x},
+  .ifSome(f)  -> this.match{.some x -> f#x; .empty -> {}};
+  .ifEmpty(f) -> this.match{.some _ -> {}; .empty -> f#};
 
-  .as(f)      -> this.match{.some(x)->f#x .empty->{}},
+  .str(f) -> this.match{ .some x -> `Opt[`+(f#x)+`]`; .empty -> `Opt[]` };
+  .info(f) -> this.match{ .some x -> Infos.list(f#x); .empty -> {} };
   
-  .ifSome(f)  -> this.match{.some(x) -> f#x, .empty -> {}},
-  .ifEmpty(f) -> this.match{.some(_) -> {}, .empty -> f#},
-
-  .str(f) -> this.match{ .some(x) -> `Opt[`+f#x+`]`, .empty -> `Opt[]` },
-  .info(f) -> this.match{ .some(x) -> Infos.list(f#x), .empty -> Infos.empty },
-  .order(f) -> { 
-    .hash(h) -> this.match{ .some(x)-> f#(x).hash(h) + 1, .empty -> 0 },
-    <=>(other) -> this.match{
-      .some(x) -> other.match{.some(y)-> f#(x) <=> y, .empty -> OrderGt },
-      .empty   -> other.match{ .some(y)-> OrderLt, .empty -> OrderEq },
-      },
-    },
-  }
-  
-  _Opt[T:*]:{
-  mut  .match[R:**](m: mut OptMatch[T, R]): R,
-  read .match[R:*](m: mut OptMatch[read/imm T, R]): R,
-  imm  .match[R:*](m: mut OptMatch[imm T, R]): R,
-
-  mut  .map[R:*](f: mut OptMap[T, R]): mut Opt[R],
-  read .map[R:*](f: mut OptMap[read/imm T, R]): mut Opt[R],
-  imm  .map[R:*](f: mut OptMap[imm T, R]): mut Opt[R],
-
-  mut  .flatMap[R:*](f: mut OptFlatMap[T, R]): mut Opt[R],
-  read .flatMap[R:*](f: mut OptFlatMap[read/imm T, R]): mut Opt[R],
-  imm  .flatMap[R:*](f: mut OptFlatMap[imm T, R]): mut Opt[R],
-
-  mut  .or(default: T): T,
-  read .or(default: read/imm T): read/imm T,
-  imm  .or(default: imm T): imm T,
-
-  mut  |(default: T): T,
-  read |(default: read/imm T): read/imm T,
-  imm  |(default: imm T): imm T,
-
-  mut  ||(default: mut MF[T]): T,
-  read ||(default: mut MF[read/imm T]): read/imm T,
-  imm  ||(default: mut MF[imm T]): imm T,
-
-  mut  !: T,
-  read !: read/imm T,
-  imm  !: imm T,
-
-  mut  .flow: mut Flow[T],
-  read .flow: mut Flow[read/imm T],
-  imm  .flow: mut Flow[imm T],
-
-  mut  .ifSome(f: mut MF[T, Void]): Void,
-  read .ifSome(f: mut MF[read/imm T, Void]): Void,
-  imm  .ifSome(f: mut MF[imm T, Void]): Void,
-
-  read .isEmpty: Bool,
-  read .isSome: Bool,
-  read .ifEmpty(f: mut MF[Void]): Void,
-  read .as[R:imm](f: mut MF[read/imm E, R]): Opt[R],  
-  }
-
-  .orderH by->OrderHashByCmp[Opt[E]]{
-    .hash(a,h)->by#a.hash(h);
-    .cmp(a,b,lt,eq,gt)->a.match{
-      .empty->b.match{ .empty->eq; .some _->lt};
-      .some ea->b.match{ .empty->gt; .some eb->by#ea.cmp(ea,eb,lt,eq,gt)};
-      };
-    }
-*/
-Opt[E:*]:DataType[Opt[E],E,Opt[imm E]]{
-  .match[R:**](m: mut OptMatch[E,R]): R -> m.empty;
-  .close->::; .close:read Opt[E]->this;        /// fixpoint type closed
-  .str by->Todo!;/*this.match{//needs proper 3 versions of match
-    .empty->`()`;
-    .some e->`(`+by#e+`)`;
-    };*/
-  .info by->Todo!;/*this.match{
-    .empty->{};
-    .some e->Infos.map(`.some`,by#e);
-    };*/
-  .imm by->Todo!;/*this.match{
-    .empty->{};
-    .some e->Opts#(by#e);
-    };*/
-  .cmp by, a, b, m -> Todo!;/*a.match{
+  .cmp by, a, b, m -> a.match{
     .empty -> b.match{ .empty -> m.eq; .some _ -> m.lt; };
     .some ea -> b.match{
       .empty   -> m.gt;
-      .some eb -> by#ea<=>(eb, m);
+      .some eb -> by#ea<=>(by#eb, m);
       }
-    };*/
-  .hash(by, h) -> Todo!;/*this.match{
+    };
+  .hash(by, h) -> this.match{
     .empty  -> 0;
     .some e -> h#(1, by#e);
-    };*/
+    };
+  }
+  
+_Opt[E:*]:DataType[Opt[E],Opt[imm E],E,imm E]{
+  mut  .match[R:**](m: mut OptMatch[E, R]): R;
+  read .match[R:**](m: mut OptMatch[read/imm E, R]): R;
+  imm  .match[R:**](m: mut OptMatch[imm E, R]): R;
+
+  mut  .or(default: E): E;
+  read .or(default: read/imm E): read/imm E;
+  imm  .or(default: imm E): imm E;
+
+  mut  |(default: E): E;
+  read |(default: read/imm E): read/imm E;
+  imm  |(default: imm E): imm E;
+
+  mut  ||(default: mut MF[E]): E;
+  read ||(default: mut MF[read/imm E]): read/imm E;
+  imm  ||(default: mut MF[imm E]): imm E;
+
+  mut  !: E;
+  read !: read/imm E;
+  imm  !: imm E;
+
+  mut  .flow: mut Flow[E];
+  read .flow: mut Flow[read/imm E];
+  imm  .flow: mut Flow[imm E];
+
+  mut  .ifSome(f: mut MF[E, Void]): Void;
+  read .ifSome(f: mut MF[read/imm E, Void]): Void;
+  imm  .ifSome(f: mut MF[imm E, Void]): Void;
+
+  read .ifEmpty(f: mut MF[Void]): Void;
+
+  read .isEmpty: Bool;
+  read .isSome: Bool;
+  read .as[R:imm](f: mut MF[read/imm E, R]): Opt[R];  
 }
+
 Opts:{
-  #[T:*](x: T): mut Opt[T] -> { .match(m) -> m.some(x) };
+  #[E:*](x: E): mut Opt[E] -> { .match(m) -> m.some(x) };
 }
-OptMatch[T:*, R:**]:{
-  mut .some(x: T): R;
+OptMatch[E:*, R:**]:{
+  mut .some(x: E): R;
   mut .empty: R;
 }

@@ -21,7 +21,7 @@ Debug: Sealed{
   #(x: read ToStr): Void -> Magic!;
   .identify[T](x: read T): Str -> Magic!;//TODO: can this break observability?
   }
-As[X:*]: Sealed{ #(x: X): X -> x }
+As[X:**]: Sealed{ #(x: X): X -> x }
 
 Let: { #[A:*,R:**](l: mut Let[A, R]): R -> l.in(l.let); }
 Let[A:*,R:**]: { mut .let: A; mut .in(a: A): R }

@@ -12,5 +12,6 @@ Assert:Sealed{
       .else -> this._fail(msg#);
       };
   ._fail[R:*]: R -> Error.nonDeterministic`Assertion failure.`;
-  ._fail[R:*](msg: Str): R -> Error.nonDeterministic(`Assertion failure.`|msg)
+  ._fail[R:*](msg: Str): R -> Error.nonDeterministic(`Assertion failure.`|msg);
+  .msg[R:*](msg: Str): R -> this._fail msg;
   }

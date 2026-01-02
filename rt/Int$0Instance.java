@@ -14,12 +14,12 @@ public record Int$0Instance(int val) implements Int$0{
     if (x > 255){ return (byte)255; }
     return (byte)x;
   }
-  @Override public Object read$nat$0(){ return Nat$0Instance.instance(val < 0 ? 0 : val); }
-  @Override public Object read$byte$0(){ return Byte$0Instance.instance(clampByte(val)); }
-  @Override public Object read$float$0(){ return Float$0Instance.instance((double)val); }
-  @Override public Object read$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(val),BigInteger.ONE); }
-  @Override public Object read$natExact$0(){ return val < 0 ? optEmpty() : optSome(Nat$0Instance.instance(val)); }
-  @Override public Object read$byteExact$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$0Instance.instance((byte)val)); }
+  @Override public Object imm$nat$0(){ return Nat$0Instance.instance(val < 0 ? 0 : val); }
+  @Override public Object imm$byte$0(){ return Byte$0Instance.instance(clampByte(val)); }
+  @Override public Object imm$float$0(){ return Float$0Instance.instance((double)val); }
+  @Override public Object imm$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(val),BigInteger.ONE); }
+  @Override public Object imm$natExact$0(){ return val < 0 ? optEmpty() : optSome(Nat$0Instance.instance(val)); }
+  @Override public Object imm$byteExact$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$0Instance.instance((byte)val)); }
 
   @Override public Object imm$$plus$1(Object p0){ return instance(Math.addExact(val,i(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(Math.subtractExact(val,i(p0))); }
@@ -32,27 +32,6 @@ public record Int$0Instance(int val) implements Int$0{
   @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toString(val)); }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$$lt_eq_gt$1(Object p0){ return ord(Integer.compare(val,i(p0))); }
-  @Override public Object imm$inRange$2(Object p0, Object p1){
-    int lo= i(p0), hi= i(p1);
-    if (lo > hi){ throw err("Int.inRange: lo>hi"); }
-    return bool(lo <= val && val <= hi);
-  }
-  @Override public Object imm$inRangeOpen$2(Object p0, Object p1){
-    int lo= i(p0), hi= i(p1);
-    if (lo > hi){ throw err("Int.inRangeOpen: lo>hi"); }
-    return bool(lo < val && val < hi);
-  }
-  @Override public Object imm$inRangeLoOpen$2(Object p0, Object p1){
-    int lo= i(p0), hi= i(p1);
-    if (lo > hi){ throw err("Int.inRangeLoOpen: lo>hi"); }
-    return bool(lo < val && val <= hi);
-  }
-  @Override public Object imm$inRangeHiOpen$2(Object p0, Object p1){
-    int lo= i(p0), hi= i(p1);
-    if (lo > hi){ throw err("Int.inRangeHiOpen: lo>hi"); }
-    return bool(lo <= val && val < hi);
-  }
   @Override public Object imm$clamp$2(Object p0, Object p1){
     int lo= i(p0), hi= i(p1);
     if (lo > hi){ throw err("Int.clamp: lo>hi"); }
@@ -102,6 +81,8 @@ public record Int$0Instance(int val) implements Int$0{
   @Override public Object imm$aluXor$1(Object p0){ return instance(val ^ i(p0)); }
   @Override public Object imm$aluAnd$1(Object p0){ return instance(val & i(p0)); }
   @Override public Object imm$aluOr$1(Object p0){ return instance(val | i(p0)); }
-  @Override public Object read$aluNat$0(){ return Nat$0Instance.instance(val); }
-  @Override public Object read$aluByte$0(){ return Byte$0Instance.instance((byte)val); }
+  @Override public Object imm$aluNat$0(){ return Nat$0Instance.instance(val); }
+  @Override public Object imm$aluByte$0(){ return Byte$0Instance.instance((byte)val); }
+  
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Integer.compare(i(p0),i(p1)),p2); }
 }

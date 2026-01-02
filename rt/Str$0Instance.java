@@ -1,11 +1,11 @@
 package base;
+import static base.Util.*;
 
 public record Str$0Instance(String val) implements Str$0{
   public static Str$0 instance(String val){ return new Str$0Instance(val); }
-  @Override public Object imm$$lt_eq_gt$1(Object p0){
-    return Util.ord(val.compareTo(((Str$0Instance)p0).val));
-  }
   String toS(Object o){return ((Str$0Instance)((ToStr$0)o).read$str$0()).val; }
+  @Override public String toString(){ return toS(this); }
+  private static String s(Object o){ return ((Str$0Instance)o).val; }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$str$0(){ return this; }
@@ -25,4 +25,5 @@ public record Str$0Instance(String val) implements Str$0{
     return instance("`"+res+"`");
   }
 
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(s(p0).compareTo(s(p1)),p2); }
 }

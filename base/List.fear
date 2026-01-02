@@ -1,0 +1,151 @@
+package base;
+
+/// List[E] is the standard persistent sequence.
+/// It also supports DataType[List[E],List[imm E],E,imm E] operations:
+/// .imm/.str/.info/.cmp/.hash/.close (see DataType docs).
+List[E:*]:_List[E]{
+  .close->this; .close->::;
+  .size->0;
+  .isEmpty->True;
+  .get(i)->Assert.msg `.get called on empty list`;
+  .opt(i)->{};
+
+  .first->Assert.msg `.first called on empty list`;
+  .last->Assert.msg `.last called on empty list`;
+  .firstOpt->{};
+  .lastOpt->{};
+
+  ++(xs)->xs;
+
+  mut  <+ e->Lists#(e);
+  read <+ e->Lists.singletonRead[E](e);  
+  imm  <+ e->Lists.singletonImm[E](e);
+
+  mut  +> e->Lists#(e);
+  read +> e->Lists.singletonRead[E](e);
+  imm  +> e->Lists.singletonImm[E](e);
+  
+  .subList(start,end)->Block#(
+    Assert!(start==0 && {end==0},
+      {`.sublist(`+start+`, `+end+`) called on empty list`}),
+    {});
+  .subList(start)->this.subList(start,this.size);
+
+  .with(i,e)->Assert.msg `.with called on empty list`;
+  mut .withAlso(i,e)->Block#(
+    Assert!(i==0,{`.withAlso(`+i+`, _) called on empty list`}),
+    Lists#e);
+  read .withAlso(i,e)->Block#(
+    Assert!(i==0,{`.withAlso(`+i+`, _) called on empty list`}),
+    Lists.singletonRead[E]e);
+  imm .withAlso(i,e)->Block#(
+    Assert!(i==0,{`.withAlso(`+i+`, _) called on empty list`}),
+    Lists.singletonImm[E]e);
+
+  .without(i)->Assert.msg `.without called on empty list`;
+
+  .reverse->{};
+
+  .flow->Flows#;
+
+  .as(f)->{};
+
+  .imm by->{};
+  .str by->`[]`;
+  .info by->{};
+
+  .hash(by, h)->h.list(by,this);
+
+  .cmp(by, a, b, m)->a.opt(0).match{
+    .empty->b.opt(0).match{ .empty->m.eq; .some _->m.lt; };
+    .some ea->b.opt(0).match{
+      .empty->m.gt;
+      .some eb->by#ea<=>(by#eb,{
+        .lt->m.lt;
+        .gt->m.gt;
+        .eq->this.cmp(by, a.subList(1), b.subList(1), m);
+        });
+      };
+    };
+}
+_List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E]{
+  read .size: Nat;                           /// number of elements
+  read .isEmpty: Bool;                       /// True iff size == 0
+
+  mut  .get(i: Nat): E;                      /// element at i (0-based); throws if i >= size
+  read .get(i: Nat): read/imm E;             /// element at i (0-based); throws if i >= size
+  imm  .get(i: Nat): imm E;                  /// element at i (0-based); throws if i >= size
+
+  mut  .opt(i: Nat): mut Opt[E];             /// .some(get(i)) if i < size; .empty otherwise
+  read .opt(i: Nat): mut Opt[read/imm E];    /// .some(get(i)) if i < size; .empty otherwise
+  imm  .opt(i: Nat): mut Opt[imm E];         /// .some(get(i)) if i < size; .empty otherwise
+
+  mut  .first: E;                            /// get(0); throws iff empty
+  read .first: read/imm E;                   /// get(0); throws iff empty
+  imm  .first: imm E;                        /// get(0); throws iff empty
+
+  mut  .last: E;                             /// get(size-1); throws iff empty
+  read .last: read/imm E;                    /// get(size-1); throws iff empty
+  imm  .last: imm E;                         /// get(size-1); throws iff empty
+
+  mut  .firstOpt: mut Opt[E];                /// .some(first) if non-empty; .empty otherwise
+  read .firstOpt: mut Opt[read/imm E];       /// .some(first) if non-empty; .empty otherwise
+  imm  .firstOpt: mut Opt[imm E];            /// .some(first) if non-empty; .empty otherwise
+
+  mut  .lastOpt: mut Opt[E];                 /// .some(last) if non-empty; .empty otherwise
+  read .lastOpt: mut Opt[read/imm E];        /// .some(last) if non-empty; .empty otherwise
+  imm  .lastOpt: mut Opt[imm E];             /// .some(last) if non-empty; .empty otherwise
+
+  mut  ++ (xs: mut List[E]): mut List[E];    /// concat: this followed by xs
+  read ++ (xs: read List[E]): read List[E];  /// concat: this followed by xs
+  imm  ++ (xs: List[E]): List[E];    /// concat: this followed by xs
+
+  mut  <+ (e: E): mut List[E];               /// add element to left (head)
+  read <+ (e: read E): read List[E];         /// add element to left
+  imm  <+ (e: imm E): List[E];               /// add element to left
+
+  mut  +> (e: E): mut List[E];               /// add element to right (tail)
+  read +> (e: read E): read List[E];         /// add element to right
+  imm  +> (e: imm E): List[E];               /// add element to right
+
+  mut  .subList(start: Nat, end: Nat): mut List[E];      /// slice [start,end); throws if start>end or end>size
+  read .subList(start: Nat, end: Nat): read List[E];     /// slice [start,end); throws if start>end or end>size
+  imm  .subList(start: Nat, end: Nat): List[E];      /// slice [start,end); throws if start>end or end>size
+
+  mut  .subList(start: Nat): mut List[E];      /// subList(start, size)
+  read .subList(start: Nat): read List[E];     /// subList(start, size)
+  imm  .subList(start: Nat): List[E];      /// subList(start, size)
+
+  mut  .with(i: Nat, e: E): mut List[E];       /// replace element at i; throws if i >= size
+  read .with(i: Nat, e: read E): read List[E]; /// replace element at i; throws if i >= size
+  imm  .with(i: Nat, e: imm E): List[E];       /// replace element at i; throws if i >= size
+
+  mut  .withAlso(i: Nat, e: E): mut List[E];       /// insert before i; i in [0,size]; throws otherwise
+  read .withAlso(i: Nat, e: read E): read List[E]; /// insert before i; i in [0,size]; throws otherwise
+  imm  .withAlso(i: Nat, e: imm E): List[E];       /// insert before i; i in [0,size]; throws otherwise
+
+  mut  .without(i: Nat): mut List[E];          /// remove element at i; throws if i>=size
+  read .without(i: Nat): read List[E];         /// remove element at i; throws if i>=size
+  imm  .without(i: Nat): List[E];              /// remove element at i; throws if i>=size
+
+  mut  .reverse: mut List[E];                /// reverse order
+  read .reverse: read List[E];               /// reverse order
+  imm  .reverse: List[imm E];                /// reverse order
+
+  mut  .flow: mut Flow[E];                   /// view as flow
+  read .flow: mut Flow[read/imm E];          /// view as flow
+  imm  .flow: mut Flow[imm E];               /// view as flow
+
+  mut  .as[R:imm](f: mut MF[E,R]): List[R];          /// map to imm list (optimized vs flow.map.list)
+  read .as[R:imm](f: mut MF[read/imm E,R]): List[R]; /// map to imm list (optimized vs flow.map.list)
+  imm  .as[R:imm](f: mut MF[imm E,R]): List[R];      /// map to imm list (optimized vs flow.map.list)
+}
+
+Lists:Sealed{//No need of empty, just use {}
+  #[E:*](E): mut List[E]->Magic!;
+  #[E:*](E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E): mut List[E]->Magic!;
+  .singletonRead[E:*](read E): read List[E]->Magic!;
+  .singletonImm[E:*](imm E): imm List[E]->Magic!;
+}

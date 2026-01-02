@@ -37,23 +37,23 @@ public record Float$0Instance(double val) implements Float$0{
     return x == Math.rint(x);
   }
   @Override public Object imm$$star_star$1(Object p0){ return instance(Math.pow(val,f(p0))); }
-  @Override public Object read$int$0(){ return Int$0Instance.instance(clampTrunc0ToInt(val)); }
-  @Override public Object read$nat$0(){ return Nat$0Instance.instance(clampTrunc0ToNatBits(val)); }
-  @Override public Object read$byte$0(){ return Byte$0Instance.instance(clampTrunc0ToByteBits(val)); }
-  @Override public Object read$numExact$0(){
+  @Override public Object imm$int$0(){ return Int$0Instance.instance(clampTrunc0ToInt(val)); }
+  @Override public Object imm$nat$0(){ return Nat$0Instance.instance(clampTrunc0ToNatBits(val)); }
+  @Override public Object imm$byte$0(){ return Byte$0Instance.instance(clampTrunc0ToByteBits(val)); }
+  @Override public Object imm$numExact$0(){
     throw err("Float.numExact: need the chosen policy for converting a finite double to Num (or when to return empty)");
   }
-  @Override public Object read$intExact$0(){
+  @Override public Object imm$intExact$0(){
     if (!isIntegral(val)){ return optEmpty(); }
     if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){ return optEmpty(); }
     return optSome(Int$0Instance.instance((int)val));
   }
-  @Override public Object read$natExact$0(){
+  @Override public Object imm$natExact$0(){
     if (!isIntegral(val)){ return optEmpty(); }
     if (val < 0.0d || val > 4294967295.0d){ return optEmpty(); }
     return optSome(Nat$0Instance.instance((int)((long)val)));
   }
-  @Override public Object read$byteExact$0(){
+  @Override public Object imm$byteExact$0(){
     if (!isIntegral(val)){ return optEmpty(); }
     if (val < 0.0d || val > 255.0d){ return optEmpty(); }
     return optSome(Byte$0Instance.instance((byte)((int)val)));
@@ -67,27 +67,6 @@ public record Float$0Instance(double val) implements Float$0{
   @Override public Object read$str$0(){ return Str$0Instance.instance(Double.toString(val)); }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$$lt_eq_gt$1(Object p0){ return ord(cmpFearless(val,f(p0))); }
-  @Override public Object imm$inRange$2(Object p0, Object p1){
-    double lo= f(p0), hi= f(p1);
-    checkRangeEnds(lo,hi,"Float.inRange");
-    return bool(lo <= val && val <= hi);
-  }
-  @Override public Object imm$inRangeOpen$2(Object p0, Object p1){
-    double lo= f(p0), hi= f(p1);
-    checkRangeEnds(lo,hi,"Float.inRangeOpen");
-    return bool(lo < val && val < hi);
-  }
-  @Override public Object imm$inRangeLoOpen$2(Object p0, Object p1){
-    double lo= f(p0), hi= f(p1);
-    checkRangeEnds(lo,hi,"Float.inRangeLoOpen");
-    return bool(lo < val && val <= hi);
-  }
-  @Override public Object imm$inRangeHiOpen$2(Object p0, Object p1){
-    double lo= f(p0), hi= f(p1);
-    checkRangeEnds(lo,hi,"Float.inRangeHiOpen");
-    return bool(lo <= val && val < hi);
-  }
   @Override public Object imm$clamp$2(Object p0, Object p1){
     double lo= f(p0), hi= f(p1);
     if (Double.compare(lo,hi) > 0){ throw err("Float.clamp: lo>hi"); }
@@ -123,4 +102,6 @@ public record Float$0Instance(double val) implements Float$0{
   @Override public Object imm$ieeeSameBits$1(Object p0){ return bool(bits(val) == bits(f(p0))); }
   @Override public Object imm$ieeeStr$0(){ return Str$0Instance.instance(Double.toString(val)); }
   @Override public Object imm$ieeeRemainder$1(Object p0){ return instance(Math.IEEEremainder(val,f(p0))); }
+
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(cmpFearless(f(p0),f(p1)),p2); }
 }

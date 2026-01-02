@@ -24,15 +24,15 @@ public record Nat$0Instance(int val) implements Nat$0{
     if (ua != 0 && ub > (0xFFFF_FFFFL / ua)){ throw err("Nat.* overflow"); }
     return (int)(ua * ub);
   }
-  @Override public Object read$int$0(){ return Int$0Instance.instance(val < 0 ? Integer.MAX_VALUE : val); }
-  @Override public Object read$byte$0(){
+  @Override public Object imm$int$0(){ return Int$0Instance.instance(val < 0 ? Integer.MAX_VALUE : val); }
+  @Override public Object imm$byte$0(){
     int x= Integer.compareUnsigned(val,255) > 0 ? 255 : val;
     return Byte$0Instance.instance((byte)x);
   }
-  @Override public Object read$float$0(){ return Float$0Instance.instance((double)u32(val)); }
-  @Override public Object read$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(u32(val)),BigInteger.ONE); }
-  @Override public Object read$intExact$0(){ return val < 0 ? optEmpty() : optSome(Int$0Instance.instance(val)); }
-  @Override public Object read$byteExact$0(){
+  @Override public Object imm$float$0(){ return Float$0Instance.instance((double)u32(val)); }
+  @Override public Object imm$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(u32(val)),BigInteger.ONE); }
+  @Override public Object imm$intExact$0(){ return val < 0 ? optEmpty() : optSome(Int$0Instance.instance(val)); }
+  @Override public Object imm$byteExact$0(){
     return Integer.compareUnsigned(val,255) > 0 ? optEmpty() : optSome(Byte$0Instance.instance((byte)val));
   }
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,n(p0))); }
@@ -42,27 +42,6 @@ public record Nat$0Instance(int val) implements Nat$0{
   @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toUnsignedString(val)); }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$$lt_eq_gt$1(Object p0){ return ord(Integer.compareUnsigned(val,n(p0))); }
-  @Override public Object imm$inRange$2(Object p0, Object p1){
-    int lo= n(p0), hi= n(p1);
-    if (Integer.compareUnsigned(lo,hi) > 0){ throw err("Nat.inRange: lo>hi"); }
-    return bool(Integer.compareUnsigned(val,lo) >= 0 && Integer.compareUnsigned(val,hi) <= 0);
-  }
-  @Override public Object imm$inRangeOpen$2(Object p0, Object p1){
-    int lo= n(p0), hi= n(p1);
-    if (Integer.compareUnsigned(lo,hi) > 0){ throw err("Nat.inRangeOpen: lo>hi"); }
-    return bool(Integer.compareUnsigned(val,lo) > 0 && Integer.compareUnsigned(val,hi) < 0);
-  }
-  @Override public Object imm$inRangeLoOpen$2(Object p0, Object p1){
-    int lo= n(p0), hi= n(p1);
-    if (Integer.compareUnsigned(lo,hi) > 0){ throw err("Nat.inRangeLoOpen: lo>hi"); }
-    return bool(Integer.compareUnsigned(val,lo) > 0 && Integer.compareUnsigned(val,hi) <= 0);
-  }
-  @Override public Object imm$inRangeHiOpen$2(Object p0, Object p1){
-    int lo= n(p0), hi= n(p1);
-    if (Integer.compareUnsigned(lo,hi) > 0){ throw err("Nat.inRangeHiOpen: lo>hi"); }
-    return bool(Integer.compareUnsigned(val,lo) >= 0 && Integer.compareUnsigned(val,hi) < 0);
-  }
   @Override public Object imm$clamp$2(Object p0, Object p1){
     int lo= n(p0), hi= n(p1);
     if (Integer.compareUnsigned(lo,hi) > 0){ throw err("Nat.clamp: lo>hi"); }
@@ -109,6 +88,8 @@ public record Nat$0Instance(int val) implements Nat$0{
   @Override public Object imm$aluXor$1(Object p0){ return instance(val ^ n(p0)); }
   @Override public Object imm$aluAnd$1(Object p0){ return instance(val & n(p0)); }
   @Override public Object imm$aluOr$1(Object p0){ return instance(val | n(p0)); }
-  @Override public Object read$aluInt$0(){ return Int$0Instance.instance(val); }
-  @Override public Object read$aluByte$0(){ return Byte$0Instance.instance((byte)val); }
+  @Override public Object imm$aluInt$0(){ return Int$0Instance.instance(val); }
+  @Override public Object imm$aluByte$0(){ return Byte$0Instance.instance((byte)val); }
+  
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Integer.compareUnsigned(n(p0),n(p1)),p2); }
 }

@@ -91,32 +91,32 @@ public record Num$0Instance(BigInteger val1, BigInteger val2) implements Num$0{
     return instance(q,one);
   }
   @Override public Object imm$isInteger$0(){ return bool(val2.equals(one)); }
-  @Override public Object read$int$0(){
+  @Override public Object imm$int$0(){
     var z= trunc0Z(val1,val2);
     return Int$0Instance.instance(clampIntZ(z));
   }
-  @Override public Object read$nat$0(){
+  @Override public Object imm$nat$0(){
     var z= trunc0Z(val1,val2);
     return Nat$0Instance.instance(clampNatBitsZ(z));
   }
-  @Override public Object read$byte$0(){
+  @Override public Object imm$byte$0(){
     var z= trunc0Z(val1,val2);
     return Byte$0Instance.instance(clampByteBitsZ(z));
   }
-  @Override public Object read$float$0(){
+  @Override public Object imm$float$0(){
     return Float$0Instance.instance(val1.doubleValue() / val2.doubleValue());
   }
-  @Override public Object read$intExact$0(){
+  @Override public Object imm$intExact$0(){
     if (!val2.equals(one)){ return optEmpty(); }
     if (val1.compareTo(minInt) < 0 || val1.compareTo(maxInt) > 0){ return optEmpty(); }
     return optSome(Int$0Instance.instance(val1.intValue()));
   }
-  @Override public Object read$natExact$0(){
+  @Override public Object imm$natExact$0(){
     if (!val2.equals(one)){ return optEmpty(); }
     if (val1.signum() < 0 || val1.compareTo(maxNat) > 0){ return optEmpty(); }
     return optSome(Nat$0Instance.instance((int)val1.longValue()));
   }
-  @Override public Object read$byteExact$0(){
+  @Override public Object imm$byteExact$0(){
     if (!val2.equals(one)){ return optEmpty(); }
     if (val1.signum() < 0 || val1.compareTo(maxByte) > 0){ return optEmpty(); }
     return optSome(Byte$0Instance.instance((byte)val1.intValue()));
@@ -127,27 +127,6 @@ public record Num$0Instance(BigInteger val1, BigInteger val2) implements Num$0{
   }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$$lt_eq_gt$1(Object p0){ return ord(cmp(this,num(p0))); }
-  @Override public Object imm$inRange$2(Object p0, Object p1){
-    var lo= num(p0); var hi= num(p1);
-    if (lt(hi,lo)){ throw err("Num.inRange: lo>hi"); }
-    return bool(le(lo,this) && le(this,hi));
-  }
-  @Override public Object imm$inRangeOpen$2(Object p0, Object p1){
-    var lo= num(p0); var hi= num(p1);
-    if (lt(hi,lo)){ throw err("Num.inRangeOpen: lo>hi"); }
-    return bool(lt(lo,this) && lt(this,hi));
-  }
-  @Override public Object imm$inRangeLoOpen$2(Object p0, Object p1){
-    var lo= num(p0); var hi= num(p1);
-    if (lt(hi,lo)){ throw err("Num.inRangeLoOpen: lo>hi"); }
-    return bool(lt(lo,this) && le(this,hi));
-  }
-  @Override public Object imm$inRangeHiOpen$2(Object p0, Object p1){
-    var lo= num(p0); var hi= num(p1);
-    if (lt(hi,lo)){ throw err("Num.inRangeHiOpen: lo>hi"); }
-    return bool(le(lo,this) && lt(this,hi));
-  }
   @Override public Object imm$clamp$2(Object p0, Object p1){
     var lo= num(p0); var hi= num(p1);
     if (lt(hi,lo)){ throw err("Num.clamp: lo>hi"); }
@@ -162,4 +141,6 @@ public record Num$0Instance(BigInteger val1, BigInteger val2) implements Num$0{
     var diff= (Num$0Instance)((Num$0Instance)this.imm$$dash$1(exp)).imm$abs$0();
     return bool(le(diff,d));
   }
+
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(cmp(num(p0),num(p1)),p2); }
 }
