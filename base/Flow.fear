@@ -1,0 +1,18 @@
+package base;
+
+Flows:{
+  #[R:*]:mut Flow[R]->Magic!;
+  #[R:*](r1:R):mut Flow[R]->Magic!;
+  #[R:*](r1:R,r2:R):mut Flow[R]->Magic!;
+  #[R:*](r1:R,r2:R,r3:R):mut Flow[R]->Magic!;
+  #[R:*](r1:R,r2:R,r3:R,r4:R):mut Flow[R]->Magic!;
+  .fromMutList[R:*](xs: mut List[R]): mut Flow[R]->Magic!;
+  .fromReadList[R:*](xs: read List[R]): mut Flow[read/imm R]->Magic!;
+  .fromImmList[R:*](xs: List[R]): mut Flow[imm R]->Magic!;
+  }
+Flow[E:*]:{
+  mut .map[R:*](f: read F[E, R]): mut Flow[R];
+  mut .list:mut List[E];
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
+  mut .mapping[K,E0:*](OrderBy[K,K],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
+  }

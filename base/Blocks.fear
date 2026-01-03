@@ -1,6 +1,6 @@
 package base;
 
-Block: Sealed{
+/*Block: Sealed{
   #[X:**, R:**](X, res: R): R -> res;
   #[X1:**, X2:**, R:**](X1, X2, res: R): R -> res;
   #[X1:**, X2:**, X3:**, R:**](X1, X2, X3, res: R): R -> res;
@@ -8,4 +8,76 @@ Block: Sealed{
   #[X1:**, X2:**, X3:**, X4:**, X5:**, R:**](X1, X2, X3, X4, X5, res: R): R -> res;
 
   //#[R:*]: mut Block[R] -> {};
+  }*/
+Continuation[T:*,R:*]: {mut #(x: T, self: mut Block[R]): R}
+
+Block: Sealed{
+  #[R:*]: mut Block[R] -> {};
+  #[A:**](A): Void -> {};
+  #[A:**, R:**](A, res: R): R -> res;
+  #[A:**, B:**, R:**](A, B, res: R): R -> res;
+  #[A:**, B:**, C:**, R:**](A, B, C, res: R): R -> res;
+  #[A:**, B:**, C:**, D:**, R:**](A, B, C, D, res: R): R -> res;
   }
+Block[R:*]: Sealed{
+  mut .done: Void -> {};
+  mut .return(a: mut MF[R]): R -> a#;
+  mut .do(r: mut MF[Void]): mut Block[R] -> 
+    Block#(r#,this);
+  mut .assert(p: mut F[Bool]): mut Block[R] ->
+    Block#(Assert!(p#),this);
+  mut .assert(p: mut F[Bool], failMsg: F[Str]): mut Block[R] ->
+    Block#(Assert!(p#,failMsg),this);
+  mut .let[X:*](x: mut MF[X], cont: mut Continuation[X,R]): R ->
+    cont#(x#, this);
+  mut .openIso[X](x: iso X, cont: mut Continuation[mut X,R]): R ->
+    cont#(x, this);
+//  mut .var[X:*]( x: mut MF[X], cont: mut Continuation[mut Var[X], R] ): R ->
+//    cont#(Vars#(x#), this);
+//  mut .isoPod[X]( x: iso X, cont: mut Continuation[mut IsoPod[X], R]): R ->
+//    cont#(IsoPod#(x), this);
+  mut .if(p: mut F[Bool]): mut BlockIf[R] -> p# ? {
+    .then -> {
+      .return a -> _DecidedBlock#(a#);
+      .error  i -> Error!(i#);
+      .do     r -> Block#(r#,this);
+      };
+    .else -> {
+      .return _ -> this;
+      .error  _ -> this;
+      .do     _ -> this;
+      };
+    };
+  mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> body#.match mut ControlFlowMatch[R:*]:{
+    mut .continue: mut Block[R]     -> this.loop(body);
+    mut .break: mut Block[R]        -> this;
+    mut .return(v: R): mut Block[R] -> _DecidedBlock#v;
+    };
+  }
+BlockIf[R:*]:{
+  mut .return(a: mut MF[R]): mut Block[R];
+  mut .do(r: mut MF[Void]): mut Block[R];
+  mut .error(info: mut MF[Info]): mut Block[R];
+  }
+_DecidedBlock:{
+  #[R:*](res: R): mut Block[R] -> { 'self
+    .return  _    -> res;
+    .do      _    -> self;
+    .let     _, _ -> res;
+    .openIso _, _ -> res;
+    //.var     _, _ -> res;
+    //.isoPod  _, _ -> res;
+    .assert  _    -> self;
+    .assert  _, _ -> self;
+    .loop    _    -> self;
+    .if      _    -> {
+      .return _ -> self;
+      .do     _ -> self;
+      .error  _ -> self;
+      };
+    }
+  }
+ControlFlow[R:*]:Sealed { mut .match(m: mut ControlFlowMatch[R]): mut Block[R]; }
+Continue:{#[R:*]:mut ControlFlow[R]->{::.continue}}
+Break:{#[R:*]:mut ControlFlow[R]->{::.break}}
+OuterReturn:{#[R:*](r:R):mut ControlFlow[R]->{::.return r} }

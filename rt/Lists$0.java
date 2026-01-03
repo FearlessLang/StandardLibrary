@@ -91,9 +91,9 @@ public interface Lists$0 extends Sealed$0{
 }
 
 record List$1Instance(List<Object> val) implements List$1{
-  private static Object wrap(List<Object> l){ return l.isEmpty() ? List$1.instance : new List$1Instance(l); }
+  static Object wrap(List<Object> l){ return l.isEmpty() ? List$1.instance : new List$1Instance(l); }
 
-  private static List<Object> asJava(Object xs){
+  static List<Object> asJava(Object xs){
     if (xs == List$1.instance){ return List.of(); }
     if (xs instanceof List$1Instance x){ return x.val; }
     throw new AssertionError("Unexpected List impl: "+xs.getClass());
@@ -218,10 +218,6 @@ record List$1Instance(List<Object> val) implements List$1{
   @Override public Object mut$reverse$0(){ return wrap(val.reversed()); }
   @Override public Object read$reverse$0(){ return mut$reverse$0(); }
   @Override public Object imm$reverse$0(){ return mut$reverse$0(); }
-
-  @Override public Object mut$flow$0(){ throw err("TODO List.flow"); }
-  @Override public Object read$flow$0(){ return mut$flow$0(); }
-  @Override public Object imm$flow$0(){ return mut$flow$0(); }
 
   @Override public Object mut$as$1(Object p0){
     var l= new ArrayList<Object>(val.size());

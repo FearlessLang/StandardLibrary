@@ -20,9 +20,14 @@ public class Util{
     assert i >= 0;
     return new Nat$0Instance(i);
   }
-  public static Object callMF$2(Object f, Object x){
-    return ((MF$2)f).mut$$hash$1(x);
-  }
+  public static Object callMF$1(Object f){ return ((MF$1)f).mut$$hash$0(); }
+  public static Object callMF$2(Object f, Object x){ return ((MF$2)f).mut$$hash$1(x); }
+  public static Object callMF$3(Object f,Object x,Object y){ return ((MF$3)f).mut$$hash$2(x,y); }
+  public static Object callF$1(Object f){ return ((F$1)f).read$$hash$0(); }
+  public static Object callF$2(Object f, Object x){ return ((F$2)f).read$$hash$1(x); }
+  public static Object callF$3(Object f,Object x,Object y){ return ((F$3)f).read$$hash$2(x,y); }
+
+
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }
   }

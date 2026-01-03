@@ -61,5 +61,11 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E]{
   //mut  .update(k: K, f: mut MF[E,E]): mut Map[K,E];        /// replace value at k with f(get(k)); throws iff absent
 }
 
-KeyElem[K,E:*]:{.key:K;.elem:E;}
+KeyElem[K,E:*]:{
+  read .key: K;
+  mut .elem: E;
+  read .elem: read/imm E;
+  imm .elem: imm E;
+  }
+KeyElems:{#[K,E:*](key: K, elem: E): mut KeyElem[K,E] ->{ .key->key; .elem->elem; } }
 KeyElemMapper[A:*,K,E:*]:{.key(A):K;.elem(A):E;}//needed in Flow.mapping

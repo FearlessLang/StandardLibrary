@@ -1,19 +1,5 @@
 package base;
 
-Flows:{
-  #[R:*]:mut Flow[R]->Todo!;
-  #[R:*](r1:R):mut Flow[R]->Todo!;
-  #[R:*](r1:R,r2:R):mut Flow[R]->Todo!;
-  #[R:*](r1:R,r2:R,r3:R):mut Flow[R]->Todo!;
-  #[R:*](r1:R,r2:R,r3:R,r4:R):mut Flow[R]->Todo!;
-  }
-Flow[E:*]:{
-  mut .map[R:*](f: read F[E, R]): mut Flow[R];
-  mut .list:mut List[E];
-  mut .fold[R:*](init:R, f: read F[R,E,R]): R;
-  mut .mapping[K,E0:*](OrderBy[K,K],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
-  }
-
 Infos:Sealed {
   .msg(str: Str): Info -> str.isEmpty?{
     .then->{};
@@ -65,7 +51,7 @@ Info:Sealed,DataType[Info,Info]{
     };
   }
 _InfoMapPlus:{ #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->
-  m2.flow.fold(m1, {acc,ke->
+  m2.flow.fold({m1}, {acc,ke->
     acc.opt(ke.key).match{
       .empty -> acc.with(ke.key, ke.elem);
       .some v -> acc.with(ke.key, v+(ke.elem));

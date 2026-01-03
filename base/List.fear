@@ -46,7 +46,9 @@ List[E:*]:_List[E]{
 
   .reverse->{};
 
-  .flow->Flows#;
+  mut  .flow-> Flows.fromMutList(this);
+  read  .flow-> Flows.fromReadList(this);
+  imm  .flow-> Flows.fromImmList(this);
 
   .as(f)->{};
 
