@@ -13,6 +13,7 @@ TestNumbers:Main{s->
     .testSuite FloatIeee
     .testSuite FloatConv
     .testSuite FloatRange
+    .testSuite FloatLiteralFormsLarge
 
     .testSuite NumArith
     .testSuite NumRound
@@ -20,6 +21,8 @@ TestNumbers:Main{s->
     .testSuite NumIsInteger
     .testSuite NumConv
     .testSuite NumRange
+    .testSuite NumRationalLiteralForms
+    .testSuite NumRationalTokenizationWitness
 
     .testSuite IntArith
     .testSuite IntDivRem
@@ -27,6 +30,8 @@ TestNumbers:Main{s->
     .testSuite IntConv
     .testSuite IntAlu
     .testSuite IntRange
+    .testSuite IntLiteralForms
+    .testSuite IntBoundaryAndBoundedVsAlu
 
     .testSuite NatArith
     .testSuite NatDivRem
@@ -34,11 +39,14 @@ TestNumbers:Main{s->
     .testSuite NatConv
     .testSuite NatAlu
     .testSuite NatRange
+    .testSuite NatLiteralForms
+    .testSuite NatBoundaryAndBoundedVsAlu
 
     .testSuite ByteArith
     .testSuite ByteDivRem
     .testSuite ByteConv
     .testSuite ByteAlu
     .testSuite ByteRange
+    .testSuite ByteBoundaryAndBoundedVsAlu
     .done
 }

@@ -75,12 +75,12 @@ public record Nat$0Instance(int val) implements Nat$0{
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance(val * n(p0)); }
   @Override public Object imm$aluDiv$1(Object p0){
     int d= n(p0);
-    if (d == 0){ throw err("Nat.aluDiv: x==0"); }
+    if (d == 0){ throw err("Nat.aluDiv: divByZero"); }
     return instance(Integer.divideUnsigned(val,d));
   }
   @Override public Object imm$aluRem$1(Object p0){
     int d= n(p0);
-    if (d == 0){ throw err("Nat.aluRem: x==0"); }
+    if (d == 0){ throw err("Nat.aluRem: divByZero"); }
     return instance(Integer.remainderUnsigned(val,d));
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){ return instance(val << n(p0)); }

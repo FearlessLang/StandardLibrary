@@ -1,6 +1,7 @@
 package base;
 
 import static base.Util.*;
+import java.math.BigInteger;
 
 public record Float$0Instance(double val) implements Float$0{
   public static Float$0 instance(double val){ return new Float$0Instance(val); }
@@ -40,9 +41,27 @@ public record Float$0Instance(double val) implements Float$0{
   @Override public Object imm$int$0(){ return Int$0Instance.instance(clampTrunc0ToInt(val)); }
   @Override public Object imm$nat$0(){ return Nat$0Instance.instance(clampTrunc0ToNatBits(val)); }
   @Override public Object imm$byte$0(){ return Byte$0Instance.instance(clampTrunc0ToByteBits(val)); }
-  @Override public Object imm$numExact$0(){
-    throw err("Float.numExact: need the chosen policy for converting a finite double to Num (or when to return empty)");
+  private static Object numExactFinite(double x){
+    if (x == 0.0d){ return Num$0Instance.instance(BigInteger.ZERO,BigInteger.ONE); } // also -0.0
+    long b= Double.doubleToRawLongBits(x);
+    boolean neg= (b >>> 63) != 0;
+    int exp= (int)((b >>> 52) & 0x7FFL);
+    long frac= b & 0x000F_FFFF_FFFF_FFFFL;
+
+    long mant= exp == 0 ? frac : (1L << 52) | frac;
+    int e= exp == 0 ? -1074 : exp - 1023 - 52; // exact power-of-two exponent
+
+    var n= BigInteger.valueOf(mant);
+    var d= BigInteger.ONE;
+    if (e >= 0){ n= n.shiftLeft(e); }
+    else { d= d.shiftLeft(-e); }
+    if (neg){ n= n.negate(); }
+    return Num$0Instance.instance(n,d);
   }
+  @Override public Object imm$numExact$0(){
+    if (Double.isNaN(val) || Double.isInfinite(val)){ return optEmpty(); }
+    return optSome(numExactFinite(val));
+  }  
   @Override public Object imm$intExact$0(){
     if (!isIntegral(val)){ return optEmpty(); }
     if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){ return optEmpty(); }

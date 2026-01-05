@@ -1,14 +1,17 @@
 package base;
 
-
 NumArith:F[Tests,Tests]{::
-  .test((+1.num + (+2.num)) .assertEq (+3.num))
-  .test((+5.num - (+2.num)) .assertEq (+3.num))
-  .test((+3.num * (+4.num)) .assertEq (+12.num))
-  .test((+6.num / (+3.num)) .assertEq (+2.num))
-  .test(-5.num.abs .assertEq (+5.num))
+  .test(+1.num + (+2.num) .assertEq (+3.num))
+  .test(+5.num - (+2.num) .assertEq (+3.num))
+  .test(+3.num * (+4.num) .assertEq (+12.num))
+  .test(+6.num / (+3.num) .assertEq (+2.num))
+
+  .test((-5.num).abs .assertEq (+5.num))
+  .test(+5.num.abs .assertEq (+5.num))
+
   .test(+9.num.sqrt .assertEq +3.0)
-  .test(-1.num.sqrt.isNaN .assertEq True)
+  .test((-1.num).sqrt.isNaN .assertEq True)
+
   .test(+1.num.assertEqDelta(+1.num,+0.num))
 }
 
@@ -16,43 +19,64 @@ NumRound:F[Tests,Tests]{::
   .test(+1.num / (+2.num).round .assertEq (+0.num))
   .test(+3.num / (+2.num).round .assertEq (+2.num))
   .test(+5.num / (+2.num).round .assertEq (+2.num))
-  .test(-1.num / (+2.num).round .assertEq (+0.num))
-  .test(-3.num / (+2.num).round .assertEq (-2.num))
-  .test(-5.num / (+2.num).round .assertEq (-2.num))
+
+  .test((-1.num) / (+2.num).round .assertEq (+0.num))
+  .test((-3.num) / (+2.num).round .assertEq (-2.num))
+  .test((-5.num) / (+2.num).round .assertEq (-2.num))
+
   .test(+1.num / (+3.num).round .assertEq (+0.num))
   .test(+2.num / (+3.num).round .assertEq (+1.num))
+
   .test(+1.num / (+2.num).round.isInteger .assertEq True)
+
+  // round ties-to-even check: 0.5 -> 0; 1.5 -> 2; 2.5 -> 2
+  .test(+1.num / (+2.num).round .assertEq (+0.num))
+  .test(+3.num / (+2.num).round .assertEq (+2.num))
+  .test(+5.num / (+2.num).round .assertEq (+2.num))
 }
 
 NumFloorCeilTrunc:F[Tests,Tests]{::
   .test(+3.num / (+2.num).floor .assertEq (+1.num))
-  .test(+3.num / (+2.num).ceil  .assertEq (+2.num))
+  .test(+3.num / (+2.num).ceil .assertEq (+2.num))
   .test(+3.num / (+2.num).trunc0 .assertEq (+1.num))
-  .test(-3.num / (+2.num).floor .assertEq (-2.num))
-  .test(-3.num / (+2.num).ceil  .assertEq (-1.num))
-  .test(-3.num / (+2.num).trunc0 .assertEq (-1.num))
+
+  .test((-3.num) / (+2.num).floor .assertEq (-2.num))
+  .test((-3.num) / (+2.num).ceil .assertEq (-1.num))
+  .test((-3.num) / (+2.num).trunc0 .assertEq (-1.num))
+
+  // exact on integers
+  .test(+5.num.floor .assertEq (+5.num))
+  .test(+5.num.ceil .assertEq (+5.num))
+  .test(+5.num.trunc0 .assertEq (+5.num))
 }
 
 NumIsInteger:F[Tests,Tests]{::
   .test(+2.num.isInteger .assertEq True)
   .test(+1.num / (+2.num).isInteger .assertEq False)
+  .test((-2.num).isInteger .assertEq True)
 }
 
 NumConv:F[Tests,Tests]{::
-  .test((+5.num).int .assertEq +5)
-  .test((+5.num).nat .assertEq 5)
-  .test((+5.num).byte .assertEq (+5.byte))
-  .test((+5.num).float .assertEq +5.0)
+  .test(+5.num.int .assertEq +5)
+  .test(+5.num.nat .assertEq 5)
+  .test(+5.num.byte .assertEq (+5.byte))
+  .test(+5.num.float .assertEq +5.0)
 
   .test(+1.num / (+2.num).int .assertEq +0)
-  .test(-1.num / (+2.num).nat .assertEq 0)
+  .test((-1.num) / (+2.num).nat .assertEq 0)
 
-  .test(+2.num.intExact .assertEq({::},Opts#(+2)))
-  .test(+1.num / (+2.num).intExact .assertEq({::},Opt[Int]))
-  .test(+2.num.natExact .assertEq({::},Opts#(2)))
-  .test(-1.num.natExact .assertEq({::},Opt[Nat]))
-  .test(+255.num.byteExact .assertEq({::},Opts#(+255.byte)))
-  .test(+256.num.byteExact .assertEq({::},Opt[Byte]))
+  // clamp conversions
+  .test(+300.num.byte .assertEq (+255.byte))
+  .test((-1.num).byte .assertEq (+0.byte))
+
+  .test(+2.num.intExact .assertEq ({::},Opts#(+2)))
+  .test(+1.num / (+2.num).intExact .assertEq ({::},Opt[Int]))
+
+  .test(+2.num.natExact .assertEq ({::},Opts#(2)))
+  .test((-1.num).natExact .assertEq ({::},Opt[Nat]))
+
+  .test(+255.num.byteExact .assertEq ({::},Opts#(+255.byte)))
+  .test(+256.num.byteExact .assertEq ({::},Opt[Byte]))
 }
 
 NumRange:F[Tests,Tests]{::
@@ -60,7 +84,28 @@ NumRange:F[Tests,Tests]{::
   .test(+3.num.assertInRangeOpen(+1.num,+5.num))
   .test(+3.num.assertInRangeLoOpen(+1.num,+3.num))
   .test(+3.num.assertInRangeHiOpen(+3.num,+5.num))
+
   .test(+0.num.clamp(+1.num,+5.num) .assertEq (+1.num))
   .test(+6.num.clamp(+1.num,+5.num) .assertEq (+5.num))
   .test(+3.num.clamp(+1.num,+5.num) .assertEq (+3.num))
+  .test(+3.num.clamp(+3.num,+3.num) .assertEq (+3.num))
+}
+
+NumRationalLiteralForms:F[Tests,Tests]{::
+  // SignedRational token: +n/d (no spaces)
+  .test(+1/2 + +1/2 .assertEq (+1.num))
+  .test(+3/2 - (+1.num) .assertEq (+1/2))
+
+  // underscores inside rationals
+  .test(+1_0/2_0 .assertEq (+1/2))
+  .test(+10/20 .assertEq (+1/2))
+
+  // decimal forms inside SignedRational
+  .test(+1.0/2.0 + +1.0/2.0 .assertEq (+1.num))
+}
+
+NumRationalTokenizationWitness:F[Tests,Tests]{::
+  // This is meant to distinguish "SignedRational token" from "operator /".
+  // We avoid relying on operator '/' semantics by using Int.div.
+  .test(+3/2 - (((+3).div 2).num) .assertEq (+1/2))
 }

@@ -21,9 +21,18 @@ public record Int$0Instance(int val) implements Int$0{
   @Override public Object imm$natExact$0(){ return val < 0 ? optEmpty() : optSome(Nat$0Instance.instance(val)); }
   @Override public Object imm$byteExact$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$0Instance.instance((byte)val)); }
 
-  @Override public Object imm$$plus$1(Object p0){ return instance(Math.addExact(val,i(p0))); }
-  @Override public Object imm$$dash$1(Object p0){ return instance(Math.subtractExact(val,i(p0))); }
-  @Override public Object imm$$star$1(Object p0){ return instance(Math.multiplyExact(val,i(p0))); }
+  @Override public Object imm$$plus$1(Object p0){
+    try{ return instance(Math.addExact(val,i(p0))); }
+    catch(ArithmeticException e){ throw err("Int.+ overflow"); }
+  }
+  @Override public Object imm$$dash$1(Object p0){
+    try{ return instance(Math.subtractExact(val,i(p0))); }
+    catch(ArithmeticException e){ throw err("Int.- overflow"); }
+  }
+  @Override public Object imm$$star$1(Object p0){
+    try{ return instance(Math.multiplyExact(val,i(p0))); }
+    catch(ArithmeticException e){ throw err("Int.* overflow"); }
+  }
   @Override public Object imm$abs$0(){
     if (val == Integer.MIN_VALUE){ throw err("Int.abs overflow"); }
     return instance(Math.abs(val));
@@ -67,12 +76,12 @@ public record Int$0Instance(int val) implements Int$0{
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance(val * i(p0)); }
   @Override public Object imm$aluDiv$1(Object p0){
     int x= i(p0);
-    if (x == 0){ throw err("Int.aluDiv: x==0"); }
+    if (x == 0){ throw err("Int.aluDiv: divByZero"); }
     return instance(val / x);
   }
   @Override public Object imm$aluRem$1(Object p0){
     int x= i(p0);
-    if (x == 0){ throw err("Int.aluRem: x==0"); }
+    if (x == 0){ throw err("Int.aluRem: divByZero"); }
     return instance(val % x);
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){ return instance(val << (natBits(p0))); }

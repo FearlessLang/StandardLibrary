@@ -1,78 +1,117 @@
 package base;
 
 IntArith:F[Tests,Tests]{::
-  .test((+1 + +2) .assertEq +3)
-  .test((+5 - +2) .assertEq +3)
-  .test((+3 * +4) .assertEq +12)
+  .test(+1 + +2 .assertEq +3)
+  .test(+5 - +2 .assertEq +3)
+  .test(+3 * +4 .assertEq +12)
+
   .test((-7).abs .assertEq +7)
-  .test((+9).sqrt .assertEq +3.0)
+  .test(+9.sqrt .assertEq +3.0)
   .test((-1).sqrt.isNaN .assertEq True)
 
-  .test((+1).assertLt(+2))
-  .test((+2).assertLe(+2))
-  .test((+2).assertGe(+2))
-  .test((+3).assertGt(+2))
+  .test(+1.assertLt(+2))
+  .test(+2.assertLe(+2))
+  .test(+2.assertGe(+2))
+  .test(+3.assertGt(+2))
 }
 
 IntDivRem:F[Tests,Tests]{::
-  .test((-7) .div 3 .assertEq -2)
-  .test((-7) .rem 3 .assertEq -1)
-  .test((+7) .div 3 .assertEq +2)
-  .test((+7) .rem 3 .assertEq +1)
-  .test((+6) .divExact 3 .assertEq ({::},Opts#(+2)))
-  .test((+7) .divExact 3 .assertEq ({::},Opt[Int]))
-  .test((+7) .divExact 0 .assertEq ({::},Opt[Int]))
+  .test((-7).div 3 .assertEq -2)
+  .test((-7).rem 3 .assertEq -1)
+
+  .test(+7.div 3 .assertEq +2)
+  .test(+7.rem 3 .assertEq +1)
+
+  .test(+6.divExact 3 .assertEq ({::},Opts#(+2)))
+  .test(+7.divExact 3 .assertEq ({::},Opt[Int]))
+  .test(+7.divExact 0 .assertEq ({::},Opt[Int]))
 }
 
 IntWrapIndex:F[Tests,Tests]{::
-  .test((-1) .wrapIndex 7 .assertEq 6)
-  .test((+0) .wrapIndex 7 .assertEq 0)
-  .test((+7) .wrapIndex 7 .assertEq 0)
-  .test((+8) .wrapIndex 7 .assertEq 1)
+  .test((-1).wrapIndex 7 .assertEq 6)
+  .test(+0.wrapIndex 7 .assertEq 0)
+  .test(+7.wrapIndex 7 .assertEq 0)
+  .test(+8.wrapIndex 7 .assertEq 1)
 }
 
 IntConv:F[Tests,Tests]{::
   .test((-1).nat .assertEq 0)
-  .test((+3).nat .assertEq 3)
-  .test((-1).byte .assertEq (+0.byte))
-  .test((+300).byte .assertEq (+255.byte))
-  .test((+3).float .assertEq +3.0)
-  .test((+3).num .assertEq (+3.num))
+  .test(+3.nat .assertEq 3)
 
-  .test((+3).natExact .assertEq ({::},Opts#3))
+  .test((-1).byte .assertEq (+0.byte))
+  .test(+300.byte .assertEq (+255.byte))
+
+  .test(+3.float .assertEq +3.0)
+  .test(+3.num .assertEq (+3.num))
+
+  .test(+3.natExact .assertEq ({::},Opts#(3)))
   .test((-1).natExact .assertEq ({::},Opt[Nat]))
-  .test((+255).byteExact .assertEq ({::},Opts#(+255.byte)))
-  .test((+256).byteExact .assertEq ({::},Opt[Byte]))
+
+  .test(+255.byteExact .assertEq ({::},Opts#(+255.byte)))
+  .test(+256.byteExact .assertEq ({::},Opt[Byte]))
   .test((-1).byteExact .assertEq ({::},Opt[Byte]))
 }
 
 IntAlu:F[Tests,Tests]{::
-  .test((+2147483647) .aluAddWrap(+1) .assertEq -2147483648)
-  .test((-2147483648) .aluSubWrap(+1) .assertEq +2147483647)
-  .test((+65536) .aluMulWrap(+65536) .assertEq +0)
+  .test(+2147483647.aluAddWrap(+1) .assertEq -2147483648)
+  .test((-2147483648).aluSubWrap(+1) .assertEq +2147483647)
+  .test(+65536.aluMulWrap(+65536) .assertEq +0)
 
-  .test((-7) .aluDiv(+3) .assertEq -2)
-  .test((-7) .aluDiv(-3) .assertEq +2)
-  .test((-7) .aluRem(+3) .assertEq -1)
-  .test((-7) .aluRem(-3) .assertEq -1)
+  .test((-7).aluDiv(+3) .assertEq -2)
+  .test((-7).aluDiv(-3) .assertEq +2)
+  .test((-7).aluRem(+3) .assertEq -1)
+  .test((-7).aluRem(-3) .assertEq -1)
 
-  .test((+1) .aluShiftLeft 32 .assertEq +1)
-  .test((-2) .aluShiftRight 1 .assertEq -1)
+  // effective shift = bits & 31
+  .test(+1.aluShiftLeft 32 .assertEq +1)
+  .test(+1.aluShiftLeft 33 .assertEq +2)
+  .test((-2).aluShiftRight 1 .assertEq -1)
+  .test((-2).aluShiftRight 33 .assertEq -1)
 
-  .test((+1) .aluXor(+3) .assertEq +2)
-  .test((+3) .aluAnd(+6) .assertEq +2)
-  .test((+3) .aluOr(+4) .assertEq +7)
+  .test(+1.aluXor(+3) .assertEq +2)
+  .test(+3.aluAnd(+6) .assertEq +2)
+  .test(+3.aluOr(+4) .assertEq +7)
 
   .test((-1).aluNat.aluInt .assertEq -1)
-  .test((+300).aluByte .assertEq (+44.byte))
+  .test(+300.aluByte .assertEq (+44.byte))
 }
 
 IntRange:F[Tests,Tests]{::
-  .test((+3).assertInRange(+1,+5))
-  .test((+3).assertInRangeOpen(+1,+5))
-  .test((+3).assertInRangeLoOpen(+1,+3))
-  .test((+3).assertInRangeHiOpen(+3,+5))
-  .test((+0).clamp(+1,+5) .assertEq +1)
-  .test((+6).clamp(+1,+5) .assertEq +5)
-  .test((+3).clamp(+1,+5) .assertEq +3)
+  .test(+3.assertInRange(+1,+5))
+  .test(+3.assertInRangeOpen(+1,+5))
+  .test(+3.assertInRangeLoOpen(+1,+3))
+  .test(+3.assertInRangeHiOpen(+3,+5))
+
+  .test(+0.clamp(+1,+5) .assertEq +1)
+  .test(+6.clamp(+1,+5) .assertEq +5)
+  .test(+3.clamp(+1,+5) .assertEq +3)
+  .test(+3.clamp(+3,+3) .assertEq +3)
+}
+
+IntLiteralForms:F[Tests,Tests]{::
+  .test(-0 .assertEq +0)
+  .test(+1_000 .assertEq +1000)
+  .test(-1_000 .assertEq -1000)
+  .test(+2_147_483_647 .assertEq +2147483647)
+
+  // if your literal parser clamps (like byte/nat conversions do), these two should hold:
+  .test(2_147_483_648.int .assertEq +2147483647)
+  //.test(-2_147_483_649 .assertEq -2147483648) //parser error too big
+}
+
+IntBoundaryAndBoundedVsAlu:F[Tests,Tests]{::
+  //.test(+2147483647 + +1 .assertEq +2147483647)// correctly throws instead
+  .test(+2147483647.aluAddWrap +1 .assertEq -2147483648)
+
+  //.test(-2147483648 - +1 .assertEq -2147483648)// correctly throws instead
+  .test(-2147483648.aluSubWrap +1 .assertEq +2147483647)
+
+  // 65536*65536 = 4294967296
+  //.test(+65536 * +65536 .assertEq +2147483647)
+  .test(+65536.aluMulWrap +65536 .assertEq +0)
+
+  // bounded vs aluNat view
+  //.test((-1).nat .assertEq 0)// correctly throws instead
+  .test((-1).aluNat .assertEq 4294967295)
+  .test((-1).aluNat.aluInt .assertEq -1)
 }
