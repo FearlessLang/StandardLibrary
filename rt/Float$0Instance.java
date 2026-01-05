@@ -83,14 +83,18 @@ public record Float$0Instance(double val) implements Float$0{
   @Override public Object imm$$slash$1(Object p0){ return instance(val / f(p0)); }
   @Override public Object imm$abs$0(){ return instance(Math.abs(val)); }
   @Override public Object imm$sqrt$0(){ return instance(Math.sqrt(val)); }
-  @Override public Object read$str$0(){ return Str$0Instance.instance(Double.toString(val)); }
+  @Override public Object read$str$0(){
+    double x= (val == 0.0d) ? 0.0d : val; // merges -0.0 and +0.0
+    return Str$0Instance.instance(Double.toString(x));
+  }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$clamp$2(Object p0, Object p1){
-    double lo= f(p0), hi= f(p1);
-    if (Double.compare(lo,hi) > 0){ throw err("Float.clamp: lo>hi"); }
-    if (val < lo){ return instance(lo); }
-    if (val > hi){ return instance(hi); }
+  @Override public Object imm$clamp$2(Object p0,Object p1){
+    double lo= f(p0);
+    double hi= f(p1);
+    if (cmpFearless(lo,hi) > 0){ throw err("Float.clamp: lo>hi"); }
+    if (cmpFearless(val,lo) < 0){ return instance(lo); }
+    if (cmpFearless(val,hi) > 0){ return instance(hi); }
     return this;
   }
   @Override public Object imm$eqDelta$2(Object p0, Object p1){
