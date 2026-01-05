@@ -1,9 +1,9 @@
 package base;
 
 ByteArith:F[Tests,Tests]{::
-  .test((+1.byte + (+2.byte)) .assertEq (+3.byte))
-  .test((+5.byte - (+2.byte)) .assertEq (+3.byte))
-  .test((+3.byte * (+4.byte)) .assertEq (+12.byte))
+  .test(+1.byte + (+2.byte) .assertEq (+3.byte))
+  .test(+5.byte - (+2.byte) .assertEq (+3.byte))
+  .test(+3.byte * (+4.byte) .assertEq (+12.byte))
   .test(+9.byte.sqrt .assertEq +3.0)
 
   // Unsigned ordering

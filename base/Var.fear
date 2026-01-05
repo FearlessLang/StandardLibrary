@@ -6,7 +6,7 @@ Var[E:imm,mut,read]: {
   mut .swap(v: E): E;
   mut .set(v: E): Void -> Block#(this.swap(v), Void);
   }
-Vars: Sealed{#[E:*](var: E): mut Var[E] -> mut MagicVar[E:*]: Var[E]{
+Vars: Sealed{#[E:*](var: E): mut Var[E] -> {
   read .get  -> Magic![read/imm E];
   mut .get   -> Magic![E];
   .swap(v)   -> Magic![E];

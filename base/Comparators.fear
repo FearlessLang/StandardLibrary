@@ -77,27 +77,6 @@ Order[T,E:*]:{                      /// environment-dependent ordering of T (E s
     .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
   };
 }
-
-Hasher:{                            /// stateful hasher for composite structures
-  mut #[A,B](a: read OrderHash[A], b: read OrderHash[B]): Nat ->  /// mix two already-hashable values
-    a.hash(this) * 31 + (b.hash(this));
-  //Note that his can be overridden in other hashes, so that #(a,b) just calls Block#(a.hash(this),b.hash(this)) while this accumulates on mut state
-  
-  //#[A,A0,B,B0,C,C0](a: read OrderHash[A,A0], b: read OrderHash[B,B0], c: read OrderHash[C,C0]): Nat -> ...;
-  //...//more overloads to compose more values
-  mut .nat(v: Nat): Nat->v;
-  mut .int(v: Int): Nat->Todo!;
-  mut .num(v: Num): Nat->Todo!;
-  mut .float(v: Float): Nat->Todo!;
-  mut .byte(v: Byte): Nat->Todo!;
-  mut .bool(v: Bool): Nat->v?{.then->0; .else->1};
-  mut .info(i: Info): Nat->this.str(i.str); 
-  mut .str(v: Str): Nat->Todo!;  
-  mut .list[E:*,E0](f: OrderHashBy[imm E,E0],l: read List[E]):Nat->Todo!;
-  mut .opt[E:*,E0](f: OrderHashBy[imm E,E0], o: read Opt[E]):Nat->Todo!;
-  mut .map[K,E:*,E0](f: OrderHashBy[imm E,E0], m: read Map[K,E]):Nat->Todo!;
-  }
-
 OrderHash[T]:Order[T],ToStr{            /// OrderHash adds hashing and ToStr. This is all the Maps/Set may need.
   read .hash(h: mut Hasher): Nat;
   read .close(t: read T): read OrderHash[T];

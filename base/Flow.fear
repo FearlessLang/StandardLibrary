@@ -14,5 +14,5 @@ Flow[E:*]:{
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
   mut .list:mut List[E];
   mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
-  mut .mapping[K,E0:*](OrderBy[K,K],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
+  mut .mapping[K,E0:*](OrderHashBy[K,K],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
   }
