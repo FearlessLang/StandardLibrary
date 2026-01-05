@@ -1,19 +1,9 @@
 package base;
 
-/*Block: Sealed{
-  #[X:**, R:**](X, res: R): R -> res;
-  #[X1:**, X2:**, R:**](X1, X2, res: R): R -> res;
-  #[X1:**, X2:**, X3:**, R:**](X1, X2, X3, res: R): R -> res;
-  #[X1:**, X2:**, X3:**, X4:**, R:**](X1, X2, X3, X4, res: R): R -> res;
-  #[X1:**, X2:**, X3:**, X4:**, X5:**, R:**](X1, X2, X3, X4, X5, res: R): R -> res;
-
-  //#[R:*]: mut Block[R] -> {};
-  }*/
 Continuation[T:*,R:*]: {mut #(x: T, self: mut Block[R]): R}
 
 Block: Sealed{
   #[R:*]: mut Block[R] -> {};
-  #[A:**](A): Void -> {};
   #[A:**, R:**](A, res: R): R -> res;
   #[A:**, B:**, R:**](A, B, res: R): R -> res;
   #[A:**, B:**, C:**, R:**](A, B, C, res: R): R -> res;
@@ -32,8 +22,8 @@ Block[R:*]: Sealed{
     cont#(x#, this);
   mut .openIso[X](x: iso X, cont: mut Continuation[mut X,R]): R ->
     cont#(x, this);
-//  mut .var[X:*]( x: mut MF[X], cont: mut Continuation[mut Var[X], R] ): R ->
-//    cont#(Vars#(x#), this);
+  mut .var[X:*]( x: mut MF[X], cont: mut Continuation[mut Var[X], R] ): R ->
+    cont#(Vars#(x#), this);
 //  mut .isoPod[X]( x: iso X, cont: mut Continuation[mut IsoPod[X], R]): R ->
 //    cont#(IsoPod#(x), this);
   mut .if(p: mut F[Bool]): mut BlockIf[R] -> p# ? {

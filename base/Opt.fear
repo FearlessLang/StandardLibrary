@@ -25,7 +25,7 @@ Opt[E:*]: _Opt[E]{
   
   .cmp by, a, b, m -> a.match{
     .empty -> b.match{ .empty -> m.eq; .some _ -> m.lt; };
-    .some ea -> b.match{
+    .some ea -> b.match[read]{
       .empty   -> m.gt;
       .some eb -> by#ea<=>(by#eb, m);
       }

@@ -60,12 +60,12 @@ List[E:*]:_List[E]{
 
   .cmp(by, a, b, m)->a.opt(0).match{
     .empty->b.opt(0).match{ .empty->m.eq; .some _->m.lt; };
-    .some ea->b.opt(0).match{
+    .some ea->b.opt[read](0).match{
       .empty->m.gt;
       .some eb->by#ea<=>(by#eb,{
         .lt->m.lt;
         .gt->m.gt;
-        .eq->this.cmp(by, a.subList(1), b.subList(1), m);
+        .eq->this.cmp(by, a.subList[read](1), b.subList[read](1), m);
         });
       };
     };

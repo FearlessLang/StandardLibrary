@@ -1,0 +1,46 @@
+package base;
+
+Var[E:imm,mut,read]: {
+  read .get: read/imm E;
+  mut  .get: E;
+  mut .swap(v: E): E;
+  mut .set(v: E): Void -> Block#(this.swap(v), Void);
+  }
+Vars: Sealed{#[E:*](var: E): mut Var[E] -> mut MagicVar[E:*]: Var[E]{
+  read .get  -> Magic![read/imm E];
+  mut .get   -> Magic![E];
+  .swap(v)   -> Magic![E];
+  }}
+Count[N]: Var[N]{
+  mut ++: Void;
+  mut --: Void;
+  mut +=(n: N): Void;
+  mut -=(n: N): Void;
+  mut *=(n: N): Void;
+  }
+Count:{
+  .int(n: Int): mut Count[Int] -> Block#
+    .var[Int] c = {n}
+    .return {{
+      mut .get    -> c.get[mut];
+      read .get   -> c.get[read];
+      .swap x -> c.swap(x);
+      ++      -> c .set (c.get + +1);
+      --      -> c .set (c.get - +1);
+      +=   n2 -> c .set (c.get + n2);
+      -=   n2 -> c .set (c.get - n2);
+      *=   n2 -> c .set (c.get * n2);
+      }};
+  .nat(n: Nat): mut Count[Nat] -> Block#
+    .var[Nat] c = {n}
+    .return {{
+      mut .get    -> c.get[mut];
+      read .get   -> c.get[read];
+      .swap x -> c.swap(x);
+      ++      -> c .set (c.get + 1);
+      --      -> c .set (c.get - 1);
+      +=   n2 -> c .set (c.get + n2);
+      -=   n2 -> c .set (c.get - n2);
+      *=   n2 -> c .set (c.get * n2);
+      }};
+  }
