@@ -1,21 +1,33 @@
 package base;
 
+///Simple string type
+///This string type is designed for robustness and ease of reasoning.
+///It can only even contain the following whitelisted characters:
+///0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\
+///Plus space ` ` and new line.
+///There is no concept of escape as in some other languages, so `\n` is two characters.
+///The methods ^ and | can be used to obtain a string including new lines or backticks (`).
 Str:Sealed,DataType[Str,Str]{
   .close->::; .close->this;         /// fixpoint type closed
-  +(x: read ToStr): Str;          ///string concatenation; throws on result size > maxInt
-  |(x: read ToStr): Str;          /// like + but inserts newline between
-  ^(x: read ToStr): Str;          /// concat with backticks around x.str
-  ^^(x: read ToStr): Str;         /// concat with double quotes around x.str
-  |:Str;//adds \n
-  ^:Str;//adds `
-  ^^:Str;//adds "
-  .hash(h) -> h.str(this.imm);
-  .isEmpty:Bool;
-  .escape:Str;
-  //.ieeeFloat:Opt[Float];
-  //.float:Opt[Float];
-  //.int:Opt[Int];
-  //.num:Opt[Num];
-  //.nat:Opt[Nat];
-  //.byte:Opt[Byte];  
+  +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
+  |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings
+  ^(x: read ToStr): Str;            /// like + but inserts a backtick between the two strings
+  ^^(x: read ToStr): Str;           /// like + but inserts a double quote between the two strings
+
+  | : Str;                          /// appends a newline
+  ^ : Str;                          /// appends a backtick
+  ^^ : Str;                         /// appends a double quote
+
+  .hash(h) -> h.str(this.imm);      /// hash via hasher
+  .isEmpty: Bool;                   /// true iff size == 0
+  .size: Nat;                       /// the amount of characters in this string
+  .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use ^ and |, not necessarily a single literal)
+
+  .ieeeFloat: Opt[Float];           /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .float: Opt[Float];               /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+
+  .int: Opt[Int];                   /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
+  .num: Opt[Num];                   /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
+  .nat: Opt[Nat];                   /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
+  .byte: Opt[Byte];                 /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
 }
