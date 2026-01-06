@@ -100,5 +100,5 @@ MapBasics:F[Tests,Tests]{::
   .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `a` .assertEq False)
   .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `b` .assertEq True)
   .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .size .assertEq 1)
-  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .get `b` .assertEq `yk`)
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .get `b` .assertEq `y`)
 }

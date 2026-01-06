@@ -60,7 +60,6 @@ List[E:*]:_List[E]{
     .match->::.list list;
     .list -> list;
     .imm->i;
-    .info->i;
     }};
 
   .hash(by, h)->h.list(by,this);

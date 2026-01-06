@@ -9,7 +9,9 @@ public class Util{
   }
   public static Opt$1 optEmpty(){ return Opt$1.instance; }
   public static Object optSome(Object x){ return Opts$0.instance.imm$$hash$1(x); }
-  public static Error err(String msg){ return new Error(msg); }
+  public static Error err(String msg){
+    return Error$0.instance.imm$nonDeterministic$1(msg);
+    }
 
   public static int natToInt(Object n){
     int res= ((Nat$0Instance)n).val();
@@ -49,4 +51,47 @@ public class Util{
   }
   }
   public static MapKey mapKey(OrderHashBy$1 oh,Object k){ return new MapKey(oh,k); }
+  
+  public static RuntimeException deterministic(Info$0 i){ return new Deterministic(i); }
+  public static Error nonDeterministic(Info$0 i){ return new NonDeterministic(i); }
+  public static void topLevel(Runnable r){
+    try{r.run();}
+    catch(Deterministic d){ printInfo(d.i); }
+    catch(NonDeterministic d){ printInfo(d.i); }
+    catch(Throwable t){ t.printStackTrace();}
+  }
+  public static void printInfo(Info$0 i){
+    var map= ((Map$2Instance)i.imm$map$0()).elems();
+    map.entrySet().stream()
+      .filter(e->is(e.getKey(),"msg")).forEach(e->printInfoMsg("","",(Info$0)e.getValue()));
+    map.entrySet().stream()
+      .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$0)e.getValue()));
+
+  }
+  public static boolean is(MapKey k,String label){
+    return k.key instanceof Str$0Instance s && s.val().equals(label);
+    }
+  public static void printInfoMsg(String prefix, String indent, Info$0 i){
+    var msg= ((Str$0Instance)i.imm$msg$0()).val();
+    msg = msg.replace("\n","\n"+indent);
+    System.err.println(prefix+msg);
+  }
+  public static void printInfoList(Info$0 i){ 
+    var fList= (List$1)i.imm$list$0();
+    if (isTrue(fList.read$isEmpty$0())){
+      System.err.println("\nEmpty stack trace");  
+      return;
+    }
+    System.err.println("\nStack trace:");
+    var jList= ((List$1Instance)fList).val();
+    for(var e : jList){ printInfoMsg("- ","  ",(Info$0)e); }
+  }
+}
+@SuppressWarnings("serial")
+class Deterministic extends RuntimeException{
+  Info$0 i;Deterministic(Info$0 i){this.i= i;}
+}
+@SuppressWarnings("serial")
+class NonDeterministic extends Error{
+  Info$0 i;NonDeterministic(Info$0 i){this.i= i;}
 }
