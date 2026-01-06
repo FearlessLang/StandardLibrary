@@ -32,7 +32,7 @@ public record Str$0Instance(String val) implements Str$0{
   }
 
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(s(p0).compareTo(s(p1)),p2); }
-  //--- Below here is GPT code mostly unreviewd
+  
   static final Pattern signedInt= Pattern.compile("[+-][0-9](?:[0-9_]*[0-9])?");
   static final Pattern unsignedInt= Pattern.compile("[0-9](?:[0-9_]*[0-9])?");
   static final Pattern signedFloat= Pattern.compile(
@@ -42,7 +42,7 @@ public record Str$0Instance(String val) implements Str$0{
     "[+-](?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)/(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)");
   static final long maxNatU= 0xFFFF_FFFFL;
   static final long maxByteU= 255L;
-  @Override public Object imm$int$0(){
+  @Override public Object imm$intExact$0(){
     if (!signedInt.matcher(val).matches()){ return optEmpty(); }
     try{ return optSome(Int$0Instance.instance(Integer.parseInt(no_(val)))); }
     catch(NumberFormatException e){ return optEmpty(); }
@@ -54,7 +54,7 @@ public record Str$0Instance(String val) implements Str$0{
     try{ return optSome(Float$0Instance.instance(Double.parseDouble(val))); }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$nat$0(){
+  @Override public Object imm$natExact$0(){
     if (!unsignedInt.matcher(val).matches()){ return optEmpty(); }
     try{
       long x= Long.parseLong(no_(val));
@@ -63,7 +63,7 @@ public record Str$0Instance(String val) implements Str$0{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$byte$0(){
+  @Override public Object imm$byteExact$0(){
     if (!unsignedInt.matcher(val).matches()){ return optEmpty(); }
     try{
       int x= Integer.parseInt(no_(val));
@@ -72,7 +72,7 @@ public record Str$0Instance(String val) implements Str$0{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$num$0(){
+  @Override public Object imm$numExact$0(){
     if (!signedRational.matcher(val).matches()){ return optEmpty(); }
     try{
       String t= no_(val);
@@ -96,7 +96,7 @@ public record Str$0Instance(String val) implements Str$0{
       return new Dec(new BigInteger(s.substring(0,dot)+s.substring(dot+1)), s.length()-dot-1);
     }
   }
-  @Override public Object imm$float$0(){
+  @Override public Object imm$floatExact$0(){
     if (!signedFloat.matcher(val).matches()){ return optEmpty(); }
     try{
       String x= no_(val);

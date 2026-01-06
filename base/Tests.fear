@@ -52,6 +52,7 @@ AllTest:Main{s->
     .testSuite StrBasics
     .testSuite StrConcat
     .testSuite StrSepOps
+    .testSuite StrTokenSeparation
     .testSuite StrOrder
     .testSuite StrEscape
     .testSuite StrParseInt

@@ -132,151 +132,151 @@ StrEscape:F[Tests,Tests]{::
 }
 
 StrParseInt:F[Tests,Tests]{::
-  .test(`` .int .assertEq({::}, Opt[Int]))
+  .test(`` .intExact .assertEq({::}, Opt[Int]))
 
-  .test(`+0` .int .assertEq({::}, Opts#(+0)))
-  .test(`-0` .int .assertEq({::}, Opts#(+0)))
+  .test(`+0` .intExact .assertEq({::}, Opts#(+0)))
+  .test(`-0` .intExact .assertEq({::}, Opts#(+0)))
 
-  .test(`+1` .int .assertEq({::}, Opts#(+1)))
-  .test(`-1` .int .assertEq({::}, Opts#(-1)))
+  .test(`+1` .intExact .assertEq({::}, Opts#(+1)))
+  .test(`-1` .intExact .assertEq({::}, Opts#(-1)))
 
-  .test(`+2_147_483_647` .int .assertEq({::}, Opts#(+2147483647)))
-  .test(`-2_147_483_648` .int .assertEq({::}, Opts#(-2147483648)))
+  .test(`+2_147_483_647` .intExact .assertEq({::}, Opts#(+2147483647)))
+  .test(`-2_147_483_648` .intExact .assertEq({::}, Opts#(-2147483648)))
 
-  .test(`+2_147_483_648` .int .assertEq({::}, Opt[Int]))
-  .test(`-2_147_483_649` .int .assertEq({::}, Opt[Int]))
+  .test(`+2_147_483_648` .intExact .assertEq({::}, Opt[Int]))
+  .test(`-2_147_483_649` .intExact .assertEq({::}, Opt[Int]))
 
   // Int requires an explicit sign (otherwise it's a Nat literal)
-  .test(`2147483647` .int .assertEq({::}, Opt[Int]))
+  .test(`2147483647` .intExact .assertEq({::}, Opt[Int]))
 
   // leading zeros (still an Int because sign is present)
-  .test(`+000` .int .assertEq({::}, Opts#(+0)))
-  .test(`-000` .int .assertEq({::}, Opts#(+0)))
-  .test(`+0001` .int .assertEq({::}, Opts#(+1)))
-  .test(`-0001` .int .assertEq({::}, Opts#(-1)))
+  .test(`+000` .intExact .assertEq({::}, Opts#(+0)))
+  .test(`-000` .intExact .assertEq({::}, Opts#(+0)))
+  .test(`+0001` .intExact .assertEq({::}, Opts#(+1)))
+  .test(`-0001` .intExact .assertEq({::}, Opts#(-1)))
 
   // underscore placement
-  .test(`+1_000` .int .assertEq({::}, Opts#(+1000)))
-  .test(`+_1` .int .assertEq({::}, Opt[Int]))
-  .test(`+1_` .int .assertEq({::}, Opt[Int]))
-  .test(`+1__0` .int .assertEq({::},  Opts# +1__0))
-  .test(`+01__0` .int .assertEq({::}, Opts# +01__0))
-  .test(`+0__10` .int .assertEq({::}, Opts# +0__10))
+  .test(`+1_000` .intExact .assertEq({::}, Opts#(+1000)))
+  .test(`+_1` .intExact .assertEq({::}, Opt[Int]))
+  .test(`+1_` .intExact .assertEq({::}, Opt[Int]))
+  .test(`+1__0` .intExact .assertEq({::},  Opts# +1__0))
+  .test(`+01__0` .intExact .assertEq({::}, Opts# +01__0))
+  .test(`+0__10` .intExact .assertEq({::}, Opts# +0__10))
 
   // whitespace is invalid
-  .test(` +1` .int .assertEq({::}, Opt[Int]))
-  .test(`+1 ` .int .assertEq({::}, Opt[Int]))
+  .test(` +1` .intExact .assertEq({::}, Opt[Int]))
+  .test(`+1 ` .intExact .assertEq({::}, Opt[Int]))
 }
 
 StrParseNat:F[Tests,Tests]{::
-  .test(`` .nat .assertEq({::}, Opt[Nat]))
+  .test(`` .natExact .assertEq({::}, Opt[Nat]))
 
-  .test(`0` .nat .assertEq({::}, Opts#(0)))
-  .test(`1` .nat .assertEq({::}, Opts#(1)))
-  .test(`1_000_000` .nat .assertEq({::}, Opts#(1000000)))
+  .test(`0` .natExact .assertEq({::}, Opts#(0)))
+  .test(`1` .natExact .assertEq({::}, Opts#(1)))
+  .test(`1_000_000` .natExact .assertEq({::}, Opts#(1000000)))
 
-  .test(`4_294_967_295` .nat .assertEq({::}, Opts#(4294967295)))
-  .test(`4_294_967_296` .nat .assertEq({::}, Opt[Nat]))
+  .test(`4_294_967_295` .natExact .assertEq({::}, Opts#(4294967295)))
+  .test(`4_294_967_296` .natExact .assertEq({::}, Opt[Nat]))
 
   // leading zeros
-  .test(`000` .nat .assertEq({::}, Opts#(0)))
-  .test(`0001` .nat .assertEq({::}, Opts#(1)))
+  .test(`000` .natExact .assertEq({::}, Opts#(0)))
+  .test(`0001` .natExact .assertEq({::}, Opts#(1)))
 
   // signs are invalid for Nat
-  .test(`+1` .nat .assertEq({::}, Opt[Nat]))
-  .test(`-1` .nat .assertEq({::}, Opt[Nat]))
+  .test(`+1` .natExact .assertEq({::}, Opt[Nat]))
+  .test(`-1` .natExact .assertEq({::}, Opt[Nat]))
 
   // underscore placement
-  .test(`_1` .nat .assertEq({::}, Opt[Nat]))
-  .test(`1_` .nat .assertEq({::}, Opt[Nat]))
-  .test(`1__0` .nat .assertEq({::}, Opts# 1__0))
-  .test(`00_1` .nat .assertEq({::}, Opts# 00_1))
+  .test(`_1` .natExact .assertEq({::}, Opt[Nat]))
+  .test(`1_` .natExact .assertEq({::}, Opt[Nat]))
+  .test(`1__0` .natExact .assertEq({::}, Opts# 1__0))
+  .test(`00_1` .natExact .assertEq({::}, Opts# 00_1))
 
   // whitespace is invalid
-  .test(` 1` .nat .assertEq({::}, Opt[Nat]))
-  .test(`1 ` .nat .assertEq({::}, Opt[Nat]))
+  .test(` 1` .natExact .assertEq({::}, Opt[Nat]))
+  .test(`1 ` .natExact .assertEq({::}, Opt[Nat]))
 }
 
 StrParseByte:F[Tests,Tests]{::
-  .test(`` .byte .assertEq({::}, Opt[Byte]))
+  .test(`` .byteExact .assertEq({::}, Opt[Byte]))
 
-  .test(`0` .byte .assertEq({::}, Opts#(+0 .byte)))
-  .test(`1` .byte .assertEq({::}, Opts#(+1 .byte)))
-  .test(`10` .byte .assertEq({::}, Opts#(+10 .byte)))
-  .test(`255` .byte .assertEq({::}, Opts#(+255 .byte)))
+  .test(`0` .byteExact .assertEq({::}, Opts#(+0 .byte)))
+  .test(`1` .byteExact .assertEq({::}, Opts#(+1 .byte)))
+  .test(`10` .byteExact .assertEq({::}, Opts#(+10 .byte)))
+  .test(`255` .byteExact .assertEq({::}, Opts#(+255 .byte)))
 
-  .test(`000` .byte .assertEq({::}, Opts#(+0 .byte)))
-  .test(`001` .byte .assertEq({::}, Opts#(+1 .byte)))
+  .test(`000` .byteExact .assertEq({::}, Opts#(+0 .byte)))
+  .test(`001` .byteExact .assertEq({::}, Opts#(+1 .byte)))
 
-  .test(`256` .byte .assertEq({::}, Opt[Byte]))
-  .test(`4_294_967_295` .byte .assertEq({::}, Opt[Byte]))
+  .test(`256` .byteExact .assertEq({::}, Opt[Byte]))
+  .test(`4_294_967_295` .byteExact .assertEq({::}, Opt[Byte]))
 
   // signs are invalid for byte parser
-  .test(`+1` .byte .assertEq({::}, Opt[Byte]))
-  .test(`-1` .byte .assertEq({::}, Opt[Byte]))
+  .test(`+1` .byteExact .assertEq({::}, Opt[Byte]))
+  .test(`-1` .byteExact .assertEq({::}, Opt[Byte]))
 
   // underscores inside digits are allowed (range still enforced)
-  .test(`1_0` .byte .assertEq({::}, Opts#(+10 .byte)))
-  .test(`2_5_5` .byte .assertEq({::}, Opts#(+255 .byte)))
-  .test(`25_5` .byte .assertEq({::}, Opts#(+255 .byte)))
-  .test(`25_6` .byte .assertEq({::}, Opt[Byte]))
+  .test(`1_0` .byteExact .assertEq({::}, Opts#(+10 .byte)))
+  .test(`2_5_5` .byteExact .assertEq({::}, Opts#(+255 .byte)))
+  .test(`25_5` .byteExact .assertEq({::}, Opts#(+255 .byte)))
+  .test(`25_6` .byteExact .assertEq({::}, Opt[Byte]))
 
   // underscore placement + whitespace
-  .test(`_1` .byte .assertEq({::}, Opt[Byte]))
-  .test(`1_` .byte .assertEq({::}, Opt[Byte]))
-  .test(` 1` .byte .assertEq({::}, Opt[Byte]))
-  .test(`1 ` .byte .assertEq({::}, Opt[Byte]))
+  .test(`_1` .byteExact .assertEq({::}, Opt[Byte]))
+  .test(`1_` .byteExact .assertEq({::}, Opt[Byte]))
+  .test(` 1` .byteExact .assertEq({::}, Opt[Byte]))
+  .test(`1 ` .byteExact .assertEq({::}, Opt[Byte]))
 }
 
 StrParseNum:F[Tests,Tests]{::
-  .test(`` .num .assertEq({::}, Opt[Num]))
+  .test(`` .numExact .assertEq({::}, Opt[Num]))
 
-  .test(`+0` .num .assertEq({::}, {}))
-  .test(`-0` .num .assertEq({::}, {}))
+  .test(`+0` .numExact .assertEq({::}, {}))
+  .test(`-0` .numExact .assertEq({::}, {}))
 
-  .test(`+1` .num .assertEq({::}, {}))
-  .test(`-1` .num .assertEq({::}, {}))
+  .test(`+1` .numExact .assertEq({::}, {}))
+  .test(`-1` .numExact .assertEq({::}, {}))
 
   // signed rational token forms
-  .test(`+1/2` .num .assertEq({::}, Opts#(+1/2)))
-  .test(`-1/2` .num .assertEq({::}, Opts#(-1/2)))
-  .test(`+10/20` .num .assertEq({::}, Opts#(+1/2)))
-  .test(`-10/20` .num .assertEq({::}, Opts#(-1/2)))
+  .test(`+1/2` .numExact .assertEq({::}, Opts#(+1/2)))
+  .test(`-1/2` .numExact .assertEq({::}, Opts#(-1/2)))
+  .test(`+10/20` .numExact .assertEq({::}, Opts#(+1/2)))
+  .test(`-10/20` .numExact .assertEq({::}, Opts#(-1/2)))
   
-  .test(`+12/2` .num!.str .assertEq(`+6/1`))
+  .test(`+12/2` .numExact!.str .assertEq(`+6/1`))
 
   // denominator == 0 is invalid
-  .test(`+1/0` .num .assertEq({::}, Opt[Num]))
-  .test(`-1/0` .num .assertEq({::}, Opt[Num]))
+  .test(`+1/0` .numExact .assertEq({::}, Opt[Num]))
+  .test(`-1/0` .numExact .assertEq({::}, Opt[Num]))
 
   // sign required (otherwise "1/2" is not a SignedRational token)
-  .test(`1/2` .num .assertEq({::}, Opt[Num]))
+  .test(`1/2` .numExact .assertEq({::}, Opt[Num]))
 
   // underscores inside rationals
-  .test(`+1_0/2_0` .num .assertEq({::}, Opts#(+1/2)))
-  .test(`-1_0/2_0` .num .assertEq({::}, Opts#(-1/2)))
+  .test(`+1_0/2_0` .numExact .assertEq({::}, Opts#(+1/2)))
+  .test(`-1_0/2_0` .numExact .assertEq({::}, Opts#(-1/2)))
 
   // whitespace invalid
-  .test(` +1/2` .num .assertEq({::}, Opt[Num]))
-  .test(`+1/2 ` .num .assertEq({::}, Opt[Num]))
+  .test(` +1/2` .numExact .assertEq({::}, Opt[Num]))
+  .test(`+1/2 ` .numExact .assertEq({::}, Opt[Num]))
 }
 
 StrParseFloat:F[Tests,Tests]{::
-  .test(`` .float .assertEq({::}, Opt[Float]))
+  .test(`` .floatExact .assertEq({::}, Opt[Float]))
 
   // decimal forms
-  .test(`+0.0` .float .assertEq({::}, Opts#(+0.0)))
-  .test(`-0.0` .float .assertEq({::}, Opts#(+0.0)))
-  .test(`+0.5` .float .assertEq({::}, Opts#(+0.5)))
-  .test(`+1.5` .float .assertEq({::}, Opts#(+1.5)))
-  .test(`+2.5` .float .assertEq({::}, Opts#(+2.5)))
-  .test(`+1_000.0` .float .assertEq({::}, Opts#(+1000.0)))
+  .test(`+0.0` .floatExact .assertEq({::}, Opts#(+0.0)))
+  .test(`-0.0` .floatExact .assertEq({::}, Opts#(+0.0)))
+  .test(`+0.5` .floatExact .assertEq({::}, Opts#(+0.5)))
+  .test(`+1.5` .floatExact .assertEq({::}, Opts#(+1.5)))
+  .test(`+2.5` .floatExact .assertEq({::}, Opts#(+2.5)))
+  .test(`+1_000.0` .floatExact .assertEq({::}, Opts#(+1000.0)))
 
   // rounding is prevented
-  .test(`+0.1` .float .assertEq({::}, Opt[Float]))
-  .test(`+0.2` .float .assertEq({::}, {}))
-  .test(`-0.1` .float .assertEq({::}, {}))
-  .test(`+000.100` .float .assertEq({::}, {}))
+  .test(`+0.1` .floatExact .assertEq({::}, Opt[Float]))
+  .test(`+0.2` .floatExact .assertEq({::}, {}))
+  .test(`-0.1` .floatExact .assertEq({::}, {}))
+  .test(`+000.100` .floatExact .assertEq({::}, {}))
   
   .test(+0012.str.assertEq `+12`)
   //.test(+_0012.str.assertEq `+12`) invalid synax: fragement can not start with _
@@ -284,28 +284,28 @@ StrParseFloat:F[Tests,Tests]{::
   //.test(_0012.str.assertEq `12`) invalid synax: fragement can not start with _
   
   // exponent variants
-  .test(`+1.0e3` .float .assertEq({::}, Opts#(+1000.0)))
-  .test(`+1.0e+3` .float .assertEq({::}, Opts#(+1000.0)))
-  .test(`-1.0e3` .float .assertEq({::}, Opts#(-1000.0)))
-  .test(`+1.0E3` .float .assertEq({::}, Opts#(+1000.0)))
-  //.test(`+1.0e-3` .float .assertEq({::}, Opts#(+0.001))) not an exactly representable float
+  .test(`+1.0e3` .floatExact .assertEq({::}, Opts#(+1000.0)))
+  .test(`+1.0e+3` .floatExact .assertEq({::}, Opts#(+1000.0)))
+  .test(`-1.0e3` .floatExact .assertEq({::}, Opts#(-1000.0)))
+  .test(`+1.0E3` .floatExact .assertEq({::}, Opts#(+1000.0)))
+  //.test(`+1.0e-3` .floatExact .assertEq({::}, Opts#(+0.001))) not an exactly representable float
 
   // syntactically invalid for Fearless Float
-  .test(`NaN` .float .assertEq({::}, Opt[Float]))
-  .test(`Infinity` .float .assertEq({::}, Opt[Float]))
-  .test(`-Infinity` .float .assertEq({::}, Opt[Float]))
+  .test(`NaN` .floatExact .assertEq({::}, Opt[Float]))
+  .test(`Infinity` .floatExact .assertEq({::}, Opt[Float]))
+  .test(`-Infinity` .floatExact .assertEq({::}, Opt[Float]))
 
   // too big -> would become Inf under IEEE; must be rejected here
-  .test(`+1.0e309` .float .assertEq({::}, Opt[Float]))
-  .test(`-1.0e309` .float .assertEq({::}, Opt[Float]))
+  .test(`+1.0e309` .floatExact .assertEq({::}, Opt[Float]))
+  .test(`-1.0e309` .floatExact .assertEq({::}, Opt[Float]))
 
   // underscore placement + whitespace
-  .test(`+_1.0` .float .assertEq({::}, Opt[Float]))
-  .test(`+1_.0` .float .assertEq({::}, Opt[Float]))
-  .test(` +1.0` .float .assertEq({::}, Opt[Float]))
-  .test(`+1.0 ` .float .assertEq({::}, Opt[Float]))
-  //.test(`+1._0` .float .assertEq({::}, Opt[Float])) invalid synax: fragement can not start with _
-  .test(`+1.0_e3` .float .assertEq({::}, Opt[Float]))
+  .test(`+_1.0` .floatExact .assertEq({::}, Opt[Float]))
+  .test(`+1_.0` .floatExact .assertEq({::}, Opt[Float]))
+  .test(` +1.0` .floatExact .assertEq({::}, Opt[Float]))
+  .test(`+1.0 ` .floatExact .assertEq({::}, Opt[Float]))
+  //.test(`+1._0` .floatExact .assertEq({::}, Opt[Float])) invalid synax: fragement can not start with _
+  .test(`+1.0_e3` .floatExact .assertEq({::}, Opt[Float]))
 }
 
 StrParseIeeeFloat:F[Tests,Tests]{::
@@ -324,13 +324,18 @@ StrParseIeeeFloat:F[Tests,Tests]{::
   .test(`1000.0` .ieeeFloat .assertEq({::}, Opts#(+1000.0)))
   .test(`0.1` .ieeeFloat .isSome .assertEq True)
   .test(`-0.1` .ieeeFloat .isSome .assertEq True)
-
+  
+  .test(`0.1`.ieeeFloat!.ieeeStr .assertEq `0.1`) //this lies to us twice
+  .test(`0.100000000000000005`.ieeeFloat!.ieeeStr .assertEq `0.1`)
   // round-trip sanity on real values (avoids relying on literal syntax)
   .test(+0.0 .ieeeStr .ieeeFloat .isSome .assertEq True)
   .test(+0.0 / +0.0 .ieeeStr .ieeeFloat .match{ .some f->f .isNaN; .empty->False } .assertEq True)
 
   // ieeeFloat accepts NaN/Inf, but float must reject them
-  .test(`NaN` .float .isEmpty .assertEq True)
-  .test(`Infinity` .float .isEmpty .assertEq True)
-  .test(`-Infinity` .float .isEmpty .assertEq True)
+  .test(`NaN` .floatExact .isEmpty .assertEq True)
+  .test(`Infinity` .floatExact .isEmpty .assertEq True)
+  .test(`-Infinity` .floatExact .isEmpty .assertEq True)
+  
+  .test(`+0.1`.ieeeFloat!.numExact!.inRange(+0.100000000000000005/1, +2/1).assertEq True)
+  .test(`+0.1`.ieeeFloat!.numExact!.inRange(+0.1/1 , +0.100000000000000005/1).assertEq False)
 }
