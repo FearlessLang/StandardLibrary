@@ -43,8 +43,9 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     try{
       var kem= (KeyElemMapper$3)p1;
       var m= new LinkedHashMap<Util.MapKey,Object>();
-      s.forEach(e->m.put(mapKey(p0,kem.imm$key$1(e)), kem.imm$elem$1(e)));
-      return new Map$2Instance(p0,m);
+      var k= Maps$0.toKey(p0);
+      s.forEach(e->m.put(mapKey(k,kem.imm$key$1(e)), kem.imm$elem$1(e)));
+      return new Map$2Instance(k,m);
     }
     catch(IllegalStateException e){ throw consumed(); }
   }

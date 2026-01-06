@@ -1,51 +1,67 @@
 package base;
 
 import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
+
 import static base.Util.*;
 
 public interface Maps$0 extends Sealed$0{
   default Object imm$$hash$1(Object p0){ // (oh)
-    return new Map$2Instance(p0,new LinkedHashMap<>());
+    var k= toKey(p0);
+    return new Map$2Instance(k,new LinkedHashMap<>());
   }
   default Object imm$$hash$3(Object p0,Object p1,Object p2){ // (oh,k,e)
     var m= new LinkedHashMap<MapKey,Object>(2);
-    m.put(mapKey(p0,p1),p2);
-    return new Map$2Instance(p0,m);
+    var k= toKey(p0);
+    m.put(mapKey(k,p1),p2);
+    return new Map$2Instance(k,m);
   }
   default Object imm$$hash$5(Object p0,Object p1,Object p2,Object p3,Object p4){ // (oh,k,e,k,e)
     var m= new LinkedHashMap<MapKey,Object>(4);
-    m.put(mapKey(p0,p1),p2);
-    m.put(mapKey(p0,p3),p4);
-    return new Map$2Instance(p0,m);
+    var k= toKey(p0);
+    m.put(mapKey(k,p1),p2);
+    m.put(mapKey(k,p3),p4);
+    return new Map$2Instance(k,m);
   }
   default Object imm$$hash$7(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6){ // 3 pairs
     var m= new LinkedHashMap<MapKey,Object>(6);
-    m.put(mapKey(p0,p1),p2);
-    m.put(mapKey(p0,p3),p4);
-    m.put(mapKey(p0,p5),p6);
-    return new Map$2Instance(p0,m);
+    var k= toKey(p0);
+    m.put(mapKey(k,p1),p2);
+    m.put(mapKey(k,p3),p4);
+    m.put(mapKey(k,p5),p6);
+    return new Map$2Instance(k,m);
   }
   default Object imm$$hash$9(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8){ // 4 pairs
     var m= new LinkedHashMap<MapKey,Object>(8);
-    m.put(mapKey(p0,p1),p2);
-    m.put(mapKey(p0,p3),p4);
-    m.put(mapKey(p0,p5),p6);
-    m.put(mapKey(p0,p7),p8);
-    return new Map$2Instance(p0,m);
+    var k= toKey(p0);
+    m.put(mapKey(k,p1),p2);
+    m.put(mapKey(k,p3),p4);
+    m.put(mapKey(k,p5),p6);
+    m.put(mapKey(k,p7),p8);
+    return new Map$2Instance(k,m);
   }
-
+  static OrderHashBy$1 toKey(Object k){return (OrderHashBy$1) ((OrderHashBy$2)k).imm$hideKey$0(); }
   default Object read$singletonRead$3(Object p0,Object p1,Object p2){ return imm$$hash$3(p0,p1,p2); }
   default Object imm$singletonImm$3(Object p0,Object p1,Object p2){ return imm$$hash$3(p0,p1,p2); }
 
   Maps$0 instance= new Maps$0(){};
 }
 
-record Map$2Instance(Object keyOh, LinkedHashMap<MapKey,Object> elems) implements Map$2{
+record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) implements Map$2{
 
   @Override public Object read$size$0(){ return intToNat(elems.size()); }
   @Override public Object read$isEmpty$0(){ return bool(elems.isEmpty()); }
   @Override public Object read$keyOh$0(){ return keyOh; }
 
+  @Override public Object read$str$1(Object p0){
+    var byE= (ToStrBy$1)p0;
+    var byK= (ToStrBy$1)keyOh;
+    String res= elems.entrySet().stream().map(e->
+      ((Str$0Instance)((ToStr$0)byK.imm$$hash$1(e.getKey().key)).read$str$0()).val()
+      +": "+((Str$0Instance)((ToStr$0)byE.imm$$hash$1(e.getValue())).read$str$0()).val()
+      ).collect(Collectors.joining(", ","{","}"));
+    return Str$0Instance.instance(res);
+  }
   @Override public Object mut$get$1(Object p0){
     var mk= mapKey(keyOh,p0);
     var e= elems.get(mk);
@@ -119,4 +135,10 @@ record Map$2Instance(Object keyOh, LinkedHashMap<MapKey,Object> elems) implement
 
   @Override public Object read$close$0(){ return this; }
   @Override public Object read$close$1(Object p0){ return p0; }
+  @Override public Object read$imm$1(Object p0){
+    var by= (ToImmBy$2)p0;
+    var m=new LinkedHashMap<MapKey,Object>();
+    elems.entrySet().stream().forEach(e->m.put(e.getKey(), ((ToImm$1)by.imm$$hash$1(e.getValue())).read$imm$0()));
+    return new Map$2Instance(keyOh,m);
+  }
 }

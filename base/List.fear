@@ -54,7 +54,13 @@ List[E:*]:_List[E]{
 
   .imm by->{};
   .str by->`[]`;
-  .info by->{};
+  .info by->Block#[Info]
+    .let[List[Info]] list= {this.flow.map[Info]{e->by#e.info}.list.as{::}}
+    .return{Info{'i
+    .match->::.list list;
+    .list -> list;
+    .imm->i;
+    }};
 
   .hash(by, h)->h.list(by,this);
 

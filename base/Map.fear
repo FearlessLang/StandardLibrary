@@ -59,6 +59,17 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E]{
 
   //TODO: for the future, we need to consider the variants of this (update, computeIfAbsent, etc)
   //mut  .update(k: K, f: mut MF[E,E]): mut Map[K,E];        /// replace value at k with f(get(k)); throws iff absent
+  
+  .info by->Block#[Info]
+    .let[Map[Str,Info]] map= {this.flow.mapping({::},{
+      .key e->this.keyOh#(e.key).str;
+      .elem e->by#(e.elem).info;
+      }).as{::}}
+    .return{Info{'i
+    .match->::.map map;
+    .map -> map;
+    .imm->i;
+    }};  
 }
 
 KeyElem[K,E:*]:{

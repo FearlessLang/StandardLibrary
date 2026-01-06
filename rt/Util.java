@@ -36,9 +36,9 @@ public class Util{
     public final Object key;      // representative K (first inserted)
     public final Object close;    // K0
     public final int hc;
-    public MapKey(Object oh,Object k){
+    public MapKey(OrderHashBy$1 oh,Object k){
       key= k;
-      ord= (OrderHash$1)((OrderHashBy$2)oh).imm$$hash$1(k);
+      ord= (OrderHash$1)oh.imm$$hash$1(k);
       close= ((Order$1)ord).read$close$0();
       hc= natToInt(ord.read$hash$1(Hasher$0.instance));
   }
@@ -48,5 +48,5 @@ public class Util{
     return isTrue(((Order$1)ord).read$$eq_eq$1(x.close));
   }
   }
-  public static MapKey mapKey(Object oh,Object k){ return new MapKey(oh,k); }
+  public static MapKey mapKey(OrderHashBy$1 oh,Object k){ return new MapKey(oh,k); }
 }

@@ -1,1 +1,95 @@
 package base;
+
+ListBasics:F[Tests,Tests]{::
+  // empty list literal (type-directed)
+  .test(List[Str] .size .assertEq 0)
+  .test(List[Int] .isEmpty .assertEq True)
+
+  // empty list string: requires by (DataType); for nested lists, by must be nested too
+  .test(List[Str] .str{::.str} .assertEq `[]`)
+  .test(List[List[Str]] .str{::.str{::.str}} .assertEq `[]`)
+
+  // operations on empty should be safe as per List[E] implementation
+  .test(List[Str] .opt 0 .isEmpty .assertEq True)
+  .test(List[Str] .firstOpt .isEmpty .assertEq True)
+  .test(List[Str] .lastOpt .isEmpty .assertEq True)
+  .test(List[Str] .reverse .size .assertEq 0)
+  .test(List[Str] .subList 0 .size .assertEq 0)
+
+  // ++ on empty returns rhs
+  // NOTE: RHS must be grouped if it is a Type#(...) call, otherwise it splits as (xs ++ Lists)#(...)
+  .test(List[Str] ++ (Lists#`a`) .size .assertEq 1)
+  .test(List[Str] ++ (Lists#`a`) .get 0 .assertEq `a`)
+  .test(List[Int] ++ (Lists# +1) .get 0 .assertEq +1)
+
+  // <+ and +> on empty: both create singleton lists
+  .test(List[Str] <+ `a` .size .assertEq 1)
+  .test(List[Str] <+ `a` .get 0 .assertEq `a`)
+  .test(List[Str] +> `a` .size .assertEq 1)
+  .test(List[Str] +> `a` .get 0 .assertEq `a`)
+
+  // withAlso on empty: 2 args -> MUST use parentheses
+  .test(List[Str] .withAlso(0, `a`) .size .assertEq 1)
+  .test(List[Str] .withAlso(0, `a`) .get 0 .assertEq `a`)
+
+  // str on singleton: avoid hardcoding formatting; compare two equivalent constructions
+  .test(List[Str] .withAlso(0, `a`) .str{::.str} .assertEq(Lists#`a` .str{::.str}))
+
+  // ++ with Lists#(a,b,...) on RHS MUST be parenthesized to prevent # splitting
+  .test(Lists#(+1,+2) ++ (Lists#(+3,+4)) .size .assertEq 4)
+  .test(Lists#(+1,+2) ++ (Lists#(+3,+4)) .get 0 .assertEq +1)
+  .test(Lists#(+1,+2) ++ (Lists#(+3,+4)) .get 1 .assertEq +2)
+  .test(Lists#(+1,+2) ++ (Lists#(+3,+4)) .get 2 .assertEq +3)
+  .test(Lists#(+1,+2) ++ (Lists#(+3,+4)) .get 3 .assertEq +4)
+
+  // ++ associativity (left-assoc): (xs ++ ys) ++ zs
+  .test(Lists#(+1) ++ (Lists#(+2)) ++ (Lists#(+3)) .size .assertEq 3)
+  .test(Lists#(+1) ++ (Lists#(+2)) ++ (Lists#(+3)) .get 2 .assertEq +3)
+
+  // opt / firstOpt / lastOpt on non-empty
+  .test(Lists#`a` .opt 0 .isEmpty .assertEq False)
+  .test(Lists#`a` .opt 1 .isEmpty .assertEq True)
+  .test(Lists#(`a`,`b`) .firstOpt .isEmpty .assertEq False)
+  .test(Lists#(`a`,`b`) .lastOpt .isEmpty .assertEq False)
+
+  // subList corner cases on non-empty (2 args -> parentheses)
+  .test(Lists#(`a`,`b`,`c`) .subList(0,0) .size .assertEq 0)
+  .test(Lists#(`a`,`b`,`c`) .subList(0,1) .get 0 .assertEq `a`)
+  .test(Lists#(`a`,`b`,`c`) .subList(1,3) .size .assertEq 2)
+  .test(Lists#(`a`,`b`,`c`) .subList(1,3) .get 0 .assertEq `b`)
+  .test(Lists#(`a`,`b`,`c`) .subList(1,3) .get 1 .assertEq `c`)
+  .test(Lists#(`a`,`b`,`c`) .subList 3 .size .assertEq 0)
+
+  // reverse
+  .test(Lists#(`a`,`b`,`c`) .reverse .get 0 .assertEq `c`)
+  .test(Lists#(`a`,`b`,`c`) .reverse .get 2 .assertEq `a`)
+  .test(Lists#(+1,+2,+3) .reverse .get 0 .assertEq +3)
+
+  // with / withAlso / without
+  .test(Lists#(`a`,`b`) .with(0, `x`) .get 0 .assertEq `x`)
+  .test(Lists#(`a`,`b`) .with(1, `x`) .get 1 .assertEq `x`)
+
+  .test(Lists#(`a`,`c`) .withAlso(1, `b`) .size .assertEq 3)
+  .test(Lists#(`a`,`c`) .withAlso(1, `b`) .get 0 .assertEq `a`)
+  .test(Lists#(`a`,`c`) .withAlso(1, `b`) .get 1 .assertEq `b`)
+  .test(Lists#(`a`,`c`) .withAlso(1, `b`) .get 2 .assertEq `c`)
+
+  .test(Lists#(`a`,`b`,`c`) .without 0 .get 0 .assertEq `b`)
+  .test(Lists#(`a`,`b`,`c`) .without 2 .get 1 .assertEq `b`)
+  .test(Lists#(`a`,`b`,`c`) .without 1 .size .assertEq 2)
+  .test(Lists#(`a`,`b`,`c`) .without 1 .get 0 .assertEq `a`)
+  .test(Lists#(`a`,`b`,`c`) .without 1 .get 1 .assertEq `c`)
+
+  // List of List: build nested via withAlso(0, ...)
+  .test(List[List[Str]] .withAlso(0, Lists#`a`) .get 0 .get 0 .assertEq `a`)
+  .test(List[List[Int]] .withAlso(0, Lists#(+1,+2)) .get 0 .size .assertEq 2)
+  .test(List[List[Int]] .withAlso(0, Lists#(+1,+2)) .get 0 .get 1 .assertEq +2)
+
+  // List of List ++ : RHS must be grouped (Type#(...) would otherwise split)
+  .test(Lists#(Lists#`a`) ++ (Lists#(Lists#`b`)) .size .assertEq 2)
+  .test(Lists#(Lists#`a`) ++ (Lists#(Lists#`b`)) .get 0 .get 0 .assertEq `a`)
+  .test(Lists#(Lists#`a`) ++ (Lists#(Lists#`b`)) .get 1 .get 0 .assertEq `b`)
+
+  // string for nested lists: again avoid hardcoding formatting; compare equivalent constructions
+  .test(List[List[Str]] .withAlso(0, Lists#`a`) .str{::.str{::.str}} .assertEq( Lists#(Lists#`a`) .str{::.str{::.str}}))
+}

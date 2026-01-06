@@ -2,6 +2,8 @@ package base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import static base.Util.*;
 public interface Lists$0 extends Sealed$0{
   default Object imm$singletonRead$1(Object p0){ return imm$$hash$1(p0); }
@@ -106,6 +108,13 @@ record List$1Instance(List<Object> val) implements List$1{
 
   @Override public Object read$size$0(){ return intToNat(val.size()); }
   @Override public Object read$isEmpty$0(){ return bool(val.isEmpty()); }
+
+  @Override public Object read$str$1(Object p0){
+    var by= (ToStrBy$1)p0;
+    String res= val.stream().map(e->((Str$0Instance)((ToStr$0)by.imm$$hash$1(e)).read$str$0()).val()).collect(Collectors.joining(", ","[","]"));
+    return Str$0Instance.instance(res);
+  }
+
 
   @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
   @Override public Object read$get$1(Object p0){ return val.get(idx(p0)); }
@@ -226,4 +235,8 @@ record List$1Instance(List<Object> val) implements List$1{
   }
   @Override public Object read$as$1(Object p0){ return mut$as$1(p0); }
   @Override public Object imm$as$1(Object p0){ return mut$as$1(p0); }
+  @Override public Object read$imm$1(Object p0){
+    var by= (ToImmBy$2)p0;
+    return new List$1Instance(val.stream().map(e->((ToImm$1)by.imm$$hash$1(e)).read$imm$0()).toList());
+  }  
 }

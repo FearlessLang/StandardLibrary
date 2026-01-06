@@ -62,5 +62,7 @@ AllTest:Main{s->
     .testSuite StrParseFloat
     .testSuite StrParseIeeeFloat
     
+    .testSuite ListBasics
+    .testSuite MapBasics
     .done
 }

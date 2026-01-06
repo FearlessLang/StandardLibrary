@@ -1,0 +1,104 @@
+package base;
+
+MapBasics:F[Tests,Tests]{::
+  // empty map (explicit key OrderHashBy)
+  .test(Maps#[Str,Str,Int]{::} .size .assertEq 0)
+  .test(Maps#[Str,Str,Int]{::} .isEmpty .assertEq True)
+
+  // close on empty should still be a map (choose the map-returning close by chaining)
+  .test(Maps#[Str,Str,Int]{::} .close .size .assertEq 0)
+
+  // empty map .str: compare two equivalent empty constructions (avoid hardcoding formatting)
+  // NOTE: this compares different E (Int vs Str); should still be OK if empty str is type-erased.
+  .test(Maps#[Str,Str,Int]{::} .str{::.str} .assertEq( Maps#({::}, `a`, `x`) .without `a` .str{::.str}))
+
+  // same-E empty .str equality (safer)
+  .test(Maps#[Str,Str,Str]{::} .str{::.str} .assertEq( Maps#({::}, `a`, `x`) .without `a` .str{::.str}))
+
+  // get/opt/containsKey on singleton
+  .test(Maps#({::}, `a`, `x`) .size .assertEq 1)
+  .test(Maps#({::}, `a`, `x`) .isEmpty .assertEq False)
+  .test(Maps#({::}, `a`, `x`) .get `a` .assertEq `x`)
+  .test(Maps#({::}, `a`, `x`) .opt `a` .isEmpty .assertEq False)
+  .test(Maps#({::}, `a`, `x`) .opt `b` .isEmpty .assertEq True)
+  .test(Maps#({::}, `a`, `x`) .containsKey `a` .assertEq True)
+  .test(Maps#({::}, `a`, `x`) .containsKey `b` .assertEq False)
+
+  // with on empty (2 args -> parentheses)
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .size .assertEq 1)
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .get `a` .assertEq `x`)
+
+  // replacing existing key keeps size
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`a`, `y`) .size .assertEq 1)
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`a`, `y`) .get `a` .assertEq `y`)
+
+  // without removes key (without has 1 arg, no parentheses)
+  .test(Maps#({::}, `a`, `x`) .without `a` .isEmpty .assertEq True)
+  .test(Maps#({::}, `a`, `x`) .without `a` .size .assertEq 0)
+  .test(Maps#({::}, `a`, `x`) .without `a` .opt `a` .isEmpty .assertEq True)
+  .test(Maps#({::}, `a`, `x`) .without `a` .containsKey `a` .assertEq False)
+
+  // imm (DataType): values are Str so imm should preserve them
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .imm{::.imm} .size .assertEq 2)
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .imm{::.imm} .get `a` .assertEq `x`)
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .imm{::.imm} .get `bb` .assertEq `y`)
+
+  // str (DataType): compare constructor vs with-chain (avoid hardcoding formatting)
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .str{::.str} .assertEq(
+    Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`bb`, `y`) .str{::.str}))
+
+  // insertion order should matter for .str (spec says .str order follows insertion order)
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .str{::.str} .assertNe( Maps#({::}, `bb`, `y`, `a`, `x`) .str{::.str}))
+
+  // opt corner cases on multi-entry
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .opt `a` .isEmpty .assertEq False)
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .opt `bb` .isEmpty .assertEq False)
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .opt `c` .isEmpty .assertEq True)
+
+  // ++ union: RHS MUST be grouped if it begins with Maps#(...) or Maps#[...]... (otherwise # splits)
+  // left priority on conflicts
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .size .assertEq 2)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .get `a` .assertEq `x`)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .get `b` .assertEq `z`)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .containsKey `b` .assertEq True)
+
+  // ++ with disjoint keys
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .size .assertEq 2)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .get `a` .assertEq `x`)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .get `b` .assertEq `y`)
+
+  // ++ with empty on left/right (still group RHS to avoid # splitting)
+  .test(Maps#[Str,Str,Str]{::} ++ (Maps#({::}, `a`, `x`)) .size .assertEq 1)
+  .test(Maps#[Str,Str,Str]{::} ++ (Maps#({::}, `a`, `x`)) .get `a` .assertEq `x`)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#[Str,Str,Str]{::}) .size .assertEq 1)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#[Str,Str,Str]{::}) .get `a` .assertEq `x`)
+
+  // ++ associativity parsing (left-assoc): (m1 ++ m2) ++ m3
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) ++ (Maps#({::}, `c`, `z`)) .size .assertEq 3)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) ++ (Maps#({::}, `c`, `z`)) .get `c` .assertEq `z`)
+
+  // ++ and .str: compare union with an equivalent with-chain (avoids hardcoding formatting)
+  .test(Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .str{::.str} .assertEq(
+    Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .str{::.str}))
+
+  // as: map values, keep keys
+  .test(Maps#[Str,Str,Str]{::} .as {::.size} .size .assertEq 0)
+  .test(Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .size .assertEq 2)
+  .test(Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .get `a` .assertEq 2)
+  .test(Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .get `bb` .assertEq 1)
+  .test(Maps#({::}, `a`, `xx`) .as {::.size} .containsKey `a` .assertEq True)
+
+  // Map values can themselves be lists (E is generic)
+  .test(Maps#[Str,Str,List[Str]]{::} .with(`a`, Lists#`x`) .size .assertEq 1)
+  .test(Maps#[Str,Str,List[Str]]{::} .with(`a`, Lists#`x`) .get `a` .get 0 .assertEq `x`)
+  .test(Maps#[Str,Str,List[Str]]{::} .with(`a`, Lists#(`x`,`y`)) .get `a` .size .assertEq 2)
+
+  // as over list values
+  .test(Maps#[Str,Str,List[Str]]{::} .with(`a`, Lists#(`x`,`y`)) .as {::.size} .get `a` .assertEq 2)
+
+  // without after with-chain
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `a` .assertEq False)
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `b` .assertEq True)
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .size .assertEq 1)
+  .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .get `b` .assertEq `yk`)
+}

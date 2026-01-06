@@ -8,13 +8,13 @@ Hasher:{                            /// stateful hasher for composite structures
   //#[A,A0,B,B0,C,C0](a: read OrderHash[A,A0], b: read OrderHash[B,B0], c: read OrderHash[C,C0]): Nat -> ...;
   //...//more overloads to compose more values
   mut .nat(v: Nat): Nat->v;
-  mut .int(v: Int): Nat->Todo!;
-  mut .num(v: Num): Nat->Todo!;
-  mut .float(v: Float): Nat->Todo!;
-  mut .byte(v: Byte): Nat->Todo!;
+  mut .int(v: Int): Nat->0;
+  mut .num(v: Num): Nat->0;
+  mut .float(v: Float): Nat->0;
+  mut .byte(v: Byte): Nat->0;
   mut .bool(v: Bool): Nat->v?{.then->0; .else->1};
   mut .info(i: Info): Nat->this.str(i.str); 
-  mut .str(v: Str): Nat->Todo!;  
+  mut .str(v: Str): Nat->0;  
   mut .list[E:*,E0](f: OrderHashBy[imm E,E0],l: read List[E]):Nat->Todo!;
   mut .opt[E:*,E0](f: OrderHashBy[imm E,E0], o: read Opt[E]):Nat->Todo!;
   mut .map[K,E:*,E0](f: OrderHashBy[imm E,E0], m: read Map[K,E]):Nat->Todo!;

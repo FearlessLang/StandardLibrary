@@ -195,22 +195,29 @@ OrderHashBy[T,K]:OrderBy[T,K],ToStrBy[T]{  /// order+hash by key K, plus per-val
       .eq ->next#t0<=>(next#t1,m);
       .gt ->m.gt});
     .hash t,h -> h#(this#t, next#t);
+    .str t->this#t.str;
   };
 
   .viewHash[A](f:F[read A,read T]):OrderHashBy[A] -> {         /// contramap for both cmp and hash
     .cmp a0,a1,m -> this#(f#a0)<=>(this#(f#a1),m);
     .hash a,h -> this#(f#a).hash(h);
+    .str t->this#(f#t).str;
   };
+  .hideKey: OrderHashBy[T] -> {
+    .cmp t0,t1,m -> this#t0 <=> (this#t1,m);
+    .hash t,h -> (this#t).hash(h);
+    .str t ->this#t.str;
+  };  
 }
 
 OrderHashBy[T]:OrderHashBy[T,T]{          /// direct order+hash for T
   .cmp[R:**](t0:read T,t1:read T,m:mut OrderMatch[R]): R;
   .hash(t: read T,h: mut Hasher):Nat;
-
+  .str(t: read T): Str; 
   # t -> {                                /// close->t; compare/hash delegate to this.cmp/this.hash
     .close -> t; .close t0 -> this#t0; 
     .cmp t0,t1,m -> this.cmp(t0,t1,m);
     .hash h -> this.hash(t,h);
-    .str -> this#t.str;
+    .str -> this.str(t); 
   };
 }
