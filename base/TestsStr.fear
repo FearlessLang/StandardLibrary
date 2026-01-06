@@ -242,6 +242,8 @@ StrParseNum:F[Tests,Tests]{::
   .test(`-1/2` .num .assertEq({::}, Opts#(-1/2)))
   .test(`+10/20` .num .assertEq({::}, Opts#(+1/2)))
   .test(`-10/20` .num .assertEq({::}, Opts#(-1/2)))
+  
+  .test(`+12/2` .num!.str .assertEq(`+6/1`))
 
   // denominator == 0 is invalid
   .test(`+1/0` .num .assertEq({::}, Opt[Num]))
