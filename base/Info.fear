@@ -7,6 +7,7 @@ Infos:Sealed {
       .match->::.msg str;
       .msg -> str;
       .imm->i;
+      .info->i;
       }};
   .list(i1: read ToInfo): Info -> Lists#(i1.info).info{::};
   .list(i1: read ToInfo, i2: read ToInfo): Info -> Lists#(i1.info,i2.info).info{::};

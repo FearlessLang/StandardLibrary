@@ -10,7 +10,7 @@ public record Str$0Instance(String val) implements Str$0{
   @Override public String toString(){ return toS(this); }
   private static String s(Object o){ return ((Str$0Instance)o).val; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object read$info$0(){ return Info$0.instance; }
+  @Override public Object read$info$0(){ return Infos$0.instance.imm$msg$1(this); }
   @Override public Object read$str$0(){ return this; }
 
   @Override public Object imm$$plus$1(Object p0){ return instance(val+toS(p0)); }
