@@ -5,7 +5,7 @@ Tests:{
   .done: Void -> {};
   .testSuite(f:F[Tests,Tests]):Tests -> f#this;
 }
-TestNumbers:Main{s->
+AllTest:Main{s->
   Tests
     .testSuite FloatArith
     .testSuite FloatRound
@@ -48,5 +48,18 @@ TestNumbers:Main{s->
     .testSuite ByteAlu
     .testSuite ByteRange
     .testSuite ByteBoundaryAndBoundedVsAlu
+    
+    .testSuite StrBasics
+    .testSuite StrConcat
+    .testSuite StrSepOps
+    .testSuite StrOrder
+    .testSuite StrEscape
+    .testSuite StrParseInt
+    .testSuite StrParseNat
+    .testSuite StrParseByte
+    .testSuite StrParseNum
+    .testSuite StrParseFloat
+    .testSuite StrParseIeeeFloat
+    
     .done
 }

@@ -7,6 +7,61 @@ package base;
 ///Plus space ` ` and new line.
 ///There is no concept of escape as in some other languages, so `\n` is two characters.
 ///The methods ^ and | can be used to obtain a string including new lines or backticks (`).
+
+/// Relations of parsers and printers.
+/// Methods .int/.float/.num/.byte below accept exactly the numeric type names
+/// accepted by the Fearless syntax, including the allowed `_` as for the Fearless syntax.
+/// They *do not* evaluate expressions.
+/// Str.escape, Float.str and Float.ieeeStr  instead output Fearless code when there is no literal represing the value.
+///
+/// Int:
+/// - rejected: `12`.int  `+1_`.int  `+_1`.int
+//  - accepted: `+12`.int, `+1_000`.int  `+0__10`.int  `+01__0`.int `+1__0`.int `+00`.int `-00`.int `-001`.int `+001`.int
+/// - canonicalization: `+00_12`.int.str ==`+12`
+///
+/// Nat (UnsignedInt token, range 0..2^32-1):
+/// - Str.nat accepts: "0", "42", "4_294_967_295" ; rejects: "+1"
+/// - spelling NOT preserved: "000_255".nat may print as "255"
+///
+/// Byte (UnsignedInt token, range 0..255):
+/// - Str.byte accepts: "255", "000_255" ; rejects: "+255"
+/// - spelling NOT preserved for the same reasons as Nat.
+///
+/// Num (SignedRational token):
+/// - Str.num accepts: "+12/1", "-2.5/3.0", "+12.4/3.2" ; rejects: "12"
+/// - spelling NOT preserved (canonical reduction): "+12.40/3.20".num prints like "+31/8"
+/// - therefore Num.str must print "+n/d" (not bare "n") if you want Str.num to accept it.
+///
+/// Float has TWO string domains:
+///
+/// (A) Strict Fearless Float literal: Str.float (SignedFloat token + exactness)
+/// - Str.float accepts SignedFloat literals only, and rejects values that would round.
+///   Accept: "+0.5", "+1.25", "+1.0e-3" (if exact)
+///   Reject: "+0.1" (rounds), "+NaN", "+Infinity"
+/// - signed zero canonicalization: Str.float("-0.0") yields +0.0; so Float.str never prints "-0.0".
+/// - IMPORTANT: Float.str may print code that is NOT a Float literal:
+///   NaN -> "(+0.0/+0.0)", +Inf -> "(+1.0/+0.0)", -Inf -> "(-1.0/+0.0)".
+///   These are valid Fearless code, but Str.float returns .empty on them (literal-only).
+///
+/// (B) IEEE/Java Double text: Str.ieeeFloat / Float.ieeeStr
+/// - Str.ieeeFloat accepts Double.parseDouble domain (includes NaN/Inf and signed zero; rounding allowed).
+/// - Float.ieeeStr.ieeeFloat roundtrips the IEEE value (except NaN payload).
+/// - strings are canonicalized: "1e0" -> "1.0", "+0.0" -> "0.0".
+///
+/// Note: Fearless exposes no object identity; "same" means observable behavior (and for Float, ieeeSameBits if you care).
+
+
+
+/// - The parse methods below accept exactly the numeric type names accepted by the Fearless syntax,
+///   including the allowed `_` as a digit separator.
+/// - Printing (.str / .ieeeStr) is primarily for display; unless stated otherwise, it is NOT guaranteed to be accepted by the corresponding parser.
+///
+/// Int:
+/// - someStr.int.str: the string is normalized (drops '_' usually drops a leading '+', and may drop leading zeros).
+//NO, 'May'??? what is and is not allowed by the regexes?
+
+
+
 Str:Sealed,DataType[Str,Str]{
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt

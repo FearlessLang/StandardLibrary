@@ -84,8 +84,14 @@ public record Float$0Instance(double val) implements Float$0{
   @Override public Object imm$abs$0(){ return instance(Math.abs(val)); }
   @Override public Object imm$sqrt$0(){ return instance(Math.sqrt(val)); }
   @Override public Object read$str$0(){
-    double x= (val == 0.0d) ? 0.0d : val; // merges -0.0 and +0.0
-    return Str$0Instance.instance(Double.toString(x));
+    if (Double.isNaN(val)){ return Str$0Instance.instance("(+0.0 / +0.0)"); }
+    if (val == Double.POSITIVE_INFINITY){ return Str$0Instance.instance("(+1.0 / +0.0)"); }
+    if (val == Double.NEGATIVE_INFINITY){ return Str$0Instance.instance("(-1.0 / +0.0)"); }
+    double x= (val == 0.0d) ? 0.0d : val; // merge -0.0
+    String s= new java.math.BigDecimal(x).toPlainString(); // exact decimal of this binary64
+    if (s.indexOf('.') == -1){ s += ".0"; }                // satisfy SignedFloat shape
+    if (s.charAt(0) != '-'){ s= "+"+s; }                   // SignedFloat requires sign
+    return Str$0Instance.instance(s);
   }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }

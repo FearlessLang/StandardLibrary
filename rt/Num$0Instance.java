@@ -122,8 +122,8 @@ public record Num$0Instance(BigInteger val1, BigInteger val2) implements Num$0{
     return optSome(Byte$0Instance.instance((byte)val1.intValue()));
   }
   @Override public Object read$str$0(){
-    String s= val2.equals(one) ? val1.toString() : (val1.toString()+"/"+val2.toString());
-    return Str$0Instance.instance(s);
+    String sn= (val1.signum() < 0 ? "" : "+")+val1;
+    return Str$0Instance.instance(sn+"/"+val2);
   }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }

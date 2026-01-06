@@ -26,8 +26,9 @@ public record Str$0Instance(String val) implements Str$0{
   @Override public Object imm$size$0(){ return Nat$0Instance.instance(val.length()); }
   
   @Override public Object imm$escape$0(){
-    var res= val.replace("`", "` ^ `").replace("\n", "` | `");
-    return instance("`"+res+"`");
+    var res= "`"+val.replace("`", "` ^ `").replace("\n", "` | `")+"`";
+    if (val.length()+2 != res.length()){ res= "("+res+")"; }
+    return instance(res);
   }
 
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(s(p0).compareTo(s(p1)),p2); }
@@ -101,11 +102,11 @@ public record Str$0Instance(String val) implements Str$0{
       String x= no_(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return optEmpty(); }
-      // must be exactly representable as binary64
-      if (new BigDecimal(x).compareTo(BigDecimal.valueOf(d)) != 0){ return optEmpty(); }
+      // reject "would-round" decimals: input must equal the exact value of the parsed double bits
+      if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return optEmpty(); }
       if (d == 0.0d){ d= 0.0d; } // canonicalize -0.0 -> +0.0 for normal Float
       return optSome(Float$0Instance.instance(d));
-    }
+      }
     catch(NumberFormatException e){ return optEmpty(); }
   }
   static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }

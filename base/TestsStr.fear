@@ -1,0 +1,334 @@
+package base;
+
+StrBasics:F[Tests,Tests]{::
+  .test(`` .isEmpty .assertEq True)
+  .test(`` .size .assertEq 0)
+
+  .test(`a` .isEmpty .assertEq False)
+  .test(`a` .size .assertEq 1)
+  .test(`ab` .size .assertEq 2)
+
+  .test(`` .imm .assertEq ``)
+  .test(`a` .imm .assertEq `a`)
+  .test(`a` .str .assertEq `a`)
+  .test(`a` .close .assertEq `a`)
+  .test(`ab` .close .assertEq `ab`)
+}
+
+StrConcat:F[Tests,Tests]{::
+  .test(`a` + `b` .assertEq `ab`)
+  .test(`ab` + `c` .assertEq `abc`)
+
+  .test(`a` + `` .assertEq `a`)
+  .test(`` + `a` .assertEq `a`)
+  .test(`` + `` .assertEq ``)
+
+  .test(`a` + `` + `b` .assertEq `ab`)
+  .test(`` + `a` + `` .assertEq `a`)
+  .test(`a` + `b` + `c` .assertEq `abc`)
+
+  .test(`x=` + True .assertEq `x=True`)
+  .test(`x=` + False .assertEq `x=False`)
+  .test(`x=` + True .str .assertEq `x=True`)
+  .test(`x=` + True + False .assertEq `x=TrueFalse`)
+
+  .test(`n=` + 5 .assertEq `n=5`)
+  .test(`n=` + 4_294_967_295 .assertEq `n=4294967295`)
+
+  .test(`a` + `b` .size .assertEq 2)
+  .test(`a` + `` .size .assertEq 1)
+  .test(`` + `b` .size .assertEq 1)
+}
+
+StrSepOps:F[Tests,Tests]{::
+  // | inserts newline between
+  .test(`a` | `b` .size .assertEq 3)
+  .test(`a` | `b` | `c` .size .assertEq 5)
+  .test(`` | `a` .size .assertEq 2)
+  .test(`a` | `` .size .assertEq 2)
+
+  // nullary | appends newline (token separation matters)
+  .test(`a` | .size .assertEq 2)
+  .test(`a` | .assertEq (`a` | ``))
+  .test(`a` | | `b` .size .assertEq 4)
+
+  // ^ inserts backtick character between
+  .test(`a` ^ `b` .size .assertEq 3)
+  .test(`a` ^ `b` ^ `c` .size .assertEq 5)
+  .test(`` ^ `a` .size .assertEq 2)
+  .test(`a` ^ `` .size .assertEq 2)
+
+  // nullary ^ appends backtick; "^ ^" is NOT "^^"
+  .test(`a` ^ .size .assertEq 2)
+  .test(`a` ^ .assertEq (`a` ^ ``))
+  .test(`a` ^ ^ `b` .size .assertEq 4)
+
+  // ^^ inserts double quote character between (no space inside the token)
+  .test(`a` ^^ `b` .size .assertEq 3)
+  .test(`a` ^^ `b` ^^ `c` .size .assertEq 5)
+  .test(`` ^^ `a` .size .assertEq 2)
+  .test(`a` ^^ `` .size .assertEq 2)
+
+  // nullary ^^ appends double quote
+  .test(`a` ^^ .size .assertEq 2)
+  .test(`a` ^^ .assertEq (`a` ^^ ``))
+  .test(`a` ^^ ^^ `b` .size .assertEq 4) // (a ^^ ) ^^ b == `a""b`
+
+  // ToStr with separators: size checks (a + sep + True)
+  .test(`a` | True .size .assertEq 6)
+  .test(`a` ^ True .size .assertEq 6)
+  .test(`a` ^^ True .size .assertEq 6)
+
+  // empty is never produced by adding a separator
+  .test(`` | `` .isEmpty .assertEq False)
+  .test(`` ^ `` .isEmpty .assertEq False)
+  .test(`` ^^ `` .isEmpty .assertEq False)
+}
+
+StrTokenSeparation:F[Tests,Tests]{::
+  // token separation examples (space changes the operator tokenization)
+  .test(`a` ^^ `b` .size .assertEq 3)    // a ^^ b == `a"b`
+  .test(`a` ^ ^ `b` .assertNe (`a` ^^ `b`))
+
+  .test(`x` | .size .assertEq 2)
+  .test(`x` ^ .size .assertEq 2)
+  .test(`x` ^^ .size .assertEq 2)
+}
+
+StrOrder:F[Tests,Tests]{::
+  .test(`a` .assertEq `a`)
+  .test(`a` .assertNe `b`)
+
+  .test(`a` .assertLt `b`)
+  .test(`b` .assertGt `a`)
+
+  .test(`a` .assertLe `a`)
+  .test(`a` .assertGe `a`)
+
+  // prefix ordering (lexicographic)
+  .test(`a` .assertLt `aa`)
+  .test(`aa` .assertGt `a`)
+  .test(`a` .assertLt `ab`)
+
+  // case sensitivity / codepoint ordering should be stable
+  .test(`A` .assertLt `a`)
+  .test(`a` .assertGt `A`)
+}
+
+StrEscape:F[Tests,Tests]{::
+  // empty string should escape to the empty literal: ``
+  .test(`` .escape .assertEq (`` ^ ^))
+  .test(`` .escape .size .assertEq 2)
+
+  // plain literals should escape as a single literal: `...`
+  .test(`a` .escape .assertEq (`` ^ `a` ^))
+  .test(`a` .escape .size .assertEq 3)
+  .test(`abc` .escape .assertEq (`` ^ `abc` ^))
+
+  // newline/backtick/dquote content can be expressed via operators in code
+  .test(`a` | `b` .escape .assertEq (`(` ^ `a` ^ ` | ` ^ `b` ^ `)`))
+  .test(`a` ^ `b` .escape .assertEq (`(` ^ `a` ^ ` ^ ` ^ `b` ^ `)`))
+  .test(`a` ^^ `b` .escape .assertEq (`` ^ `a"b` ^))
+}
+
+StrParseInt:F[Tests,Tests]{::
+  .test(`` .int .assertEq({::}, Opt[Int]))
+
+  .test(`+0` .int .assertEq({::}, Opts#(+0)))
+  .test(`-0` .int .assertEq({::}, Opts#(+0)))
+
+  .test(`+1` .int .assertEq({::}, Opts#(+1)))
+  .test(`-1` .int .assertEq({::}, Opts#(-1)))
+
+  .test(`+2_147_483_647` .int .assertEq({::}, Opts#(+2147483647)))
+  .test(`-2_147_483_648` .int .assertEq({::}, Opts#(-2147483648)))
+
+  .test(`+2_147_483_648` .int .assertEq({::}, Opt[Int]))
+  .test(`-2_147_483_649` .int .assertEq({::}, Opt[Int]))
+
+  // Int requires an explicit sign (otherwise it's a Nat literal)
+  .test(`2147483647` .int .assertEq({::}, Opt[Int]))
+
+  // leading zeros (still an Int because sign is present)
+  .test(`+000` .int .assertEq({::}, Opts#(+0)))
+  .test(`-000` .int .assertEq({::}, Opts#(+0)))
+  .test(`+0001` .int .assertEq({::}, Opts#(+1)))
+  .test(`-0001` .int .assertEq({::}, Opts#(-1)))
+
+  // underscore placement
+  .test(`+1_000` .int .assertEq({::}, Opts#(+1000)))
+  .test(`+_1` .int .assertEq({::}, Opt[Int]))
+  .test(`+1_` .int .assertEq({::}, Opt[Int]))
+  .test(`+1__0` .int .assertEq({::},  Opts# +1__0))
+  .test(`+01__0` .int .assertEq({::}, Opts# +01__0))
+  .test(`+0__10` .int .assertEq({::}, Opts# +0__10))
+
+  // whitespace is invalid
+  .test(` +1` .int .assertEq({::}, Opt[Int]))
+  .test(`+1 ` .int .assertEq({::}, Opt[Int]))
+}
+
+StrParseNat:F[Tests,Tests]{::
+  .test(`` .nat .assertEq({::}, Opt[Nat]))
+
+  .test(`0` .nat .assertEq({::}, Opts#(0)))
+  .test(`1` .nat .assertEq({::}, Opts#(1)))
+  .test(`1_000_000` .nat .assertEq({::}, Opts#(1000000)))
+
+  .test(`4_294_967_295` .nat .assertEq({::}, Opts#(4294967295)))
+  .test(`4_294_967_296` .nat .assertEq({::}, Opt[Nat]))
+
+  // leading zeros
+  .test(`000` .nat .assertEq({::}, Opts#(0)))
+  .test(`0001` .nat .assertEq({::}, Opts#(1)))
+
+  // signs are invalid for Nat
+  .test(`+1` .nat .assertEq({::}, Opt[Nat]))
+  .test(`-1` .nat .assertEq({::}, Opt[Nat]))
+
+  // underscore placement
+  .test(`_1` .nat .assertEq({::}, Opt[Nat]))
+  .test(`1_` .nat .assertEq({::}, Opt[Nat]))
+  .test(`1__0` .nat .assertEq({::}, Opts# 1__0))
+  .test(`00_1` .nat .assertEq({::}, Opts# 00_1))
+
+  // whitespace is invalid
+  .test(` 1` .nat .assertEq({::}, Opt[Nat]))
+  .test(`1 ` .nat .assertEq({::}, Opt[Nat]))
+}
+
+StrParseByte:F[Tests,Tests]{::
+  .test(`` .byte .assertEq({::}, Opt[Byte]))
+
+  .test(`0` .byte .assertEq({::}, Opts#(+0 .byte)))
+  .test(`1` .byte .assertEq({::}, Opts#(+1 .byte)))
+  .test(`10` .byte .assertEq({::}, Opts#(+10 .byte)))
+  .test(`255` .byte .assertEq({::}, Opts#(+255 .byte)))
+
+  .test(`000` .byte .assertEq({::}, Opts#(+0 .byte)))
+  .test(`001` .byte .assertEq({::}, Opts#(+1 .byte)))
+
+  .test(`256` .byte .assertEq({::}, Opt[Byte]))
+  .test(`4_294_967_295` .byte .assertEq({::}, Opt[Byte]))
+
+  // signs are invalid for byte parser
+  .test(`+1` .byte .assertEq({::}, Opt[Byte]))
+  .test(`-1` .byte .assertEq({::}, Opt[Byte]))
+
+  // underscores inside digits are allowed (range still enforced)
+  .test(`1_0` .byte .assertEq({::}, Opts#(+10 .byte)))
+  .test(`2_5_5` .byte .assertEq({::}, Opts#(+255 .byte)))
+  .test(`25_5` .byte .assertEq({::}, Opts#(+255 .byte)))
+  .test(`25_6` .byte .assertEq({::}, Opt[Byte]))
+
+  // underscore placement + whitespace
+  .test(`_1` .byte .assertEq({::}, Opt[Byte]))
+  .test(`1_` .byte .assertEq({::}, Opt[Byte]))
+  .test(` 1` .byte .assertEq({::}, Opt[Byte]))
+  .test(`1 ` .byte .assertEq({::}, Opt[Byte]))
+}
+
+StrParseNum:F[Tests,Tests]{::
+  .test(`` .num .assertEq({::}, Opt[Num]))
+
+  .test(`+0` .num .assertEq({::}, {}))
+  .test(`-0` .num .assertEq({::}, {}))
+
+  .test(`+1` .num .assertEq({::}, {}))
+  .test(`-1` .num .assertEq({::}, {}))
+
+  // signed rational token forms
+  .test(`+1/2` .num .assertEq({::}, Opts#(+1/2)))
+  .test(`-1/2` .num .assertEq({::}, Opts#(-1/2)))
+  .test(`+10/20` .num .assertEq({::}, Opts#(+1/2)))
+  .test(`-10/20` .num .assertEq({::}, Opts#(-1/2)))
+
+  // denominator == 0 is invalid
+  .test(`+1/0` .num .assertEq({::}, Opt[Num]))
+  .test(`-1/0` .num .assertEq({::}, Opt[Num]))
+
+  // sign required (otherwise "1/2" is not a SignedRational token)
+  .test(`1/2` .num .assertEq({::}, Opt[Num]))
+
+  // underscores inside rationals
+  .test(`+1_0/2_0` .num .assertEq({::}, Opts#(+1/2)))
+  .test(`-1_0/2_0` .num .assertEq({::}, Opts#(-1/2)))
+
+  // whitespace invalid
+  .test(` +1/2` .num .assertEq({::}, Opt[Num]))
+  .test(`+1/2 ` .num .assertEq({::}, Opt[Num]))
+}
+
+StrParseFloat:F[Tests,Tests]{::
+  .test(`` .float .assertEq({::}, Opt[Float]))
+
+  // decimal forms
+  .test(`+0.0` .float .assertEq({::}, Opts#(+0.0)))
+  .test(`-0.0` .float .assertEq({::}, Opts#(+0.0)))
+  .test(`+0.5` .float .assertEq({::}, Opts#(+0.5)))
+  .test(`+1.5` .float .assertEq({::}, Opts#(+1.5)))
+  .test(`+2.5` .float .assertEq({::}, Opts#(+2.5)))
+  .test(`+1_000.0` .float .assertEq({::}, Opts#(+1000.0)))
+
+  // rounding is prevented
+  .test(`+0.1` .float .assertEq({::}, Opt[Float]))
+  .test(`+0.2` .float .assertEq({::}, {}))
+  .test(`-0.1` .float .assertEq({::}, {}))
+  .test(`+000.100` .float .assertEq({::}, {}))
+  
+  .test(+0012.str.assertEq `+12`)
+  //.test(+_0012.str.assertEq `+12`) invalid synax: fragement can not start with _
+  .test(00_12.str.assertEq `12`)
+  //.test(_0012.str.assertEq `12`) invalid synax: fragement can not start with _
+  
+  // exponent variants
+  .test(`+1.0e3` .float .assertEq({::}, Opts#(+1000.0)))
+  .test(`+1.0e+3` .float .assertEq({::}, Opts#(+1000.0)))
+  .test(`-1.0e3` .float .assertEq({::}, Opts#(-1000.0)))
+  .test(`+1.0E3` .float .assertEq({::}, Opts#(+1000.0)))
+  //.test(`+1.0e-3` .float .assertEq({::}, Opts#(+0.001))) not an exactly representable float
+
+  // syntactically invalid for Fearless Float
+  .test(`NaN` .float .assertEq({::}, Opt[Float]))
+  .test(`Infinity` .float .assertEq({::}, Opt[Float]))
+  .test(`-Infinity` .float .assertEq({::}, Opt[Float]))
+
+  // too big -> would become Inf under IEEE; must be rejected here
+  .test(`+1.0e309` .float .assertEq({::}, Opt[Float]))
+  .test(`-1.0e309` .float .assertEq({::}, Opt[Float]))
+
+  // underscore placement + whitespace
+  .test(`+_1.0` .float .assertEq({::}, Opt[Float]))
+  .test(`+1_.0` .float .assertEq({::}, Opt[Float]))
+  .test(` +1.0` .float .assertEq({::}, Opt[Float]))
+  .test(`+1.0 ` .float .assertEq({::}, Opt[Float]))
+  //.test(`+1._0` .float .assertEq({::}, Opt[Float])) invalid synax: fragement can not start with _
+  .test(`+1.0_e3` .float .assertEq({::}, Opt[Float]))
+}
+
+StrParseIeeeFloat:F[Tests,Tests]{::
+  .test(`` .ieeeFloat .isEmpty .assertEq True)
+
+  // must accept Float.ieeeStr output forms
+  .test(`0.0` .ieeeFloat .match{ .some f->f .isPosZero; .empty->False } .assertEq True)
+  .test(`-0.0` .ieeeFloat .match{ .some f->f .isNegZero; .empty->False } .assertEq True)
+
+  .test(`NaN` .ieeeFloat .match{ .some f->f .isNaN; .empty->False } .assertEq True)
+  .test(`Infinity` .ieeeFloat .match{ .some f->f .isPosInfinity; .empty->False } .assertEq True)
+  .test(`-Infinity` .ieeeFloat .match{ .some f->f .isNegInfinity; .empty->False } .assertEq True)
+
+  // finite decimals should parse
+  .test(`1.5` .ieeeFloat .assertEq({::}, Opts#(+1.5)))
+  .test(`1000.0` .ieeeFloat .assertEq({::}, Opts#(+1000.0)))
+  .test(`0.1` .ieeeFloat .isSome .assertEq True)
+  .test(`-0.1` .ieeeFloat .isSome .assertEq True)
+
+  // round-trip sanity on real values (avoids relying on literal syntax)
+  .test(+0.0 .ieeeStr .ieeeFloat .isSome .assertEq True)
+  .test(+0.0 / +0.0 .ieeeStr .ieeeFloat .match{ .some f->f .isNaN; .empty->False } .assertEq True)
+
+  // ieeeFloat accepts NaN/Inf, but float must reject them
+  .test(`NaN` .float .isEmpty .assertEq True)
+  .test(`Infinity` .float .isEmpty .assertEq True)
+  .test(`-Infinity` .float .isEmpty .assertEq True)
+}

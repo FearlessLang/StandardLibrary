@@ -38,7 +38,8 @@ public record Int$0Instance(int val) implements Int$0{
     return instance(Math.abs(val));
   }
   @Override public Object imm$sqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)val)); }
-  @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toString(val)); }
+  @Override public Object read$str$0(){ return Str$0Instance.instance((val < 0 ? "" : "+")+val); }
+
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object imm$clamp$2(Object p0, Object p1){
