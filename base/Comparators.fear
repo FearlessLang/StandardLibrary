@@ -59,7 +59,7 @@ OrderBy[T,K]:{                       /// order values of T by a component/key K
   };
 
   .view[A](f:F[read A,read T]):OrderBy[A] ->       /// contramap: order A by mapping into T
-    {a0,a1,m-> this#(f#a0)<=>(this#(f#a1),m)};
+    {a0,a1,m-> this#(f#a0)<=>(this#(f#a1),m)};    
 }
 
 OrderBy[T]:OrderBy[T,T]{            /// produces an ordering via .cmp
@@ -203,7 +203,7 @@ OrderHashBy[T,K]:OrderBy[T,K],ToStrBy[T]{  /// order+hash by key K, plus per-val
     .hash a,h -> this#(f#a).hash(h);
     .str t->this#(f#t).str;
   };
-  .hideKey: OrderHashBy[T] -> {
+  .hideKey: OrderHashBy[T] -> {//Just convenience over .viewHash{::}
     .cmp t0,t1,m -> this#t0 <=> (this#t1,m);
     .hash t,h -> (this#t).hash(h);
     .str t ->this#t.str;

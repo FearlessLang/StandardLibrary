@@ -21,7 +21,7 @@ ToInfo[E:*]:{ read .info(by: ToInfoBy[imm E]): Info }     /// env-dependent Info
 
 FromInfo[T]:{ .fromInfo(i: Info): T }            /// parse/decode from Info
 
-DataType[T,T0]:ToInfo,ToImm[T0],WidenTo[T],OrderHash[T]{
+DataType[T,T0]:ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Extensible[T]{
   read .close(t: read T): read DataType[T,T0];                    /// close on t (often implemented as .close->:: when T:DataType)
 }
 /// Env-dependent DataType for T (contains E); imm rep is still T0.

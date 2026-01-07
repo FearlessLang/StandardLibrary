@@ -15,8 +15,8 @@ CapTry: ToIso[CapTry], WidenTo[CapTry]{
   /// the non deterministic exception.
   /// However any violations of strong exception safety can only be observed with an object
   /// capability because the iso reference is not linked to the outer world, so it is conceptually
-  //  data that could have equivalently been recreated internally; and can not escape as mut
-  mut #[T:**,R](data: iso T, try: read F[iso T,R]): mut Action[R];
+  //  data that could have equivalently been recreated internally.
+  mut #[T:**,R:*](data: iso T, try: read F[iso T,R]): mut Action[R];
   }
 CapTrys: F[mut System, mut CapTry]{sys -> sys.try}
   
