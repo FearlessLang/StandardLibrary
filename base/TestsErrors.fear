@@ -1,0 +1,11 @@
+package base;
+
+TestThrowing:Main{s->Block#
+  .let try= {s.try}
+  .do{try#{12 .div 0}.assertInfo }
+  .do{TestSuite1#try}
+  .done
+}
+TestSuite1:F[mut CapTry,Void]{try->Block#
+  .do{try#{+12/3 / +0/1}.assertInfo }
+  .done}

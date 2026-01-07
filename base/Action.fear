@@ -1,3 +1,40 @@
 package base;
 
-Action[R:*]:{}
+//Action[R:*]:{}
+
+Actions: {
+  //.lazy is a bad method, suggests failure causes .info, but of course not.
+  //.lazy[T:*](f: mut MF[T]): mut Action[T] -> {::.ok(f#)};
+  .ok[T:*](x: T): mut Action[T] -> {::.ok(x)};
+  .info[T:*](info: Info): mut Action[T] -> {::.info(info)};
+  }
+Action[T:*]: {
+  mut .run[R:*](m: mut ActionMatch[T,R]): R;
+  mut .map[R:*](f: mut MF[T,R]): mut Action[R] -> {m -> this.run{
+    .ok   x -> m.ok(f#x);
+    .info i -> m.info(i);
+    }};
+  mut .andThen[R:*](f: mut MF[T,mut Action[R]]): mut Action[R] -> {m -> this.run{
+    .ok   x -> f#x.run(m);
+    .info i -> m.info(i);
+    }};
+  mut .mapInfo(f: mut MF[Info,Info]): mut Action[T] -> {m -> this.run{
+    .ok   x -> m.ok(x);
+    .info i -> m.info(f#i);
+    }};
+  mut !: T -> this.run{.ok(x) -> x; .info(i) -> Error!i};
+  mut .ok  : mut Opt[T] -> this.run{.ok x -> Opts#x; .info _ -> {}};
+  mut .info: Opt[Info]  -> this.run[Opt[Info]]{.ok _ -> {}; .info i -> Opts#i};
+  mut .assertInfo: Void -> this.run{
+    .ok _ -> Assert.msg `Failure expected but nothing was thrown`;
+    .info _->{};
+    };
+  //mut .assertInfo(constraint1: Str): Void -> this.run{
+  //  .ok _ -> Assert.msg `Failure expected containing`^constraint1^`but nothing was thrown`;
+  //  .info _->{};//checking containmenet is not obvious
+  //  };//TODO: this can be a good exercise to implement this directl in Fearless
+  }
+ActionMatch[T:*,R:*]: {
+  mut .ok(x: T): R;
+  mut .info(info: Info): R;
+  }

@@ -31,6 +31,8 @@ Bool:Sealed,DataType[Bool,Bool]{
   .str -> this.imm?{ .then->`True`; .else->`False` };
 
   .info -> Infos.msg(this.str);
+  .assertTrue: Void -> this.assertEq True;
+  .assertFalse: Void -> this.assertEq False;
 }
 
 True:Bool{

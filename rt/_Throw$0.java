@@ -25,7 +25,7 @@ public interface _Throw$0{
   default Object imm$stackTrace$0(){
     var st= new Throwable().getStackTrace();
     var al= new ArrayList<>();
-    for(int i=2;i<st.length;i++){
+    for(int i= 2; i < st.length; i++){
       var s= fmtFrame(st[i]);
       if(s != null){ al.add(new Str$0Instance(s)); }
     }
