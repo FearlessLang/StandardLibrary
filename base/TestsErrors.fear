@@ -1,6 +1,6 @@
 package base;
 
-TestThrowing:Main{s->Block#
+TestThrowingExample:Main{s->Block#
   .let try= {s.try}
   .do{try#{12 .div 0}.assertInfo }
   .do{TestSuite1#try}
@@ -9,3 +9,22 @@ TestThrowing:Main{s->Block#
 TestSuite1:F[mut CapTry,Void]{try->Block#
   .do{try#{+12/3 / +0/1}.assertInfo }
   .done}
+
+TestThrowing:Main{s->Block#
+  .let try= {s.try}
+  .do{ThrowHarnessSuite#try}
+  .do{ThrowArithSuite#try}
+  .do{ThrowRangeSuite#try}
+  .do{ThrowListSuite#try}
+  .do{ThrowMapSuite#try}
+  .done
+}
+
+ThrowHarnessSuite:F[mut CapTry,Void]{try->Block#
+  // Assert failures are errors; ensure they are catchable+observable via try#(...) + assertInfo
+  .do{try#{Assert! False}.assertInfo}
+
+  // "assertInfo" itself must fail on an ok Action (it throws via Assert.msg) :contentReference[oaicite:2]{index=2}
+  .do{try#{Actions.ok(+1).assertInfo}.assertInfo}
+  .done
+}

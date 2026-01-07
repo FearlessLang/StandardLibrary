@@ -1,0 +1,81 @@
+package base;
+
+ThrowArithSuite:F[mut CapTry,Void]{try->Block#
+  // div by 0 (Nat/Int/Byte/Num)
+  .do{try#{12 .div 0}.assertInfo}
+  .do{try#{+12 .div 0}.assertInfo}
+  .do{try#{+12.byte .div 0}.assertInfo}
+  .do{try#{+12/3 / +0/1}.assertInfo}
+
+  // Nat overflow/underflow
+  .do{try#{4_294_967_295 + 1}.assertInfo}
+  .do{try#{0 - 1}.assertInfo}
+  .do{try#{65_536 * 65_536}.assertInfo}
+
+  // Int overflow/underflow
+  .do{try#{+2147483647 + +1}.assertInfo}
+  .do{try#{-2147483648 - +1}.assertInfo}
+  .do{try#{+65_536 * +65_536}.assertInfo}
+  .do{try#{-2147483648.abs}.assertInfo}
+
+  // Byte overflow/underflow
+  .do{try#{+250.byte + (+10.byte)}.assertInfo}
+  .do{try#{+0.byte - (+1.byte)}.assertInfo}
+
+  // index helpers that should error on bad inputs
+  .do{try#{+7.wrapIndex 0}.assertInfo}          // throws iff len==0
+  .do{try#{0.indexOffset -1}.assertInfo}        // negative result
+  .do{try#{4_294_967_295.indexOffset +1}.assertInfo} // overflow
+  .done
+}
+
+
+ThrowRangeSuite:F[mut CapTry,Void]{try->Block#
+  // invalid range (lo > hi) must error
+  .do{try#{+3.assertInRange(+5,+1)}.assertInfo}
+
+  // valid range but value outside must error
+  .do{try#{+3.assertInRange(+5,+7)}.assertInfo}
+
+  // open range excludes endpoints
+  .do{try#{+5.assertInRangeOpen(+5,+7)}.assertInfo}
+
+  // non-numeric too
+  .do{try#{`b`.assertInRange(`c`,`d`)}.assertInfo}
+
+  // clamp precondition: lo > hi must error (Int and Nat both specify this)
+  .do{try#{+3.clamp(+5,+1)}.assertInfo}
+  .do{try#{3.clamp(5,1)}.assertInfo}
+  .done
+}
+
+ThrowListSuite:F[mut CapTry,Void]{try->Block#
+  // empty list traps
+  .do{try#{List[Str].get 0}.assertInfo}
+  .do{try#{List[Str].first}.assertInfo}
+  .do{try#{List[Str].last}.assertInfo}
+  .do{try#{List[Str].with(0,`x`)}.assertInfo}
+  .do{try#{List[Str].without 0}.assertInfo}
+  .do{try#{List[Str].withAlso(1,`x`)}.assertInfo}
+
+  // out-of-range on non-empty
+  .do{try#{Lists#(`a`).get 1}.assertInfo}
+  .do{try#{Lists#(`a`).without 1}.assertInfo}
+  .do{try#{Lists#(`a`).with(1,`b`)}.assertInfo}
+  .do{try#{Lists#(`a`).withAlso(2,`b`)}.assertInfo}
+
+  // subList end > size
+  .do{try#{Lists#(`a`,`b`).subList(0,3)}.assertInfo}
+  .done
+}
+
+ThrowMapSuite:F[mut CapTry,Void]{try->Block#
+  // empty map: get/without must error
+  .do{try#{Maps#[Str,Str,Str]{::}.get `a`}.assertInfo}
+  .do{try#{Maps#[Str,Str,Str]{::}.without `a`}.assertInfo}
+
+  // singleton: missing key must error
+  .do{try#{Maps#({::}, `a`, `x`).get `b`}.assertInfo}
+  .do{try#{Maps#({::}, `a`, `x`).without `b`}.assertInfo}
+  .done
+}
