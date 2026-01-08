@@ -25,7 +25,7 @@ Opt[E:*]: _Opt[E]{
   
   .cmp by, a, b, m -> a.match{
     .empty -> b.match{ .empty -> m.eq; .some _ -> m.lt; };
-    .some ea -> b.match[read]{
+    .some ea -> b.match{
       .empty   -> m.gt;
       .some eb -> by#ea<=>(by#eb, m);
       }
@@ -43,11 +43,9 @@ _Opt[E:*]:DataType[Opt[E],Opt[imm E],E,imm E]{
 
   mut  .or(default: E): E;
   read .or(default: read/imm E): read/imm E;
-  imm  .or(default: imm E): imm E;
 
   mut  |(default: E): E;
   read |(default: read/imm E): read/imm E;
-  imm  |(default: imm E): imm E;
 
   mut  ||(default: mut MF[E]): E;
   read ||(default: mut MF[read/imm E]): read/imm E;
@@ -55,7 +53,6 @@ _Opt[E:*]:DataType[Opt[E],Opt[imm E],E,imm E]{
 
   mut  !: E;
   read !: read/imm E;
-  imm  !: imm E;
 
   mut  .flow: mut Flow[E];
   read .flow: mut Flow[read/imm E];

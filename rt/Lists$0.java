@@ -7,8 +7,7 @@ import java.util.stream.Collectors;
 import static base.Util.*;
 public interface Lists$0 extends Sealed$0{
   default Object imm$singletonRead$1(Object p0){ return imm$$hash$1(p0); }
-  default Object imm$singletonImm$1(Object p0){ return imm$$hash$1(p0); }
-  
+    
   default Object imm$$hash$1(Object p0){
     var l= new ArrayList<Object>(1);
     l.add(p0);
@@ -118,7 +117,6 @@ record List$1Instance(List<Object> val) implements List$1{
 
   @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
   @Override public Object read$get$1(Object p0){ return val.get(idx(p0)); }
-  @Override public Object imm$get$1(Object p0){ return val.get(idx(p0)); }
 
   @Override public Object mut$opt$1(Object p0){
     int i= natToInt(p0);
@@ -132,14 +130,12 @@ record List$1Instance(List<Object> val) implements List$1{
     return val.get(0);
   }
   @Override public Object read$first$0(){ return mut$first$0(); }
-  @Override public Object imm$first$0(){ return mut$first$0(); }
 
   @Override public Object mut$last$0(){
     //can not be empty check(!val.isEmpty(), "List was empty");
     return val.get(val.size()-1);
   }
   @Override public Object read$last$0(){ return mut$last$0(); }
-  @Override public Object imm$last$0(){ return mut$last$0(); }
 
   @Override public Object mut$firstOpt$0(){ return optSome(val.get(0)); }
   @Override public Object read$firstOpt$0(){ return mut$firstOpt$0(); }
@@ -158,7 +154,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
-  @Override public Object imm$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
 
   @Override public Object mut$$lt_plus$1(Object p0){
     var l= new ArrayList<Object>(val.size()+1);
@@ -167,7 +162,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$$lt_plus$1(Object p0){ return mut$$lt_plus$1(p0); }
-  @Override public Object imm$$lt_plus$1(Object p0){ return mut$$lt_plus$1(p0); }
 
   @Override public Object mut$$plus_gt$1(Object p0){
     var l= new ArrayList<Object>(val.size()+1);
@@ -176,7 +170,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$$plus_gt$1(Object p0){ return mut$$plus_gt$1(p0); }
-  @Override public Object imm$$plus_gt$1(Object p0){ return mut$$plus_gt$1(p0); }
 
   @Override public Object mut$subList$2(Object p0, Object p1){
     int s= Util.natToInt(p0); int e= Util.natToInt(p1);
@@ -184,11 +177,9 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(val.subList(s,e));
   }
   @Override public Object read$subList$2(Object p0, Object p1){ return mut$subList$2(p0,p1); }
-  @Override public Object imm$subList$2(Object p0, Object p1){ return mut$subList$2(p0,p1); }
 
   @Override public Object mut$subList$1(Object p0){ return mut$subList$2(p0, Util.intToNat(val.size())); }
   @Override public Object read$subList$1(Object p0){ return mut$subList$1(p0); }
-  @Override public Object imm$subList$1(Object p0){ return mut$subList$1(p0); }
 
   @Override public Object mut$with$2(Object p0, Object p1){
     int i= idx(p0);
@@ -197,7 +188,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0,p1); }
-  @Override public Object imm$with$2(Object p0, Object p1){ return mut$with$2(p0,p1); }
 
   @Override public Object mut$withAlso$2(Object p0, Object p1){
     int i= natToInt(p0);
@@ -209,7 +199,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$withAlso$2(Object p0, Object p1){ return mut$withAlso$2(p0,p1); }
-  @Override public Object imm$withAlso$2(Object p0, Object p1){ return mut$withAlso$2(p0,p1); }
 
   @Override public Object mut$without$1(Object p0){
     int i= idx(p0);
@@ -222,11 +211,9 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$without$1(Object p0){ return mut$without$1(p0); }
-  @Override public Object imm$without$1(Object p0){ return mut$without$1(p0); }
 
   @Override public Object mut$reverse$0(){ return wrap(val.reversed()); }
   @Override public Object read$reverse$0(){ return mut$reverse$0(); }
-  @Override public Object imm$reverse$0(){ return mut$reverse$0(); }
 
   @Override public Object mut$as$1(Object p0){
     var l= new ArrayList<Object>(val.size());

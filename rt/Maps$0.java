@@ -42,7 +42,6 @@ public interface Maps$0 extends Sealed$0{
   }
   static OrderHashBy$1 toKey(Object k){return (OrderHashBy$1) ((OrderHashBy$2)k).imm$hideKey$0(); }
   default Object read$singletonRead$3(Object p0,Object p1,Object p2){ return imm$$hash$3(p0,p1,p2); }
-  default Object imm$singletonImm$3(Object p0,Object p1,Object p2){ return imm$$hash$3(p0,p1,p2); }
 
   Maps$0 instance= new Maps$0(){};
 }
@@ -69,7 +68,6 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
     return e;
   }
   @Override public Object read$get$1(Object p0){ return mut$get$1(p0); }
-  @Override public Object imm$get$1(Object p0){ return mut$get$1(p0); }
 
   @Override public Object mut$opt$1(Object p0){
     var mk= mapKey(keyOh,p0);
@@ -90,7 +88,6 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
     return new Map$2Instance(keyOh,m);
   }
   @Override public Object read$with$2(Object p0,Object p1){ return mut$with$2(p0,p1); }
-  @Override public Object imm$with$2(Object p0,Object p1){ return mut$with$2(p0,p1); }
 
   @Override public Object mut$without$1(Object p0){
     var mk= mapKey(keyOh,p0);
@@ -99,7 +96,6 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
     return new Map$2Instance(keyOh,m);
   }
   @Override public Object read$without$1(Object p0){ return mut$without$1(p0); }
-  @Override public Object imm$without$1(Object p0){ return mut$without$1(p0); }
 
   @Override public Object mut$$plus_plus$1(Object p0){
     var other= (Map$2Instance)p0;
@@ -113,7 +109,6 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
     return new Map$2Instance(keyOh,m);
   }
   @Override public Object read$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
-  @Override public Object imm$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
 
   @Override public Object mut$as$1(Object p0){
     var m= new LinkedHashMap<MapKey,Object>(elems.size()*2);

@@ -7,7 +7,6 @@ Maps:Sealed{
   #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E):mut Map[K,E]->Magic!;
   #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
   .singletonRead[K,K0,E:*](OrderHashBy[K,K0], K, read E): read Map[K,E]->Magic!;
-  .singletonImm[K,K0,E:*](OrderHashBy[K,K0], K, imm E): imm Map[K,E]->Magic!;
   }
 
 /// Map[K,E] is the standard persistent key/value dictionary.
@@ -22,7 +21,6 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E]{
 
   mut  .get(k: K): E;              /// value for k; throws iff k absent
   read .get(k: K): read/imm E;     /// value for k; throws iff k absent
-  imm  .get(k: K): imm E;          /// value for k; throws iff k absent
 
   mut  .opt(k: K): mut Opt[E];           /// .some(get(k)) if present; .empty otherwise
   read .opt(k: K): mut Opt[read/imm E];  /// .some(get(k)) if present; .empty otherwise
@@ -32,15 +30,12 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E]{
 
   mut  .with(k: K, e: E): mut Map[K,E];           /// insert/replace binding for k
   read .with(k: K, e: read E): read Map[K,E];     /// insert/replace binding for k
-  imm  .with(k: K, e: imm E): Map[K,E];           /// insert/replace binding for k
 
   mut  .without(k: K): mut Map[K,E];       /// remove binding for k; throws iff k absent
   read .without(k: K): read Map[K,E];      /// remove binding for k; throws iff k absent
-  imm  .without(k: K): Map[K,E];           /// remove binding for k; throws iff k absent
 
   mut  ++ (other: mut Map[K,E]): mut Map[K,E];    /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
   read ++ (other: read Map[K,E]): read Map[K,E];  /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
-  imm  ++ (other: Map[K,E]): Map[K,E];            /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
 
 //  TODO: for the future, but there are big questions about the exact type signature(s)
 //  mut  .merge(merge: mut F[E,E,E], other: mut Map[K,E]): mut Map[K,E];
@@ -60,12 +55,12 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E]{
   //TODO: for the future, we need to consider the variants of this (update, computeIfAbsent, etc)
   //mut  .update(k: K, f: mut MF[E,E]): mut Map[K,E];        /// replace value at k with f(get(k)); throws iff absent
   
-  .info by->Block#[Info]
-    .let[Map[Str,Info]] map= {this.flow.mapping({::},{
+  .info by->Block#
+    .let map= {this.flow.mapping({::},{
       .key e->this.keyOh#(e.key).str;
       .elem e->by#(e.elem).info;
       }).as{::}}
-    .return{Info{'i
+    .return{{'i
     .match->::.map map;
     .map -> map;
     .imm->i;

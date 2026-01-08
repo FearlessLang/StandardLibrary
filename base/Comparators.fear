@@ -94,53 +94,53 @@ OrderHash[T]:Order[T],ToStr{            /// OrderHash adds hashing and ToStr. Th
   read .assertLt(x: read T):Void -> this.assertLt(x,{``});
   read .assertLt(x: read T, msg:F[Str]):Void -> Assert!(
     this < x,
-    { msg# | `Expected: `+this | ` < `+(this.close[read](x)) });
+    { msg# | `Expected: `+this | ` < `+(this.close(x)) });
     
   read .assertLe(x: read T):Void -> this.assertLe(x,{``});
   read .assertLe(x: read T, msg:F[Str]):Void -> Assert!(
     this <= x,
-    { msg# | `Expected: `+this | ` <= `+(this.close[read](x)) });
+    { msg# | `Expected: `+this | ` <= `+(this.close(x)) });
 
   read .assertGt(x: read T):Void -> this.assertGt(x,{``});
   read .assertGt(x: read T, msg:F[Str]):Void -> Assert!(
     this > x,
-    { msg# | `Expected: `+this | ` > `+(this.close[read](x)) });
+    { msg# | `Expected: `+this | ` > `+(this.close(x)) });
 
   read .assertGe(x: read T):Void -> this.assertGe(x,{``});
   read .assertGe(x: read T, msg:F[Str]):Void -> Assert!(
     this >= x,
-    { msg# | `Expected: `+this | ` >= `+(this.close[read](x)) });
+    { msg# | `Expected: `+this | ` >= `+(this.close(x)) });
         
   read .assertInRange(lo: read T, hi: read T):Void -> this.assertInRange(lo,hi,{``});
   read .assertInRange(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
     this.inRange(lo,hi),
     { msg# | `Expected in [lo,hi]`
-      | `lo: `+(this.close[read](lo))
-      | `hi: `+(this.close[read](hi))
+      | `lo: `+(this.close(lo))
+      | `hi: `+(this.close(hi))
       | `actual: `+this });
   
   read .assertInRangeOpen(lo: read T, hi: read T):Void -> this.assertInRangeOpen(lo,hi,{``});
   read .assertInRangeOpen(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
     this.inRangeOpen(lo,hi),
     { msg# | `Expected in (lo,hi)`
-      | `lo: `+(this.close[read](lo))
-      | `hi: `+(this.close[read](hi))
+      | `lo: `+(this.close(lo))
+      | `hi: `+(this.close(hi))
       | `actual: `+this });
       
   read .assertInRangeLoOpen(lo: read T, hi: read T):Void -> this.assertInRangeLoOpen(lo,hi,{``});
   read .assertInRangeLoOpen(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
     this.inRangeLoOpen(lo,hi),
     { msg# | `Expected in (lo,hi]`
-      | `lo: `+(this.close[read](lo))
-      | `hi: `+(this.close[read](hi))
+      | `lo: `+(this.close(lo))
+      | `hi: `+(this.close(hi))
       | `actual: `+this });
       
   read .assertInRangeHiOpen(lo: read T, hi: read T):Void -> this.assertInRangeHiOpen(lo,hi,{``});
   read .assertInRangeHiOpen(lo: read T, hi: read T, msg:F[Str]):Void -> Assert!(
     this.inRangeHiOpen(lo,hi),
     { msg# | `Expected in [lo,hi)`
-      | `lo: `+(this.close[read](lo))
-      | `hi: `+(this.close[read](hi))
+      | `lo: `+(this.close(lo))
+      | `hi: `+(this.close(hi))
       | `actual: `+this });
 }
 

@@ -19,11 +19,9 @@ List[E:*]:_List[E]{
 
   mut  <+ e->Lists#(e);
   read <+ e->Lists.singletonRead[E](e);  
-  imm  <+ e->Lists.singletonImm[E](e);
 
   mut  +> e->Lists#(e);
   read +> e->Lists.singletonRead[E](e);
-  imm  +> e->Lists.singletonImm[E](e);
   
   .subList(start,end)->Block#(
     Assert!(start==0 && {end==0},
@@ -38,9 +36,6 @@ List[E:*]:_List[E]{
   read .withAlso(i,e)->Block#(
     Assert!(i==0,{`.withAlso(`+i+`, _) called on empty list`}),
     Lists.singletonRead[E]e);
-  imm .withAlso(i,e)->Block#(
-    Assert!(i==0,{`.withAlso(`+i+`, _) called on empty list`}),
-    Lists.singletonImm[E]e);
 
   .without(i)->Assert.msg `.without called on empty list`;
 
@@ -66,12 +61,12 @@ List[E:*]:_List[E]{
 
   .cmp(by, a, b, m)->a.opt(0).match{
     .empty->b.opt(0).match{ .empty->m.eq; .some _->m.lt; };
-    .some ea->b.opt[read](0).match{
+    .some ea->b.opt(0).match{
       .empty->m.gt;
       .some eb->by#ea<=>(by#eb,{
         .lt->m.lt;
         .gt->m.gt;
-        .eq->this.cmp(by, a.subList[read](1), b.subList[read](1), m);
+        .eq->this.cmp(by, a.subList(1), b.subList(1), m);
         });
       };
     };
@@ -82,7 +77,6 @@ _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E]{
 
   mut  .get(i: Nat): E;                      /// element at i (0-based); throws if i >= size
   read .get(i: Nat): read/imm E;             /// element at i (0-based); throws if i >= size
-  imm  .get(i: Nat): imm E;                  /// element at i (0-based); throws if i >= size
 
   mut  .opt(i: Nat): mut Opt[E];             /// .some(get(i)) if i < size; .empty otherwise
   read .opt(i: Nat): mut Opt[read/imm E];    /// .some(get(i)) if i < size; .empty otherwise
@@ -90,11 +84,9 @@ _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E]{
 
   mut  .first: E;                            /// get(0); throws iff empty
   read .first: read/imm E;                   /// get(0); throws iff empty
-  imm  .first: imm E;                        /// get(0); throws iff empty
 
   mut  .last: E;                             /// get(size-1); throws iff empty
   read .last: read/imm E;                    /// get(size-1); throws iff empty
-  imm  .last: imm E;                         /// get(size-1); throws iff empty
 
   mut  .firstOpt: mut Opt[E];                /// .some(first) if non-empty; .empty otherwise
   read .firstOpt: mut Opt[read/imm E];       /// .some(first) if non-empty; .empty otherwise
@@ -106,39 +98,30 @@ _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E]{
 
   mut  ++ (xs: mut List[E]): mut List[E];    /// concat: this followed by xs
   read ++ (xs: read List[E]): read List[E];  /// concat: this followed by xs
-  imm  ++ (xs: List[E]): List[E];    /// concat: this followed by xs
 
   mut  <+ (e: E): mut List[E];               /// add element to left (head)
   read <+ (e: read E): read List[E];         /// add element to left
-  imm  <+ (e: imm E): List[E];               /// add element to left
 
   mut  +> (e: E): mut List[E];               /// add element to right (tail)
   read +> (e: read E): read List[E];         /// add element to right
-  imm  +> (e: imm E): List[E];               /// add element to right
 
   mut  .subList(start: Nat, end: Nat): mut List[E];      /// slice [start,end); throws if start>end or end>size
   read .subList(start: Nat, end: Nat): read List[E];     /// slice [start,end); throws if start>end or end>size
-  imm  .subList(start: Nat, end: Nat): List[E];      /// slice [start,end); throws if start>end or end>size
 
   mut  .subList(start: Nat): mut List[E];      /// subList(start, size)
   read .subList(start: Nat): read List[E];     /// subList(start, size)
-  imm  .subList(start: Nat): List[E];      /// subList(start, size)
 
   mut  .with(i: Nat, e: E): mut List[E];       /// replace element at i; throws if i >= size
   read .with(i: Nat, e: read E): read List[E]; /// replace element at i; throws if i >= size
-  imm  .with(i: Nat, e: imm E): List[E];       /// replace element at i; throws if i >= size
 
   mut  .withAlso(i: Nat, e: E): mut List[E];       /// insert before i; i in [0,size]; throws otherwise
   read .withAlso(i: Nat, e: read E): read List[E]; /// insert before i; i in [0,size]; throws otherwise
-  imm  .withAlso(i: Nat, e: imm E): List[E];       /// insert before i; i in [0,size]; throws otherwise
 
   mut  .without(i: Nat): mut List[E];          /// remove element at i; throws if i>=size
   read .without(i: Nat): read List[E];         /// remove element at i; throws if i>=size
-  imm  .without(i: Nat): List[E];              /// remove element at i; throws if i>=size
 
   mut  .reverse: mut List[E];                /// reverse order
   read .reverse: read List[E];               /// reverse order
-  imm  .reverse: List[imm E];                /// reverse order
 
   mut  .flow: mut Flow[E];                   /// view as flow
   read .flow: mut Flow[read/imm E];          /// view as flow
@@ -155,5 +138,4 @@ Lists:Sealed{//No need of empty, just use {}
   #[E:*](E,E,E): mut List[E]->Magic!;
   #[E:*](E,E,E,E): mut List[E]->Magic!;
   .singletonRead[E:*](read E): read List[E]->Magic!;
-  .singletonImm[E:*](imm E): imm List[E]->Magic!;
 }
