@@ -1,0 +1,69 @@
+package base;
+
+/// A couple of concrete dictionaries, so we can test the "DataTypeBy#t has close->t" path.
+IntBy:DataTypeBy[Int,Int]{
+  .cmp t0,t1,m -> t0<=> (t1,m);
+  .hash(t,h)   -> t.hash h;
+  .str (t)     -> t.str;
+  .info(t)     -> t.info;
+  .imm (t)     -> t.imm;
+}
+StrBy:DataTypeBy[Str,Str]{
+  .cmp t0,t1,m -> t0<=> (t1,m);
+  .hash(t,h)   -> t.hash h;
+  .str (t)     -> t.str;
+  .info(t)     -> t.info;
+  .imm (t)     -> t.imm;
+}
+
+/// Observably-nontrivial close: proves "~ passes this.close, not 'this'".
+Weird:Extensible[Int]{ .close -> +7; }
+
+ExtensibleBasics:F[Tests,Tests]{::
+  .test((+3~{x->x* +2}).assertEq +6)
+  .test((`a`~{s->s+`b`}).assertEq `ab`)
+  .test((Lists#(+1,+2)~{xs->xs.size}).assertEq 2)
+  .test((Maps#({::}, `a`, `x`)~{::.get `a`}).assertEq `x`)
+  .test((Opts#(+1)~{o->o.isSome}).assertEq True)
+}
+
+ExtensibleCloseSemantics:F[Tests,Tests]{::
+  .test((Weird~{n->n + +1}).assertEq +8)
+  .test(((Weird~{n->Flows#(n,n + +1)}).list.get 1).assertEq +8)
+}
+
+ExtensibleReenterFlow:F[Tests,Tests]{::
+  .test(
+    (((Lists#(+1,+2).flow.map{x->x* +2}.list.get 0)
+      ~{n->Flows#(n,n + +1)})
+      .map{x->x + +1}.list.get 1)
+    .assertEq +4)
+}
+
+/// "C#-style" extension methods: stuff~NewMeth#(a,b,c) (i.e., (stuff~NewMeth)#(a,b,c)).
+NewAdd:MF[Int,F[Int,Int]]{x->{y->x+y}}
+NewSum3:MF[Int,F[Int,Int,Int,Int]]{x->{a,b,c->x+a+b+c}}
+AddFirst:MF[List[Int],F[Int,Int]]{xs->{k-> (xs.get 0)+k}}
+
+ExtensibleExtensionMethods:F[Tests,Tests]{::
+  .test(+3~NewAdd# +4.assertEq +7)
+  .test(+1~NewSum3#(+2,+3,+4).assertEq +10)
+  .test(Lists# +5~ AddFirst# +7.assertEq +12)
+}
+
+/// Shows the "adapter dictionary produces an extensible object with close->t" behavior.
+ExtensibleViaDataTypeBy:F[Tests,Tests]{::
+  .test(IntBy# +3.imm~{n->n + +1}.assertEq +4)
+  .test(StrBy#`a`.imm~{s->s+`b`}.assertEq `ab`)
+}
+
+/// Standalone entry point to run only Extensible-focused tests.
+ExtensibleTest:Main{s->
+  Tests
+    .testSuite ExtensibleBasics
+    .testSuite ExtensibleCloseSemantics
+    .testSuite ExtensibleReenterFlow
+    .testSuite ExtensibleExtensionMethods
+    .testSuite ExtensibleViaDataTypeBy
+    .done
+}

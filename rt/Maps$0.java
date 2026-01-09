@@ -129,6 +129,7 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
   @Override public Object read$elems$0(){ return new Flow$1Instance(elems.values().stream()); }
 
   @Override public Object read$close$0(){ return this; }
+  @Override public Object mut$close$0(){ return this; }
   @Override public Object read$close$1(Object p0){ return p0; }
   @Override public Object read$imm$1(Object p0){
     var by= (ToImmBy$2)p0;

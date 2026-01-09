@@ -25,9 +25,8 @@ DataType[T,T0]:ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Extensible[T]{
   read .close(t: read T): read DataType[T,T0];                    /// close on t (often implemented as .close->:: when T:DataType)
 }
 /// Env-dependent DataType for T (contains E); imm rep is still T0.
-DataType[T,T0,E:*,E0]:ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E]{
+DataType[T,T0,E:*,E0]:ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Extensible[T]{
   read .close(t: read T): read DataType[T,T0,E,E0];          /// close on t in this env-dependent instance
-  .close: read T;                                            /// closed fixpoint value
 
   /// Freeze the env by capturing element dictionaries in "by".
   /// Note: by may be a true dictionary supplier ({::}) or a projection ({::.key}).
