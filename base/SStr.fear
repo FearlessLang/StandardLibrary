@@ -56,7 +56,7 @@ package base;
 ///   `+0.1`.ieeeFloat!.numExact!.inRange(+0.100000000000000005/1, +2/1) holds
 ///   `+0.1`.ieeeFloat!.numExact!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
 
-Str:Sealed,DataType[Str,Str]{
+Str:Sealed,DataType[Str,Str],_AssertImmEmpty,_AssertImmSize{
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
   |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings

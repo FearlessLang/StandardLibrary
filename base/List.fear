@@ -3,7 +3,7 @@ package base;
 /// List[E] is the standard persistent sequence.
 /// It also supports DataType[List[E],List[imm E],E,imm E] operations:
 /// .imm/.str/.info/.cmp/.hash/.close (see DataType docs).
-List[E:*]:_List[E]{
+List[E:*]:_List[E],_AssertEmpty,_AssertSize{
   .close->this; .close->::;
   .size->0;
   .isEmpty->True;

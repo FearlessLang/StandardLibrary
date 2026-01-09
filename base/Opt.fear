@@ -1,6 +1,6 @@
 package base;
 
-Opt[E:*]: _Opt[E]{
+Opt[E:*]: _Opt[E],_AssertEmpty{
   .close->this; .close->::;
   .match(m)   -> m.empty;
   .imm by     -> this.match[Opt[imm E]]{.some x -> Opts#(by#x.imm); .empty->{} };

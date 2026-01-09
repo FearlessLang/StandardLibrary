@@ -17,7 +17,7 @@ Infos:Sealed {
 //how to turn keys into string is part of the key is datatype of map
 //will have to syntetize fresh key pedex if the str is already in there.
 
-Info:Sealed,DataType[Info,Info]{
+Info:Sealed,DataType[Info,Info],_AssertImmEmpty{
   .close->::; .close->this;
   .info->this.imm;
   .imm->{};

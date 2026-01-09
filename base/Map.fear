@@ -12,7 +12,7 @@ Maps:Sealed{
 /// Map[K,E] is the standard persistent key/value dictionary.
 /// Keys are treated as imm and compared/hashed using the map's stored OrderHashBy[K,...].
 /// The flow order, .str order etc all respect/follow the map insertion order.
-Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E]{
+Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize{
 
   read .size: Nat;                 /// number of elements
   read .isEmpty: Bool;             /// True iff size == 0

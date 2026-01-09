@@ -15,3 +15,42 @@ _AssertApprox[T]:DataType[T,T]{
       | `delta: `+(this.close(delta))
       | `actual: `+this });
   }
+  
+_AssertSize:{
+  read .size: Nat;
+
+  read .assertSize(expected: Nat): Void -> this.assertSize(expected,{``});
+  read .assertSize(expected: Nat, msg: F[Str]): Void -> Assert!(
+    this.size == expected,
+    { msg#
+      | `Expected size: `+expected
+      | `Actual size: `+(this.size) });
+  }
+
+_AssertImmSize:{
+  imm .size: Nat;
+
+  imm .assertSize(expected: Nat): Void -> this.assertSize(expected,{``});
+  imm .assertSize(expected: Nat, msg: F[Str]): Void -> Assert!(
+    this.size == expected,
+    { msg#
+      | `Expected size: `+expected
+      | `Actual size: `+(this.size) });
+  }
+
+_AssertEmpty:{
+  read .isEmpty: Bool;
+
+  read .assertEmpty: Void -> this.assertEmpty({``});
+  read .assertEmpty(msg: F[Str]): Void -> Assert!(
+    this.isEmpty,
+    { msg# | `Expected empty` });
+  }
+_AssertImmEmpty:{
+  imm .isEmpty: Bool;
+
+  imm .assertEmpty: Void -> this.assertEmpty({``});
+  imm .assertEmpty(msg: F[Str]): Void -> Assert!(
+    this.isEmpty,
+    { msg# | `Expected empty` });
+  }
