@@ -11,7 +11,7 @@ CapTry: ToIso[CapTry], WidenTo[CapTry]{
   /// This method upholds strong exception safety, so you can observe changes to
   ///  the program state from any exception-causing code.
   mut #[R:*](try: read F[R]): mut Action[R];
-  /// This method is designed to take an iso object capability to do effects while handing
+  /// This method is designed to take an iso object capability to do effects while handling
   /// the non deterministic exception.
   /// However any violations of strong exception safety can only be observed with an object
   /// capability because the iso reference is not linked to the outer world, so it is conceptually

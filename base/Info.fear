@@ -13,16 +13,16 @@ Infos:Sealed {
   .map(k1: Str, e1: read ToInfo): Info-> Maps#({::},k1,e1.info).info{::};
   .map(k1: Str, e1: read ToInfo,k2: Str, e2: read ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info).info{::};
   }
-//To make an info from arbitrary map/list, just do myList.info{::} myMap.info{::}
-//how to turn keys into string is part of the key is datatype of map
-//will have to syntetize fresh key pedex if the str is already in there.
+//To make an info from arbitrary map/list, just do myList.info{::} or myMap.info{::}
+//how to turn keys into string is part of the key datatype of map
+//will have to synthetize fresh key suffix if the str is already in there.
 
 Info:Sealed,DataType[Info,Info],_AssertImmEmpty{
   .close->::; .close->this;
   .info->this.imm;
   .imm->{};
   .hash->::.info (this.imm);
-  .cmp a,b,m ->Todo!;
+  .cmp a,b,m -> a.str <=> (b.str, m);
   .msg:Str->``;
   .list:List[Info]->{};
   .map:Map[Str,Info]->Maps#[Str,Str,Info]{::};
@@ -57,8 +57,14 @@ _InfoMapPlus:{ #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->
       .empty -> acc.with(ke.key, ke.elem);
       .some v -> acc.with(ke.key, v+(ke.elem));
     };
-  });
-}
+  });}
+_InfoFreshKey:{
+  #(m: Map[Str,Info], base: Str, i: Nat): Str -> Block#
+    .let k= {i == 0 ? {.then->base; .else->base + `#` + i.str; }}
+    .return{ m.containsKey(k)?{
+      .then -> this#(m, base, i + 1);
+      .else -> k;
+  }};}
 
 InfoMatch[R]:{
   .empty:R;

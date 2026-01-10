@@ -79,4 +79,5 @@ Str:Sealed,DataType[Str,Str],_AssertImmEmpty,_AssertImmSize{
   .numExact: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
   .natExact: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
   .byteExact: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
+  .cheapHash: Nat;                  /// fast string hash 
 }

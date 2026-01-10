@@ -1,21 +1,38 @@
 package base;
 
 Hasher:{                            /// stateful hasher for composite structures
-  mut #[A,B](a: read OrderHash[A], b: read OrderHash[B]): Nat ->  /// mix two already-hashable values
+ mut #[A,B](a: read OrderHash[A], b: read OrderHash[B]): Nat ->  /// mix two already-hashable values
     a.hash(this).aluMulWrap(31).aluAddWrap(b.hash(this));
   //Note that his can be overridden in other hashes, so that #(a,b) just calls Block#(a.hash(this),b.hash(this)) while this accumulates on mut state
-  
-  //#[A,A0,B,B0,C,C0](a: read OrderHash[A,A0], b: read OrderHash[B,B0], c: read OrderHash[C,C0]): Nat -> ...;
-  //...//more overloads to compose more values
+  mut #[A,B,C](a: read OrderHash[A], b: read OrderHash[B], c: read OrderHash[C]): Nat ->
+    a.hash(this)
+      .aluMulWrap(31).aluAddWrap(b.hash(this))
+      .aluMulWrap(31).aluAddWrap(c.hash(this));
+
+  mut #[A,B,C,D](a: read OrderHash[A], b: read OrderHash[B], c: read OrderHash[C], d: read OrderHash[D]): Nat ->
+    a.hash(this)
+      .aluMulWrap(31).aluAddWrap(b.hash(this))
+      .aluMulWrap(31).aluAddWrap(c.hash(this))
+      .aluMulWrap(31).aluAddWrap(d.hash(this)); 
+
   mut .nat(v: Nat): Nat->v;
-  mut .int(v: Int): Nat->0;
-  mut .num(v: Num): Nat->0;
-  mut .float(v: Float): Nat->0;
-  mut .byte(v: Byte): Nat->0;
+  mut .byte(v: Byte): Nat->v.nat;
+  mut .int(v: Int): Nat->v.aluNat;
+
+  /// Cheap-but-correct defaults for now: hash the canonical string forms.
+  /// (Float: must unify -0.0 and +0.0; and unify all NaNs.)
+  mut .float(v: Float): Nat ->
+    v.isNegZero?{.then->this.str(`0.0`); .else->this.str(v.ieeeStr)};
+  mut .num(v: Num): Nat -> this.str(v.str);
   mut .bool(v: Bool): Nat->v?{.then->0; .else->1};
-  mut .info(i: Info): Nat->this.str(i.str); 
-  mut .str(v: Str): Nat->0;  
-  mut .list[E:*,E0](f: OrderHashBy[imm E,E0],l: read List[E]):Nat->Todo!;
-  mut .opt[E:*,E0](f: OrderHashBy[imm E,E0], o: read Opt[E]):Nat->Todo!;
-  mut .map[K,E:*,E0](f: OrderHashBy[imm E,E0], m: read Map[K,E]):Nat->Todo!;
+  mut .info(i: Info): Nat->this.str(i.str);
+  mut .str(v: Str): Nat->v.cheapHash;
+  mut .list[E:*,E0](f: OrderHashBy[imm E,E0], l: read List[E]): Nat ->Block#
+    .let size= {l.size}
+    .return {size};//{l.flow.fold({ size }, { acc, e -> acc.aluMulWrap(31).aluAddWrap(f#e)}) };
+  mut .opt[E:*,E0](f: OrderHashBy[imm E,E0], o: read Opt[E]): Nat ->
+    o.match{ .empty -> 0; .some x -> this#(1, f#x); };
+  mut .map[K,E:*,E0](f: OrderHashBy[imm E,E0], m: read Map[K,E]): Nat ->Block#
+    .let size= {m.size}
+    .return {size};//m.flow.fold({ m.size }, { acc, ke -> this#(acc, m.keyOh#(ke.key), f#(ke.elem)) });  
   }

@@ -109,5 +109,8 @@ public record Str$0Instance(String val) implements Str$0{
       }
     catch(NumberFormatException e){ return optEmpty(); }
   }
+  @Override public Object imm$cheapHash$0(){
+    return Nat$0Instance.instance(val.hashCode());
+  }
   static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }
 }

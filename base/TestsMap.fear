@@ -101,4 +101,9 @@ MapBasics:F[Tests,Tests]{::
   .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `b` .assertEq True)
   .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .size .assertEq 1)
   .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .get `b` .assertEq `y`)
+  
+  .test(Maps#({::},`a`, `x`,`b`, `y`).info{::}.str.assertEq (`{a: `^`x`^`, b: `^`y`^`}`))
+  .test(Maps#({::},_BSs#`a`, `x`,_BSs#`b`, `y`, _BSs#`c`,`z`).info{::}.str.assertEq (`{Nope: `^`x`^`, Nope#1: `^`y`^`, Nope#2: `^`z`^`}`))  
 }
+_BS:DataType[_BS,_BS]{read .s:Str; .str->`Nope`; .info->Todo!; .close->this; .close->::; .imm->Todo!; .hash h->this.s.hash(h); .cmp a, b, m->a.s<=>(b.s,m);}
+_BSs:{#(s:Str):_BS->{s}}

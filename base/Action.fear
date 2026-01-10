@@ -25,6 +25,10 @@ Action[T:*]: {
   mut !: T -> this.run{.ok(x) -> x; .info(i) -> Error!i};
   mut .ok  : mut Opt[T] -> this.run{.ok x -> Opts#x; .info _ -> {}};
   mut .info: Opt[Info]  -> this.run[Opt[Info]]{.ok _ -> {}; .info i -> Opts#i};
+  mut .assertOk: Void -> this.run{
+    .ok _ -> {};
+    .info i -> Assert.msg(`Success expected but an Info was thrown:` | i.str);
+  };
   mut .assertInfo: Void -> this.run{
     .ok _ -> Assert.msg `Failure expected but nothing was thrown`;
     .info _->{};

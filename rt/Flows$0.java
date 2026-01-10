@@ -34,7 +34,7 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     try{
       var it= s.iterator();
       Object r= callMF$1(p0);
-      while(it.hasNext()){ r = callMF$3(p1,r,it.next()); }
+      while(it.hasNext()){ r = callF$3(p1,r,it.next()); }
       return r;
     }
     catch(IllegalStateException e){ throw consumed(); }

@@ -8,8 +8,9 @@ package base;
 /// - widen/equality helpers (defined elsewhere)
 ///
 /// Fixpoint story:
-/// - OrderHash[T] already provides the closed value .close:T allowing to this this as a T
-/// - DataType adds the opposide direction .close(t:T):DataType[...] allowing to this T as DataType[T]
+/// - OrderHash[T] already provides the method .close:T allowing to see this as a T
+/// - DataType adds the opposite direction .close(t:T):DataType[...] allowing to this T as DataType[T]
+/// Basically, by implementing those two methods we close the type fixpoint making T and the DataType the same logical type.
 
 ToImm[T0]:{ read .imm: T0 }                               /// deep immutable representation (may change type)
 ToImmBy[E,E0]:{#(t: read E):read ToImm[E0]}               /// per-value ToImm dictionary

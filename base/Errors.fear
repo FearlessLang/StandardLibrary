@@ -6,6 +6,16 @@ _Throw:{
   .stackTrace:Info->Magic!
   }
 
+/// Exception classes (observability):
+/// - deterministic: The same operation called with observationally identical input
+///   will either always throw or never throw.
+///   Catchable anywhere via Try#.
+/// - nonDeterministic: the throw may or may not happen in the same abstract situation
+///   (OOM, stack overflow, asserts, etc).
+///   Catching/observing requires mut CapTry obtained from mut System.
+///
+/// Asserts are nonDeterministic because another standard library may legally replace
+/// them with no-ops.
 Error: {
   ![R:**](info: Info): R -> _Throw.deterministic(info);
   .msg[R:**](msg: Str): R -> _Throw.deterministic(Infos.msg msg + (_Throw.stackTrace));
