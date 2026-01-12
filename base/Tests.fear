@@ -1,5 +1,3 @@
-package base;
-
 Tests:{
   .test(v: Void): Tests -> this;
   .done: Void -> {};

@@ -1,5 +1,3 @@
-package base;
-
 _Throw:{
   .deterministic[R:**](info:Info):R ->Magic!;
   .nonDeterministic[R:**](info:Info):R ->Magic!;

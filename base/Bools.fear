@@ -1,5 +1,3 @@
-package base;
-
 BoolMatch[R:**]:{ mut .true: R; mut .false: R; }
 ThenElse[R:**]: { mut .then: R; mut .else: R; }
 

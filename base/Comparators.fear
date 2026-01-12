@@ -1,5 +1,3 @@
-package base;
-
 /// Ordering + hashing via "closed fixpoints".
 /// Intuition:
 /// - An Order[T] is a comparator that is also a *closed* value: .close: T.

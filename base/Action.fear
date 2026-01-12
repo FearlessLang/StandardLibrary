@@ -1,7 +1,3 @@
-package base;
-
-//Action[R:*]:{}
-
 Actions: {
   //.lazy is a bad method, suggests failure causes .info, but of course not.
   //.lazy[T:*](f: mut MF[T]): mut Action[T] -> {::.ok(f#)};

@@ -1,5 +1,3 @@
-package base;
-
 ByteArith:F[Tests,Tests]{::
   .test(+1.byte + (+2.byte) .assertEq (+3.byte))
   .test(+5.byte - (+2.byte) .assertEq (+3.byte))

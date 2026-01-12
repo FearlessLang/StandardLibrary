@@ -1,5 +1,3 @@
-package base;
-
 Main: { .main(s: mut System): Void }
 Sealed: {}
 Void: Sealed{}

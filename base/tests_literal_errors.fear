@@ -1,5 +1,3 @@
-package base;
-
 ThrowArithSuite:F[mut CapTry,Void]{try->Block#
   // div by 0 (Nat/Int/Byte/Num)
   .do{try#{12 .div 0}.assertInfo}

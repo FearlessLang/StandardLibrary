@@ -1,5 +1,3 @@
-package base;
-
 _AssertApprox[T]:DataType[T,T]{
   .eqDelta(n:T, delta:T):Bool;
   .assertEqDelta(expected:T, delta:T):Void -> Assert!(

@@ -1,5 +1,3 @@
-package base;
-
 StrBasics:F[Tests,Tests]{::
   .test(`` .isEmpty .assertEq True)
   .test(`` .size .assertEq 0)

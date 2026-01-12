@@ -1,5 +1,3 @@
-package base;
-
 /// DataType sits on top of OrderHash:
 ///   Order > OrderHash > DataType
 /// It adds:

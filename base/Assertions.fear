@@ -1,5 +1,3 @@
-package base;
-
 Assert:Sealed{
   !(assertion: Bool): Void -> this!(assertion,{``}, { Void });
   !(assertion: Bool, msg: read F[Str]): Void -> this!(assertion, msg, { Void });

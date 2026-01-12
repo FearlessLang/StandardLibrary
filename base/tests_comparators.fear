@@ -1,5 +1,3 @@
-package base;
-
 Box[E:*]: OrderHash[Box[E],E]{            /// wrapper: ordering/hash/str delegate to the element via by
   mut  .get: E;
   read .get: read/imm E;

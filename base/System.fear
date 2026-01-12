@@ -1,5 +1,3 @@
-package base;
-
 System: ToIso[System], WidenTo[System]{
   //mut .io: mut IO;
   //mut .rng: mut RandomSeed;

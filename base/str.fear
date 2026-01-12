@@ -1,5 +1,3 @@
-package base;
-
 ///Simple string type
 ///This string type is designed for robustness and ease of reasoning.
 ///It can only even contain the following whitelisted characters:

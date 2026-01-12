@@ -1,5 +1,3 @@
-package base;
-
 Extensible[S:*]:{
   mut  .close: mut  S;
   read .close: read S;
@@ -8,4 +6,3 @@ Extensible[S:*]:{
   read ~[R:*](ext: mut MF[read S, R]): R -> ext#(this.close);
   imm  ~[R:*](ext: mut MF[imm  S, R]): R -> ext#(this.close);
   }
-

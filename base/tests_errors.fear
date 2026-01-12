@@ -1,5 +1,3 @@
-package base;
-
 TestThrowingExample:Main{s->Block#
   .let try= {s.try}
   .do{try#{12 .div 0}.assertInfo }

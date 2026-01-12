@@ -1,5 +1,3 @@
-package base;
-
 FloatArith:F[Tests,Tests]{::
   .test(+1.0 + +2.0 .assertEq +3.0)
   .test(+5.0 - +2.0 .assertEq +3.0)

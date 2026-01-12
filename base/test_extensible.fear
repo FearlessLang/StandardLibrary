@@ -1,5 +1,3 @@
-package base;
-
 /// A couple of concrete dictionaries, so we can test the "DataTypeBy#t has close->t" path.
 IntBy:DataTypeBy[Int,Int]{
   .cmp t0,t1,m -> t0<=> (t1,m);

@@ -1,5 +1,3 @@
-package base;
-
 // Num: unlimited-precision rational (exact arithmetic).
 Num:Sealed,DataType[Num,Num],_AssertApprox[Num]{
   +(x:Num):Num;                     /// exact add

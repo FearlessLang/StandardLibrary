@@ -1,5 +1,3 @@
-package base;
-
 MapBasics:F[Tests,Tests]{::
   // empty map (explicit key OrderHashBy)
   .test(Maps#[Str,Str,Int]{::} .size .assertEq 0)

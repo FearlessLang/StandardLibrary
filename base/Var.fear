@@ -1,5 +1,3 @@
-package base;
-
 Var[E:imm,mut,read]: {
   read .get: read/imm E;
   mut  .get: E;

@@ -1,5 +1,3 @@
-package base;
-
 Infos:Sealed {
   .msg(str: Str): Info -> str.isEmpty?{
     .then->{};

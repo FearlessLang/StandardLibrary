@@ -1,5 +1,3 @@
-package base;
-
 /// List[E] is the standard persistent sequence.
 /// It also supports DataType[List[E],List[imm E],E,imm E] operations:
 /// .imm/.str/.info/.cmp/.hash/.close (see DataType docs).

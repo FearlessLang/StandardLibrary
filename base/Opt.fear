@@ -1,5 +1,3 @@
-package base;
-
 Opt[E:*]: _Opt[E],_AssertEmpty{
   .close->this; .close->::;
   .match(m)   -> m.empty;

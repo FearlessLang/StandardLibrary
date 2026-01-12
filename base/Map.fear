@@ -1,5 +1,3 @@
-package base;
-
 Maps:Sealed{
   #[K,K0,E](OrderHashBy[K,K0]):mut Map[K,E]->Magic!;
   #[K,K0,E](OrderHashBy[K,K0], K,E):mut Map[K,E]->Magic!;

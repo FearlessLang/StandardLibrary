@@ -1,5 +1,3 @@
-package base;
-
 Hasher:{                            /// stateful hasher for composite structures
  mut #[A,B](a: read OrderHash[A], b: read OrderHash[B]): Nat ->  /// mix two already-hashable values
     a.hash(this).aluMulWrap(31).aluAddWrap(b.hash(this));

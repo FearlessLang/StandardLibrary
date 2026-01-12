@@ -1,5 +1,3 @@
-package base;
-
 Continuation[T:*,R:*]: {mut #(x: T, self: mut Block[R]): R}
 
 Block: Sealed{

@@ -1,5 +1,3 @@
-package base;
-
 ListBasics:F[Tests,Tests]{::
   // empty list literal (type-directed)
   .test(List[Str] .size .assertEq 0)
