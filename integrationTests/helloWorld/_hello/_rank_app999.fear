@@ -1,2 +1,2 @@
 use base.Main as Main;
-Hello:Main{s->base.Debug(`hello world`)}
+Hello:Main{s->base.Debug#(`hello world`)}
