@@ -1,0 +1,2 @@
+use base.Str as Str;
+B:{.text:Str->a.C.text;}

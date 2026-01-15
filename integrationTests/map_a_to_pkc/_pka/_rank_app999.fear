@@ -1,0 +1,3 @@
+use base.Main as Main;
+map a as pkc in pkb;
+Hello:Main{s->base.Debug#(pkb.B.text)}
