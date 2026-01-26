@@ -1,4 +1,7 @@
 use base.Main as Main;
 use base.Lists as L;
 Hello1:Main{s->base.Debug#(`hello world 3`)}
-Hello2:Main{s->base.Debug#(L#(`Hi`).str{::})}
+//Hello2:Main{s->base.Debug#(L#(`Hi`))}
+Hello3:Main{s->base.Debug#(L#(`Hi`).str{::})}
+Hello4:Main{s->base.Debug#(L#(1,2,3,4).str{::})}
+Hello5:Main{s->base.Debug#(L#(1,2,3,4).flow.map{:: + 10}.list.str{::})}
