@@ -8,7 +8,8 @@ public interface Debug$0 extends Sealed$0{
   default Object imm$$hash$1(Object p0){
     var x= (ToStr$0)p0;
     //return Magic$0.instance.imm$$bang$0();
-    System.out.println(((Str$0Instance)x.read$str$0()).val());
+    System.out.print(((Str$0Instance)x.read$str$0()).val()+"\n");
+    //Crucially the above does not use println since that makes \r\n on win
     return Void$0.instance;
   }
   default Object imm$identify$1(Object p0){
