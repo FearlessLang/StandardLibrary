@@ -69,6 +69,8 @@ Float:Sealed,DataType[Float,Float],_AssertApprox[Float]{
 // Int: signed 32-bit.
 // Note: / is not provided; use div/rem (divisor is Nat).
 Int:Sealed,DataType[Int,Int]{
+  .succ:Int->this + +1;             /// successor number; throws on overflow
+  .pred:Int->this + -1;             /// predecessor number; throws on underflow
   +(x:Int):Int;                     /// checked add; throws on overflow/underflow
   -(x:Int):Int;                     /// checked sub; throws on overflow/underflow
   *(x:Int):Int;                     /// checked mul; throws on overflow/underflow
@@ -105,6 +107,8 @@ Int:Sealed,DataType[Int,Int]{
 // Nat: 32-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
 Nat:Sealed,DataType[Nat,Nat]{
+  .succ:Nat->this + 1;              /// successor number; throws on overflow
+  .pred:Nat->this - 1;              /// predecessor number; throws on underflow
   +(x:Nat):Nat;                     /// checked add; throws on overflow (past maxNat)
   -(x:Nat):Nat;                     /// checked sub; throws on underflow (below 0)
   *(x:Nat):Nat;                     /// checked mul; throws on overflow
