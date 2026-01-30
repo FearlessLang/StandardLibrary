@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-fearless">
+    <comment>Fearless source/project</comment>
+    <glob pattern="*.fearless"/>
+  </mime-type>
+</mime-info>
+
+To put in 
+~/.local/share/mime/packages/fearless.xml
+
+then run 
+update-mime-database ~/.local/share/mime
