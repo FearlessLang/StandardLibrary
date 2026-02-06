@@ -12,7 +12,7 @@ public class Util{
   public static Error err(String msg){
     return (Error)Error$0.instance.imm$nonDeterministic$1(new Str$0Instance(msg));
     }
-
+  public static String toS(Object o){return ((Str$0Instance)((ToStr$0)o).read$str$0()).val(); }
   public static int natToInt(Object n){
     int res= ((Nat$0Instance)n).val();
     assert res >= 0;
@@ -33,6 +33,18 @@ public class Util{
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }
   }
+  private static final Integer lt= -1, eq= 0, gt= 1;//avoid some access to the cached integer maps
+  private static final OrderMatch$1 cmpM= new OrderMatch$1(){
+    @Override public Object mut$lt$0(){ return lt; }
+    @Override public Object mut$eq$0(){ return eq; }
+    @Override public Object mut$gt$0(){ return gt; }
+  };
+  //OrderHashBy$1 implements OrderHashBy$2; $1 or $2 is the number of generics
+  public static int cmp(OrderHashBy$2 by,Object a,Object b){//so this is the more general method
+    var ohA= (Order$1)((OrderHash$1)by.imm$$hash$1(a));
+    var ohB= (Order$1)((OrderHash$1)by.imm$$hash$1(b));
+    return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
+  }
   public static final class MapKey{
     public final OrderHash$1 ord; // OrderHash[K0] closed at this key's projection
     public final Object key;      // representative K (first inserted)
@@ -42,13 +54,13 @@ public class Util{
       key= k;
       ord= (OrderHash$1)oh.imm$$hash$1(k);
       close= ((Order$1)ord).read$close$0();
-      hc= natToInt(ord.read$hash$1(Hasher$0.instance));
+      hc= natToInt(ord.read$hash$0());
   }
   @Override public int hashCode(){ return hc; }
   @Override public boolean equals(Object o){
     if (!(o instanceof MapKey x)){ assert false; return false; }
     return isTrue(((Order$1)ord).read$$eq_eq$1(x.close));
-  }
+    }
   }
   public static MapKey mapKey(OrderHashBy$1 oh,Object k){ return new MapKey(oh,k); }
   

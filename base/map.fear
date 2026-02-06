@@ -7,8 +7,7 @@ Maps:Sealed{
   .singletonRead[K,K0,E:*](OrderHashBy[K,K0], K, read E): read Map[K,E]->Magic!;
   }
 
-/// Map[K,E] is the standard persistent key/value dictionary.
-/// Keys are treated as imm and compared/hashed using the map's stored OrderHashBy[K,...].
+/// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,...].
 /// The flow order, .str order etc all respect/follow the map insertion order.
 Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize{
 

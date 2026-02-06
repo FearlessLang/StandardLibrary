@@ -9,6 +9,7 @@ Flows:{
   .fromImmList[R:*](xs: List[R]): mut Flow[imm R]->Magic!;
   }
 Flow[E:*]:{
+  mut .forEach[R:*](f: mut MF[E,Void]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
   mut .list:mut List[E];
   mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;

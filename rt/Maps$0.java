@@ -56,8 +56,8 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
     var byE= (ToStrBy$1)p0;
     var byK= (ToStrBy$1)keyOh;
     String res= elems.entrySet().stream().map(e->
-      ((Str$0Instance)((ToStr$0)byK.imm$$hash$1(e.getKey().key)).read$str$0()).val()
-      +": "+((Str$0Instance)((ToStr$0)byE.imm$$hash$1(e.getValue())).read$str$0()).val()
+      toS(byK.imm$$hash$1(e.getKey().key))
+      +": "+toS(byE.imm$$hash$1(e.getValue()))
       ).collect(Collectors.joining(", ","{","}"));
     return Str$0Instance.instance(res);
   }
@@ -88,7 +88,34 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
     return new Map$2Instance(keyOh,m);
   }
   @Override public Object read$with$2(Object p0,Object p1){ return mut$with$2(p0,p1); }
-
+  @Override public Object read$hash$1(Object p0){
+    var byE= (base.OrderHashBy$2)p0;
+    int h= 0;
+    for(var e: elems.entrySet()){
+      int kh= e.getKey().hashCode();
+      int vh= natToInt(((base.OrderHash$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
+      h += kh ^ vh;
+    }
+    return new Nat$0Instance(h);
+  }
+  @Override public Object read$cmp$4(Object p0,Object p1,Object p2,Object m){
+    var byE= (OrderHashBy$2)p0;
+    var a= (Map$2Instance)p1;
+    var b= (Map$2Instance)p2;
+    int c= a.elems.size() - b.elems.size();
+    if (c != 0){ return ord(c,m); }
+    var ia= a.elems.entrySet().iterator();
+    var ib= b.elems.entrySet().iterator();
+    while(ia.hasNext()){
+      var ea= ia.next();
+      var eb= ib.next();
+      c= cmp(a.keyOh, ea.getKey().key, eb.getKey().key);
+      if (c != 0){ return ord(c,m); }
+      c= cmp(byE, ea.getValue(), eb.getValue());
+      if (c != 0){ return ord(c,m); }
+    }
+    return ((OrderMatch$1)m).mut$eq$0();
+  }
   @Override public Object mut$without$1(Object p0){
     var mk= mapKey(keyOh,p0);
     var m= new LinkedHashMap<MapKey,Object>(elems);

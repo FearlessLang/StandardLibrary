@@ -11,11 +11,11 @@
 /// Basically, by implementing those two methods we close the type fixpoint making T and the DataType the same logical type.
 
 ToImm[T0]:{ read .imm: T0 }                               /// deep immutable representation (may change type)
-ToImmBy[E,E0]:{#(t: read E):read ToImm[E0]}               /// per-value ToImm dictionary
+ToImmBy[E,E0]:{#(t: read E):read ToImm[E0]}               /// per-value ToImm conversion
 ToImm[E:*,E0,T0]:{ read .imm(by: ToImmBy[imm E,E0]): T0 } /// env-dependent deep imm
 
 ToInfo:{ read .info: Info }                     /// structured diagnostics info
-ToInfoBy[E]:{#(t: read E):read ToInfo}            /// per-value Info dictionary
+ToInfoBy[E]:{#(t: read E):read ToInfo}            /// per-value Info conversion
 ToInfo[E:*]:{ read .info(by: ToInfoBy[imm E]): Info }     /// env-dependent Info
 
 FromInfo[T]:{ .fromInfo(i: Info): T }            /// parse/decode from Info
@@ -27,20 +27,20 @@ DataType[T,T0]:ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Extensible[T]{
 DataType[T,T0,E:*,E0]:ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Extensible[T]{
   read .close(t: read T): read DataType[T,T0,E,E0];          /// close on t in this env-dependent instance
 
-  /// Freeze the env by capturing element dictionaries in "by".
-  /// Note: by may be a true dictionary supplier ({::}) or a projection ({::.key}).
+  /// Freeze the env by capturing element conversions in "by".
+  /// For example by may be {::} or a projection {::.key}.
   read .dataType[K](by: DataTypeBy[imm E,K,E0]): read DataType[T,T0] -> {
     .close t -> this.close(t).dataType(by);
     .close   -> this.close;
     .str     -> this.str(by);
     .info    -> this.info(by);
     .imm     -> this.imm(by);
-    .hash h  -> this.hash[K](by,h);
+    .hash    -> this.hash[K](by);
     .cmp[R:**] t0,t1,m -> this.cmp[K,R](by,t0,t1,m);
   };
 }
 
-/// DataTypeBy is the "by key" dictionary, analogous to OrderHashBy.
+/// DataTypeBy is the "by key" conversion, analogous to OrderHashBy.
 /// It returns a closed DataType[K,K0] for each source value t:T.
 /// Examples:
 /// - If Key implements DataType[Key,Key0], then {::.key} : DataTypeBy[Foo,Key,Key0].
@@ -60,7 +60,7 @@ DataTypeBy[E,K,K0]:ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K]{
         .eq->(next#e0) <=>(next#e1,m);
       });
 
-    .hash e,h -> h#(this#e, next#e);
+    .hash e -> this#e.hash.aluMulWrap(31).aluAddWrap(next#e.hash);
 
     .str  t -> this#t.str + `, ` + (next#t.str);
     .info t -> this#t.info + (next#t.info);
@@ -77,7 +77,7 @@ DataTypeBy[E,K,K0]:ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K]{
 /// This mirrors OrderHashBy[T]: you provide per-value ops, and # closes into a DataType[T,T0].
 DataTypeBy[T,T0]:DataTypeBy[T,T,T0]{
   .cmp[R:**](t0:read T,t1:read T,m:mut OrderMatch[R]): R;
-  .hash(t:read T,h: mut Hasher): Nat;
+  .hash(t:read T): Nat;
   .str (t:read T): Str;
   .info(t:read T): Info;
   .imm (t:read T): T0;
@@ -86,9 +86,9 @@ DataTypeBy[T,T0]:DataTypeBy[T,T,T0]{
     .close -> t;
     .close t2 -> this#t2;
     .cmp t0,t1,m -> this.cmp(t0,t1,m);
-    .hash h -> this.hash(t,h);
-    .str  -> this.str(t);
-    .info -> this.info(t);
-    .imm  -> this.imm(t);
+    .hash -> this.hash t;
+    .str  -> this.str t;
+    .info -> this.info t;
+    .imm  -> this.imm t;
   };
 }

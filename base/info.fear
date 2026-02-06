@@ -19,7 +19,7 @@ Info:Sealed,DataType[Info,Info],_AssertImmEmpty{
   .close->::; .close->this;
   .info->this.imm;
   .imm->{};
-  .hash->::.info (this.imm);
+  .hash->this.str.hash;
   .cmp a,b,m -> a.str <=> (b.str, m);
   .msg:Str->``;
   .list:List[Info]->{};

@@ -28,9 +28,9 @@ Opt[E:*]: _Opt[E],_AssertEmpty{
       .some eb -> by#ea<=>(by#eb, m);
       }
     };
-  .hash(by, h) -> this.match{
+  .hash by -> this.match{
     .empty  -> 0;
-    .some e -> h#(1, by#e);
+    .some e -> 31.aluAddWrap(by#e.hash);
     };
   }
   

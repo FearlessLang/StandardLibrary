@@ -21,14 +21,14 @@ Num:Sealed,DataType[Num,Num],_AssertApprox[Num]{
   .natExact:Opt[Nat];               /// .some if integer and in [0,maxNat]; .empty otherwise
   .byteExact:Opt[Byte];             /// .some if integer and in [0,maxByte]; .empty otherwise
   .clamp(lo:Num, hi:Num):Num;       /// clamp into [lo,hi]; throws if lo>hi
-  .hash(h) -> h.num(this.imm);      /// hash via hasher
+  .hash -> this.str.hash;           /// hash via string
   .close->::; .close->this;         /// fixpoint type closed
 }
 
 /// Float: 64 bits IEEE values. Note: ==/order instead follow the usual rules:
 /// - NaN == NaN (all different NaNs equal); NaN is greater than everything else including +Inf
 /// - -0.0 == +0.0
-/// Method Hasher.float(Float) must respect this ordering
+/// Method hash must respect this ordering
 Float:Sealed,DataType[Float,Float],_AssertApprox[Float]{
   +(x:Float):Float;                 /// IEEE add
   -(x:Float):Float;                 /// IEEE sub
@@ -62,7 +62,8 @@ Float:Sealed,DataType[Float,Float],_AssertApprox[Float]{
   .natExact:Opt[Nat];               /// .some if finite, integral, in [0,maxNat]; .empty otherwise
   .byteExact:Opt[Byte];             /// .some if finite, integral, in [0,maxByte]; .empty otherwise
   .clamp(lo:Float, hi:Float):Float; /// clamp into [lo,hi]; throws if lo>hi 
-  .hash(h) -> h.float(this.imm);    /// hash via hasher
+  .hash -> this.imm.isNegZero?{.then->`0.0`.hash; .else->this.imm.ieeeStr.hash};/// hash via str
+  
   .close->::; .close->this;         /// fixpoint type closed
 }
 
@@ -101,7 +102,7 @@ Int:Sealed,DataType[Int,Int]{
   .aluNat:Nat;                      /// reinterpret i32 bits as u32 Nat (bit-cast)
   .aluByte:Byte;                    /// low 8 bits (wrap), not clamp
   .clamp(lo:Int, hi:Int):Int;       /// clamp into [lo,hi]; throws if lo>hi
-  .hash(h) -> h.int(this.imm);      /// hash via hasher
+  .hash -> this.str.hash;           /// hash via str
   .close->::; .close->this;         /// fixpoint type closed
 }
 // Nat: 32-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
@@ -136,7 +137,7 @@ Nat:Sealed,DataType[Nat,Nat]{
   .aluInt:Int;                      /// reinterpret u32 bits as i32 Int (bit-cast)
   .aluByte:Byte;                    /// low 8 bits (wrap), not clamp
   .clamp(lo:Nat, hi:Nat):Nat;       /// clamp into [lo,hi]; throws if lo>hi
-  .hash(h) -> h.nat(this.imm);      /// hash via hasher
+  .hash -> this.str.hash;           /// hash via str
   .close->::; .close->this;         /// fixpoint type closed
 }
 
@@ -165,6 +166,6 @@ Byte:Sealed,DataType[Byte,Byte]{
   .aluAnd(x:Byte):Byte;             /// u8 and
   .aluOr(x:Byte):Byte;              /// u8 or
   .clamp(lo:Byte, hi:Byte):Byte;    /// clamp into [lo,hi]; throws if lo>hi
-  .hash(h) -> h.byte(this.imm);     /// hash via hasher
+  .hash -> this.str.hash;           /// hash via str
   .close->::; .close->this;         /// fixpoint type closed
 }

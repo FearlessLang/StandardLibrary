@@ -2,6 +2,7 @@ System: ToIso[System], WidenTo[System]{
   //mut .io: mut IO;
   //mut .rng: mut RandomSeed;
   mut .try: mut CapTry;
+  mut .out: mut Output;
   }
   
 /// This try-catch will catch non-deterministic errors.
@@ -18,3 +19,9 @@ CapTry: ToIso[CapTry], WidenTo[CapTry]{
   }
 CapTrys: F[mut System, mut CapTry]{sys -> sys.try}
   
+Output: ToIso[Output], WidenTo[Output]{
+  mut .print(ToStr):Void;
+  mut .println(ToStr):Void;//later add printU and printlnU
+  mut .byte(Byte):Void;///Does not flush
+  mut .bytes(List[Byte]):Void;//Does flush
+  }

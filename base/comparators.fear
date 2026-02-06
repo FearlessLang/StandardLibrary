@@ -76,7 +76,7 @@ Order[T,E:*]:{                      /// environment-dependent ordering of T (E s
   };
 }
 OrderHash[T]:Order[T],ToStr{            /// OrderHash adds hashing and ToStr. This is all the Maps/Set may need.
-  read .hash(h: mut Hasher): Nat;
+  read .hash: Nat;
   read .close(t: read T): read OrderHash[T];
   
   read .assertEq(expected: read T):Void -> this.assertEq(expected,{``});
@@ -143,14 +143,14 @@ OrderHash[T]:Order[T],ToStr{            /// OrderHash adds hashing and ToStr. Th
 }
 
 OrderHash[T,E:*]:Order[T,E],ToStr[E]{   /// env-dependent ordered+hashable+printable
-  read .hash[K](by: OrderHashBy[imm E,K], h: mut Hasher): Nat; /// hash using by
+  read .hash[K](by: OrderHashBy[imm E,K]): Nat; /// hash using by
   read .close(t: read T): read OrderHash[T,E];
   
   read .orderHash[K](by: OrderHashBy[imm E,K]): read OrderHash[T] -> { /// freeze by into plain OrderHash[T]
     .close -> this.close;
     .close t -> this.close(t).orderHash(by);
     .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
-    .hash h -> this.hash(by,h);
+    .hash -> this.hash by;
     .str  -> this.str by;
   };
   read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertEq(expected);
@@ -192,30 +192,30 @@ OrderHashBy[T,K]:OrderBy[T,K],ToStrBy[T]{  /// order+hash by key K, plus per-val
       .lt ->m.lt;
       .eq ->next#t0<=>(next#t1,m);
       .gt ->m.gt});
-    .hash t,h -> h#(this#t, next#t);
+    .hash t -> this#t.hash.aluMulWrap(31).aluAddWrap(next#t.hash);
     .str t->this#t.str;
   };
 
   .viewHash[A](f:F[read A,read T]):OrderHashBy[A] -> {         /// contramap for both cmp and hash
     .cmp a0,a1,m -> this#(f#a0)<=>(this#(f#a1),m);
-    .hash a,h -> this#(f#a).hash(h);
+    .hash a -> this#(f#a).hash;
     .str t->this#(f#t).str;
   };
   .hideKey: OrderHashBy[T] -> {//Just convenience over .viewHash{::}
     .cmp t0,t1,m -> this#t0 <=> (this#t1,m);
-    .hash t,h -> (this#t).hash(h);
+    .hash t -> this#t.hash;
     .str t ->this#t.str;
   };  
 }
 
 OrderHashBy[T]:OrderHashBy[T,T]{          /// direct order+hash for T
   .cmp[R:**](t0:read T,t1:read T,m:mut OrderMatch[R]): R;
-  .hash(t: read T,h: mut Hasher):Nat;
+  .hash(t: read T):Nat;
   .str(t: read T): Str; 
   # t -> {                                /// close->t; compare/hash delegate to this.cmp/this.hash
     .close -> t; .close t0 -> this#t0; 
     .cmp t0,t1,m -> this.cmp(t0,t1,m);
-    .hash h -> this.hash(t,h);
-    .str -> this.str(t); 
+    .hash -> this.hash t;
+    .str -> this.str t; 
   };
 }

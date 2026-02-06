@@ -2,6 +2,8 @@ MapBasics:F[Tests,Tests]{::
   // empty map (explicit key OrderHashBy)
   .test(Maps#[Str,Str,Int]{::} .size .assertEq 0)
   .test(Maps#[Str,Str,Int]{::} .isEmpty .assertEq True)
+  .test(Maps#[Str,Str,Int]{::} .hash{::} .assertEq 0)
+  .test(Maps#[Str,Str,Int]{::}.orderHash{::} == (Maps#[Str,Str,Int]{::}).assertTrue)
 
   // close on empty should still be a map (choose the map-returning close by chaining)
   .test(Maps#[Str,Str,Int]{::} .close .size .assertEq 0)
@@ -101,7 +103,69 @@ MapBasics:F[Tests,Tests]{::
   .test(Maps#[Str,Str,Str]{::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .get `b` .assertEq `y`)
   
   .test(Maps#({::},`a`, `x`,`b`, `y`).info{::}.str.assertEq (`{a: `^`x`^`, b: `^`y`^`}`))
-  .test(Maps#({::},_BSs#`a`, `x`,_BSs#`b`, `y`, _BSs#`c`,`z`).info{::}.str.assertEq (`{Nope: `^`x`^`, Nope#1: `^`y`^`, Nope#2: `^`z`^`}`))  
+  .test(Maps#({::},_BSs#`a`, `x`,_BSs#`b`, `y`, _BSs#`c`,`z`).info{::}.str.assertEq (`{Nope: `^`x`^`, Nope#1: `^`y`^`, Nope#2: `^`z`^`}`))
+  
+  //testing layered maps on different keyOhs
+  
+  // maps as keys: keyOh is "map -> map.orderHash{...}"
+  // This must be usable as a lawful key criterion even if the compared maps have different keyOh.
+  .test((Maps#({::}, `aa`, `x`, `b`, `y`).orderHash{::} == (Maps#({::.imm.size}, `aa`, `x`, `b`, `y`))).assertTrue)
+  .test((Maps#({::.imm.size}, `aa`, `x`, `b`, `y`).orderHash{::} == (Maps#({::}, `aa`, `x`, `b`, `y`))).assertTrue)
+
+  // outer map retrieval: insert with keyOh={::}, retrieve with keyOh={::.size}
+  //.test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+  //  .get (Maps#({::.imm.size}, `aa`, `x`, `b`, `y`)) .assertEq `v1`)
+  //Correctly fails, those two maps have different hashcodes?
+
+  // outer map overwrite: second key compares equal, so size stays 1 and value updates
+  //.test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+  //  .with(Maps#({::.imm.size}, `aa`, `x`, `b`, `y`), `v2`) .size .assertEq 1)
+  //correctly add a second one here?
+  //.test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+  //  .with(Maps#({::.imm.size}, `aa`, `x`, `b`, `y`), `v2`)
+  //  .get (Maps#({::}, `aa`, `x`, `b`, `y`)) .assertEq `v2`)
+  //correctly will get v1 here?
+  
+  // insertion order still matters for map-keys: same bindings, different order => different key => size 2
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `b`, `y`, `aa`, `x`), `v3`) .size .assertEq 2)  
+  // map-as-key: same internal keyOh, same entries, same insertion order => retrievable
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .get (Maps#({::}, `aa`, `x`, `b`, `y`)) .assertEq `v1`)
+
+  // overwrite under same key => size stays 1
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `aa`, `x`, `b`, `y`), `v2`) .size .assertEq 1)
+
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `aa`, `x`, `b`, `y`), `v2`)
+    .get (Maps#({::}, `aa`, `x`, `b`, `y`)) .assertEq `v2`)
+
+  // insertion order matters for map-keys => size becomes 2
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `b`, `y`, `aa`, `x`), `v3`) .size .assertEq 2)
+
+  // different internal keyOh => different key (so absent, but check via containsKey/opt to avoid throwing)
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .containsKey (Maps#({::.imm.size}, `aa`, `x`, `b`, `y`)) .assertFalse)
+
+  // both variants can coexist as distinct keys
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::.imm.size}, `aa`, `x`, `b`, `y`), `vS`) .size .assertEq 2)
+
+  .test(Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::.imm.size}, `aa`, `x`, `b`, `y`), `vS`)
+    .get (Maps#({::.imm.size}, `aa`, `x`, `b`, `y`)) .assertEq `vS`)
+  // Element comparator where K != E: compare Str elements by their size (Nat).
+  // values `x` and `y` have same size => maps equal under _BySize
+  .test(Maps#({::}, `a`, `x`) .orderHash _BySize == (Maps#({::}, `a`, `y`)) .assertTrue)
+
+  // `x` (size 1) < `yy` (size 2) => map order reflects that
+  .test(Maps#({::}, `a`, `x`) .orderHash _BySize < (Maps#({::}, `a`, `yy`)) .assertTrue)
+
+  // difference in later entry should decide after earlier ones tie
+  .test(Maps#({::}, `a`, `x`, `b`, `zz`) .orderHash _BySize < (Maps#({::}, `a`, `x`, `b`, `zzz`)) .assertTrue)
 }
-_BS:DataType[_BS,_BS]{read .s:Str; .str->`Nope`; .info->Todo!; .close->this; .close->::; .imm->Todo!; .hash h->this.s.hash(h); .cmp a, b, m->a.s<=>(b.s,m);}
+_BySize:OrderHashBy[Str,Nat]{# s->s.imm.size}
+_BS:DataType[_BS,_BS]{read .s:Str; .str->`Nope`; .info->Todo!; .close->this; .close->::; .imm->Todo!; .hash ->this.s.hash; .cmp a, b, m->a.s<=>(b.s,m);}
 _BSs:{#(s:Str):_BS->{s}}

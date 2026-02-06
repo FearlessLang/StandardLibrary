@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 public record Str$0Instance(String val) implements Str$0{
   public static Str$0 instance(String val){ return new Str$0Instance(val); }
-  String toS(Object o){return ((Str$0Instance)((ToStr$0)o).read$str$0()).val; }
   @Override public String toString(){ return toS(this); }
   private static String s(Object o){ return ((Str$0Instance)o).val; }
   @Override public Object read$imm$0(){ return this; }
@@ -109,7 +108,7 @@ public record Str$0Instance(String val) implements Str$0{
       }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$cheapHash$0(){
+  @Override public Object read$hash$0(){
     return Nat$0Instance.instance(val.hashCode());
   }
   static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }

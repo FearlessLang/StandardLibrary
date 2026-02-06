@@ -1,14 +1,14 @@
-/// A couple of concrete dictionaries, so we can test the "DataTypeBy#t has close->t" path.
+/// A couple of concrete conversions, so we can test the "DataTypeBy#t has close->t" path.
 IntBy:DataTypeBy[Int,Int]{
   .cmp t0,t1,m -> t0<=> (t1,m);
-  .hash(t,h)   -> t.hash h;
+  .hash(t)   -> t.hash;
   .str (t)     -> t.str;
   .info(t)     -> t.info;
   .imm (t)     -> t.imm;
 }
 StrBy:DataTypeBy[Str,Str]{
   .cmp t0,t1,m -> t0<=> (t1,m);
-  .hash(t,h)   -> t.hash h;
+  .hash(t)   -> t.hash;
   .str (t)     -> t.str;
   .info(t)     -> t.info;
   .imm (t)     -> t.imm;
@@ -49,7 +49,7 @@ ExtensibleExtensionMethods:F[Tests,Tests]{::
   .test(Lists# +5~ AddFirst# +7.assertEq +12)
 }
 
-/// Shows the "adapter dictionary produces an extensible object with close->t" behavior.
+/// Shows the "adapter conversions produces an extensible object with close->t" behavior.
 ExtensibleViaDataTypeBy:F[Tests,Tests]{::
   .test(IntBy# +3.imm~{n->n + +1}.assertEq +4)
   .test(StrBy#`a`.imm~{s->s+`b`}.assertEq `ab`)

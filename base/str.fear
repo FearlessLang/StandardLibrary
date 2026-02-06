@@ -64,8 +64,6 @@ Str:Sealed,DataType[Str,Str],_AssertImmEmpty,_AssertImmSize{
   | : Str;                          /// appends a newline
   ^ : Str;                          /// appends a backtick
   ^^ : Str;                         /// appends a double quote
-
-  .hash(h) -> h.str(this.imm);      /// hash via hasher
   .isEmpty: Bool;                   /// true iff size == 0
   .size: Nat;                       /// the amount of characters in this string
   .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use ^ and |, not necessarily a single literal)
@@ -77,5 +75,4 @@ Str:Sealed,DataType[Str,Str],_AssertImmEmpty,_AssertImmSize{
   .numExact: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
   .natExact: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
   .byteExact: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
-  .cheapHash: Nat;                  /// fast string hash 
 }

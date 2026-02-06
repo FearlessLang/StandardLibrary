@@ -24,7 +24,7 @@ Bool:Sealed,DataType[Bool,Bool]{
     .else->b.imm?{ .then->m.lt; .else->m.eq };
     };
 
-  .hash h -> h.bool(this.imm);
+  .hash -> this.imm?{ .then->1; .else->0 };
 
   .str -> this.imm?{ .then->`True`; .else->`False` };
 

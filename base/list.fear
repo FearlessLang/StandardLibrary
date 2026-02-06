@@ -55,8 +55,11 @@ List[E:*]:_List[E],_AssertEmpty,_AssertSize{
     .imm->i;
     }};
 
-  .hash(by, h)->h.list(by,this);
-
+  .hash by -> Block#
+    .let size= {this.size}
+    .return {this.flow.fold({ size },
+       { acc, e -> acc.aluMulWrap(31).aluAddWrap(by#e.hash)}
+       )};
   .cmp(by, a, b, m)->a.opt(0).match{
     .empty->b.opt(0).match{ .empty->m.eq; .some _->m.lt; };
     .some ea->b.opt(0).match{

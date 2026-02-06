@@ -2,6 +2,7 @@ ListBasics:F[Tests,Tests]{::
   // empty list literal (type-directed)
   .test(List[Str] .size .assertEq 0)
   .test(List[Int] .isEmpty .assertEq True)
+  .test(List[Int].orderHash{::} == List[Int].assertEq True)
 
   // empty list string: requires by (DataType); for nested lists, by must be nested too
   .test(List[Str] .str{::.str} .assertEq `[]`)
@@ -62,6 +63,8 @@ ListBasics:F[Tests,Tests]{::
   .test(Lists#(`a`,`b`,`c`) .reverse .get 0 .assertEq `c`)
   .test(Lists#(`a`,`b`,`c`) .reverse .get 2 .assertEq `a`)
   .test(Lists#(+1,+2,+3) .reverse .get 0 .assertEq +3)
+  .test(Lists#(`a`,`b`,`c`).orderHash{::} == (Lists#(`a`,`b`,`c`)).assertEq True)
+  .test(Lists#(`a`,`b`,`c`).orderHash{::} == (Lists#(`a`,`b`,`c`).reverse.reverse).assertEq True)
 
   // with / withAlso / without
   .test(Lists#(`a`,`b`) .with(0, `x`) .get 0 .assertEq `x`)
