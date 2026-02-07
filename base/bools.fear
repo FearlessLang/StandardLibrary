@@ -11,6 +11,7 @@ Bool:Sealed,DataType[Bool,Bool]{
   ||(b: mut MF[Bool]): Bool;
 
   .not: Bool;
+  ==> (b: mut MF[Bool]): Bool -> this.not || b;
 
   .if[R:**](f: mut ThenElse[R]): R;
   ?[R:**](f: mut ThenElse[R]): R -> this.if(f);

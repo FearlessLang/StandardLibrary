@@ -26,6 +26,22 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     try{ return new Flow$1Instance(s.map(e->callF$2(p0,e))); }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$filter$1(Object p0){
+    try{ return new Flow$1Instance(s.filter(e->isTrue(callF$2(p0,e)))); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$size$0(){
+    try{ return new Nat$0Instance((int)s.count()); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$$plus_plus$1(Object o){
+  //Note: all those try catches are relying on the JVM enforcing the stream consumptions,
+  //but in the standard it is not guaranteed that it is checked. We need to add tests to all of the flow methods
+  //to check that the current JVM does enforce it.
+    var other= ((Flow$1Instance)o).s;
+    try{ return new Flow$1Instance(Stream.concat(s, other)); }
+    catch(IllegalStateException e){ throw consumed(); }    
+  }
   @Override public Object mut$forEach$1(Object p0){
     try{ s.forEach(e->callMF$2(p0,e)); return Void$0.instance; }
     catch(IllegalStateException e){ throw consumed(); }

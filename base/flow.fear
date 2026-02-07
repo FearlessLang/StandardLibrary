@@ -11,7 +11,11 @@ Flows:{
 Flow[E:*]:{
   mut .forEach[R:*](f: mut MF[E,Void]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
-  mut .list:mut List[E];
+  mut .filter(f: read F[E, Bool]): mut Flow[E];
+  mut .size: Nat;
+  mut .isEmpty: Bool -> this.size == 0;
+  mut ++ (mut Flow[E]): mut Flow[E];
+  mut .list: mut List[E];
   mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
   mut .mapping[K,E0:*](OrderHashBy[K,K],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
   }
