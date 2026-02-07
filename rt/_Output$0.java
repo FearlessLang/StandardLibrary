@@ -4,7 +4,7 @@ import static base.Util.*;
 
 import java.util.List;
 public final class _Output$0 implements Output$0{
-  public final Object mut$print$1(Object p0){ 
+  public final Object mut$print$1(Object p0){
     print(toS(p0));
     return Void$0.instance;
   }
