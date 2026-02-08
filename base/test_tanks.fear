@@ -91,6 +91,8 @@ NextState:F[List[Tank],List[Tank]]{
       .else -> t;
     };
   }
+//----------------------------------
+//File _tank_game/print_game.fear
 TanksToS: F[List[Tank],Str]{ ts -> Block#
   .let res = {0.rangeUntil(30).map{_->this.newLine}.list }
   .do{ ts.flow.forEach{ t -> Block#
@@ -112,15 +114,18 @@ PrintGame: {
   mut .lines(rounds: Nat, ts: List[Tank]): Void -> Block#
     .var current= {ts}
     .return{ 0.rangeUntil(rounds).forEach{step -> Block#(
-      this.out.println(`Step `+step|),
-      this.out.println(`------------------------------------------------------------`|),
-      this.singleLine(current.get),
-      this.out.println(`------------------------------------------------------------`|),
+      Void,//this.out.println(`Step `+step|),
+      Void,//this.out.println(`------------------------------------------------------------`|),
+      Void,//this.singleLine(current.get),
+      Void,//this.out.println(`------------------------------------------------------------`|),
       current.set(NextState#(current.get))
       )}}
   }
-//ReadGame: { ... }
+//----------------------------------
+//File _tank_game/read_game.fear
 ReadGame: { mut .in: mut InputCursorNode; mut .read:List[Tank]->{};}
+//----------------------------------
+//File _tank_game/_rank_app.fear
 Test: Main {sys -> Block#
   .let out= {sys.out}
   .let in= {sys.inputCursor# !}
