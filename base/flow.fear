@@ -18,4 +18,6 @@ Flow[E:*]:{
   mut .list: mut List[E];
   mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
   mut .mapping[K,E0:*](OrderHashBy[K,K],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
+  mut .join(js: JoinStr[E]): E -> js.joinStr this;
   }
+JoinStr[E:*]:Sealed{ .joinStr(mut Flow[E]): E }

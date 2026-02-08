@@ -137,6 +137,8 @@ Nat:Sealed,DataType[Nat,Nat]{
   .aluInt:Int;                      /// reinterpret u32 bits as i32 Int (bit-cast)
   .aluByte:Byte;                    /// low 8 bits (wrap), not clamp
   .clamp(lo:Nat, hi:Nat):Nat;       /// clamp into [lo,hi]; throws if lo>hi
+  .rangeUntil(Nat): mut Flow[Nat];  /// Range from this to Nat-1 included
+  .rangeTo(Nat): mut Flow[Nat];     /// Range from this to Nat included
   .hash -> this.str.hash;           /// hash via str
   .close->::; .close->this;         /// fixpoint type closed
 }

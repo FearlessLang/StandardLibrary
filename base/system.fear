@@ -3,6 +3,7 @@ System: ToIso[System], WidenTo[System]{
   //mut .rng: mut RandomSeed;
   mut .try: mut CapTry;
   mut .out: mut Output;
+  mut .inputCursor: mut InputCursor;
   }
   
 /// This try-catch will catch non-deterministic errors.
@@ -24,4 +25,14 @@ Output: ToIso[Output], WidenTo[Output]{
   mut .println(ToStr):Void;//later add printU and printlnU
   mut .byte(Byte):Void;///Does not flush
   mut .bytes(List[Byte]):Void;//Does flush
+  }
+InputCursor: ToIso[InputCursor], WidenTo[InputCursor]{
+  mut #: mut Opt[mut InputCursorNode];
+  mut .next: mut InputCursor;
+  }
+InputCursorNode: ToIso[InputCursorNode], WidenTo[InputCursorNode]{
+  mut .label: Str; ///best effort portable name to help debugging
+  mut .text: Opt[Str]; /// fresh read+decode each call; throws on I/O failure
+  // mut .uText: Opt[UStr];
+  // mut .image: Opt[Image];
   }

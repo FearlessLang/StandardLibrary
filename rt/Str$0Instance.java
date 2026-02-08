@@ -3,6 +3,7 @@ import static base.Util.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public record Str$0Instance(String val) implements Str$0{
   public static Str$0 instance(String val){ return new Str$0Instance(val); }
@@ -110,6 +111,11 @@ public record Str$0Instance(String val) implements Str$0{
   }
   @Override public Object read$hash$0(){
     return Nat$0Instance.instance(val.hashCode());
+  }
+  @Override public Object imm$joinStr$1(Object p0){
+    Stream<Object> stream= ((Flow$1Instance)p0).s();
+    String res= stream.map(o->((Str$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
+    return new Str$0Instance(res);
   }
   static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }
 }

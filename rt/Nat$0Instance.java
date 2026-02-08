@@ -92,4 +92,16 @@ public record Nat$0Instance(int val) implements Nat$0{
   @Override public Object imm$aluByte$0(){ return Byte$0Instance.instance((byte)val); }
   
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Integer.compareUnsigned(n(p0),n(p1)),p2); }
+  @Override public Object imm$rangeUntil$1(Object p0){
+    var start= this.val;
+    var until= ((Nat$0Instance)p0).val;
+    var res= java.util.stream.IntStream.range(start,until).<Object>mapToObj(Nat$0Instance::new);
+    return new Flow$1Instance(res);
+  }
+  @Override public Object imm$rangeTo$1(Object p0){
+    var start= this.val;
+    var until= ((Nat$0Instance)p0).val;
+    var res= java.util.stream.IntStream.range(start,until+1).<Object>mapToObj(Nat$0Instance::new);
+    return new Flow$1Instance(res);
+  }
 }

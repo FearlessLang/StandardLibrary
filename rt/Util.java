@@ -14,9 +14,7 @@ public class Util{
     }
   public static String toS(Object o){return ((Str$0Instance)((ToStr$0)o).read$str$0()).val(); }
   public static int natToInt(Object n){
-    int res= ((Nat$0Instance)n).val();
-    assert res >= 0;
-    return res;
+    return ((Nat$0Instance)n).val();
   }
   public static Object intToNat(int i){
     assert i >= 0;

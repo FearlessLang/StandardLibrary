@@ -29,11 +29,13 @@ Block[R:*]: Sealed{
       .return a -> _DecidedBlock#(a#);
       .error  i -> Error!(i#);
       .do     r -> Block#(r#,this);
+      .done     -> _DecidedBlock#(Void);
       };
     .else -> {
       .return _ -> this;
       .error  _ -> this;
       .do     _ -> this;
+      .done     -> Block#[Void];
       };
     };
   mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> body#.match mut ControlFlowMatch[R:*]:{
@@ -46,6 +48,7 @@ BlockIf[R:*]:{
   mut .return(a: mut MF[R]): mut Block[R];
   mut .do(r: mut MF[Void]): mut Block[R];
   mut .error(info: mut MF[Info]): mut Block[R];
+  mut .done: mut Block[Void];
   }
 _DecidedBlock:{
   #[R:*](res: R): mut Block[R] -> { 'self
@@ -62,6 +65,7 @@ _DecidedBlock:{
       .return _ -> self;
       .do     _ -> self;
       .error  _ -> self;
+      .done     -> _DecidedBlock#(Void);
       };
     }
   }

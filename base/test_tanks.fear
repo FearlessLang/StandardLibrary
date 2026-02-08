@@ -1,0 +1,129 @@
+//File _tank_game/point.fear
+Points:{#(x: Nat, y: Nat): Point -> Point: ToStr{ 'self
+  .x: Nat -> x;
+  .y: Nat -> y;
+  +(other: Point): Point -> Points#(other.x + x, other.y + y);
+  .move(d: Direction): Point -> d.match{
+    .north -> Points#(x - 1, y    );
+    .east  -> Points#(x,     y + 1);
+    .south -> Points#(x + 1, y    );
+    .west  -> Points#(x,     y - 1);
+    };
+  ==(other:Point): Bool -> other.x == x  .and (other.y == y );
+  .str -> `[x=` + x + `, y=` + y + `]`;
+  }}
+//----------------------------------
+//File _tank_game/direction.fear
+North: Direction {::.north}
+East : Direction {::.east}
+South: Direction {::.south}
+West : Direction {::.west}
+DirectionMatch[R:**]: { mut .north: R; mut .east: R; mut .south: R; mut .west: R; }
+Direction: ToStr, Sealed, WidenTo[Direction] {
+  read .match[R: **](mut DirectionMatch[R]): R;
+  .turn: Direction -> this.match{
+    .north -> East;
+    .east  -> South;
+    .south -> West;
+    .west  -> North;
+    };
+  .str -> this.match{
+    .north -> `North`;
+    .east  -> `East`;
+    .south -> `South`;
+    .west  -> `West`;
+    };
+  }
+//----------------------------------
+//File _tank_game/tank.fear
+Tanks: { #(heading: Direction, aiming: Direction, position: Point): Tank -> {'self
+  .heading -> heading; .aiming -> aiming; .position -> position;
+  .str -> ``| (self.repr1) | (self.repr2) | (self.repr3) |;
+  }}
+Tank: ToStr {
+  .heading:  Direction;
+  .aiming:   Direction;
+  .position: Point;
+  .move:     Tank -> Tanks#(this.heading, this.aiming, this.position.move(this.heading));
+  .repr1:    Str  -> this.aiming .match AimingRepr1;
+  .repr2:    Str  -> this.aiming .match mut AimingRepr2{this.heading .match HeadingChar};
+  .repr3:    Str  -> this.aiming .match AimingRepr3;
+  }
+HeadingChar: DirectionMatch[Str]{
+  .north -> `A`;
+  .east  -> `<`; 
+  .south -> `V`;
+  .west  -> `>`;
+  }
+AimingRepr1: DirectionMatch[Str]{
+  .north -> ` / | \ `;
+  .east  -> ` / - \ `; 
+  .south -> ` / - \ `;
+  .west  -> ` / - \ `;
+  }
+AimingRepr2: DirectionMatch[Str]{
+  mut .centre: Str;
+  .north -> ` | ` + (this.centre) + ` | `;
+  .east  -> ` - ` + (this.centre) + ` | `;
+  .south -> ` | ` + (this.centre) + ` | `;
+  .west  -> ` | ` + (this.centre) + ` - `;
+  }
+AimingRepr3: DirectionMatch[Str]{
+  .north -> ` \ _ / `;
+  .east  -> ` \ _ / `; 
+  .south -> ` \ | / `;
+  .west  -> ` \ _ / `;
+  }
+//----------------------------------
+//File _tank_game/next_state.fear
+NextState:F[List[Tank],List[Tank]]{
+  #(tanks)->Block#
+    .let danger= { tanks.flow.map{ t -> t.position.move(t.aiming) }.list }
+    .let survivors= { tanks.flow.filter{t -> danger.flow.filter{::==(t.position)}.isEmpty } .list }
+    .let occupied= { 
+      (survivors.flow.map{::.position}) ++ (survivors.flow.map{::.move.position}) .list }
+    .return { survivors.flow.map{t -> this.moveIfFree(t,occupied)} .list };
+ 
+  read .moveIfFree(t: Tank, occupied: List[Point]): Tank-> occupied.flow
+    .filter{::==(t.position)}
+    .size == 1 .if{
+      .then -> t.move;
+      .else -> t;
+    };
+  }
+TanksToS: F[List[Tank],Str]{ ts -> Block#
+  .let res = {0.rangeUntil(30).map{_->this.newLine}.list }
+  .do{ ts.flow.forEach{ t -> Block#
+    .let x= { t.position.x }
+    .let y= { t.position.y }
+    .if {x.inRange(0,10).not} .done
+    .if {y.inRange(0,10).not} .done
+    .do{ res.get(y * 3)    .get(x).set(t.repr1) }
+    .do{ res.get(y * 3 + 1).get(x).set(t.repr2) }
+    .do{ res.get(y * 3 + 2).get(x).set(t.repr3) }
+    .done
+    }}
+  .return { res.flow.map{::.flow.map{::.get}.join(``)}.join(``|) };
+  read .newLine: mut List[mut Var[Str]] -> 0.rangeUntil(10).map{ _ -> Vars#(`      `)}.list;
+  }
+PrintGame: {
+  mut .out: mut Output;
+  mut .singleLine(ts: List[Tank]): Void -> this.out.println(TanksToS#(ts));
+  mut .lines(rounds: Nat, ts: List[Tank]): Void -> Block#
+    .var current= {ts}
+    .return{ 0.rangeUntil(rounds).forEach{step -> Block#(
+      this.out.println(`Step `+step|),
+      this.out.println(`------------------------------------------------------------`|),
+      this.singleLine(current.get),
+      this.out.println(`------------------------------------------------------------`|),
+      current.set(NextState#(current.get))
+      )}}
+  }
+//ReadGame: { ... }
+ReadGame: { mut .in: mut InputCursorNode; mut .read:List[Tank]->{};}
+Test: Main {sys -> Block#
+  .let out= {sys.out}
+  .let in= {sys.inputCursor# !}
+  .let game= {mut ReadGame{in}.read}
+  .return{ mut PrintGame{out}.lines(50,game) }
+  }
