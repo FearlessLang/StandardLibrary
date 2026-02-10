@@ -43,7 +43,7 @@ List[E:*]:_List[E],_AssertEmpty,_AssertSize{
   read  .flow-> Flows.fromReadList(this);
   imm  .flow-> Flows.fromImmList(this);
 
-  .as(f)->{};
+  .as f ->{};
 
   .imm by->{};
   .str by->`[]`;
@@ -58,7 +58,7 @@ List[E:*]:_List[E],_AssertEmpty,_AssertSize{
   .hash by -> Block#
     .let size= {this.size}
     .return {this.flow.fold({ size },
-       { acc, e -> acc.aluMulWrap(31).aluAddWrap(by#e.hash)}
+       { acc, e -> acc.hashWith(by#e.hash)}
        )};
   .cmp(by, a, b, m)->a.opt(0).match{
     .empty->b.opt(0).match{ .empty->m.eq; .some _->m.lt; };

@@ -1,5 +1,5 @@
 // Num: unlimited-precision rational (exact arithmetic).
-Num:Sealed,DataType[Num,Num],_AssertApprox[Num]{
+Num:Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num]{
   +(x:Num):Num;                     /// exact add
   -(x:Num):Num;                     /// exact sub
   *(x:Num):Num;                     /// exact mul
@@ -23,13 +23,15 @@ Num:Sealed,DataType[Num,Num],_AssertApprox[Num]{
   .clamp(lo:Num, hi:Num):Num;       /// clamp into [lo,hi]; throws if lo>hi
   .hash -> this.str.hash;           /// hash via string
   .close->::; .close->this;         /// fixpoint type closed
+  .sumNumber xs ->                  /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );
 }
 
 /// Float: 64 bits IEEE values. Note: ==/order instead follow the usual rules:
 /// - NaN == NaN (all different NaNs equal); NaN is greater than everything else including +Inf
 /// - -0.0 == +0.0
 /// Method hash must respect this ordering
-Float:Sealed,DataType[Float,Float],_AssertApprox[Float]{
+Float:Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float]{
   +(x:Float):Float;                 /// IEEE add
   -(x:Float):Float;                 /// IEEE sub
   *(x:Float):Float;                 /// IEEE mul
@@ -62,14 +64,15 @@ Float:Sealed,DataType[Float,Float],_AssertApprox[Float]{
   .natExact:Opt[Nat];               /// .some if finite, integral, in [0,maxNat]; .empty otherwise
   .byteExact:Opt[Byte];             /// .some if finite, integral, in [0,maxByte]; .empty otherwise
   .clamp(lo:Float, hi:Float):Float; /// clamp into [lo,hi]; throws if lo>hi 
-  .hash -> this.imm.isNegZero?{.then->`0.0`.hash; .else->this.imm.ieeeStr.hash};/// hash via str
-  
+  .hash -> this.imm.isNegZero?{.then->`0.0`.hash; .else->this.imm.ieeeStr.hash};/// hash via str  
   .close->::; .close->this;         /// fixpoint type closed
+  .sumNumber xs ->                  /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );  
 }
 
 // Int: signed 32-bit.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Int:Sealed,DataType[Int,Int]{
+Int:Sealed,DataType[Int,Int],SumNumber[Int]{
   .succ:Int->this + +1;             /// successor number; throws on overflow
   .pred:Int->this + -1;             /// predecessor number; throws on underflow
   +(x:Int):Int;                     /// checked add; throws on overflow/underflow
@@ -104,10 +107,12 @@ Int:Sealed,DataType[Int,Int]{
   .clamp(lo:Int, hi:Int):Int;       /// clamp into [lo,hi]; throws if lo>hi
   .hash -> this.str.hash;           /// hash via str
   .close->::; .close->this;         /// fixpoint type closed
+  .sumNumber xs ->                  /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );  
 }
 // Nat: 32-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Nat:Sealed,DataType[Nat,Nat]{
+Nat:Sealed,DataType[Nat,Nat],SumNumber[Nat]{
   .succ:Nat->this + 1;              /// successor number; throws on overflow
   .pred:Nat->this - 1;              /// predecessor number; throws on underflow
   +(x:Nat):Nat;                     /// checked add; throws on overflow (past maxNat)
@@ -141,11 +146,14 @@ Nat:Sealed,DataType[Nat,Nat]{
   .rangeTo(Nat): mut Flow[Nat];     /// Range from this to Nat included
   .hash -> this.str.hash;           /// hash via str
   .close->::; .close->this;         /// fixpoint type closed
+  .sumNumber xs ->                  /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );
+  .hashWith(other:Nat):Nat -> this.aluMulWrap(31).aluAddWrap(other);
+  
 }
-
 // Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Byte:Sealed,DataType[Byte,Byte]{
+Byte:Sealed,DataType[Byte,Byte],SumNumber[Byte]{
   +(x:Byte):Byte;                   /// checked add; throws on overflow (past 255)
   -(x:Byte):Byte;                   /// checked sub; throws on underflow (below 0)
   *(x:Byte):Byte;                   /// checked mul; throws on overflow
@@ -170,4 +178,6 @@ Byte:Sealed,DataType[Byte,Byte]{
   .clamp(lo:Byte, hi:Byte):Byte;    /// clamp into [lo,hi]; throws if lo>hi
   .hash -> this.str.hash;           /// hash via str
   .close->::; .close->this;         /// fixpoint type closed
+  .sumNumber xs ->                  /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );  
 }

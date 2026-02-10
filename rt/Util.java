@@ -37,10 +37,9 @@ public class Util{
     @Override public Object mut$eq$0(){ return eq; }
     @Override public Object mut$gt$0(){ return gt; }
   };
-  //OrderHashBy$1 implements OrderHashBy$2; $1 or $2 is the number of generics
-  public static int cmp(OrderHashBy$2 by,Object a,Object b){//so this is the more general method
-    var ohA= (Order$1)((OrderHash$1)by.imm$$hash$1(a));
-    var ohB= (Order$1)((OrderHash$1)by.imm$$hash$1(b));
+  public static int cmp(OrderBy$2 by,Object a,Object b){//so this is the more general method
+    var ohA= (Order$1)by.imm$$hash$1(a);
+    var ohB= (Order$1)by.imm$$hash$1(b);
     return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
   }
   public static final class MapKey{
@@ -48,7 +47,7 @@ public class Util{
     public final Object key;      // representative K (first inserted)
     public final Object close;    // K0
     public final int hc;
-    public MapKey(OrderHashBy$1 oh,Object k){
+    public MapKey(OrderHashBy$2 oh,Object k){
       key= k;
       ord= (OrderHash$1)oh.imm$$hash$1(k);
       close= ((Order$1)ord).read$close$0();
@@ -60,7 +59,7 @@ public class Util{
     return isTrue(((Order$1)ord).read$$eq_eq$1(x.close));
     }
   }
-  public static MapKey mapKey(OrderHashBy$1 oh,Object k){ return new MapKey(oh,k); }
+  public static MapKey mapKey(OrderHashBy$2 oh,Object k){ return new MapKey(oh,k); }
   
   public static RuntimeException deterministic(Info$0 i){ return new Deterministic(i); }
   public static Error nonDeterministic(Info$0 i){ return new NonDeterministic(i); }

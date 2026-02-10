@@ -11,13 +11,79 @@ Flows:{
 Flow[E:*]:{
   mut .forEach[R:*](f: mut MF[E,Void]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
+  mut .flatMap[R:*](f: read F[E, Flow[R]]): mut Flow[R];
   mut .filter(f: read F[E, Bool]): mut Flow[E];
   mut .size: Nat;
   mut .isEmpty: Bool -> this.size == 0;
   mut ++ (mut Flow[E]): mut Flow[E];
   mut .list: mut List[E];
-  mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
-  mut .mapping[K,E0:*](OrderHashBy[K,K],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
+  mut .eList: mut EList[E];
+  mut .mapping[K,K0,E0:*](OrderHashBy[K,K0],read KeyElemMapper[E,K,E0]):mut Map[K,E0];
   mut .join(js: JoinStr[E]): E -> js.joinStr this;
+  mut .sum(sn: SumNumber[E]): E -> sn.sumNumber this;
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
+  mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R ->
+    this.fold(acc,{a,e->a.acc e}).result;
+  mut .max[K](by:OrderBy[imm E,K]):          mut Flow[E] -> this.foldAcc({ MaxAcc#by }).flow;
+  mut .min[K](by:OrderBy[imm E,K]):          mut Flow[E] -> this.foldAcc({ MinAcc#by }).flow;
+  mut .sort[K](by:OrderBy[imm E,K]):         mut Flow[E]-> this.eList.sortAnd by .flow;
+  mut .distinct[K](by:OrderHashBy[imm E,K]): mut Flow[E]-> this.eList.distinctAnd by .flow;
+  mut .sortDistinct[K](by:OrderBy[imm E,K]): mut Flow[E]-> this.eList.sortDistinctAnd by .flow;
+  mut .any(f: read F[E, Bool]):  Bool;
+  mut .all(f: read F[E, Bool]):  Bool;
+  mut .none(f: read F[E, Bool]): Bool;
+  mut .get:   E;//get the first element if size==1, throws otherwise
+  mut .opt:   Opt[E];//opt of the first element if size in {0,1} throws otherwise
+  mut .first: Opt[E]; //opt of the first element, never throws
   }
-JoinStr[E:*]:Sealed{ .joinStr(mut Flow[E]): E }
+FoldAcc[E:*,R:**]:{ mut .result:R; mut .acc(E): mut FoldAcc[E,R] }
+ELists:{ #[E:*]: mut EList[E]-> Magic! }
+EList[E:*]:{
+  //I was considering if EList should start with a Num current size AND should allow for 'holes', so .get
+  //can give exception in the middle of present items.
+  mut .add(E):Void;
+  mut .addAnd(E): mut EList[E];
+  mut .clear: Void;
+  mut .clearAnd: mut EList[E];
+  mut .sort[K](by: OrderBy[imm E,K]): Void;
+  mut .sortAnd[K](by: OrderBy[imm E,K]): mut EList[E];
+  mut .distinct[K](by: OrderHashBy[imm E,K]): Void;
+  mut .distinctAnd[K](by: OrderHashBy[imm E,K]): mut EList[E];
+  mut .sortDistinct[K](by: OrderBy[imm E,K]): Void;
+  mut .sortDistinctAnd[K](by: OrderBy[imm E,K]): mut EList[E]; 
+  mut .flow: mut Flow[E]; //consumes the EList
+  mut .get(Nat): E; //simpler model with most methods `mut`
+  read .size: Nat;
+  mut .list: mut List[E]; //consumes the EList and moves the data in the result
+  }
+JoinStr[E:*]:{ .joinStr(mut Flow[E]): E }
+SumNumber[E:*]:{ .sumNumber(mut Flow[E]): E }
+
+MaxAcc:{
+  #[E:*,K](by:OrderBy[imm E,K]): mut FoldAcc[E,mut EList[E]] -> {
+    ELists#;
+    e -> MaxAcc#(by, ELists#.addAnd e);
+  };
+  #[E:*,K](by: OrderBy[imm E,K], bests: mut EList[E]): mut FoldAcc[E,mut EList[E]] -> {'self
+    bests;
+    e -> by#(bests.get 0) <=> (by#e,{
+      .lt -> Block#(bests.clearAnd.add e,self);
+      .eq -> Block#(bests.add e,self);
+      .gt -> self;
+      });
+    };
+  }
+MinAcc:{
+  #[E:*,K](by:OrderBy[imm E,K]): mut FoldAcc[E,mut EList[E]] -> {
+    ELists#;
+    e -> MinAcc#(by, ELists#.addAnd e);
+  };
+  #[E:*,K](by: OrderBy[imm E,K], bests: mut EList[E]): mut FoldAcc[E,mut EList[E]] -> {'self
+    bests;
+    e -> by#(bests.get 0) <=> (by#e,{
+      .lt -> self;
+      .eq -> Block#(bests.add e,self);
+      .gt -> Block#(bests.clearAnd.add e,self);
+      });
+    };
+  }

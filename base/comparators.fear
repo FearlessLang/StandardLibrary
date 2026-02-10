@@ -19,6 +19,11 @@ OrderMatch[R:**]:{                  /// compare result carrier: cmp selects exac
   mut .lt:R;
   mut .eq:R;
   mut .gt:R;
+  mut &&(onEq: mut MF[R]): mut OrderMatch[R]-> {
+    .lt->this.lt;
+    .eq->onEq#;
+    .gt->this.gt; 
+    }
 }
 
 Order[T]:{
@@ -47,14 +52,8 @@ _LE:{ #[T](o: read Order[T], a: read T, b: read T): Bool -> o.cmp(a,b,{ .lt->Tru
 OrderBy[T,K]:{                       /// order values of T by a component/key K
   #(read T): read Order[K];          /// build a closed Order[K] for t's key (key is .close of the result)
 
-  .then[K0](next: OrderBy[T,K0]): OrderBy[T] -> {  /// lexicographic: first this-key, then next-key
-    .cmp(t0,t1,m)-> this#t0 <=>(
-      this#t1, {
-        .lt->m.lt;
-        .gt->m.gt;
-        .eq->next#t0<=>(next#t1,m);
-      })
-  };
+  .then[K0](next: OrderBy[T,K0]): OrderBy[T] -> 
+    {t0,t1,m -> this#t0 <=> ( this#t1, m &&{ next#t0<=>(next#t1,m)}) };
 
   .view[A](f:F[read A,read T]):OrderBy[A] ->       /// contramap: order A by mapping into T
     {a0,a1,m-> this#(f#a0)<=>(this#(f#a1),m)};    
@@ -192,7 +191,7 @@ OrderHashBy[T,K]:OrderBy[T,K],ToStrBy[T]{  /// order+hash by key K, plus per-val
       .lt ->m.lt;
       .eq ->next#t0<=>(next#t1,m);
       .gt ->m.gt});
-    .hash t -> this#t.hash.aluMulWrap(31).aluAddWrap(next#t.hash);
+    .hash t -> this#t.hash.hashWith(next#t.hash);
     .str t->this#t.str;
   };
 

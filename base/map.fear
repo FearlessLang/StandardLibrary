@@ -75,11 +75,7 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertS
     .map -> map;
     .imm->i;
     }};
-    
-    
-    
-     
-}
+  }
 
 KeyElem[K,E:*]:{
   read .key: K;

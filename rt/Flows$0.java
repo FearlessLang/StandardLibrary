@@ -69,4 +69,48 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$flatMap$1(Object p0){
+    try{ return new Flow$1Instance(s.flatMap(e->((Flow$1Instance)callF$2(p0,e)).s)); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  //---
+  @Override public Object mut$any$1(Object p0){
+    try{ return bool(s.anyMatch(e->isTrue(callF$2(p0,e)))); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$all$1(Object p0){
+    try{ return bool(s.allMatch(e->isTrue(callF$2(p0,e)))); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$none$1(Object p0){
+    try{ return bool(s.noneMatch(e->isTrue(callF$2(p0,e)))); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$get$0(){
+    try{
+      var it= s.iterator();
+      check(it.hasNext(), "Flow.get expected size==1, got 0");
+      var e0= it.next();
+      check(!it.hasNext(), "Flow.get expected size==1, got 2+");
+      return e0;
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$opt$0(){
+    try{
+      var it= s.iterator();
+      if(!it.hasNext()){ return optEmpty(); }
+      var e0= it.next();
+      check(!it.hasNext(), "Flow.opt expected size in {0,1}, got 2+");
+      return optSome(e0);
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$first$0(){
+    try{
+      var it= s.iterator();
+      return it.hasNext() ? optSome(it.next()) : optEmpty();
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
 }

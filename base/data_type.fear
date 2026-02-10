@@ -60,12 +60,10 @@ DataTypeBy[E,K,K0]:ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K]{
         .eq->(next#e0) <=>(next#e1,m);
       });
 
-    .hash e -> this#e.hash.aluMulWrap(31).aluAddWrap(next#e.hash);
-
-    .str  t -> this#t.str + `, ` + (next#t.str);
-    .info t -> this#t.info + (next#t.info);
-
-    .imm  t -> mergeImm#(this#t.imm, next#t.imm);
+    .hash by -> this#by.hash.hashWith(next#by.hash);
+    .str  by -> this#by.str + `, ` + (next#by.str);
+    .info by -> this#by.info + (next#by.info);
+    .imm  by -> mergeImm#(this#by.imm, next#by.imm);
   };
 
   /// Convenience: keep left imm rep (often fine for "by key then tie-breaker").
