@@ -138,5 +138,18 @@ Lists:Sealed{//No need of empty, just use {}
   #[E:*](E,E): mut List[E]->Magic!;
   #[E:*](E,E,E): mut List[E]->Magic!;
   #[E:*](E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+
   .singletonRead[E:*](read E): read List[E]->Magic!;
 }

@@ -2,6 +2,7 @@ package base;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import static base.Util.*;
 
@@ -10,7 +11,10 @@ public interface ELists$0 extends Sealed$0{
   ELists$0 instance= new ELists$0(){};
 }
 final class EList$1Instance implements EList$1{
-  private ArrayList<Object> xs= new ArrayList<>();
+  static Object wrap(List<Object> l){ return new EList$1Instance(new ArrayList<>(l)); }
+  EList$1Instance(ArrayList<Object> l){ xs= l; }
+  EList$1Instance(){ xs= new ArrayList<>(); }
+  private ArrayList<Object> xs;
   private ArrayList<Object> drain(){
     var r= xs;
     xs= new ArrayList<>();

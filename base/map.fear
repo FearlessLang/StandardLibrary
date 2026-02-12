@@ -41,6 +41,10 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertS
   read .flow: mut Flow[KeyElem[K,read/imm E]];     /// entries as a flow (The flow order follows the map insertion order)
   imm  .flow: mut Flow[KeyElem[K,imm E]];          /// entries as a flow (The flow order follows the map insertion order)
 
+  mut  .flow[R:*](read F[K,E,R]): mut Flow[R];          /// entries as a flow (The flow order follows the map insertion order)
+  read .flow[R:*](read F[K,read/imm E,R]): mut Flow[R]; /// entries as a flow (The flow order follows the map insertion order)
+  imm  .flow[R:*](read F[K,imm E,R]): mut Flow[R];      /// entries as a flow (The flow order follows the map insertion order)
+
   // Optional but commonly useful conveniences (still consistent with List style):
   read .keys: mut Flow[K];               /// keys as a flow (same iteration order as .flow)
   read .elems: mut Flow[read/imm E];     /// values as a flow (same iteration order as .flow)

@@ -50,6 +50,10 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     try{ return List$1Instance.wrap(s.toList()); }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$eList$0(){
+    try{ return EList$1Instance.wrap(s.toList()); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
   @Override public Object mut$fold$2(Object p0,Object p1){
     try{
       var it= s.iterator();

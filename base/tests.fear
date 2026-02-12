@@ -62,5 +62,14 @@ AllTest:Main{s->
     
     .testSuite ListBasics
     .testSuite MapBasics
+    
+    .testSuite TestFlowsBasics
+    .testSuite TestListsBasics
+    .testSuite TestListOps
+    .testSuite TestOrderBasics
+    .testSuite TestOrderByAndFlows
+    .testSuite TestMapsAndSets
+    .testSuite TestOrderingCollections
+    
     .done
 }

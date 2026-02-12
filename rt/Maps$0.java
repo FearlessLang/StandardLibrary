@@ -152,6 +152,14 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
   @Override public Object read$flow$0(){ return mut$flow$0(); }
   @Override public Object imm$flow$0(){ return mut$flow$0(); }
 
+  @Override public Object mut$flow$1(Object p0){
+    return new Flow$1Instance(elems.entrySet().stream()
+      .map(e-> callF$3(p0,e.getKey().key,e.getValue())));
+  }
+  @Override public Object read$flow$1(Object p0){ return mut$flow$1(p0); }
+  @Override public Object imm$flow$1(Object p0){ return mut$flow$1(p0); }
+
+
   @Override public Object read$keys$0(){ return new Flow$1Instance(elems.keySet().stream().map(k->k.key)); }
   @Override public Object read$elems$0(){ return new Flow$1Instance(elems.values().stream()); }
 

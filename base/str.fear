@@ -74,4 +74,8 @@ Str:Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize{
   .numExact: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
   .natExact: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
   .byteExact: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
+  .startsWith(Str):Bool;            /// this string starts with the other string
+  .lower: Str;                      /// this string but all lowercase
+  .upper: Str;                      /// this string but all uppercase
 }
+OrderByCaseInsensitive:OrderBy[Str]{ s0,s1,m -> s0.imm.lower <=> (s1.imm.lower, m) }

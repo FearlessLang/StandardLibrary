@@ -117,5 +117,12 @@ public record Str$0Instance(String val) implements Str$0{
     String res= stream.map(o->((Str$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
     return new Str$0Instance(res);
   }
+  @Override public Object imm$startsWith$1(Object p0){
+    var other= ((Str$0Instance)p0).val;
+    return bool(val.startsWith(other));  
+  }
+  @Override public Object imm$lower$0(){ return new Str$0Instance(val.toLowerCase()); }
+  @Override public Object imm$upper$0(){ return new Str$0Instance(val.toUpperCase()); }
+
   static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }
 }
