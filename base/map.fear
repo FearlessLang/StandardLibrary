@@ -67,6 +67,7 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertS
     .imm->i;
     }};*/
   .info by->Block#
+    .if {this.isEmpty} .return {Info}
     .let map= {this.flow.fold(
       {Maps#[Str,Str,Info]{::}},
       {acc,ke->Block#

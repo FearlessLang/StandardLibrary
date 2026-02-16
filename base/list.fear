@@ -47,14 +47,14 @@ List[E:*]:_List[E],_AssertEmpty,_AssertSize{
 
   .imm by->{};
   .str by->`[]`;
-  .info by->Block#[Info]
+  .info by->Block#
+    .if {this.isEmpty} .return {Info}
     .let list= {this.flow.map[Info]{e->by#e.info}.list.as{::}}
     .return{Info{'i
-    .match->::.list list;
-    .list -> list;
-    .imm->i;
+      .match->::.list list;
+      .list -> list;
+      .imm->i;
     }};
-
   .hash by -> Block#
     .let size= {this.size}
     .return {this.flow.fold({ size },
