@@ -70,6 +70,7 @@ AllTest:Main{s->
     .testSuite TestOrderByAndFlows
     .testSuite TestMapsAndSets
     .testSuite TestOrderingCollections
+    .testSuite TestRepr
     
     .done
 }

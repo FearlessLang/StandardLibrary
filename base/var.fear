@@ -42,3 +42,66 @@ Count:{
       *=   n2 -> c .set (c.get * n2);
       }};
   }
+IsoPods:{ #[T](val: iso T): mut IsoPod[T] -> Magic!; }
+IsoPod[T]: {
+  read .isClosed: Bool;
+  read .peek[R:iso,imm,mut,read,mutH](f: mut IsoViewer[T, R]): R;//Crucially not readH
+  read .look[R:iso,imm,mut,read,mutH](f: mut MF[readH T, R]): R -> this.peek{
+    .some x -> f#x;
+    .empty -> Error.msg `The IsoPod was open`;
+    };
+  mut .open: iso T;                ///and makes .isClosed false
+  read .isOpen: Bool -> this.isClosed.not;
+  mut .consume[R:**](f: mut IsoConsumer[T, R]): R ->
+    this.isClosed ? { .then -> f.some(this.open); .else -> f.empty };
+  mut .mutate[R:iso,imm,mut,read](f: mut IsoMutator[T, R]): R;
+  mut .blindMutate(f: F[mut T, Void]): Void-> ///NO operation on open
+    this.mutate{
+      mhT->f#mhT;//by useMutH1 promotion
+      Void;
+      };
+  }
+IsoConsumer[T, R:**]:{
+  mut .some(x: iso T): R;
+  mut .empty: R;
+  }
+IsoMutator[T, R:iso,imm,mut,read]:{
+  mut .some(x: mutH T): R;
+  mut .empty: R;
+  }
+IsoViewer[T, R:iso,imm,mut,read,mutH]:{//crucially readH not allowed
+  mut .some(x: readH T): R;
+  mut .empty: R;
+  }
+
+Slots: {#[E:*]: mut Slot[E] -> Block#
+  .var[mut Opt[E]] e = {{}}
+  .return {mut Slot[E:*]: {'slot
+    mut  !: E -> e.get!;
+    read !: read/imm E -> e.get!;
+    mut .fill(x: E): Void -> e.set(e.get.match{
+      .some _ -> Error.msg `Slot was already full`;
+      .empty  -> Opts#x;
+      });
+    read .isFull: Bool -> e.get.isSome;
+    mut .opt: mut Opt[E] -> e.get;
+    //read .opt: read Opt[read/imm E] -> e.get; //TODO: correctly returning Opt[E], but it is undesirable?
+    }};
+  }
+
+Reprs: {
+  #[T](x: iso T, inv: F[read T,Bool]): mut Repr[T] -> Block#
+    .openIso _x = x
+    .if {inv#(_x).not} .error {Infos.msg`Invariant does not initially hold`} 
+    .return{mut Repr[T]: {
+      mut .mutate[R:iso,imm,mut,read](f: mut MF[mutH T,R]): R ->_IdOrErr#(f#(_x),inv#(_x)); 
+      read .look[R](f: read F[read T,R]): R -> f#(_x);
+      read .cachableLook[R](f: F[read T,R]): R -> f#(_x);
+      }}
+  }
+_IdOrErr:{#[R:iso,imm,mut,read](r:R,b:Bool):R->Block#(//Needed for the iso case of R
+  b?{.then->Void; .else->Error.msg`Invariant does not hold after mutation`},
+  r
+  )}
+FilterAny:{#[R:**](R,F[R,Bool],F[R]):R->Magic! }//Needed in some cases. Should it be part of the magic?
+//TODO: add .repr to block with .invariant?

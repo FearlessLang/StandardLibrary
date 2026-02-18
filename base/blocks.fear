@@ -1,4 +1,7 @@
 Continuation[T:*,R:*]: {mut #(x: T, self: mut Block[R]): R}
+OpenIsoContinuation[T,R:*]: {mut #(x: mut T, self: mut Block[R]): R}//Only needed for limitations of inference
+//otherwise the same as Continuation[mut X,R]
+ReprWithInvariant[T]:{ mut .elem:iso T; mut .invariant:F[read T,Bool];}
 
 Block: Sealed{
   #[R:*]: mut Block[R] -> {};
@@ -18,10 +21,12 @@ Block[R:*]: Sealed{
     Block#(Assert!(p#,failMsg),this);
   mut .let[X:*](x: mut MF[X], cont: mut Continuation[X,R]): R ->
     cont#(x#, this);
-  mut .openIso[X](x: iso X, cont: mut Continuation[mut X,R]): R ->
+  mut .openIso[X](x: iso X, cont: mut OpenIsoContinuation[X,R]): R ->
     cont#(x, this);
   mut .var[X:*]( x: mut MF[X], cont: mut Continuation[mut Var[X], R] ): R ->
     cont#(Vars#(x#), this);
+  mut .repr[X](x: mut ReprWithInvariant[X], cont: mut Continuation[mut Repr[X], R] ): R ->
+    cont#(Reprs#(x.elem,x.invariant), this);
 //  mut .isoPod[X]( x: iso X, cont: mut Continuation[mut IsoPod[X], R]): R ->
 //    cont#(IsoPod#(x), this);
   mut .if(p: mut F[Bool]): mut BlockIf[R] -> p# ? {
@@ -56,7 +61,8 @@ _DecidedBlock:{
     .do      _    -> self;
     .let     _, _ -> res;
     .openIso _, _ -> res;
-    //.var     _, _ -> res;
+    .var     _, _ -> res;
+    .repr    _, _ -> res;
     //.isoPod  _, _ -> res;
     .assert  _    -> self;
     .assert  _, _ -> self;

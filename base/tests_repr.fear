@@ -1,0 +1,22 @@
+MinMaxs: F[Nat,Nat,mut MinMax]{min, max -> Block#
+  .var _min = {min}
+  .var _max = {max}
+  .return {mut MinMax: {
+  read .min: Nat -> _min.get;
+  read .max: Nat -> _max.get;
+  mut .min(n: Nat): Void -> _min.set(n);
+  mut .max(n: Nat): Void -> _max.set(n);
+  }}}
+Ranges: F[Nat,Nat,mut Range]{min, max -> Block#
+  .repr minMax = {MinMaxs#(min,max); .invariant-> {r -> r.min < (r.max)} }
+  .return {mut Range: {
+  read .min: Nat -> minMax.look{r -> r.min};
+  read .max: Nat -> minMax.look{r -> r.max};
+  mut .min(n: Nat): Void -> minMax.mutate{r -> r.min(n)};
+  mut .max(n: Nat): Void -> minMax.mutate{r -> r.max(n)};
+  read .str: Str -> minMax.cachableLook{r -> `[`+(r.min)+`-`+(r.max)+`]`};
+  }}}
+
+TestRepr:F[Tests,Tests]{::
+  .test(Ranges#(1,2).str.assertEq (`[1-2]`))
+}
