@@ -1,0 +1,82 @@
+///Unicode string type
+///This string type is designed to support the evil concept of unicode strings.
+///As for simple strings, unicode string literals can only even contain the following whitelisted characters:
+///0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\
+///Plus space ` ` and new line.
+///There is no concept of escape as in some other languages, so `\n` is two characters.
+///The methods ^^ and | can be used to obtain a string including new lines or double quotes (").
+
+UStr: Sealed, ToUStr, ToImm[UStr], DataType[UStr,UStr,UStr,UStr], JoinStr[UStr]{
+  .close->::; .close->this;         /// fixpoint type closed
+  .merge (x: read UStr): UStr;      /// string concatenation; diffence from + is only that it can merge graphene clusters; throws on result size > maxInt  
+  + (x: read UStr): UStr;           /// string concatenation; throws on result size > maxInt
+  | (x: read UStr): UStr;           /// like + but inserts a newline between the two strings
+  ^ (x: read UStr): UStr;           /// like + but inserts a backtick between the two strings
+  ^^(x: read UStr): UStr;           /// like + but inserts a double quote between the two strings
+
+  | : UStr;                         /// appends a newline
+  ^ : UStr;                         /// appends a backtick
+  ^^ : UStr;                        /// appends a double quote
+  .isEmpty: Bool;                   /// true iff size == 0
+  .size: Nat;                       /// the amount of extended graphene clusters in this string
+  .sizeBytes: Nat;                   /// the amount of bytes encoding this string
+  .sizeCodePoints: Nat;              /// the amount of unicode codepoints in this string
+  .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use ^^, | and U+xxxx, not necessarily a single literal)
+
+  //read .strUCode producing `... ...` as a valid U+ input. different from .escape, this uses the code for all of them.
+  //imm .isStr: Bool;                     /// true if this method only uses characters that can appear in a Str
+  //imm .isUnitStr: Bool-> this.isStr .and (this.sizeCodePoints == 1);
+  // Str need methods to evaluate UStr.escape but also Str.escape
+
+  read .cmpCodePoints[K,R:**](by: OrderBy[imm Nat,K], t0: read Nat, t1: read Nat, m: mut OrderMatch[R]): R; /// compare t0 vs t1 over CodePoints
+  read .cmpBytes[K,R:**](by: OrderBy[imm Byte,K], t0: read Byte, t1: read Byte, m: mut OrderMatch[R]): R; /// compare t0 vs t1 over Bytes
+
+  read .hashCodePoints[K](by: OrderHashBy[imm Nat,K]):Nat;
+  read .hashBytes[K](by: OrderHashBy[imm Byte,K]):Nat;
+
+  //imm .flow: mut Flow[UStr];
+  //imm .flowBytes: mut Flow[UStr];
+  //imm .flowCodePoints: mut Flow[UStr];
+  
+  //imm .slice(start: Nat, end: Nat): UStr;
+  //imm .sliceBytes(start: Nat, end: Nat): UStr;
+  //imm .sliceCodePoints(start: Nat, end: Nat): UStr;
+
+  //read .dataTypeByte[K](by: DataTypeBy[Byte,K,Byte]): read DataType[UStr,UStr];
+  //read .dataTypeCodePoint[K](by: DataTypeBy[Nat,K,Nat]): read DataType[UStr,UStr];  
+  //read .orderHashByte[K](by: OrderHashBy[Byte,K,Byte]): read OrderHash[UStr,UStr];
+  //read .orderHashCodePoint[K](by: OrderHashBy[Nat,K,Nat]): read OrderHash[UStr,UStr];  
+  //read .orderByte[K](by: OrderBy[Byte,K,Byte]): read Order[UStr,UStr];
+  //read .orderCodePoint[K](by: OrderBy[Nat,K,Nat]): read Order[UStr,UStr];
+  
+  // imm .caseFoldLowercase: UStr; ///different from display oriented lowercase
+  // imm .caseFoldUpeercase: UStr;
+  
+  imm  .startsWithStr(str:Str): Bool;
+  imm  .startsWithCodePoints[K](by: OrderBy[Nat,K], uStr: UStr): Bool;
+  imm  .startsWithBytes[K](by: OrderBy[Byte,K], uStr: UStr): Bool;
+  imm  .startsWith[K](by: OrderBy[UStr,K], uStr: UStr): Bool;
+  
+  imm  .endsWithStr(str:Str): Bool;
+  imm  .endsWithCodePoints[K](by: OrderBy[Nat,K], uStr: UStr): Bool;  
+  imm  .endsWithBytes[K](by: OrderBy[Byte,K], uStr: UStr): Bool;
+  imm  .endsWith[K](by: OrderBy[UStr,K], uStr: UStr): Bool;
+  
+  read .strCodePoints(by: ToStrBy[Nat]): Str;
+  read .strBytes(by: ToStrBy[Nat]): Str;
+  
+  read .infoCodePoints(by: ToInfoBy[Nat]): Info;
+  read .infoBytes(by: ToInfoBy[Byte]): Info;
+}
+ToUStr:{ read .uStr: UStr }
+
+UStrProcs:{
+  imm .add(a:UStr,b:ToUStr): mut UStrProc -> this.add(a,b);
+  }
+UStrProc:{
+  mut .add(a:UStr,b:ToUStr): mut UStrProc -> this.add(a,b);
+  mut .build(a:UStr): UStr-> a;
+  }
+U:{
+  +(Str):UStr
+  }

@@ -49,7 +49,8 @@ List[E:*]:_List[E],_AssertEmpty,_AssertSize{
   .str by->`[]`;
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let list= {this.flow.map[Info]{e->by#e.info}.list.as{::}}
+    .let list= {this.flow.map{e->by#e.info}.list.as{::}}
+    //.return{list.info{::}};This would go in stack overflow
     .return{Info{'i
       .match->::.list list;
       .list -> list;
@@ -60,7 +61,7 @@ List[E:*]:_List[E],_AssertEmpty,_AssertSize{
     .return {this.flow.fold({ size },
        { acc, e -> acc.hashWith(by#e.hash)}
        )};
-  .cmp(by, a, b, m)->a.opt(0).match{
+  .cmp by, a, b, m ->a.opt(0).match{
     .empty->b.opt(0).match{ .empty->m.eq; .some _->m.lt; };
     .some ea->b.opt(0).match{
       .empty->m.gt;

@@ -72,5 +72,7 @@ AllTest:Main{s->
     .testSuite TestOrderingCollections
     .testSuite TestRepr
     
+    .testSuite UStrTest
+    
     .done
 }

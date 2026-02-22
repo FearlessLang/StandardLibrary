@@ -35,23 +35,3 @@ MF[A:**,R:**]: { mut #(a: A): R }
 MF[A:**, B:**, R:**]: { mut #(a: A, b: B): R }
 MF[A:**, B:**, C:**, R:**]: { mut #(a: A, b: B, c: C): R }
 MF[A:**, B:**, C:**, D:**, R:**]: { mut #(a: A, b: B, c: C, d: D): R }
-  
-//To slowly move to other files
-
-UStr:Sealed,WidenTo[UStr]{}
-ToUStr:{ read .uStr: UStr }
-
-StrProcs:{
-  imm .add(a:Str,b:ToStr): mut StrProc -> this.add(a,b);
-  }
-StrProc:{
-  mut .add(a:Str,b:ToStr): mut StrProc -> this.add(a,b);
-  mut .build(a:Str): Str-> a;
-  }
-UStrProcs:{
-  imm .add(a:UStr,b:ToUStr): mut UStrProc -> this.add(a,b);
-  }
-UStrProc:{
-  mut .add(a:UStr,b:ToUStr): mut UStrProc -> this.add(a,b);
-  mut .build(a:UStr): UStr-> a;
-  }

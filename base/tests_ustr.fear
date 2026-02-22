@@ -1,0 +1,82 @@
+UStrTest:F[Tests,Tests]{::
+  .test("Hello".size .assertEq (5))
+}
+/*
+  .test("Hello".str{U.simpleAnd({_->Error.msg`Unreachable`})} .assertEq (`Hello`))
+  .test("Hello".str{U.simpleStrOr({_->`@`})} .assertEq (`Hello`))
+  .test("Hello".hash{U.simpleOrderHashOr({_->`@`})} .assertEq (`Hello`.hash))//may not hold, not the point
+  U.simpleHashOr
+  U.simpleOrderOr
+  }
+  One crucial part of the U interface should be a bunch of static methods with named control thingy.
+  U.zwsp etc 
+  
+  Should we offer a UStr.cmp that does unicode normalization, or a set of U.orderByXXX?
+  //user code U.orderByNorm(s1)==s2
+  UStrNorm.nfc(u: UStr): UStr
+
+UStrNorm.nfd(u: UStr): UStr
+UStrNorm.nfkc(u: UStr): UStr
+UStrNorm.nfkd(u: UStr): UStr
+UStrNorm.caseFold(u: UStr): UStr
+UStrNorm.nfkcCaseFoldNfc(u: UStr): UStr
+UStrOrderHash.utf8Bytes
+UStrOrderHash.codePoints
+
+
+  UStrOrders.nfc
+  UStrOrders.nfd
+  UStrOrders.nfkc
+  UStrOrders.nfkd
+  UStrOrders.caseFold
+  UStrOrders.nfkcCaseFold
+  
+  UStrOrders.ucaRootPrimary //why are we mixing acronimums and full names?
+  UStrOrders.ucaRootSecondary
+  UStrOrders.ucaRootTertiary
+  UStrOrders.ucaRootQuaternary
+  UStrOrders.ucaRootIdentical
+  UStrOrders.ucaRootPrimaryCaseLevel
+  UStrOrders.ucaRootTertiaryUpperFirst
+  UStrOrders.ucaRootTertiaryLowerFirst
+  UStrOrders.ucaRootNumericTertiary
+  UStrOrders.ucaRootIgnorePunctuationQuaternary
+  UStrOrders.uca(opts: Info)// opts can store all the configuration + locale
+  
+  
+  U.simpleToStrOr(fallback: ToStrBy[UStr]): ToStrBy[UStr]
+  U.simpleOrderOr(fallback: OrderBy[UStr,K]): OrderBy[UStr,K2] (whatever your encoding is)
+  U.simpleHashOr(fallback: OrderHashBy[UStr,K]): OrderHashBy[UStr,K2]
+  U.strAsCodePoints
+  U.strAsBytes
+  //.escape of something that starts/end with U+: test it and see if it makes sense.
+  
+  U.simpleOrderOr{u1,u2,m ->  }//appropriate if I'm calling .max
+  U.simpleOrderOr{UStr -> Order[UStr,_] }//appropriate if I'm calling UStr.order
+  
+  U.simpleOrderHashOr {UStr->OrderHash[UStr,_]} //appropriate to call UStr.orderHash
+  
+  U.simpleStrOr{UStr->ToStr}
+  U.simpleStrOr{u->str}//those two kind of work the same by accident since Str implements ToStr
+  
+  U.simpleDataTypeOr{UStr->DataType[UStr,_]} //appropriate to call UStr.dataType
+
+  U.simpleInfoOr //does not even conceptually work?
+  U.simpleImmOr //also a strange thing to want, the str .imm by is a dumb side effect of implementing DataType
+  
+  
+  UDelegate.str(ToStrBy)
+  UDelegate.cmp(a,b,m)
+  UDelegate.hash(UStr->Nat)
+  UDelegate.order(OrderBy[UStr,K])
+  UDelegate.orderHash(OrderHashBy[UStr,K])
+  UDelegate.dataType(DataTypeBy[UStr,K])
+  
+  consider the methods .str and may be .info to take extra parameters.
+  .str(by,separator) for example would be intersting, but... actually
+  "..".flow.map(UDelegate.str{_->'@'}).join ", "
+  works already anyway.
+  .strAsBytes similarly, but
+  .strUCode producing `... ...` as a valid U+ input would be good. 
+  
+  */

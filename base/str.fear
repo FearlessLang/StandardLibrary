@@ -78,4 +78,11 @@ Str:Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize{
   .lower: Str;                      /// this string but all lowercase
   .upper: Str;                      /// this string but all uppercase
 }
+StrProcs:{
+  imm .add(a:Str,b:ToStr): mut StrProc -> this.add(a,b);
+  }
+StrProc:{
+  mut .add(a:Str,b:ToStr): mut StrProc -> this.add(a,b);
+  mut .build(a:Str): Str-> a;
+  }
 OrderByCaseInsensitive:OrderBy[Str]{ s0,s1,m -> s0.imm.lower <=> (s1.imm.lower, m) }
