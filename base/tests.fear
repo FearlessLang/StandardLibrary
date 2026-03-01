@@ -76,3 +76,4 @@ AllTest:Main{s->
     
     .done
 }
+TestLog:Main{_->Log.log(`Hello`)}

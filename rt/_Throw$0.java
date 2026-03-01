@@ -38,7 +38,7 @@ public interface _Throw$0{
     }
     int targs= Integer.parseInt(ds);
     var type= ty.substring(0,dol) + holes('[',']',targs);
-    return fmtMeth(type,e.getMethodName())+" line: "+e.getLineNumber()+" in file "+e.getFileName();
+    return fmtMeth(type,e.getMethodName())+" error line: "+e.getLineNumber()+" in file "+e.getFileName();
   }
   static String fmtMeth(String type,String m){
     int a= m.indexOf('$');
