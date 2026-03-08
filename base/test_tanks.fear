@@ -126,7 +126,7 @@ PrintGame: {
 ReadGame: { mut .in: mut InputCursorNode; mut .read:List[Tank]->{};}
 //----------------------------------
 //File _tank_game/_rank_app.fear
-Test: Main {sys -> Block#
+TankTest: Main {sys -> Block#
   .let out= {sys.out}
   .let in= {sys.inputCursor# !}
   .let game= {mut ReadGame{in}.read}
