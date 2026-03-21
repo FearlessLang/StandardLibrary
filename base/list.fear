@@ -73,6 +73,7 @@ List[E:*]:_List[E],_AssertEmpty,_AssertSize{
       };
     };
 }
+
 _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E]{
   read .size: Nat;                           /// number of elements
   read .isEmpty: Bool;                       /// True iff size == 0

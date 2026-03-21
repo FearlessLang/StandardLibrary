@@ -200,6 +200,7 @@ OrderHashBy[T,K]:OrderBy[T,K],ToStrBy[T]{  /// order+hash by key K, plus per-val
     .hash a -> this#(f#a).hash;
     .str t->this#(f#t).str;
   };
+
   .hideKey: OrderHashBy[T] -> {//Just convenience over .viewHash{::}
     .cmp t0,t1,m -> this#t0 <=> (this#t1,m);
     .hash t -> this#t.hash;
