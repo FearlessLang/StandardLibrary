@@ -1,7 +1,7 @@
 package base;
 
-public record Int$0Instance(int val) implements Int$0{
-  public static Int$0 instance(int val){ return new Int$0Instance(val); }
+public record Int$0Instance(long val) implements Int$0{
+  public static Int$0 instance(long val){ return new Int$0Instance(val); }
 
   @Override public Object imm$shiftLeft$1(Object p0){ throw new Error(); }
   @Override public Object imm$shiftRight$1(Object p0){ throw new Error(); }
