@@ -19,7 +19,6 @@ public record Nat$0Instance(long val) implements Nat$0{
 
   private static long n(Object o){ return ((Nat$0Instance)o).val; }
   private static long i(Object o){ return ((Int$0Instance)o).val(); }
-  private static long u32(long x){ return Integer.toUnsignedLong(x); } // TODO: IS THIS CORRECT?
 
   /**
    * For a long to overflow a + b has to be greater than Long.MAX_VALUE
@@ -175,7 +174,7 @@ public record Nat$0Instance(long val) implements Nat$0{
     return optSome(instance(Long.divideUnsigned(val,d)));
   }
   @Override public Object imm$indexOffset$1(Object p0){
-    long r= val + (long) (p0);
+    long r= val + (long) i(p0);
     // NOTE: This provides a different error message for underflow and overflow.
     if (Long.compareUnsigned(r, MAX_UNSIGNED_VALUE) > 0) {
       throw err("Nat.indexOffset: overflow");
