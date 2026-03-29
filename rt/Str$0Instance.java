@@ -98,6 +98,7 @@ public record Str$0Instance(String val) implements Str$0{
       return new Dec(new BigInteger(s.substring(0,dot)+s.substring(dot+1)), s.length()-dot-1);
     }
   }
+  /// TODO: DOESN'T handle NaN or Inf values consistently with Float$0Instance.str
   @Override public Object imm$floatExact$0(){
     if (!signedFloat.matcher(val).matches()){ return optEmpty(); }
     try{

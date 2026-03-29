@@ -15,7 +15,7 @@ public record Nat$0Instance(long val) implements Nat$0{
    */
   @SuppressWarnings("NumericOverflow")
   public static final long MAX_UNSIGNED_VALUE = 2L * Long.MAX_VALUE + 1;
-  public static final double MAX_UNSIGNED_VALUE_FLOAT = 2.0 * Long.MAX_VALUE + 1.0;
+  public static final double MAX_UNSIGNED_VALUE_FLOAT = 18446744073709551615.0d;
   public static Nat$0 instance(long val){ return new Nat$0Instance(val); }
 
   public static boolean overflowsLong(long unsignedLong){

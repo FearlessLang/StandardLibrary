@@ -35,8 +35,8 @@ FloatRound:F[Tests,Tests]{::
 
   // NaN/Inf policy for round
   .test(+0.0 / +0.0 .round .assertEq +0)
-  .test(+1.0 / +0.0 .round .assertEq +2147483647)
-  .test((-1.0) / +0.0 .round .assertEq -2147483648)
+  .test(+1.0 / +0.0 .round .assertEq (IntConst.max))
+  .test((-1.0) / +0.0 .round .assertEq (IntConst.min))
 }
 
 FloatPred:F[Tests,Tests]{::
@@ -88,10 +88,10 @@ FloatConv:F[Tests,Tests]{::
   .test((-1.0).byte .assertEq (+0.byte))
 
   .test(+0.0 / +0.0 .int .assertEq +0)
-  .test(+1.0 / +0.0 .int .assertEq +9223372036854775807)
-  .test((-1.0) / +0.0 .int .assertEq -9223372036854775808)
+  .test(+1.0 / +0.0 .int .assertEq (IntConst.max))
+  .test((-1.0) / +0.0 .int .assertEq (IntConst.min))
 
-  .test(+1.0 / +0.0 .nat .assertEq (18446744073709551615))
+  .test(+1.0 / +0.0 .nat .assertEq (NatConst.max))
 
   // Exact conversions to Opt (assuming Opt is empty and Opts#(x) is some)
   .test(+3.0.intExact .assertEq ({::},Opts#(+3)))

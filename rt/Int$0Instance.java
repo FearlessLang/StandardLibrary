@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import static base.Util.*;
 
 public record Int$0Instance(long val) implements Int$0{
+  public static final long MAX_VALUE = Long.MAX_VALUE;
+  public static final long MIN_VALUE = Long.MIN_VALUE;
   public static Int$0 instance(long val){ return new Int$0Instance(val); }
 
   private static long i(Object o){ return ((Int$0Instance)o).val; }
