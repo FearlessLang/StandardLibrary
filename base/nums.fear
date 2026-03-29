@@ -83,7 +83,7 @@ Int:Sealed,DataType[Int,Int],SumNumber[Int]{
   .rem(d:Nat):Int;                  /// r = this - (this.div(d))*d; throws iff d==0;
   .divExact(d:Nat):Opt[Int];        /// .some if d!=0 and this.rem(d)==0; .empty otherwise
 
-  .abs:Int;                         /// abs; throws on overflow for minInt
+  .abs:Nat;                         /// abs; x if x >= 0, -x otherwise. Returns a Nat to handle the overflow at Long.MIN_VALUE
   .sqrt:Float;                      /// approximate sqrt; returns NaN iff this is negative
   .wrapIndex(len:Nat):Nat;          /// normalize into [0,len-1]; throws iff len==0; example: -1.wrapIndex(7) == 6
   .nat:Nat;                         /// clamp to [0,maxNat] (that is, just clamp negatives to 0)
@@ -110,6 +110,7 @@ Int:Sealed,DataType[Int,Int],SumNumber[Int]{
   .sumNumber xs ->                  /// summing all numbers starting from this
     xs.fold( {this}, {acc,e -> acc + e} );  
 }
+
 // Nat: 32-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
 Nat:Sealed,DataType[Nat,Nat],SumNumber[Nat]{

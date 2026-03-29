@@ -18,9 +18,9 @@ public record Num$0Instance(BigInteger val1, BigInteger val2) implements Num$0{
   }
   private static final BigInteger one= BigInteger.ONE;
   private static final BigInteger zero= BigInteger.ZERO;
-  private static final BigInteger minInt= BigInteger.valueOf(Integer.MIN_VALUE);
-  private static final BigInteger maxInt= BigInteger.valueOf(Integer.MAX_VALUE);
-  private static final BigInteger maxNat= one.shiftLeft(32).subtract(one);
+  private static final BigInteger minInt= BigInteger.valueOf(Long.MIN_VALUE);
+  private static final BigInteger maxInt= BigInteger.valueOf(Long.MAX_VALUE);
+  private static final BigInteger maxNat= one.shiftLeft(64).subtract(one);
   private static final BigInteger maxByte= BigInteger.valueOf(255);
 
   private static Num$0Instance num(Object o){ return (Num$0Instance)o; }
@@ -43,15 +43,15 @@ public record Num$0Instance(BigInteger val1, BigInteger val2) implements Num$0{
     if (qr[1].signum() == 0){ return q; }
     return n.signum() > 0 ? q.add(one) : q;
   }
-  private static int clampIntZ(BigInteger z){
-    if (z.compareTo(minInt) < 0){ return Integer.MIN_VALUE; }
-    if (z.compareTo(maxInt) > 0){ return Integer.MAX_VALUE; }
+  private static long clampIntZ(BigInteger z){
+    if (z.compareTo(minInt) < 0){ return Long.MIN_VALUE; }
+    if (z.compareTo(maxInt) > 0){ return Long.MAX_VALUE; }
     return z.intValue();
   }
-  private static int clampNatBitsZ(BigInteger z){
-    if (z.signum() <= 0){ return 0; }
-    if (z.compareTo(maxNat) >= 0){ return -1; } // 0xFFFF_FFFF
-    return (int)z.longValue();
+  private static long clampNatBitsZ(BigInteger z){
+    if (z.signum() <= 0){ return 0L; }
+    if (z.compareTo(maxNat) >= 0){ return -1L; } // 0xFFFF_FFFF
+    return z.longValue();
   }
   private static byte clampByteBitsZ(BigInteger z){
     if (z.signum() <= 0){ return 0; }

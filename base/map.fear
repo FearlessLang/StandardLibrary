@@ -5,7 +5,7 @@ Maps:Sealed{
   #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E):mut Map[K,E]->Magic!;
   #[K,K0,E](OrderHashBy[K,K0], K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
   .singletonRead[K,K0,E:*](OrderHashBy[K,K0], K, read E): read Map[K,E]->Magic!;
-  }
+}
 
 /// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,...].
 /// The flow order, .str order etc all respect/follow the map insertion order.

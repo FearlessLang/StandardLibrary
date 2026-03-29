@@ -24,9 +24,10 @@ public record Float$0Instance(double val) implements Float$0{
   private static int clampTrunc0ToInt(double x){ return (int)x; }
   private static int clampTrunc0ToNatBits(double x){
     if (Double.isNaN(x) || x <= 0.0d){ return 0; }
+    // TODO: -1?
     if (x >= 4294967295.0d){ return -1; } // 2^32-1
     long t= (long)x;
-    return t > 0xFFFF_FFFFL ? -1 : (int)t;
+    return t > Long.MAX_VALUE ? -1 : (int)t;
   }
   private static byte clampTrunc0ToByteBits(double x){
     if (Double.isNaN(x) || x <= 0.0d){ return 0; }
@@ -38,8 +39,28 @@ public record Float$0Instance(double val) implements Float$0{
     return x == Math.rint(x);
   }
   @Override public Object imm$$star_star$1(Object p0){ return instance(Math.pow(val,f(p0))); }
-  @Override public Object imm$int$0(){ return Int$0Instance.instance(clampTrunc0ToInt(val)); }
-  @Override public Object imm$nat$0(){ return Nat$0Instance.instance(clampTrunc0ToNatBits(val)); }
+  @Override public Object imm$int$0(){
+    if (Double.isNaN(val)) {
+      return Int$0Instance.instance(0);
+    }
+    if (val <= Long.MIN_VALUE) {
+      return Int$0Instance.instance(Long.MIN_VALUE);
+    }
+    if (val >= Long.MAX_VALUE) {
+      return Int$0Instance.instance(Long.MAX_VALUE);
+    }
+    return Int$0Instance.instance((long) val);
+  }
+  /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
+  @Override public Object imm$nat$0(){
+    if (Double.isNaN(val) || val <= 0.0d) {
+      return Nat$0Instance.instance(0);
+    }
+    if (val > Nat$0Instance.MAX_UNSIGNED_VALUE_FLOAT) {
+      return Nat$0Instance.instance(Nat$0Instance.MAX_UNSIGNED_VALUE);
+    }
+    return Nat$0Instance.instance((long) val);
+  }
   @Override public Object imm$byte$0(){ return Byte$0Instance.instance(clampTrunc0ToByteBits(val)); }
   private static Object numExactFinite(double x){
     if (x == 0.0d){ return Num$0Instance.instance(BigInteger.ZERO,BigInteger.ONE); } // also -0.0

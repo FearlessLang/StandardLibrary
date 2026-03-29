@@ -42,29 +42,29 @@ NatConv:F[Tests,Tests]{::
   .test(300.byteExact .assertEq ({::},Opt[Byte]))
 
   // clamp to maxInt
-  .test((-1).aluNat.int .assertEq +2147483647)
+  .test((-1).aluNat.int .assertEq (IntConst.max))
 }
 
 NatAlu:F[Tests,Tests]{::
   .test((-1).aluNat.aluAddWrap 1 .assertEq 0)
   .test(0 .aluSubWrap 1 .aluInt .assertEq -1)
-  .test(65536 .aluMulWrap 65536 .assertEq 0)
+  .test(4294967296 .aluMulWrap 4294967296 .assertEq 0)
 
   // aluDiv / aluRem (unsigned)
   .test(7 .aluDiv 3 .assertEq 2)
   .test(7 .aluRem 3 .assertEq 1)
-  .test((-1).aluNat.aluDiv 2 .aluInt .assertEq +2147483647)
+  .test((-1).aluNat.aluDiv 2 .aluInt .assertEq (IntConst.max))
   .test((-1).aluNat.aluRem 2 .assertEq 1)
 
-  .test(1 .aluShiftLeft 32 .assertEq 1)
-  .test((-1).aluNat .aluShiftRight 1 .aluInt .assertEq +2147483647)
+  .test(1 .aluShiftLeft (NatConst.numBits) .assertEq 1)
+  .test((-1).aluNat .aluShiftRight 1 .aluInt .assertEq (IntConst.max))
 
   .test(5 .aluXor 3 .assertEq 6)
   .test(5 .aluAnd 3 .assertEq 1)
   .test(5 .aluOr 2 .assertEq 7)
 
   .test((-1).aluNat.aluInt .assertEq -1)
-  .test((-1).aluNat.aluByte .assertEq (+255.byte))
+  .test((-1).aluNat.aluByte .assertEq (ByteConst.max))
 }
 
 NatRange:F[Tests,Tests]{::
@@ -84,20 +84,18 @@ NatLiteralForms:F[Tests,Tests]{::
 
   // big literal interactions
   .test(4_294_967_295.byte .assertEq (+255.byte))
-  .test(4_294_967_295.int .assertEq +2147483647)
+  .test(NatConst.max.int .assertEq (IntConst.max))
 }
 
 NatBoundaryAndBoundedVsAlu:F[Tests,Tests]{::
-  //.test(4294967295 + 1 .assertEq 4294967295)// correctly throws instead
-  .test(4294967295.aluAddWrap 1 .assertEq 0)
+  .test(NatConst.max.aluAddWrap 1 .assertEq (NatConst.min))
 
   //.test(0 - 1 .assertEq 0) // correctly throws instead
-  .test(0.aluSubWrap 1 .assertEq 4294967295)
+  .test(NatConst.min.aluSubWrap 1 .assertEq (NatConst.max))
 
-  // 65536*65536 = 4294967296
   //.test(65536 * 65536 .assertEq 4294967295)// correctly throws instead
-  .test(65536.aluMulWrap 65536 .assertEq 0)
+  .test(4294967296.aluMulWrap 4294967296 .assertEq 0)
 
   // bits-view sanity
-  .test(4294967295.aluInt .assertEq -1)
+  .test(NatConst.max.aluInt .assertEq -1)
 }

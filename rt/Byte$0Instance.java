@@ -4,14 +4,19 @@ import java.math.BigInteger;
 import static base.Util.*;
 
 public record Byte$0Instance(byte val) implements Byte$0{
+  private static final byte MAX_VALUE = (byte) 255;
+  private static final long MAX_VALUE_LONG = 255;
+
   public static Byte$0 instance(byte val){ return new Byte$0Instance(val); }
 
-  private static int u8(byte b){ return b & 255; }
+  private static byte clampToByte(Object o) {
+    return (byte) (((Byte$0Instance)o).val & 255);
+  }
+  private static int u8(byte b){ return Byte.toUnsignedInt(b); }
   private static int u8(Object o){ return u8(((Byte$0Instance)o).val); }
   private static byte b(Object o){ return ((Byte$0Instance)o).val; }
 
-  private static int natBits(Object o){ return ((Nat$0Instance)o).val(); }
-  private static long natU(Object o){ return Integer.toUnsignedLong(natBits(o)); }
+  private static long natBits(Object o){ return ((Nat$0Instance)o).val(); }
 
   private static byte addChecked(byte a, byte b){
     int r= u8(a) + u8(b);
@@ -19,9 +24,10 @@ public record Byte$0Instance(byte val) implements Byte$0{
     return (byte)r;
   }
   private static byte subChecked(byte a, byte b){
-    int ua= u8(a), ub= u8(b);
-    if (ua < ub){ throw err("Byte.- underflow"); }
-    return (byte)(ua - ub);
+    if (Byte.compareUnsigned(a, b) < 0) {
+      throw err("Byte.- underflow");
+    }
+    return (byte) (a - b);
   }
   private static byte mulChecked(byte a, byte b){
     int r= u8(a) * u8(b);
@@ -32,20 +38,26 @@ public record Byte$0Instance(byte val) implements Byte$0{
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
   @Override public Object imm$div$1(Object p0){
-    long d= natU(p0);
+    long d= natBits(p0);
+
     if (d == 0L){ throw err("Byte.div: d==0"); }
     return instance((byte)(u8(val) / d));
   }
+  /// if b >= a, then a % b
+  /// Therefore we can clamp b to 255
+  /// as this can not be larger than that
   @Override public Object imm$rem$1(Object p0){
-    long d= natU(p0);
-    if (d == 0L){ throw err("Byte.rem: d==0"); }
-    return instance((byte)(u8(val) % d));
+    long d= natBits(p0);
+    if (d == 0){ throw err("Byte.rem: d==0"); }
+    return instance(
+        (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
+    );
   }
   @Override public Object imm$divExact$1(Object p0){
-    long d= natU(p0);
+    long d= natBits(p0);
     if (d == 0L){ return optEmpty(); }
     int x= u8(val);
-    if ((x % d) != 0L){ return optEmpty(); }
+    if (Long.remainderUnsigned(x, d) != 0L){ return optEmpty(); }
     return optSome(instance((byte)(x / d)));
   }
   @Override public Object imm$sqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)u8(val))); }
@@ -78,11 +90,11 @@ public record Byte$0Instance(byte val) implements Byte$0{
     return instance((byte)(u8(val) % d));
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){
-    int sh= natBits(p0) & 7; // Byte is u8, effective shift = bits & 7 (NOT Java's &31).
+    long sh= natBits(p0) & 7; // Byte is u8, effective shift = bits & 7 (NOT Java's &31).
     return instance((byte)((u8(val) << sh)));
   }
   @Override public Object imm$aluShiftRight$1(Object p0){
-    int sh= natBits(p0) & 7;
+    long sh= natBits(p0) & 7;
     return instance((byte)(u8(val) >>> sh));
   }
   @Override public Object imm$aluXor$1(Object p0){ return instance((byte)(val ^ b(p0))); }

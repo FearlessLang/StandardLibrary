@@ -1,0 +1,24 @@
+NatConst: {
+    .min: Nat -> 0;
+    .max: Nat -> 18_446_744_073_709_551_615;
+    .numBits: Nat -> 64;
+}
+
+IntConst: {
+    .min: Int -> -9_223_372_036_854_775_808;
+    .max: Int -> +9_223_372_036_854_775_807;
+    .numBits: Nat -> 64;
+}
+
+ByteConst: {
+    .min: Byte -> 0.byte;
+    .max: Byte -> 255.byte;
+    .numBits: Nat -> 8;
+}
+
+FloatConst: {
+    .inf: Float -> +1.0 / +0.0;
+    .neg_inf: Float -> (-1.0) / +0.0;
+    .nan: Float -> +0.0 / +0.0;
+    .numBits: Nat -> 64;
+}

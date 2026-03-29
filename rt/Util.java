@@ -13,10 +13,11 @@ public class Util{
     return (Error)Error$0.instance.imm$nonDeterministic$1(new Str$0Instance(msg));
     }
   public static String toS(Object o){return ((Str$0Instance)((ToStr$0)o).read$str$0()).val(); }
+  ///  TODO: Should this clamp?
   public static int natToInt(Object n){
-    return ((Nat$0Instance)n).val();
+    return (int) ((Nat$0Instance)n).val();
   }
-  public static Object intToNat(int i){
+  public static Object intToNat(long i){
     assert i >= 0;
     return new Nat$0Instance(i);
   }

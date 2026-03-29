@@ -1,7 +1,7 @@
 package base;
 
-public record Nat$0Instance(int val) implements Nat$0{
-  public static Nat$0 instance(int val){ return new Nat$0Instance(val); }
+public record Nat$0Instance(long val) implements Nat$0{
+  public static Nat$0 instance(long val){ return new Nat$0Instance(val); }
 
   @Override public Object imm$shiftLeft$1(Object p0){ throw new Error(); }
   @Override public Object imm$shiftRight$1(Object p0){ throw new Error(); }

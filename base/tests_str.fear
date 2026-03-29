@@ -138,11 +138,11 @@ StrParseInt:F[Tests,Tests]{::
   .test(`+1` .intExact .assertEq({::}, Opts#(+1)))
   .test(`-1` .intExact .assertEq({::}, Opts#(-1)))
 
-  .test(`+2_147_483_647` .intExact .assertEq({::}, Opts#(+2147483647)))
-  .test(`-2_147_483_648` .intExact .assertEq({::}, Opts#(-2147483648)))
+  .test(`+9223372036854775807` .intExact .assertEq({::}, Opts#(+9223372036854775807)))
+  .test(`-9223372036854775808` .intExact .assertEq({::}, Opts#(-9223372036854775808)))
 
-  .test(`+2_147_483_648` .intExact .assertEq({::}, Opt[Int]))
-  .test(`-2_147_483_649` .intExact .assertEq({::}, Opt[Int]))
+  .test(`+9223372036854775808` .intExact .assertEq({::}, Opt[Int]))
+  .test(`-9223372036854775809` .intExact .assertEq({::}, Opt[Int]))
 
   // Int requires an explicit sign (otherwise it's a Nat literal)
   .test(`2147483647` .intExact .assertEq({::}, Opt[Int]))
@@ -173,8 +173,8 @@ StrParseNat:F[Tests,Tests]{::
   .test(`1` .natExact .assertEq({::}, Opts#(1)))
   .test(`1_000_000` .natExact .assertEq({::}, Opts#(1000000)))
 
-  .test(`4_294_967_295` .natExact .assertEq({::}, Opts#(4294967295)))
-  .test(`4_294_967_296` .natExact .assertEq({::}, Opt[Nat]))
+  .test(`18_446_744_073_709_551_615` .natExact .assertEq({::}, Opts#(NatConst.max)))
+  .test(`18_446_744_073_709_551_616` .natExact .assertEq({::}, Opt[Nat]))
 
   // leading zeros
   .test(`000` .natExact .assertEq({::}, Opts#(0)))

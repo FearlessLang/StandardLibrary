@@ -6,24 +6,24 @@ ThrowArithSuite:F[mut CapTry,Void]{try->Block#
   .do{try#{+12/3 / +0/1}.assertInfo}
 
   // Nat overflow/underflow
-  .do{try#{4_294_967_295 + 1}.assertInfo}
-  .do{try#{0 - 1}.assertInfo}
-  .do{try#{65_536 * 65_536}.assertInfo}
+  .do{try#{NatConst.max + 1}.assertInfo}
+  .do{try#{NatConst.min - 1}.assertInfo}
+  .do{try#{4294967296 * 4294967296}.assertInfo}
 
   // Int overflow/underflow
-  .do{try#{+2147483647 + +1}.assertInfo}
-  .do{try#{-2147483648 - +1}.assertInfo}
-  .do{try#{+65_536 * +65_536}.assertInfo}
-  .do{try#{-2147483648.abs}.assertInfo}
+  .do{try#{IntConst.max + +1}.assertInfo}
+  .do{try#{IntConst.min - +1}.assertInfo}
+
+  .do{try#{IntConst.max * (+2)}.assertInfo}
 
   // Byte overflow/underflow
   .do{try#{+250.byte + (+10.byte)}.assertInfo}
-  .do{try#{+0.byte - (+1.byte)}.assertInfo}
+  .do{try#{ByteConst.min - (+1.byte)}.assertInfo}
 
   // index helpers that should error on bad inputs
   .do{try#{+7.wrapIndex 0}.assertInfo}          // throws iff len==0
-  .do{try#{0.indexOffset -1}.assertInfo}        // negative result
-  .do{try#{4_294_967_295.indexOffset +1}.assertInfo} // overflow
+  .do{try#{0.indexOffset (-1)}.assertInfo}        // negative result
+  .do{try#{NatConst.max.indexOffset (+1)}.assertInfo} // overflow
   .done
 }
 

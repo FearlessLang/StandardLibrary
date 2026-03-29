@@ -3,7 +3,8 @@ IntArith:F[Tests,Tests]{::
   .test(+5 - +2 .assertEq +3)
   .test(+3 * +4 .assertEq +12)
 
-  .test((-7).abs .assertEq +7)
+  .test((-7).abs .assertEq 7)
+  .test(IntConst.min.abs .assertEq (IntConst.max.nat + 1))
   .test(+9.sqrt .assertEq +3.0)
   .test((-1).sqrt.isNaN .assertEq True)
 
@@ -51,20 +52,20 @@ IntConv:F[Tests,Tests]{::
 }
 
 IntAlu:F[Tests,Tests]{::
-  .test(+2147483647.aluAddWrap(+1) .assertEq -2147483648)
-  .test((-2147483648).aluSubWrap(+1) .assertEq +2147483647)
-  .test(+65536.aluMulWrap(+65536) .assertEq +0)
+  .test(IntConst.max.aluAddWrap(+1) .assertEq (IntConst.min))
+  .test(IntConst.min.aluSubWrap(+1) .assertEq (IntConst.max))
+  .test((+4294967296).aluMulWrap (+4294967296) .assertEq +0)
 
   .test((-7).aluDiv(+3) .assertEq -2)
   .test((-7).aluDiv(-3) .assertEq +2)
   .test((-7).aluRem(+3) .assertEq -1)
   .test((-7).aluRem(-3) .assertEq -1)
 
-  // effective shift = bits & 31
-  .test(+1.aluShiftLeft 32 .assertEq +1)
-  .test(+1.aluShiftLeft 33 .assertEq +2)
+  // effective shift = bits & 63
+  .test(+1.aluShiftLeft (IntConst.numBits) .assertEq +1)
+  .test(+1.aluShiftLeft (IntConst.numBits + 1) .assertEq +2)
   .test((-2).aluShiftRight 1 .assertEq -1)
-  .test((-2).aluShiftRight 33 .assertEq -1)
+  .test((-2).aluShiftRight (IntConst.numBits + 1) .assertEq -1)
 
   .test(+1.aluXor(+3) .assertEq +2)
   .test(+3.aluAnd(+6) .assertEq +2)
@@ -93,23 +94,23 @@ IntLiteralForms:F[Tests,Tests]{::
   .test(+2_147_483_647 .assertEq +2147483647)
 
   // if your literal parser clamps (like byte/nat conversions do), these two should hold:
-  .test(2_147_483_648.int .assertEq +2147483647)
-  //.test(-2_147_483_649 .assertEq -2147483648) //parser error too big
+  .test((IntConst.max.nat + 1).int .assertEq (IntConst.max))
+  .test((IntConst.min.num - +1/1).int .assertEq (IntConst.min)) //parser error too big
 }
 
 IntBoundaryAndBoundedVsAlu:F[Tests,Tests]{::
   //.test(+2147483647 + +1 .assertEq +2147483647)// correctly throws instead
-  .test(+2147483647.aluAddWrap +1 .assertEq -2147483648)
+  .test(IntConst.max.aluAddWrap +1 .assertEq (IntConst.min))
 
-  //.test(-2147483648 - +1 .assertEq -2147483648)// correctly throws instead
-  .test(-2147483648.aluSubWrap +1 .assertEq +2147483647)
+  //.test(IntConst.min - +1 .assertEq -2147483648)// correctly throws instead
+  .test(IntConst.min.aluSubWrap +1 .assertEq (IntConst.max))
 
   // 65536*65536 = 4294967296
   //.test(+65536 * +65536 .assertEq +2147483647)
-  .test(+65536.aluMulWrap +65536 .assertEq +0)
+  .test((+4294967296.aluMulWrap (+4294967296)) .assertEq +0)
 
   // bounded vs aluNat view
   //.test((-1).nat .assertEq 0)// correctly throws instead
-  .test((-1).aluNat .assertEq 4294967295)
+  .test((-1).aluNat .assertEq (NatConst.max))
   .test((-1).aluNat.aluInt .assertEq -1)
 }

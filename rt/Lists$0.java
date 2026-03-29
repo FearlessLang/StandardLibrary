@@ -110,7 +110,9 @@ record List$1Instance(List<Object> val) implements List$1{
 
   @Override public Object read$str$1(Object p0){
     var by= (ToStrBy$1)p0;
-    String res= val.stream().map(e->toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ","[","]"));
+    String res= val.stream()
+        .map(e->toS(by.imm$$hash$1(e)))
+        .collect(Collectors.joining(", ","[","]"));
     return Str$0Instance.instance(res);
   }
 

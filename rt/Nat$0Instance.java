@@ -14,8 +14,13 @@ public record Nat$0Instance(long val) implements Nat$0{
    * The maximum unsigned value that can be represented in a long (2^64 - 1)
    */
   @SuppressWarnings("NumericOverflow")
-  public static long MAX_UNSIGNED_VALUE = 2L * Long.MAX_VALUE + 1;
+  public static final long MAX_UNSIGNED_VALUE = 2L * Long.MAX_VALUE + 1;
+  public static final double MAX_UNSIGNED_VALUE_FLOAT = 2.0 * Long.MAX_VALUE + 1.0;
   public static Nat$0 instance(long val){ return new Nat$0Instance(val); }
+
+  public static boolean overflowsLong(long unsignedLong){
+    return Long.compareUnsigned(unsignedLong, Long.MAX_VALUE) > 0;
+  }
 
   private static long n(Object o){ return ((Nat$0Instance)o).val; }
   private static long i(Object o){ return ((Int$0Instance)o).val(); }
@@ -64,7 +69,7 @@ public record Nat$0Instance(long val) implements Nat$0{
    * Clamp the natural number to the range of int,
    * since that's the largest type we can convert it to without losing information
    */
-  @Override public Object imm$long$0(){
+  @Override public Object imm$int$0(){
 
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
       return Int$0Instance.instance(Long.MAX_VALUE);
@@ -85,15 +90,14 @@ public record Nat$0Instance(long val) implements Nat$0{
     if (Long.compareUnsigned(num, Long.MAX_VALUE) > 0) {
         // Hopefully correct...
         // a + b - b is an identity function, up to floating point precision
-        // We subtract Long.MIN_VALUE rather than adding Long.MAX_VALUE,
+        // We add Long.MIN_VALUE rather than subtracting Long.MAX_VALUE,
         // MIN_VALUE = -2^63 rather than MAX_VALUE = 2^63 - 1
-        return ((double) (num + Long.MIN_VALUE)) - Long.MIN_VALUE
+        return ((double) (num + Long.MIN_VALUE)) - Long.MIN_VALUE;
     }
-
     // Since the number is small enough that the sign bit is not set,
     // we can safely interpret the unsigned long as a signed long
     // and thus use the regular conversion to double.
-    return Float$0Instance.instance((double)val);
+    return (double) num;
   }
   @Override public Object imm$float$0(){
     return Float$0Instance.instance(unsignedLongToDouble(val));
@@ -128,7 +132,7 @@ public record Nat$0Instance(long val) implements Nat$0{
   /**
    * Is this method named the right thing?
    */
-  @Override public Object imm$longExact$0() {
+  @Override public Object imm$intExact$0() {
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
       return optEmpty();
     }
@@ -174,16 +178,15 @@ public record Nat$0Instance(long val) implements Nat$0{
     return optSome(instance(Long.divideUnsigned(val,d)));
   }
   @Override public Object imm$indexOffset$1(Object p0){
-    long r= val + (long) i(p0);
-    // NOTE: This provides a different error message for underflow and overflow.
-    if (Long.compareUnsigned(r, MAX_UNSIGNED_VALUE) > 0) {
-      throw err("Nat.indexOffset: overflow");
-    }
-    if (Long.compareUnsigned(r, 0) < 0) {
-      throw err("Nat.indexOffset: underflow");
-    }
+    long offset = i(p0);
 
-    return instance(r);
+    if (offset <= 0) {
+      // works for Long.MIN_VALUE as well,
+      // Since -Long.MIN_VALUE == Long.MIN_VALUE but when treated as unsigned it actually
+      // is correctly treated as the positive number.
+      return instance(subChecked(val, -offset));
+    }
+    return instance(addChecked(val, offset));
   }
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance(val + n(p0)); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance(val - n(p0)); }

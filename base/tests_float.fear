@@ -88,10 +88,10 @@ FloatConv:F[Tests,Tests]{::
   .test((-1.0).byte .assertEq (+0.byte))
 
   .test(+0.0 / +0.0 .int .assertEq +0)
-  .test(+1.0 / +0.0 .int .assertEq +2147483647)
-  .test((-1.0) / +0.0 .int .assertEq -2147483648)
+  .test(+1.0 / +0.0 .int .assertEq +9223372036854775807)
+  .test((-1.0) / +0.0 .int .assertEq -9223372036854775808)
 
-  .test(+1.0 / +0.0 .nat .assertEq (4294967295.aluInt.aluNat)) // avoid giant Nat literal
+  .test(+1.0 / +0.0 .nat .assertEq (18446744073709551615))
 
   // Exact conversions to Opt (assuming Opt is empty and Opts#(x) is some)
   .test(+3.0.intExact .assertEq ({::},Opts#(+3)))

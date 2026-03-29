@@ -40,11 +40,11 @@ public record Str$0Instance(String val) implements Str$0{
     + "(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?");
   static final Pattern signedRational= Pattern.compile(
     "[+-](?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)/(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)");
-  static final long maxNatU= 0xFFFF_FFFFL;
+  static final long maxNatU= Nat$0Instance.MAX_UNSIGNED_VALUE;
   static final long maxByteU= 255L;
   @Override public Object imm$intExact$0(){
     if (!signedInt.matcher(val).matches()){ return optEmpty(); }
-    try{ return optSome(Int$0Instance.instance(Integer.parseInt(no_(val)))); }
+    try{ return optSome(Int$0Instance.instance(Long.parseLong(no_(val)))); }
     catch(NumberFormatException e){ return optEmpty(); }
   }
   static final Pattern ieeeFloatText= Pattern.compile(
@@ -57,11 +57,13 @@ public record Str$0Instance(String val) implements Str$0{
   @Override public Object imm$natExact$0(){
     if (!unsignedInt.matcher(val).matches()){ return optEmpty(); }
     try{
-      long x= Long.parseLong(no_(val));
-      if (x < 0L || x > maxNatU){ return optEmpty(); }
-      return optSome(Nat$0Instance.instance((int)x)); // bit-cast semantics via int bits
+      // throws if the number is negative or too large.
+      long x= Long.parseUnsignedLong(no_(val));
+      return optSome(Nat$0Instance.instance(x)); // bit-cast semantics via int bits
     }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch(NumberFormatException e){
+      return optEmpty();
+    }
   }
   @Override public Object imm$byteExact$0(){
     if (!unsignedInt.matcher(val).matches()){ return optEmpty(); }
