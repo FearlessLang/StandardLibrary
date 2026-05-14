@@ -15,3 +15,7 @@
 /integrationTests/testUnitTests/.out
 /integrationTests/testDocs/.fearless_out
 /integrationTests/testingNorms/.fearless_out
+/integrationTests/testAssets/.fearless_out
+/integrationTests/testAssets/.out
+/guiLibrary/srcStdLib
+/integrationTests/testGui1/.fearless_out

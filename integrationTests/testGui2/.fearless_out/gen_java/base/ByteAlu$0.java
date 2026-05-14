@@ -1,0 +1,88 @@
+package base;
+public interface ByteAlu$0 extends base.F$2{
+  default Object read$$hash$1(Object p0){
+    var this$= this;
+    var _aimpl$= (base.Tests$0)p0;
+    return ((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)((base.Tests$0)_aimpl$.imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(250L).imm$byte$0(
+)).imm$aluAddWrap$1(
+base.Int$0Instance.instance(10L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(4L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(0L).imm$byte$0(
+)).imm$aluSubWrap$1(
+base.Int$0Instance.instance(1L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(255L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(16L).imm$byte$0(
+)).imm$aluMulWrap$1(
+base.Int$0Instance.instance(16L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(0L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(1L).imm$byte$0(
+)).imm$aluShiftLeft$1(
+base.Nat$0Instance.instance(8L))).read$assertEq$1(
+base.Int$0Instance.instance(1L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(1L).imm$byte$0(
+)).imm$aluShiftLeft$1(
+base.Nat$0Instance.instance(9L))).read$assertEq$1(
+base.Int$0Instance.instance(2L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(128L).imm$byte$0(
+)).imm$aluShiftRight$1(
+base.Nat$0Instance.instance(1L))).read$assertEq$1(
+base.Int$0Instance.instance(64L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(2L).imm$byte$0(
+)).imm$aluShiftRight$1(
+base.Nat$0Instance.instance(9L))).read$assertEq$1(
+base.Int$0Instance.instance(1L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(5L).imm$byte$0(
+)).imm$aluXor$1(
+base.Int$0Instance.instance(3L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(6L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(5L).imm$byte$0(
+)).imm$aluAnd$1(
+base.Int$0Instance.instance(3L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(1L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(5L).imm$byte$0(
+)).imm$aluOr$1(
+base.Int$0Instance.instance(2L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(7L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(250L).imm$byte$0(
+)).imm$aluDiv$1(
+base.Int$0Instance.instance(10L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(25L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(250L).imm$byte$0(
+)).imm$aluRem$1(
+base.Int$0Instance.instance(10L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(0L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(255L).imm$byte$0(
+)).imm$aluDiv$1(
+base.Int$0Instance.instance(2L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(127L).imm$byte$0(
+)))).imm$test$1(
+((base.Byte$0)((base.Byte$0)base.Int$0Instance.instance(255L).imm$byte$0(
+)).imm$aluRem$1(
+base.Int$0Instance.instance(2L).imm$byte$0(
+))).read$assertEq$1(
+base.Int$0Instance.instance(1L).imm$byte$0(
+)));
+  }
+  ByteAlu$0 instance= new ByteAlu$0(){};}

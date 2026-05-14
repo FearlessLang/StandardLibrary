@@ -66,6 +66,14 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 ///   .done
 ///   }
 /// ```
+/// Example checking that an action fails:
+/// ```
+/// .checkWithSys { ::.try#{SomethingThatShouldFail#}.assertInfo}
+/// ```
+/// Example checking that an action succeeds:
+/// ```
+/// .check{SomethingThatShouldSucceed#}
+/// ```
 UnitTests: Main {
   .main sys->Block#
     .let[mut RTestCap] ts= {_TestCaps#(sys,ELists#)}

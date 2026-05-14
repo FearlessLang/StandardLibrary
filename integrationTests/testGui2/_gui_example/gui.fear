@@ -1,0 +1,111 @@
+
+Gui:Consumer[mut Frame]{::
+  .title `Gui buttons replace canvas painter`
+  .fps 30
+//.modelFps(100)//behaves like a button.
+  .contentB{::
+    .background(Color.ghostWhite)
+    .north(mut ShapeHeader)
+    .center{:: .style(ShapeCanvas) .save(this.canvas)}//how to avoid bad errors for () instead of {}
+    .south(mut ShapeButtons{this.model})
+    };
+
+  mut .canvas: mut Slot[mut Pane];
+  mut .model: mut Model;
+  mut .setImage(p:Painter):Void-> Block#(this.canvas!.paint(p),Void);
+  }
+ShapeCanvas:Scope[Pane]{::
+    .background (Color.deepNapBlue)
+    .width (Width#520)
+    .height (Height#280)
+    .paint(PaintBox)
+  }
+ShapeButtons:Scope[Pane]{::
+    .background (Color.cardboard)
+    .heightGap (Height#12)
+    .widthGap (Width#12)
+    .button{::
+      .text `Target`
+      .background (Color.rubberDuck)
+      .action{this.model.imgTarget}
+      }
+    .button{::
+      .text `Box`
+      .background (Color.alienMint)
+      .action{this.model.imgBox}
+      }
+    .button{::
+      .text `Portal`
+      .background (Color.sleepyBlue)
+      .foreground (Color.ghostWhite)
+      .action{this.model.imgPortal}
+      }
+    .button{::
+      .text `Warning`
+      .background (Color.dangerTomato)
+      .foreground (Color.ghostWhite)
+      .action{this.model.imgWarning}
+      };
+  mut .model: mut Model;
+  }
+
+PaintTarget:Painter{::
+  .color (Color.ghostWhite)
+  .position(X#(this.size), Y#50)
+  .oval(Width#180, Height#180)
+  .color(Color.rubberDuck)
+  .position(X#205, Y#85)
+  .oval(Width#110, Height#110)
+  .color (Color.dangerTomato)
+  .position(X#240, Y#120)
+  .oval(Width#40, Height#40);
+
+  .size:Nat;
+  }
+
+PaintBox:Painter{::
+  .color (Color.alienMint)
+  .position(X#150, Y#70)
+  .rect(Width#220, Height#150)
+
+  .color (Color.goblinGreen)
+  .position(X#190, Y#105)
+  .rect(Width#140, Height#80)
+
+  .color (Color.toxicSlime)
+  .position(X#235, Y#130)
+  .rect(Width#50, Height#30)
+  }
+
+PaintPortal:Painter{::
+  .color (Color.wizardPurple)
+  .position(X#150, Y#45)
+  .oval(Width#220, Height#190)
+
+  .color (Color.sleepyBlue)
+  .position(X#180, Y#70)
+  .oval(Width#160, Height#140)
+
+  .color (Color.ghostWhite)
+  .position(X#225, Y#110)
+  .oval(Width#70, Height#60)
+  }
+
+PaintWarning:Painter{::
+  .color (Color.dangerTomato)
+  .position(X#140, Y#70)
+  .rect(Width#240, Height#150)
+
+  .color (Color.lavaOrange)
+  .position(X#170, Y#100)
+  .rect(Width#180, Height#90)
+
+  .color (Color.rubberDuck)
+  .position(X#230, Y#120)
+  .rect(Width#60, Height#50)
+  }
+ShapeHeader:Scope[Pane]{::
+    .background (Color.ghostWhite)
+    .label{:: .text `Press buttons to change the image` }
+    .label{:: .text `Buttons below replace the whole Painter of the canvas` }
+  }

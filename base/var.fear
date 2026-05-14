@@ -82,21 +82,6 @@ IsoViewer[T, R:iso,imm,mut,read,mutH]: {//crucially readH not allowed
   mut .empty: R;
   }
 
-Slots: {#[E:*]: mut Slot[E] -> Block#
-  .var[mut Opt[E]] e = {{}}
-  .return {mut Slot[E:*]: {'slot
-    mut  !: E -> e.get!;
-    read !: read/imm E -> e.get!;
-    mut .fill(x: E): Void -> e.set(e.get.match{
-      .some _ -> Error.msg `Slot was already full`;
-      .empty  -> Opts#x;
-      });
-    read .isFull: Bool -> e.get.isSome;
-    mut .opt: mut Opt[E] -> e.get;
-    //read .opt: read Opt[read/imm E] -> e.get; //TODO: correctly returning Opt[E], but it is undesirable?
-    }};
-  }
-
 Reprs: {
   #[T](x: iso T, inv: F[read T,Bool]): mut Repr[T] -> Block#
     .openIso _x = x

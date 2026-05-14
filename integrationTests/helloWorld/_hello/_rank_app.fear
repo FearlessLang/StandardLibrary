@@ -3,8 +3,8 @@ use base.Lists as L;
 use base.Error as Error;
 use base.Void as Void;
 
-HelloAutoLoad:Main{s->base.Debug#(Auto_loadTest_text.strUtf8)}
-HelloAutoLoadZip:Main{s->base.Debug#(Auto_zip_loadSubTest_text_in_zip.strUtf8)}
+//HelloAutoLoad:Main{s->base.Debug#(Auto_loadTest_text.strUtf8)}
+//HelloAutoLoadZip:Main{s->base.Debug#(Auto_zip_loadSubTest_text_in_zip.strUtf8)}
 
 Hello1:Main{s->base.Debug#(`hello world 3`)}
 //Hello2:Main{s->base.Debug#(L#(`Hi`))}

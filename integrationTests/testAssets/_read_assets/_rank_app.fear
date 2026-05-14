@@ -1,0 +1,108 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Block as Block;
+use base.Str as Str;
+use base.UStr as UStr;
+use base.BadTextReason as BadTextReason;
+use base.BadStrUnitRecover as BadStrUnitRecover;
+use base.BadUStrUnitRecover as BadUStrUnitRecover;
+use base.F as F;
+use base.Void as Void;
+
+AssetTextReadAsciiTests: UnitTests { ::
+  .test AssetTextReadAsciiPlainFiles
+  .test AssetTextReadAsciiRepeatedRead
+  .test AssetTextReadAsciiConsumeProtocol
+  }
+
+AssetTextReadAsciiPlainFiles: Test { ::
+  .checkWithSys { s->
+    Auto_loadTest_text
+      .readStrUtf8(s.assetRead,UnexpectedBadStr)
+      .assertEq `Hello! We are automatically reading this file!`
+    }
+  .checkWithSys { s->
+    GoodAsciiStr#(Asset_textGood_ascii.readStrUtf8(s.assetRead,UnexpectedBadStr))
+    }
+  .checkWithSys { s->
+    GoodAsciiUStr#(Asset_textGood_ascii.readUStrUtf8(s.assetRead,UnexpectedBadUStr))
+    }
+  .checkWithSys { s->
+    GoodAsciiStr#(Asset_textGood_ascii.readStrAscii(s.assetRead,UnexpectedBadStr))
+    }
+  .checkWithSys { s->
+    GoodAsciiUStr#(Asset_textGood_ascii.readUStrAscii(s.assetRead,UnexpectedBadUStr))
+    }
+  .checkWithSys { s->
+    GoodAsciiStr#(Asset_textGood_ascii.readStrLatin1(s.assetRead,UnexpectedBadStr))
+    }
+  .checkWithSys { s->
+    GoodAsciiUStr#(Asset_textGood_ascii.readUStrLatin1(s.assetRead,UnexpectedBadUStr))
+    }
+  .checkWithSys { s->
+    Auto_zip_loadSubTest_text_in_zip
+      .readStrUtf8(s.assetRead,UnexpectedBadStr)
+      .assertEq `Hello! We are automatically reading this file from a zip!`
+    }
+  }
+
+AssetTextReadAsciiRepeatedRead: Test { ::
+  .checkWithSys { s-> Block#
+    .do { GoodAsciiStr#(Asset_textGood_ascii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
+    .do { GoodAsciiStr#(Asset_textGood_ascii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
+    .do { GoodAsciiUStr#(Asset_textGood_ascii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
+    .do { GoodAsciiUStr#(Asset_textGood_ascii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
+    .done
+    }
+  }
+
+AssetTextReadAsciiConsumeProtocol: Test { ::
+  .check {
+    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-1`,UnexpectedBadStr))
+    }
+  .checkWithSys { sys -> Block#(
+    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)),
+    sys.try#{
+      Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)
+      }.assertInfo)}
+  .check {
+    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-3a`,UnexpectedBadStr))
+    }
+  .check {
+    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-3b`,UnexpectedBadStr))
+    }
+  .check {
+    GoodAsciiUStr#(Asset_textGood_ascii.consumeUStrUtf8(`ascii-consume-4`,UnexpectedBadUStr))
+    }
+  .checkWithSys { sys -> Block#(
+    GoodAsciiUStr#(Asset_textGood_ascii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)),
+    sys.try#{
+      Asset_textGood_ascii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)
+      }.assertInfo)}
+  }
+
+GoodAsciiStr: F[Str,Void] { ::.assertEq `Hello safe Str!` }
+
+GoodAsciiUStr: F[UStr,Void] { ::.scalarHex.assertEq `0048 0065 006C 006C 006F 0020 0073 0061 0066 0065 0020 0053 0074 0072 0021`}
+
+UnexpectedBadStr: BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
+  `[unexpected recovery:`
+  + (BadTextReasonName#reason)
+  + `:`
+  + byteOffset
+  + `:`
+  + byteLength
+  + `:`
+  + rejectedValue
+  + `]`
+  }
+
+UnexpectedBadUStr: BadUStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
+  (UnexpectedBadStr#(reason,byteOffset,byteLength,rejectedValue)).u
+  }
+BadTextReasonName: F[BadTextReason,Str] { ::.match {
+  .malformedEncoding -> `malformedEncoding`;
+  .truncatedEncoding -> `truncatedEncoding`;
+  .notScalar -> `notScalar`;
+  .notInStr -> `notInStr`;
+  }}

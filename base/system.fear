@@ -4,11 +4,13 @@ System: ToIso[System], WidenTo[System] {
   mut .try: mut CapTry;
   mut .out: mut Output;
   mut .inputCursor: mut InputCursor;
-  
+  mut .assetRead: mut AssetReadCapability;//TODO: rename as CapAssetRead? and complete real system and the inherited metods returning 'this'
   ///Creates a reader for this in memory log.
   ///Concrete log types must be non generic.
   ///Creating a reader throw with nondeterministic error if the concrete log type is generic.
   mut .readLog[T](InMemoryLog[T]): mut LogReader[T];
+  
+  mut .gui:mut Gui;
   }
   
 /// This try-catch will catch non-deterministic errors.

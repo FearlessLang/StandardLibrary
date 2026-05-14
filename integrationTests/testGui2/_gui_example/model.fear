@@ -1,0 +1,38 @@
+Models:{#(gui:mut Gui):mut Model->Block#
+  .var size={100}
+  .return {mut Model:{
+    mut .imgPortal:Void -> gui .setImage PaintPortal;
+    mut .imgWarning:Void -> gui .setImage PaintWarning;
+    mut .imgBox:Void -> gui .setImage PaintBox;
+    mut .imgTarget:Void -> Block#
+      .let s={size.get}
+      .do { size.set(size.get + 5) }
+      .return {gui .setImage PaintTarget{s}};
+  }}}
+
+
+/*
+Division Model - Gui and closing the loop
+
+
+
+  .let model={Slots#[mut Model]}
+  .let canvas={Slots#[Pane]}
+  .let[mut Gui] gui= {mut Gui{.canvas->canvas; .model->model!;}}
+The main defines the 'gui fields' as slots that are filled later
+and the model will never see them
+
+The model created with fields and constructor
+The model sees the gui as an ABSTRACT access to graphical editing, the gui hides
+the actual Fearless GUI library with set/get methods like .setImage
+
+
+- .with should take the nat and .with' should take the With
+- .A component like 'button' that is invisible and just 'triggers an action' any xx time
+//.modelFps(100)//behaves like a button.
+This forces the Frame to have all the needed setters and getters like the components
+Frame needs the .style and .save as all the other thingys
+
+- test that the gui top level positioning and resizing and undecorate still work
+- test that they can be changed from the slotted Frame (opt)
+*/

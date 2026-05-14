@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>gui_example</title>
+<style>
+body{font-family:sans-serif;margin:0;line-height:1.35}
+.layout{display:flex;min-height:100vh}
+.toc{width:18em;max-height:100vh;overflow:auto;position:sticky;top:0;padding:1.2em;border-right:1px solid #ccc;box-sizing:border-box}
+.toc h2{margin-top:0}
+.toc ul{list-style:none;padding-left:0}
+.toc li{margin:.35em 0}
+.toc a{text-decoration:none;color:#0645ad}
+main{padding:2em;max-width:80em;box-sizing:border-box}
+h1{border-bottom:1px solid #bbb;padding-bottom:.3em}
+.type{margin:2em 0;padding:1em;border:1px solid #ccc;border-radius:.5em}
+.method{margin:.25em 0 0 1.5em;padding:.15em .4em;border-left:3px solid #ddd}
+.method summary{cursor:pointer;list-style-position:outside}
+.method summary::-webkit-details-marker{margin-right:.35em}
+.sig{font-family:monospace;white-space:pre-wrap;font-size:1.08em;font-weight:600}
+.variant{font-family:monospace;white-space:pre-wrap}
+.doc{margin:.35em 0 .35em 1.3em;color:#333;font-size:.94em}
+.missing{color:#777;font-style:italic}
+.from,.variants{color:#555}
+details{margin:.5em 0}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+<h2>Types</h2>
+<ul>
+<li><a href="#type-gui_5f_example_2e_Foo-0">Foo</a></li>
+<li><a href="#type-gui_5f_example_2e_Gui-0">Gui</a></li>
+<li><a href="#type-gui_5f_example_2e_Model-0">Model</a></li>
+<li><a href="#type-gui_5f_example_2e_Models-0">Models</a></li>
+<li><a href="#type-gui_5f_example_2e_PaintBox-0">PaintBox</a></li>
+<li><a href="#type-gui_5f_example_2e_PaintPortal-0">PaintPortal</a></li>
+<li><a href="#type-gui_5f_example_2e_PaintTarget-0">PaintTarget</a></li>
+<li><a href="#type-gui_5f_example_2e_PaintWarning-0">PaintWarning</a></li>
+<li><a href="#type-gui_5f_example_2e_ShapeButtons-0">ShapeButtons</a></li>
+<li><a href="#type-gui_5f_example_2e_ShapeCanvas-0">ShapeCanvas</a></li>
+<li><a href="#type-gui_5f_example_2e_ShapeHeader-0">ShapeHeader</a></li>
+</ul>
+</nav>
+<main>
+<h1>Package gui_example</h1>
+<section class="type" id="type-gui_5f_example_2e_Foo-0">
+<h2>Foo</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Main-0">Main</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_Foo-imm-_2e_main-1">
+<summary><span class="sig">.main(mut System):Void</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Main-imm-_2e_main-1">Main.main</a>.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_Gui-0">
+<h2>Gui</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Consumer-1">base.Consumer[mut base.Frame]</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_Gui-mut-_2e_accept-1">
+<summary><span class="sig">mut .accept(mut base.Frame):Void</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Consumer-mut-_2e_accept-1">base.Consumer[mut base.Frame].accept</a>.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_Gui-mut-_2e_canvas-0">
+<summary><span class="sig">mut .canvas:mut Slot[mut base.Pane]</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_Gui-mut-_2e_model-0">
+<summary><span class="sig">mut .model:mut Model</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_Gui-mut-_2e_setImage-1">
+<summary><span class="sig">mut .setImage(base.Painter):Void</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_Model-0">
+<h2>Model</h2>
+<p class="doc missing">No documentation yet.</p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_Model-mut-_2e_imgBox-0">
+<summary><span class="sig">mut .imgBox:Void</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_Model-mut-_2e_imgPortal-0">
+<summary><span class="sig">mut .imgPortal:Void</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_Model-mut-_2e_imgTarget-0">
+<summary><span class="sig">mut .imgTarget:Void</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_Model-mut-_2e_imgWarning-0">
+<summary><span class="sig">mut .imgWarning:Void</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_Models-0">
+<h2>Models</h2>
+<p class="doc missing">No documentation yet.</p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_Models-imm-_23_-1">
+<summary><span class="sig">#(mut Gui):mut Model</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_PaintBox-0">
+<h2>PaintBox</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Painter-0">base.Painter</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_PaintBox-imm-_2e_run-1">
+<summary><span class="sig">.run(mut base.Graphics):mut base.Graphics</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Painter-imm-_2e_run-1">base.Painter.run</a>.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_PaintPortal-0">
+<h2>PaintPortal</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Painter-0">base.Painter</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_PaintPortal-imm-_2e_run-1">
+<summary><span class="sig">.run(mut base.Graphics):mut base.Graphics</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Painter-imm-_2e_run-1">base.Painter.run</a>.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_PaintTarget-0">
+<h2>PaintTarget</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Painter-0">base.Painter</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_PaintTarget-imm-_2e_run-1">
+<summary><span class="sig">.run(mut base.Graphics):mut base.Graphics</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Painter-imm-_2e_run-1">base.Painter.run</a>.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_PaintTarget-imm-_2e_size-0">
+<summary><span class="sig">.size:Nat</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_PaintWarning-0">
+<h2>PaintWarning</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Painter-0">base.Painter</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_PaintWarning-imm-_2e_run-1">
+<summary><span class="sig">.run(mut base.Graphics):mut base.Graphics</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Painter-imm-_2e_run-1">base.Painter.run</a>.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_ShapeButtons-0">
+<h2>ShapeButtons</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Scope-1">base.Scope[base.Pane]</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_ShapeButtons-mut-_2e_model-0">
+<summary><span class="sig">mut .model:mut Model</span></summary>
+<p class="doc missing">No documentation yet.</p>
+</details>
+<details class="method" id="method-gui_5f_example_2e_ShapeButtons-mut-_2e_run-1">
+<summary><span class="sig">mut .run(mut base.Pane):mut base.Pane</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Scope-mut-_2e_run-1">base.Scope[base.Pane].run</a>.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_ShapeCanvas-0">
+<h2>ShapeCanvas</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Scope-1">base.Scope[base.Pane]</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_ShapeCanvas-mut-_2e_run-1">
+<summary><span class="sig">mut .run(mut base.Pane):mut base.Pane</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Scope-mut-_2e_run-1">base.Scope[base.Pane].run</a>.</p>
+</details>
+</section>
+<section class="type" id="type-gui_5f_example_2e_ShapeHeader-0">
+<h2>ShapeHeader</h2>
+<p class="doc missing">No documentation yet.</p>
+<p><b>Extends:</b> <a href="base.html#type-base_2e_Scope-1">base.Scope[base.Pane]</a></p>
+<h3>Methods</h3>
+<details class="method" id="method-gui_5f_example_2e_ShapeHeader-mut-_2e_run-1">
+<summary><span class="sig">mut .run(mut base.Pane):mut base.Pane</span></summary>
+<p class="doc missing">No documentation yet.</p>
+<p class="doc from">From: <a href="base.html#method-base_2e_Scope-mut-_2e_run-1">base.Scope[base.Pane].run</a>.</p>
+</details>
+</section>
+</main>
+</div>
+</body>
+</html>

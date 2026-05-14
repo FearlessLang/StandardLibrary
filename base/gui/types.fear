@@ -1,0 +1,284 @@
+Wrapper[S,T]: DataType[S,S] {
+  read .get: T -> this.getDataType.close;
+  read .name: Str;
+  read .getDataType: DataType[T,T];
+  .str -> this.name+"["+(this.getDataType.close(this.get).str)+"]";
+  read #(t:T): S;
+  .hash -> this.getDataType.close(this.get).hash;
+  .cmp(a,b,m) ->
+    this.getDataType.cmp(this.close(a).get, this.close(b).get, m);
+  read .close(s: read S): read Wrapper[S,T];
+  .info->this.getDataType.close(this.get).info;
+  .imm->this#(this.get);
+}
+XNat:Wrapper[XNat,Nat]{.name->"X"; .getDataType -> 0;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+YNat:Wrapper[YNat,Nat]{.name->"Y"; .getDataType -> 0;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+WidthNat:Wrapper[WidthNat,Nat]{.name->"Width"; .getDataType -> 0;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+HeightNat:Wrapper[HeightNat,Nat]{.name->"Height"; .getDataType -> 0;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+
+Red:Wrapper[Red,Byte]{.name->"Red"; .getDataType -> 0.byte;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+Green:Wrapper[Green,Byte]{.name->"Green"; .getDataType -> 0.byte;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+Blue:Wrapper[Blue,Byte]{.name->"Blue"; .getDataType -> 0.byte;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+Alpha:Wrapper[Alpha,Byte]{.name->"Alpha"; .getDataType -> 0.byte;
+  # t ->{ .getDataType->t }; .close->this; .close->::;
+  .opaque:Alpha->Alpha#(255.byte);
+  .transparent:Alpha->Alpha#(0.byte);
+  }
+Hue:Wrapper[Hue,Float]{.name->"Hue"; .getDataType -> 0.0;
+  # t ->Block#(t.assertInRange(0.0,1.0,{"Hue must be between 0 and 1"}),
+  { .getDataType->t });
+  .close->this; .close->::; }
+Saturation:Wrapper[Saturation,Float]{.name->"Saturation"; .getDataType -> 0.0;
+  # t ->Block#(t.assertInRange(0.0,1.0,{"Saturation must be between 0 and 1"}),
+  { .getDataType->t });
+  .close->this; .close->::; }
+Brightness:Wrapper[Brightness,Float]{.name->"Brightness"; .getDataType -> 0.0;
+  # t ->Block#(t.assertInRange(0.0,1.0,{"Brightness must be between 0 and 1"}),
+  { .getDataType->t });
+  .close->this; .close->::; }
+
+KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "";
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+
+Time:Wrapper[Time,Nat]{.name->"Time"; .getDataType -> 0;
+  # t ->{ .getDataType->t };
+  .seconds(t:Nat):Time->this#(t*1000000);
+  .milliSeconds(t:Nat):Time->this#(t*1000);
+  .close->this; .close->::; }
+Color:DataType[Color,Color]{
+  .close->this; .close->::;
+  read .red:Red->{};
+  read .green:Green->{};
+  read .blue:Blue->{};
+  read .alpha:Alpha->Alpha.opaque;
+  #(red:Red,green:Green,blue:Blue,alpha:Alpha):Color->{
+    .red->red;
+    .green->green;
+    .blue->blue;
+    .alpha->alpha;
+    };
+  .str -> "Color["+(this.red)+", "+(this.green)+", "+(this.blue)+", "+(this.alpha)+"]";
+  .hash ->     this.red.hash
+    .hashWith (this.green.hash)
+    .hashWith (this.blue.hash)
+    .hashWith (this.alpha.hash);
+  .cmp(a,b,m) -> a.str<=>(b.str,m);//TODO: improve
+  .info->this.str.info;
+  .imm->Color#(this.red,this.green,this.blue,this.alpha);
+  .transparent:Color->Color#({},{},{},Alpha.transparent);
+  .boringGray:Color->
+    Color#(Red#(160.byte),Green#(160.byte),Blue#(160.byte),Alpha.opaque);
+  .voidBlack:Color->
+    Color#(Red#(0.byte),Green#(0.byte),Blue#(0.byte),Alpha.opaque);
+  .ghostWhite:Color->
+    Color#(Red#(245.byte),Green#(245.byte),Blue#(245.byte),Alpha.opaque);
+  .rubberDuck:Color->
+    Color#(Red#(255.byte),Green#(220.byte),Blue#(40.byte),Alpha.opaque);
+  .bananaBruise:Color->
+    Color#(Red#(126.byte),Green#(96.byte),Blue#(32.byte),Alpha.opaque);
+  .dangerTomato:Color->
+    Color#(Red#(230.byte),Green#(64.byte),Blue#(48.byte),Alpha.opaque);
+  .lavaOrange:Color->
+    Color#(Red#(255.byte),Green#(96.byte),Blue#(16.byte),Alpha.opaque);
+  .wizardPurple:Color->
+    Color#(Red#(116.byte),Green#(64.byte),Blue#(196.byte),Alpha.opaque);
+  .sleepyBlue:Color->
+    Color#(Red#(72.byte),Green#(120.byte),Blue#(210.byte),Alpha.opaque);
+  .deepNapBlue:Color->
+    Color#(Red#(24.byte),Green#(48.byte),Blue#(112.byte),Alpha.opaque);
+  .goblinGreen:Color->
+    Color#(Red#(40.byte),Green#(170.byte),Blue#(64.byte),Alpha.opaque);
+  .toxicSlime:Color->
+    Color#(Red#(120.byte),Green#(255.byte),Blue#(32.byte),Alpha.opaque);
+  .alienMint:Color->
+    Color#(Red#(128.byte),Green#(255.byte),Blue#(190.byte),Alpha.opaque);
+  .swampTea:Color->
+    Color#(Red#(82.byte),Green#(112.byte),Blue#(54.byte),Alpha.opaque);
+  .rustyRobot:Color->
+    Color#(Red#(174.byte),Green#(86.byte),Blue#(44.byte),Alpha.opaque);
+  .dustyRose:Color->
+    Color#(Red#(196.byte),Green#(120.byte),Blue#(132.byte),Alpha.opaque);
+  .blueberrySoup:Color->
+    Color#(Red#(64.byte),Green#(72.byte),Blue#(176.byte),Alpha.opaque);
+  .terminalGreen:Color->
+    Color#(Red#(32.byte),Green#(220.byte),Blue#(80.byte),Alpha.opaque);
+  .panicPink:Color->
+    Color#(Red#(255.byte),Green#(72.byte),Blue#(168.byte),Alpha.opaque);
+  .cardboard:Color->
+    Color#(Red#(178.byte),Green#(136.byte),Blue#(86.byte),Alpha.opaque);
+  .moonCheese:Color->
+    Color#(Red#(236.byte),Green#(226.byte),Blue#(148.byte),Alpha.opaque);
+  }
+Widget[S]:{
+  mut .self:mut S;
+  mut .save(mut Consumer[S]):mut S;
+  mut .topInset(HeightNat):mut S;
+  mut .bottomInset(HeightNat):mut S;
+  mut .leftInset(WidthNat):mut S;
+  mut .rightInset(WidthNat):mut S;
+  mut .heightGap(HeightNat):mut S;
+  mut .widthGap(WidthNat):mut S;
+  mut .width(WidthNat):mut S;
+  mut .height(HeightNat):mut S;
+  mut .autoWidth:mut S;
+  mut .autoHeight:mut S;
+  mut .radius(Nat):mut S;
+  mut .foreground(Color):mut S;
+  mut .background(Color):mut S;
+  mut .autoSize:mut S;
+  mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
+  read .topInset: HeightNat;
+  read .bottomInset: HeightNat;
+  read .leftInset:WidthNat;
+  read .rightInset:WidthNat;
+  read .heightGap:HeightNat;
+  read .widthGap:WidthNat;
+  read .width:Opt[WidthNat];
+  read .height:Opt[HeightNat];
+  read .radius:Nat;
+  read .foreground:Color;
+  read .background:Color;
+}
+Border:Widget[Border]{
+  .self->this;
+  mut .mouse(mut Scope[Mouse]):mut Border;
+  mut .north(mut Scope[Pane]):mut Border;
+  mut .south(mut Scope[Pane]):mut Border;
+  mut .east(mut Scope[Pane]):mut Border;
+  mut .west(mut Scope[Pane]):mut Border;
+  mut .center(mut Scope[Pane]):mut Border;
+  mut .northB(mut Scope[Border]):mut Border;
+  mut .southB(mut Scope[Border]):mut Border;
+  mut .eastB(mut Scope[Border]):mut Border;
+  mut .westB(mut Scope[Border]):mut Border;
+  mut .centerB(mut Scope[Border]):mut Border;
+  mut .paint(Painter):mut Border;
+}
+Button: Widget[Button]{
+  .self-> this;
+  mut .action(mut MF[Void]):mut Button;
+  mut .text(Str):mut Button;
+  mut .textSize(HeightNat):mut Button;
+  read .text:Str;
+  read .textSize:HeightNat;
+}
+
+Frame:{//TODO: add getters like title/fps. Can we get location getters?
+  //read .elapsed:Time;
+  //mut .screenSizeW:WidthNat;
+  //mut .screenSizeH:HeightNat;
+  mut .maximized:mut Frame;
+  mut .resizable:mut Frame;
+  mut .undecorated(Alpha):mut Frame;
+  mut .title(Str):mut Frame;
+  mut .fps(Nat):mut Frame;
+  mut .location(XNat, YNat):mut Frame;
+  mut .onKey(mut Scope[Keys]):mut Frame;
+  mut .content(mut Scope[Pane]):Void;
+  mut .contentB(mut Scope[Border]):Void;
+}
+Graphics:{
+  mut .color(Color):mut Graphics;
+  mut .position(XNat, YNat):mut Graphics;
+  mut .line(XNat, YNat):mut Graphics;
+  mut .rect(WidthNat, HeightNat):mut Graphics;
+  mut .oval(WidthNat, HeightNat):mut Graphics;
+  read .elapsed:Time;
+  read .screenWidth:WidthNat;
+  read .screenHeight:HeightNat;
+  read .panelWidth:WidthNat;
+  read .panelHeight:HeightNat;
+}
+Gui:{ mut .run(mut Consumer[mut Frame]):Void }//public interface TopF{ void run(Frame f); }
+Label:Widget[Label]{
+  .self->this;
+  mut .textSize(HeightNat):mut Label;
+  mut .text(Str):mut Label;
+  read .text:Str;
+  read .textSize:HeightNat
+}
+Mouse:{
+  mut .clicked(mut Consumer[MouseEvent]):mut Mouse;
+  mut .pressed(mut Consumer[MouseEvent]):mut Mouse;
+  mut .released(mut Consumer[MouseEvent]):mut Mouse;
+  mut .moved(mut Consumer[MouseEvent]):mut Mouse;
+  mut .dragged(mut Consumer[MouseEvent]):mut Mouse;
+  mut .entered(mut Consumer[MouseEvent]):mut Mouse;
+  mut .exited(mut Consumer[MouseEvent]):mut Mouse;
+}
+MouseEvent:{
+  .mouseX:XNat;
+  .mouseY:YNat;
+  .elapsed:Time;
+  .screenWidth:WidthNat;
+  .screenHeight:HeightNat;
+  .panelWidth:WidthNat;
+  .panelHeight:HeightNat;
+}
+Pane:Widget[Pane]{
+  .self->this;
+  mut .mouse(mut Scope[Mouse]):mut Pane;
+  mut .pane(mut Scope[Pane]):mut Pane;
+  mut .border(mut Scope[Border]):mut Pane;
+  mut .button(mut Scope[Button]):mut Pane;
+  mut .label(mut Scope[Label]):mut Pane;
+  mut .paint(Painter):mut Pane;
+}
+Scope[T]:{ mut .run(mut T): mut T; }
+Painter:{ .run(mut Graphics): mut Graphics; }
+
+Consumer[E:*]:{ mut .accept(E):Void; }
+Slots: {#[E:*]: mut Slot[E] -> Block#
+  .var[mut Opt[E]] e = {{}}
+  .return {mut Slot[E:*]:Consumer[E] {'slot
+    .accept x-> slot.fill x;
+    mut  !: E -> e.get!;
+    read !: read/imm E -> e.get!;
+    mut .fill(x: E): Void -> e.set(e.get.match{
+      .some _ -> Error.msg `Slot was already full`;
+      .empty  -> Opts#x;
+      });
+    read .isFull: Bool -> e.get.isSome;
+    mut .opt: mut Opt[E] -> e.get;
+    //read .opt: read Opt[read/imm E] -> e.get; //TODO: correctly returning Opt[E], but it is undesirable?
+    }};
+  }
+KeyEvent:{
+  .elapsed:Time;
+  .screenWidth:WidthNat;
+  .screenHeight:HeightNat;
+  .windowWidth:WidthNat;
+  .windowHeight:HeightNat;
+  .keyStroke:KeyStroke;
+}
+KeyActions:{#:mut KeyAction->Block#
+  .let[mut EList[KeyStroke]] match= {ELists#}
+  .let[mut EList[mut Consumer[KeyEvent]]] actions= {ELists#}
+  .return{mut KeyAction:{'self
+    mut .match: mut EList[KeyStroke]->match;
+    mut .actions: mut EList[mut Consumer[KeyEvent]]->actions;
+    mut .matchOnly( k:KeyStroke): mut KeyAction->
+      Block#(match.clear,match.add(k),self);
+    mut .matchAlso( k:KeyStroke): mut KeyAction->
+      Block#(match.add(k),self);
+    mut .doOnly( c:mut Consumer[KeyEvent]): mut KeyAction->
+      Block#(actions.clear,actions.add(c),self);
+    mut .doAlso( c:mut Consumer[KeyEvent]): mut KeyAction->
+      Block#(actions.add(c),self);
+    mut .save(c:mut Consumer[mut KeyAction]):mut KeyAction->
+      Block#(c.accept(self),self);
+    mut .style(c:mut Scope[KeyAction]):mut KeyAction->
+      Block#(c.run(self),self);
+  }}
+}
+Keys:{
+  mut .pressed(mut Scope[KeyAction]):mut Keys;
+  mut .released(mut Scope[KeyAction]):mut Keys;
+  }

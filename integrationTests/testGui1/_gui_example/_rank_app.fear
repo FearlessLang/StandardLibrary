@@ -1,0 +1,182 @@
+use base.Void as Void;
+use base.Str as Str;
+use base.Gui as Gui;
+use base.Block as Block;
+use base.Consumer as Consumer;
+use base.Frame as Frame;
+use base.Debug as Debug;
+use base.Color as Color;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
+use base.KeyStroke as Key;
+use base.Label as Label;
+use base.Slot as Slot;
+use base.Slots as Slots;
+
+
+Foo:base.Main{s->Block#
+  .let g={s.gui}
+  .do{ g.run Gui01 }
+  .do{ g.run Gui02 }
+  .do{ g.run Gui03 }
+  .do{ g.run Gui04 }
+  .do{ g.run Gui05 }
+  .do{ g.run Gui06 }
+  .do{ g.run Gui07 }
+  .let label={Slots#[Label]}
+  .do{ g.run mut Gui08{label} }  
+  .done
+  }
+Gui01:Consumer[mut Frame]{::
+  .title `Gui01: two labels`
+  .content{::
+    .label{:: .text `Hello` }
+    .label{:: .text `World` }
+    }
+  }
+Gui02:Consumer[mut Frame]{::
+  .title `Gui02: many labels in flow`
+  .content{::
+    .label{:: .text `One` }
+    .label{:: .text `Two` }
+    .label{:: .text `Three` }
+    .label{:: .text `Four` }
+    .label{:: .text `Five` }
+    .label{:: .text `Six` }
+    .label{:: .text `Seven` }
+    .label{:: .text `Eight` }
+    .label{:: .text `Nine` }
+    .label{:: .text `Ten` }
+    }
+  }
+
+Gui03:Consumer[mut Frame]{::
+  .title `Gui03: nested panes with colors`
+  .content{::
+    .background (Color.ghostWhite)
+    .pane{::
+      .background (Color.rubberDuck)
+      .label{:: .text `row 1 / left` }
+      .label{:: .text `row 1 / right` }
+      }
+    .pane{::
+      .background (Color.sleepyBlue)
+      .label{:: .text `row 2 / left`.foreground (Color.ghostWhite) }
+      .label{:: .text `row 2 / middle`.foreground (Color.ghostWhite) }
+      .label{:: .text `row 2 / right`.foreground (Color.ghostWhite) }
+      }
+    }
+  }
+
+Gui04:Consumer[mut Frame]{::
+  .title `Gui04: border layout with colors`
+  .contentB{::
+    .background (Color.ghostWhite)
+    .north{:: 
+      .background (Color.rubberDuck)
+      .label{:: .text `north` } }
+    .west{:: 
+      .background (Color.goblinGreen)
+      .label{:: .text `west` } }
+    .center{:: 
+      .background (Color.sleepyBlue)
+      .label{:: .text `center`.foreground (Color.ghostWhite) } }
+    .east{:: 
+      .background (Color.lavaOrange)
+      .label{:: .text `east` } }
+    .south{:: 
+      .background (Color.wizardPurple)
+      .label{:: .text `south`.foreground (Color.ghostWhite) } }
+    }
+  }
+
+
+Gui05:Consumer[mut Frame]{::
+  .title `Gui05: buttons`
+  .content{::
+    .label{:: .text `Clicking buttons should not crash` }
+    .button{:: .text `button A`.action{Debug#"Button A Pressed" } }
+    .button{:: .text `button B`.action{Debug#"Button B Pressed" } }
+    .button{:: .text `button C`.action{Debug#"Button C Pressed" } }
+    }
+  }
+Gui06:Consumer[mut Frame]{::
+  .title `Gui06: mouse handlers`
+  .content{::
+    .background (Color.ghostWhite)
+    .label{:: .text `Move/click inside the window, then close` }
+    .pane{::
+      .width (Width#360)
+      .height (Height#180)
+      .background (Color.alienMint)
+      .mouse{::
+        .clicked{ e-> Debug#"mouse clicked" }
+        .pressed{ e-> Debug#"mouse pressed" }
+        .released{ e-> Debug#"mouse released" }
+        .moved{ e-> Debug#"mouse moved" }
+        .dragged{ e-> Debug#"mouse dragged" }
+        .entered{ e-> Debug#"mouse entered" }
+        .exited{ e-> Debug#"mouse exited" }
+        }
+      }
+    }
+  }
+
+Gui07:Consumer[mut Frame]{::
+  .title `Gui07: key bindings`
+  .onKey{::
+    .pressed{::
+      .matchOnly (Key#`A`)
+      .doOnly{ e-> Debug#"pressed A" }
+      }
+    .released{::
+      .matchOnly (Key#`A`)
+      .doOnly{ e-> Debug#"released A" }
+      }
+    .pressed{::
+      .matchOnly (Key#`SPACE`)
+      .doOnly{ e-> Debug#"pressed SPACE" }
+      }
+    .pressed{::
+      .matchOnly (Key#`ENTER`)
+      .doOnly{ e-> Debug#"pressed ENTER" }
+      }
+    .pressed{::
+      .matchOnly (Key#`LEFT`)
+      .doOnly{ e-> Debug#"pressed LEFT" }
+      }
+    .pressed{::
+      .matchOnly (Key#`RIGHT`)
+      .doOnly{ e-> Debug#"pressed RIGHT" }
+      }
+    }
+  .content{::
+    .background (Color.ghostWhite)
+    .label{:: .text `Press A, SPACE, ENTER, LEFT, RIGHT` }
+    .label{:: .text `Then click the button and try the keys again` }
+    .button{:: .text `click me`.action{Debug#"button clicked"} }
+    }
+  }
+
+Gui08:Consumer[mut Frame]{
+  mut .slot: mut Slot[mut Label];
+  ::
+  .title `Gui08: button mutates label`
+  .content{::
+    .background (Color.ghostWhite)
+   .label{::
+      .text `Hello`
+      .width (Width#500)
+      .height (Height#80)
+      .textSize (Height#24)
+      .background (Color.rubberDuck)
+      .save (this.slot)
+      }
+    .button{::
+      .text `Add !`
+      .action{
+        Block#(this.slot!.text ((this.slot!.text) + `!`),Void)
+        }
+      }
+    }
+  }
