@@ -1,0 +1,29 @@
+MaxAcc: {
+  #[E:*,K](by: OrderBy[imm E,K]): mut FoldAcc[E,mut EList[E]] -> {
+    ELists#;
+    e -> MaxAcc#(by, ELists#.addAnd e);
+  };
+  #[E:*,K](by: OrderBy[imm E,K], bests: mut EList[E]): mut FoldAcc[E,mut EList[E]] -> {'self
+    bests;
+    e -> by#(bests.get 0) <=> (by#e,{
+      .lt -> Block#(bests.clearAnd.add e,self);
+      .eq -> Block#(bests.add e,self);
+      .gt -> self;
+      });
+    };
+  }
+
+MinAcc: {
+  #[E:*,K](by: OrderBy[imm E,K]): mut FoldAcc[E,mut EList[E]] -> {
+    ELists#;
+    e -> MinAcc#(by, ELists#.addAnd e);
+  };
+  #[E:*,K](by: OrderBy[imm E,K], bests: mut EList[E]): mut FoldAcc[E,mut EList[E]] -> {'self
+    bests;
+    e -> by#(bests.get 0) <=> (by#e,{
+      .lt -> self;
+      .eq -> Block#(bests.add e,self);
+      .gt -> Block#(bests.clearAnd.add e,self);
+      });
+    };
+  }

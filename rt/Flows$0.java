@@ -1,6 +1,8 @@
 package base;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static base.Util.*;
@@ -16,7 +18,8 @@ public interface Flows$0 extends Sealed$0{
   default Object imm$fromMutList$2(Object p0,Object p1){ return new Flow$1Instance(List$1Instance.asJava(p0).stream()); }//maybeparallel
   default Object imm$fromReadList$1(Object p0){ return new Flow$1Instance(List$1Instance.asJava(p0).stream()); }//maybeparallel
   default Object imm$fromImmList$1(Object p0){ return new Flow$1Instance(List$1Instance.asJava(p0).stream()); }//maybeparallel
-
+  default Object imm$fromSet$1(Object p0) { return new Flow$1Instance(Set$2Instance.unwrap(p0).stream().map(k -> ((MapKey) k).key)); }
+  default Object imm$seqFromSet$1(Object p0) { return new Flow$1Instance(Set$2Instance.unwrap(p0).stream().map(k -> ((MapKey) k).key)); }
   Flows$0 instance= new Flows$0(){};
 }
 
@@ -51,6 +54,20 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     try{ return List$1Instance.wrap(s.toList()); }
     catch(IllegalStateException e){ throw consumed(); }
   }
+
+  @Override public Object mut$set$2(Object p0, Object p1){
+    OrderHashBy$2 ordering = Set$2Instance.ordering(p1);
+    AsImm$2 toImm = (AsImm$2) p0;
+
+    try{ return new Set$2Instance(
+            ordering,
+            s.map(e -> toImm.imm$$hash$1(e))
+            .map(e -> mapKey(ordering, e))
+            .collect(Collectors.toCollection(LinkedHashSet::new))
+    );}
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+
   @Override public Object mut$eList$0(){
     try{ return EList$1Instance.wrap(s.toList()); }
     catch(IllegalStateException e){ throw consumed(); }

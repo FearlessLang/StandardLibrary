@@ -262,14 +262,14 @@ public record Nat$0Instance(long val) implements Nat$0 {
     ) {
       return new Flow$1Instance(
               LongStream.range(start, until)
-                      .<Object>mapToObj(Nat$0Instance::new)
+                      .<Object>mapToObj(Nat$0Instance::instance)
       );
     }
 
     return new Flow$1Instance(LongStream.concat(
             LongStream.rangeClosed(start,Long.MAX_VALUE),
             LongStream.range(Long.MIN_VALUE, until)
-    ).mapToObj(Nat$0Instance::new));
+    ).mapToObj(Nat$0Instance::instance));
   }
   @Override public Object imm$$tilde_tilde_eq$1(Object p0){
    long start= this.val;
@@ -285,14 +285,14 @@ public record Nat$0Instance(long val) implements Nat$0 {
     ) {
       return new Flow$1Instance(
               LongStream.rangeClosed(start, until)
-                      .<Object>mapToObj(Nat$0Instance::new)
+                      .<Object>mapToObj(Nat$0Instance::instance)
       );
     }
 
     return new Flow$1Instance(LongStream.concat(
             LongStream.rangeClosed(start,Long.MAX_VALUE),
             LongStream.rangeClosed(Long.MIN_VALUE, until)
-    ).mapToObj(Nat$0Instance::new));
+    ).mapToObj(Nat$0Instance::instance));
   }
   @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_->new Norm(this)); }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>();

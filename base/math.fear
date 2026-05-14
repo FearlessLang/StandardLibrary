@@ -1,8 +1,46 @@
+_MagicMath: Sealed {
+  /// The natural log of the given float, returns:
+  /// throws if x NaN or < 0,
+  /// returns negative infinity if x = 0,
+  /// returns positive infinity if x is positive infinity
+  .ln(x: Float): Float -> Magic!;
+
+  /// The log base 10 of the given float, returns:
+  /// throws if x NaN or < 0,
+  /// -ve infinity if x = 0,
+  /// +ve infinity if x is positive infinity,
+  /// log base 10 of x otherwise;
+  .log(x: Float): Float -> Magic!;
+
+  /// Returns the arc sine of a value; the returned angle is in [-pi/2, pi/2].
+  /// Throws if the argument is NaN or its absolute value is greater than 1, NaN.
+  /// If the argument is zero, then the result is a zero with the same sign as the argument.
+  .asin(x: Float): Radian -> Magic!;
+
+  /// Returns the arc sine of a value; the returned angle is in [0, pi].
+  /// throws if the argument is NaN or its absolute value is greater than 1.
+  .acos(x: Float): Radian -> Magic!;
+
+  /// Returns the arc tangent of a value; the returned angle is in [-pi/2, pi/2].
+  /// throws if the argument is NaN.
+  /// If the argument is zero, then the result is a zero with the same sign as the argument.
+  .atan(x: Float): Radian -> Magic!;
+
+  /// Returns the angle theta from the conversion of rectangular coordinates (x, y) to polar coordinates (r, theta).
+  /// This method computes the phase theta by computing an arc tangent of y / x in [-pi to pi]
+  /// Throws if either x or y is NaN.
+  .atan2(x: Float, y: Float): Radian -> Magic!;
+
+  /// Returns (x** +2.0 + y** +2.0).sqrt without intermediate overflow or underflow.
+  /// Throws if either argument is NaN
+  .hypot(x: Float, y: Float): Float -> Magic!;
+  }
+
 /// Question: How many methods should be added here?
 /// Stuff like .abs and .sqrt are defined on the numeric types themselves, so they are not included here, should they be?
 /// What about .sin, .cos, .tan, .log, .exp, etc? Should they be included here?
 /// What about other constants like Pi and E? When do they get too obscure to be worth including here?
-Math: Sealed {
+Math: Sealed, _MagicMath {
   .minInt: Int -> -9_223_372_036_854_775_808;   /// The smallest representable Int (-2^63)
   .maxInt: Int -> +9_223_372_036_854_775_807;   /// The largest representable Int (2^63 - 1)
   .intBits: Nat -> 64;                          /// The number of bits in the binary representation of an Int (64)
@@ -24,19 +62,6 @@ Math: Sealed {
   .tau: Float -> +2.0 * (this.pi);                                        /// The mathematical constant Tau (2 * Pi)
   .e: Float -> +2.718281828459045090795598298427648842334747314453125;  /// The mathematical constant e
 
-  /// The natural log of the given float, returns:
-  /// throws if x NaN or < 0,
-  /// returns negative infinity if x = 0,
-  /// returns positive infinity if x is positive infinity
-  .ln(x: Float): Float -> Magic!;
-
-  /// The log base 10 of the given float, returns:
-  /// throws if x NaN or < 0,
-  /// -ve infinity if x = 0,
-  /// +ve infinity if x is positive infinity,
-  /// log base 10 of x otherwise;
-  .log(x: Float): Float -> Magic!;
-
   /// The log base `base` of the given float, returns:
   /// throws if base, or x is NaN or < 0, or b <= 0,
   /// -ve infinity if x = 0,
@@ -54,25 +79,6 @@ Math: Sealed {
   /// log base 2 of x otherwise;
   .log2(x: Float): Float -> this.logb(+2.0, x);
 
-  /// Returns the arc sine of a value; the returned angle is in [-pi/2, pi/2].
-  /// Throws if the argument is NaN or its absolute value is greater than 1, NaN.
-  /// If the argument is zero, then the result is a zero with the same sign as the argument.
-  .asin(x: Float): Radian -> Magic!;
-
-  /// Returns the arc sine of a value; the returned angle is in [0, pi].
-  /// throws if the argument is NaN or its absolute value is greater than 1.
-  .acos(x: Float): Radian -> Magic!;
-
-  /// Returns the arc tangent of a value; the returned angle is in [-pi/2, pi/2].
-  /// throws if the argument is NaN.
-  /// If the argument is zero, then the result is a zero with the same sign as the argument.
-  .atan(x: Float): Radian -> Magic!;
-
-  /// Returns the angle theta from the conversion of rectangular coordinates (x, y) to polar coordinates (r, theta).
-  /// This method computes the phase theta by computing an arc tangent of y / x in [-pi to pi]
-  /// Throws if either x or y is NaN.
-  .atan2(x: Float, y: Float): Radian -> Magic!;
-
   /// Return the euclidean modulus of two floats.
   /// This is the "non-negative" mod if the divisor is positive:
   /// Math.euclideanMod(-3.0, +7.0) .assertEq +4.0;
@@ -83,10 +89,6 @@ Math: Sealed {
         .then -> mod + divisor;
         .else -> mod
       }};
-
-  /// Returns (x** +2.0 + y** +2.0).sqrt without intermediate overflow or underflow.
-  /// Throws if either argument is NaN
-  .hypot(x: Float, y: Float): Float -> Magic!;
 
   /// Return the maximum of two elements given the ordering.
   /// Will return the first one if the elements are equal.
@@ -99,39 +101,14 @@ Math: Sealed {
   .min[T,K](t0: T, t1: T, ordering: OrderBy[T, K]): T -> ordering#t0 <=> (ordering#t1, {
       .lt -> t0; .eq -> t0; .gt -> t1;
     });
-
-  /// Match over all the special variants of float weirdness.
-  /// Allows to match over +/-0.0, NaN, +/-inf, and pass a custom function for
-  /// the other regular numbers. Recommended to use with `FloatMatches`.
-  .match[R:*](f: Float, m: mut FloatMatch[R]): R ->
-    mut Opt[R]
-      | (_MapTrue[R]#(f.isPosZero, {m.posZero}))
-      | (_MapTrue[R]#(f.isNegZero, {m.negZero}))
-      | (_MapTrue[R]#(f.isPosInfinity, {m.posInf}))
-      | (_MapTrue[R]#(f.isNegInfinity, {m.negInf}))
-      | (_MapTrue[R]#(f.isNaN, {m.nan}))
-      .orLazy{ m.regular f };
   }
 
-
-/// Create a new Angle in degrees,
-/// .empty if angle is NaN, or +/- inf
-Degrees: F[Float, Opt[Degree]] {
-  angle -> angle.finite.as{a -> {a}}
-  }
-
-
-/// Create a new Angle in radians,
-/// .empty if angle is NaN, or +/- inf
-Radians: F[Float, Opt[Radian]] {
-  angle -> angle.finite.as{a -> {a}}
-  }
 
 /// The super type of Radians and Degrees, used to enforce common behaviour
 /// Angles that normalize to the same value are considered equal,
 /// `Degrees#(+360.0)! == Degrees#(+0.0)! .assertTrue`
 /// `Radians#(Math.tau / -4.0)! == Degrees#(+3.0 / +4.0 * Math.tau)! .assertTrue`
-Angle[Self]: F[Float], Sealed, DataType[Self, Self] {
+Angle[Self]: F[Float],Sealed,DataType[Self, Self] {
   +(other: Self): Self;
   -(other: Self): Self;
   read .normalize: Self;
@@ -139,9 +116,9 @@ Angle[Self]: F[Float], Sealed, DataType[Self, Self] {
   .sin: Float;                          /// The sine of the given angle.
   .cos: Float;                          /// The cosine of the given angle.
   .tan: Float;                          /// The tangent of the given angle.
-  .csc: Float -> +1.0 / (this.sin);     /// 
-  .sec: Float -> +1.0 / (this.cos);
-  .cot: Float -> +1.0 / (this.tan);
+  .csc: Float -> +1.0 / (this.sin);     /// The co-secant of the given angle.
+  .sec: Float -> +1.0 / (this.cos);     /// The secant of the given angle.
+  .cot: Float -> +1.0 / (this.tan);     /// The co-tangent of the given angle.
 
 
   .info -> Infos.msg(this.str);
@@ -149,17 +126,18 @@ Angle[Self]: F[Float], Sealed, DataType[Self, Self] {
 
 /// An angle measured in degrees
 Degree: Angle[Degree] {
-  + other -> this# + (other#) |> Degrees!;
-  - other -> this# + (other#) |> Degrees!;
+  + other -> this# + (other#) .deg!;
+  - other -> this# - (other#) .deg!;
   .sin: Float -> this.toRad.sin;
   .cos: Float -> this.toRad.cos;
   .tan: Float -> this.toRad.tan;
-  .toRad: Radian -> this# * (Math.pi) / +180.0 |> Radians!;
+
+  .toRad: Radian -> this# * (Math.pi) / +180.0 .rad!;
   /// Wrap this angle into the range [0, 360);
-  .normalize -> this# |> { Math.euclideanMod(::, +360.0) } |> Degrees!;
+  .normalize -> Math.euclideanMod(this#, +360.0).deg!;
 
   .close -> this;
-  .imm -> this# |> Degrees!;
+  .imm -> this#.deg!;
   .str -> `Degree[`+(this#.str)+`]`;
   /// Compare two angles after normalizing them
   .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
@@ -167,19 +145,27 @@ Degree: Angle[Degree] {
   .close -> ::;
   }
 
+
+_RadianTrig: Sealed {
+  .sin(x: Radian): Float -> Magic!;
+  .cos(x: Radian): Float -> Magic!;
+  .tan(x: Radian): Float -> Magic!;
+  }
+
 /// An angle measured in radians
 Radian: Angle[Radian] {
-  + other -> this# + (other#) |> Radians!;
-  - other -> this# + (other#) |> Radians!;
-  .sin: Float -> Magic!;
-  .cos: Float -> Magic!;
-  .tan: Float -> Magic!;
-  .toDeg: Degree -> this# * +180.0 / (Math.pi) |> Degrees!;
+  + other -> this# + (other#) .rad!;
+  - other -> this# - (other#) .rad!;
+  .toDeg: Degree -> this# * +180.0 / (Math.pi) .deg!;
   /// Wrap this angle into the range [0, 2pi)
-  .normalize -> this# |> { Math.euclideanMod(::, Math.tau) } |> Radians!;
+  .normalize -> Math.euclideanMod(this#, Math.tau).rad!;
+
+  .sin -> _RadianTrig.sin this;
+  .cos -> _RadianTrig.cos this;
+  .tan -> _RadianTrig.tan this;
 
   .close -> this;
-  .imm -> this# |> Radians!;
+  .imm -> this#.rad!;
   .str -> `Radian[`+(this#.str)+`]`;
   /// Compare two angles after normalizing them
   .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
@@ -201,45 +187,6 @@ FloatMatch[R:**]: {
   mut .nan: R;
   }
 
-/// A Factory for constructing a FloatMatch, provides some constructors
-/// If you need one more custom than this method provides,
-/// it is recommended to just build a FloatMatch by hand
-FloatMatches[R:**]: {
-  /// Supply nan# if the float f is NaN, otherwise number#(f)
-  #(number: mut MF[Float, R], nan: mut MF[R]): mut FloatMatch[R] -> {
-    .regular x -> number#x;
-    .posZero -> number# +0.0;
-    .negZero -> number# -0.0;
-    .posInf -> number#(Math.inf);
-    .negInf -> number#(Math.negInf);
-    .nan -> nan#;
-    };
-
-  // Supply nan# if f is nan infs#f if f is +/- inf, finite#f otherwise
-  #(finite: mut MF[Float, R], nan: mut MF[R], infs: mut MF[Float,R]): mut FloatMatch[R] -> {
-    .regular x -> finite#x;
-    .posZero -> finite# +0.0;
-    .negZero -> finite# -0.0;
-    .posInf -> infs#(Math.inf);
-    .negInf -> infs#(Math.negInf);
-    .nan -> nan#;
-    };
-
-  // Supply nan# if f is nan, infs#f if f is +/- inf, zeros#f if f is +/- 0, finite#f otherwise
-  #(
-    regular: mut MF[Float, R],
-    nan: mut MF[R],
-    infs: mut MF[Float,R],
-    zeros: mut MF[Float,R]
-    ): mut FloatMatch[R] -> {
-    .regular x -> regular#x;
-    .posZero -> zeros# +0.0;
-    .negZero -> zeros# -0.0;
-    .posInf -> infs#(Math.inf);
-    .negInf -> infs#(Math.negInf);
-    .nan -> nan#;
-    };
-  }
 
 _MapTrue[R: *]: MF[Bool, mut MF[R], mut Opt[R]] {
   #(b: Bool, f: mut MF[R]): mut Opt[R] -> b.if {

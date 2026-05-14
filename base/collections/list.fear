@@ -39,7 +39,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .reverse->{};
 
   mut  .seqFlow-> Flows.fromMutList(this);
-  read  .flow-> Flows.fromReadList(this);
+  read .flow-> Flows.fromReadList(this);
   imm  .flow-> Flows.fromImmList(this);
   mut  .flow mode-> Flows.fromMutList(this,mode);
   
@@ -78,7 +78,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
 _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E] {
   read .size: Nat;                           /// number of elements
   read .isEmpty: Bool;                       /// True iff size == 0
-
+  read .notEmpty: Bool -> this.isEmpty.not;  /// True iff the size > 0
   mut  .get(i: Nat): E;                      /// element at i (0-based); throws if i >= size
   read .get(i: Nat): read/imm E;             /// element at i (0-based); throws if i >= size
 
@@ -114,10 +114,12 @@ _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E] {
 
   mut  .subList(start: Nat): mut List[E];      /// subList(start, size)
   read .subList(start: Nat): read List[E];     /// subList(start, size)
-
+  
+  // Should this be called replace?
   mut  .with(i: Nat, e: E): mut List[E];       /// replace element at i; throws if i >= size
   read .with(i: Nat, e: read E): read List[E]; /// replace element at i; throws if i >= size
-
+  
+  // Should this be called insert, or insertBefore
   mut  .withAlso(i: Nat, e: E): mut List[E];       /// insert before i; i in [0,size]; throws otherwise
   read .withAlso(i: Nat, e: read E): read List[E]; /// insert before i; i in [0,size]; throws otherwise
 

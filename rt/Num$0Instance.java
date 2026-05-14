@@ -143,13 +143,13 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
 
     if (exponent == Long.MIN_VALUE) {
       // Since |Long.MIN_VALUE| is too large to fit in long
-      return new Num$0Instance(
+      return Num$0Instance.instance(
               pow(denominator, Long.MAX_VALUE).multiply(denominator),
               pow(numerator, Long.MAX_VALUE).multiply(numerator)
       );
     }
 
-    return new Num$0Instance(
+    return Num$0Instance.instance(
             pow(denominator, Math.abs(exponent)),
             pow(numerator, Math.abs(exponent))
     );
