@@ -21,11 +21,13 @@ use base.Scope as Scope;
 use base.Painter as Painter;
 
 Foo:base.Main{s->Block#
-  .let g={s.gui}
   .let model={Slots#[mut Model]}
   .let canvas={Slots#[Pane]}
   .let[mut Gui] gui= {mut Gui{.canvas->canvas; .model->model!;}}
+
   .do {model.fill (Models#gui) }
+
+  .let g={s.gui}
   .do { g.run gui }
   .done
   }
