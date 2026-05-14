@@ -73,9 +73,31 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .sumNumber xs ->                  /// summing all numbers starting from this
     xs.fold( {this}, {acc,e -> acc + e} );
   .finite: Opt[Float] ->            /// return .empty if this is NaN, or Infinity .some of this otherwise.
-    Math.match(this, FloatMatches[Opt[Float]]#(
-      { x -> Opts#(x) }, { {} }, { _ -> {} }
-      ));
+    this.match({
+    .posInf -> {}; .negInf -> {}; .nan -> {};
+    .posZero -> Opts#(+0.0); .negZero -> Opts#(-0.0);
+    .regular x -> Opts#(x);
+    });
+
+  /// Match over all the special variants of float weirdness.
+  /// Allows to match over +/-0.0, NaN, +/-inf, and pass a custom function for
+  /// the other regular numbers.
+  .match[R:*](m: mut FloatMatch[R]): R ->
+    mut Opt[R]
+      | (_MapTrue[R]#(this.isPosZero, {m.posZero}))
+      | (_MapTrue[R]#(this.isNegZero, {m.negZero}))
+      | (_MapTrue[R]#(this.isPosInfinity, {m.posInf}))
+      | (_MapTrue[R]#(this.isNegInfinity, {m.negInf}))
+      | (_MapTrue[R]#(this.isNaN, {m.nan}))
+      .orLazy{ m.regular this };
+
+  /// Try to convert this float into a Degree
+  /// Returns .some if this is finite, .empty otherwise
+  .deg: Opt[Degree] -> this.finite.as{x-> {x}};
+
+  /// Try to convert this float into a Radian
+  /// Returns .some if this is finite, .empty otherwise
+  .rad: Opt[Radian] -> this.finite.as{x -> {x}};
   }
 
 /// Int: signed 64-bit.
@@ -91,7 +113,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .rem(d: Nat): Int;                        /// r = this - (this.div(d))*d; throws iff d==0;
   .divExact(d: Nat): Opt[Int];              /// .some if d!=0 and this.rem(d)==0; .empty otherwise
   .sign: Int;                               /// Return the sign of this number: +0 if x is 0, +1 if x is positive, -1 if x is negative.
-  .abs: Nat;                                /// abs; x if x >= 0, -x otherwise. Returns a Nat sice Math.minInt.abs is larger than Math.maxInt, so it would be unrepresentable as an Int.
+  .abs: Nat;                                /// abs; x if x >= 0, -x otherwise. Returns a Nat since Math.minInt.abs is larger than Math.maxInt, so it would be unrepresentable as an Int.
   .sqrt: Float;                             /// approximate sqrt; returns NaN iff this is negative
   .wrapIndex(len: Nat): Nat;                /// normalize into [0,len-1]; throws iff len==0; example: -1.wrapIndex(7) == 6
   / (d: Nat) : Num;                         /// create a Num represening the exact result of this division; throws iff d==0
@@ -127,7 +149,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
+Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   .succ: Nat -> this + 1;                  /// successor number; throws on overflow
   .pred: Nat -> this - 1;                  /// predecessor number; throws on underflow
   +(x: Nat): Nat;                          /// checked add; throws on overflow (past maxNat)
@@ -146,17 +168,17 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
   .num: Num;                               /// converts to Float (note: Num can represent exactly all Nat values)
   .intExact: Opt[Int];                     /// .some if this <= maxInt; .empty otherwise
   .byteExact: Opt[Byte];                   /// .some if this <= maxByte; .empty otherwise
-  .aluAddWrap(x: Nat): Nat;                /// u32 wraparound add (mod 2^32)
-  .aluSubWrap(x: Nat): Nat;                /// u32 wraparound sub (mod 2^32)
-  .aluMulWrap(x: Nat): Nat;                /// u32 wraparound mul (mod 2^32)
-  .aluDiv(x: Nat): Nat;                    /// u32 trunc division; throws iff x == 0
+  .aluAddWrap(x: Nat): Nat;                /// u64 wraparound add (mod 2^64)
+  .aluSubWrap(x: Nat): Nat;                /// u64 wraparound sub (mod 2^64)
+  .aluMulWrap(x: Nat): Nat;                /// u64 wraparound mul (mod 2^64)
+  .aluDiv(x: Nat): Nat;                    /// u64 trunc division; throws iff x == 0
   .aluRem(x: Nat): Nat;                    /// paired with aluDiv; throws iff x == 0
-  .aluShiftLeft(bits: Nat): Nat;           /// u32 shift-left; effective shift = bits & 31 (i.e., modulo 32).
-  .aluShiftRight(bits: Nat): Nat;          /// u32 logical shift-right; effective shift = bits & 31.
-  .aluXor(x: Nat): Nat;                    /// u32 xor
-  .aluAnd(x: Nat): Nat;                    /// u32 and
-  .aluOr(x: Nat): Nat;                     /// u32 or
-  .aluInt: Int;                            /// reinterpret u32 bits as i32 Int (bit-cast)
+  .aluShiftLeft(bits: Nat): Nat;           /// u64 shift-left; effective shift = bits & 63 (i.e., modulo 64).
+  .aluShiftRight(bits: Nat): Nat;          /// u64 logical shift-right; effective shift = bits & 63.
+  .aluXor(x: Nat): Nat;                    /// u64 xor
+  .aluAnd(x: Nat): Nat;                    /// u64 and
+  .aluOr(x: Nat): Nat;                     /// u64 or
+  .aluInt: Int;                            /// reinterpret u64 bits as i64 Int (bit-cast)
   .aluByte: Byte;                          /// low 8 bits (wrap), not clamp
   .clamp(lo: Nat, hi: Nat): Nat;           /// clamp into [lo,hi]; throws if lo>hi
 
@@ -168,6 +190,10 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
     xs.fold( {this}, {acc,e -> acc + e} );
   .hashWith(other: Nat): Nat -> this.aluMulWrap(31).aluAddWrap(other);
   .norm: Norm[Nat];
+  .indexInto info -> info.match {
+      .empty -> {}; .msg _ -> {}; .map _ -> {};
+      .list list -> list.opt(this);
+      }
   }
 
 /// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.

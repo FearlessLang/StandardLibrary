@@ -1,27 +1,27 @@
 Main: { .main(s: mut System): Void }
 Sealed: {}
-Void: Sealed{}
-WidenTo[T]:{}
-InferUnknown:Sealed{}
-InferErr[A,B]:Sealed{}
-InferErr[A,B,C]:Sealed{}
-InferErr[A,B,C,D]:Sealed{}
+Void: Sealed {}
+WidenTo[T]: {}
+InferUnknown: Sealed {}
+InferErr[A,B]: Sealed {}
+InferErr[A,B,C]: Sealed {}
+InferErr[A,B,C,D]: Sealed {}
 
 ToIso[R]: {mut .iso: iso ToIso[R]; mut .close: mut R;}
 
-Abort: Sealed{![R:**]: R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);}
-Magic: Sealed{
+Abort: Sealed {![R:**]: R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);}
+Magic: Sealed {
   ![R:**]: R -> this!; // magic'd out to tell us what we forgot to implement
   //![R:**](_: mut _System): R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);
   }
 
-Debug: Sealed{
-  #[T:*](x: T, f:F[T,Str]): T -> Block#(this#(f#x),x);
+Debug: Sealed {
+  #[T:*](x: T, f: F[T,Str]): T -> Block#(this#(f#x),x);
   #(x: read ToStr): Void -> Magic!;
   //.identify[T](x: read T): Str -> Magic!;//TODO: can this break observability?
   }
 
-As[X:**]: Sealed{ #(x: X): X -> x }
+As[X:**]: Sealed { #(x: X): X -> x }
 
 Let: { #[A:*,R:**](l: mut Let[A, R]): R -> l.in(l.let); }
 Let[A:*,R:**]: { mut .let: A; mut .in(a: A): R }

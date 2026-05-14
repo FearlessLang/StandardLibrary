@@ -25,8 +25,8 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .hash->this.str.hash;
   .cmp a,b,m -> a.str <=> (b.str, m);
   .msg: Str->``;
-  .list: List[Info]->{};
-  .map: Map[Str,Info]->Maps#[Str,Str,Info] {::};
+  .list: List[Info] -> {};
+  .map: Map[Str,Info] -> Maps#[Str,Str,Info] {::};
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
   .match[R](m: InfoMatch[R]): R->m.empty;
   .str -> this.imm.match(_InfoToStr);
@@ -51,6 +51,15 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
       .map  m2 -> _InfoMapPlus#(m1, m2) .info {::};
       };
     };
+
+    //&: InfoMatches -> {this};
+    ~: InfoExtractor -> {Opts#(this)};
+  }
+
+/// Allow indexing into an info,
+/// Union of Str and Nat
+InfoKey: Sealed {
+  .indexInto(Info): Opt[Info];
   }
 
 _InfoMapPlus: { #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->
@@ -77,7 +86,7 @@ InfoMatch[R]: {
   }
 
 _InfoToStr: InfoMatch[Str] {
-  .empty ->`EmptyInfo`;
+  .empty -> `EmptyInfo`;
   .msg(msg) -> msg.escape;
   .list(list) -> list.str {::};
   .map(map) -> map.str {::};

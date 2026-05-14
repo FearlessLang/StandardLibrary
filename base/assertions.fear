@@ -1,16 +1,14 @@
-LazyInfo:F[read ToInfo]{}
+LazyInfo: F[read ToInfo] {}
 
-Assert:Sealed{
+Assert: Sealed {
   !(assertion: Bool): Void -> this!(assertion,{``}, { Void });
   !(assertion: Bool, msg: read LazyInfo): Void -> this!(assertion, msg, { Void });
-  /*![R:*](assertion: Bool, cont: mut MF[R]): R -> assertion ? {
-    .then -> cont#;//No because of missing overloading
-    .else -> this._fail;
-    };*/
+
   ![R:*](assertion: Bool, msg: read LazyInfo, cont: mut MF[R]): R -> assertion ? {
     .then -> cont#;
     .else -> this._fail(msg#);
     };
+
   ._fail[R:*]: R -> Error.nonDeterministic`Assertion failure.`;
   ._fail[R:*](msg: read ToInfo): R -> Error.nonDeterministicInfo(`Assertion failure.`.info + (msg.info));
   .msg[R:*](msg: Str): R -> this._fail msg;

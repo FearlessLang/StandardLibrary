@@ -1,0 +1,54 @@
+EsetFileTests: F[Tests, Tests] {::
+  .testSuite ESetTests
+  }
+
+ESetTests: F[Tests, Tests] {::
+  .test(Block#
+        .let eset = {ESets#[Nat,Nat]{::}}
+        .do {eset.isEmpty .assertTrue}
+        .do {eset.add(1)}
+        .return {eset.set.str .assertEq "{1}"})
+  .test(ESets#{::}.addAnd(1).addAnd(2).addAnd(3)
+        .set.str.assertEq "{1, 2, 3}")
+  .test(Block#
+        .let eset = {ESets#[Nat, Nat]{::}.addAnd(1).addAnd(2)}
+        .do {eset.size .assertEq 2}
+        .do {eset.clear()}
+        .return {eset.isEmpty .assertTrue})
+  .test(Block#
+        .let eset = {ESets#[Nat, Nat]{::}.addAnd(1).addAnd(2)}
+        .do {eset.size .assertEq 2}
+        .do {eset.clearAnd().isEmpty .assertTrue}
+        .return {eset.isEmpty .assertTrue})
+  .test(Block#
+        .let eset = {ESets#[Nat,Nat]{::}.addAnd(1).addAnd(2)}
+        .do {eset.contains(1) .assertTrue}
+        .return {eset.contains(3) .assertFalse})
+  .test(Block#
+        .let eset = {ESets#[Int, Int]{::}.addAnd(+1).addAnd(-2).addAnd(+3)}
+        .do {eset.size .assertEq 3}
+        .do {eset.distinctBy {::.imm.sign}}
+        .return {eset.set.str{::} .assertEq "{+1, -2}"})
+  .test(ESets#[Int, Int]{::}
+        .addAnd(+1).addAnd(-2).addAnd(+3)
+        .distinctByAnd {::.imm.sign}.set.str{::} .assertEq "{+1, -2}")
+  .test(Block#
+        .let eset = {ESets#[Int, Int]{::}.addAnd(+1).addAnd(-2).addAnd(+3)}
+        .do {eset.seqFlow.list.str{::} .assertEq "[+1, -2, +3]"}
+        .return {eset.isEmpty.assertTrue})
+  .test(Block#
+        .let eset = {ESets#[Int, Int]{::}.addAnd(+1).addAnd(-2).addAnd(+3)}
+        .do {eset.flow.list.str{::} .assertEq "[+1, -2, +3]"}
+        .return {eset.isEmpty.assertTrue})
+  .test(Block#
+        .let eset = {ESets#[Int, Int]{::}.addAnd(+1).addAnd(-2).addAnd(+3)}
+        .do {eset.set.str .assertEq "{+1, -2, +3}"}
+        .return {eset.isEmpty.assertTrue})
+  .test(ESets#[Nat,Nat]{::}.addAnd(1).addAnd(2).addAnd(3)
+        .size.assertEq 3)
+  .test(ESets#[Nat,Nat]{::}.size .assertEq 0)
+  .test(ESets#[Nat,Nat]{::}.isEmpty.assertTrue)
+  .test(ESets#[Nat,Nat]{::}.addAnd(1).isEmpty.assertFalse)
+  .test(ESets#[Nat,Nat]{::}.notEmpty.assertFalse)
+  .test(ESets#[Nat,Nat]{::}.addAnd(1).notEmpty.assertTrue)
+  }

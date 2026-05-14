@@ -194,6 +194,9 @@ public record Str$0Instance(String val) implements Str$0{
     var other= ((Str$0Instance)p0).val;
     return bool(val.startsWith(other));  
   }
+  @Override public Object imm$contains$1(Object p0) {
+    return bool(val.contains(s(p0)));
+  }
   @Override public Object imm$lower$0(){ return new Str$0Instance(val.toLowerCase()); }
   @Override public Object imm$upper$0(){ return new Str$0Instance(val.toUpperCase()); }
   @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_->new Norm(this)); }

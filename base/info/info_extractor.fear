@@ -1,0 +1,126 @@
+InfoExtractor[T: *]: {
+  .matchLevel: Opt[T];
+  =>[R: *](mapper: read F[imm T, R]): Opt[R] ->
+    this.matchLevel.flow.map mapper .opt;
+  }
+
+/// Use the same syntax as the InfoMatch, but the final operation (=>)
+/// Actually uses the value you descend to as the mapped value.
+InfoExtractor: InfoExtractor[imm Info] {
+  /// Descend one layer deeper into info,
+  /// matching against it being a map with a key `key`
+  /// or a List with index key: Nat.
+  >(key: InfoKey): InfoExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some i -> key.indexInto i;
+      }
+    };
+
+
+  .msgMatch(fn: F[Str, Bool]): StrExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some i -> i.match {
+        .empty -> {}; .list _ -> {}; .map _ -> {};
+
+        .msg m -> fn#(m).match {
+           .true -> Opts#(m);
+           .false -> {};
+          }
+        }
+      }
+    };
+
+  .listMatch(fn: F[List[Info], Bool]): ListExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some info -> info.match {
+        .empty -> {}; .msg _ -> {}; .map _ -> {};
+
+        .list l -> fn#(l).match {
+          .true -> Opts#(l);
+          .false -> {}
+          }
+        }
+      }
+    };
+
+  .mapMatch(fn: F[Map[Str, Info], Bool]): MapExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some i -> i.match {
+        .empty -> {}; .msg _ -> {}; .list _ -> {};
+
+        .map m -> fn#(m).match {
+          .true -> Opts#(m);
+          .false -> {}
+          }
+        }
+      }
+    };
+
+  .isMsg: StrExtractor -> this.msgMatch{_ -> True};
+  .isList: ListExtractor -> this.listMatch{_ -> True};
+  .isMap: MapExtractor -> this.mapMatch{_ -> True};
+
+  .isEmpty: InfoExtractor[Info] -> {
+    .matchLevel -> this.matchLevel.match {
+      .empty -> {};
+      .some i -> i.match {
+        .msg _ -> {}; .list _ -> {}; .map _ -> {};
+        .empty -> Opts#(i);
+        }
+      }
+    };
+  }
+
+StrExtractor: InfoExtractor[Str] {
+  .msgMatch(fn: F[Str, Bool]): StrExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some str -> fn#(str).match {
+        .true -> Opts#(str);
+        .false -> {};
+        }
+      }
+    }
+  }
+
+MapExtractor: InfoExtractor[Map[Str, Info]] {
+  .mapMatch(fn: F[Map[Str, Info], Bool]): MapExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some m -> fn#(m).match{
+        .true -> Opts#(m);
+        .false -> {};
+        };
+      }
+    };
+
+  > (key: Str): InfoExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some m -> m.opt key;
+      }
+    };
+  }
+
+ListExtractor: InfoExtractor[List[Info]] {
+  .listMatch(fn: F[List[Info], Bool]): ListExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some l -> fn#(l).match{
+        .true -> Opts#(l);
+        .false -> {};
+        }
+      }
+    };
+
+  > (index: Nat): InfoExtractor -> {
+    .matchLevel -> this.matchLevel.match{
+      .empty -> {};
+      .some l -> l.opt index;
+      }
+    };
+  }

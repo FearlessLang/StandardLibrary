@@ -1,4 +1,4 @@
-Opt[E:*]: _Opt[E]{
+Opt[E:*]: _Opt[E] {
   .close->this; .close->::;
   .match m    -> m.empty;
   .imm by     -> this.match{.some x -> Opts#(by#x.imm); .empty->{} };
@@ -19,7 +19,7 @@ Opt[E:*]: _Opt[E]{
   .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
 
   .as[R] f    -> this.match{.some x->Opts#(f#x); .empty->{}};
-  
+
   .ifSome  f  -> this.match{.some x -> f#x; .empty -> {}};
   .ifEmpty f  -> this.match{.some _ -> {}; .empty -> f#};
 
@@ -81,7 +81,7 @@ _Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E],_AssertEmpty {
 
   read .isEmpty: Bool;
   read .isSome: Bool;
-  read .as[R:imm](mut MF[read/imm E, R]): Opt[R];  
+  read .as[R:imm](mut MF[read/imm E, R]): Opt[R];
   }
 
 Opts: {

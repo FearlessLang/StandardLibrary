@@ -20,12 +20,12 @@ ToInfo[E:*]: { read .info(by: ToInfoBy[imm E]): Info }     /// env-dependent Inf
 
 FromInfo[T]: { .fromInfo(i: Info): T }            /// parse/decode from Info
 
-DataType[T,T0]: ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Extensible[T] {
+DataType[T,T0]: ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Pipe[T] {
   read .close(t: read T): read DataType[T,T0];                    /// close on t (often implemented as .close->:: when T: DataType)
   }
 
 /// Env-dependent DataType for T (contains E); imm rep is still T0.
-DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Extensible[T] {
+DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Pipe[T] {
   read .close(t: read T): read DataType[T,T0,E,E0];          /// close on t in this env-dependent instance
 
   /// Freeze the env by capturing element conversions in "by".
