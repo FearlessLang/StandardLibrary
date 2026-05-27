@@ -27,11 +27,13 @@ The model sees the gui as an ABSTRACT access to graphical editing, the gui hides
 the actual Fearless GUI library with set/get methods like .setImage
 
 
-- .with should take the nat and .with' should take the With
+- .width should take the nat and .width' should take the Width
 - .A component like 'button' that is invisible and just 'triggers an action' any xx time
 //.modelFps(100)//behaves like a button.
 This forces the Frame to have all the needed setters and getters like the components
 Frame needs the .style and .save as all the other thingys
+
+---------------------- do later ----------------------
 
 - test that the gui top level positioning and resizing and undecorate still work
 - test that they can be changed from the slotted Frame (opt)

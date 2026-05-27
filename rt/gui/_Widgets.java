@@ -186,12 +186,26 @@ abstract class AWidget<S,C extends JComponent> implements Widget$1{
     return mut$self$0();
   }
   @Override public Object mut$width$1(Object w){
+    var wn = (WidthNat$0) WidthNat$0.instance.read$$hash$1((Nat$0)w);
+    frame.width(wn,"widget width");
+    preferredWidth = wn;
+    frame.markLayoutDirty();
+    return mut$self$0();
+  }
+  @Override public Object mut$width$p1$1(Object w){
     frame.width((WidthNat$0)w,"widget width");
     preferredWidth = (WidthNat$0)w;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$height$1(Object h){
+    var hn = (HeightNat$0) HeightNat$0.instance.read$$hash$1((Nat$0)h);
+    frame.height(hn,"widget height");
+    preferredHeight = hn;
+    frame.markLayoutDirty();
+    return mut$self$0();
+  }
+  @Override public Object mut$height$p1$1(Object h){
     frame.height((HeightNat$0)h,"widget height");
     preferredHeight = (HeightNat$0)h;
     frame.markLayoutDirty();

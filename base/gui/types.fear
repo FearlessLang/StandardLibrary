@@ -125,8 +125,10 @@ Widget[S]:{
   mut .rightInset(WidthNat):mut S;
   mut .heightGap(HeightNat):mut S;
   mut .widthGap(WidthNat):mut S;
-  mut .width(WidthNat):mut S;
-  mut .height(HeightNat):mut S;
+  mut .width(Nat):mut S;
+  mut .height(Nat):mut S;
+  mut .width'(WidthNat):mut S;
+  mut .height'(HeightNat):mut S;
   mut .autoWidth:mut S;
   mut .autoHeight:mut S;
   mut .radius(Nat):mut S;
