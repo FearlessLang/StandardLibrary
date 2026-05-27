@@ -2,7 +2,9 @@
 Gui:Consumer[mut Frame]{::
   .title `Gui buttons replace canvas painter`
   .fps 30
-//.modelFps(100)//behaves like a button.
+  .modelFps (1, {::
+    .action{Debug#"tick done"}
+    })
   .contentB{::
     .background(Color.ghostWhite)
     .north(mut ShapeHeader)

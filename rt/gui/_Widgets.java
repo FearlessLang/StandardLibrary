@@ -282,6 +282,8 @@ abstract class AContainer<S,C extends JComponent> extends AWidget<S,C>{
 class _Frame implements Frame$0{
   final FearlessFrame frame;
   Time$0 elapsed=time(0);//So that it can not be null if a repaint is scheduled very early
+  private Nat$0 modelFpsVal = null;
+  private final java.util.List<MF$1> modelTickActions = new java.util.ArrayList<>();
   final int screenW;
   final int screenH;
   final WidthNat$0 screenSizeW;
@@ -437,6 +439,13 @@ class _Frame implements Frame$0{
       Math.round(1000.0f / Scopes.nat(fps)),
       () -> tick(timeNanos(System.nanoTime() - startNanos))
     );
+    if (modelFpsVal != null && !modelTickActions.isEmpty()){
+        var actions = java.util.List.copyOf(modelTickActions);
+        frame.startModelTimer(
+          Math.round(1000.0f / Scopes.nat(modelFpsVal)),
+          actions
+        );
+    }
   }
   private void maximize(WidthNat$0 w, HeightNat$0 h) {
     frame.setSize(Awt.dimension(w,h));
@@ -467,6 +476,18 @@ class _Frame implements Frame$0{
     long nn= Util.natToInt((Nat$0)fps);
     if (nn<1 || nn > 500){ throw Util.detErr("FPS must be between 1 and 500"); }
     this.fps = (Nat$0) fps; return this;
+  }
+  @Override public Object mut$modelFps$2(Object fps, Object scope){
+    long nn = Util.natToInt((Nat$0)fps);
+    if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
+    modelFpsVal = (Nat$0)fps;
+    ((Scope$1)scope).mut$run$1(new ModelFps$0(){
+      @Override public Object mut$action$1(Object r){
+        modelTickActions.add((MF$1)r);
+        return this;
+      }
+    });
+    return this;
   }
 
   @Override public Object mut$content$1(Object s){

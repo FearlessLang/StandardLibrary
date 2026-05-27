@@ -27,9 +27,13 @@ The model sees the gui as an ABSTRACT access to graphical editing, the gui hides
 the actual Fearless GUI library with set/get methods like .setImage
 
 
-- .width should take the nat and .width' should take the Width
-- .A component like 'button' that is invisible and just 'triggers an action' any xx time
+- .width should take the nat and .width' should take the Width DONE
+- .A component like 'button' that is invisible and just 'triggers an action' any xx time DONE
+  .modelFps (1, {::
+    .action{Debug#"tick done"}
+    })
 //.modelFps(100)//behaves like a button.
+
 This forces the Frame to have all the needed setters and getters like the components
 Frame needs the .style and .save as all the other thingys
 
