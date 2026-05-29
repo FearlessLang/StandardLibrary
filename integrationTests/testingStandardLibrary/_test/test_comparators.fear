@@ -1,0 +1,307 @@
+Box[E:*]: OrderHash[Box[E],E] {
+  mut  .get: E;
+  read .get: read/imm E;
+  imm  .get: imm E;
+
+  .close->this;  .close->::;
+
+  .cmp by, t0, t1, m-> by#(t0.get)<=>(by#(t1.get),m);
+  .hash by -> by#(this.get).hash;
+  .str by->by#(this.get).str;
+
+  .proofConcrete(s: Str): Box[Str]->Box[Str] { .get->s; };
+}
+
+A1: OrderHash[A1] {
+  .close -> this;  .close->::;
+  .cmp t0, t1, m -> m.eq;
+  .hash -> 0;
+  .str ->``;
+  .proofConcrete: A1->A1;
+}
+
+Cats: {
+  #(name: Str, weight: Nat): Cat ->
+    Cat: { .name: Str -> name; .weight: Nat -> weight; }
+  }
+
+Persons: {
+  #(age: Nat, name: Str, cats: List[Cat]): Person ->
+    Person: OrderHash[Person] { 'self
+      read .name: Str -> name;
+      read .age: Nat -> age;
+      read .cats: List[Cat] -> cats;
+
+      .cmp p1,p2,m -> p1.age<=>(p2.age, m &&{ p1.name<=>(p2.name, m) });
+
+      .hash: Nat -> age.hash.hashWith(name.hash);
+
+      .str: Str -> `Person[age=`+age+`, name=`+name+`, cats=`+(cats.size)+`]`;
+
+      .close -> self;
+      .close -> ::;
+      }
+  }
+
+Names: { #(ps: List[Person]): List[Str] -> ps.flow.map{::.name}.list }
+Doctors: { #(ps: List[Person]): List[Person] -> ps.flow.filter{::.name.startsWith `Dr.`}.list }
+AllCats: { #(ps: List[Person]): List[Cat] -> ps.flow.flatMap{::.cats.flow}.list }
+AllNames: { #(ps: List[Person]): Str -> ps.flow.map{::.name}.join `, ` }
+SumSizes: { #(ps: List[Person]): Nat -> ps.flow.map{::.name.size}.sum 0 }
+
+SadAny: { #(ps: List[Person]): Bool -> ps.flow.any{::.cats.isEmpty} }
+SadAll: { #(ps: List[Person]): Bool -> ps.flow.all{::.cats.isEmpty} }
+SadNone: { #(ps: List[Person]): Bool -> ps.flow.none{::.cats.isEmpty} }
+
+Nicer: {
+  #(owner: Person, ps: List[Person]): Person ->
+    ps.flow.fold({owner},{acc,p ->
+      (p.cats.size >= (acc.cats.size)).if{ .then->p; .else->acc; }
+    })
+  }
+
+Data: {
+  .cA: Cat -> Cats#(`Mimi`,3);
+  .cB: Cat -> Cats#(`Nori`,5);
+  .cC: Cat -> Cats#(`Puff`,2);
+
+  .p1: Person -> Persons#(30,`Dr. Alice`, Lists#(this.cA,this.cB));
+  .p2: Person -> Persons#(25,`Bob`, List[Cat]);
+  .p3: Person -> Persons#(40,`Dr. Carol`, Lists#(this.cC));
+
+  .ps: List[Person] -> Lists#(this.p1,this.p2,this.p3);
+
+  .psAllCats: List[Person] -> Lists#(
+    Persons#(20,`Eve`, Lists#(Cats#(`X`,1))),
+    Persons#(21,`Frank`, Lists#(Cats#(`Y`,1),Cats#(`Z`,1)))
+    );
+
+  .psNoCats: List[Person] -> Lists#(
+    Persons#(20,`Eve`, List[Cat]),
+    Persons#(21,`Frank`, List[Cat])
+    );
+
+  .natsDup: List[Nat] -> Lists#(1,2,3,3,2,1,1,0);
+  }
+
+Grid: {
+  .inner: List[Nat];
+  .get(x: Nat, y: Nat): Nat -> this.inner.get(y * 5 + x);
+  .y(index: Nat): Nat -> index.divExact 5;
+  .x(index: Nat): Nat -> index.remExact 5;
+  }
+
+Grids: {
+  #(inner: List[Nat]): Grid -> { .inner -> inner; }
+  }
+
+CPoints: {
+  #(x: Nat, y: Nat): CPoint ->
+    CPoint: Order[CPoint] { 'self
+      read .x: Nat -> x;
+      read .y: Nat -> y;
+      .cmp p0,p1,m -> p0.x<=>(p1.x, m &&{ p0.y<=>(p1.y, m) });
+      .close -> self;
+      }
+  }
+
+Cars: {
+  #(id: Nat, driver: Person): Car -> Car: {'self .id: Nat -> id; .driver: Person -> driver; read .imm: Car->self; }
+  }
+
+StrSizeOrder: OrderHashBy[Str] {
+  t0,t1,m -> t0.imm.size<=>(t1.imm.size, m);
+  .hash s -> s.imm.size.hash;
+  .str s  -> s.imm;
+  }
+
+TestFlowsBasicsTests: Test {::
+  .check{Names#(Data.ps).size.assertEq 3}
+  .check{Names#(Data.ps).get(0).assertEq `Dr. Alice`}
+  .check{Names#(Data.ps).get(1).assertEq `Bob`}
+  .check{Names#(Data.ps).get(2).assertEq `Dr. Carol`}
+  .check{Doctors#(Data.ps).size.assertEq 2}
+  .check{Doctors#(Data.ps).get(0).name.assertEq `Dr. Alice`}
+  .check{Doctors#(Data.ps).get(1).name.assertEq `Dr. Carol`}
+  .check{AllCats#(Data.ps).size.assertEq 3}
+  .check{AllCats#(Data.ps).get(0).name.assertEq `Mimi`}
+  .check{AllCats#(Data.ps).get(1).name.assertEq `Nori`}
+  .check{AllCats#(Data.ps).get(2).name.assertEq `Puff`}
+  .check{AllCats#(Data.psNoCats).isEmpty.assertEq True}
+  .check{AllNames#(Data.ps).assertEq `Dr. Alice, Bob, Dr. Carol`}
+  .check{SumSizes#(Data.ps).assertEq 21}
+  .check{SadAny#(Data.ps).assertEq True}
+  .check{SadAll#(Data.ps).assertEq False}
+  .check{SadNone#(Data.ps).assertEq False}
+  .check{SadAny#(Data.psAllCats).assertEq False}
+  .check{SadAll#(Data.psAllCats).assertEq False}
+  .check{SadNone#(Data.psAllCats).assertEq True}
+  .check{Nicer#(Data.p1, Data.ps).name.assertEq `Dr. Alice`}
+  }
+
+TestListsBasicsTests: Test {::
+  .check{List[Str].size.assertEq 0}
+  .check{List[Int].isEmpty.assertEq True}
+  .check{Lists#(`a`,`b`,`c`,`d`,`e`).size.assertEq 5}
+  .check{Lists#(`a`,`b`,`c`,`d`,`e`).get(0).assertEq `a`}
+  .check{Lists#(`a`,`b`,`c`,`d`,`e`).get(4).assertEq `e`}
+  .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).get(3,1).assertEq 8}
+  .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).y(13).assertEq 2}
+  .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).x(13).assertEq 3}
+  .check{
+    Lists#(1,2,3).as{::+ 2 .str}.orderHash{::} ==
+      (Lists#(1,2,3).flow.map{::+ 2 .str}.list)
+    .assertTrue
+    }
+  .check{Lists#(1,2,3).as{::}.orderHash{::} == (Lists#(1,2,3)).assertTrue}
+  }
+
+TestListOpsTests: Test {::
+  .check{Lists#(1,2,3,4).orderHash{::} == (Lists#(1,2) +> 3 +> 4).assertTrue}
+  .check{Lists#(1,2,3,4).orderHash{::} == (Lists#(1,2) ++ (Lists#(3,4))).assertTrue}
+  .check{Lists#(1,2,3,4).orderHash{::} == (Lists#(1) ++ (Lists#(2,3,4))).assertTrue}
+  .check{Lists#(10,11,12,13,14).subList(1,4).size.assertEq 3}
+  .check{Lists#(10,11,12,13,14).subList(1,4).get(0).assertEq 11}
+  .check{Lists#(10,11,12,13,14).subList(1,4).get(2).assertEq 13}
+  .check{
+    Lists#(0,1,2,3,4).withAlso(2,9).orderHash{::} ==
+      (Lists#(0,1,9,2,3,4))
+    .assertTrue
+    }
+  .check{
+    Lists#(0,1,2,3,4).with(2,9).orderHash{::} ==
+      (Lists#(0,1,9,3,4))
+    .assertTrue
+    }
+  .check{
+    Lists#(0,1,2,3,4).without(2).orderHash{::} ==
+      (Lists#(0,1,3,4))
+    .assertTrue
+    }
+  .check{Lists#(0,1,2,3,4).orderHash{::} == (Lists#(0,1,2,3,4).with(2,9).without(2)).assertFalse}
+  }
+
+TestOrderBasicsTests: Test {::
+  .check{CPoints#(1,2) == (CPoints#(1,2)).assertTrue}
+  .check{CPoints#(1,2) != (CPoints#(1,3)).assertTrue}
+  .check{CPoints#(1,2) <  (CPoints#(1,3)).assertTrue}
+  .check{CPoints#(1,9) >  (CPoints#(0,99)).assertTrue}
+  .check{5.inRange(0,10).assertTrue}
+  .check{5.inRangeOpen(0,10).assertTrue}
+  .check{0.inRangeOpen(0,10).assertFalse}
+  .check{10.inRangeOpen(0,10).assertFalse}
+  .check{0.inRangeHiOpen(0,10).assertTrue}
+  .check{10.inRangeHiOpen(0,10).assertFalse}
+  .check{0.inRangeLoOpen(0,10).assertFalse}
+  .check{10.inRangeLoOpen(0,10).assertTrue}
+  }
+
+TestOrderByAndFlowsTests: Test {::
+  .check{Data.natsDup.flow.max{::}.list.orderHash{::} == (Lists#(3,3)).assertTrue}
+  .check{List[Nat].flow.max{::}.list.isEmpty.assertEq True}
+  .check{Lists#(1,2,3).flow.max{::}.get.assertEq 3}
+  .check{Lists#(0,1,0,2).flow.min{::}.list.orderHash{::} == (Lists#(0,0)).assertTrue}
+  .check{Data.natsDup.flow.sort{::}.list.orderHash{::} == (Lists#(0,1,1,1,2,2,3,3)).assertTrue}
+  .check{Data.natsDup.flow.distinct{::}.list.orderHash{::} == (Lists#(1,2,3,0)).assertTrue}
+  .check{Data.natsDup.flow.sortDistinct{::}.list.orderHash{::} == (Lists#(0,1,2,3)).assertTrue}
+  .check{
+    Lists#(
+      Persons#(25,`Bob`,List[Cat]),
+      Persons#(25,`Alice`,List[Cat]),
+      Persons#(24,`Zed`,List[Cat])
+      ).flow.sort(({::.age}.then{::.name})).list.get(0).name.assertEq `Zed`
+    }
+  .check{
+    Lists#(
+      Persons#(25,`Bob`,List[Cat]),
+      Persons#(25,`Alice`,List[Cat])
+      ).flow.sort(({::.age}.then{::.name})).list.get(0).name.assertEq `Alice`
+    }
+  .check{
+    Lists#(
+      Cars#(2, Persons#(40,`Old`,List[Cat])),
+      Cars#(1, Persons#(20,`Young`,List[Cat]))
+      ).flow.sort(({::.age}.view {::.imm.driver})).list.get(0).id.assertEq 1
+    }
+  }
+
+TestMapsAndSetsTests: Test {::
+  .check{
+    Maps#({::},
+      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
+      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
+      ).size.assertEq 2
+    }
+  .check{
+    Maps#({::},
+      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
+      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
+      ).isEmpty.assertEq False
+    }
+  .check{
+    Maps#({::},
+      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
+      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
+      ).get(Persons#(34,`Alice`,List[Cat])).assertEq `Wellington 134 Kelburn Parade`
+    }
+  .check{
+    Maps#({::},
+      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
+      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
+      ).opt(Persons#(38,`Neil Armstrong`,List[Cat])).orValue(`Moon`).assertEq `Moon`
+    }
+  .check{
+    Maps#({::},
+      Persons#(25,`Bob`,List[Cat]), `A`,
+      Persons#(34,`Alice`,List[Cat]), `B`
+      ).flow.zipExact{k, v -> k.name + v}.list.get(0).assertEq `BobA`
+    }
+  .check{
+    Maps#({::},
+      Persons#(25,`Bob`,List[Cat]), `A`,
+      Persons#(34,`Alice`,List[Cat]), `B`
+      ).flow.zipExact{k, v -> k.name + v}.list.get(1).assertEq `AliceB`
+    }
+  .check{
+    Data.ps.flow.mapping({::},{
+      .key  p -> p.name;
+      .elem p -> p.age;
+      }).get(`Dr. Carol`).assertEq 40
+    }
+  }
+
+TestOrderingCollectionsTests: Test {::
+  .check{
+    Lists#(
+      Lists#(2),
+      Lists#(1,0),
+      Lists#(1),
+      List[Nat]
+      ).flow.sort{::.order{::}}.list
+      .orderHash{::.orderHash{::}}
+      ==
+      (Lists#(
+        List[Nat],
+        Lists#(1),
+        Lists#(1,0),
+        Lists#(2)
+        ))
+    .assertTrue
+    }
+  .check{
+    Lists#(1,2,3).orderHash{::} == (Lists#(1,2,3)).assertTrue
+    }
+  .check{
+    Lists#(1,2,3).orderHash{::} != (Lists#(1,2,4)).assertTrue
+    }
+  }
+
+TestComparators: Test {::
+  .test TestFlowsBasicsTests
+  .test TestListsBasicsTests
+  .test TestListOpsTests
+  .test TestOrderBasicsTests
+  .test TestOrderByAndFlowsTests
+  .test TestMapsAndSetsTests
+  .test TestOrderingCollectionsTests
+  }

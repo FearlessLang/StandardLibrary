@@ -24,7 +24,7 @@ alias base.Map as Map,
 alias base.EmptyMap as EmptyMap,
 alias base.Lens as Lens,
 
-alias base.Extensible as Extensible,
+alias base.Pipe as Pipe,
 alias base.Extension as Extension,
 
 alias base.Either as Either,

@@ -24,6 +24,16 @@ Action[T:*]: {
   mut !: T -> this.run{.ok(x) -> x, .info(i) -> Error!i};
   mut .ok: mut Opt[T] -> this.run{.ok(x) -> Opts#x, .info(_) -> {}};
   mut .info: Opt[Info] -> this.run{.ok(_) -> {}, .info(i) -> Opts#i};
+
+  mut .catch[R:*](catch: mut MF[Info, Opt[R]]) -> mut Action[R] -> {
+    m -> this.run{
+      .ok(x) -> m.ok(x);
+      .info(i) -> catch#i.match{
+        .some r -> m.ok(r);
+        .empty -> m.info(i);
+        }
+      };
+    };
   }
 ActionMatch[T:*,R:*]: {
   mut .ok(x: T): R;

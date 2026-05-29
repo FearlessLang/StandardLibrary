@@ -20,6 +20,9 @@ Bool: Sealed,DataType[Bool,Bool] {
 
   .close -> this; .close -> ::;
 
+  /// `this.then(f)` returns `.some f#` if `this == True` otherwise `.empty`.
+  .then[R:*](mut MF[R]): mut Opt[R];
+
   .cmp a, b, m -> a.imm?{
     .then->b.imm?{ .then->m.eq; .else->m.gt };
     .else->b.imm?{ .then->m.lt; .else->m.eq };
@@ -42,6 +45,7 @@ True: Bool {
   .not -> False;
   .if f -> f.then;
   .imm -> True;
+  .then f -> Opts#(f#);
   }
 
 False: Bool {
@@ -52,4 +56,5 @@ False: Bool {
   .not -> True;
   .if f -> f.else;
   .imm -> False;
+  .then _ -> {};
   }

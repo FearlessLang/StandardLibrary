@@ -1,0 +1,38 @@
+
+InfiniteFlow[E: *]: Pipe[InfiniteFlow[E]] {
+  mut .forEach[R:*](f: mut MF[E,Void]): Void;
+  mut .map[R:*](f: read F[E, R]): mut InfiniteFlow[R];
+  mut .flatMap[R:*](f: read ToFlow[E, R]): mut InfiniteFlow[R];
+  mut .filter(f: read F[E, Bool]): mut InfiniteFlow[E];
+
+  mut .foldUntil[R:*](acc: iso MF[R], f: read F[R,E,R], read F[R, Bool]): R;
+
+  mut .distinct[K](by: OrderHashBy[imm E,K]): mut InfiniteFlow[E];
+
+  /// `this.first` returns the first element of the infinite stream.
+  /// Note: this operation can never fail since the stream is infinite, but it may never terminate.
+  ///   e.g. `Flows.generate{0}.filter{_ -> false}.first` will never terminate.
+  mut .first: E;
+
+  mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut InfiniteFlow[R] ->
+    this.map(f)
+      .filter{r -> r.isSome}
+      .map{r -> r!};
+
+  /// `this.peek(f)` applies `f` to each element of the flow.
+  /// Note: this doesn't change, or consume the flow in anyway, only useful for invariants and debugging.
+  /// Warning: `f` will only be applied to the element of the flow as they are pulled, so these will do nothing without a terminal operation.
+  mut .peek(f: read F[E, Void]): mut InfiniteFlow[E] ->//Only useful for invarians+debug, wonder if we should have a better name
+    this.map{e -> Block#(f#e, e)};
+  mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut InfiniteFlow[E] -> //crucial to do IO side effects while flowing
+    this.map(ctx, {c, e -> Block#(f#(c, e), e)});
+  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut InfiniteFlow[R]->Error.msg`TODO`;
+
+
+  /// `this.limit(n)` returns a flow of the first `n` elements of this flow.
+  /// Note: this operation may never terminate if all elements are filtered out.
+  mut .limit(n: Nat): mut SizedFlow[E];
+  mut .scan[S:imm](input: S, f: read F[S,E,S]): mut InfiniteFlow[S] -> this.map{e -> f#(input, e)};
+
+  .close -> this;
+  }

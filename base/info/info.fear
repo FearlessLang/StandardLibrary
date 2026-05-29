@@ -26,9 +26,9 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .cmp a,b,m -> a.str <=> (b.str, m);
   .msg: Str->``;
   .list: List[Info] -> {};
-  .map: Map[Str,Info] -> Maps#[Str,Str,Info] {::};
+  .map: Map[Str,Str,Info] -> Maps#[Str,Str,Info] {::};
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
-  .match[R](m: InfoMatch[R]): R->m.empty;
+  .match[R:**](m: InfoMatch[R]): R->m.empty;
   .str -> this.imm.match(_InfoToStr);
   +(other: Info) : Info -> this.match {
     .empty -> other;
@@ -52,37 +52,37 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
       };
     };
 
-    //&: InfoMatches -> {this};
+    &: InfoMatches -> {Opts#(this)};
     ~: InfoExtractor -> {Opts#(this)};
   }
 
 /// Allow indexing into an info,
 /// Union of Str and Nat
 InfoKey: Sealed {
-  .indexInto(Info): Opt[Info];
+  .indexInto(Info): mut Opt[Info];
   }
 
-_InfoMapPlus: { #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->
-  m2.flow.fold({m1}, {acc,ke->
-    acc.opt(ke.key).match {
-      .empty -> acc.with(ke.key, ke.elem);
-      .some v -> acc.with(ke.key, v+(ke.elem));
+_InfoMapPlus: { #[K](m1: Map[K,K,Info], m2: Map[K,K,Info]): Map[K,K,Info] ->
+  m2.flow.foldExact({m1}, {acc,k,v->
+    acc.opt(k).match {
+      .empty -> acc.with(k, v);
+      .some v' -> acc.with(k, v+v');
     };
   });}
 
 _InfoFreshKey: {
-  #(m: Map[Str,Info], base: Str, i: Nat): Str -> Block#
+  #(m: Map[Str,Str,Info], base: Str, i: Nat): Str -> Block#
     .let k= {i == 0 ? {.then->base; .else->base + `#` + i.str; }}
     .return { m.containsKey(k)?{
       .then -> this#(m, base, i + 1);
       .else -> k;
   }};}
 
-InfoMatch[R]: {
+InfoMatch[R:**]: {
   .empty: R;
   .msg(Str): R;
   .list(List[Info]): R;
-  .map(Map[Str,Info]): R;
+  .map(Map[Str,Str,Info]): R;
   }
 
 _InfoToStr: InfoMatch[Str] {

@@ -1,0 +1,127 @@
+
+// helpers
+_InfoTest: {
+  .msg: imm Info -> "hello".info;
+  .list: imm Info -> Lists#("a", "b").info{::};
+  .map: imm Info -> Maps#({::}, "k", "v").info{::};
+  .empty: imm Info -> Info;
+  .nested: imm Info ->
+    Maps#({::},
+      "friends", Lists#(
+        Maps#({::}, "name", "Bob").info{::},
+        Maps#({::}, "name", "Alice").info{::}
+        ).info{::}
+      ).info{::};
+  }
+
+InfoExtractorUnitTests: Test {::
+  .test InfoExtractorTests
+  }
+InfoExtractorTests: Test {::
+  .test InfoExtractorTest01DescendHitA0
+  .test InfoExtractorTest02DescendMissA0
+  .test InfoExtractorTest03TypeShapeA0
+  .test InfoExtractorTest04MsgMatchA0
+  .test InfoExtractorTest05ExtractA0
+  .test InfoExtractorTest06AndBridgeA0
+  .test InfoExtractorTest07MatchesDescendA0
+  .test InfoExtractorTest08MatchesLogicA0
+  .test InfoExtractorTest09MatchesExtractA0
+  .test InfoExtractorTest10CouplingA0
+  }
+
+
+InfoExtractorTest01DescendHitA0: Test {::
+  .check{ Lists#("a", "b").info{::}~ > 0 .extractedValue .assertEq({::}, Opts#("a".info)) }
+  .check{ (_InfoTest.map~ > "k").extractedValue.isEmpty .assertFalse }
+  .check{ Debug#((_InfoTest.list~ > 0).extractedValue, {::.str{::}}).isEmpty .assertFalse }
+  }
+
+InfoExtractorTest02DescendMissA0: Test {::
+  // missing key, out-of-bounds index, and chained miss all yield .empty
+  .check{ (_InfoTest.map~ > "missing").extractedValue.isEmpty .assertTrue }
+  .check{ (_InfoTest.list~ > 9).extractedValue.isEmpty .assertTrue }
+  .check{ (_InfoTest.map~ > "missing" > "k").extractedValue.isEmpty .assertTrue }
+  }
+
+InfoExtractorTest03TypeShapeA0: Test {::
+  .check{ (_InfoTest.msg~ .isMsg).extractedValue.isEmpty .assertFalse }
+  .check{ (_InfoTest.list~ .isList).extractedValue.isEmpty .assertFalse }
+  .check{ (_InfoTest.map~ .isMap).extractedValue.isEmpty .assertFalse }
+  // wrong shape yields .empty
+  .check{ (_InfoTest.msg~ .isList).extractedValue.isEmpty .assertTrue }
+  }
+
+InfoExtractorTest04MsgMatchA0: Test {::
+  .check{ (_InfoTest.msg~ .msgMatch{:: == "hello"}).extractedValue .assertEq({::}, Opts#("hello")) }
+  .check{ (_InfoTest.msg~ .msgMatch{:: == "world"}).extractedValue.isEmpty .assertTrue }
+  .check{ (_InfoTest.msg~ .isMsg .msgMatch{:: == "hello"}).extractedValue .assertEq({::}, Opts#("hello")) }
+  }
+
+InfoExtractorTest05ExtractA0: Test {::
+  // => maps the extracted value; .empty on failed extraction
+  .check{
+    (_InfoTest.msg~ .isMsg) => {::.upper}
+    .assertEq({::}, Opts#("HELLO"))
+    }
+  .check{
+    (_InfoTest.msg~ .msgMatch{_ -> True}) => {s -> s}
+    .assertEq({::}, Opts#("hello"))
+    }
+  .check{ (_InfoTest.msg~ .isList) => {_ -> "nope"} .isEmpty .assertTrue }
+  }
+
+InfoExtractorTest06AndBridgeA0: Test {::
+  // ~ & bridges InfoExtractor to InfoMatches
+  .check{ (_InfoTest.msg~ &).currentlyMatching .assertTrue }
+  .check{ (_InfoTest.msg~ > "missing" &).currentlyMatching .assertFalse }
+  }
+
+InfoExtractorTest07MatchesDescendA0: Test {::
+  .check{ (_InfoTest.map~ & > "k")# .assertTrue }
+  .check{ (_InfoTest.map~ & > "missing")# .assertFalse }
+  .check{ (_InfoTest.list~ & > 0)# .assertTrue }
+  }
+
+InfoExtractorTest08MatchesLogicA0: Test {::
+  // & (and) requires both sides; | (or) requires either
+  .check{ _InfoTest.msg~ & .msgMatch{s -> s == "hello"}# .assertTrue }
+  .check{ _InfoTest.msg~
+    & .msgMatch{s -> s == "hello"}
+    & .msgMatch{s -> s == "world"}
+    # .assertFalse }
+  .check{ _InfoTest.msg~
+      & .msgMatch{s -> s == "world"}
+      | .msgMatch{s -> s == "hello"}
+      # .assertTrue }
+  .check{ _InfoTest.msg~
+      & .msgMatch{s -> s == "hello"}
+      & .msgMatch{s -> s == "world"}.not
+      # .assertTrue }
+  .check{ (_InfoTest.msg~ & .not)# .assertFalse }
+  .check{ (_InfoTest.msg~ & .not) => {i -> i} .isEmpty .assertTrue }
+  }
+
+InfoExtractorTest09MatchesExtractA0: Test {::
+  // => on InfoMatches yields .some of .close when matching, .empty otherwise
+  .check{ (_InfoTest.msg~ & .isMsg) => {i -> i} .isEmpty .assertFalse }
+  .check{ (_InfoTest.msg~ & .isList) => {i -> i} .isEmpty .assertTrue }
+  }
+
+InfoExtractorTest10CouplingA0: Test {::
+  // mirrors the doc example exactly
+  .let info={ _InfoTest.nested }
+  .check{
+    info~
+      > "friends"
+      & > 0 > "name" .msgMatch{:: == "Bob"}
+      & > 1 > "name" .msgMatch{:: == "Alice"}
+      => {_ -> "I am friends with Bob and Alice!"}
+    .assertEq({::}, Opts#("I am friends with Bob and Alice!"))
+    }
+  .check{
+    info~ > "friends" > 0 > "name" .msgMatch{:: == "Alice"}
+    => {s -> s}
+    .isEmpty .assertTrue
+    }
+  }

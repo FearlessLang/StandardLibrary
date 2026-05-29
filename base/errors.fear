@@ -38,3 +38,16 @@ Try: {
   #[R:*](try: read F[R]): mut Action[R] -> Magic!;
   #[T:iso,imm,mut,read,R:*](data: iso T, try: read F[iso T, R]): mut Action[R] -> Magic!;
   }
+
+ErrorKinds: {
+  .stackOverflow(error: Info): Opt[Info] -> _MsgStartsWith#(error, `StackOverflowError`);
+  .todo(error: Info): Opt[Info] -> _MsgStartsWith#(error, `Todo:`);
+  .unreachable(error: Info): Opt[Info] -> _MsgStartsWith#(error, `This code was flagged as unreachable`);
+  .emptyOpt(error: Info): Opt[Info] -> _MsgStartsWith#(error, `Opt was empty`);
+  .listIndexOutOfRange(error: Info): Opt[Info] -> _MsgStartsWith#(error, `List index out of range`);
+  .any(error: Info): Opt[Info] -> Opts#(error);
+  }
+
+_MsgStartsWith: F[Info, Str, Opt[Info]] {
+  # error, str -> error ~ > `msg` .msgMatch {::.startsWith str} => {_ -> error}
+  }

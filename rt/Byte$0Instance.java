@@ -66,7 +66,7 @@ public record Byte$0Instance(byte val) implements Byte$0{
     return Byte$0Instance.instance(result);
   }
 
-  @Override public Object imm$div$1(Object p0){
+  @Override public Object imm$divExact$1(Object p0){
     long d= natBits(p0);
 
     if (d == 0L){ throw err("Byte.div: d==0"); }
@@ -75,14 +75,14 @@ public record Byte$0Instance(byte val) implements Byte$0{
   /// if b >= a, then a % b
   /// Therefore we can clamp b to 255
   /// as this can not be larger than that
-  @Override public Object imm$rem$1(Object p0){
+  @Override public Object imm$remExact$1(Object p0){
     long d= natBits(p0);
     if (d == 0){ throw err("Byte.rem: d==0"); }
     return instance(
             (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
     );
   }
-  @Override public Object imm$divExact$1(Object p0){
+  @Override public Object imm$div$1(Object p0){
     long d= natBits(p0);
     if (d == 0L){ return optEmpty(); }
     int x= u8(val);
@@ -96,7 +96,6 @@ public record Byte$0Instance(byte val) implements Byte$0{
   @Override public Object imm$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(u8(val)),BigInteger.ONE); }
 
   @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toString(u8(val))); }
-  @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object imm$clamp$2(Object p0, Object p1){
     int lo= u8(p0), hi= u8(p1), x= u8(val);

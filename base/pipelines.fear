@@ -7,7 +7,6 @@ Operation[S:**, R:**]: Pipe[Operation[S, R]] {
 }
 
 
-
 Pipe[S:*]: {
   mut  .close: mut  S;
   read .close: read S;
@@ -15,8 +14,4 @@ Pipe[S:*]: {
   mut  |>[R:*](fn: mut Operation[mut  S, R]): R -> fn#(this.close);
   read |>[R:*](fn: mut Operation[read S, R]): R -> fn#(this.close);
   imm  |>[R:*](fn: mut Operation[imm  S, R]): R -> fn#(this.close);
-
-  mut  .pipe[R:*](fn: mut Operation[mut  S, R]): R -> this |> fn;
-  read .pipe[R:*](fn: mut Operation[read S, R]): R -> this |> fn;
-  imm  .pipe[R:*](fn: mut Operation[imm  S, R]): R -> this |> fn;
   }

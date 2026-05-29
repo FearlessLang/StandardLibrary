@@ -1,6 +1,118 @@
-TestInt:Test{::
-  .check{+1.assertEq +1}
-  .check{+2.assertEq +2}
-  .check{+2.assertEq -2}
+IntArithTests: Test {::
+  .check{+1 + +2 .assertEq +3}
+  .check{+5 - +2 .assertEq +3}
+  .check{+3 * +4 .assertEq +12}
+  .check{+3 ** 3 .assertEq +27}
+  .check{-3 ** 3 .assertEq -27}
+  .check{(-7).abs .assertEq 7}
+  .check{+9.sqrtExact .assertEq +3.0}
+  .check{(-1).sqrtDefensive.isNaN .assertEq True}
+  .check{+1.assertLt(+2)}
+  .check{+2.assertLe(+2)}
+  .check{+2.assertGe(+2)}
+  .check{+3.assertGt(+2)}
+  }
 
+IntDivRemTests: Test {::
+  .check{(-7).divExact 3 .assertEq -2}
+  .check{(-7).remExact 3 .assertEq -1}
+  .check{+7.divExact 3 .assertEq +2}
+  .check{+7.remExact 3 .assertEq +1}
+  .check{+6.div 3 .assertEq ({::},Opts#(+2))}
+  .check{+7.div 3 .assertEq ({::},Opt[Int])}
+  .check{+7.div 0 .assertEq ({::},Opt[Int])}
+  }
+
+IntWrapIndexTests: Test {::
+  .check{(-1).wrapIndexExact 7 .assertEq 6}
+  .check{+0.wrapIndexExact 7 .assertEq 0}
+  .check{+7.wrapIndexExact 7 .assertEq 0}
+  .check{+8.wrapIndexExact 7 .assertEq 1}
+  }
+
+IntConvTests: Test {::
+  .check{(-1).natDefensive .assertEq 0}
+  .check{+3.natExact .assertEq 3}
+  .check{(-1).byteDefensive .assertEq (Math.minByte)}
+  .check{+300.byteDefensive .assertEq (Math.maxByte)}
+  .check{+3.floatExact .assertEq +3.0}
+  .check{+3.num .assertEq (+3.num)}
+  .check{+3.nat .assertEq ({::},Opts#(3))}
+  .check{(-1).nat .assertEq ({::},Opt[Nat])}
+  .check{+255.byte .assertEq ({::},Opts#(+255.byteExact))}
+  .check{+256.byte .assertEq ({::},Opt[Byte])}
+  .check{(-1).byte .assertEq ({::},Opt[Byte])}
+  }
+
+IntAluTests: Test {::
+  .check{Math.maxInt.aluAddWrap(+1) .assertEq (Math.minInt)}
+  .check{Math.minInt.aluSubWrap(+1) .assertEq (Math.maxInt)}
+  .check{+4294967296.aluMulWrap(+4294967296) .assertEq +0}
+  .check{(-7).aluDiv(+3) .assertEq -2}
+  .check{(-7).aluDiv(-3) .assertEq +2}
+  .check{(-7).aluRem(+3) .assertEq -1}
+  .check{(-7).aluRem(-3) .assertEq -1}
+  .check{+1.aluShiftLeft(Math.intBits) .assertEq +1}
+  .check{+1.aluShiftLeft(Math.intBits + 1) .assertEq +2}
+  .check{(-2).aluShiftRight 1 .assertEq -1}
+  .check{(-2).aluShiftRight(Math.intBits + 1) .assertEq -1}
+  .check{+1.aluXor(+3) .assertEq +2}
+  .check{+3.aluAnd(+6) .assertEq +2}
+  .check{+3.aluOr(+4) .assertEq +7}
+  .check{(-1).aluNat.aluInt .assertEq -1}
+  .check{+300.aluByte .assertEq (+44.byteExact)}
+  }
+
+IntRangeChecksTests: Test {::
+  .check{+3.assertInRange(+1,+5)}
+  .check{+3.assertInRangeOpen(+1,+5)}
+  .check{+3.assertInRangeLoOpen(+1,+3)}
+  .check{+3.assertInRangeHiOpen(+3,+5)}
+  .check{+0.clampExact(+1,+5) .assertEq +1}
+  .check{+6.clampExact(+1,+5) .assertEq +5}
+  .check{+3.clampExact(+1,+5) .assertEq +3}
+  .check{+3.clampExact(+3,+3) .assertEq +3}
+  }
+
+IntLiteralFormsTests: Test {::
+  .check{-0 .assertEq +0}
+  .check{+1_000 .assertEq +1000}
+  .check{-1_000 .assertEq -1000}
+  .check{+2_147_483_647 .assertEq +2147483647}
+  .check{Math.maxInt.natExact + 1 .intExact .assertEq(Math.maxInt)}
+  }
+
+IntBoundaryAndBoundedVsAluTests: Test {::
+  .check{Math.maxInt.aluAddWrap +1 .assertEq(Math.minInt)}
+  .check{Math.minInt.aluSubWrap +1 .assertEq(Math.maxInt)}
+  .check{(-1).aluNat .assertEq(Math.maxNat)}
+  .check{(-1).aluNat.aluInt .assertEq -1}
+  }
+
+IntSignTests: Test {::
+  .check{-12.sign.assertEq -1}
+  .check{+7.sign.assertEq +1}
+  .check{+0.sign.assertEq +0}
+  }
+
+IntRangeTests: Test {::
+  .check{+0~~ +0.size .assertEq 0}
+  .check{+0~~ +1.list .assertEq({::},  Lists#(+0))}
+  .check{+0~~= +1.list .assertEq({::},  Lists#(+0, +1))}
+  .check{+0~~ +2.list .assertEq({::},  Lists#(+0, +1))}
+  .check{-2~~ +2.list .assertEq({::}, Lists#(-2, -1, +0, +1))}
+  .check{-2~~= +2.list .assertEq({::}, Lists#(-2, -1, +0, +1, +2))}
+  }
+
+TestInt: Test {::
+  .test IntArithTests
+  .test IntDivRemTests
+  .test IntWrapIndexTests
+  .test IntConvTests
+  .test IntAluTests
+  .test IntRangeChecksTests
+  .test IntLiteralFormsTests
+  .test IntBoundaryAndBoundedVsAluTests
+  .test IntSignTests
+  .test IntRangeTests
   }

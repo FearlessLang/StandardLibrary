@@ -5,7 +5,7 @@ Opt[E:*]: _Opt[E] {
   .isEmpty    -> this.match{.some _ -> False; .empty -> True};
   .isSome     -> this.match{.some _ -> True; .empty -> False};  
   !           -> this.match{.some x -> x; .empty -> Error.msg `Opt was empty`};
-  ! msg       -> this.match{.some x -> x; .empty -> Error.msg msg};
+  ! toInfo       -> this.match{.some x -> x; .empty -> Error!(toInfo.info)};
 
   .or other -> this.match{.some _ -> this; .empty -> other};
   |   other -> this.or(other);
@@ -15,7 +15,20 @@ Opt[E:*]: _Opt[E] {
   .orValue default -> this.match{.some x -> x; .empty -> default};
 
   .orLazy default -> this.match{.some x -> x; .empty -> default#};
-  
+
+ .and other -> this.match{.some _ -> other; .empty -> this};
+  &   other -> this.and(other);
+
+  &&  other -> this.match{.some _ -> other#; .empty -> this};
+  // read .andThen[E', R](mut MF[read Opt[E']], read F[E, E', R]): read Opt[R];
+  .andThen other, f -> this.match{
+    .some x -> other# .match {
+      .some y -> Opts#(f#(x, y));
+      .empty -> {}
+      };
+    .empty -> {}
+    };
+
   .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
 
   .as[R] f    -> this.match{.some x->Opts#(f#x); .empty->{}};
@@ -38,8 +51,9 @@ Opt[E:*]: _Opt[E] {
     .some e -> 31.aluAddWrap(by#e.hash);
     };
   }
-  
-_Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E],_AssertEmpty {
+
+
+_Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E],_AssertEmpty,Sealed {
   mut  .match[R:**](mut OptMatch[E, R]): R;
   read .match[R:**](mut OptMatch[read/imm E, R]): R;
   imm  .match[R:**](mut OptMatch[imm E, R]): R;
@@ -63,11 +77,28 @@ _Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E],_AssertEmpty {
   read .orLazy(mut MF[read/imm E]): read/imm E;
   imm  .orLazy(mut MF[imm E]): imm E;
 
+  mut  .and(mut Opt[E]): mut Opt[E];
+  read .and(read Opt[E]): read Opt[E];
+  imm  .and(Opt[E]): imm Opt[E];
+
+  mut  &(mut Opt[E]): mut Opt[E];
+  read &(read Opt[E]): read Opt[E];
+  imm  &(imm Opt[E]): imm Opt[E];
+
+  mut  &&(mut MF[mut Opt[E]]): mut Opt[E];
+  read &&(mut MF[read Opt[E]]): read Opt[E];
+  imm  &&(mut MF[imm Opt[E]]): imm Opt[E];
+
+  mut  .andThen[E':*, R:*](mut MF[mut Opt[E']], read F[E, E', R]): mut Opt[R];
+  read .andThen[E':*, R:*](mut MF[read Opt[E']], read F[read/imm E, read/imm E', R]): read Opt[R];
+  imm  .andThen[E':*, R:*](mut MF[imm Opt[E']], read F[imm E, imm E', R]): imm Opt[R];
+
+
   mut  !: E;
   read !: read/imm E;
 
-  mut  !(Str): E;
-  read !(Str): read/imm E;
+  mut  !(ToInfo): E;
+  read !(ToInfo): read/imm E;
 
   mut  .flow: mut Flow[E];
   read .flow: mut Flow[read/imm E];
@@ -91,4 +122,8 @@ Opts: {
 OptMatch[E:*,R:**]: {
   mut .some(E): R;
   mut .empty: R;
+  }
+
+OptCombiner[E:*, E':*, R:**]: {
+  mut #(e: E, e': E'): R;
   }

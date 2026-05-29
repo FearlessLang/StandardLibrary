@@ -1,0 +1,40 @@
+MinMaxs: F[Nat,Nat,mut MinMax] {min, max -> Block#
+  .var _min = {min}
+  .var _max = {max}
+  .return {mut MinMax: {
+  read .min: Nat -> _min.get;
+  read .max: Nat -> _max.get;
+  mut .min(n: Nat): Void -> _min.set(n);
+  mut .max(n: Nat): Void -> _max.set(n);
+  }}}
+
+/// Uncommenting ranges causes the compiler to break..
+/*
+java.lang.NullPointerException: Cannot invoke "core.E$Literal.bs()" because "d" is
+  at FearlessFrontend/typeSystem.Kinding.checkC(Kinding.java:15)
+  at FearlessFrontend/typeSystem.Kinding.checkRCC(Kinding.java:32)
+  at FearlessFrontend/typeSystem.Kinding.check(Kinding.java:25)
+  at FearlessFrontend/typeSystem.Kinding.checkC(Kinding.java:18)
+  at FearlessFrontend/typeSystem.TypeSystem.lambda$18(TypeSystem.java:149)
+  ...
+  at Coordinator/coordinator.Coordinator.main(Coordinator.java:35)
+  at Coordinator/integrationTests.RunIntegration.testOk(RunIntegration.java:17)
+  at Coordinator/integrationTests.RunIntegration.testingStandardLibrary(RunIntegration.java:24)
+*/
+// Ranges: F[Nat,Nat,mut Range] {min, max -> Block#
+//   .repr minMax = {MinMaxs#(min,max); .invariant-> {r -> r.min < (r.max)} }
+//   .return {mut Range: {
+//   read .min: Nat -> minMax.look{r -> r.min};
+//   read .max: Nat -> minMax.look{r -> r.max};
+//   mut .min(n: Nat): Void -> minMax.mutate{r -> r.min(n)};
+//   mut .max(n: Nat): Void -> minMax.mutate{r -> r.max(n)};
+//   read .str: Str -> minMax.cachableLook{r -> `[`+(r.min)+`-`+(r.max)+`]`};
+//   }}}
+// TestReprTests: Test {::
+//   .check{Ranges#(1,2).str.assertEq (`[1-2]`)}
+//   }
+//
+// TestRepr: Test {::
+//   .test TestReprTests
+//   }
+//

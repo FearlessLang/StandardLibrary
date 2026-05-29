@@ -1,30 +1,30 @@
 Maps: Sealed {
-  #[K,K0,E](OrderHashBy[K,K0]): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K']): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
   
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
-  #[K,K0,E](OrderHashBy[K,K0],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'],K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E): mut Map[K,K',E]->Magic!;
 
-  .singletonRead[K,K0,E:*](OrderHashBy[K,K0], K, read E): read Map[K,E]->Magic!;
+  .singletonRead[K,K',E:*](OrderHashBy[K,K'], K, read E): read Map[K,K',E]->Magic!;
   }
 
-/// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,...].
+/// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,K'].
 /// The flow order, .str order etc all respect/follow the map insertion order.
-Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize {
+Map[K,K',E:*]: Sealed,DataType[Map[K,K',E],Map[K,K',imm E],E,imm E],_AssertEmpty,_AssertSize {
+  read .size: Nat;                           /// number of elements
+  read .isEmpty: Bool -> this.size == 0;     /// True iff size == 0
+  read .notEmpty: Bool -> this.isEmpty.not;  /// True iff the size > 0
 
-  read .size: Nat;                 /// number of elements
-  read .isEmpty: Bool;             /// True iff size == 0
-
-  read .keyOh: OrderHashBy[K];     /// key comparator+hash used by this map;
+  read .keyOrderHash: OrderHashBy[K,K'];     /// key comparator+hash used by this map;
 
   mut  .get(k: K): E;              /// value for k; throws iff k absent
   read .get(k: K): read/imm E;     /// value for k; throws iff k absent
@@ -35,55 +35,51 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertS
 
   read .containsKey(k: K): Bool;         /// true iff k present
 
-  mut  .with(k: K, e: E): mut Map[K,E];           /// insert/replace binding for k
-  read .with(k: K, e: read E): read Map[K,E];     /// insert/replace binding for k
+  /// `this.distinctBy(by)` returns a new map with all the keys of this using `by`'s orderHash.
+  /// Note this new map may not contain all of the elements of this as elements that are considered equal under `by` will be deduplicated.
+  /// The resulting map will remove the duplicates that appear later in the original ordering.
+  //.distinctBy[K''](by: OrderHashBy[E, K'']): Map[K, K'', E];
 
-  mut  .without(k: K): mut Map[K,E];       /// remove binding for k; throws iff k absent
-  read .without(k: K): read Map[K,E];      /// remove binding for k; throws iff k absent
+  mut  .with(k: K, e: E): mut Map[K,K',E];           /// insert/replace binding for k
+  read .with(k: K, e: read E): read Map[K,K',E];     /// insert/replace binding for k
 
-  mut  ++ (other: mut Map[K,E]): mut Map[K,E];    /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
-  read ++ (other: read Map[K,E]): read Map[K,E];  /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
+  mut  .without(k: K): mut Map[K,K',E];       /// remove binding for k; throws iff k absent
+  read .without(k: K): read Map[K,K',E];      /// remove binding for k; throws iff k absent
 
-//  TODO: for the future, but there are big questions about the exact type signature(s)
-//  mut  .merge(merge: mut F[E,E,E], other: mut Map[K,E]): mut Map[K,E];
+  mut  ++ (other: mut Map[K,K',E]): mut Map[K,K',E] -> this ++ (other, this.keyOrderHash);    /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
+  read ++ (other: read Map[K,K',E]): read Map[K,K',E] -> this ++ (other, this.keyOrderHash);  /// union; Note: the left map has priority: elements in left are not overridden by elements in right; and the key Order is always the left one (left map's ordering reinterprets right map's keys)
 
-  mut  .flow: mut Flow[KeyElem[K,E]];              /// entries as a flow (The flow order follows the map insertion order)
-  read .flow: mut Flow[KeyElem[K,read/imm E]];     /// entries as a flow (The flow order follows the map insertion order)
-  imm  .flow: mut Flow[KeyElem[K,imm E]];          /// entries as a flow (The flow order follows the map insertion order)
+  /// `this ++ (other, by)` returns a new map from the result of merging the two maps using the by as the new OrderHash
+  mut  ++[K'',K'''](other: mut Map[K,K'',E], OrderHashBy[K, K''']): mut Map[K,K''',E];
+  /// `this ++ (other, by)` returns a new map from the result of merging the two maps using the by as the new OrderHash
+  read ++[K'',K'''](other: read Map[K,K'',E], OrderHashBy[K, K''']): read Map[K,K''',E];
 
-  mut  .flow[R:*](read F[K,E,R]): mut Flow[R];          /// entries as a flow (The flow order follows the map insertion order)
-  read .flow[R:*](read F[K,read/imm E,R]): mut Flow[R]; /// entries as a flow (The flow order follows the map insertion order)
-  imm  .flow[R:*](read F[K,imm E,R]): mut Flow[R];      /// entries as a flow (The flow order follows the map insertion order)
+
+
+  mut  .flow: mut BiFlow[K, E];          /// entries as a BiFlow (The flow order follows the map insertion order)
+  read .flow: mut BiFlow[K, read/imm E]; /// entries as a BiFlow (The flow order follows the map insertion order)
+  imm  .flow: mut BiFlow[K, imm E];      /// entries as a BiFlow (The flow order follows the map insertion order)
+
 
   // Optional but commonly useful conveniences (still consistent with List style):
-  read .keys: mut Flow[K];               /// keys as a flow (same iteration order as .flow)
-  read .elems: mut Flow[read/imm E];     /// values as a flow (same iteration order as .flow)
+  read .keys: mut SizedFlow[K];               /// keys as a flow (same iteration order as .flow)
+  read .elems: mut SizedFlow[read/imm E];     /// values as a flow (same iteration order as .flow)
 
-  mut  .as[R:imm](f: mut MF[E,R]): Map[K,R];          /// map elements to an imm map with same keys
-  read .as[R:imm](f: mut MF[read/imm E,R]): Map[K,R]; /// map elements to an imm map with same keys
-  imm  .as[R:imm](f: mut MF[imm E,R]): Map[K,R];      /// map elements to an imm map with same keys
+  mut  .as[R:imm](f: mut MF[E,R]): Map[K,K',R];          /// map elements to an imm map with same keys
+  read .as[R:imm](f: mut MF[read/imm E,R]): Map[K,K',R]; /// map elements to an imm map with same keys
+  imm  .as[R:imm](f: mut MF[imm E,R]): Map[K,K',R];      /// map elements to an imm map with same keys
 
   //TODO: for the future, we need to consider the variants of this (update, computeIfAbsent, etc)
-  //mut  .update(k: K, f: mut MF[E,E]): mut Map[K,E];        /// replace value at k with f(get(k)); throws iff absent
-  
-  /*.info by->Block#
-    .let map= {this.flow.mapping({::},{
-      .key e->this.keyOh#(e.key).str;
-      .elem e->by#(e.elem).info;
-      }).as{::}}
-    .return{{'i
-    .match->::.map map;
-    .map -> map;
-    .imm->i;
-    }};*/
+  //mut  .update(k: K, f: mut MF[E,E]): mut Map[K,K',E];        /// replace value at k with f(get(k)); throws iff absent
+
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let map= {this.flow.fold(
+    .let map= {this.flow.foldExact(
       {Maps#[Str,Str,Info]{::}},
-      {acc,ke->Block#
-        .let base= {this.keyOh#(ke.key).str}
-        .let k= {_InfoFreshKey#(acc, base, 0)}
-        .return{acc.with(k, by#(ke.elem).info)}
+      {acc,k,v->Block#
+        .let base= {this.keyOrderHash#(k).str}
+        .let k'= {_InfoFreshKey#(acc, base, 0)}
+        .return{acc.with(k', by#(v).info)}
     })}
   .return{{'i //correct to make the Info object (as for List), calling .info here would go in stack overflow
     .match->::.map map;
@@ -92,12 +88,4 @@ Map[K,E:*]: Sealed,DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertS
     }};
   }
 
-KeyElem[K,E:*]: {
-  read .key: K;
-  mut .elem: E;
-  read .elem: read/imm E;
-  imm .elem: imm E;
-  }
-
-KeyElems: {#[K,E:*](key: K, elem: E): mut KeyElem[K,E] -> { .key->key; .elem->elem; } }
 KeyElemMapper[A:*,K,E:*]: {.key(A):K;.elem(A):E;}//needed in Flow.mapping

@@ -12,7 +12,7 @@ Assert: Sealed {
   ._fail[R:*]: R -> Error.nonDeterministic`Assertion failure.`;
   ._fail[R:*](msg: read ToInfo): R -> Error.nonDeterministicInfo(`Assertion failure.`.info + (msg.info));
   .msg[R:*](msg: Str): R -> this._fail msg;
-  
+
   .expectedActual(assertion: Bool, msg: read LazyInfo, expected: read ToStr, actual: read ToStr): Void -> assertion ? {
     .then -> Void;
     .else -> this._fail(msg#.info

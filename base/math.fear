@@ -31,7 +31,7 @@ _MagicMath: Sealed {
   /// Throws if either x or y is NaN.
   .atan2(x: Float, y: Float): Radian -> Magic!;
 
-  /// Returns (x** +2.0 + y** +2.0).sqrt without intermediate overflow or underflow.
+  /// `this.hypot(x, y)` returns `(x** +2.0 + y** +2.0).sqrt`.
   /// Throws if either argument is NaN
   .hypot(x: Float, y: Float): Float -> Magic!;
   }
@@ -49,8 +49,8 @@ Math: Sealed, _MagicMath {
   .maxNat: Nat -> 18_446_744_073_709_551_615;   /// The largest representable Nat (2^64 - 1)
   .natBits: Nat -> 64;                          /// The number of bits in the binary representation of a Nat (64)
 
-  .minByte: Byte -> 0.byte;                     /// The smallest representable Byte (0)
-  .maxByte: Byte -> 255.byte;                   /// The largest representable Byte (255)
+  .minByte: Byte -> 0.byteExact;                /// The smallest representable Byte (0)
+  .maxByte: Byte -> 255.byteExact;              /// The largest representable Byte (255)
   .byteBits: Nat -> 8;                          /// The number of bits in the binary representation of a Byte (8)
 
   .inf: Float -> +1.0 / +0.0;                   /// The representation of positive infinity in the Float type
@@ -171,20 +171,6 @@ Radian: Angle[Radian] {
   .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
   .hash -> this.normalize#.hash;
   .close -> ::;
-  }
-
-/// A matcher for floats, has all the special cases of float:
-/// 1. Regular floats (which are none of the following)
-/// 2. +0.0 and -0.0 (numbers can get rounded/FPE'd to these)
-/// 3. +inf and -inf
-/// 4. NaN
-FloatMatch[R:**]: {
-  mut .regular(x: Float): R;
-  mut .posZero: R;
-  mut .negZero: R;
-  mut .posInf: R;
-  mut .negInf: R;
-  mut .nan: R;
   }
 
 

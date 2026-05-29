@@ -1,188 +1,204 @@
 package base;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import base.Util.MapKey;
 
-import static base.Util.mapKey;
-import static base.Util.intToNat;
-import static base.Util.bool;
+import static base.Util.*;
 
 
 public interface Sets$0 extends Sealed$0 {
-  LinkedHashSet<Object> emptySet = new LinkedHashSet<>(0);
+  ArrayList<Object> emptyList = new ArrayList<>(0);
   default Object imm$$hash$1(Object p0){
     var ordering = Set$2Instance.ordering(p0);
-    return new Set$2Instance(ordering, emptySet);
+    return new Set$2Instance(ordering, emptyList);
   }
   default Object imm$$hash$2(Object p0, Object p1){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(1);
-    s.add(mapKey(ordering, p1));
+    var s = new ArrayList<>(1);
+    s.add(p1);
     return new Set$2Instance(ordering, s);
   }
   default Object imm$$hash$3(Object p0, Object p1, Object p2){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(2);
-    s.add(mapKey(ordering, p1));
-    s.add(mapKey(ordering, p2));
+    var s = new ArrayList<>(2);
+    s.add(p1);
+    s.add(p2);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$4(Object p0, Object p1, Object p2, Object p3){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(3);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
+    var s = new ArrayList<>(3);
+    s.add(p1); s.add(p2); s.add(p3);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(4);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2));
-    s.add(mapKey(ordering, p3)); s.add(mapKey(ordering, p4));
+    var s = new ArrayList<>(4);
+    s.add(p1); s.add(p2);
+    s.add(p3); s.add(p4);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$6(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(5);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5));
+    var s = new ArrayList<>(5);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(6);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
+    var s = new ArrayList<>(6);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$8(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(7);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7));
+    var s = new ArrayList<>(7);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(8);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8));
+    var s = new ArrayList<>(8);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$10(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(9);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
+    var s = new ArrayList<>(9);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(10);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
-    s.add(mapKey(ordering, p10));
+    var s = new ArrayList<>(10);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
+    s.add(p10);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$12(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(11);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
-    s.add(mapKey(ordering, p10)); s.add(mapKey(ordering, p11));
+    var s = new ArrayList<>(11);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
+    s.add(p10); s.add(p11);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(12);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
-    s.add(mapKey(ordering, p10)); s.add(mapKey(ordering, p11)); s.add(mapKey(ordering, p12));
+    var s = new ArrayList<>(12);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
+    s.add(p10); s.add(p11); s.add(p12);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$14(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(13);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
-    s.add(mapKey(ordering, p10)); s.add(mapKey(ordering, p11)); s.add(mapKey(ordering, p12));
-    s.add(mapKey(ordering, p13));
+    var s = new ArrayList<>(13);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
+    s.add(p10); s.add(p11); s.add(p12);
+    s.add(p13);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(14);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
-    s.add(mapKey(ordering, p10)); s.add(mapKey(ordering, p11)); s.add(mapKey(ordering, p12));
-    s.add(mapKey(ordering, p13)); s.add(mapKey(ordering, p14));
+    var s = new ArrayList<>(14);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
+    s.add(p10); s.add(p11); s.add(p12);
+    s.add(p13); s.add(p14);
     return new Set$2Instance(ordering, s);
   }
   default Object imm$$hash$16(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(15);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
-    s.add(mapKey(ordering, p10)); s.add(mapKey(ordering, p11)); s.add(mapKey(ordering, p12));
-    s.add(mapKey(ordering, p13)); s.add(mapKey(ordering, p14)); s.add(mapKey(ordering, p15));
+    var s = new ArrayList<>(15);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
+    s.add(p10); s.add(p11); s.add(p12);
+    s.add(p13); s.add(p14); s.add(p15);
     return new Set$2Instance(ordering, s);
   }
 
   default Object imm$$hash$17(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15, Object p16){
     var ordering = Set$2Instance.ordering(p0);
-    var s = new LinkedHashSet<>(15);
-    s.add(mapKey(ordering, p1)); s.add(mapKey(ordering, p2)); s.add(mapKey(ordering, p3));
-    s.add(mapKey(ordering, p4)); s.add(mapKey(ordering, p5)); s.add(mapKey(ordering, p6));
-    s.add(mapKey(ordering, p7)); s.add(mapKey(ordering, p8)); s.add(mapKey(ordering, p9));
-    s.add(mapKey(ordering, p10)); s.add(mapKey(ordering, p11)); s.add(mapKey(ordering, p12));
-    s.add(mapKey(ordering, p13)); s.add(mapKey(ordering, p14)); s.add(mapKey(ordering, p15));
-    s.add(mapKey(ordering, p16));
+    var s = new ArrayList<>(15);
+    s.add(p1); s.add(p2); s.add(p3);
+    s.add(p4); s.add(p5); s.add(p6);
+    s.add(p7); s.add(p8); s.add(p9);
+    s.add(p10); s.add(p11); s.add(p12);
+    s.add(p13); s.add(p14); s.add(p15);
+    s.add(p16);
     return new Set$2Instance(ordering, s);
   }
 
   Sets$0 instance= new Sets$0(){};
 }
 
-record Set$2Instance(OrderHashBy$2 ordering, LinkedHashSet<Object> set) implements Set$2{
-  Set$2Instance{
-    // Ideally we would check that they all have the same .ord as would be produced by this ordering
-    // but that's not possible :(
-    assert set.stream()
-            .allMatch(k -> k instanceof MapKey) : "Set has not mapkey elements -  this will break hashing :(";
+final class Set$2Instance implements Set$2 {
+  private final OrderHashBy$2 ordering;
+  private final HashSet<MapKey> set;
+  private final ArrayList<Object> sortedList;
+  static Set$2Instance of(OrderHashBy$2 ordering, List<Object> values) {
+    return new Set$2Instance(ordering, new ArrayList<>(values));
   }
-  
-  static Object extractKey(Object mapKey) {
-      return ((MapKey) mapKey).key;
+  static Set$2Instance fromSet(OrderHashBy$2 ordering, HashSet<MapKey> values) {
+    return new Set$2Instance(ordering, values);
   }
-  static LinkedHashSet<Object> unwrap(Object xs){
-    if (xs instanceof Set$2Instance set) {
-      return set.set;
-    }
-    throw new AssertionError("Unexpected List impl: "+xs.getClass());
+
+
+  Set$2Instance(OrderHashBy$2 ordering, ArrayList<Object> values) {
+    this.ordering = ordering;
+    values.sort((a, b) -> cmp(ordering,a,b));
+    this.sortedList = values;
+    this.set = sortedList.stream().map(k -> mapKey(ordering, k))
+            .collect(Collectors.toCollection(HashSet::new));
   }
+
+  Set$2Instance(OrderHashBy$2 ordering, HashSet<MapKey> values) {
+    this.ordering = ordering;
+    this.sortedList = values.stream().map(Set$2Instance::extractKey)
+      .collect(Collectors.toCollection(ArrayList::new));
+
+    this.sortedList.sort((a, b) -> cmp(ordering,a,b));
+    this.set = values;
+  }
+
+  static Object extractKey(MapKey mapKey) {
+      return mapKey.key;
+  }
+
   private static Set$2Instance setInstance(Object p0) {
     if (p0 instanceof Set$2Instance s1) {
       return s1;
@@ -194,33 +210,32 @@ record Set$2Instance(OrderHashBy$2 ordering, LinkedHashSet<Object> set) implemen
     return (OrderHashBy$2) ordering;
   }
 
-  @Override public Object read$orderHash$0() { return ordering; }
+  @Override public Object read$imm$0() {return this;}
+
+  @Override public Object imm$orderHash$0() { return ordering; }
   @Override public Object read$size$0(){ return intToNat(set.size()); }
   @Override public Object read$isEmpty$0(){ return bool(set.isEmpty()); }
 
-  @Override public Object read$contains$1(Object p0) {
+  @Override public Object imm$contains$1(Object p0) {
     return bool(set.contains(mapKey(ordering, p0)));
   }
 
-  @Override public Object mut$$plus$1(Object p0){
-    var s = new LinkedHashSet<>(set.size()+1);
-    s.addAll(set);
-    s.add(mapKey(ordering, p0));
-    return new Set$2Instance(ordering, s);
+  @Override public Object imm$$plus$1(Object p0){
+    // TODO: make this o(1)
+    var list = new ArrayList<>(set.size() + 1);
+    list.addAll(sortedList);
+    list.add(p0);
+    return new Set$2Instance(ordering, list);
   }
 
-  @Override public Object read$$plus$1(Object p0){ return mut$$plus$1(p0); }
-
-
-  @Override public Object mut$$dash$1(Object p0) {
+  @Override public Object imm$$dash$1(Object p0) {
     // Need to figure out if this is actually more efficient
     // Hashes twice 2*O(1) - but doesn't allocate the memory if the set O(n) if the element doesn't exist
     var setElement = mapKey(ordering, p0);
     if (!set.contains(setElement)) {
       return this;
     }
-    var s = new LinkedHashSet<>(set.size()-1);
-    s.addAll(this.set);
+    var s = new HashSet<MapKey>(set);
     if (!s.remove(setElement)) {
         throw new IllegalArgumentException("Failed to remove from set");
     }
@@ -228,12 +243,10 @@ record Set$2Instance(OrderHashBy$2 ordering, LinkedHashSet<Object> set) implemen
     return new Set$2Instance(ordering, s);
   }
 
-  @Override public Object read$$dash$1(Object p0) { return mut$$dash$1(p0); }
 
-
-  @Override public Object mut$union$2(Object p0, Object p1){
-    var newOrdering = ordering(p1);
-    Set$2Instance other = setInstance(p0);
+  @Override public Object imm$union$2(Object p0, Object p1){
+    var newOrdering = ordering(p0);
+    Set$2Instance other = setInstance(p1);
 
     // See if we can avoid rehashing some of the elements
     if (newOrdering.equals(ordering)) {
@@ -243,35 +256,32 @@ record Set$2Instance(OrderHashBy$2 ordering, LinkedHashSet<Object> set) implemen
       return fastUnion(other, this);
     }
 
-    LinkedHashSet<Object> newSet = Stream.concat(
-            this.set.stream(),
-            other.set.stream()
-    ).map(Set$2Instance::extractKey)
-      .map(k -> mapKey(newOrdering, k))
-      .collect(Collectors.toCollection(LinkedHashSet::new));
+    var set = Stream.concat(
+            this.sortedList.stream(),
+            other.sortedList.stream()
+    ).map(e -> mapKey(newOrdering, e))
+        .collect(Collectors.toCollection(HashSet::new));
 
-    return new Set$2Instance(newOrdering, newSet);
+    return new Set$2Instance(newOrdering, set);
   }
-
-  @Override public Object read$union$2(Object p0, Object p1){ return this.mut$union$2(p0, p1); }
 
   private static Set$2Instance fastUnion(Set$2Instance setWithHasher, Set$2Instance other) {
     // This cannot allocate a set that is too small - but it can make one that is too big...
-    LinkedHashSet<Object> newSet = new LinkedHashSet<>(setWithHasher.set.size() + other.set.size());
+    ArrayList<Object> newSet = new ArrayList<>(setWithHasher.set.size() + other.set.size());
     newSet.addAll(setWithHasher.set);
-    for (Object elem : other.set) {
-      MapKey newKey = new MapKey(setWithHasher.ordering, extractKey(elem));
+    for (Object elem : other.sortedList) {
+      MapKey newKey = new MapKey(setWithHasher.ordering, elem);
       newSet.add(newKey);
     }
     return new Set$2Instance(setWithHasher.ordering, newSet);
   }
 
-  @Override public Object mut$intersection$2(Object p0, Object p1){
-    var newOrdering = ordering(p1);
+  @Override public Object imm$intersection$2(Object p0, Object p1){
+    var newOrdering = ordering(p0);
     Set$2Instance s1 = this;
-    Set$2Instance s2 = setInstance(p0);
+    Set$2Instance s2 = setInstance(p1);
     if (s1.set.isEmpty() || s2.set.isEmpty()) {
-      return Sets$0.instance.imm$$hash$1(p1);
+      return Sets$0.instance.imm$$hash$1(newOrdering);
     }
 
     if (newOrdering.equals(ordering)) {
@@ -296,78 +306,77 @@ record Set$2Instance(OrderHashBy$2 ordering, LinkedHashSet<Object> set) implemen
     return new Set$2Instance(newOrdering, result);
   }
 
-  @Override public Object read$intersection$2(Object p0, Object p1){ return mut$intersection$2(p0, p1);
-  }
   private static Set$2Instance fastIntersection(Set$2Instance setWithHasher, Set$2Instance other) {
-    return new Set$2Instance(
+    return fromSet(
         setWithHasher.ordering,
         other.set.stream()
             .map(Set$2Instance::extractKey)
             .map(k -> Util.mapKey(setWithHasher.ordering, k))
             .filter(setWithHasher.set::contains)
-            .collect(Collectors.toCollection(LinkedHashSet::new)));
+            .collect(Collectors.toCollection(HashSet::new))
+    );
   }
 
-  @Override public Object mut$$dash_dash$2(Object p0, Object p1) {
+  @Override public Object imm$$dash_dash$2(Object p0, Object p1) {
     if (this.set.isEmpty()) {return Sets$0.instance.imm$$hash$1(p1);}
-    var newOrdering = ordering(p1);
-    Set$2Instance other = setInstance(p0);
+    var newOrdering = ordering(p0);
+    Set$2Instance other = setInstance(p1);
 
 
     if (this.ordering.equals(newOrdering)) {
         // Don't have to rehash the elements from this
         return new Set$2Instance(
           newOrdering,
-          this.set.stream()
+          (HashSet<MapKey>) this.set.stream()
             .filter(k -> !other.set.contains(mapKey(
                         other.ordering,
                         extractKey(k)
-            ))).collect(Collectors.toCollection(LinkedHashSet::new))
+            ))).collect(Collectors.toCollection(HashSet::new))
         );
     }
     if (other.ordering.equals(newOrdering)) {
-       return new Set$2Instance(
+       return fromSet(
           newOrdering,
           this.set.stream()
              // rehash the current elements
             .map(k -> mapKey(newOrdering, extractKey(k)))
             // Don't need to rehash to match other.
             .filter(k -> !other.set.contains(k))
-            .collect(Collectors.toCollection(LinkedHashSet::new))
+            .collect(Collectors.toCollection(HashSet::new))
         );
     }
 
     // should investigate whether keep in this if not in other, or
     // remove from this if in other is better
-    return new Set$2Instance(
-          newOrdering,
+    return fromSet(
+        newOrdering,
           this.set.stream()
             .filter(k -> !other.set.contains(
                     mapKey(other.ordering, extractKey(k))
             ))
             .map(k -> mapKey(newOrdering, extractKey(k)))
-            .collect(Collectors.toCollection(LinkedHashSet::new))
+            .collect(Collectors.toCollection(HashSet::new))
         );
   }
-  
-  private static LinkedHashSet<Object> rehash(LinkedHashSet<Object> s, OrderHashBy$2 ordering) {
+
+  private static HashSet<MapKey> rehash(HashSet<MapKey> s, OrderHashBy$2 ordering) {
     return s.stream()
-          .<Object>map(k -> extractKey(k))
-          .<Object>map(k -> mapKey(ordering, k))
-          .collect(Collectors.toCollection(LinkedHashSet::new));
+          .map(Set$2Instance::extractKey)
+          .map(k -> mapKey(ordering, k))
+          .collect(Collectors.toCollection(HashSet::new));
   }
 
-  @Override public Object read$containsAll$2(Object p0, Object p1) {
-      Set$2Instance set = setInstance(p0);
-      var newOrdering = ordering(p1);
-      LinkedHashSet<Object> rehashedThis = null;
-      LinkedHashSet<Object> rehashedOther = null;
+  @Override public Object imm$containsAll$2(Object p0, Object p1) {
+      Set$2Instance set = setInstance(p1);
+      var newOrdering = ordering(p0);
+      HashSet<MapKey> rehashedThis = null;
+      HashSet<MapKey> rehashedOther = null;
 
-      if (newOrdering.equals(this.ordering())) {
+      if (newOrdering.equals(this.ordering)) {
         rehashedThis = this.set;
         rehashedOther = rehash(set.set, newOrdering);
 
-      } else if (newOrdering.equals(set.ordering())) {
+      } else if (newOrdering.equals(set.ordering)) {
         rehashedThis = rehash(this.set, newOrdering);
         rehashedOther = set.set;
       } else {
@@ -378,11 +387,16 @@ record Set$2Instance(OrderHashBy$2 ordering, LinkedHashSet<Object> set) implemen
       return bool(rehashedThis.containsAll(rehashedOther));
   }
 
-  @Override public Object mut$distinctBy$1(Object p0) {
+  @Override public Object imm$distinctBy$1(Object p0) {
       var newOrdering = ordering(p0);
       if (this.ordering.equals(newOrdering)) { return this; }
       return new Set$2Instance(newOrdering, rehash(set, newOrdering));
   }
 
-  @Override public Object read$distinctBy$1(Object p0) { return mut$distinctBy$1(p0); }
+
+  @Override public Object imm$list$0() {
+    return List$1Instance.wrap(sortedList);
+  }
 }
+
+

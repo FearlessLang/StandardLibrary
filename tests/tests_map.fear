@@ -48,7 +48,7 @@ MapBasics: F[Tests,Tests] {::
     Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`bb`, `y`) .str{::.str}))
 
   // insertion order should matter for .str (spec says .str order follows insertion order)
-  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .str{::.str} .assertNe( Maps#({::}, `bb`, `y`, `a`, `x`) .str{::.str}))
+  .test(Maps#({::}, `a`, `x`, `bb`, `y`) .str{::.str} .( Maps#({::}, `bb`, `y`, `a`, `x`) .str{::.str}))
 
   // opt corner cases on multi-entry
   .test(Maps#({::}, `a`, `x`, `bb`, `y`) .opt `a` .isEmpty .assertEq False)

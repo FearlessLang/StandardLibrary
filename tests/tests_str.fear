@@ -72,7 +72,7 @@ StrSepOps: F[Tests,Tests] {::
 
 StrOrder: F[Tests,Tests] {::
   .test(`a` .assertEq `a`)
-  .test(`a` .assertNe `b`)
+  .test(`a` . `b`)
 
   .test(`a` .assertLt `b`)
   .test(`b` .assertGt `a`)

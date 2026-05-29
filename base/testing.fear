@@ -84,14 +84,23 @@ UnitTests: Main {
 
 TestCap: Sealed {//by making it sealed we can guaranteed the output of the function is the same of the original input
   //so we can use subtyping to get more methods on that object/rely on the injected EList
-  mut .let[T](f: F[T],c: TestCont[T]): mut TestCap -> c#(f#,this);
+  mut .let[T](f: F[T], c: TestCont[T]): mut TestCap -> c#(f#,this); // line 87
   //so .let must be just imm stuff, nothing else makes sense.
   mut .test(t: Test): mut TestCap -> t.tests this;
   mut .disabledTest(Test): mut TestCap;
   mut .check(Check): mut TestCap;
   mut .disabledCheck(Check): mut TestCap; 
   mut .checkWithSys(CheckSys): mut TestCap;
-  mut .disabledCheckWithSys(CheckSys): mut TestCap;  
+  mut .disabledCheckWithSys(CheckSys): mut TestCap;
+  mut .checkDetErr[T](errorMatch: F[Info, Bool], f: F[T]): mut TestCap -> this.check{
+    Try#(f).run {
+      .ok _ -> Error.msg "Expected error but got success";
+      .info i -> errorMatch#i .if {
+        .then -> Void;
+        .else -> Error.msg("Error did not match expected: " + (i.str));
+        }
+      }
+    };
   }
 
 TestCont[T]: { #(t: T, self: mut TestCap): mut TestCap }
@@ -103,13 +112,13 @@ _TestCaps: {
       .do {UnitTestLog.log(_PlanLine#(`RUN`,st,2))}
       .do {ts.add(CheckInfos#(
         { _ -> c#; ._fetchTrace f -> c._fetchTrace f },
-        st))}
+        st)).done}
       .return {self};
 
     .checkWithSys c -> Block#
       .let[List[StackFrame]] st = {c._fetchTrace {sys.try.currentStackTrace}}
       .do {UnitTestLog.log(_PlanLine#(`RUN`,st,2))}
-      .do {ts.add(CheckInfos#(c,st))}
+      .do {ts.add(CheckInfos#(c,st)).done}
       .return {self};
 
     .disabledCheck c -> Block#(

@@ -15,9 +15,13 @@ Magic: Sealed {
   //![R:**](_: mut _System): R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);
   }
 
+_MagicDebug: Sealed {
+  #(x: read ToStr): Void -> Magic!;
+  }
+
 Debug: Sealed {
   #[T:*](x: T, f: F[T,Str]): T -> Block#(this#(f#x),x);
-  #(x: read ToStr): Void -> Magic!;
+  #(x: read ToStr): Void -> _MagicDebug# x;
   //.identify[T](x: read T): Str -> Magic!;//TODO: can this break observability?
   }
 
