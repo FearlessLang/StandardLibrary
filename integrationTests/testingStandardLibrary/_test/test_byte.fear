@@ -1,0 +1,79 @@
+ByteArithTests: Test {::
+  .check{+1.byteExact + (+2.byteExact) .assertEq (+3.byteExact)}
+  .check{+5.byteExact - (+2.byteExact) .assertEq (+3.byteExact)}
+  .check{+3.byteExact * (+4.byteExact) .assertEq (+12.byteExact)}
+  .check{+9.byteExact.sqrt .assertEq +3.0}
+  .check{3.byteExact ** (3.byteExact) .assertEq (27.byteExact)}
+  .check{+255.byteExact .assertGt (+0.byteExact)}
+  .check{+0.byteExact .assertLt (+255.byteExact)}
+  }
+
+ByteDivRemTests: Test {::
+  .check{+7.byteExact.divExact 3 .assertEq (+2.byteExact)}
+  .check{+7.byteExact.remExact 3 .assertEq (+1.byteExact)}
+  .check{+6.byteExact.div 3 .assertEq ({::},Opts#(+2.byteExact))}
+  .check{+7.byteExact.div 3 .assertEq ({::},Opt[Byte])}
+  .check{+7.byteExact.div 0 .assertEq ({::},Opt[Byte])}
+  }
+
+ByteConvTests: Test {::
+  .check{+0.byteExact.nat .assertEq 0}
+  .check{+0.byteExact.int .assertEq +0}
+  .check{+255.byteExact.nat .assertEq 255}
+  .check{+255.byteExact.int .assertEq +255}
+  .check{+5.byteExact.float .assertEq +5.0}
+  .check{+255.byteExact.float .assertEq +255.0}
+  .check{+5.byteExact.num .assertEq (+5.num)}
+  }
+
+ByteAluTests: Test {::
+  .check{+250.byteExact.aluAddWrap(+10.byteExact) .assertEq (+4.byteExact)}
+  .check{+0.byteExact.aluSubWrap(+1.byteExact) .assertEq (+255.byteExact)}
+  .check{+16.byteExact.aluMulWrap(+16.byteExact) .assertEq (+0.byteExact)}
+  .check{+1.byteExact.aluShiftLeft 8 .assertEq (+1.byteExact)}
+  .check{+1.byteExact.aluShiftLeft 9 .assertEq (+2.byteExact)}
+  .check{+128.byteExact.aluShiftRight 1 .assertEq (+64.byteExact)}
+  .check{+2.byteExact.aluShiftRight 9 .assertEq (+1.byteExact)}
+  .check{+5.byteExact.aluXor(+3.byteExact) .assertEq (+6.byteExact)}
+  .check{+5.byteExact.aluAnd(+3.byteExact) .assertEq (+1.byteExact)}
+  .check{+5.byteExact.aluOr(+2.byteExact) .assertEq (+7.byteExact)}
+  .check{+250.byteExact.aluDiv(+10.byteExact) .assertEq (+25.byteExact)}
+  .check{+250.byteExact.aluRem(+10.byteExact) .assertEq (+0.byteExact)}
+  .check{+255.byteExact.aluDiv(+2.byteExact) .assertEq (+127.byteExact)}
+  .check{+255.byteExact.aluRem(+2.byteExact) .assertEq (+1.byteExact)}
+  }
+
+ByteRangeChecksTests: Test {::
+  .check{+3.byteExact.assertInRange(+1.byteExact,+5.byteExact)}
+  .check{+3.byteExact.assertInRangeOpen(+1.byteExact,+5.byteExact)}
+  .check{+3.byteExact.assertInRangeLoOpen(+1.byteExact,+3.byteExact)}
+  .check{+3.byteExact.assertInRangeHiOpen(+3.byteExact,+5.byteExact)}
+  .check{+0.byteExact.clamp(+1.byteExact,+5.byteExact) .assertEq (+1.byteExact)}
+  .check{+6.byteExact.clamp(+1.byteExact,+5.byteExact) .assertEq (+5.byteExact)}
+  .check{+3.byteExact.clamp(+1.byteExact,+5.byteExact) .assertEq (+3.byteExact)}
+  .check{+3.byteExact.clamp(+3.byteExact,+3.byteExact) .assertEq (+3.byteExact)}
+  }
+
+ByteBoundaryAndBoundedVsAluTests: Test {::
+  .check{+250.byteExact.aluAddWrap(+10.byteExact) .assertEq (+4.byteExact)}
+  .check{+0.byteExact.aluSubWrap(+1.byteExact) .assertEq (+255.byteExact)}
+  .check{+16.byteExact.aluMulWrap(+16.byteExact) .assertEq (+0.byteExact)}
+  .check{+255.byteExact.aluAddWrap(+1.byteExact) .assertEq (+0.byteExact)}
+  }
+
+ByteRangeTests: Test {::
+  .check{0.byteExact~~(0.byteExact).size .assertEq 0}
+  .check{0.byteExact~~(1.byteExact).list .assertEq({::},  Lists#(0.byteExact))}
+  .check{0.byteExact~~=(1.byteExact).list .assertEq({::},  Lists#(0.byteExact, 1.byteExact))}
+  .check{0.byteExact~~(2.byteExact).list .assertEq({::},  Lists#(0.byteExact, 1.byteExact))}
+  }
+
+TestByte: Test {::
+  .test ByteArithTests
+  .test ByteDivRemTests
+  .test ByteConvTests
+  .test ByteAluTests
+  .test ByteRangeChecksTests
+  .test ByteBoundaryAndBoundedVsAluTests
+  .test ByteRangeTests
+  }
