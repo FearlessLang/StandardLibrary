@@ -121,13 +121,13 @@ MinAcc: {
       });
     };
   }
-FlowMode[T:*]:Sealed{}
+FlowMode[T:*]:Sealed{.flowMode:FlowMode[T];}
 Par:Sealed{#[T:imm,read]:Par[T]->Par[T]}
-Par[T:imm,read]:FlowMode[T]{}
+Par[T:imm,read]:FlowMode[T]{this}
 ParRepr:Sealed{#[T]:ParRepr[T]->ParRepr[T]}
-ParRepr[T]:FlowMode[mut Repr[T]]{}
+ParRepr[T]:FlowMode[mut Repr[T]]{this}
 ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
-ParPod[T]:FlowMode[mut IsoPod[T]]{}
+ParPod[T]:FlowMode[mut IsoPod[T]]{this}
 
 ActorImpl[S:*,E:*,R]: { 
   read #(downstream: mut ActorSink[R], state: S, e: E, m: ActorMatch[R]): R

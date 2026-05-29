@@ -184,19 +184,21 @@ Frame:{//TODO: add getters like title/fps. Can we get location getters?
   mut .content(mut Scope[Pane]):Void;
   mut .contentB(mut Scope[Border]):Void;
 }
+
 Graphics:{
-  mut .color(Color):mut Graphics;
-  mut .position(XNat, YNat):mut Graphics;
-  mut .line(XNat, YNat):mut Graphics;
-  mut .rect(WidthNat, HeightNat):mut Graphics;
-  mut .oval(WidthNat, HeightNat):mut Graphics;
-  read .elapsed:Time;
-  read .screenWidth:WidthNat;
-  read .screenHeight:HeightNat;
-  read .panelWidth:WidthNat;
-  read .panelHeight:HeightNat;
-}
-Gui:{ mut .run(mut Consumer[mut Frame]):Void }//public interface TopF{ void run(Frame f); }
+  mut .color(Color): mut Graphics;
+  mut .position(XNat, YNat): mut Graphics;
+  mut .line(XNat, YNat): mut Graphics;
+  mut .rect(WidthNat, HeightNat): mut Graphics;
+  mut .oval(WidthNat, HeightNat): mut Graphics;
+  mut .image(Image): mut Graphics;
+  read .elapsed: Time;
+  read .screenWidth: WidthNat;
+  read .screenHeight: HeightNat;
+  read .panelWidth: WidthNat;
+  read .panelHeight: HeightNat;
+  }
+Gui:{ mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run(Frame f); }
 Label:Widget[Label]{
   .self->this;
   mut .textSize(HeightNat):mut Label;

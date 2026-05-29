@@ -64,7 +64,15 @@ record CGraphicsCtx(
       );
     return this;
   }
-
+  @Override public Object mut$image$1(Object image){
+    g2d.drawImage(
+      ((Image$0Instance)image).image(),
+      frame.xPos(currentX,"graphics image x"),
+      frame.yPos(currentY,"graphics image y"),
+      null
+      );
+    return this;
+  }
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object read$screenWidth$0(){ return frame.screenSizeW; }
   @Override public Object read$screenHeight$0(){ return frame.screenSizeH; }
