@@ -24,7 +24,7 @@ class IntCache {
   }
 }
 
-public record Int$0Instance(long val) implements Int$0{
+public record Int$0Instance(long val) implements Int$0,Norm$1{
   public static final long MAX_VALUE = Long.MAX_VALUE;
   public static final long MIN_VALUE = Long.MIN_VALUE;
   public static Int$0 instance(long val){ return IntCache.getInt(val); }
@@ -255,6 +255,6 @@ public record Int$0Instance(long val) implements Int$0{
             LongStream.rangeClosed(start, end).mapToObj(Int$0Instance::instance)
     );
   }
-  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_->new Norm(this)); }
-  static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
+  @Override public Object imm$get$0(){ return this; }
+  @Override public Object imm$norm$0(){ return this; }
 }

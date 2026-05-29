@@ -13,12 +13,14 @@ use base.Info as Info;
 use base.Repr as Repr;
 use base.Var as Var;
 use base.Vars as Vars;
+use base.CacheF as CacheF;
+use base.CaptureFree as CaptureFree;
 
 CacheSum:{ #(a:Nat,b:Nat):Nat->Cache#(a.norm,b.norm,{
   a',b'->Block#(Debug#("Summing "+(a'.get)+" and "+(b'.get)),a'.get + (b'.get))
   })}
 
-CacheInfo:{ #(str:Norm[Str]):Norm[Info]->Cache.norm(str,{
+CacheInfo:{ #(str:Norm[Str]):Norm[Info]->Cache.ofMemo(str,{
   s->Block#(Debug#("ToInfo "+(s.get)),s.get.info)
   })}
 
@@ -79,3 +81,20 @@ Hello:Main{s->Block#(
   Debug#(CacheSum#(1,2)),
   Debug#(CacheSum#(3,4)),
   )}
+
+Bar:{ .baz(a:Norm[Str],b:Norm[List[Norm[Str]]]):Nat->Block#(
+  Debug#("Bar.baz called"),
+  a.get.size+(b.get.size)); }
+Cache_27Out:{
+  .methName(a:Norm[Str],b:Norm[List[Norm[Str]]]):Nat->
+  Cache.of(a,b,Cache27:CacheF[Str,List[Norm[Str]],Nat]{ aa,bb->Bar.baz(aa,bb)})
+  }
+MainFlushCache:Main{s->Block#
+  .let x= {Cache_27Out.methName("foo".norm,Lists#("b").norm{::.norm})}
+  .let y= {Cache_27Out.methName("foo".norm,Lists#("b").norm{::.norm})}
+  .let z= {Cache_27Out.methName("foo".norm,Lists#("b").norm{::.norm})}
+  .do{ Debug#("cleaned") }
+  .do {Cache.flush(Cache27)}
+  .let w= {Cache_27Out.methName("foo".norm,Lists#("b").norm{::.norm})}
+  .done
+  }

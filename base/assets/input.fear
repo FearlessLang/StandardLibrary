@@ -1,0 +1,148 @@
+TxtFile:{
+  .path: Str;
+  .diskPath: Str;
+  .zipSteps: Str;
+  .zipEntry: Str;
+
+  .readStrUtf8(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
+    cap.readStrUtf8(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .readUStrUtf8(cap: mut AssetReadCapability, recover: mut BadUStrUnitRecover): UStr ->
+    cap.readUStrUtf8(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .readStrUtf16Le(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
+    cap.readStrUtf16Le(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .readUStrUtf16Le(cap: mut AssetReadCapability, recover: mut BadUStrUnitRecover): UStr ->
+    cap.readUStrUtf16Le(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .readStrUtf32Le(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
+    cap.readStrUtf32Le(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .readUStrUtf32Le(cap: mut AssetReadCapability, recover: mut BadUStrUnitRecover): UStr ->
+    cap.readUStrUtf32Le(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .readStrUtf16Be(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
+    cap.readStrUtf16Be(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .readUStrUtf16Be(cap: mut AssetReadCapability, recover: mut BadUStrUnitRecover): UStr ->
+    cap.readUStrUtf16Be(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .readStrUtf32Be(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
+    cap.readStrUtf32Be(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .readUStrUtf32Be(cap: mut AssetReadCapability, recover: mut BadUStrUnitRecover): UStr ->
+    cap.readUStrUtf32Be(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .readStrAscii(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
+    cap.readStrAscii(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .readUStrAscii(cap: mut AssetReadCapability, recover: mut BadUStrUnitRecover): UStr ->
+    cap.readUStrAscii(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .readStrLatin1(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
+    cap.readStrLatin1(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .readUStrLatin1(cap: mut AssetReadCapability, recover: mut BadUStrUnitRecover): UStr ->
+    cap.readUStrLatin1(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .consumeStrUtf8(requestId: Str, recover: mut BadStrUnitRecover): Str ->
+    _TxtRead.consumeStrUtf8(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .consumeUStrUtf8(requestId: Str, recover: mut BadUStrUnitRecover): UStr ->
+    _TxtRead.consumeUStrUtf8(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .consumeStrUtf16Le(requestId: Str, recover: mut BadStrUnitRecover): Str ->
+    _TxtRead.consumeStrUtf16Le(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .consumeUStrUtf16Le(requestId: Str, recover: mut BadUStrUnitRecover): UStr ->
+    _TxtRead.consumeUStrUtf16Le(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .consumeStrUtf32Le(requestId: Str, recover: mut BadStrUnitRecover): Str ->
+    _TxtRead.consumeStrUtf32Le(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .consumeUStrUtf32Le(requestId: Str, recover: mut BadUStrUnitRecover): UStr ->
+    _TxtRead.consumeUStrUtf32Le(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .consumeStrUtf16Be(requestId: Str, recover: mut BadStrUnitRecover): Str ->
+    _TxtRead.consumeStrUtf16Be(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .consumeUStrUtf16Be(requestId: Str, recover: mut BadUStrUnitRecover): UStr ->
+    _TxtRead.consumeUStrUtf16Be(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .consumeStrUtf32Be(requestId: Str, recover: mut BadStrUnitRecover): Str ->
+    _TxtRead.consumeStrUtf32Be(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .consumeUStrUtf32Be(requestId: Str, recover: mut BadUStrUnitRecover): UStr ->
+    _TxtRead.consumeUStrUtf32Be(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .consumeStrAscii(requestId: Str, recover: mut BadStrUnitRecover): Str ->
+    _TxtRead.consumeStrAscii(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .consumeUStrAscii(requestId: Str, recover: mut BadUStrUnitRecover): UStr ->
+    _TxtRead.consumeUStrAscii(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+
+  .consumeStrLatin1(requestId: Str, recover: mut BadStrUnitRecover): Str ->
+    _TxtRead.consumeStrLatin1(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+  .consumeUStrLatin1(requestId: Str, recover: mut BadUStrUnitRecover): UStr ->
+    _TxtRead.consumeUStrLatin1(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
+}
+AssetReadCapability: ToIso[AssetReadCapability], WidenTo[AssetReadCapability]{
+  mut .readStrUtf8(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str;
+  mut .readUStrUtf8(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr;  
+  mut .readStrUtf16Le(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str;
+  mut .readUStrUtf16Le(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr;  
+  mut .readStrUtf32Le(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str;
+  mut .readUStrUtf32Le(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr;  
+  mut .readStrUtf16Be(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str;
+  mut .readUStrUtf16Be(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr;  
+  mut .readStrUtf32Be(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str;
+  mut .readUStrUtf32Be(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr;  
+  mut .readStrAscii(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str;
+  mut .readUStrAscii(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr;  
+  mut .readStrLatin1(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str;
+  mut .readUStrLatin1(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr;  
+
+  mut .readImage(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,maxPixels: Nat): Image;
+  }
+_TxtRead:{
+  .consumeStrUtf8(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
+  .consumeUStrUtf8(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  .consumeStrUtf16Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
+  .consumeUStrUtf16Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  .consumeStrUtf32Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
+  .consumeUStrUtf32Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  .consumeStrUtf16Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
+  .consumeUStrUtf16Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  .consumeStrUtf32Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
+  .consumeUStrUtf32Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  .consumeStrAscii(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
+  .consumeUStrAscii(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  .consumeStrLatin1(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
+  .consumeUStrLatin1(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  }
+_ImageRead:{
+  .consumeImage(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,maxPixels: Nat): Image -> Magic!;
+  }
+
+BadStrUnitRecover:{
+  mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str
+  }
+
+BadUStrUnitRecover:{//Nat is 64 bit unsigned integer
+  mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr
+  }
+BadTextReason:{
+  .match[R:**](mut BadTextReasonMatch[R]):R
+  }
+
+BadTextReasonMatch[R:**]:{
+  mut .malformedEncoding:R;
+  mut .truncatedEncoding:R;
+  mut .notScalar:R;
+  mut .notInStr:R;
+  }
+ImageFile:{
+  .path: Str;
+  .diskPath: Str;
+  .zipSteps: Str;
+  .zipEntry: Str;
+  .readImage(cap: mut AssetReadCapability, maxPixels: Nat): Image ->
+    cap.readImage(this.path,this.diskPath,this.zipSteps,this.zipEntry,maxPixels);
+  .consumeImage(requestId: Str, maxPixels: Nat): Image ->
+    _ImageRead.consumeImage(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,maxPixels);
+  }
+Image:{
+  read .width: WidthNat;
+  read .height: HeightNat;
+  .scale(width: WidthNat, height: HeightNat): Image;
+  .scaleToWidth(width: WidthNat): Image;
+  .scaleToHeight(height: HeightNat): Image;
+  }

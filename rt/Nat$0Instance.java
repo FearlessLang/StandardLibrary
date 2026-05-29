@@ -25,7 +25,7 @@ class NatCache {
  * They represent the numbers >= 0;
  * @param val
  */
-public record Nat$0Instance(long val) implements Nat$0 {
+public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
 
   /**
    * The maximum unsigned value that can be represented in a long (2^64 - 1)
@@ -329,6 +329,6 @@ public record Nat$0Instance(long val) implements Nat$0 {
             LongStream.rangeClosed(Long.MIN_VALUE, until)
     ).mapToObj(Nat$0Instance::instance));
   }
-  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_->new Norm(this)); }
-  static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>();
+  @Override public Object imm$norm$0(){ return this; }
+  @Override public Object imm$get$0(){ return this; }
 }

@@ -18,7 +18,7 @@ class ByteCache {
   }
 }
 
-public record Byte$0Instance(byte val) implements Byte$0{
+public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
   private static final byte MAX_VALUE = (byte) 255;
   private static final long MAX_VALUE_LONG = 255;
 
@@ -151,8 +151,6 @@ public record Byte$0Instance(byte val) implements Byte$0{
             IntStream.rangeClosed(start, end).mapToObj(i -> Byte$0Instance.instance((byte) i))
     );
   }
-  //TODO: no, since here we cache them all, we should merge the two and keep the cache from Byte to Norm[Byte] only.
-  //Not sure about the others with partial cache.
-  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_->new Norm(this)); }
-  static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
+  @Override public Object imm$norm$0(){ return this; }
+  @Override public Object imm$get$0(){ return this; }
 }

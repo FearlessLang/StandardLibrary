@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public record Str$0Instance(String val) implements Str$0{
+public record Str$0Instance(String val) implements Str$0,Norm$1{
   public static Str$0 instance(String val){ return new Str$0Instance(val); }
   @Override public String toString(){ return toS(this); }
   private static String s(Object o){ return ((Str$0Instance)o).val; }
@@ -199,7 +199,11 @@ public record Str$0Instance(String val) implements Str$0{
   }
   @Override public Object imm$lower$0(){ return new Str$0Instance(val.toLowerCase()); }
   @Override public Object imm$upper$0(){ return new Str$0Instance(val.toUpperCase()); }
-  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_->new Norm(this)); }
+  @Override public Object imm$norm$0(){
+    if (val.length() < 64){ return this; }
+    return myCache.computeIfAbsent(val,_->new Norm(this));
+  }
+  @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
   static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }
 }

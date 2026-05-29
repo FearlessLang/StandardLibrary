@@ -36,7 +36,7 @@ class NumCache {
   }
 }
 
-public record Num$0Instance(BigInteger numerator, BigInteger denominator) implements Num$0 {
+public record Num$0Instance(BigInteger numerator, BigInteger denominator) implements Num$0,Norm$1 {
   public static Num$0 instance(BigInteger numerator, BigInteger denominator) {
     // if is a small enough integer
     if (NumCache.isInteger(numerator, denominator)) {
@@ -239,8 +239,11 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
     var diff= (Num$0Instance)((Num$0Instance)this.imm$$dash$1(exp)).imm$abs$0();
     return bool(le(diff,d));
   }
-
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(cmp(num(p0),num(p1)),p2); }
-  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(this,_->new Norm(this)); }
+  @Override public Object imm$norm$0(){
+    if (numerator.abs().bitLength() + denominator.bitLength() <= 512){ return this; }
+    return myCache.computeIfAbsent(this,_->new Norm(this));
+  }
+  @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
 }

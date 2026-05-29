@@ -1,0 +1,33 @@
+use base.Void as Void;
+use base.Str as Str;
+use base.Nat as Nat;
+use base.Gui as GuiC;
+use base.Block as Block;
+use base.Consumer as Consumer;
+use base.Frame as Frame;
+use base.Debug as Debug;
+use base.Color as Color;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
+use base.XNat as X;
+use base.YNat as Y;
+use base.KeyStroke as Key;
+use base.Label as Label;
+use base.Slot as Slot;
+use base.Slots as Slots;
+use base.Pane as Pane;
+use base.Border as Border;
+use base.Scope as Scope;
+use base.Painter as Painter;
+
+Foo:base.Main{s->Block#
+  .let model={Slots#[mut Model]}
+  .let canvas={Slots#[Pane]}
+  .let[mut Gui] gui= {mut Gui{.canvas->canvas; .model->model!;}}
+
+  .do {model.fill (Models#gui) }
+
+  .let g={s.gui}
+  .do { g.run gui }
+  .done
+  }
