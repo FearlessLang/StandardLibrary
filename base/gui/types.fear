@@ -119,12 +119,18 @@ Color:DataType[Color,Color]{
 Widget[S]:{
   mut .self:mut S;
   mut .save(mut Consumer[S]):mut S;
-  mut .topInset(HeightNat):mut S;
-  mut .bottomInset(HeightNat):mut S;
-  mut .leftInset(WidthNat):mut S;
-  mut .rightInset(WidthNat):mut S;
-  mut .heightGap(HeightNat):mut S;
-  mut .widthGap(WidthNat):mut S;
+  mut .topInset(Nat):mut S;
+  mut .topInset'(HeightNat):mut S;
+  mut .bottomInset(Nat):mut S;
+  mut .bottomInset'(HeightNat):mut S;
+  mut .leftInset(Nat):mut S;
+  mut .leftInset'(WidthNat):mut S;
+  mut .rightInset(Nat):mut S;
+  mut .rightInset'(WidthNat):mut S;
+  mut .heightGap(Nat):mut S;
+  mut .heightGap'(HeightNat):mut S;
+  mut .widthGap(Nat):mut S;
+  mut .widthGap'(WidthNat):mut S;
   mut .width(Nat):mut S;
   mut .height(Nat):mut S;
   mut .width'(WidthNat):mut S;

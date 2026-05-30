@@ -24,8 +24,8 @@ ShapeCanvas:Scope[Pane]{::
   }
 ShapeButtons:Scope[Pane]{::
     .background (Color.cardboard)
-    .heightGap (Height#12)
-    .widthGap (Width#12)
+    .heightGap' (Height#12)
+    .widthGap' (Width#12)
     .button{::
       .text `Target`
       .background (Color.rubberDuck)

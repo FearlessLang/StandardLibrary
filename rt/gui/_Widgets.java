@@ -149,48 +149,63 @@ abstract class AWidget<S,C extends JComponent> implements Widget$1{
     textSize= (HeightNat$0) HeightNat$0.instance.read$$hash$1(defText);
     frame.markLayoutDirty();
   }
+
   @Override public Object mut$topInset$1(Object v){
+    return mut$topInset$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$topInset$p1$1(Object v){
     frame.height((HeightNat$0)v,"top inset");
     top = (HeightNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$bottomInset$1(Object v){
+    return mut$bottomInset$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$bottomInset$p1$1(Object v){
     frame.height((HeightNat$0)v,"bottom inset");
     bottom = (HeightNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$leftInset$1(Object v){
+    return mut$leftInset$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$leftInset$p1$1(Object v){
     frame.width((WidthNat$0)v,"left inset");
     left = (WidthNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$rightInset$1(Object v){
+    return mut$rightInset$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$rightInset$p1$1(Object v){
     frame.width((WidthNat$0)v,"right inset");
     right = (WidthNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$heightGap$1(Object v){
+    return mut$heightGap$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$heightGap$p1$1(Object v){
     frame.height((HeightNat$0)v,"height gap");
     heightGap = (HeightNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$widthGap$1(Object v){
+    return mut$widthGap$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$widthGap$p1$1(Object v){
     frame.width((WidthNat$0)v,"width gap");
     widthGap = (WidthNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$width$1(Object w){
-    var wn = (WidthNat$0) WidthNat$0.instance.read$$hash$1((Nat$0)w);
-    frame.width(wn,"widget width");
-    preferredWidth = wn;
-    frame.markLayoutDirty();
-    return mut$self$0();
+    return mut$width$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)w));
   }
   @Override public Object mut$width$p1$1(Object w){
     frame.width((WidthNat$0)w,"widget width");
@@ -199,11 +214,7 @@ abstract class AWidget<S,C extends JComponent> implements Widget$1{
     return mut$self$0();
   }
   @Override public Object mut$height$1(Object h){
-    var hn = (HeightNat$0) HeightNat$0.instance.read$$hash$1((Nat$0)h);
-    frame.height(hn,"widget height");
-    preferredHeight = hn;
-    frame.markLayoutDirty();
-    return mut$self$0();
+    return mut$height$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)h));
   }
   @Override public Object mut$height$p1$1(Object h){
     frame.height((HeightNat$0)h,"widget height");
@@ -217,6 +228,7 @@ abstract class AWidget<S,C extends JComponent> implements Widget$1{
     frame.markLayoutDirty();
     return mut$self$0();
   }
+
   public Object mut$textSize$1(Object textSize){//will cross override later for button/label
     frame.height((HeightNat$0)textSize,"text size");
     this.textSize = (HeightNat$0)textSize;
