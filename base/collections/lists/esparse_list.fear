@@ -1,0 +1,124 @@
+ESparseLists: {
+  #[E:*]: ESparseList[E] -> this# 0;
+  /// `this# n` creates and returns an empty ESparseList with the given capacity.
+  /// This will back the ESparseList with an array if the expectedDensity is high, or the capacity is small,
+  /// and a hash map if the expectedDensity is low.
+  #[E:*](capacity: Nat): ESparseList[E] -> capacity < 1_000 .if {
+    .then -> this.backedWithArray(capacity);
+    .else -> this.backedWithMap(capacity);
+    };
+
+  /// `this#(capacity, expectedDensity)` returns an empty ESparseList with the given capacity.
+  /// Note this uses the expectedDensity to choose an appropriate internal representation.
+  /// This will back the ESparseList with an array if the expectedDensity is high, or the capacity is small,
+  /// and a hash map if the expectedDensity is low.
+  #[E:*](capacity: Nat, expectedDensity: Float): ESparseList[E] -> capacity < 100 || {expectedDensity > 0.25} .if {
+    .then -> this.backedWithArray(capacity);
+    .else -> this.backedWithMap(capacity);
+    };
+
+  /// `this.backedWithArray(capacity)` returns an empty ESparseList with the given capacity, backed by an array.
+  .backedWithArray[E:*](capacity: Nat): ESparseList[E] -> Magic!;
+  /// `this.backedWithMap(capacity)` returns an empty ESparseList with the given capacity, backed by a Map.
+  .backedWithMap[E:*](capacity: Nat): ESparseList[E] -> Magic!;
+  }
+
+/// A list with "holes".
+/// TODO: decide whether the implementation should be an array with many nulls,
+/// or a hash map from indices to elements.
+/// Perhaps there is a good hybrid approach that uses a map when the capacity/density is large and a list when the capacity/density is small?
+ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
+  read .isFull: Bool -> this.numHoles == 0;
+  read .isEmpty: Bool -> this.numHoles == (this.capacity);
+  read .hasHoles: Bool -> this.isFull.not;
+
+  read .capacity: Nat;
+  read .numHoles: Nat;
+
+  mut .increaseCapacity(Nat): mut ESparseList[E];
+  mut .increaseCapacityDefensive(Nat): mut ESparseList[E];
+
+
+  // Discussion point: Should this return a EList as it is now "full"
+  mut .fillHoles(mut MF[Nat, E]): mut ESparseList[E];
+
+  /// `this.fillWith(flow)` uses the elements in `flow` to fill the holes in this, starting from index 0,
+  /// until either there are no more holes or no more elements in `list`.
+  /// Note: this will consume part of the flow, if the flow has more elements than holes,
+  /// the remaining elements will remain in `flow`.
+  mut .fillFrom(Flow[E]): mut ESparseList[E];
+
+  /// `this.fillWith(flow)` uses the elements in `list` to fill the holes in this, starting from index 0,
+  /// expanding the capacity of this if necessary to fit all elements in `list`.
+  /// Note: this will consume the entire flow.
+  mut .fillAndExpand(SizedFlow[E]): mut ESparseList[E];
+
+  mut  .seqFlowOpts: mut SizedFlow[mut Opt[E]];
+  mut  .flowOpts(mode: FlowMode[E]): mut SizedFlow[mut Opt[E]];
+
+  mut  .flatSeqFlow: mut SizedFlow[E];
+  mut  .flatFlow(mode: FlowMode[E]): mut SizedFlow[E];
+
+  mut  .seqFlow(): mut Opt[mut SizedFlow[E]] -> this.isFull .then {this.flatSeqFlow};
+  mut  .flow(mode: FlowMode[E]): mut Opt[mut SizedFlow[E]] -> this.isFull .then {this.flatFlow(mode)};
+
+  mut  .seqFlowExact(): mut SizedFlow[E] -> this.isFull .if {
+    .then -> this.flatSeqFlow;
+    .else -> Error.msg(
+      "Cannot create a flow of an ESparseList that is not full."
+      | `Use a "hole-safe" flow method, or fill the holes first.`
+      );
+    };
+
+  mut .flowExact(mode: FlowMode[E]): mut SizedFlow[E] -> this.isFull .if {
+    .then -> this.flatFlow(mode);
+    .else -> Error.msg(
+      "Cannot create a flow of an ESparseList that is not full."
+      | `Use a "hole-safe" flow method, or fill the holes first.`
+      );
+    };
+
+  mut  .listExact: mut List[E];
+  mut  .list(): mut Opt[mut List[E]] -> this.isFull .then {this.listExact};
+  }
+
+_EditableList[E:*, Self]: Pipe[Self],OrderHash[Self, E],ToInfo[E] {
+  mut .all(f: mut MF[E, Bool]): Bool;
+  mut .any(f: mut MF[E, Bool]): Bool;
+  mut .none(f: mut MF[E, Bool]): Bool;
+
+  mut .firstIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
+  mut .lastIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
+  mut .indicesWhere(mut MF[E, Bool]): mut Flow[Nat];
+
+
+  mut .set(Nat, E): mut Self;
+
+  mut .clear: mut Self;
+  mut .removeIf(mut MF[E, Bool]): mut Self;
+  mut .retainIf(mut MF[E, Bool]): mut Self;
+  mut .remove(Nat): mut Self;
+  mut .removeFirstWhere(mut MF[E, Bool]): mut Self;
+  mut .removeLastWhere(mut MF[E, Bool]): mut Self;
+
+  /// `this.trimTo(start, end)` removes all elements with indices outside of the range `[start, end)`.
+  mut .trimTo(start: Nat, end: Nat): mut Self;
+
+  /// `this.reverse` returns this with the order of the elements reversed.
+  mut .reverse: mut Self;
+  /// `this.mapInPlace(f)` applies `f` to each element of this, replacing the element with the result.
+  mut .mapInPlace(mut MF[E, E]): mut Self;
+  /// `this.swap(i, j)` swaps the elements at indices `i` and `j`.
+  mut .swap(Nat, Nat): mut Self;
+
+  /// `this.shallow_clone` returns a shallow clone of this.
+  /// The main use of this is to allow to hold onto an identical editable list after this one has been drained.
+  /// Note elements in the resulting list will still point to the same elements as the ones in this.
+  mut .shallow_clone: mut Self;
+
+  /// `this.done` returns `Void`. This is to allow the end of chain operations.
+  /// Note: `this... .done` is equivalent to `Block#(..., Void)`
+  read .done: Void -> Void;
+  }
+
+

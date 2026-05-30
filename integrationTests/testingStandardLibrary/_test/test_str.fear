@@ -1,0 +1,229 @@
+StrBasicsTests: Test {::
+  .check{`` .isEmpty .assertEq True}
+  .check{`` .size .assertEq 0}
+  .check{`a` .isEmpty .assertEq False}
+  .check{`a` .size .assertEq 1}
+  .check{`ab` .size .assertEq 2}
+  .check{`` .imm .assertEq ``}
+  .check{`a` .imm .assertEq `a`}
+  .check{`a` .str .assertEq `a`}
+  .check{`a` .close .assertEq `a`}
+  .check{`ab` .close .assertEq `ab`}
+  }
+
+StrConcatTests: Test {::
+  .check{`a` + `b` .assertEq `ab`}
+  .check{`ab` + `c` .assertEq `abc`}
+  .check{`a` + `` .assertEq `a`}
+  .check{`` + `a` .assertEq `a`}
+  .check{`` + `` .assertEq ``}
+  .check{`a` + `` + `b` .assertEq `ab`}
+  .check{`` + `a` + `` .assertEq `a`}
+  .check{`a` + `b` + `c` .assertEq `abc`}
+  .check{`x=` + True .assertEq `x=True`}
+  .check{`x=` + False .assertEq `x=False`}
+  .check{`x=` + True .str .assertEq `x=True`}
+  .check{`x=` + True + False .assertEq `x=TrueFalse`}
+  .check{`n=` + 5 .assertEq `n=5`}
+  .check{`n=` + 4_294_967_295 .assertEq `n=4294967295`}
+  .check{`a` + `b` .size .assertEq 2}
+  .check{`a` + `` .size .assertEq 1}
+  .check{`` + `b` .size .assertEq 1}
+  }
+
+StrSepOpsTests: Test {::
+  .check{`a` | `b` .size .assertEq 3}
+  .check{`a` | `b` | `c` .size .assertEq 5}
+  .check{`` | `a` .size .assertEq 2}
+  .check{`a` | `` .size .assertEq 2}
+  .check{`a` | .size .assertEq 2}
+  .check{`a` | .assertEq (`a` | ``)}
+  .check{`a` | | `b` .size .assertEq 4}
+  .check{`a` ^ `b` .size .assertEq 3}
+  .check{`a` ^ `b` ^ `c` .size .assertEq 5}
+  .check{`` ^ `a` .size .assertEq 2}
+  .check{`a` ^ `` .size .assertEq 2}
+  .check{`a` ^ .size .assertEq 2}
+  .check{`a` ^ .assertEq (`a` ^ ``)}
+  .check{`a` ^ ^ `b` .size .assertEq 4}
+  .check{`a` | True .size .assertEq 6}
+  .check{`a` ^ True .size .assertEq 6}
+  .check{`` | `` .isEmpty .assertEq False}
+  .check{`` ^ `` .isEmpty .assertEq False}
+  }
+
+StrOrderTests: Test {::
+  .check{`a` .assertEq `a`}
+  .check{`a` .assertNotEq `b`}
+  .check{`a` .assertLt `b`}
+  .check{`b` .assertGt `a`}
+  .check{`a` .assertLe `a`}
+  .check{`a` .assertGe `a`}
+  .check{`a` .assertLt `aa`}
+  .check{`aa` .assertGt `a`}
+  .check{`a` .assertLt `ab`}
+  .check{`A` .assertLt `a`}
+  .check{`a` .assertGt `A`}
+  }
+
+StrEscapeTests: Test {::
+  .check{`` .escape .assertEq (`""`)}
+  .check{`` .escape .size .assertEq 2}
+  .check{`a` .escape .assertEq (`` ^ `a` ^)}
+  .check{`a` .escape .size .assertEq 3}
+  .check{`abc` .escape .assertEq (`` ^ `abc` ^)}
+  .check{`a` | `b` .escape .assertEq (`` ^ `a` ^ ` | ` ^ `b` ^)}
+  .check{`a` ^ `b` .escape .assertEq ("`"+`a"b`+"`")}
+  }
+
+StrParseIntTests: Test {::
+  .check{`` .int .assertEq({::}, Opt[Int])}
+  .check{`+0` .int .assertEq({::}, Opts#(+0))}
+  .check{`-0` .int .assertEq({::}, Opts#(+0))}
+  .check{`+1` .int .assertEq({::}, Opts#(+1))}
+  .check{`-1` .int .assertEq({::}, Opts#(-1))}
+  .check{`+9_223_372_036_854_775_807` .int .assertEq({::}, Opts#(Math.maxInt))}
+  .check{`-9_223_372_036_854_775_808` .int .assertEq({::}, Opts#(Math.minInt))}
+  .check{`+9_223_372_036_854_775_808` .int .assertEq({::}, Opt[Int])}
+  .check{`-9_223_372_036_854_775_809` .int .assertEq({::}, Opt[Int])}
+  .check{`2147483647` .int .assertEq({::}, Opt[Int])}
+  .check{`+000` .int .assertEq({::}, Opts#(+0))}
+  .check{`-000` .int .assertEq({::}, Opts#(+0))}
+  .check{`+0001` .int .assertEq({::}, Opts#(+1))}
+  .check{`-0001` .int .assertEq({::}, Opts#(-1))}
+  .check{`+1_000` .int .assertEq({::}, Opts#(+1000))}
+  .check{`+_1` .int .assertEq({::}, Opt[Int])}
+  .check{`+1_` .int .assertEq({::}, Opt[Int])}
+  .check{`+1__0` .int .assertEq({::},  Opts# +1__0)}
+  .check{`+01__0` .int .assertEq({::}, Opts# +01__0)}
+  .check{`+0__10` .int .assertEq({::}, Opts# +0__10)}
+  .check{` +1` .int .assertEq({::}, Opt[Int])}
+  .check{`+1 ` .int .assertEq({::}, Opt[Int])}
+  }
+
+StrParseNatTests: Test {::
+  .check{`` .nat .assertEq({::}, Opt[Nat])}
+  .check{`0` .nat .assertEq({::}, Opts#(0))}
+  .check{`1` .nat .assertEq({::}, Opts#(1))}
+  .check{`1_000_000` .nat .assertEq({::}, Opts#(1000000))}
+  .check{`18_446_744_073_709_551_615` .nat .assertEq({::}, Opts#(Math.maxNat))}
+  .check{`18_446_744_073_709_551_616` .nat .assertEq({::}, Opt[Nat])}
+  .check{`000` .nat .assertEq({::}, Opts#(0))}
+  .check{`0001` .nat .assertEq({::}, Opts#(1))}
+  .check{`+1` .nat .assertEq({::}, Opt[Nat])}
+  .check{`-1` .nat .assertEq({::}, Opt[Nat])}
+  .check{`_1` .nat .assertEq({::}, Opt[Nat])}
+  .check{`1_` .nat .assertEq({::}, Opt[Nat])}
+  .check{`1__0` .nat .assertEq({::}, Opts# 1__0)}
+  .check{`00_1` .nat .assertEq({::}, Opts# 00_1)}
+  .check{` 1` .nat .assertEq({::}, Opt[Nat])}
+  .check{`1 ` .nat .assertEq({::}, Opt[Nat])}
+  }
+
+StrParseByteTests: Test {::
+  .check{`` .byte .assertEq({::}, Opt[Byte])}
+  .check{`0` .byte .assertEq({::}, Opts#(+0 .byteExact))}
+  .check{`1` .byte .assertEq({::}, Opts#(+1 .byteExact))}
+  .check{`10` .byte .assertEq({::}, Opts#(+10 .byteExact))}
+  .check{`255` .byte .assertEq({::}, Opts#(+255 .byteExact))}
+  .check{`000` .byte .assertEq({::}, Opts#(+0 .byteExact))}
+  .check{`001` .byte .assertEq({::}, Opts#(+1 .byteExact))}
+  .check{`256` .byte .assertEq({::}, Opt[Byte])}
+  .check{`4_294_967_295` .byte .assertEq({::}, Opt[Byte])}
+  .check{`+1` .byte .assertEq({::}, Opt[Byte])}
+  .check{`-1` .byte .assertEq({::}, Opt[Byte])}
+  .check{`1_0` .byte .assertEq({::}, Opts#(+10 .byteExact))}
+  .check{`2_5_5` .byte .assertEq({::}, Opts#(+255 .byteExact))}
+  .check{`25_5` .byte .assertEq({::}, Opts#(+255 .byteExact))}
+  .check{`25_6` .byte .assertEq({::}, Opt[Byte])}
+  .check{`_1` .byte .assertEq({::}, Opt[Byte])}
+  .check{`1_` .byte .assertEq({::}, Opt[Byte])}
+  .check{` 1` .byte .assertEq({::}, Opt[Byte])}
+  .check{`1 ` .byte .assertEq({::}, Opt[Byte])}
+  .check{`-1` .byte  .assertEq({::}, Opt[Byte])}
+  }
+
+StrParseNumTests: Test {::
+  .check{`` .num .assertEq({::}, Opt[Num])}
+  .check{`+0` .num .assertEq({::}, {})}
+  .check{`-0` .num .assertEq({::}, {})}
+  .check{`+1` .num .assertEq({::}, {})}
+  .check{`-1` .num .assertEq({::}, {})}
+  .check{`+1/2` .num .assertEq({::}, Opts#(+1/2))}
+  .check{`-1/2` .num .assertEq({::}, Opts#(-1/2))}
+  .check{`+10/20` .num .assertEq({::}, Opts#(+1/2))}
+  .check{`-10/20` .num .assertEq({::}, Opts#(-1/2))}
+  .check{`+12/2` .num!.str .assertEq(`+6/1`)}
+  .check{`+1/0` .num .assertEq({::}, Opt[Num])}
+  .check{`-1/0` .num .assertEq({::}, Opt[Num])}
+  .check{`+1_0/2_0` .num .assertEq({::}, Opts#(+1/2))}
+  .check{`-1_0/2_0` .num .assertEq({::}, Opts#(-1/2))}
+  .check{` +1/2` .num .assertEq({::}, Opt[Num])}
+  .check{`+1/2 ` .num .assertEq({::}, Opt[Num])}
+  }
+
+StrParseFloatTests: Test {::
+  .check{`` .float .assertEq({::}, Opt[Float])}
+  .check{`+0.0` .float .assertEq({::}, Opts#(+0.0))}
+  .check{`-0.0` .float .assertEq({::}, Opts#(+0.0))}
+  .check{`+0.5` .float .assertEq({::}, Opts#(+0.5))}
+  .check{`+1.5` .float .assertEq({::}, Opts#(+1.5))}
+  .check{`+2.5` .float .assertEq({::}, Opts#(+2.5))}
+  .check{`+1_000.0` .float .assertEq({::}, Opts#(+1000.0))}
+  .check{`+0.1` .float .assertEq({::}, Opt[Float])}
+  .check{`+0.2` .float .assertEq({::}, {})}
+  .check{`-0.1` .float .assertEq({::}, {})}
+  .check{`+000.100` .float .assertEq({::}, {})}
+  .check{+0012.str.assertEq `+12`}
+  .check{00_12.str.assertEq `12`}
+  .check{`+1.0e3` .float .assertEq({::}, Opts#(+1000.0))}
+  .check{`+1.0e+3` .float .assertEq({::}, Opts#(+1000.0))}
+  .check{`-1.0e3` .float .assertEq({::}, Opts#(-1000.0))}
+  .check{`+1.0E3` .float .assertEq({::}, Opts#(+1000.0))}
+  .check{`NaN` .float .assertEq({::}, Opt[Float])}
+  .check{`Infinity` .float .assertEq({::}, Opt[Float])}
+  .check{`-Infinity` .float .assertEq({::}, Opt[Float])}
+  .check{`+1.0e309` .float .assertEq({::}, Opt[Float])}
+  .check{`-1.0e309` .float .assertEq({::}, Opt[Float])}
+  .check{`+_1.0` .float .assertEq({::}, Opt[Float])}
+  .check{`+1_.0` .float .assertEq({::}, Opt[Float])}
+  .check{` +1.0` .float .assertEq({::}, Opt[Float])}
+  .check{`+1.0 ` .float .assertEq({::}, Opt[Float])}
+  .check{`+1.0_e3` .float .assertEq({::}, Opt[Float])}
+  }
+
+StrParseIeeeFloatTests: Test {::
+  .check{`` .ieeeFloat .isEmpty .assertEq True}
+  .check{`0.0` .ieeeFloat .match{ .some f->f .isPosZero; .empty->False } .assertEq True}
+  .check{`-0.0` .ieeeFloat .match{ .some f->f .isNegZero; .empty->False } .assertEq True}
+  .check{`NaN` .ieeeFloat .match{ .some f->f .isNaN; .empty->False } .assertEq True}
+  .check{`Infinity` .ieeeFloat .match{ .some f->f .isPosInfinity; .empty->False } .assertEq True}
+  .check{`-Infinity` .ieeeFloat .match{ .some f->f .isNegInfinity; .empty->False } .assertEq True}
+  .check{`1.5` .ieeeFloat .assertEq({::}, Opts#(+1.5))}
+  .check{`1000.0` .ieeeFloat .assertEq({::}, Opts#(+1000.0))}
+  .check{`0.1` .ieeeFloat .isSome .assertEq True}
+  .check{`-0.1` .ieeeFloat .isSome .assertEq True}
+  .check{`0.1`.ieeeFloat!.ieeeStr .assertEq `0.1`}
+  .check{`0.100000000000000005`.ieeeFloat!.ieeeStr .assertEq `0.1`}
+  .check{+0.0 .ieeeStr .ieeeFloat .isSome .assertEq True}
+  .check{+0.0 / +0.0 .ieeeStr .ieeeFloat .match{ .some f->f .isNaN; .empty->False } .assertEq True}
+  .check{`NaN` .float .isEmpty .assertEq True}
+  .check{`Infinity` .float .isEmpty .assertEq True}
+  .check{`-Infinity` .float .isEmpty .assertEq True}
+  .check{`+0.1`.ieeeFloat!.num!.inRange(`0.100000000000000005/1`.num!, +2/1).assertEq True}
+  .check{`+0.1`.ieeeFloat!.num!.inRange(`+0.1/1`.num! , `+0.100000000000000005/1`.num!).assertEq False}
+  }
+
+TestStr: Test {::
+  .test StrBasicsTests
+  .test StrConcatTests
+  .test StrSepOpsTests
+  .test StrOrderTests
+  .test StrEscapeTests
+  .test StrParseIntTests
+  .test StrParseNatTests
+  .test StrParseByteTests
+  .test StrParseNumTests
+  .test StrParseFloatTests
+  .test StrParseIeeeFloatTests
+  }

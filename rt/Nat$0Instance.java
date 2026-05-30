@@ -1,5 +1,6 @@
 package base;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
@@ -88,11 +89,37 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     );
   }
 
+
+  @Override public Object imm$int$0() {
+    if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
+        return optEmpty();
+    }
+    // We are in the long normal range, so we can safely interpret the unsigned long as a signed long
+    return optSome(Int$0Instance.instance(val));
+  }
+
+  @Override public Object imm$byte$0() {
+    if (Long.compareUnsigned(val, 255L) > 0) {
+      return optEmpty();
+    }
+    // We are in the long normal range, so we can safely interpret the unsigned long as a signed long
+    return optSome(Byte$0Instance.instance((byte) val));
+  }
+
+  @Override public Object imm$float$0() {
+    if (!canConvertToFloat(val)) {
+      return optEmpty();
+    }
+    return optSome(Float$0Instance.instance(unsignedLongToDouble(val)));
+  }
+
+
+
   /**
    * Clamp the natural number to the range of int,
    * since that's the largest type we can convert it to without losing information
    */
-  @Override public Object imm$int$0(){
+  @Override public Object imm$intDefensive$0(){
 
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
       return Int$0Instance.instance(Long.MAX_VALUE);
@@ -101,9 +128,13 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     return Int$0Instance.instance(val);
   }
 
-  @Override public Object imm$byte$0(){
+  @Override public Object imm$byteDefensive$0(){
     long x= Long.compareUnsigned(val,255) > 0 ? 255 : val;
     return Byte$0Instance.instance((byte)x);
+  }
+
+  @Override public Object imm$floatDefensive$0(){
+    return Float$0Instance.instance(unsignedLongToDouble(val));
   }
 
   private static double unsignedLongToDouble(long num) {
@@ -122,17 +153,16 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     // and thus use the regular conversion to double.
     return (double) num;
   }
-  @Override public Object imm$float$0(){
-    return Float$0Instance.instance(unsignedLongToDouble(val));
-  }
 
-  @Override public Object imm$num$0(){
-    return Num$0Instance.instance(
-            toUnsignedBigInteger(val),
-            BigInteger.ONE
-    );
+  static boolean canConvertToFloat(long val) {
+    // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+    // The largest integer that can be exactly represented in a double is 2^53.
+    if (Long.compareUnsigned(val, 9007199254740993L) <= 0) {
+      return true;
+    }
+    BigInteger bigInteger = toUnsignedBigInteger(val);
+    return BigDecimal.valueOf(bigInteger.doubleValue()).toBigInteger().equals(bigInteger);
   }
-
   /**
    * Code is from using a private method in the open jdk <a href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/Long.java">Long</a> class.
    * Seen as of <a href="https://github.com/openjdk/jdk/commit/a7507ffa1dda403110a61c4b61143b76e8a7911e">this commit</a>
@@ -152,20 +182,29 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     }
   }
 
-  /**
-   * Is this method named the right thing?
-   */
+
   @Override public Object imm$intExact$0() {
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
-      return optEmpty();
+      throw err("Nat.intExact: cannot convert to Int, "+Long.toUnsignedString(val)+" is greater than Math.maxInt");
     }
 
-    return optSome(Int$0Instance.instance(val));
+    return Int$0Instance.instance(val);
+  }
+  @Override public Object imm$byteExact$0() {
+    if (Long.compareUnsigned(val, 255L) > 0) {
+      throw err("Nat.intExact: cannot convert to Byte, "+Long.toUnsignedString(val)+" is greater than Math.maxByte");
+    }
+
+    return Byte$0Instance.instance((byte) val);
   }
 
-  @Override public Object imm$byteExact$0(){
-    return Long.compareUnsigned(val,255) > 0 ? optEmpty() : optSome(Byte$0Instance.instance((byte)val));
+  @Override public Object imm$floatExact$0() {
+    if (!canConvertToFloat(val)) {
+      throw err("Nat.floatExact: cannot convert to Float without losing precision, "+Long.toUnsignedString(val)+" is too large");
+    }
+    return Float$0Instance.instance(unsignedLongToDouble(val));
   }
+
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,n(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,n(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,n(p0))); }
@@ -190,32 +229,27 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     );
   }
   @Override public Object read$str$0(){ return Str$0Instance.instance(Long.toUnsignedString(val)); }
-  @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$clamp$2(Object p0, Object p1){
+  @Override public Object imm$clampExact$2(Object p0, Object p1){
     long lo= n(p0), hi= n(p1);
     if (Long.compareUnsigned(lo,hi) > 0){ throw err("Nat.clamp: lo>hi"); }
     if (Long.compareUnsigned(val,lo) < 0){ return instance(lo); }
     if (Long.compareUnsigned(val,hi) > 0){ return instance(hi); }
     return this;
   }
-  @Override public Object imm$div$1(Object p0){
+  @Override public Object imm$divExact$1(Object p0){
     long d= n(p0);
     if (d == 0){ throw err("Nat.div: d==0"); }
     return instance(Long.divideUnsigned(val,d));
   }
-  @Override public Object imm$rem$1(Object p0){
+
+  @Override public Object imm$remExact$1(Object p0){
     long d= n(p0);
     if (d == 0){ throw err("Nat.rem: d==0"); }
     return instance(Long.remainderUnsigned(val,d));
   }
-  @Override public Object imm$divExact$1(Object p0){
-    long d= n(p0);
-    if (d == 0){ return optEmpty(); }
-    if (Long.remainderUnsigned(val,d) != 0){ return optEmpty(); }
-    return optSome(instance(Long.divideUnsigned(val,d)));
-  }
-  @Override public Object imm$indexOffset$1(Object p0){
+
+  @Override public Object imm$indexOffsetExact$1(Object p0){
     long offset = i(p0);
 
     if (offset <= 0) {
@@ -226,6 +260,7 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     }
     return instance(addChecked(val, offset));
   }
+
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance(val + n(p0)); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance(val - n(p0)); }
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance(val * n(p0)); }
@@ -262,14 +297,14 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     ) {
       return new Flow$1Instance(
               LongStream.range(start, until)
-                      .<Object>mapToObj(Nat$0Instance::new)
+                      .<Object>mapToObj(Nat$0Instance::instance)
       );
     }
 
     return new Flow$1Instance(LongStream.concat(
             LongStream.rangeClosed(start,Long.MAX_VALUE),
             LongStream.range(Long.MIN_VALUE, until)
-    ).mapToObj(Nat$0Instance::new));
+    ).mapToObj(Nat$0Instance::instance));
   }
   @Override public Object imm$$tilde_tilde_eq$1(Object p0){
    long start= this.val;
@@ -285,14 +320,14 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     ) {
       return new Flow$1Instance(
               LongStream.rangeClosed(start, until)
-                      .<Object>mapToObj(Nat$0Instance::new)
+                      .<Object>mapToObj(Nat$0Instance::instance)
       );
     }
 
     return new Flow$1Instance(LongStream.concat(
             LongStream.rangeClosed(start,Long.MAX_VALUE),
             LongStream.rangeClosed(Long.MIN_VALUE, until)
-    ).mapToObj(Nat$0Instance::new));
+    ).mapToObj(Nat$0Instance::instance));
   }
   @Override public Object imm$norm$0(){ return this; }
   @Override public Object imm$get$0(){ return this; }

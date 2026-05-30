@@ -6,8 +6,54 @@ use base.List as List;
 use base.Lists as Lists;
 use base.Flows as Flows;
 use base.Flow as Flow;
+use base.Sets as Sets;
+use base.Debug as Debug;
+use base.Opt as Opt;
+use base.Str as Str;
+use base.Num as Num;
+use base.Nat as Nat;
+use base.Int as Int;
+use base.Float as Float;
+use base.Byte as Byte;
+use base.ELists as ELists;
+use base.Info as Info;
+use base.InfoExtractor as InfoExtractor;
+use base.InfoMatches as InfoMatches;
+use base.Map as Map;
+use base.Maps as Maps;
+use base.Opts as Opts;
+use base.True as True;
+use base.False as False;
+use base.Bool as Bool;
+use base.Block as Block;
+use base.Math as Math;
+use base.F as F;
+use base.MF as MF;
+use base.OrderHash as OrderHash;
+use base.Order as Order;
+use base.OrderHashBy as OrderHashBy;
+use base.OrderBy as OrderBy;
+use base.DataType as DataType;
+use base.DataTypeBy as DataTypeBy;
+use base.Pipe as Pipe;
+use base.Operation as Operation;
+use base.Todo as Todo;
 
 MyTests:UnitTests{::
+  .test TestByte
+  .test TestFloat
   .test TestInt
+  .test TestNat
+  .test TestNum
+  .test TestStr
+  .test TestList
+  .test TestMap
+  .test TestRepr
+  .test TestLiteralErrors
+  .test TestPipe
+  .test TestComparators
   .test TestUStr
+  .test SetUnitTests
+  .test InfoExtractorUnitTests
+  .test MathUnitTests
   }

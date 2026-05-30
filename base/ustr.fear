@@ -40,7 +40,10 @@ UStr: Sealed,ToUStr,ToImm[UStr],JoinStr[UStr] {
 
   .scalarHex: Str;                  /// uppercase hexadecimal Unicode scalar values separated by single spaces.
   .isStr: Bool;                     /// true if this UStr only uses scalar values allowed inside instances of type Str.
-  .strExact: Opt[Str];              /// .some containg this string if .isStr; .empty otherwise
+  .str: Opt[Str]                    /// .some containing this string if .isStr; .empty otherwise
+    -> this.isStr.then{this.strExact};
+  .strExact: Str;                   /// `this.strExact` returns this as a Str. Throws if this contains scalar values not allowed inside instances of type Str
+
   .flow: mut Flow[Nat];             /// return a flow of scalar values.
   .equalRepr(other: UStr): Bool;    /// checks if the two unicode strings have the same exact scalar value representation.
   .hashRepr: Nat;                   /// hashes all the scalar values together.

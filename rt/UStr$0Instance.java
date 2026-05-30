@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
-public record UStr$0Instance(int[] val) implements UStr$0{
+public record UStr$0Instance(int[] val) implements UStr$0 {
   private static final Pattern uCodeText= Pattern.compile("[0-9A-F]{1,6}(?: [0-9A-F]{1,6})*");
   private static final int[] empty= {};
   private static final int[] nl= {'\n'};
@@ -46,10 +48,19 @@ public record UStr$0Instance(int[] val) implements UStr$0{
   @Override public Object imm$isStr$0(){ return bool(isStr(val)); }
 
   @Override public Object imm$strExact$0(){
-    return isStr(val)
-      ? optSome(Str$0Instance.instance(new String(val,0,val.length)))
-      : optEmpty();
+      if (val.length == 0) {
+          return Str$0Instance.instance("");
+      }
+      if(!isStr(val)) {
+          throw err("Cannot convert to Str, Invalid characters: " + IntStream.range(0, val.length)
+              .filter(i -> !isStr(val[i]))
+              .mapToObj(i -> val[i] + " at index " + i)
+              .collect(Collectors.joining(",", "[", "]"))
+          );
+      }
+      return Str$0Instance.instance(new String(val,0,val.length));
   }
+
   @Override public Object imm$flow$0(){
     return new Flow$1Instance(Arrays.stream(val).mapToObj(e->Nat$0Instance.instance((long)e)));
   }

@@ -20,16 +20,16 @@ WidthNat:Wrapper[WidthNat,Nat]{.name->"Width"; .getDataType -> 0;
 HeightNat:Wrapper[HeightNat,Nat]{.name->"Height"; .getDataType -> 0;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
 
-Red:Wrapper[Red,Byte]{.name->"Red"; .getDataType -> 0.byte;
+Red:Wrapper[Red,Byte]{.name->"Red"; .getDataType -> 0.byteExact;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
-Green:Wrapper[Green,Byte]{.name->"Green"; .getDataType -> 0.byte;
+Green:Wrapper[Green,Byte]{.name->"Green"; .getDataType -> 0.byteExact;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
-Blue:Wrapper[Blue,Byte]{.name->"Blue"; .getDataType -> 0.byte;
+Blue:Wrapper[Blue,Byte]{.name->"Blue"; .getDataType -> 0.byteExact;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
-Alpha:Wrapper[Alpha,Byte]{.name->"Alpha"; .getDataType -> 0.byte;
+Alpha:Wrapper[Alpha,Byte]{.name->"Alpha"; .getDataType -> 0.byteExact;
   # t ->{ .getDataType->t }; .close->this; .close->::;
-  .opaque:Alpha->Alpha#(255.byte);
-  .transparent:Alpha->Alpha#(0.byte);
+  .opaque:Alpha->Alpha#(255.byteExact);
+  .transparent:Alpha->Alpha#(0.byteExact);
   }
 Hue:Wrapper[Hue,Float]{.name->"Hue"; .getDataType -> 0.0;
   # t ->Block#(t.assertInRange(0.0,1.0,{"Hue must be between 0 and 1"}),
@@ -74,47 +74,47 @@ Color:DataType[Color,Color]{
   .imm->Color#(this.red,this.green,this.blue,this.alpha);
   .transparent:Color->Color#({},{},{},Alpha.transparent);
   .boringGray:Color->
-    Color#(Red#(160.byte),Green#(160.byte),Blue#(160.byte),Alpha.opaque);
+    Color#(Red#(160.byteExact),Green#(160.byteExact),Blue#(160.byteExact),Alpha.opaque);
   .voidBlack:Color->
-    Color#(Red#(0.byte),Green#(0.byte),Blue#(0.byte),Alpha.opaque);
+    Color#(Red#(0.byteExact),Green#(0.byteExact),Blue#(0.byteExact),Alpha.opaque);
   .ghostWhite:Color->
-    Color#(Red#(245.byte),Green#(245.byte),Blue#(245.byte),Alpha.opaque);
+    Color#(Red#(245.byteExact),Green#(245.byteExact),Blue#(245.byteExact),Alpha.opaque);
   .rubberDuck:Color->
-    Color#(Red#(255.byte),Green#(220.byte),Blue#(40.byte),Alpha.opaque);
+    Color#(Red#(255.byteExact),Green#(220.byteExact),Blue#(40.byteExact),Alpha.opaque);
   .bananaBruise:Color->
-    Color#(Red#(126.byte),Green#(96.byte),Blue#(32.byte),Alpha.opaque);
+    Color#(Red#(126.byteExact),Green#(96.byteExact),Blue#(32.byteExact),Alpha.opaque);
   .dangerTomato:Color->
-    Color#(Red#(230.byte),Green#(64.byte),Blue#(48.byte),Alpha.opaque);
+    Color#(Red#(230.byteExact),Green#(64.byteExact),Blue#(48.byteExact),Alpha.opaque);
   .lavaOrange:Color->
-    Color#(Red#(255.byte),Green#(96.byte),Blue#(16.byte),Alpha.opaque);
+    Color#(Red#(255.byteExact),Green#(96.byteExact),Blue#(16.byteExact),Alpha.opaque);
   .wizardPurple:Color->
-    Color#(Red#(116.byte),Green#(64.byte),Blue#(196.byte),Alpha.opaque);
+    Color#(Red#(116.byteExact),Green#(64.byteExact),Blue#(196.byteExact),Alpha.opaque);
   .sleepyBlue:Color->
-    Color#(Red#(72.byte),Green#(120.byte),Blue#(210.byte),Alpha.opaque);
+    Color#(Red#(72.byteExact),Green#(120.byteExact),Blue#(210.byteExact),Alpha.opaque);
   .deepNapBlue:Color->
-    Color#(Red#(24.byte),Green#(48.byte),Blue#(112.byte),Alpha.opaque);
+    Color#(Red#(24.byteExact),Green#(48.byteExact),Blue#(112.byteExact),Alpha.opaque);
   .goblinGreen:Color->
-    Color#(Red#(40.byte),Green#(170.byte),Blue#(64.byte),Alpha.opaque);
+    Color#(Red#(40.byteExact),Green#(170.byteExact),Blue#(64.byteExact),Alpha.opaque);
   .toxicSlime:Color->
-    Color#(Red#(120.byte),Green#(255.byte),Blue#(32.byte),Alpha.opaque);
+    Color#(Red#(120.byteExact),Green#(255.byteExact),Blue#(32.byteExact),Alpha.opaque);
   .alienMint:Color->
-    Color#(Red#(128.byte),Green#(255.byte),Blue#(190.byte),Alpha.opaque);
+    Color#(Red#(128.byteExact),Green#(255.byteExact),Blue#(190.byteExact),Alpha.opaque);
   .swampTea:Color->
-    Color#(Red#(82.byte),Green#(112.byte),Blue#(54.byte),Alpha.opaque);
+    Color#(Red#(82.byteExact),Green#(112.byteExact),Blue#(54.byteExact),Alpha.opaque);
   .rustyRobot:Color->
-    Color#(Red#(174.byte),Green#(86.byte),Blue#(44.byte),Alpha.opaque);
+    Color#(Red#(174.byteExact),Green#(86.byteExact),Blue#(44.byteExact),Alpha.opaque);
   .dustyRose:Color->
-    Color#(Red#(196.byte),Green#(120.byte),Blue#(132.byte),Alpha.opaque);
+    Color#(Red#(196.byteExact),Green#(120.byteExact),Blue#(132.byteExact),Alpha.opaque);
   .blueberrySoup:Color->
-    Color#(Red#(64.byte),Green#(72.byte),Blue#(176.byte),Alpha.opaque);
+    Color#(Red#(64.byteExact),Green#(72.byteExact),Blue#(176.byteExact),Alpha.opaque);
   .terminalGreen:Color->
-    Color#(Red#(32.byte),Green#(220.byte),Blue#(80.byte),Alpha.opaque);
+    Color#(Red#(32.byteExact),Green#(220.byteExact),Blue#(80.byteExact),Alpha.opaque);
   .panicPink:Color->
-    Color#(Red#(255.byte),Green#(72.byte),Blue#(168.byte),Alpha.opaque);
+    Color#(Red#(255.byteExact),Green#(72.byteExact),Blue#(168.byteExact),Alpha.opaque);
   .cardboard:Color->
-    Color#(Red#(178.byte),Green#(136.byte),Blue#(86.byte),Alpha.opaque);
+    Color#(Red#(178.byteExact),Green#(136.byteExact),Blue#(86.byteExact),Alpha.opaque);
   .moonCheese:Color->
-    Color#(Red#(236.byte),Green#(226.byte),Blue#(148.byte),Alpha.opaque);
+    Color#(Red#(236.byteExact),Green#(226.byteExact),Blue#(148.byteExact),Alpha.opaque);
   }
 Widget[S]:{
   mut .self:mut S;

@@ -1,0 +1,78 @@
+// Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
+// Note: / is not provided; use div/rem (divisor is Nat).
+Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
+  .succ: Nat -> this + 1;                  /// successor number; throws on overflow
+  .pred: Nat -> this - 1;                  /// predecessor number; throws on underflow
+  +(x: Nat): Nat;                          /// checked add; throws on overflow (past maxNat)
+  -(x: Nat): Nat;                          /// checked sub; throws on underflow (below 0)
+  *(x: Nat): Nat;                          /// checked mul; throws on overflow
+  **(x: Nat): Nat;                         /// checked power; throws on overflow.
+  .divExact(d: Nat): Nat;                  /// trunc toward 0; throws iff d==0
+  .remExact(d: Nat): Nat;                  /// r = this - (this.div(d))*d; throws iff d==0;
+  .rem(d: Nat): Opt[Nat] ->                /// r = this - (this.div(d))*d; .empty iff d==0;
+    d == 0 .then {this.remExact(d)};
+  .div(d: Nat): Opt[Nat]                   /// .some if d!=0 and this.rem(d)==0; .empty otherwise
+    -> this.rem(d).match {
+      .empty -> {};
+      .some r -> r == 0 .then {this.divExact(d)};
+      };  .sqrt: Float;                            /// approximate sqrt
+  .indexOffsetExact(delta: Int): Nat;           /// index helper: this + delta; throws on under/overflow
+  .indexOffset(delta: Int): Opt[Nat] -> delta >= +0 .if {
+      // See if this + delta.nat would overflow
+      .then -> delta.natExact <= (Math.maxNat - this) .then {this.indexOffsetExact(delta)};
+      // See if this + delta.nat would underflow
+      .else -> delta.abs <= this .then {this.indexOffsetExact(delta)};
+      };
+  / (d: Nat) : Num;                        /// create a Num represening the exact result of this division; throws iff d==0
+
+  .num: Num -> this / 1;                   /// converts to Num. Note Num can safely represent all `Nat`'s
+  .int: Opt[Int];                          /// .some if this <= maxInt; .empty otherwise
+  .byte: Opt[Byte];                        /// .some if this <= maxByte; .empty otherwise
+  .float: Opt[Float];                      /// .some if this is exactly representable; .empty otherwise
+
+  .intExact: Int;                            /// converts if this <= maxInt; throws otherwise
+  .byteExact: Byte;                          /// converts if this <= maxByte; throws otherwise
+  .floatExact: Float;                        /// converts if this is exactly representable; throws otherwise
+
+  .intDefensive: Int;                        /// converts by clamping to [0,maxInt]
+  .byteDefensive: Byte;                      /// converts by clamping to [0,maxByte]
+  .floatDefensive: Float;                    /// converts to the closest representable number
+
+  .aluAddWrap(x: Nat): Nat;                /// u64 wraparound add (mod 2^64)
+  .aluSubWrap(x: Nat): Nat;                /// u64 wraparound sub (mod 2^64)
+  .aluMulWrap(x: Nat): Nat;                /// u64 wraparound mul (mod 2^64)
+  .aluDiv(x: Nat): Nat;                    /// u64 trunc division; throws iff x == 0
+  .aluRem(x: Nat): Nat;                    /// paired with aluDiv; throws iff x == 0
+  .aluShiftLeft(bits: Nat): Nat;           /// u64 shift-left; effective shift = bits & 63 (i.e., modulo 64).
+  .aluShiftRight(bits: Nat): Nat;          /// u64 logical shift-right; effective shift = bits & 63.
+  .aluXor(x: Nat): Nat;                    /// u64 xor
+  .aluAnd(x: Nat): Nat;                    /// u64 and
+  .aluOr(x: Nat): Nat;                     /// u64 or
+  .aluInt: Int;                            /// reinterpret u64 bits as i64 Int (bit-cast)
+  .aluByte: Byte;                          /// low 8 bits (wrap), not clamp
+  .clampDefensive(lo: Nat, hi: Nat): Nat -> lo <= hi .if {
+    .then -> this.clampExact(lo, hi);
+    .else -> this.clampExact(hi, lo);
+    };
+
+  /// `this.clamp` returns .some of this clamped into [lo,hi], .empty if lo>hi
+  .clamp(lo: Nat, hi: Nat): Opt[Nat] -> lo <= hi .then {this.clampExact(lo, hi)};
+
+  /// `this.clampExact` returns this clamped into [lo,hi], throws if lo>hi
+  .clampExact(lo: Nat, hi: Nat): Nat;
+
+
+  ~~(end: Nat): mut SizedFlow[Nat];            /// Range from this to Nat-1 included.Throws if end < this, if end == this, and empty range  is produced
+  ~~=(endInclusive: Nat): mut SizedFlow[Nat];  /// Range from this to Nat included, throws if end < this, If end == this, a singleton range is produced.
+  .hash -> this.str.hash;                 /// hash via str
+  .info -> Infos.msg(this.str);            /// info via str
+  .close->::; .close->this;               /// fixpoint type closed
+  .sumNumber xs ->                        /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );
+  .hashWith(other: Nat): Nat -> this.aluMulWrap(31).aluAddWrap(other);
+  .norm: Norm[Nat];
+  .indexInto info -> info.match {
+      .empty -> {}; .msg _ -> {}; .map _ -> {};
+      .list list -> list.opt(this);
+      }
+  }

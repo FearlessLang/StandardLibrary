@@ -53,34 +53,53 @@
 ///   But, `0.100000000000000005` is closer to the actual representable Float value. That is,
 ///   `+0.1`.ieeeFloat!.numExact!.inRange(+0.100000000000000005/1, +2/1) holds
 ///   `+0.1`.ieeeFloat!.numExact!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
-Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
+Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKey {
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
   |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings
-  ^(x: read ToStr): Str;           /// like + but inserts a double quote between the two strings
+  ^(x: read ToStr): Str;            /// like + but inserts a double quote between the two strings
 
   | : Str;                          /// appends a newline
-  ^ : Str;                         /// appends a double quote
+  ^ : Str;                          /// appends a double quote
   .isEmpty: Bool;                   /// true iff size == 0
   .size: Nat;                       /// the amount of characters in this string
   .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use ^ and |, not necessarily a single literal)
-  .indexOf(Str): Opt[Nat];          /// index of the first occourence of the parameter. Returns 0 if the parameter is ``
+  .indexOf(Str): Opt[Nat];          /// index of the first occurrence of the parameter. Returns 0 if the parameter is ``
   .sub(from: Nat, to: Nat): Str;    /// substring [from,to); throws on from/to out of the string boundaries or from > to
   .replaceSimultaneous(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement; throws on empty keys, duplicated keys, odd sized lists, keys with prefixes
   .replaceSimultaneousOrdered(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement where the first matching rule wins; throws on empty keys, duplicated keys, odd sized lists
+  
   .ieeeFloat: Opt[Float];           /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
-  .floatExact: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  .float: Opt[Float];               /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  .int: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
+  .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
+  .nat: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
+  .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
 
-  .intExact: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
-  .numExact: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
-  .natExact: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
-  .byteExact: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
-  .startsWith(Str): Bool;            /// this string starts with the other string
+  .ieeeFloatExact: Float;           /// parse IEEE-754 string; accepts Float.ieeeStr output; throws if invalid .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .floatExact: Float;               /// parse a string representing a valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  .intExact: Int;              /// parse a string representing a valid Fearless Int; Throws if invalid (this includes out of range)
+  .numExact: Num;              /// parse a string representing a valid Fearless Num; Throws if invalid (this includes denominator == 0)
+  .natExact: Nat;              /// parse a string representing a valid Fearless Nat; Throws if invalid (this includes out of range)
+  .byteExact: Byte;            /// parse a string representing a valid Fearless Nat in the range [0,255]; Throws if invalid (this includes out of range)
+
+  .floatDefensive: Float;           /// parse a string representing a valid Fearless Float; clamps values that would round to the nearest representable Float
+  .intDefensive: Int;               /// parse a string representing a valid Fearless Int; clamps to [minInt,maxInt]
+  .natDefensive: Nat;               /// parse a string representing a valid Fearless Nat; clamps to [0,maxNat]
+  .byteDefensive: Byte;             /// parse a string representing a valid Fearless Nat in the range [0,255]; clamps to [0,255]
+
+  .startsWith(Str): Bool;           /// this string starts with the other string
+  .contains(Str): Bool;             /// return true if the other string is a substring of this one.
   .lower: Str;                      /// this string but all lowercase
   .upper: Str;                      /// this string but all uppercase
   .u : UStr;                        /// this string, but as a Unicode string
   .u(values: Str) : UStr;           /// equivalent to this.u.u values
   .norm: Norm[Str];
+
+  .indexInto info -> info.match {
+    .empty -> {}; .msg _ -> {}; .list _ -> {};
+    .map map -> map.opt(this);
+    }
   }
 
 OrderByCaseInsensitive: OrderBy[Str] { s0,s1,m -> s0.imm.lower <=> (s1.imm.lower, m) }

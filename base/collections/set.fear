@@ -1,0 +1,376 @@
+/// The implementation of a Set, the set keys must be imm to prevent breaking set invariants through mutating it's contents.
+/// This set is immutable so this + e will produce a new set with e included, and will not change this.
+Set[E, K]: Sealed,DataType[Set[E, K],Set[E, K],E,E] {
+  .close -> this; .close -> ::;
+  /// `this.size` returns the number of elements in `this`.
+  //- {::
+  //>   .check{Sets#({::}, 1, 2, 3).size .assertEq 3}
+  //>   .check{Sets#[Nat, Nat]({::}).size .assertEq 0}
+  //-   }
+  read .size: Nat;
+
+  /// `this.isEmpty` returns True if `this` has no elements.
+  //- {::
+  //>   .check{Sets#[Nat, Nat]({::}).isEmpty .assertTrue}
+  //>   .check{Sets#({::}, 1).isEmpty .assertFalse}
+  //-   }
+  read .isEmpty: Bool;
+
+  /// `this.notEmpty` returns True if `this` has any elements.
+  //- {::
+  //>   .check{Sets#[Nat, Nat]({::}).notEmpty .assertFalse}
+  //>   .check{Sets#({::}, 1).notEmpty .assertTrue}
+  //-   }
+  read .notEmpty: Bool -> this.isEmpty.not;
+
+  /// `this.imm` returns `this` recovering imm reference capability.
+  /// This is used to make the type system happy as many things take `read`s.
+  read .imm: imm Set[E, K];
+
+  /// The orderHash used to determine equality, hashing and potentially ordering of elements in this set.
+  //- {::.check{Sets#[Int, Nat]({::.imm.abs}, -1).contains(+1) .assertTrue}}
+  .orderHash: OrderHashBy[E, K];
+
+  /// `this.contains(e)` returns True if `e` is present in this.
+  //- {::
+  //>   .check{Sets#({::}, 1).contains(1) .assertTrue}
+  //>   .check{Sets#({::}, 0).contains(1) .assertFalse}
+  //-   }
+  .contains(E): Bool;
+
+  /// `this.get(e)` returns .some of the element in this equal to `e` under this's orderHash
+  /// if it's in this, otherwise returns .empty.
+  //- {::
+  //>   .check{Sets#({::.imm.abs}, +1, -2).get(-1)! .assertEq +1}
+  //>   .check{Sets#({::}, 1, 2).get(3).isEmpty .assertTrue}
+  //-   }
+  .get(elem: E): Opt[E] -> this.contains(elem) .if {
+    .then -> this.flow.filter{
+      e -> this.orderHash#e <=> (this.orderHash#elem, {.eq -> True; .lt -> False; .gt -> False;})
+      }.opt;
+    .else -> Opt[E];
+    };
+
+  /// `this + e` returns a new Set containing all elements of this plus `e`.
+  /// Adding an element already present under the orderHash has no effect.
+  //- {::
+  //>   .check{Sets#({::}, 1) + 2 .assertEq({::}, Sets#({::}, 1, 2))}
+  //>   .check{Sets#({::.imm.abs.intExact}, +1) + -1 .assertEq({::}, Sets#({::}, +1))}
+  //-   }
+  +(E): Set[E, K];
+
+  /// `this - e` returns a new Set containing all elements of this except `e`.
+  /// Removing an absent element leaves the set unchanged.
+  //- {::
+  //>   .check{Sets#({::}, 2, 3) - 2 - 3 .isEmpty .assertTrue}
+  //>   .check{Sets#({::}, 1) - 2 .assertEq({::}, Sets#({::}, 1))}
+  //-   }
+  -(E): Set[E, K];
+
+  /// `this.union(by, other)` returns a new set containing all the elements of `this` and `other` using the given `by`.
+  /// Equivalent to `this ++ (by, other)`
+  //- {::
+  //>   .let s1={Sets#({::}, +1, +2)}
+  //>   .let s2={Sets#({::}, +2, +3)}
+  //>   .check{s1.union({::}, s2) .assertEq({::}, Sets#({::}, +1, +2, +3))}
+  //>   .check{s1.union({::.imm.abs.intExact}, Sets#({::}, -1, -2)) .assertEq({::}, s1)}
+  //-   }
+  .union[K', K''](by: OrderHashBy[E, K''], other: Set[E, K']): Set[E, K''];
+
+  /// `this ++ (by, other)` returns the union of `this` and `other` using the given `by`.
+  /// Equivalent to `this.union(by, other)`
+  //- {::
+  //>   .let s1={Sets#({::}, +1, +2)}
+  //>   .let s2={Sets#({::}, +2, +3)}
+  //>   .check{s1 ++ ({::}, s2) .assertEq({::}, Sets#({::}, +1, +2, +3))}
+  //>   .check{s1 ++ ({::.imm.abs.intExact}, Sets#({::}, -1, -2)) .assertEq({::}, s1)}
+  //-   }
+  ++[K', K''](by: OrderHashBy[E, K''], other: Set[E, K']): Set[E, K''] -> this.union(by, other);
+
+  /// `this.union(other)` returns a new set containing all the elements of `this` and `other`, using this's orderHash.
+  /// Equivalent to `this.union(this.orderHash, other)`, and `this ++ other`.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2)}
+  //>   .let s2={Sets#({::}, 2, 3)}
+  //>   .check{s1.union(s2) .assertEq({::}, Sets#({::}, 1, 2, 3))}
+  //-   }
+  .union[K'](other: Set[E, K']): Set[E, K] -> this.union(this.orderHash, other);
+
+  /// `this ++ other` returns the union of `this` and `other`, using this's orderHash.
+  /// Equivalent to `this ++ (this.orderHash, other)`, and `this.union(other)`.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2)}
+  //>   .let s2={Sets#({::}, 2, 3)}
+  //>   .check{s1 ++ s2 .assertEq({::}, Sets#({::}, 1, 2, 3))}
+  //-   }
+  ++[K'](other: Set[E, K']): Set[E, K] -> this.union(other);
+
+  /// `this.intersection(by, other)` returns a new set containing only elements
+  /// present in both this and other, keyed by the given `by`.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2)}
+  //>   .let s2={Sets#({::}, 2, 3)}
+  //>   .check{s1.intersection({::}, s2) .assertEq({::}, Sets#({::}, 2))}
+  //>   .check{Sets#({::}, 1, 2, 3).intersection({::}, Sets#({::})) .isEmpty .assertTrue}
+  //-   }
+  .intersection[K', K''](by: OrderHashBy[E, K''], other: Set[E, K']): Set[E, K''];
+
+  /// `this & (by, other)` returns the intersection of this and other using the given `by`.
+  /// Equivalent to `this.intersection(by, other)`
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2)}
+  //>   .let s2={Sets#({::}, 2, 3)}
+  //>   .check{s1 & ({::}, s2) .assertEq({::}, Sets#({::}, 2))}
+  //>   .check{Sets#({::}, 1, 2, 3) & ({::}, Sets#({::})) .isEmpty .assertTrue}
+  //-   }
+  &[K', K''](by: OrderHashBy[E, K''], other: Set[E, K']): Set[E, K''] -> this.intersection(by, other);
+
+  /// `this.intersection(other)` returns the elements present in both this and other,
+  /// using this's orderHash.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2)}
+  //>   .let s2={Sets#({::}, 2, 3)}
+  //>   .check{s1.intersection(s2) .assertEq({::}, Sets#({::}, 2))}
+  //-   }
+  .intersection[K'](other: Set[E,K']): Set[E, K] -> this.intersection(this.orderHash, other);
+
+  /// `this & other` returns the intersection of this and other, using this's orderHash.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2)}
+  //>   .let s2={Sets#({::}, 2, 3)}
+  //>   .check{s1 & s2 .assertEq({::}, Sets#({::}, 2))}
+  //-   }
+  &[K'](other: Set[E,K']): Set[E,K] -> this.intersection(other);
+
+  /// `this -- (by, other)` returns a new set with all elements of other removed from this,
+  /// using the given `by` to determine equality.
+  //- {::
+  //>   .let s1={Sets#({::}, +1, +2, +3)}
+  //>   .let s2={Sets#({::}, +2)}
+  //>   .check{s1 -- ({::}, s2) .assertEq({::}, Sets#({::}, +1, +3))}
+  //>   .check{s1 -- ({::.imm.abs.intExact}, Sets#({::}, -2)) .assertEq({::}, Sets#({::}, +1, +3))}
+  //-   }
+  --[K', K''](by: OrderHashBy[E, K''], other: Set[E, K']): Set[E, K''];
+
+  /// `this -- other` returns a set containing the elements in this that are not in other,
+  /// using this's orderHash.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2, 3)}
+  //>   .let s2={Sets#({::}, 2)}
+  //>   .check{s1 -- s2 .assertEq({::}, Sets#({::}, 1, 3))}
+  //-   }
+  --[K'](other: Set[E, K']): Set[E,K] -> this -- (this.orderHash, other);
+
+  /// `this.symmetricDifference(by, other)` returns elements present in exactly one of
+  /// this or other, using the given `by`.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2, 3)}
+  //>   .let s2={Sets#({::}, 2, 4)}
+  //>   .check{s1.symmetricDifference({::}, s2) .assertEq({::}, Sets#({::}, 1, 3, 4))}
+  //-   }
+  .symmetricDifference[K', K''](by: OrderHashBy[E, K''], other: Set[E, K']): Set[E, K'']
+    -> this.union(by, other) -- (by, this.intersection(by, other));
+
+  /// `this.symmetricDifference(other)` returns elements present in exactly one of this or other,
+  /// using this's orderHash.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2, 3)}
+  //>   .let s2={Sets#({::}, 2, 4)}
+  //>   .check{s1.symmetricDifference(s2) .assertEq({::}, Sets#({::}, 1, 3, 4))}
+  //-   }
+  .symmetricDifference[K'](other: Set[E, K']): Set[E, K]
+    -> this.symmetricDifference(this.orderHash, other);
+
+  /// `this.containsAll(by, other)` returns True if every element of other is present in this,
+  /// using `by` to determine equality.
+  //- {::
+  //>   .check{Sets#({::}, +1, +2).containsAll({::.imm.abs}, Sets#({::}, -1, -2)) .assertTrue}
+  //>   .check{Sets#({::}, +1, +2).containsAll({::.imm.abs}, Sets#({::}, -1, -3)) .assertFalse}
+  //-   }
+  .containsAll[K', K''](by: OrderHashBy[E, K''], other: Set[E,K']): Bool;
+
+  /// `this.containsAll(other)` returns True if every element of other is present in this,
+  /// using this's orderHash.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2, 3)}
+  //>   .check{s1.containsAll(Sets#({::}, 1, 2)) .assertTrue}
+  //>   .check{s1.containsAll(Sets#({::}, 1, 2, 4)) .assertFalse}
+  //-   }
+  .containsAll[K'](other: Set[E,K']): Bool -> this.containsAll(this.orderHash, other);
+
+  /// `this.isSuperset(by, other)` returns True if this contains all elements of other,
+  /// using `by` to determine equality.
+  //- {::
+  //>   .check{Sets#({::}, +1, +2).isSuperset({::.imm.abs}, Sets#({::}, -1, -2)) .assertTrue}
+  //>   .check{Sets#({::}, +1, +2).isSuperset({::.imm.abs}, Sets#({::}, -1, -3)) .assertFalse}
+  //-   }
+  .isSuperset[K', K''](by: OrderHashBy[E, K''], other: Set[E,K']): Bool
+    -> this.containsAll(by, other);
+
+  /// `this.isSuperset(other)` returns True if this contains all elements of other,
+  /// using this's orderHash.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2, 3)}
+  //>   .check{s1.isSuperset(Sets#({::}, 1, 2)) .assertTrue}
+  //>   .check{s1.isSuperset(Sets#({::}, 1, 2, 4)) .assertFalse}
+  //-   }
+  .isSuperset[K'](other: Set[E,K']): Bool -> this.containsAll(other);
+
+  /// `this.isSubset(by, other)` returns True if other contains all elements of this,
+  /// using `by` to determine equality.
+  //- {::
+  //>   .check{Sets#({::}, -1, -2).isSubset({::.imm.abs}, Sets#({::}, +1, +2)) .assertTrue}
+  //>   .check{Sets#({::}, -1, -3).isSubset({::.imm.abs}, Sets#({::}, +1, +2)) .assertFalse}
+  //-   }
+  .isSubset[K', K''](by: OrderHashBy[E, K''], other: Set[E,K']): Bool
+    -> other.isSuperset(by, this);
+
+  /// `this.isSubset(other)` returns True if other contains all elements of this,
+  /// using this's orderHash.
+  //- {::
+  //>   .let s1={Sets#({::}, 1, 2, 3)}
+  //>   .check{Sets#({::}, 1, 2).isSubset(s1) .assertTrue}
+  //>   .check{s1.isSubset(Sets#({::}, 1, 2)) .assertFalse}
+  //-   }
+  .isSubset[K'](other: Set[E,K']): Bool -> other.isSuperset(this.orderHash, this);
+
+  /// `this.isDisjoint(by, other)` returns True if this and other share no elements,
+  /// using `by` to determine equality.
+  //- {::
+  //>   .check{Sets#({::}, +1, +2).isDisjoint({::.imm.abs}, Sets#({::}, -3, -4)) .assertTrue}
+  //>   .check{Sets#({::}, +1, +2).isDisjoint({::.imm.abs}, Sets#({::}, -1, -3)) .assertFalse}
+  //-   }
+  .isDisjoint[K', K''](by: OrderHashBy[E, K''], other: Set[E,K']): Bool
+    -> this & (by, other) .isEmpty;
+
+  /// `this.isDisjoint(other)` returns True if this and other share no elements,
+  /// using this's orderHash.
+  //- {::
+  //>   .check{Sets#({::}, 1, 2).isDisjoint(Sets#({::}, 3, 4)) .assertTrue}
+  //>   .check{Sets#({::}, 1, 2).isDisjoint(Sets#({::}, 2, 3)) .assertFalse}
+  //-   }
+  .isDisjoint[K'](other: Set[E,K']): Bool -> this & other .isEmpty;
+
+  /// `this.distinctBy(by)` returns a new set with all the elements of this using `by`'s orderHash.
+  /// Note:
+  /// - this new set may not contain all of the elements of this as elements that are considered equal under `by` will be deduplicated.
+  /// - The complexity of this operation is O(nlog(n)) as it needs to sort the elements of this using`by`.
+  //- {::
+  //>   .let s={Sets#({::}, +1, -1, +2, -2)}
+  //>   .check{s.distinctBy({::.imm.abs}).str{::} .assertEq "{-1, -2}"}
+  //-   }
+  .distinctBy[K'](by: OrderHashBy[E, K']): Set[E, K'];
+
+  /// `this.flow` returns a potentially parallel flow over the elements of this.
+  //- {::
+  //>   .check{Sets#({::}, 1, 2, 3).flow.list .assertEq({::}, Lists#(1, 2, 3))}
+  //-   }
+  .flow: mut SizedFlow[E] -> this.list.flow;
+
+  /// `this.seqFlow` returns a sequential flow over the elements of this.
+  //- {::
+  //>   .check{Sets#({::}, 1, 2, 3).seqFlow.list .assertEq({::}, Lists#(1, 2, 3))}
+  //-   }
+  .seqFlow: mut Flow[E] -> this.list.seqFlow;
+
+  /// `this.str(by)` returns a string representation of this set,
+  /// using `by` as the ToStr for each element.
+  //- {::
+  //>   .check{Sets#({::}, -1, +2, -3).str{::.imm.abs} .assertEq "{1, 2, 3}"}
+  //-   }
+  .str by -> "{"+(this.imm.flow.map{by#:: .str}.join ", ")+"}";
+
+  /// `this.str` returns a string representation of this set,
+  /// using the orderHash of this for the ToStr for each element.
+  /// Equivalent to `this.str(this.orderHash)`.
+  /// Note since this uses this.orderHash for the ToStr of each element,
+  /// this may give unexpected results.
+  //- {::
+  //>   .check{Sets#({::}, -1, +2, -3).str .assertEq "{-3, -1, +2}"}
+  //>   .check{Sets#({::.imm.abs}, -1, +2, -3).str .assertEq "{1, 2, 3}"}
+  //>   .check{Sets#[Int,Int]({::}).str .assertEq "{}"}
+  //-   }
+  .str: Str -> "{"+(this.flow.map{this.orderHash#:: .str}.join ", ")+"}";
+
+  /// `this.info(by)` returns an Info representation of this set using `by` to convert each element.
+  /// Returns an empty Info if this is empty.
+  /// Note: a `by` argument is required as Info.str cannot be used to recover a ToStr from the orderHash.
+  //- {::
+  //>   .check{Sets#({::}, 1, 2).info{::} ~ .isList => {l -> l.assertEq({::}, Lists#(1.info, 2.info))}!}
+  //-   }
+  .info by -> this.imm.list.info by;
+
+  /// `this.hash(by)` returns a hash of this set using `by` to hash each element.
+  /// The hash is seeded with the size of this set, then each element's hash is folded in.
+  /// Note: lists and sets use the same hash algorithm; two collections with the same elements
+  /// in the same order will produce the same hash.
+  //- {::
+  //>   .let s={Sets#({::}, 1, 2, 3)}
+  //>   .check{s.hash{::} .assertEq(s.hash{::})}
+  //-   }
+  .hash by -> this.imm.list.hash by;
+
+  /// `this.hash` returns a hash of this set using the orderHash to hash each element.
+  /// Equivalent to `this.hash(this.orderHash)`.
+  //- {::
+  //>   .let s={Sets#({::}, 1, 2, 3)}
+  //>   .check{s.hash .assertEq(s.hash)}
+  //-   }
+  .hash: Nat -> this.hash(this.orderHash);
+
+  /// `this.cmp(by, a, b, m)` compares sets `a` and `b` using `by`.
+  /// Returns `m.eq` if `a` and `b` contain the same elements under `by`.
+  /// If unequal, returns `m.gt` if the first non-equal element of `a` is greater than
+  /// the first non-equal element of `b`, or all elements are equal and `a` is larger.
+  /// Note the ordering of the set elements is given by their orderHash, not the given `by`.
+  /// Returns `m.lt` otherwise.
+  //- {::
+  //>   .let empty={Sets#[Nat,Nat]({::})}
+  //>   .check{empty.cmp({::}, Sets#({::}, 1, 2, 3), Sets#({::}, 2, 3, 1), {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 0}
+  //>   .check{empty.cmp({::}, Sets#({::}, 3, 1, 2), Sets#({::}, 0, 1, 2, 3),  {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 1}
+  //>   .check{empty.cmp({::}, Sets#({::}, 1, 2, 3), Sets#({::}, 1, 2), {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 2}
+  //-   }
+  .cmp by, a, b, m -> List[E].cmp(by, a.imm.list, b.imm.list, m);
+
+  /// `this.cmp(a, b, m)` compares sets `a` and `b` using this's orderHash.
+  /// Equivalent to `this.cmp(this.orderHash, a, b, m)`.
+  /// Note the ordering of the set elements is given by their orderHash, not the given `by`.
+  //- {::
+  //>   .let s1=Sets#({::}, +1, +2, +3)
+  //>   .let s2=Sets#({::}, -2, -3, -1)
+  //>   .check{Sets#[Int,Int]({::.imm.abs.int}).cmp(s1, s2, {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 1}
+  //-   }
+  .cmp[R:**](a: read Set[E,K], b: read Set[E,K], m: mut OrderMatch[R]): R
+    -> this.cmp(this.orderHash, a, b, m);
+
+  /// `this.list` returns a sorted list of all the elements. The sorted order is the order specified by `this.orderHash`
+  /// Note: This list is zero cost as this collection maintains a sorted list.
+  //- {::
+  //>   .check{ Sets#({::.imm.abs}, -3, +2, -1).list.assertEq({::}, Lists#(-1, +2, -3)) }
+  //-   }
+  .list: List[E];
+  }
+
+
+
+/// A Factory class for making sets of elements.
+Sets: Sealed {
+  #[E,K](OrderHashBy[E,K]): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E,K]->Magic!;
+  }
+

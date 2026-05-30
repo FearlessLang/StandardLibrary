@@ -1,5 +1,6 @@
 package base;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
@@ -42,12 +43,54 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
     catch(ArithmeticException e){ throw err("Int.* overflow"); }
   }
 
-  @Override public Object imm$nat$0(){ return Nat$0Instance.instance(val < 0 ? 0 : val); }
-  @Override public Object imm$byte$0(){ return Byte$0Instance.instance(clampByte(val)); }
-  @Override public Object imm$float$0(){ return Float$0Instance.instance((double)val); }
+
   @Override public Object imm$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(val),BigInteger.ONE); }
-  @Override public Object imm$natExact$0(){ return val < 0 ? optEmpty() : optSome(Nat$0Instance.instance(val)); }
-  @Override public Object imm$byteExact$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$0Instance.instance((byte)val)); }
+
+  @Override public Object imm$nat$0(){ return val < 0 ? optEmpty() : optSome(Nat$0Instance.instance(val)); }
+  @Override public Object imm$byte$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$0Instance.instance((byte)val)); }
+  @Override public Object imm$float$0(){
+    if (canConvertToFloat(val)) {
+      return optSome(Float$0Instance.instance((double) val));
+    }
+    return optEmpty();
+  }
+
+  static boolean canConvertToFloat(long val) {
+    // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+    // The largest integer that can be exactly represented in a double is 2^53.
+    if (-9007199254740993L <= val && val <= 9007199254740993L) {
+      return true;
+    }
+
+    // Further optimisations exist here, I just can't be bothered right now...
+    return val == (long) ((double) val);
+  }
+
+  @Override public Object imm$natExact$0(){
+    if (val < 0) {
+      throw err("Int.natExact: cannot convert to Nat "+val+" is less than 0");
+    }
+    return Nat$0Instance.instance(val);
+  }
+  @Override public Object imm$byteExact$0(){
+    if (val < 0) {
+      throw err("Int.byteExact: cannot convert to Byte "+val+" is less than 0");
+    }
+    if (val > 255) {
+      throw err("Int.byteExact: cannot convert to Byte "+val+" is greater than 255");
+    }
+    return Byte$0Instance.instance((byte)val);
+  }
+  @Override public Object imm$floatExact$0(){
+    if (canConvertToFloat(val)) {
+      return Float$0Instance.instance((double) val);
+    }
+    throw err("Int.floatExact: cannot convert to Float "+val+" is too large to be represented as a Float without loss of precision");
+  }
+
+  @Override public Object imm$natDefensive$0(){ return Nat$0Instance.instance(val < 0 ? 0 : val); }
+  @Override public Object imm$byteDefensive$0(){ return Byte$0Instance.instance(clampByte(val)); }
+  @Override public Object imm$floatDefensive$0(){ return Float$0Instance.instance((double)val); }
 
   @Override public Object imm$$plus$1(Object p0){
     try{ return instance(Math.addExact(val,i(p0))); }
@@ -83,7 +126,7 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
     // Long.MIN_VALUE correctly converted to Long.MAX_VALUE + 1
     return Nat$0Instance.instance(Math.abs(val));
   }
-  @Override public Object imm$sqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)val)); }
+  @Override public Object imm$sqrtDefensive$0(){ return Float$0Instance.instance(Math.sqrt((double)val)); }
 
   @Override public Object imm$sign$0() {
     if (val == 0L) {
@@ -97,9 +140,8 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
 
   @Override public Object read$str$0(){ return Str$0Instance.instance((val < 0 ? "" : "+")+val); }
 
-  @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$clamp$2(Object p0, Object p1){
+  @Override public Object imm$clampExact$2(Object p0, Object p1){
     long lo= i(p0), hi= i(p1);
     if (lo > hi){ throw err("Int.clamp: lo>hi"); }
     if (val < lo){ return instance(lo); }
@@ -149,7 +191,7 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
    * 4. val < 0, |val| == len, only happens when val == Long.MIN_VALUE and len == Long.MAX_VALUE + 1
    *  - val % len == 0, since val is congruent to 0.
    */
-  @Override public Object imm$wrapIndex$1(Object p0){
+  @Override public Object imm$wrapIndexExact$1(Object p0){
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ throw err("Int.wrapIndex: len==0"); }
     // handle case where len cannot be represented as a signed long.

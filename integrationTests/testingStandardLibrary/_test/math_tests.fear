@@ -1,0 +1,248 @@
+MathUnitTests: Test {::
+  .test MathConstantsTests
+  .test LnTests
+  .test LogTests
+  .test LogbTests
+  .test Log2Tests
+  .test AsinTests
+  .test AcosTests
+  .test AtanTests
+  .test Atan2Tests
+  .test EuclideanModTests
+  .test HypotTests
+  .test MaxMinTests
+  .test DegreeTests
+  .test RadianTests
+  }
+
+_FloatTest: {
+  .within(actual: Float, expected: Float, delta: Float): Void ->
+    actual.assertInRange(expected - delta, expected + delta);
+
+  .closeTo(actual: Float, expected: Float): Void ->
+    this.within(
+      actual, expected, +0.000100000000000000004792173602385929598312941379845142364501953125
+      );
+  }
+
+MathConstantsTests: Test {::
+  .check{Math.minInt.assertEq(-9_223_372_036_854_775_808)}
+  .check{Math.maxInt.assertEq(+9_223_372_036_854_775_807)}
+  .check{Math.intBits.assertEq(64)}
+
+  .check{Math.minNat.assertEq(0)}
+  .check{Math.maxNat.assertEq(18_446_744_073_709_551_615)}
+  .check{Math.natBits.assertEq(64)}
+
+  .check{Math.minByte.assertEq(0.byteExact)}
+  .check{Math.maxByte.assertEq(255.byteExact)}
+  .check{Math.byteBits.assertEq(8)}
+
+  .check{Math.floatBits.assertEq(64)}
+  .check{Math.inf.assertEq(+1.0 / +0.0)}
+  .check{Math.negInf.assertEq((-1.0) / +0.0)}
+  .check{Math.nan.isNaN.assertTrue}
+
+  .check{Math.pi.assertInRange(
+    +3.141592653589793115997963468544185161590576171875,
+    +3.141592653589793115997963468544185161590576171875
+    )}
+
+  .check{Math.tau.assertEq(Math.pi * +2.0)}
+
+  .check{Math.e.assertInRange(
+    +2.718281828459045090795598298427648842334747314453125,
+    +2.718281828459045978974017998552881181240081787109375
+    )}
+  }
+
+LnTests: Test {::
+  .check{Math.ln(+0.0).assertEq(Math.negInf)}
+  .check{Math.ln(-0.0).assertEq(Math.negInf)}
+  .check{Math.ln(Math.inf).assertEq(Math.inf)}
+  .check{Math.ln(+2.0).assertInRange(
+    +0.693147170000000034661979952943511307239532470703125,
+    +0.69314718055994528622676398299518041312694549560546875
+    )}
+  .check{Math.ln(Math.e).assertEq(+1.0)}
+  .check{Math.ln(+1.0).assertEq(+0.0)}
+  .checkDetErr({i -> True}, {Math.ln(-1.0)})
+  .checkDetErr({i -> True}, {Math.ln(Math.nan)})
+  .checkDetErr({i -> True}, {Math.ln(Math.negInf)})
+  }
+
+LogTests: Test {::
+  .check{Math.log(+0.0).assertEq(Math.negInf)}
+  .check{Math.log(-0.0).assertEq(Math.negInf)}
+  .check{Math.log(Math.inf).assertEq(Math.inf)}
+  .check{Math.log(+10.0).assertEq(+1.0)}
+  .check{Math.log(+1.0).assertEq(+0.0)}
+  .check{Math.log(+2.0).assertInRange(
+    +0.301029995599999988797890182468108832836151123046875,
+    +0.301029995800000005345964382286183536052703857421875
+    )}
+  .checkDetErr({i -> True}, {Math.log(-1.0)})
+  .checkDetErr({i -> True}, {Math.log(Math.nan)})
+  .checkDetErr({i -> True}, {Math.log(Math.negInf)})
+  }
+
+LogbTests: Test {::
+  .check{Math.logb(+2.0, +8.0).assertEq(+3.0)}
+  .check{Math.logb(+10.0, +100.0).assertEq(+2.0)}
+  .check{_FloatTest.closeTo(Math.logb(+3.0, +3.0 ** +5.0), +5.0)}
+  .check{Math.logb(+2.0, +1.0).assertEq(+0.0)}
+  .check{Math.logb(+2.0, +0.0).assertEq(Math.negInf)}
+  .check{Math.logb(+2.0, Math.inf).assertEq(Math.inf)}
+  .checkDetErr({i -> True}, {Math.logb(+2.0, -1.0)})
+  .checkDetErr({i -> True}, {Math.logb(-2.0, +4.0)})
+  .checkDetErr({i -> True}, {Math.logb(+0.0, +4.0)})
+  .checkDetErr({i -> True}, {Math.logb(Math.nan, +1.0)})
+  .checkDetErr({i -> True}, {Math.logb(+3.0, Math.nan)})
+  }
+
+Log2Tests: Test {::
+  .check{Math.log2(+8.0).assertEq(+3.0)}
+  .check{Math.log2(+1.0).assertEq(+0.0)}
+  .check{Math.log2(+7.0).assertInRange(
+    +2.8073549209999999476394805242307484149932861328125,
+    +2.8073549230000001131202225224114954471588134765625
+    )}
+  .check{Math.log2(+0.0).assertEq(Math.negInf)}
+  .check{Math.log2(Math.inf).assertEq(Math.inf)}
+  .checkDetErr({i -> True}, {Math.log2(-1.0)})
+  .checkDetErr({i -> True}, {Math.log2(Math.nan)})
+  }
+
+AsinTests: Test {::
+  .check{Math.asin(+0.0)#.assertEq(+0.0)}
+  .check{Math.asin(-0.0)#.assertEq(-0.0)}
+  .check{Math.asin(+1.0)#.assertEq(Math.pi / +2.0)}
+  .check{Math.asin(-1.0)#.assertEq(Math.pi / -2.0)}
+  .checkDetErr({i -> True}, {Math.asin(+2.0)})
+  .checkDetErr({i -> True}, {Math.asin(-2.0)})
+  .checkDetErr({i -> True}, {Math.asin(Math.nan)})
+  }
+
+AcosTests: Test {::
+  .check{Math.acos(+1.0)#.assertEq(+0.0)}
+  .check{Math.acos(-1.0)#.assertEq(Math.pi)}
+  .check{Math.acos(+0.0)#.assertEq(Math.pi / +2.0)}
+  .checkDetErr({i -> True}, {Math.acos(+2.0)})
+  .checkDetErr({i -> True}, {Math.acos(-2.0)})
+  .checkDetErr({i -> True}, {Math.acos(Math.nan)})
+  }
+
+AtanTests: Test {::
+  .check{Math.atan(+0.0)#.assertEq(+0.0)}
+  .check{Math.atan(-0.0)#.assertEq(-0.0)}
+  .check{Math.atan(+1.0)#.assertEq(Math.pi / +4.0)}
+  .check{Math.atan(-1.0)#.assertEq(Math.pi / -4.0)}
+  .check{Math.atan(Math.inf)#.assertEq(Math.pi / +2.0)}
+  .check{Math.atan(Math.negInf)#.assertEq(Math.pi / -2.0)}
+  .checkDetErr({i -> True}, {Math.atan(Math.nan)})
+  }
+
+Atan2Tests: Test {::
+  .check{Math.atan2(+1.0, +0.0)#.assertEq(Math.pi / +2.0)}
+  .check{Math.atan2(-1.0, +0.0)#.assertEq(Math.pi / -2.0)}
+  .check{Math.atan2(+0.0, +1.0)#.assertEq(+0.0)}
+  .check{Math.atan2(+0.0, -1.0)#.assertEq(Math.pi)}
+  .checkDetErr({i -> True}, {Math.atan2(Math.nan, +1.0)})
+  .checkDetErr({i -> True}, {Math.atan2(+1.0, Math.nan)})
+  }
+
+EuclideanModTests: Test {::
+  .check{Math.euclideanMod(+3.0, +7.0).assertEq(+3.0)}
+  .check{Math.euclideanMod(-3.0, +7.0).assertEq(+4.0)}
+  .check{Math.euclideanMod(+10.0, +5.0).assertEq(+0.0)}
+  .check{Math.euclideanMod(-10.0, +5.0).assertEq(+0.0)}
+  .check{Math.euclideanMod(+3.0, -7.0).assertEq(+3.0)}
+  }
+
+HypotTests: Test {::
+  .check{Math.hypot(+3.0, +4.0).assertEq(+5.0)}
+  .check{Math.hypot(+0.0, +0.0).assertEq(+0.0)}
+  .check{Math.hypot(Math.inf, +1.0).assertEq(Math.inf)}
+  .check{Math.hypot(+1.0, Math.inf).assertEq(Math.inf)}
+  .checkDetErr({i -> True}, {Math.hypot(Math.nan, +1.0)})
+  .checkDetErr({i -> True}, {Math.hypot(+1.0, Math.nan)})
+  }
+
+_Persons: F[Str, Nat, _Person] {
+  name, age -> {.name -> name; .age -> age;}
+  }
+
+_Person: {
+  read .name: Str;
+  read .age: Nat;
+  }
+
+MaxMinTests: Test {::
+  .check{Math.max(1, 2, {::}).assertEq(2)}
+  .check{Math.min(2, 1, {::}).assertEq(1)}
+  .check{
+    Math.max(_Persons#(`Alice`, 32), _Persons#(`Bob`, 8), {::.age})
+      .name.assertEq(`Alice`)
+    }
+  .check{
+    Math.min(_Persons#(`Alice`, 32), _Persons#(`Bob`, 8), {::.age})
+      .name.assertEq(`Bob`)
+    }
+  .check{
+    Math.min(_Persons#(`Carol`, 32), _Persons#(`Daniel`, 32), {::.age})
+      .name.assertEq(`Carol`)
+    }
+  .check{
+    Math.max(_Persons#(`Carol`, 32), _Persons#(`Daniel`, 32), {::.age})
+      .name.assertEq(`Carol`)
+    }
+  }
+
+DegreeTests: Test {::
+  .check{(+180.0).deg!.toRad#.assertEq(Math.pi)}
+  .check{(+360.0).deg!.normalize#.assertEq(+0.0)}
+  .check{(-90.0).deg!.normalize#.assertEq(+270.0)}
+
+  .check{(+0.0).deg!.sin.assertEq(+0.0)}
+  .check{(+90.0).deg!.sin.assertEq(+1.0)}
+  .check{_FloatTest.closeTo((+180.0).deg!.sin, +0.0)}
+  .check{(+270.0).deg!.sin.assertEq(-1.0)}
+
+  .check{(+0.0).deg!.cos.assertEq(+1.0)}
+  .check{_FloatTest.closeTo((+90.0).deg!.cos, +0.0)}
+  .check{(+180.0).deg!.cos.assertEq(-1.0)}
+  .check{_FloatTest.closeTo((+270.0).deg!.cos, +0.0)}
+
+  .check{
+    Math.nan.deg.isEmpty
+      & (Math.inf.deg.isEmpty)
+      & (Math.negInf.deg.isEmpty)
+      .assertTrue
+    }
+  }
+
+RadianTests: Test {::
+  .check{Math.pi.rad!.toDeg.assertEq((+180.0).deg!)}
+  .check{Math.tau.rad!.normalize#.assertEq(+0.0)}
+  .check{(Math.tau / -4.0).rad!.normalize#.assertEq(Math.tau * +3.0 / +4.0)}
+
+  .check{_FloatTest.closeTo(+0.0.rad!.cos, +1.0)}
+  .check{_FloatTest.closeTo((Math.pi / +2.0).rad!.cos, +0.0)}
+  .check{_FloatTest.closeTo(Math.pi.rad!.cos, -1.0)}
+  .check{_FloatTest.closeTo((Math.tau * +3.0 / +4.00).rad!.cos, +0.0)}
+
+  .check{_FloatTest.closeTo(+0.0.rad!.tan, +0.0)}
+  .check{_FloatTest.closeTo((Math.pi / +4.0).rad!.tan, +1.0)}
+  .check{_FloatTest.closeTo(Math.pi.rad!.tan, +0.0)}
+  .check{_FloatTest.closeTo((Math.pi * +3.0 / +4.0).rad!.tan, -1.0)}
+
+  .check{(Math.pi / +2.0).rad!.tan >= (+10.0 ** +10.0) .assertTrue}
+  .check{(Math.pi / +2.0 + (+10.0 ** -6.0)).rad!.tan <= (+10.0 ** +10.0) .assertTrue}
+
+  .check{
+    Math.nan.rad.isEmpty
+      & (Math.inf.rad.isEmpty)
+      & (Math.negInf.rad.isEmpty)
+      .assertTrue
+    }
+  }

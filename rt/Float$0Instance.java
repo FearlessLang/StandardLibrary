@@ -32,11 +32,11 @@ public record Float$0Instance(double val) implements Float$0{
     if (!Double.isFinite(x)){ return false; }
     return x == Math.rint(x);
   }
-  @Override public Object imm$signnum$0() {
+  @Override public Object imm$signDefensive$0() {
     return Float$0Instance.instance(Math.signum(this.val));
   }
   @Override public Object imm$$star_star$1(Object p0){ return instance(Math.pow(val,f(p0))); }
-  @Override public Object imm$int$0(){
+  @Override public Object imm$intDefensive$0(){
     if (Double.isNaN(val)) {
       return Int$0Instance.instance(0);
     }
@@ -48,8 +48,37 @@ public record Float$0Instance(double val) implements Float$0{
     }
     return Int$0Instance.instance((long) val);
   }
-  /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
+  @Override public Object imm$intExact$0(){
+    if (Double.isNaN(val)) {
+      throw err("Float.intExact: NaN has no integer value");
+    }
+    if (val <= Long.MIN_VALUE) {
+      throw err("Float.intExact: cannot convert to Int "+val+" is less than Math.minInt");
+    }
+    if (val >= Long.MAX_VALUE) {
+      throw err("Float.intExact: cannot convert to Int "+val+" is greater than Math.maxInt");
+    }
+    if (val != (long) val) {
+      throw err("Float.intExact: cannot convert to Int "+val+" is not an integer");
+    }
+    return Int$0Instance.instance((long) val);
+  }
+  @Override public Object imm$int$0(){
+    if (Double.isNaN(val) || val <= Long.MIN_VALUE || val >= Long.MAX_VALUE || val != (long) val) {
+      return optEmpty();
+    }
+    return optSome(Int$0Instance.instance((long) val));
+  }
+
   @Override public Object imm$nat$0(){
+    if (Double.isNaN(val) || val <= 0.0d || val > MAX_UNSIGNED_VALUE_FLOAT || val != (long) val) {
+      return optEmpty();
+    }
+    return optSome(Nat$0Instance.instance((long) val));
+  }
+
+  /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
+  @Override public Object imm$natDefensive$0(){
     if (Double.isNaN(val) || val <= 0.0d) {
       return Nat$0Instance.instance(0);
     }
@@ -58,7 +87,72 @@ public record Float$0Instance(double val) implements Float$0{
     }
     return Nat$0Instance.instance((long) val);
   }
-  @Override public Object imm$byte$0(){ return Byte$0Instance.instance(clampTrunc0ToByteBits(val)); }
+
+  @Override public Object imm$natExact$0(){
+    if (Double.isNaN(val)) {
+      throw err("Float.natExact: NaN has no Nat value");
+    }
+    if (val <= 0.0d) {
+      throw err("Float.natExact: cannot convert to Nat "+val+" is less than 0");
+    }
+    if (val > MAX_UNSIGNED_VALUE_FLOAT) {
+        throw err("Float.natExact: cannot convert to Nat "+val+" is greater than Math.maxNat");
+    }
+    if (val != (long) val) {
+      throw err("Float.natExact: cannot convert to Nat "+val+" is not an integer");
+    }
+    return Nat$0Instance.instance((long) val);
+  }
+
+
+  @Override public Object imm$byte$0(){
+    if (Double.isNaN(val) || val <= 0.0d || val > 255.0d || val != (long) val) {
+      return optEmpty();
+    }
+    return optSome(Byte$0Instance.instance((byte) val));
+  }
+
+  /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
+  @Override public Object imm$byteDefensive$0(){
+    if (Double.isNaN(val) || val <= 0.0d) {
+      return Byte$0Instance.instance((byte) 0);
+    }
+    if (val > MAX_UNSIGNED_VALUE_FLOAT) {
+      return Byte$0Instance.instance((byte) 255);
+    }
+    return Byte$0Instance.instance((byte) val);
+  }
+
+  @Override public Object imm$byteExact$0(){
+    if (Double.isNaN(val)) {
+      throw err("Float.natExact: NaN has no Byte value");
+    }
+    if (val <= 0.0d) {
+      throw err("Float.natExact: cannot convert to Byte "+val+" is less than 0");
+    }
+    if (val > 255.0) {
+      throw err("Float.natExact: cannot convert to Byte "+val+" is greater than Math.maxByte");
+    }
+    if (val != (long) val) {
+      throw err("Float.natExact: cannot convert to Byte "+val+" is not an integer");
+    }
+    return Byte$0Instance.instance((byte) val);
+  }
+
+  @Override public Object imm$num$0() {
+    if (Double.isFinite(val)) {
+      return optSome(numExactFinite(val));
+    }
+    return optEmpty();
+  }
+  @Override public Object imm$numExact$0(){
+    if (Double.isFinite(val)) {
+      return numExactFinite(val);
+    }
+    throw err("Float.numDefensive: cannot convert non-finite value "+val+" to Num");
+  }
+
+
   private static Object numExactFinite(double x){
     if (x == 0.0d){ return Num$0Instance.instance(BigInteger.ZERO,BigInteger.ONE); } // also -0.0
     long b= Double.doubleToRawLongBits(x);
@@ -76,32 +170,12 @@ public record Float$0Instance(double val) implements Float$0{
     if (neg){ n= n.negate(); }
     return Num$0Instance.instance(n,d);
   }
-  @Override public Object imm$numExact$0(){
-    if (Double.isNaN(val) || Double.isInfinite(val)){ return optEmpty(); }
-    return optSome(numExactFinite(val));
-  }
-
-  @Override public Object imm$intExact$0(){
-    if (!isIntegral(val)){ return optEmpty(); }
-    if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){ return optEmpty(); }
-    return optSome(Int$0Instance.instance((int)val));
-  }
-  @Override public Object imm$natExact$0(){
-    if (!isIntegral(val)){ return optEmpty(); }
-    if (val < 0.0d || val > MAX_UNSIGNED_VALUE_FLOAT){ return optEmpty(); }
-    return optSome(Nat$0Instance.instance((int)((long)val)));
-  }
-  @Override public Object imm$byteExact$0(){
-    if (!isIntegral(val)){ return optEmpty(); }
-    if (val < 0.0d || val > 255.0d){ return optEmpty(); }
-    return optSome(Byte$0Instance.instance((byte)((int)val)));
-  }
   @Override public Object imm$$plus$1(Object p0){ return instance(val + f(p0)); }
   @Override public Object imm$$dash$1(Object p0){ return instance(val - f(p0)); }
   @Override public Object imm$$star$1(Object p0){ return instance(val * f(p0)); }
   @Override public Object imm$$slash$1(Object p0){ return instance(val / f(p0)); }
-  @Override public Object imm$abs$0(){ return instance(Math.abs(val)); }
-  @Override public Object imm$sqrt$0(){ return instance(Math.sqrt(val)); }
+  @Override public Object imm$absDefensive$0(){ return instance(Math.abs(val)); }
+  @Override public Object imm$sqrtDefensive$0(){ return instance(Math.sqrt(val)); }
   @Override public Object read$str$0(){
     if (Double.isNaN(val)){ return Str$0Instance.instance("(+0.0 / +0.0)"); }
     if (val == Double.POSITIVE_INFINITY){ return Str$0Instance.instance("(+1.0 / +0.0)"); }
@@ -112,9 +186,8 @@ public record Float$0Instance(double val) implements Float$0{
     if (s.charAt(0) != '-'){ s= "+"+s; }                   // SignedFloat requires sign
     return Str$0Instance.instance(s);
   }
-  @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$clamp$2(Object p0,Object p1){
+  @Override public Object imm$clampExact$2(Object p0,Object p1){
     double lo= f(p0);
     double hi= f(p1);
     if (cmpFearless(lo,hi) > 0){ throw err("Float.clamp: lo>hi"); }
@@ -128,7 +201,7 @@ public record Float$0Instance(double val) implements Float$0{
     if (d < 0.0d){ throw err("Float.eqDelta: delta<0"); }
     return bool(Math.abs(val - exp) <= d);
   }
-  @Override public Object imm$round$0(){
+  @Override public Object imm$roundDefensive$0(){
     if (Double.isNaN(val)){ return Int$0Instance.instance(0); }
     if (val == Double.POSITIVE_INFINITY){ return Int$0Instance.instance(Int$0Instance.MAX_VALUE); }
     if (val == Double.NEGATIVE_INFINITY){ return Int$0Instance.instance(Int$0Instance.MIN_VALUE); }
@@ -137,9 +210,9 @@ public record Float$0Instance(double val) implements Float$0{
     if (r >= (double)Int$0Instance.MAX_VALUE){ return Int$0Instance.instance(Int$0Instance.MAX_VALUE); }
     return Int$0Instance.instance((int)r);
   }
-  @Override public Object imm$ceil$0(){ return Int$0Instance.instance((int)Math.ceil(val)); }
-  @Override public Object imm$floor$0(){ return Int$0Instance.instance((int)Math.floor(val)); }
-  @Override public Object imm$trunc0$0(){ return Int$0Instance.instance(clampTrunc0ToInt(val)); }
+  @Override public Object imm$ceilDefensive$0(){ return Int$0Instance.instance((int)Math.ceil(val)); }
+  @Override public Object imm$floorDefensive$0(){ return Int$0Instance.instance((int)Math.floor(val)); }
+  @Override public Object imm$trunc0Defensive$0(){ return Int$0Instance.instance(clampTrunc0ToInt(val)); }
   @Override public Object imm$isNaN$0(){ return bool(Double.isNaN(val)); }
   @Override public Object imm$isInfinite$0(){ return bool(Double.isInfinite(val)); }
   @Override public Object imm$isPosInfinity$0(){ return bool(val == Double.POSITIVE_INFINITY); }

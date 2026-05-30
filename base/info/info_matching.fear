@@ -1,0 +1,90 @@
+/// Example usage coupling
+/// info:= {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+/// info ~ > "friends"
+///           & > 0 > "name" .msgMatch{:: == "Bob"}
+///           & > 1 > "name" .msgMatch{:: == "Alice"}
+///           => {"I am friends with Bob and Alice!"}
+
+InfoMatches: {
+  #: Bool -> this.currentlyMatching;
+  .currentlyMatching: Bool -> this.matchLevel.isSome;
+  /// The info we are matching against - how far we have "descended" into info.
+  .matchLevel: mut Opt[Info] -> this.close;
+  /// Has to be an Opt because we want this to play nicely with InfoExtractor.
+  .close: mut Opt[Info];
+
+  =>[R:*](f: read F[Info, R]): mut Opt[R] -> this# .if {
+    .then -> this.close.flow.map(f).opt;
+    .else -> {};
+    };
+
+  >(key: InfoKey): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.match {
+        .some info -> key.indexInto info;
+        .empty -> {};
+      };
+    };
+
+  .msgMatch(fn: F[Str, Bool]): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.match {
+        .some info -> info.match {
+          .empty -> {}; .list _ -> {}; .map _ -> {};
+          .msg m -> fn#(m) .then {info};
+        };
+        .empty -> {};
+      };
+    };
+
+  .listMatch(fn: F[List[Info], Bool]): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.match {
+        .some info -> info.match {
+          .empty -> {}; .msg _ -> {}; .map _ -> {};
+          .list l -> fn#(l) .then {info};
+        };
+        .empty -> {};
+      };
+    };
+
+  .mapMatch(fn: F[Map[Str,Str,Info], Bool]): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.match {
+        .some info -> info.match {
+          .empty -> {}; .msg _ -> {}; .list _ -> {};
+          .map m -> fn#(m) .then {info};
+        };
+        .empty -> {};
+      };
+    };
+
+  .isMsg: InfoMatches -> this.msgMatch{_ -> True};
+  .isList: InfoMatches -> this.listMatch{_ -> True};
+  .isMap: InfoMatches -> this.mapMatch{_ -> True};
+  .isEmpty: InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.match {
+    .some info -> info.match {
+      .msg _ -> {}; .list _ -> {}; .map _ -> {};
+      .empty -> this.matchLevel;
+      };
+    .empty -> {};
+    };
+  };
+
+  .not: InfoMatches -> {
+    .close -> this.close;
+    .currentlyMatching -> this.currentlyMatching.not;
+    };
+
+  &: InfoMatches -> {'self
+    .close -> this.close;
+    # -> this# && {self.currentlyMatching};
+    };
+
+  |: InfoMatches -> {'self
+    .close -> this.close;
+    # -> this# || {self.currentlyMatching};
+    };
+}

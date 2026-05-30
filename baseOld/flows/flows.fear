@@ -37,7 +37,7 @@ Flow: Sealed,_FlowExtensions,_FlowConverters {
   .fromMutSource[E:*](source: mut FlowOp[E], size: Nat): mut Flow[E] -> _MutSourceCollection[E]#(source, size),
   }
 
-Flow[E:*]: Sealed,Extensible[Flow[E]],_NonTerminalOps[E],_TerminalOps[E] {
+Flow[E:*]: Sealed,Pipeline[Flow[E]],_NonTerminalOps[E],_TerminalOps[E] {
   .self -> this,
   mut .let[DR:*,R:*](x: read F[mut MF[mut Flow[E]],DR], cont: mut Continuation[DR,mut Flow[E],R]): R -> Block#
     .let duplicator = {_LazyFlowDuplicators#this}
@@ -123,6 +123,7 @@ _TerminalOps[E:*]: Sealed{
   mut .for(f: read F[E, Void]): Void -> this.fold({Void}, {_, e -> f#e}),
   mut .forEffect(f: mut MF[E, Void]): Void -> this.list.iter.for{e -> f#e},
   mut .list: mut List[E] -> this.fold({List#[E]}, {acc, e -> acc + e}),
+
   mut .max(compare: read F[E, E, Ordering]): mut Opt[E] -> this.fold[mut Opt[E]]({{}}, {max, b -> max.match{
     .empty -> Opts#b,
     .some(a) -> compare#(a, b).match{

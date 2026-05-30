@@ -1,0 +1,150 @@
+//For read/imm sources, .flow is already parallel-eligible.
+//For mut sources, .seqFlow is sequential and .flow(mode) requires proof.
+//Parallel flows preserve coherent underspecification.
+//This means that for max/min/sort the tournament details have to be fixed across modes.
+Flows: {
+  #[R:*]: mut SizedFlow[R] -> Magic!;
+  #[R:*](r1: R): mut SizedFlow[R] -> Magic!;
+  #[R:*](r1: R, r2: R): mut SizedFlow[R] -> Magic!;
+  #[R:*](r1: R, r2: R, r3: R): mut SizedFlow[R] -> Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R): mut SizedFlow[R] -> Magic!;
+  .fromReadList[R:*](xs: read List[R]): mut SizedFlow[read/imm R] -> Magic!;
+  .fromImmList[R:*](xs: List[R]): mut SizedFlow[imm R] -> Magic!;
+  .fromMutList[R:*](xs: mut List[R], mode: FlowMode[R]): mut SizedFlow[R] -> Magic!;//parallel
+
+  .seqReadList[R:*](xs: read List[R]): mut SizedFlow[read/imm R] -> Magic!;
+  .seqImmList[R:*](xs: List[R]): mut SizedFlow[imm R] -> Magic!;
+  .seqMutList[R:*](xs: mut List[R]): mut SizedFlow[R] -> Magic!;
+
+  /// Generate an infinite stream.
+  .generate[E:*](mut MF[E]): InfiniteFlow[E] -> Magic!;
+  .generate[E:*](seed: mut MF[E], mut MF[E, E]): InfiniteFlow[E] -> Magic!;
+  }
+
+Flow[E:*]: Pipe[Flow[E]] {
+  mut .forEach[R:*](f: mut MF[E,Void]): Void;
+  mut .map[R:*](f: read F[E, R]): mut Flow[R];
+  mut .flatMap[R:*](f: read ToFlow[E, R]): mut Flow[R];
+  mut .filter(f: read F[E, Bool]): mut Flow[E];
+  /// `this.count` returns the number of elements in the flow.
+  /// Note: `this.count` consumes `this`
+  mut .count: Nat;
+  mut .isEmpty: Bool -> this.count == 0;
+  mut ++ (mut Flow[E]): mut Flow[E];
+  mut .list: mut List[E];
+  mut .eList: mut EList[E];
+  mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): mut Set[E', K];
+  mut .eSet[E', K](mut AsImm[E, E'], OrderHashBy[imm E, K]): mut ESet[E', K];
+  mut .mapping[K,K',E':*](OrderHashBy[K,K'], read KeyElemMapper[E,K,E']): mut Map[K,K',E'];
+
+  mut .join(js: JoinStr[E]): E -> js.joinStr this;
+  mut .sum(sn: SumNumber[E]): E -> sn.sumNumber this;
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
+  mut .foldUntil[R:*](acc: iso MF[R], f: read F[R,E,R], read F[R, Bool]): R;
+  mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R ->
+    this.fold(acc,{a,e->a.acc e}).result;
+  mut .max[K](by: OrderBy[imm E,K]):          mut Flow[E];
+  mut .min[K](by: OrderBy[imm E,K]):          mut Flow[E]; //can be parallel?
+  
+  mut .sort[K](by: OrderBy[imm E,K]):         mut SizedFlow[E]-> this.eList.sort by .seqFlow; //can be parallel?
+  mut .distinct[K](by: OrderHashBy[imm E,K]): mut SizedFlow[E]-> this.eList.distinct  by .seqFlow; //can be parallel?
+  mut .sortDistinct[K](by: OrderBy[imm E,K]): mut SizedFlow[E]-> this.eList.sortDistinct by .seqFlow; //can be parallel?
+  mut .any(f: read F[E, Bool]):  Bool;
+  mut .all(f: read F[E, Bool]):  Bool;
+  mut .none(f: read F[E, Bool]): Bool;
+  mut .get:   E;//get the first element if size==1, throws otherwise
+  mut .opt:   mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
+  mut .first: mut Opt[E]; //opt of the first element, never throws
+  mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut Flow[R] -> 
+    this.map(f)
+      .filter{r -> r.isSome}
+      .map{r -> r!};
+
+  mut .peek(f: read F[E, Void]): mut Flow[E] ->//Only useful for invarians+debug, wonder if we should have a better name
+    this.map{e -> Block#(f#e, e)};
+  mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut Flow[E] -> //crucial to do IO side effects while flowing
+    this.map(ctx, {c, e -> Block#(f#(c, e), e)});
+  //--Still to implement
+  mut .let[DR:*,R:*](
+    x: read F[mut MF[mut Flow[E]],DR],
+    cont: mut FlowContinuation[DR,R]
+  ): R->Error.msg"TODO";
+  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
+  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
+  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg`TODO`;
+  mut .limitDefensive(n: Nat): mut Flow[E];
+  mut .scan[S:imm](input: S, f: read F[S,E,S]): mut Flow[S] -> this.map{e -> f#(input, e)};
+
+  mut .last: mut Opt[E]-> this.fold({{}}, {_, e -> Opts#(e)});
+  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R] -> this.map(f)
+    .filter{r -> r.isSome}
+    .map{r -> r!}
+    .first;
+  mut .findFirst(f: read F[E, Bool]): mut Opt[E]-> this.filter(f).first;
+
+  .close -> this;
+  }
+
+FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
+
+AsImm[E:*, R]: { mut #(E): R; }
+
+JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
+
+SumNumber[E:*]: { .sumNumber(mut Flow[E]): E }
+
+ToFlow[E:**, R:*]: {
+  #(E): Flow[R];
+  }
+
+FlowMode[T:*]:Sealed{.flowMode:FlowMode[T];}
+
+Par:Sealed{#[T:imm,read]:Par[T]->Par[T]}
+Par[T:imm,read]:FlowMode[T]{this}
+
+ParRepr:Sealed{#[T]:ParRepr[T]->ParRepr[T]}
+ParRepr[T]:FlowMode[mut Repr[T]]{this}
+
+ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
+ParPod[T]:FlowMode[mut IsoPod[T]]{this}
+
+
+ToParallelizable[T:*, T':*]: Sealed {
+  /// Take a potentially non parallel safe `T` to a parallel safe `T'`
+  #(t:T): T';
+}
+ToImmOrRead[T:*, T': imm,read]: ToParallelizable[T, T'] {}
+ToMutIsoPod[T:*, T']: ToParallelizable[T, mut IsoPod[T']] {}
+ToMutRepr[T:*, T']:  ToParallelizable[T, mut Repr[T']] {}
+
+ToImmOrRead: {
+  #[T:*, T': imm,read](f: F[T, T']): ToImmOrRead[T,T'] -> {f#::}
+  }
+ToMutIsoPod: {
+  #[T:*, T'](f: F[T, mut IsoPod[T']]): ToMutIsoPod[T,T'] -> {f#::}
+  }
+ToMutRepr: {
+  #[T:*, T'](f: F[T, mut Repr[T']]): ToMutRepr[T,T'] -> {f#::}
+  }
+
+
+ActorImpl[S:*,E:*,R]: { 
+  read #(downstream: mut ActorSink[R], state: S, e: E, m: ActorMatch[R]): R
+  }
+
+ActorImplMut[S:*,E:*,R:*]: {
+  read #(downstream: mutH ActorSink[R], state: mutH S, e: E, m: ActorMatch[R]): R
+  }
+
+ActorMatch[R:*]: { mut .continue: R; mut .stop: R; }//Should we instead just have a 'stopper'?
+
+_ActorSinks: {#[T:*](sink: mut _Sink[T]): mut ActorSink[T] -> mut ActorSink[T:*]: {
+  mut #(x: T): Void -> sink#x;
+  mut .pushError(info: Info): Void -> sink.pushError(info);
+  }}
+_Sink[T:*]: {
+  mut #(x: T): Void;
+  mut .pushError(info: Info): Void;
+  mut .stopDown: Void;
+  }
+

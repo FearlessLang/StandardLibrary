@@ -48,12 +48,20 @@ public class Util{
   }
   public static Bool$0 bool(boolean b){ return b ? True$0.instance : False$0.instance; }
   public static boolean isTrue(Object b){ return b == True$0.instance; }
+  public static boolean isFalse(Object b){ return b == False$0.instance; }
   public static Object ord(int i, Object mm){
     var m= (OrderMatch$1)mm;
     return i<0?m.mut$lt$0() : i==0? m.mut$eq$0() : m.mut$gt$0();
   }
+  public static Opt$1 optNullable(Object x) {
+    if (x == null) {
+      return optEmpty();
+    }
+    return optSome(x);
+  }
+
   public static Opt$1 optEmpty(){ return Opt$1.instance; }
-  public static Object optSome(Object x){ return Opts$0.instance.imm$$hash$1(x); }
+  public static Opt$1 optSome(Object x){ return (Opt$1) Opts$0.instance.imm$$hash$1(x); }
   public static Error nonDetErr(String msg){
     return (Error)Error$0.instance.imm$nonDeterministic$1(new Str$0Instance(msg));
     }
@@ -80,10 +88,23 @@ public class Util{
   public static Object callMF$1(Object f){ return ((MF$1)f).mut$$hash$0(); }
   public static Object callMF$2(Object f, Object x){ return ((MF$2)f).mut$$hash$1(x); }
   public static Object callMF$3(Object f,Object x,Object y){ return ((MF$3)f).mut$$hash$2(x,y); }
+  public static Object callMF$4(Object f,Object w,Object x,Object y){ return ((MF$4)f).mut$$hash$3(w,x,y); }
   public static Object callF$1(Object f){ return ((F$1)f).read$$hash$0(); }
   public static Object callF$2(Object f, Object x){ return ((F$2)f).read$$hash$1(x); }
   public static Object callF$3(Object f,Object x,Object y){ return ((F$3)f).read$$hash$2(x,y); }
+  public static Object callF$4(Object f,Object x,Object y,Object z){ return ((F$4)f).read$$hash$3(x,y,z); }
+  public static Object callF$5(Object f,Object w,Object x,Object y,Object z){ return ((F$5)f).read$$hash$4(w,x,y,z); }
 
+  public static Object callMultiAcc$3(Object f, Object acc, Object x, Object y) {
+    return ((MultiAcc$3)f).read$$hash$3(acc,x,y);
+  }
+  public static Object callMultiAcc$4(Object f, Object acc, Object x, Object y, Object z) {
+    return ((MultiAcc$4) f).read$$hash$4(acc, x, y, z);
+  }
+
+  public static Object callMultiAcc$5(Object f, Object acc, Object w, Object x, Object y, Object z) {
+    return ((MultiAcc$5) f).read$$hash$5(acc, w, x, y, z);
+  }
 
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }
@@ -99,6 +120,13 @@ public class Util{
     var ohB= (Order$1)by.imm$$hash$1(b);
     return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
   }
+
+  public static int cmp(OrderHashBy$2 by,Object a,Object b){//so this is the more general method
+    var ohA= (OrderHash$1)by.imm$$hash$1(a);
+    var ohB= (OrderHash$1)by.imm$$hash$1(b);
+    return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
+  }
+
   public static final class MapKey{
     public final OrderHash$1 ord; // OrderHash[K0] closed at this key's projection
     public final Object key;      // representative K (first inserted)
@@ -128,7 +156,7 @@ public class Util{
   }
   public static void printInfo(Info$0 i, RuntimeException d){
     printInfoMsg("","",i);
-    var map= ((Map$2Instance)i.imm$map$0()).elems();
+    var map= ((Map$3Instance)i.imm$map$0()).elems();
     map.entrySet().stream()
       .filter(e->is(e.getKey(),"msg")).forEach(e->printInfoMsg("","",(Info$0)e.getValue()));
     //map.entrySet().stream()
