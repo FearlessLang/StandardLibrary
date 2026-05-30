@@ -16,6 +16,7 @@ import javax.swing.Timer;
 final class FearlessFrame extends JFrame{
   private final CompletableFuture<Void> done;
   public final SerialQueue queue= new SerialQueue(this::high);
+  private Timer modelTimer;
   private Timer timer;
   private Throwable failure;
   private boolean high;
@@ -132,7 +133,17 @@ final class FearlessFrame extends JFrame{
     }
     SwingUtilities.invokeLater(this::dispose);
   }
-  private void stopTimer(){ if (timer != null){ timer.stop(); } }//can this be null here?
+  void startModelTimer(int delayMillis, java.util.List<MF$1> actions){
+    assert modelTimer == null;
+    modelTimer = new Timer(delayMillis, _ -> {
+      for (var a : actions){ queue.submit(a); }
+    });
+    modelTimer.start();
+  }
+  private void stopTimer(){ 
+    timer.stop(); // always set before stopTimer is reachable
+    if (modelTimer != null){ modelTimer.stop(); } // conditional on modelFps
+  }
 
   private void finish(){
     Throwable e;

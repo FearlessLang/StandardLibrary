@@ -149,49 +149,74 @@ abstract class AWidget<S,C extends JComponent> implements Widget$1{
     textSize= (HeightNat$0) HeightNat$0.instance.read$$hash$1(defText);
     frame.markLayoutDirty();
   }
+
   @Override public Object mut$topInset$1(Object v){
+    return mut$topInset$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$topInset$p1$1(Object v){
     frame.height((HeightNat$0)v,"top inset");
     top = (HeightNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$bottomInset$1(Object v){
+    return mut$bottomInset$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$bottomInset$p1$1(Object v){
     frame.height((HeightNat$0)v,"bottom inset");
     bottom = (HeightNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$leftInset$1(Object v){
+    return mut$leftInset$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$leftInset$p1$1(Object v){
     frame.width((WidthNat$0)v,"left inset");
     left = (WidthNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$rightInset$1(Object v){
+    return mut$rightInset$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$rightInset$p1$1(Object v){
     frame.width((WidthNat$0)v,"right inset");
     right = (WidthNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$heightGap$1(Object v){
+    return mut$heightGap$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$heightGap$p1$1(Object v){
     frame.height((HeightNat$0)v,"height gap");
     heightGap = (HeightNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$widthGap$1(Object v){
+    return mut$widthGap$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)v));
+  }
+  @Override public Object mut$widthGap$p1$1(Object v){
     frame.width((WidthNat$0)v,"width gap");
     widthGap = (WidthNat$0)v;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$width$1(Object w){
+    return mut$width$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0)w));
+  }
+  @Override public Object mut$width$p1$1(Object w){
     frame.width((WidthNat$0)w,"widget width");
     preferredWidth = (WidthNat$0)w;
     frame.markLayoutDirty();
     return mut$self$0();
   }
   @Override public Object mut$height$1(Object h){
+    return mut$height$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0)h));
+  }
+  @Override public Object mut$height$p1$1(Object h){
     frame.height((HeightNat$0)h,"widget height");
     preferredHeight = (HeightNat$0)h;
     frame.markLayoutDirty();
@@ -203,6 +228,7 @@ abstract class AWidget<S,C extends JComponent> implements Widget$1{
     frame.markLayoutDirty();
     return mut$self$0();
   }
+
   public Object mut$textSize$1(Object textSize){//will cross override later for button/label
     frame.height((HeightNat$0)textSize,"text size");
     this.textSize = (HeightNat$0)textSize;
@@ -268,6 +294,8 @@ abstract class AContainer<S,C extends JComponent> extends AWidget<S,C>{
 class _Frame implements Frame$0{
   final FearlessFrame frame;
   Time$0 elapsed=time(0);//So that it can not be null if a repaint is scheduled very early
+  private Nat$0 modelFpsVal = null;
+  private final java.util.List<MF$1> modelTickActions = new java.util.ArrayList<>();
   final int screenW;
   final int screenH;
   final WidthNat$0 screenSizeW;
@@ -423,6 +451,13 @@ class _Frame implements Frame$0{
       Math.round(1000.0f / Scopes.nat(fps)),
       () -> tick(timeNanos(System.nanoTime() - startNanos))
     );
+    if (modelFpsVal != null && !modelTickActions.isEmpty()){
+        var actions = java.util.List.copyOf(modelTickActions);
+        frame.startModelTimer(
+          Math.round(1000.0f / Scopes.nat(modelFpsVal)),
+          actions
+        );
+    }
   }
   private void maximize(WidthNat$0 w, HeightNat$0 h) {
     frame.setSize(Awt.dimension(w,h));
@@ -453,6 +488,18 @@ class _Frame implements Frame$0{
     long nn= Util.natToInt((Nat$0)fps);
     if (nn<1 || nn > 500){ throw Util.detErr("FPS must be between 1 and 500"); }
     this.fps = (Nat$0) fps; return this;
+  }
+  @Override public Object mut$modelFps$2(Object fps, Object scope){
+    long nn = Util.natToInt((Nat$0)fps);
+    if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
+    modelFpsVal = (Nat$0)fps;
+    ((Scope$1)scope).mut$run$1(new ModelFps$0(){
+      @Override public Object mut$action$1(Object r){
+        modelTickActions.add((MF$1)r);
+        return this;
+      }
+    });
+    return this;
   }
 
   @Override public Object mut$content$1(Object s){
