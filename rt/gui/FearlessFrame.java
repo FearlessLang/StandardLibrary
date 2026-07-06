@@ -15,9 +15,9 @@ import javax.swing.Timer;
 @SuppressWarnings("serial")
 final class FearlessFrame extends JFrame{
   private final CompletableFuture<Void> done;
-  public final SerialQueue queue= new SerialQueue(this::high);
-  private Timer modelTimer;
+  final SerialQueue queue = new SerialQueue(this::high);
   private Timer timer;
+  private Timer modelTimer;
   private Throwable failure;
   private boolean high;
   private boolean closing;
@@ -32,32 +32,36 @@ final class FearlessFrame extends JFrame{
     });
   }
 
-  void startRuntime(int delayMillis,Runnable tick){
+  void startRuntime(int delayMillis, Runnable tick){
     assert timer == null;
-    timer = new Timer(delayMillis,_ -> {
-      try{ tick.run(); }
-      catch(Throwable e){ low(e); }
+    timer = new Timer(delayMillis, _ -> {
+      try { tick.run(); }
+      catch (Throwable e){ low(e); }
     });
     timer.start();
   }
-  void submit(MF$1 r){
-    assert queue != null;
-    queue.submit(r);
+
+  void startModelTimer(int delayMillis, java.util.List<MF$1> actions){
+    assert modelTimer == null;
+    modelTimer = new Timer(delayMillis, _ -> {
+      for (var a : actions){ queue.submit(a); }
+    });
+    modelTimer.start();
   }
-  // A failure from the user queue has higher priority than an EDT/painting/layout
-  // failure. During shutdown after a low-priority Swing failure, we intentionally
-  // keep draining/closing the user queue so that a user computation already in
-  // progress can report a higher priority failure.
+
+  // A failure from the user queue has higher priority than an EDT/painting/
+  // layout failure. During shutdown after a low-priority Swing failure we keep
+  // draining/closing the user queue so that a user computation already in
+  // progress can still report a higher priority failure.
   void high(Throwable e){
     assert !SwingUtilities.isEventDispatchThread();
     Throwable discarded;
     boolean accepted;
-    synchronized(this){
+    synchronized (this){
       if (completed || high){
         discarded = e;
         accepted = false;
-      }
-      else{
+      } else {
         discarded = failure;
         failure = e;
         high = true;
@@ -67,13 +71,14 @@ final class FearlessFrame extends JFrame{
     }
     if (discarded != null){ printDiscarded(discarded); }
     if (!accepted){ return; }
-    scheduleStopSwing();
+    SwingUtilities.invokeLater(this::stopSwingOnEdt);
     finish();
   }
+
   void low(Throwable e){
     assert SwingUtilities.isEventDispatchThread();
     boolean accepted;
-    synchronized(this){
+    synchronized (this){
       accepted = !completed && !closing && failure == null;
       if (accepted){
         failure = e;
@@ -85,24 +90,24 @@ final class FearlessFrame extends JFrame{
       return;
     }
     stopSwingOnEdt();
-    assert queue != null;
     queue.closeThen(this::finish);
   }
+
   void closed(){
     assert SwingUtilities.isEventDispatchThread();
     boolean accepted;
-    synchronized(this){
+    synchronized (this){
       accepted = !completed && !closing;
       if (accepted){ closing = true; }
     }
     if (!accepted){ return; }
-    stopTimer();
-    assert queue != null;
+    stopTimers();
     queue.closeThen(this::finish);
   }
+
   void abortBeforeStart(Throwable e){
     boolean accepted;
-    synchronized(this){
+    synchronized (this){
       accepted = !completed && !closing;
       if (accepted){
         closing = true;
@@ -113,47 +118,32 @@ final class FearlessFrame extends JFrame{
       printDiscarded(e);
       return;
     }
-    queue.closeThen(()->{});
-    disposeIfNeeded();
+    queue.closeThen(() -> {});
+    if (SwingUtilities.isEventDispatchThread()){ dispose(); }
+    else { SwingUtilities.invokeLater(this::dispose); }
     done.completeExceptionally(e);
   }
+
   private void stopSwingOnEdt(){
     assert SwingUtilities.isEventDispatchThread();
-    stopTimer();
+    stopTimers();
     dispose();
   }
-  private void scheduleStopSwing(){
-    assert !SwingUtilities.isEventDispatchThread();
-    SwingUtilities.invokeLater(this::stopSwingOnEdt);
-  }
-  private void disposeIfNeeded(){//why If? do we know what thread are we in?
-    if (SwingUtilities.isEventDispatchThread()){
-      dispose();
-      return;
-    }
-    SwingUtilities.invokeLater(this::dispose);
-  }
-  void startModelTimer(int delayMillis, java.util.List<MF$1> actions){
-    assert modelTimer == null;
-    modelTimer = new Timer(delayMillis, _ -> {
-      for (var a : actions){ queue.submit(a); }
-    });
-    modelTimer.start();
-  }
-  private void stopTimer(){ 
-    timer.stop(); // always set before stopTimer is reachable
-    if (modelTimer != null){ modelTimer.stop(); } // conditional on modelFps
+
+  private void stopTimers(){
+    timer.stop();// always set before stopTimers is reachable
+    if (modelTimer != null){ modelTimer.stop(); }
   }
 
   private void finish(){
     Throwable e;
-    synchronized(this){//is some of this running in a controlled thread, so can we avoid some synchronized of those blocks?
+    synchronized (this){
       if (completed){ return; }
       completed = true;
       e = failure;
     }
     if (e == null){ done.complete(null); }
-    else{ done.completeExceptionally(e); }
+    else { done.completeExceptionally(e); }
   }
 
   private static void printDiscarded(Throwable e){
@@ -168,15 +158,13 @@ final class GuiEdtBoundary extends EventQueue{
   private GuiEdtBoundary(){}
 
   static void install(){
-    if (!installed.compareAndSet(false,true)){ return; }
-    java.awt.Toolkit.getDefaultToolkit()
-      .getSystemEventQueue()
-      .push(new GuiEdtBoundary());
+    if (!installed.compareAndSet(false, true)){ return; }
+    java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().push(new GuiEdtBoundary());
   }
 
   @Override protected void dispatchEvent(AWTEvent event){
-    try{ super.dispatchEvent(event); }
-    catch(Throwable e){
+    try { super.dispatchEvent(event); }
+    catch (Throwable e){
       var frame = frameOf(event);
       if (frame == null){
         e.printStackTrace();
