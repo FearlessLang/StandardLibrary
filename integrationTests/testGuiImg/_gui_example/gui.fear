@@ -16,14 +16,14 @@ Gui:Consumer[mut Frame]{::
   }
 ShapeCanvas:Scope[Pane]{::
     .background (Color.deepNapBlue)
-    .width (Width#520)
-    .height (Height#280)
-    .paint(PaintBox)
+    .width 520
+    .height 280
+    .paint PaintBox
   }
 ShapeButtons:Scope[Pane]{::
     .background (Color.cardboard)
-    .heightGap (Height#12)
-    .widthGap (Width#12)
+    .heightGap 12
+    .widthGap 12
     .button{::
       .text `Target`
       .background (Color.rubberDuck)

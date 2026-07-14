@@ -21,6 +21,7 @@ use base.Scope as Scope;
 use base.Painter as Painter;
 
 Foo:base.Main{s->Block#
+  .do {Debug#"B"}
   .let model={Slots#[mut Model]}
   .let canvas={Slots#[Pane]}
   .let[mut Gui] gui= {mut Gui{.canvas->canvas; .model->model!;}}

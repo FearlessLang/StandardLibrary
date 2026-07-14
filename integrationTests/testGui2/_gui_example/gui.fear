@@ -2,7 +2,9 @@
 Gui:Consumer[mut Frame]{::
   .title `Gui buttons replace canvas painter`
   .fps 30
-//.modelFps(100)//behaves like a button.
+  .modelFps (1, {::
+    .action{Debug#"tick done"}
+    })
   .contentB{::
     .background(Color.ghostWhite)
     .north(mut ShapeHeader)
@@ -16,14 +18,14 @@ Gui:Consumer[mut Frame]{::
   }
 ShapeCanvas:Scope[Pane]{::
     .background (Color.deepNapBlue)
-    .width (Width#520)
-    .height (Height#280)
+    .width' (Width#520)
+    .height' (Height#280)
     .paint(PaintBox)
   }
 ShapeButtons:Scope[Pane]{::
     .background (Color.cardboard)
-    .heightGap (Height#12)
-    .widthGap (Width#12)
+    .heightGap' (Height#12)
+    .widthGap' (Width#12)
     .button{::
       .text `Target`
       .background (Color.rubberDuck)

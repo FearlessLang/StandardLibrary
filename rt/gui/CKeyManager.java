@@ -82,12 +82,7 @@ final class CKeyManager extends KeyAdapter implements Keys$0{
   private static String keyText(KeyStroke$0 k){
     return ((Str$0Instance)k.read$get$0()).val();
   }
-
-  private static String keyText(KeyEvent e){
-    return KeyEvent.getKeyText(e.getKeyCode())
-      .toUpperCase(Locale.ROOT)
-      .replace(' ','_');
-  }
+  private static String keyText(KeyEvent e){ return KeyNames.of(e.getKeyCode()); }
 
   @Override public Object mut$pressed$1(Object scope){
     var keyAction=(KeyAction$0)KeyActions$0.instance.imm$$hash$0();

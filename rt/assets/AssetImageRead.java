@@ -1,13 +1,12 @@
 package base;
 
-import java.awt.AlphaComposite;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.MemoryCacheImageInputStream;
+import io.github.humbleui.skija.Bitmap;
+import io.github.humbleui.skija.Codec;
+import io.github.humbleui.skija.ColorAlphaType;
+import io.github.humbleui.skija.ColorType;
+import io.github.humbleui.skija.Data;
+import io.github.humbleui.skija.Image;
+import io.github.humbleui.skija.ImageInfo;
 
 import static base.Util.*;
 
@@ -23,35 +22,21 @@ final class AssetImageRead{
       AssetBytesRead.nat(maxPixels)
       );
   }
-
   static Object readImage(String path,String diskPath,String zipSteps,String zipEntry,long maxPixels){
     return new Image$0Instance(
-      decode(
-        path,
-        AssetBytesRead.bytes(path,diskPath,zipSteps,zipEntry),
-        maxPixels
-        )
-      );
+      decode(path,AssetBytesRead.bytes(path,diskPath,zipSteps,zipEntry),maxPixels));
   }
 
-  static BufferedImage decode(String path,byte[] bs,long maxPixels){
-    try(var in=new MemoryCacheImageInputStream(new ByteArrayInputStream(bs))){
-      var readers=ImageIO.getImageReaders(in);
-      if (!readers.hasNext()){ throw badImage(path,"unsupported image format"); }
-      var reader=readers.next();
-      try{
-        reader.setInput(in,true,true);
-        var w=reader.getWidth(0);
-        var h=reader.getHeight(0);
-        checkSize(path,w,h,maxPixels);
-        var raw=reader.read(0);
-        if (raw == null){ throw badImage(path,"image reader returned no image"); }
-        checkSize(path,raw.getWidth(),raw.getHeight(),maxPixels);
-        return normalize(raw);
-      }
-      finally{ reader.dispose(); }
+  //Skia codecs replace ImageIO: same decoder, so same pixels, on every
+  //machine and JDK. Eager decode: errors surface here, at load; draws later
+  //are pure blits.
+  static Image decode(String path,byte[] bs,long maxPixels){
+    try(var data=Data.makeFromBytes(bs); var codec=Codec.makeFromData(data); var bm=new Bitmap()){
+      checkSize(path,codec.getWidth(),codec.getHeight(),maxPixels);
+      bm.allocPixels(new ImageInfo(codec.getWidth(),codec.getHeight(),ColorType.BGRA_8888,ColorAlphaType.PREMUL));
+      codec.readPixels(bm);
+      return Image.makeRasterFromBitmap(bm.setImmutable());//shares pixels, no copy
     }
-    catch(IOException ioe){ throw badImage(path,"image could not be decoded: "+ioe); }
     catch(RuntimeException re){
       if (re.getClass().getName().startsWith("base.")){ throw re; }
       throw badImage(path,"image could not be decoded: "+re);
@@ -65,25 +50,11 @@ final class AssetImageRead{
     throw badImage(
       path,
       "image exceeds maxPixels.\n"
-      +"width: "+w+"\n"
-      +"height: "+h+"\n"
-      +"pixels: "+pixels+"\n"
-      +"maxPixels: "+Long.toUnsignedString(maxPixels)
+      +"width: "+w+"\nheight: "+h
+      +"\npixels: "+pixels
+      +"\nmaxPixels: "+Long.toUnsignedString(maxPixels)
       );
   }
-
-  static BufferedImage normalize(BufferedImage raw){
-    if (raw.getType() == BufferedImage.TYPE_INT_ARGB_PRE){ return raw; }
-    var res=new BufferedImage(raw.getWidth(),raw.getHeight(),BufferedImage.TYPE_INT_ARGB_PRE);
-    var g=res.createGraphics();
-    try{
-      g.setComposite(AlphaComposite.Src);
-      g.drawImage(raw,0,0,null);
-    }
-    finally{ g.dispose(); }
-    return res;
-  }
-
   static RuntimeException badImage(String path,String msg){
     throw nonDetErr("Image asset could not be read.\npath: "+path+"\n"+msg);
   }

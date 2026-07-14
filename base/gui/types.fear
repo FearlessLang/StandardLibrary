@@ -119,14 +119,22 @@ Color:DataType[Color,Color]{
 Widget[S]:{
   mut .self:mut S;
   mut .save(mut Consumer[S]):mut S;
-  mut .topInset(HeightNat):mut S;
-  mut .bottomInset(HeightNat):mut S;
-  mut .leftInset(WidthNat):mut S;
-  mut .rightInset(WidthNat):mut S;
-  mut .heightGap(HeightNat):mut S;
-  mut .widthGap(WidthNat):mut S;
-  mut .width(WidthNat):mut S;
-  mut .height(HeightNat):mut S;
+  mut .topInset(Nat):mut S;
+  mut .topInset'(HeightNat):mut S;
+  mut .bottomInset(Nat):mut S;
+  mut .bottomInset'(HeightNat):mut S;
+  mut .leftInset(Nat):mut S;
+  mut .leftInset'(WidthNat):mut S;
+  mut .rightInset(Nat):mut S;
+  mut .rightInset'(WidthNat):mut S;
+  mut .heightGap(Nat):mut S;
+  mut .heightGap'(HeightNat):mut S;
+  mut .widthGap(Nat):mut S;
+  mut .widthGap'(WidthNat):mut S;
+  mut .width(Nat):mut S;
+  mut .height(Nat):mut S;
+  mut .width'(WidthNat):mut S;
+  mut .height'(HeightNat):mut S;
   mut .autoWidth:mut S;
   mut .autoHeight:mut S;
   mut .radius(Nat):mut S;
@@ -166,25 +174,43 @@ Button: Widget[Button]{
   mut .action(mut MF[Void]):mut Button;
   mut .text(Str):mut Button;
   mut .textSize(HeightNat):mut Button;
+  mut .textHeight(n:Nat): mut Button->this.textSize(HeightNat#n);
   read .text:Str;
   read .textSize:HeightNat;
 }
 
-Frame:{//TODO: add getters like title/fps. Can we get location getters?
-  //read .elapsed:Time;
-  //mut .screenSizeW:WidthNat;
-  //mut .screenSizeH:HeightNat;
-  mut .maximized:mut Frame;
-  mut .resizable:mut Frame;
-  mut .undecorated(Alpha):mut Frame;
-  mut .title(Str):mut Frame;
-  mut .fps(Nat):mut Frame;
-  mut .location(XNat, YNat):mut Frame;
-  mut .onKey(mut Scope[Keys]):mut Frame;
-  mut .content(mut Scope[Pane]):Void;
-  mut .contentB(mut Scope[Border]):Void;
+ModelFps: {
+  mut .action(mut MF[Void]): mut ModelFps;
 }
-
+Frame:{
+  mut .title(s: Str): mut Frame;
+  read .title: Str;
+  mut .fps(fps: Nat): mut Frame;
+  read .fps: Nat;
+  read .elapsed: Time;  //Time since game time zero (warmup end), as seen by the last repaint tick.
+  read .screenSizeW: WidthNat;
+  read .screenSizeH: HeightNat;
+  read .locationX: XNat;//Note: on some OS the OS may place a window at negative coordinates, reported here as 0.
+  read .locationY: YNat;
+  mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
+  mut .content(s: mut Scope[Pane]): Void;
+  mut .contentB(s: mut Scope[Border]): Void;
+  mut .location(XNat, YNat): mut Frame;
+  mut .onKey(mut Scope[Keys]): mut Frame;
+  mut .maximized: mut Frame;
+  //The user may resize by dragging the window edges; without arguments the
+  //initial size is computed from the content, with arguments it is as given.
+  //Note: an undecorated window can be technically resizable, but there is no
+  //border to drag, so the user cannot actually resize it.
+  mut .resizable: mut Frame;
+  mut .resizable(w: WidthNat, h: HeightNat): mut Frame;
+  //The window size cannot be changed by the user; without arguments the size
+  //is computed from the content, with arguments it is exactly as given.
+  mut .fixedSize: mut Frame;
+  mut .fixedSize(w: WidthNat, h: HeightNat): mut Frame;
+  mut .undecorated(a: Alpha): mut Frame;
+  mut .decorated: mut Frame;
+  }
 Graphics:{
   mut .color(Color): mut Graphics;
   mut .position(XNat, YNat): mut Graphics;
@@ -202,6 +228,7 @@ Gui:{ mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run
 Label:Widget[Label]{
   .self->this;
   mut .textSize(HeightNat):mut Label;
+  mut .textHeight(n:Nat): mut Label->this.textSize(HeightNat#n);
   mut .text(Str):mut Label;
   read .text:Str;
   read .textSize:HeightNat
@@ -231,6 +258,7 @@ Pane:Widget[Pane]{
   mut .border(mut Scope[Border]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
+  mut .clear:mut Pane;
   mut .paint(Painter):mut Pane;
 }
 Scope[T]:{ mut .run(mut T): mut T; }
