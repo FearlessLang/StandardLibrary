@@ -1,0 +1,225 @@
+ESparseLists: {
+  #[E:*]: ESparseList[E] -> this# 0;
+  /// `this# n` creates and returns an empty ESparseList with the given capacity.
+  /// This will back the ESparseList with an array if the expectedDensity is high, or the capacity is small,
+  /// and a hash map if the expectedDensity is low.
+  #[E:*](capacity: Nat): ESparseList[E] -> capacity < 1_000 .if {
+    .then -> this.backedWithArray(capacity);
+    .else -> this.backedWithMap(capacity);
+    };
+
+  /// `this#(capacity, expectedDensity)` returns an empty ESparseList with the given capacity.
+  /// Note this uses the expectedDensity to choose an appropriate internal representation.
+  /// This will back the ESparseList with an array if the expectedDensity is high, or the capacity is small,
+  /// and a hash map if the expectedDensity is low.
+  #[E:*](capacity: Nat, expectedDensity: Float): ESparseList[E] -> capacity < 100 || {expectedDensity > 0.25} .if {
+    .then -> this.backedWithArray(capacity);
+    .else -> this.backedWithMap(capacity);
+    };
+
+  /// `this.backedWithArray(capacity)` returns an empty ESparseList with the given capacity, backed by an array.
+  /// Note: the array this is backed with has a max size of (2147483647) 2^31-1.
+  .backedWithArray[E:*](capacity: Nat): ESparseList[E] -> Magic!;
+  /// `this.backedWithMap(capacity)` returns an empty ESparseList with the given capacity, backed by a Map.\
+  /// This requires a higher overhead than the array option so should only be used for very sparse lists.
+  .backedWithMap[E:*](capacity: Nat): ESparseList[E] -> Magic!;
+  /// `this.backedWithSparseSegmentTree`
+  /// This requires a high overhead to manage the segment tree data-structure,
+  /// so should only be used for implementations which expect dense islands of values surrounded by vast seas of holes
+  .backedWithSparseSegmentTree[E:*](capacity: Nat): ESparseList[E] -> Magic!;
+  }
+
+/// A list with "holes".
+ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
+  /// `this.isFull` returns `True` if there are no holes in this collection.
+  /// Equivalent to: `this.hasHoles.not`
+  read .isFull: Bool -> this.numHoles == 0;
+
+  /// `this.isEmpty` returns `True` if there are no elements in this collection and `False` otherwise.
+  /// In other words this method returns `True` if the list is all holes (or is has 0 capacity).
+  read .isEmpty: Bool -> this.numHoles == (this.capacity);
+
+  /// `this.hasHoles` returns `True` if any of the elements in this are holes, returns false otherwise.
+  /// Note: `this.hasHoles` returns `False` if the collection is empty
+  read .hasHoles: Bool -> this.isFull.not;
+
+  /// The limit of the largest index that can be inserted into this collection.
+  /// This also means that the capacity is the maximum number of elements that can be inside this collection.
+  read .capacity: Nat;
+
+  /// `this.numHoles` returns the number of holes left in this collection.
+  read .numHoles: Nat;
+
+  /// `this.increaseCapacity(n)` returns `this` after expanding it's capacity, throws if `n <= (this.currentCapacity)`
+  mut .increaseCapacity(proposedCapacity: Nat): mut ESparseList[E] ->
+    proposedCapacity >= (this.capacity) .if {
+      .then -> this.increaseCapacityDefensive(proposedCapacity);
+      .else -> Error.msg(
+        "Must truly increase capacity, proposed capacity "
+        + proposedCapacity + " must be >= current capacity "
+        + (this.capacity)
+        )
+      };
+
+  /// `this.increaseCapacity(n)` returns `this` after expanding it's capacity.
+  /// Note if n <= this.capacity then calling `this.increase` capacity does nothing.
+  mut .increaseCapacityDefensive(Nat): mut ESparseList[E];
+
+  /// `this.get(i)` returns the element at index `i`. .some(e) if e is present, and .empty if it is a hole.
+  read .get(Nat): mut Opt[read/imm E];
+
+  /// `this.get(i)` returns the element at index `i`. .some(e) if e is present, and .empty if it is a hole.
+  mut .get(Nat): mut Opt[E];
+
+  /// `this.fillHoles(f)` fills the holes in this, using the given map.
+  /// Equivalent to: `this.mapOpts{i, e -> e.orLazy{f#(i)}}`
+  mut .fillHoles(mut MF[Nat, E]): mut ESparseList[E];
+
+  /// `this.mapOpts(f)` returns `this` after it's contents have been updated by f.
+  /// `f` is given the index of each element, and `.some(e)` if there is an element there an `.none` if there is a hole.
+  /// If `f` returns `.some(e)` `e` is placed at that index, otherwise  a hole is put there instead.
+  mut .mapOpts(mut MF[Nat, mut Opt[E], mut Opt[E]]): mut ESparseList[E];
+
+  /// `this.fillFrom(list)` uses the elements in `list` to fill the holes in this, starting from index 0,
+  /// until either there are no more holes or no more elements in `list`.
+  mut .fillFrom(EList[E]): mut ESparseList[E];
+
+  /// `this.fillWith(list)` uses the elements in `list` to fill the holes in this, starting from index 0,
+  /// expanding the capacity of this if necessary to fit all elements in `list`.
+  mut .fillAndExpand(EList[E]): mut ESparseList[E];
+
+  /// `this.seqFlowOpts` drains the spare list into a sequential flow of `Opt[E]`.
+  /// where .empty if the element is a hole, and .some(e) if there is e is present.
+  /// Equivalent to: `0~~(this.capacity).map{i -> this.get(i)}`
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut  .seqFlowOpts: mut SizedFlow[mut Opt[E]];
+
+  /// `this.flowOpts` drains the spare list into a flow of `Opt[E]`.
+  /// where .empty if the element is a hole, and .some(e) if there is e is present.
+  /// Equivalent to: `0~~(this.capacity).map{i -> this.get(i)}`
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut  .flowOpts(mode: FlowMode[E]): mut SizedFlow[mut Opt[E]];
+
+
+  /// `this.seqFlowDefensive` drains the ESparseList into a sequential Flow of `E` skipping the holes.
+  /// Equivalent to: `this.seqflowOpts.filter{opt -> opt.isEmpty}`
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut  .seqFlowDefensive: mut SizedFlow[E];
+
+  /// `this.seqFlowDefensive` drains this into a flow of `E` skipping the holes.
+  /// Equivalent to: `this.flowOpts.filter{opt -> opt.isEmpty}`
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut  .flowDefensive(mode: FlowMode[E]): mut SizedFlow[E];
+
+  /// `this.seqFlow` drains this into a `.some` sequential flow if there are no holes, .empty if there are holes.
+  /// Mutates: This drains self, but only if .some is returned.
+  mut  .seqFlow(): mut Opt[mut SizedFlow[E]] -> this.isFull .then {this.seqFlowDefensive};
+
+  /// `this.flow` drains this into a `.some` flow if there are no holes, .empty if there are holes.
+  /// Mutates: This drains self, but only if .some is returned.
+  mut  .flow(mode: FlowMode[E]): mut Opt[mut SizedFlow[E]] -> this.isFull .then {this.flowDefensive(mode)};
+
+  /// `this.seqFlowExact` drains this into a `.some` sequential flow if there are no holes, otherwise it throws.
+  /// Mutates: This drains self, but only if operation succeeds.
+  mut  .seqFlowExact(): mut SizedFlow[E] -> this.isFull .if {
+    .then -> this.seqFlowDefensive;
+    .else -> Error.msg(
+      "Cannot create a flow of an ESparseList that is not full."
+      | `Use a "hole-safe" flow method, or fill the holes first.`
+      );
+    };
+
+  /// `this.flowExact` drains this into a `.some` flow if there are no holes, otherwise it throws.
+  /// Mutates: This drains self, but only if operation succeeds.
+  mut .flowExact(mode: FlowMode[E]): mut SizedFlow[E] -> this.isFull .if {
+    .then -> this.flowDefensive(mode);
+    .else -> Error.msg(
+      "Cannot create a flow of an ESparseList that is not full."
+      | `Use a "hole-safe" flow method, or fill the holes first.`
+      );
+    };
+
+  /// `this.listExact` returns `this` as an `EList`, throws if there are any holes in the collection.
+  /// Note: this operation drains the collection  if it succeeds so `this` will be empty with the same capacity.
+  mut  .listExact: mut EList[E];
+
+  /// `this.list` returns `this` as .some of an`Elist` if there are no holes. `.empty` if holes are present.
+  /// Note: this operation drains the collection  if it succeeds so `this` will be empty with the same capacity.
+  mut  .list: mut Opt[mut EList[E]] -> this.isFull .then {this.listExact};
+  }
+
+_EditableList[E:*, Self]: Pipe[Self],OrderHash[Self, E],ToInfo[E] {
+  /// `this.all(f)` returns `True` if `f` returns `True` for every element in this collection.
+  /// Returns `True` if the collection is empty.
+  mut .all(f: mut MF[E, Bool]): Bool;
+
+  /// `this.any(f)` returns `True` if `f` returns `True` for at least one element in this collection.
+  /// Returns `False` if the collection is empty.
+  mut .any(f: mut MF[E, Bool]): Bool;
+
+  /// `this.none(f)` returns `True` if `f` returns `False` for every element in this collection.
+  /// Returns `True` if the collection is empty.
+  /// Equivalent to: `this.any(f).not`
+  mut .none(f: mut MF[E, Bool]): Bool;
+
+  /// `this.firstIndexWhere(f)` returns `.some(i)` where `i` is the index of the first element
+  /// for which `f` returns `True`, or `.empty` if no such element exists.
+  mut .firstIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
+
+  /// `this.lastIndexWhere(f)` returns `.some(i)` where `i` is the index of the last element
+  /// for which `f` returns `True`, or `.empty` if no such element exists.
+  mut .lastIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
+
+  /// `this.indicesWhere(f)` returns a flow of all indices where `f` returns `True`,
+  /// in ascending order.
+  mut .indicesWhere(mut MF[E, Bool]): mut Flow[Nat];
+
+  /// `this.set(i, e)` sets the element at index `i` to `e`, returning `this`.
+  /// Throws if `i` is out of bounds.
+  mut .set(Nat, E): mut Self;
+
+  /// `this.clear` removes all elements from this collection, returning `this`.
+  /// The capacity remains unchanged.
+  mut .clear: mut Self;
+
+  /// `this.removeIf(f)` removes all elements for which `f` returns `True`, returning `this`.
+  mut .removeIf(mut MF[E, Bool]): mut Self;
+
+  /// `this.retainIf(f)` removes all elements for which `f` returns `False`, returning `this`.
+  /// Equivalent to: `this.removeIf{e -> f#e .not}`
+  mut .retainIf(mut MF[E, Bool]): mut Self;
+
+  /// `this.remove(i)` removes the element at index `i`, returning `this`.
+  /// If the index is already empty this does nothing.
+  /// Throws if `i` is out of bounds.
+  mut .remove(Nat): mut Self;
+
+  /// `this.removeFirstWhere(f)` removes the first element for which `f` returns `True`, returning `this`.
+  /// Does nothing if no such element exists.
+  mut .removeFirstWhere(mut MF[E, Bool]): mut Self;
+
+  /// `this.removeLastWhere(f)` removes the last element for which `f` returns `True`, returning `this`.
+  /// Does nothing if no such element exists.
+  mut .removeLastWhere(mut MF[E, Bool]): mut Self;
+
+  /// `this.trimTo(start, end)` removes all elements with indices outside of the range `[start, end)`,
+  /// returning `this`. Indices are re-based so that the element previously at `start` is now at index `0`.
+  /// Throws if `start > end` or `end > this.capacity`.
+  mut .trimTo(start: Nat, end: Nat): mut Self;
+
+  /// `this.reverse` reverses the order of elements in this collection in place, returning `this`.
+  mut .reverse: mut Self;
+
+  /// `this.mapInPlace(f)` applies `f` to each element of this, replacing each element with the result,
+  /// returning `this`.
+  mut .mapInPlace(mut MF[E, E]): mut Self;
+
+  /// `this.swap(i, j)` swaps the elements at indices `i` and `j`, returning `this`.
+  /// Throws if either index is out of bounds.
+  mut .swap(Nat, Nat): mut Self;
+
+  /// `this.shallow_clone` returns a shallow clone of this collection.
+  /// The main use of this is to allow holding onto an identical editable list after this one has been drained.
+  /// Note: elements in the resulting list will still point to the same objects as the ones in this.
+  mut .shallow_clone: mut Self;
+  }

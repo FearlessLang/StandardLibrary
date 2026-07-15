@@ -1,0 +1,120 @@
+ELists: {
+  #[E:*]: mut EList[E] -> Magic!;
+  /// `this# n` creates and returns an empty Elist with the given capacity.
+  /// Note: attempting to create an EList with a capacity equal to or greater than 2^31 as this is backed by java arrays
+  /// which have a maximum capacity of 2^31-1.
+  /// Many array sizes smaller than this may also fail due to running out of memory.
+  #[E:*](capacity: Nat): mut EList[E] -> Magic!;
+  }
+
+EList[E:*]: _EditableList[E, EList[E]] {
+  read .size: Nat;
+  read .isEmpty: Bool -> this.size == 0;
+  read .notEmpty: Bool -> this.isEmpty.not;
+
+  mut .add(E): mut EList[E];
+  mut .addAll(mut EList[E]): mut EList[E];
+  mut .addFirst(e: E): mut EList[E] -> this.insertBefore(0, e);
+  mut .insertBefore(Nat, E):  mut EList[E];
+
+  read .first: mut Opt[read/imm E] -> this.notEmpty .then { this.getFirst };
+  mut  .first: mut Opt[E] -> this.notEmpty .then { this.getFirst };
+
+  read .last: mut Opt[read/imm E] -> this.notEmpty .then { this.getLast };
+  mut  .last: mut Opt[E] -> this.notEmpty .then { this.getLast };
+
+  read .getFirst: read/imm E;
+  mut  .getFirst: E;
+
+  read .getLast: read/imm E;
+  mut  .getLast: E;
+
+  mut .sort[K](by: OrderBy[imm E,K]): mut SortedEList[E, K];
+  mut .distinct[K](by: OrderHashBy[imm E,K]): mut EList[E];
+  mut .sortDistinct[K](by: OrderBy[imm E,K]): mut SortedEList[E, K];
+  mut .trimToSize: EList[E]; //removes any extra capacity, so that .size == capacity
+
+  mut .fold[R:*](acc: iso MF[R], f: mut MF[R, Nat, E, R]): R;
+  mut .foldRight[R:*](acc: iso MF[R], f: mut MF[R, Nat, E, R]): R;
+
+  mut .foldUntil[R:*](
+    acc: iso MF[R],
+    f: mut MF[R, Nat, E, R],
+    pred: mut MF[R, Bool]
+    ): R;
+
+  mut .foldRightUntil[R:*](
+      acc: iso MF[R],
+      f: mut MF[R, Nat, E, R],
+      pred: mut MF[R, Bool]
+      ): R;
+
+  mut .accumulateInPlace(mut MF[E,E,E]): mut EList[E];
+  mut .accumulateRightInPlace(mut MF[E,E,E]): mut EList[E];
+
+  mut .seqFlow: mut SizedFlow[E]; //consumes the EList
+  mut .flow(mode:FlowMode[E]): mut SizedFlow[E]; //consumes the EList
+  imm .flow: mut SizedFlow[imm E]; //safe since imm receiver
+  mut .get(Nat): E; //simpler model with most methods `mut`
+  /// `this.opt(index)` returns `this.get(index)` if `index < this.size`, `.empty` otherwise
+  mut .opt(index: Nat): mut Opt[E] -> index < (this.size) .then { this.get(index) };
+  mut .list: mut List[E]; //consumes the EList and moves the data in the result
+
+
+  /// `this.eView(start, end)` returns a mutable view of this collection containing only the elements
+  /// with indices in the range `[start, end)`.
+  /// Unlike `trimTo`, this does not mutate this collection.
+  /// Note: Allowing this on SortedEList
+  mut .eView(Nat, Nat): mut EList[E] -> Todo!;
+  }
+
+/// A EList which guarantees sorted order of it's elements.
+/// Many operations will break the sorted order of this list,
+/// thus these operations must drain `this` so any references to it are still valid.
+SortedEList[E:*,K]: EList[E] {
+  read .order: OrderBy[imm E,K];
+  /// `this.binarySearch(e)` returns `.found(i)` where `i` is the index of the first found element that is equal to `e`.
+  /// If no element exists, `.notFound(i)`, where `i` is the index where `e` should be inserted to maintain the sort order.
+  read .binarySearch[R:**](E, FoundMatcher[R]): R;
+
+  /// `this.max` returns the maximum element in this collection (determined by `this.ordering`)
+  read .max: mut Opt[read/imm E] -> this.last;
+  /// `this.max` returns the minimum element in this collection (determined by `this.ordering`)
+  read .min: mut Opt[read/imm E] -> this.first;
+
+  /// `this.max` returns the maximum element in this collection (determined by `this.ordering`)
+  mut .max: mut Opt[E] -> this.last;
+  /// `this.max` returns the minimum element in this collection (determined by `this.ordering`)
+  mut .min: mut Opt[E] -> this.first;
+
+  mut .clear: mut SortedEList[E, K];
+  mut .removeIf(mut MF[E, Bool]): mut SortedEList[E, K];
+  mut .retainIf(mut MF[E, Bool]): mut SortedEList[E, K];
+  mut .remove(Nat): mut SortedEList[E, K];
+  mut .removeFirstWhere(mut MF[E, Bool]): mut SortedEList[E,K];
+  mut .removeLastWhere(mut MF[E, Bool]): mut SortedEList[E,K];
+
+  mut .distinct[K'](by: OrderHashBy[imm E,K']): mut SortedEList[E,K];
+
+  mut .trimTo(start: Nat, end: Nat): mut SortedEList[E,K];
+
+  /// `this.reverse` returns this with the order (and sort order) of the elements reversed.
+  mut .reverse: mut SortedEList[E,K];
+
+  /// `this.insert(e)` returns this with e inserted in the correct place to maintain the sort order.
+  /// Note the element will be inserted before the first found match.
+  ///   However the first found match may not be the first element in the list that is equal.
+  mut .insert(E): mut SortedEList[E,K];
+
+  /// `this.shallow_clone` returns a shallow clone of this.
+  /// The main use of this is to allow to hold onto an identical editable list after this one has been drained.
+  /// Note elements in the resulting list will still point to the same elements as the ones in this.
+  mut .shallow_clone: mut SortedEList[E,K];
+
+
+  }
+
+FoundMatcher[R:**]: {
+  mut .found(index: Nat): R;
+  mut .notFound(index: Nat): R;
+  }

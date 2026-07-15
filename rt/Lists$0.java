@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import static base.Util.*;
 public interface Lists$0 extends Sealed$0{
   default Object imm$singletonRead$1(Object p0){ return imm$$hash$1(p0); }
-    
+
   default Object imm$$hash$1(Object p0){
     var l= new ArrayList<Object>(1);
     l.add(p0);
@@ -91,8 +91,8 @@ public interface Lists$0 extends Sealed$0{
   Lists$0 instance= new Lists$0(){};
 }
 
-record List$1Instance(List<Object> val) implements List$1{
-  static Object wrap(List<Object> l){ return l.isEmpty() ? List$1.instance : new List$1Instance(l); }
+record List$1Instance(List<Object> val) implements List$1 {
+  public static Object wrap(List<Object> l){ return l.isEmpty() ? List$1.instance : new List$1Instance(l); }
 
   static List<Object> asJava(Object xs){
     if (xs == List$1.instance){ return List.of(); }
@@ -100,13 +100,17 @@ record List$1Instance(List<Object> val) implements List$1{
     throw new AssertionError("Unexpected List impl: "+xs.getClass());
   }
   private int idx(Object p0){
-    long i= natToInt(p0);
+    long i= natToLong(p0);
     check(0 <= i && i < val.size(), "List index out of range");
     return (int) i;
   }
 
-  @Override public Object read$size$0(){ return intToNat(val.size()); }
-  @Override public Object read$isEmpty$0(){ return bool(val.isEmpty()); }
+  @Override public Object read$size$0(){
+    return intToNat(val.size());
+  }
+  @Override public Object read$isEmpty$0(){
+    return bool(val.isEmpty());
+  }
 
   @Override public Object read$str$1(Object p0){
     var by= (ToStrBy$1)p0;
@@ -117,33 +121,36 @@ record List$1Instance(List<Object> val) implements List$1{
 
   @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
   @Override public Object read$get$1(Object p0){ return val.get(idx(p0)); }
-
   @Override public Object mut$opt$1(Object p0){
-    long i= natToInt(p0);
-    return (0 <= i && i < val.size()) ? optSome(val.get((int) i)) : optEmpty();
+//    System.exit(1);
+    long index = natToLong(p0);
+   if (index >= val.size()) {
+      return optEmpty();
+    }
+    return optSome(val.get((int) index));
   }
-  @Override public Object read$opt$1(Object p0){ return mut$opt$1(p0); }
-  @Override public Object imm$opt$1(Object p0){ return mut$opt$1(p0); }
+  @Override public Object read$opt$1(Object p0){ return this.mut$opt$1(p0); }
+  @Override public Object imm$opt$1(Object p0){ return this.mut$opt$1(p0); }
 
-  @Override public Object mut$first$0(){
+  @Override public Object mut$getFirst$0(){
     //can not be empty check(!val.isEmpty(), "List was empty");
-    return val.get(0);
+    return val.getFirst();
   }
+  @Override public Object read$getFirst$0(){ return mut$first$0(); }
+
+  @Override public Object mut$getLast$0(){
+    //can not be empty check(!val.isEmpty(), "List was empty");
+    return val.getLast();
+  }
+  @Override public Object read$getLast$0(){ return mut$getLast$0(); }
+
+  @Override public Object mut$first$0(){ return optSome(val.getFirst()); }
   @Override public Object read$first$0(){ return mut$first$0(); }
+  @Override public Object imm$first$0(){ return mut$first$0(); }
 
-  @Override public Object mut$last$0(){
-    //can not be empty check(!val.isEmpty(), "List was empty");
-    return val.get(val.size()-1);
-  }
+  @Override public Object mut$last$0(){ return optSome(val.getLast()); }
   @Override public Object read$last$0(){ return mut$last$0(); }
-
-  @Override public Object mut$firstOpt$0(){ return optSome(val.get(0)); }
-  @Override public Object read$firstOpt$0(){ return mut$firstOpt$0(); }
-  @Override public Object imm$firstOpt$0(){ return mut$firstOpt$0(); }
-
-  @Override public Object mut$lastOpt$0(){ return optSome(val.getLast()); }
-  @Override public Object read$lastOpt$0(){ return mut$lastOpt$0(); }
-  @Override public Object imm$lastOpt$0(){ return mut$lastOpt$0(); }
+  @Override public Object imm$last$0(){ return mut$last$0(); }
 
   @Override public Object mut$$plus_plus$1(Object p0){
     var xs= asJava(p0);
@@ -172,7 +179,7 @@ record List$1Instance(List<Object> val) implements List$1{
   @Override public Object read$$plus_gt$1(Object p0){ return mut$$plus_gt$1(p0); }
 
   @Override public Object mut$subList$2(Object p0, Object p1){
-    long s= Util.natToInt(p0); long e= Util.natToInt(p1);
+    long s= Util.natToLong(p0); long e= Util.natToLong(p1);
     check(0 <= s && s <= e && e <= val.size(), "List subList out of range");
     return wrap(val.subList((int) s, (int) e));
   }
@@ -190,7 +197,7 @@ record List$1Instance(List<Object> val) implements List$1{
   @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0,p1); }
 
   @Override public Object mut$withAlso$2(Object p0, Object p1){
-    long i= natToInt(p0);
+    long i= natToLong(p0);
     check(0 <= i && i <= val.size(), "List withAlso out of range");
     int index = (int) i;
     var l= new ArrayList<Object>(val.size()+1);
@@ -226,5 +233,5 @@ record List$1Instance(List<Object> val) implements List$1{
   @Override public Object read$imm$1(Object p0){
     var by= (ToImmBy$2)p0;
     return new List$1Instance(val.stream().map(e->((ToImm$1)by.imm$$hash$1(e)).read$imm$0()).toList());
-  }  
+  }
 }

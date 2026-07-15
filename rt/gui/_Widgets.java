@@ -478,7 +478,7 @@ class _Frame implements Frame$0{
   int yPos(YNat$0 v, String what){ return bounded(nat(v.read$get$0()), screenH - 1, what, "screen y"); }
   int size(Nat$0 v, String what){ return bounded(nat(v), Math.min(screenW, screenH), what, "screen size"); }
 
-  private long nat(Object n){ return Util.natToInt(n); }
+  private long nat(Object n){ return Util.natToLong(n); }
 
   private int bounded(long v, int max, String what, String bound){
     if (v > max){ throw Util.detErr(what + " must be <= " + max + " (" + bound + ")"); }
@@ -662,7 +662,7 @@ class _Frame implements Frame$0{
     return this;
   }
   @Override public Object mut$fps$1(Object f){
-    long nn = Util.natToInt((Nat$0) f);
+    long nn = Util.natToLong((Nat$0) f);
     if (nn < 1 || nn > 500){ throw Util.detErr("FPS must be between 1 and 500"); }
     fps = (Nat$0) f;
     if (started){
@@ -697,7 +697,7 @@ class _Frame implements Frame$0{
     return loc;
   }
   @Override public Object mut$modelFps$2(Object f, Object scope){
-    long nn = Util.natToInt((Nat$0) f);
+    long nn = Util.natToLong((Nat$0) f);
     if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
     modelFpsVal = (Nat$0) f;
     onEdtAndWait(modelTickActions::clear);// replace semantics, like .mouse and .onKey

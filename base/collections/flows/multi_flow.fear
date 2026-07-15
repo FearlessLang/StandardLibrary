@@ -1,0 +1,446 @@
+_MultiFlow: Sealed {
+  /// `this.minSize` returns the minimum size of all the channels.
+  read .minSize: Nat;
+  /// `this.maxSize` returns the maximum size of all the channels.
+  read .maxSize: Nat;
+  /// `this.sizes` returns a list of the sizes of all the channels.
+  read .sizes: List[Nat];
+
+  /// `this.isAligned` returns `True` if all the channels are the same size, and `False` otherwise.
+  /// In otherwords if it is safe to perform `Exact` operations on `this`.
+  read .isAligned: Bool -> this.minSize == (this.maxSize);
+  }
+
+BiFlow[A:*,B:*]: Pipe[BiFlow[A,B]], _MultiFlow {
+
+  /// `this.with(flow)` returns a TriFlow with `flow` added as a new channel.
+  mut .with[C:*](flow: mut SizedFlow[C]): mut TriFlow[A,B,C];
+
+  /// `this.withBoth(flow)` returns a QuadFlow with both channels from `flow` added.
+  //- {::
+  //>   .let bf1={Lists#(1,2).flow.with(Lists#(3,4).flow)}
+  //>   .let bf2={Lists#(5,6).flow.with(Lists#(7,8).flow)}
+  //>   .check{bf1.withBoth(bf2).zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(16,20))}
+  //-   }
+  mut .withBoth[C:*,D:*](flow: mut BiFlow[C,D]): mut QuadFlow[A,B,C,D];
+
+  /// `this.enumerate` returns a TriFlow with a channel of indices (starting from 0) prepended.
+  /// The index channel has size equal to `this.maxSize`.
+  /// Note: this mutates this BiFlow; references to it before this call will be broken.
+  //- {::
+  //>   .let bf={Lists#(10,20,30).flow.with(Lists#(40,50,60).flow)}
+  //>   .check{bf.enumerate.zipExact{i,a,b -> i+a+b}.list
+  //>     .assertEq({::}, Lists#(50,72,96))}
+  //-   }
+  mut .enumerate: mut TriFlow[Nat,A,B]
+    -> 0~~(this.maxSize).list.flow.withBoth(this);
+
+  /// `this.limitDefensive(n)` returns a BiFlow limited to the first `n` elements of each channel,
+  /// truncating silently if `n` exceeds a channel's size.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)}
+  //>   .check{bf.limitDefensive(2).zipExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7))}
+  //>   .check{bf.limitDefensive(10).zipOpts{a,b -> a.or{0}+b.or{0}}.list
+  //>     .assertEq({::}, Lists#(5,7,3))}
+  //-   }
+  mut .limitDefensive(n: Nat): mut BiFlow[A,B];
+
+  /// `this.limitExact(n)` returns a BiFlow limited to the first `n` elements of each channel.
+  /// Throws if `n > this.minSize`.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.limitExact(2).zipExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7))}
+  //-   }
+  mut .limitExact(n: Nat): mut BiFlow[A,B] -> n <= (this.minSize) .if {
+    .then -> this.limitDefensive n;
+    .else -> Error.msg("Tried to limitExact a BiFlow where n > minSize. n must be <= "
+      +(this.minSize)+", currently "+n);
+    };
+
+  /// `this.limit(n)` returns `.some` of a BiFlow limited to the first `n` elements
+  /// if `n <= this.minSize`, otherwise `.empty`.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.limit(2)!.zipExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7))}
+  //>   .check{bf.limit(10).isEmpty .assertTrue}
+  //-   }
+  mut .limit(n: Nat): mut Opt[mut BiFlow[A,B]]
+    -> n <= (this.minSize) .then{this.limitDefensive n};
+
+  /// `this.zipExact(f)` zips both channels using `f`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.zipExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7,9))}
+  //-   }
+  mut .zipExact[R:*](f: read F[A,B,R]): mut SizedFlow[R];
+
+  /// `this.zip(f)` returns `.some` of the zipped flow if the channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.zip{a,b -> a+b}!.list
+  //>     .assertEq({::}, Lists#(5,7,9))}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow)
+  //>     .zip{a,b -> a+b}.isEmpty .assertTrue}
+  //-   }
+  mut .zip[R:*](f: read F[A,B,R]): mut Opt[mut SizedFlow[R]]
+    -> this.isAligned .then{this.zipExact f};
+
+  /// `this.zipOpts(f)` zips both channels using `f`, passing `.empty` for missing values.
+  /// Continues until all channels are exhausted.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)}
+  //>   .check{bf.zipOpts{a,b -> a.or{0}+b.or{0}}.list
+  //>     .assertEq({::}, Lists#(5,7,3))}
+  //-   }
+  mut .zipOpts[R:*](f: read F[Opt[A],Opt[B],R]): mut SizedFlow[R];
+
+  /// `this.foldExact(acc, f)` folds both channels pairwise from left to right, starting from `acc`.
+  /// For each pair `(a, b)` the accumulator is updated to `f#(acc, a, b)`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.foldExact({0}, {acc,a,b -> acc+a+b}) .assertEq 21}
+  //-   }
+  mut .foldExact[R:*](acc: mut MF[R], f: read MultiAcc[A,B,R]): R;
+
+  /// `this.fold(acc, f)` returns `.some` of the fold result if the channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.fold({0}, {acc,a,b -> acc+a+b})! .assertEq 21}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow)
+  //>     .fold({0}, {acc,a,b -> acc+a+b}).isEmpty .assertTrue}
+  //-   }
+  mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,R]): mut Opt[R]
+    -> this.isAligned .then{this.foldExact(acc, f)};
+
+  /// `this.foldOpts(acc, f)` folds both channels pairwise from left to right, starting from `acc`,
+  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)}
+  //>   .check{bf.foldOpts({0}, {acc,a,b -> acc+a.or{0}+b.or{0}}) .assertEq 15}
+  //-   }
+  mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],R]): R;
+
+  /// `this.fillA(f)` returns a BiFlow where missing values in channel A are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let bf={Lists#(1,2).flow.with(Lists#(3,4,5).flow)}
+  //>   .check{bf.fillA{n -> n.int*10}
+  //>     .zipExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(4,6,25))}
+  //-   }
+  mut .fillA(f: read F[Nat,A]): mut BiFlow[A,B];
+
+  /// `this.fillB(f)` returns a BiFlow where missing values in channel B are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)}
+  //>   .check{bf.fillB{n -> n.int*10}
+  //>     .zipExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7,23))}
+  //-   }
+  mut .fillB(f: read F[Nat,B]): mut BiFlow[A,B];
+  }
+
+
+TriFlow[A:*,B:*,C:*]: Pipe[TriFlow[A,B,C]], _MultiFlow {
+
+  /// `this.with(flow)` returns a QuadFlow with `flow` added as a new channel.
+  //- {::
+  //>   .let tf={Lists#(1,2).flow.with(Lists#(3,4).flow).with(Lists#(5,6).flow)}
+  //>   .check{tf.with(Lists#(7,8).flow)
+  //>     .zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(16,20))}
+  //-   }
+  mut .with[D:*](flow: mut SizedFlow[D]): mut QuadFlow[A,B,C,D];
+
+  /// `this.enumerate` returns a QuadFlow with a channel of indices (starting from 0) prepended.
+  /// The index channel has size equal to `this.maxSize`.
+  /// Note: this mutates this TriFlow; references to it before this call will be broken.
+  //- {::
+  //>   .let tf={Lists#(1,2).flow.with(Lists#(3,4).flow).with(Lists#(5,6).flow)}
+  //>   .check{tf.enumerate.zipExact{i,a,b,c -> i+a+b+c}.list
+  //>     .assertEq({::}, Lists#(9,14))}
+  //-   }
+  mut .enumerate: mut QuadFlow[Nat,A,B,C]
+    -> 0~~(this.maxSize).list.flow.withAll(this);
+
+  /// `this.limitDefensive(n)` returns a TriFlow limited to the first `n` elements of each channel,
+  /// truncating silently if `n` exceeds a channel's size.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8).flow)}
+  //>   .check{tf.limitDefensive(2).zipExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(12,15))}
+  //-   }
+  mut .limitDefensive(n: Nat): mut TriFlow[A,B,C];
+
+  /// `this.limitExact(n)` returns a TriFlow limited to the first `n` elements of each channel.
+  /// Throws if `n > this.minSize`.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.limitExact(2).zipExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(12,15))}
+  //-   }
+  mut .limitExact(n: Nat): mut TriFlow[A,B,C] -> n <= (this.minSize) .if {
+    .then -> this.limitDefensive n;
+    .else -> Error.msg("Tried to limitExact a TriFlow where n > minSize. n must be <= "
+      +(this.minSize)+", currently "+n);
+    };
+
+  /// `this.limit(n)` returns `.some` of a TriFlow limited to the first `n` elements
+  /// if `n <= this.minSize`, otherwise `.empty`.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.limit(2)!.zipExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(12,15))}
+  //>   .check{tf.limit(10).isEmpty .assertTrue}
+  //-   }
+  mut .limit(n: Nat): mut Opt[mut TriFlow[A,B,C]]
+    -> n <= (this.minSize) .then{this.limitDefensive n};
+
+  /// `this.fillA(f)` returns a TriFlow where missing values in channel A are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let tf={Lists#(1,2).flow.with(Lists#(3,4,5).flow).with(Lists#(6,7,8).flow)}
+  //>   .check{tf.fillA{n -> n.int*10}
+  //>     .zipExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(10,13,25))}
+  //-   }
+  mut .fillA(f: read F[Nat,A]): mut TriFlow[A,B,C];
+
+  /// `this.fillB(f)` returns a TriFlow where missing values in channel B are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6,7,8).flow)}
+  //>   .check{tf.fillB{n -> n.int*10}
+  //>     .zipExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(11,14,27))}
+  //-   }
+  mut .fillB(f: read F[Nat,B]): mut TriFlow[A,B,C];
+
+  /// `this.fillC(f)` returns a TriFlow where missing values in channel C are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8).flow)}
+  //>   .check{tf.fillC{n -> n.int*10}
+  //>     .zipExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(12,15,27))}
+  //-   }
+  mut .fillC(f: read F[Nat,C]): mut TriFlow[A,B,C];
+
+  /// `this.zipExact(f)` zips all three channels using `f`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.zipExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(12,15,18))}
+  //-   }
+  mut .zipExact[R:*](f: read F[A,B,C,R]): mut SizedFlow[R];
+
+  /// `this.zip(f)` returns `.some` of the zipped flow if all channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.zip{a,b,c -> a+b+c}!.list
+  //>     .assertEq({::}, Lists#(12,15,18))}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)
+  //>     .zip{a,b,c -> a+b+c}.isEmpty .assertTrue}
+  //-   }
+  mut .zip[R:*](f: read F[A,B,C,R]): mut Opt[mut SizedFlow[R]]
+    -> this.isAligned .then{this.zipExact f};
+
+  /// `this.zipOpts(f)` zips all three channels using `f`, passing `.empty` for missing values.
+  /// Continues until all channels are exhausted.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6).flow)}
+  //>   .check{tf.zipOpts{a,b,c -> a.or{0}+b.or{0}+c.or{0}}.list
+  //>     .assertEq({::}, Lists#(11,7,3))}
+  //-   }
+  mut .zipOpts[R:*](f: read F[Opt[A],Opt[B],Opt[C],R]): mut SizedFlow[R];
+
+  /// `this.foldExact(acc, f)` folds all three channels from left to right, starting from `acc`.
+  /// For each triple `(a, b, c)` the accumulator is updated to `f#(acc, a, b, c)`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.foldExact(0, {acc,a,b,c -> acc+a+b+c}) .assertEq 45}
+  //-   }
+  mut .foldExact[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,R]): R;
+
+  /// `this.fold(acc, f)` returns `.some` of the fold result if all channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.fold(0, {acc,a,b,c -> acc+a+b+c})! .assertEq 45}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)
+  //>     .fold(0, {acc,a,b,c -> acc+a+b+c}).isEmpty .assertTrue}
+  //-   }
+  mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,R]): mut Opt[R]
+    -> this.isAligned .then{this.foldExact(acc, f)};
+
+  /// `this.foldOpts(acc, f)` folds all three channels from left to right, starting from `acc`,
+  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6).flow)}
+  //>   .check{tf.foldOpts(0, {acc,a,b,c -> acc+a.or{0}+b.or{0}+c.or{0}}) .assertEq 27}
+  //-   }
+  mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],Opt[C],R]): R;
+  }
+
+
+QuadFlow[A:*,B:*,C:*,D:*]: Pipe[QuadFlow[A,B,C,D]], _MultiFlow {
+
+  /// `this.limitDefensive(n)` returns a QuadFlow limited to the first `n` elements of each channel,
+  /// truncating silently if `n` exceeds a channel's size.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.limitDefensive(2).zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(22,26))}
+  //-   }
+  mut .limitDefensive(n: Nat): mut QuadFlow[A,B,C,D];
+
+  /// `this.limitExact(n)` returns a QuadFlow limited to the first `n` elements of each channel.
+  /// Throws if `n > this.minSize`.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.limitExact(2).zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(22,26))}
+  //-   }
+  mut .limitExact(n: Nat): mut QuadFlow[A,B,C,D] -> n <= (this.minSize) .if {
+    .then -> this.limitDefensive n;
+    .else -> Error.msg("Tried to limitExact a QuadFlow where n > minSize. n must be <= "
+      +(this.minSize)+", currently "+n);
+    };
+
+  /// `this.limit(n)` returns `.some` of a QuadFlow limited to the first `n` elements
+  /// if `n <= this.minSize`, otherwise `.empty`.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.limit(2)!.zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(22,26))}
+  //>   .check{qf.limit(10).isEmpty .assertTrue}
+  //-   }
+  mut .limit(n: Nat): mut Opt[mut QuadFlow[A,B,C,D]]
+    -> n <= (this.minSize) .then{this.limitDefensive n};
+
+  /// `this.fillA(f)` returns a QuadFlow where missing values in channel A are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2).flow.with(Lists#(3,4,5).flow).with(Lists#(6,7,8).flow).with(Lists#(9,10,11).flow)}
+  //>   .check{qf.fillA{n -> n.int*10}
+  //>     .zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(19,23,34))}
+  //-   }
+  mut .fillA(f: read F[Nat,A]): mut QuadFlow[A,B,C,D];
+
+  /// `this.fillB(f)` returns a QuadFlow where missing values in channel B are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6,7,8).flow).with(Lists#(9,10,11).flow)}
+  //>   .check{qf.fillB{n -> n.int*10}
+  //>     .zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(20,24,29))}
+  //-   }
+  mut .fillB(f: read F[Nat,B]): mut QuadFlow[A,B,C,D];
+
+  /// `this.fillC(f)` returns a QuadFlow where missing values in channel C are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8).flow).with(Lists#(9,10,11).flow)}
+  //>   .check{qf.fillC{n -> n.int*10}
+  //>     .zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(21,25,30))}
+  //-   }
+  mut .fillC(f: read F[Nat,C]): mut QuadFlow[A,B,C,D];
+
+  /// `this.fillD(f)` returns a QuadFlow where missing values in channel D are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11).flow)}
+  //>   .check{qf.fillD{n -> n.int*10}
+  //>     .zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(22,26,31))}
+  //-   }
+  mut .fillD(f: read F[Nat,D]): mut QuadFlow[A,B,C,D];
+
+  /// `this.zipExact(f)` zips all four channels using `f`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.zipExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(22,26,30))}
+  //-   }
+  mut .zipExact[R:*](f: read F[A,B,C,D,R]): mut SizedFlow[R];
+
+  /// `this.zip(f)` returns `.some` of the zipped flow if all channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.zip{a,b,c,d -> a+b+c+d}!.list
+  //>     .assertEq({::}, Lists#(22,26,30))}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)
+  //>     .zip{a,b,c,d -> a+b+c+d}.isEmpty .assertTrue}
+  //-   }
+  mut .zip[R:*](f: read F[A,B,C,D,R]): mut Opt[mut SizedFlow[R]]
+    -> this.isAligned .then{this.zipExact f};
+
+  /// `this.zipOpts(f)` zips all four channels using `f`, passing `.empty` for missing values.
+  /// Continues until all channels are exhausted.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6).flow).with(Lists#(7,8,9,10).flow)}
+  //>   .check{qf.zipOpts{a,b,c,d -> a.or{0}+b.or{0}+c.or{0}+d.or{0}}.list
+  //>     .assertEq({::}, Lists#(18,15,9,10))}
+  //-   }
+  mut .zipOpts[R:*](f: read F[Opt[A],Opt[B],Opt[C],Opt[D],R]): mut SizedFlow[R];
+
+  /// `this.foldExact(acc, f)` folds all four channels from left to right, starting from `acc`.
+  /// For each tuple `(a, b, c, d)` the accumulator is updated to `f#(acc, a, b, c, d)`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.foldExact(0, {acc,a,b,c,d -> acc+a+b+c+d}) .assertEq 78}
+  //-   }
+  mut .foldExact[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R]): R;
+
+  /// `this.fold(acc, f)` returns `.some` of the fold result if all channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let qfF={{Lists#(1,2).flow.with(Lists#(4,5,6).flow)
+  //>       .with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}}
+  //>   .check{qf#.fold(0, {acc,a,b,c,d -> acc+a+b+c+d}) .assertEmpty }
+  //>   .check{qf#.fillA{i -> i+1}
+  //>     .fold(0, {acc,a,b,c,d -> acc+a+b+c+d})! .assertEq 78}
+  //-   }
+  mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R]): mut Opt[R]
+    -> this.isAligned .then{this.foldExact(acc, f)};
+
+  /// `this.foldOpts(acc, f)` folds all four channels from left to right, starting from `acc`,
+  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)
+  //>       .with(Lists#(6).flow).with(Lists#(7,8,9,10).flow)}
+  //>   .check{qf.foldOpts(0, {acc,a,b,c,d -> acc+a.or{0}+b.or{0}+c.or{0}+d.or{0}}) .assertEq 55}
+  //-   }
+  mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],Opt[C],Opt[D],R]): R;
+  }
+
+
+MultiAcc[A:**, B:**, R:**]: {
+  read #(R, A, B): R;
+  }
+
+MultiAcc[A:**, B:**, C:**, R:**]: {
+  read #(R, A, B, C): R;
+  }
+
+MultiAcc[A:**, B:**, C:**, D:**, R:**]: {
+  read #(R, A, B, C, D): R;
+  }

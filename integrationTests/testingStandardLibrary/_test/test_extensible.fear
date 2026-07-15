@@ -1,0 +1,58 @@
+PipeBasicsTests: Test {::
+  .check{(+3|>{x->x* +2}).assertEq +6}
+  .check{(`a`|>{s->s+`b`}).assertEq `ab`}
+  .check{(Lists#(+1,+2)|>{xs->xs.size}).assertEq 2}
+  .check{(Maps#({::}, `a`, `x`)|>{::.get `a`}).assertEq `x`}
+  .check{(Opts#(+1)|>{o->o.isSome}).assertEq True}
+  }
+
+PipeCloseSemanticsTests: Test {::
+  .check{(Weird|>{n->n + +1}).assertEq +8}
+  .check{((Weird|>{n->Flows#(n,n + +1)}).list.get 1).assertEq +8}
+  }
+
+PipeReenterFlowTests: Test {::
+  .check{(((Lists#(+1,+2).flow.map{x->x* +2}.list.get 0)|>{n->Flows#(n,n + +1)}).map{x->x + +1}.list.get 1).assertEq +4}
+  }
+
+PipeExtensionMethodsTests: Test {::
+  .check{+3|>NewAdd# +4.assertEq +7}
+  .check{+1|>NewSum3#(+2,+3,+4).assertEq +10}
+  .check{Lists# +5|> AddFirst# +7.assertEq +12}
+  }
+
+PipeViaDataTypeByTests: Test {::
+  .check{IntBy# +3.imm|>{n->n + +1}.assertEq +4}
+  .check{StrBy#`a`.imm|>{s->s+`b`}.assertEq `ab`}
+  }
+
+TestPipe: Test {::
+  .test PipeBasicsTests
+  .test PipeCloseSemanticsTests
+  .test PipeReenterFlowTests
+  .test PipeExtensionMethodsTests
+  .test PipeViaDataTypeByTests
+  }
+
+/// Support code for tests
+IntBy:DataTypeBy[Int,Int] {
+  .cmp t0,t1,m -> t0<=> (t1,m);
+  .hash(t)   -> t.hash;
+  .str (t)     -> t.str;
+  .info(t)     -> t.info;
+  .imm (t)     -> t.imm;
+}
+
+StrBy:DataTypeBy[Str,Str] {
+  .cmp t0,t1,m -> t0<=> (t1,m);
+  .hash(t)   -> t.hash;
+  .str (t)     -> t.str;
+  .info(t)     -> t.info;
+  .imm (t)     -> t.imm;
+}
+
+Weird:Pipe[Int] { .close -> +7; }
+
+NewAdd: Operation[Int,F[Int,Int]] {x->{y->x+y}}
+NewSum3: Operation[Int,F[Int,Int,Int,Int]] {x->{a,b,c->x+a+b+c}}
+AddFirst: Operation[List[Int],F[Int,Int]] {xs->{k-> (xs.get 0)+k}}

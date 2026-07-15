@@ -1,0 +1,90 @@
+_NumAs: {
+  .int(n: Num): Bool -> n.isInteger && {n >= (Math.minInt.num)} && {n <= (Math.maxInt.num)};
+  .nat(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxNat.num)};
+  .byte(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxByte.num)};
+  }
+
+
+/// Num: unlimited-precision rational (exact arithmetic).
+Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
+  +(x: Num): Num;                    /// exact add
+  -(x: Num): Num;                    /// exact sub
+  *(x: Num): Num;                    /// exact mul
+  /(x: Num): Num;                    /// exact div; throws iff x==0
+  **(x: Int): Num;                   /// Raise this to the power of x. x is an int because fraction powers could lead to inexpressible numbers.
+  .abs: Num;                         /// exact abs
+  .sqrt: Opt[Float]
+    -> this >= (0/1) .then{this.sqrtDefensive};
+
+  /// approximate sqrt; throws iff this is negative,
+  /// This returns a float, as the result may be irrational
+  .sqrtExact: Float -> this < (0/1) .if {
+      .then -> Error.msg(".sqrtExact expected a positive number, given "+ this);
+      .else -> this.sqrtDefensive;
+    };
+
+  .sqrtDefensive: Float;             /// approximate sqrt;s NaN iff this is negative
+  .sign: Num;                        /// Return the sign of this number: +0/1 if x is 0, +1/1 if x is positive, -1/1 if x is negative.
+  .floor: Num;                       /// floor(this);
+  .ceil: Num;                        /// ceil(this);
+  .trunc0: Num;                      /// trunc toward 0;
+  .round: Num;                       /// round-to-nearest integer, ties-to-even (exact on rationals); result is an integer (denominator == 1)
+  .isInteger: Bool;                  /// true iff denominator == 1
+
+  /// `this.int` returns `.some` of `this` if this is an integer in [Math.minInt, Math.maxInt]; `.empty` otherwise
+  .int: Opt[Int] -> _NumAs.int this .then{this.intDefensive};
+
+  /// `this.nat` returns `.some` of `this` if this is an integer in [0, Math.maxNat]; `.empty` otherwise
+  .nat: Opt[Nat] -> _NumAs.nat this .then{this.natDefensive};
+
+  /// `this.byte` returns `.some` of `this` if this is an integer in [0, Math.maxByte]; `.empty` otherwise
+  .byte: Opt[Byte] -> _NumAs.byte this .then{this.byteDefensive};
+
+  /// `this.float` returns `.some` of `this` if this is exactly representable as a 64bit float, `.empty` otherwise.
+  .float: Opt[Float];
+
+  // `this.intExact` converts `this` to `Int` if this is an integer in [Math.minInt, Math.maxInt]; throws otherwise
+  .intExact: Int -> _NumAs.int this .if {
+    .then -> this.intDefensive;
+    .else -> Error.msg("Cannot convert "+this+" to Int: not an integer or out of [minInt,maxInt]");
+    };
+  /// `this.natExact` converts `this` to `Nat` if this is an integer in [0, Math.maxNat]; throws otherwise
+  .natExact: Nat -> _NumAs.nat this .if {
+    .then -> this.natDefensive;
+    .else -> Error.msg("Cannot convert "+this+" to Nat: not an integer or out of [0,maxNat]");
+    };
+  /// `this.byteExact` converts `this` to `Byte` if this is an integer in [0, Math.maxByte]; throws otherwise
+  .byteExact: Byte -> _NumAs.byte this .if {
+    .then -> this.byteDefensive;
+    .else -> Error.msg("Cannot convert "+this+" to Byte: not an integer or out of [0,maxByte]");
+    };
+
+  .floatExact: Float;                /// convert to Float, throws if not exactly representable.
+
+  .intDefensive: Int;                         /// clamp to [minInt,maxInt] after trunc0 (never throws)
+  .natDefensive: Nat;                         /// clamp to [0,maxNat] after trunc0 (never throws)
+  .byteDefensive: Byte;                       /// clamp to [0,maxByte] after trunc0 (never throws)
+  .floatDefensive: Float;                     /// approximate; (never throws)
+
+  /// `this.clampDefensive` always clamps between lo, and hi; if lo>hi the order is swapped
+  .clampDefensive(lo: Num, hi: Num): Num -> lo <= hi .if {
+    .then -> this.clampExact(lo, hi);
+    .else -> this.clampExact(hi, lo);
+    };
+
+  /// `this.clamp` returns .some of this clamped into [lo,hi], .empty if lo>hi
+  .clamp(lo: Num, hi: Num): Opt[Num] -> lo <= hi .then {this.clampExact(lo, hi)};
+
+  /// `this.clampExact` returns this clamped into [lo,hi], throws if lo>hi
+  .clampExact(lo: Num, hi: Num): Num;
+
+
+  .hash -> this.str.hash;           /// hash via string
+  .info -> Infos.msg(this.str);      /// info via string
+  .close->::; .close->this;         /// fixpoint type closed
+  .sumNumber xs ->                  /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );
+  .norm: Norm[Num];
+  }
+
+

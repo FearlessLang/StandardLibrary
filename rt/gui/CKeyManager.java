@@ -64,7 +64,7 @@ final class CKeyManager extends KeyAdapter implements Keys$0{
   }
 
   private static KeyStroke$0 matchingKey(EList$1 match,String eventKey){
-    long size=natToInt(match.read$size$0());
+    long size= natToLong(match.read$size$0());
     for (long i=0;i < size;i++){
       var k=(KeyStroke$0)match.mut$get$1(n(i));
       if (keyText(k).equals(eventKey)){ return k; }
@@ -73,7 +73,7 @@ final class CKeyManager extends KeyAdapter implements Keys$0{
   }
 
   private static void copyActions(EList$1 from,List<Consumer$1> to){
-    long size=natToInt(from.read$size$0());
+    long size= natToLong(from.read$size$0());
     for (long i=0;i < size;i++){
       to.add((Consumer$1)from.mut$get$1(n(i)));
     }

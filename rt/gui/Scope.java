@@ -10,7 +10,7 @@ class Scopes{
   static HeightNat$0 h(long n){ return (HeightNat$0) HeightNat$0.instance.read$$hash$1(new Nat$0Instance(n)); }
   static XNat$0 x(long n){ return (XNat$0) XNat$0.instance.read$$hash$1(new Nat$0Instance(n)); }
   static YNat$0 y(long n){ return (YNat$0) YNat$0.instance.read$$hash$1(new Nat$0Instance(n)); }
-  static int nat(Object n){ return Math.toIntExact(Util.natToInt(n)); }
+  static int nat(Object n){ return Math.toIntExact(Util.natToLong(n)); }
   static int byt(Object b){ return Byte.toUnsignedInt(((Byte$0Instance) b).val()); }
   static int n(Nat$0 n){ return nat(n); }
   static int w(WidthNat$0 w){ return nat(w.read$get$0()); }

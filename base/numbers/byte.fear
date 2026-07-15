@@ -1,0 +1,43 @@
+/// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
+/// Note: / is not provided; use div/rem (divisor is Nat).
+Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
+  +(x: Byte): Byte;                            /// checked add; throws on overflow (past 255)
+  -(x: Byte): Byte;                            /// checked sub; throws on underflow (below 0)
+  *(x: Byte): Byte;                            /// checked mul; throws on overflow
+  **(x: Byte): Byte;                           /// checked power; throws on overflow
+  /(x: Nat): Num;
+  .divExact(d: Nat): Byte;                     /// trunc toward 0; throws iff d == 0
+  .remExact(d: Nat): Byte;                     /// r = this - (this.div(d))*d; throws iff d == 0
+
+  .rem(d: Nat): Opt[Byte]                      /// .some of this - (this.div(d))*d; .empty d == 0
+    -> this == (0.byteExact) .then {this.remExact(d)};
+  .div(d: Nat): Opt[Byte]                      /// .some if d != 0 and this.rem(d) == 0; .empty otherwise
+    -> this == (0.byteExact) .then {this.divExact(d)};
+  .sqrt: Float;                                /// approximate sqrt
+
+  .nat: Nat;                                   /// exact widen
+  .int: Int;                                   /// exact widen
+  .float: Float;                               /// exact widen
+  .num: Num;                                   /// exact widen to rational
+
+  .aluAddWrap(x: Byte): Byte;                  /// u8 wraparound add (mod 256)
+  .aluSubWrap(x: Byte): Byte;                  /// u8 wraparound sub (mod 256)
+  .aluMulWrap(x: Byte): Byte;                  /// u8 wraparound mul (mod 256)
+  .aluDiv(x: Byte): Byte;                      /// u8 trunc division; throws iff x == 0
+  .aluRem(x: Byte): Byte;                      /// paired with aluDiv; throws iff x == 0
+  .aluShiftLeft(bits: Nat): Byte;              /// u8 shift-left; effective shift = bits & 7 (i.e., modulo 8).
+  .aluShiftRight(bits: Nat): Byte;             /// u8 logical shift-right; effective shift = bits & 7.
+  .aluXor(x: Byte): Byte;                      /// u8 xor
+  .aluAnd(x: Byte): Byte;                      /// u8 and
+  .aluOr(x: Byte): Byte;                       /// u8 or
+  .clamp(lo: Byte, hi: Byte): Byte;            /// clamp into [lo,hi]; throws if lo>hi
+  ~~(end: Byte): mut SizedFlow[Byte];               /// Range from this to Nat-1 included. If end <= this, an empty range is produced.
+  ~~=(endInclusive: Byte): mut SizedFlow[Byte];     /// Range from this to Nat included, If end < this, an empty range is produced. If end == this, a singleton range is produced.
+
+  .hash -> this.str.hash;                      /// hash via str
+  .info -> Infos.msg(this.str);                 /// info via str
+  .close->::; .close->this;                    /// fixpoint type closed
+  .sumNumber xs ->                             /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );
+  .norm: Norm[Byte];
+  }

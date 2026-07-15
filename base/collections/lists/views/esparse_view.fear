@@ -1,0 +1,109 @@
+/// A discussion point, Not concretely implemented
+
+/// A bounded mutable view into an `ESparseList`.
+/// Mutations to elements within the view are reflected in the original collection and vice versa.
+/// Unlike `ESparseList`, an `EView` has a fixed capacity and cannot be expanded.
+EView[E:*]: Sealed {
+  /// The capacity of this view, equivalent to `end - start` of the range it was created with.
+  read .capacity: Nat;
+
+  /// `this.numHoles` returns the number of holes in this view.
+  /// A design decision needs to be made here to make sure this is
+  read .numHoles: Nat;
+
+  /// `this.isFull` returns `True` if there are no holes in this view.
+  read .isFull: Bool -> this.numHoles == 0;
+
+  /// `this.isEmpty` returns `True` if all slots in this view are holes.
+  read .isEmpty: Bool -> this.numHoles == (this.capacity);
+
+  /// `this.hasHoles` returns `True` if any slot in this view is a hole.
+  read .hasHoles: Bool -> this.isFull.not;
+
+  /// `this.get(i)` returns `.some(e)` if there is an element at index `i`, or `.empty` if it is a hole.
+  /// Throws if `i >= this.capacity`.
+  read .get(Nat): mut Opt[read/imm E];
+
+  /// `this.get(i)` returns `.some(e)` if there is an element at index `i`, or `.empty` if it is a hole.
+  /// Throws if `i >= this.capacity`.
+  mut .get(Nat): mut Opt[E];
+
+  /// `this.set(i, e)` sets the element at index `i` to `e`, returning `this`.
+  /// Throws if `i >= this.capacity`.
+  mut .set(Nat, E): mut EView[E];
+
+  /// `this.remove(i)` removes the element at index `i`, returning `this`.
+  /// Does nothing if the slot is already a hole.
+  /// Throws if `i >= this.capacity`.
+  mut .remove(Nat): mut EView[E];
+
+  /// `this.clear` removes all elements from this view, returning `this`.
+  /// Does not affect elements in the parent collection outside this view's range.
+  mut .clear: mut EView[E];
+
+  /// `this.removeIf(f)` removes all elements for which `f` returns `True`, returning `this`.
+  mut .removeIf(mut MF[E, Bool]): mut EView[E];
+
+  /// `this.retainIf(f)` removes all elements for which `f` returns `False`, returning `this`.
+  /// Equivalent to: `this.removeIf{e -> f#e .not}`
+  mut .retainIf(mut MF[E, Bool]): mut EView[E];
+
+  /// `this.removeFirstWhere(f)` removes the first element for which `f` returns `True`, returning `this`.
+  /// Does nothing if no such element exists.
+  mut .removeFirstWhere(mut MF[E, Bool]): mut EView[E];
+
+  /// `this.removeLastWhere(f)` removes the last element for which `f` returns `True`, returning `this`.
+  /// Does nothing if no such element exists.
+  mut .removeLastWhere(mut MF[E, Bool]): mut EView[E];
+
+  /// `this.all(f)` returns `True` if `f` returns `True` for every element in this view.
+  /// Returns `True` if the view is empty.
+  mut .all(mut MF[E, Bool]): Bool;
+
+  /// `this.any(f)` returns `True` if `f` returns `True` for at least one element in this view.
+  /// Returns `False` if the view is empty.
+  mut .any(mut MF[E, Bool]): Bool;
+
+  /// `this.none(f)` returns `True` if `f` returns `False` for every element in this view.
+  /// Returns `True` if the view is empty.
+  /// Equivalent to: `this.any(f).not`
+  mut .none(mut MF[E, Bool]): Bool;
+
+  /// `this.firstIndexWhere(f)` returns `.some(i)` where `i` is the index of the first element
+  /// for which `f` returns `True`, or `.empty` if no such element exists.
+  /// Indices are relative to the start of this view.
+  mut .firstIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
+
+  /// `this.lastIndexWhere(f)` returns `.some(i)` where `i` is the index of the last element
+  /// for which `f` returns `True`, or `.empty` if no such element exists.
+  /// Indices are relative to the start of this view.
+  mut .lastIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
+
+  /// `this.indicesWhere(f)` returns a flow of all indices where `f` returns `True`,
+  /// in ascending order. Indices are relative to the start of this view.
+  mut .indicesWhere(mut MF[E, Bool]): mut Flow[Nat];
+
+  /// `this.mapInPlace(f)` applies `f` to each element, replacing each with the result, returning `this`.
+  mut .mapInPlace(mut MF[E, E]): mut EView[E];
+
+  /// `this.swap(i, j)` swaps the elements at indices `i` and `j`, returning `this`.
+  /// Throws if either index is out of bounds.
+  mut .swap(Nat, Nat): mut EView[E];
+
+  /// `this.reverse` reverses the order of elements within this view in place, returning `this`.
+  /// Does not affect elements in the parent collection outside this view's range.
+  mut .reverse: mut EView[E];
+
+  /// `this.trimTo(start, end)` narrows this view to the range `[start, end)`, returning `this`.
+  /// Throws if `start > end` or `end > this.capacity`.
+  mut .trimTo(start: Nat, end: Nat): mut EView[E];
+
+  /// `this.eView(start, end)` returns a further bounded view into this view for the range `[start, end)`.
+  /// Throws if `start > end` or `end > this.capacity`.
+  mut .eView(start: Nat, end: Nat): mut EView[E] -> Todo!;
+
+  /// `this.shallow_clone` returns an independent `ESparseList` copy of this view's contents.
+  /// Unlike other methods, this breaks the link to the parent collection
+  /// mutations to the clone are not reflected in the parent.
+  mut .shallow_clone: mut ESparseList[E];
+  }

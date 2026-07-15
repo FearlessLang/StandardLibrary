@@ -1,0 +1,100 @@
+NatArithTests: Test {::
+  .check{5 + 7 .assertEq 12}
+  .check{7 - 5 .assertEq 2}
+  .check{3 * 4 .assertEq 12}
+  .check{3 ** 3 .assertEq 27}
+  .check{5 .assertLt 7}
+  .check{7 .assertGt 5}
+  .check{(-1).aluNat .assertGt 0}
+  }
+
+NatDivRemTests: Test {::
+  .check{7 .divExact 3 .assertEq 2}
+  .check{7 .remExact 3 .assertEq 1}
+  .check{6 .div 3 .assertEq ({::},Opts#(2))}
+  .check{7 .div 3 .assertEq ({::},Opt[Nat])}
+  .check{7 .div 0 .assertEq ({::},Opt[Nat])}
+  .check{9 .sqrt .assertEq +3.0}
+  }
+
+NatIndexOffsetTests: Test {::
+  .check{5 .indexOffsetExact(-2) .assertEq 3}
+  .check{5 .indexOffsetExact(+2) .assertEq 7}
+  }
+
+NatConvTests: Test {::
+  .check{0.intExact .assertEq +0}
+  .check{5.intExact .assertEq +5}
+  .check{255.byteExact .assertEq (+255.byteExact)}
+  .check{300.byteDefensive .assertEq (+255.byteExact)}
+  .check{5.floatExact .assertEq +5.0}
+  .check{5.num .assertEq (+5.num)}
+  .check{5.int .assertEq ({::},Opts#(+5))}
+  .check{(-1).aluNat.int .assertEq ({::},Opt[Int])}
+  .check{5.byte .assertEq ({::},Opts#(+5.byteExact))}
+  .check{300.byte .assertEq ({::},Opt[Byte])}
+  .check{(-1).aluNat.intExact .assertEq(Math.maxInt)}
+  }
+
+NatAluTests: Test {::
+  .check{(-1).aluNat.aluAddWrap 1 .assertEq 0}
+  .check{0 .aluSubWrap 1 .aluInt .assertEq -1}
+  .check{4294967296 .aluMulWrap 4294967296 .assertEq 0}
+  .check{7 .aluDiv 3 .assertEq 2}
+  .check{7 .aluRem 3 .assertEq 1}
+  .check{(-1).aluNat.aluDiv 2 .aluInt .assertEq(Math.maxInt)}
+  .check{(-1).aluNat.aluRem 2 .assertEq 1}
+  .check{1 .aluShiftLeft(Math.natBits) .assertEq 1}
+  .check{(-1).aluNat .aluShiftRight 1 .aluInt .assertEq(Math.maxInt)}
+  .check{5 .aluXor 3 .assertEq 6}
+  .check{5 .aluAnd 3 .assertEq 1}
+  .check{5 .aluOr 2 .assertEq 7}
+  .check{(-1).aluNat.aluInt .assertEq -1}
+  .check{(-1).aluNat.aluByte .assertEq (Math.maxByte)}
+  }
+
+NatRangeChecksTests: Test {::
+  .check{3.assertInRange(1,5)}
+  .check{3.assertInRangeOpen(1,5)}
+  .check{3.assertInRangeLoOpen(1,3)}
+  .check{3.assertInRangeHiOpen(3,5)}
+  .check{0.clampExact(1,5) .assertEq 1}
+  .check{6.clampExact(1,5) .assertEq 5}
+  .check{3.clampExact(1,5) .assertEq 3}
+  .check{3.clampExact(3,3) .assertEq 3}
+  }
+
+NatLiteralFormsTests: Test {::
+  .check{1_000_000 .assertEq 1000000}
+  .check{4_294_967_295 .assertEq 4294967295}
+  .check{4_294_967_295.byteDefensive .assertEq(Math.maxByte)}
+  .check{Math.maxNat.intExact .assertEq(Math.maxInt)}
+  }
+
+NatBoundaryAndBoundedVsAluTests: Test {::
+  .check{Math.maxNat.aluAddWrap 1 .assertEq 0}
+  .check{0.aluSubWrap 1 .assertEq(Math.maxNat)}
+  .check{Math.maxNat.aluInt .assertEq -1}
+  }
+
+NatRangeTests: Test {::
+  .check{0~~0.size .assertEq 0}
+  .check{0~~1.list .assertEq({::},  Lists#(0))}
+  .check{0~~=1.list .assertEq({::},  Lists#(0,1))}
+  .check{0~~2.list .assertEq({::},  Lists#(0,1))}
+  .check{Math.maxNat - 5~~=(Math.maxNat).size .assertEq 6 }
+  .check{Math.maxNat - 5~~(Math.maxNat).size .assertEq 5 }
+  .check{Math.maxInt.natExact~~=(Math.maxInt.natExact + 1).size .assertEq 2 }
+  }
+
+TestNat: Test {::
+  .test NatArithTests
+  .test NatDivRemTests
+  .test NatIndexOffsetTests
+  .test NatConvTests
+  .test NatAluTests
+  .test NatRangeChecksTests
+  .test NatLiteralFormsTests
+  .test NatBoundaryAndBoundedVsAluTests
+  .test NatRangeTests
+  }

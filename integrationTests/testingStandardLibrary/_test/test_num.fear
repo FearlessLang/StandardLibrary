@@ -1,0 +1,100 @@
+NumArithTests: Test {::
+  .check{+1.num + (+2.num) .assertEq (+3.num)}
+  .check{+5.num - (+2.num) .assertEq (+3.num)}
+  .check{+3.num * (+4.num) .assertEq (+12.num)}
+  .check{+6.num / (+3.num) .assertEq (+2.num)}
+  .check{(-5.num).abs .assertEq (+5.num)}
+  .check{+5.num.abs .assertEq (+5.num)}
+  .check{+9.num.sqrtExact .assertEq +3.0}
+  .check{(-1.num).sqrtDefensive.isNaN .assertEq True}
+  .check{+1.num.assertEqDelta(+1.num,+0.num)}
+  .check{+1/2 ** -2.assertEq(+4.num)}
+  .check{-4/3 ** +3.assertEq(-64/27)}
+  }
+
+NumRoundTests: Test {::
+  .check{+1.num / (+2.num).round .assertEq (+0.num)}
+  .check{+3.num / (+2.num).round .assertEq (+2.num)}
+  .check{+5.num / (+2.num).round .assertEq (+2.num)}
+  .check{(-1.num) / (+2.num).round .assertEq (+0.num)}
+  .check{(-3.num) / (+2.num).round .assertEq (-2.num)}
+  .check{(-5.num) / (+2.num).round .assertEq (-2.num)}
+  .check{+1.num / (+3.num).round .assertEq (+0.num)}
+  .check{+2.num / (+3.num).round .assertEq (+1.num)}
+  .check{+1.num / (+2.num).round.isInteger .assertEq True}
+  }
+
+NumFloorCeilTruncTests: Test {::
+  .check{+3.num / (+2.num).floor .assertEq (+1.num)}
+  .check{+3.num / (+2.num).ceil .assertEq (+2.num)}
+  .check{+3.num / (+2.num).trunc0 .assertEq (+1.num)}
+  .check{(-3.num) / (+2.num).floor .assertEq (-2.num)}
+  .check{(-3.num) / (+2.num).ceil .assertEq (-1.num)}
+  .check{(-3.num) / (+2.num).trunc0 .assertEq (-1.num)}
+  .check{+5.num.floor .assertEq (+5.num)}
+  .check{+5.num.ceil .assertEq (+5.num)}
+  .check{+5.num.trunc0 .assertEq (+5.num)}
+  }
+
+NumIsIntegerTests: Test {::
+  .check{+2.num.isInteger .assertEq True}
+  .check{+1.num / (+2.num).isInteger .assertEq False}
+  .check{(-2.num).isInteger .assertEq True}
+  }
+
+NumConvTests: Test {::
+  .check{+5.num.intExact .assertEq +5}
+  .check{+5.num.natExact .assertEq 5}
+  .check{+5.num.byteExact .assertEq (+5.byteExact)}
+  .check{+5.num.floatExact .assertEq +5.0}
+  .check{+1.num / (+2.num).intExact .assertEq +0}
+  .check{(-1.num) / (+2.num).natDefensive .assertEq 0}
+  .check{+300.num.byteDefensive .assertEq (+255.byteExact)}
+  .check{(-1.num).byteDefensive .assertEq (+0.byteExact)}
+  .check{+2.num.int .assertEq ({::},Opts#(+2))}
+  .check{+1.num / (+2.num).int .assertEq ({::},Opt[Int])}
+  .check{+2.num.nat .assertEq ({::},Opts#(2))}
+  .check{(-1.num).nat .assertEq ({::},Opt[Nat])}
+  .check{+255.num.byte .assertEq ({::},Opts#(+255.byteExact))}
+  .check{+256.num.byte .assertEq ({::},Opt[Byte])}
+  }
+
+NumRangeTests: Test {::
+  .check{+3.num.assertInRange(+1.num,+5.num)}
+  .check{+3.num.assertInRangeOpen(+1.num,+5.num)}
+  .check{+3.num.assertInRangeLoOpen(+1.num,+3.num)}
+  .check{+3.num.assertInRangeHiOpen(+3.num,+5.num)}
+  .check{+0.num.clampExact(+1.num,+5.num) .assertEq (+1.num)}
+  .check{+6.num.clampExact(+1.num,+5.num) .assertEq (+5.num)}
+  .check{+3.num.clampExact(+1.num,+5.num) .assertEq (+3.num)}
+  .check{+3.num.clampExact(+3.num,+3.num) .assertEq (+3.num)}
+  }
+
+NumRationalLiteralFormsTests: Test {::
+  .check{+1/2 + (1/2) .assertEq (+1.num)}
+  .check{+3/2 - (+1.num) .assertEq (+1/2)}
+  .check{+1_0/2_0 .assertEq (+1/2)}
+  .check{+10/20 .assertEq (+1/2)}
+  }
+
+NumRationalTokenizationWitnessTests: Test {::
+  .check{+3/2 - (((+3).divExact 2).num) .assertEq (+1/2)}
+  }
+
+NumSignTests: Test {::
+  .check{-12.num.sign.assertEq(-1.num)}
+  .check{+7.num.sign.assertEq(+1.num)}
+  .check{0.num.sign.assertEq(0.num)}
+  }
+
+TestNum: Test {::
+  .test NumArithTests
+  .test NumRoundTests
+  .test NumFloorCeilTruncTests
+  .test NumIsIntegerTests
+  .test NumConvTests
+  .test NumRangeTests
+  .test NumRationalLiteralFormsTests
+  .test NumRationalTokenizationWitnessTests
+  .test NumSignTests
+  }

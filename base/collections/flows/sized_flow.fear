@@ -1,0 +1,34 @@
+
+/// A flow who has a precomputed size;
+SizedFlow[E:*]: Flow[E] {
+  /// `this.size` returns the number of elements in the flow.
+  /// Note: Calling this is O(1) and doesn't consume the flow.
+  read .size: Nat;
+
+
+  // Combine this with another sized flow
+  mut .with[E':*](mut SizedFlow[E']): mut BiFlow[E, E'];
+  // Combine this with another BiFlow
+  mut .withBoth[E':*, E'':*](mut BiFlow[E', E'']): mut TriFlow[E, E', E''];
+  // Combine this with a TriFlow
+  mut .withAll[E':*, E'':*, E''':*](mut TriFlow[E', E'',E''']): mut QuadFlow[E, E', E'',E'''];
+
+  // Produce a BiFlow with all the elements enumerated
+  mut .enumerate: mut BiFlow[Nat, E] -> 0~~(this.size).with(this);
+
+  /// Some stream operations leave you with a predictable size at the end
+  mut .map[R:*](f: read F[E, R]): mut SizedFlow[R];
+  mut .sizedConcat(mut SizedFlow[E]): mut SizedFlow[E];
+  mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut SizedFlow[E] -> this.map(ctx, {c, e -> Block#(f#(c, e), e)});
+  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut SizedFlow[R]->Error.msg`TODO`;
+
+  mut .scan[S:imm](input: S, f: read F[S,E,S]): mut SizedFlow[S] -> this.map{e -> f#(input, e)};
+
+  mut .limit(n: Nat): mut Opt[mut SizedFlow[E]] -> n <= (this.size) .then{this.limitDefensive n};
+  mut .limitExact(n: Nat): mut SizedFlow[E] -> n <= (this.size) .if {
+    .then -> this.limitDefensive n;
+    .else -> Error.msg("Tried to limit a flow of size larger than the flow. n must be <= "+(this.size)+", currently "+n);
+  };
+
+  mut .limitDefensive(Nat): mut SizedFlow[E];
+  }

@@ -1,0 +1,86 @@
+/// Int: signed 64-bit.
+/// Note: / is not provided; use div/rem (divisor is Nat).
+Int: Sealed,DataType[Int,Int],SumNumber[Int] {
+  .succ: Int -> this + +1;                  /// successor number; throws on overflow
+  .pred: Int -> this + -1;                  /// predecessor number; throws on underflow
+  +(x: Int): Int;                           /// checked add; throws on overflow/underflow
+  -(x: Int): Int;                           /// checked sub; throws on overflow/underflow
+  *(x: Int): Int;                           /// checked mul; throws on overflow/underflow
+  **(x: Nat): Int;                          /// checked power; throws on overflow/underflow. Uses Nat to make negative powers impossible as they would produce fractional results
+  / (d: Nat) : Num;                         /// create a Num represening the exact result of this division; throws iff d==0
+
+  // TODO: decide if this should be defensive or exact
+  .divExact(d: Nat): Int;                        /// trunc toward 0; throws iff d==0
+  .remExact(d: Nat): Int;                        /// r = this - (this.div(d))*d; throws iff d==0;
+  .rem(d: Nat): Opt[Int] ->               /// r = this - (this.div(d))*d; .empty iff d==0;
+    d == 0 .then {this.remExact(d)};
+  .div(d: Nat): Opt[Int]               /// .some if d!=0 and this.rem(d)==0; .empty otherwise
+    -> this.rem(d).match {
+      .empty -> {};
+      .some r -> r == +0 .then {this.divExact(d)};
+      };
+  .sign: Int;                               /// Return the sign of this number: +0 if x is 0, +1 if x is positive, -1 if x is negative.
+  .abs: Nat;                                /// abs; x if x >= 0, -x otherwise. Returns a Nat since Math.minInt.abs is larger than Math.maxInt, so it would be unrepresentable as an Int.
+
+  /// .some of the approximate sqrt; returns .empty iff this is negative
+  .sqrt: Opt[Float]
+    -> this >= -0 .then{this.sqrtDefensive};
+
+  /// approximate sqrt; throws iff this is negative
+  .sqrtExact: Float -> this < +0 .if {
+      .then -> Error.msg(".sqrtExact expected a positive number, given "+ this);
+      .else -> this.sqrtDefensive;
+    };
+
+  .sqrtDefensive: Float;                    /// approximate sqrt; returns NaN iff this is negative
+
+  .wrapIndexExact(len: Nat): Nat;           /// normalize into [0,len-1]; throws iff len==0; example: -1.wrapIndex(7) == 6
+  .wrapIndex(len: Nat): Opt[Nat] -> len == 0 .then {this.wrapIndexExact(len)};
+
+  .num: Num;                                /// converts to Num (note: Num can represent exactly all Int values)
+  .nat: Opt[Nat];                           /// .some if this >= 0; .empty otherwise
+  .byte: Opt[Byte];                         /// .some if this in [0,maxByte]; .empty otherwise
+  .float: Opt[Float];                       /// .some if this is exactly representable; .empty otherwise
+
+  .natExact: Nat;                           /// converts if this >= 0; throws otherwise
+  .byteExact: Byte;                         /// converts if this in [0,maxByte]; throws otherwise
+  .floatExact: Float;                       /// converts if this is exactly representable; throws otherwise
+
+  .natDefensive: Nat;                       /// converts by flooring to 0
+  .byteDefensive: Byte;                     /// converts by clamping to [0,maxByte]
+  .floatDefensive: Float;                   /// converts to the closest representable number
+
+  .aluAddWrap(x: Int): Int;                 /// i32 wraparound add (mod 2^32)
+  .aluSubWrap(x: Int): Int;                 /// i32 wraparound sub (mod 2^32)
+  .aluMulWrap(x: Int): Int;                 /// i32 wraparound mul (mod 2^32)
+  .aluDiv(x: Int): Int;                     /// i32 trunc division; throws iff x == 0; Note: negative divisor allowed here
+  .aluRem(x: Int): Int;                     /// paired with aluDiv; sign follows dividend; throws iff x == 0
+  .aluShiftLeft(bits: Nat): Int;            /// i32 shift-left; effective shift = bits & 31.
+  .aluShiftRight(bits: Nat): Int;           /// i32 arithmetic shift-right (sign-ext); effective shift = bits & 31.
+  .aluXor(x: Int): Int;                     /// i32 xor
+  .aluAnd(x: Int): Int;                     /// i32 and
+  .aluOr(x: Int): Int;                      /// i32 or
+  .aluNat: Nat;                             /// reinterpret i32 bits as u32 Nat (bit-cast)
+  .aluByte: Byte;                           /// low 8 bits (wrap), not clamp
+   /// `this.clampDefensive` always clamps between lo, and hi; if lo>hi the order is swapped
+  .clampDefensive(lo: Int, hi: Int): Int -> lo <= hi .if {
+    .then -> this.clampExact(lo, hi);
+    .else -> this.clampExact(hi, lo);
+    };
+
+  /// `this.clamp` returns .some of this clamped into [lo,hi], .empty if lo>hi
+  .clamp(lo: Int, hi: Int): Opt[Int] -> lo <= hi .then {this.clampExact(lo, hi)};
+
+  /// `this.clampExact` returns this clamped into [lo,hi], throws if lo>hi
+  .clampExact(lo: Int, hi: Int): Int;
+
+   ~~(end: Int): mut SizedFlow[Int];             /// Range from this to end-1 included. Throws if end < this, if end == this, an empty range is produced.
+   ~~=(endInclusive: Int): mut SizedFlow[Int];   /// Range from this to Nat included, throws if end < this, if end == this, a singleton range is produced.
+
+  .hash -> this.str.hash;                   /// hash via str
+  .info -> Infos.msg(this.str);              /// info via str
+  .close -> ::; .close -> this;             /// fixpoint type closed
+  .sumNumber xs ->                          /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );
+  .norm: Norm[Int];
+  }

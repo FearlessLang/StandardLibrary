@@ -2,5 +2,5 @@ use base.UnitTests as UnitTests;
 use base.Void as Void;
 
 MyTests:UnitTests{::
-  .check{1.assertEq 3}
+  .disabledCheck{1.assertEq 3}
   }

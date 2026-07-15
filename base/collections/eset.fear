@@ -1,0 +1,97 @@
+/// The initialisation point for an ESet, creates and empty ESet
+ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E, K] -> Magic! }
+
+/// A mutable set, allows for in place updates.
+/// In general this collection is built up with `.add` and similar methods and then consumed into a list.
+/// These sets will have some consistent guaranteed order.
+ESet[E, K]: {
+  /// `this.add(e)` adds `e` to this and returns this to allow method chaining.
+  /// Note this operation mutates this.
+  //> {::
+  //>   .check{ESets#{::}.add(1).add(2).add(3).set.str .assertEq "{1, 2, 3}"}
+  //>   }
+  mut .add(E): mut ESet[E, K];
+
+  /// `this.clear` removes all the elements from this and returns this to allow method chaining.
+  /// Note this operation mutates this.
+  //> {::
+  //>   .let eset={ESets#[Nat, Nat]{::}.add(1).add(2)}
+  //>   .check{eset.size .assertEq 2}
+  //>   .check{eset.clear.isEmpty .assertTrue}
+  //>   .check{eset.isEmpty .assertTrue}
+  //>   }
+  mut .clear: mut ESet[E, K];
+
+  /// `this.contains(e)` returns True if `e` is present in this.
+  //> {::
+  //>   .let eset={ESets#[Nat,Nat]{::}.add(1).add(2)}
+  //>   .check{eset.contains(1) .assertTrue}
+  //>   .check{eset.contains(3) .assertFalse}
+  //>   }
+  read .contains(E): Bool;
+
+  /// `this.distinctBy(by)` replaces the orderHash of this with `by` and returns this.
+  /// This may cause elements in this to be removed if they are equal under `by`.
+  /// Note this operation mutates this.
+  //> {::
+  //>   .check{ESets#[Int, Int]{::}
+  //>     .add(+1).add(-2).add(+3)
+  //>     .distinctBy({::.imm.sign}).set.str{::} .assertEq "{+1, -2}"}
+  //>   }
+  mut .distinctBy(by: OrderHashBy[imm E, K]): mut ESet[E, K];
+
+  /// `this.seqFlow` returns a sequential flow over the elements of this.
+  /// Note this operation drains this, so any future accesses to this will point to an empty ESet.
+  //> {::
+  //>   .let eset={ESets#[Int, Int]{::}.add(+1).add(-2).add(+3)}
+  //>   .check{eset.seqFlow.list.str{::} .assertEq "[+1, -2, +3]"}
+  //>   .check{eset.isEmpty .assertTrue}
+  //>   }
+  mut .seqFlow: mut Flow[E];
+
+  /// `this.flow` returns a potentially parallel flow over the elements of this.
+  /// Note this operation drains this, so any future accesses to this will point to an empty ESet.
+  //> {::
+  //>   .let eset={ESets#[Int, Int]{::}.add(+1).add(-2).add(+3)}
+  //>   .check{eset.flow.list.str{::} .assertEq "[+1, -2, +3]"}
+  //>   .check{eset.isEmpty .assertTrue}
+  //>   }
+  mut .flow: mut Flow[E];
+
+  /// `this.set` returns a Set of all the elements of this.
+  /// Note this operation drains this, so any future accesses to this will point to an empty ESet.
+  //> {::
+  //>   .let eset={ESets#[Int, Int]{::}.add(+1).add(-2).add(+3)}
+  //>   .check{eset.set.str .assertEq "{+1, -2, +3}"}
+  //>   .check{eset.isEmpty .assertTrue}
+  //>   }
+  mut .set: Set[E, K];
+
+  /// `this.size` returns the number of elements in this.
+  //> {::
+  //>   .check{ESets#[Nat,Nat]{::}.add(1).add(2).add(3).size .assertEq 3}
+  //>   .check{ESets#[Nat,Nat]{::}.size .assertEq 0}
+  //>   }
+  read .size: Nat;
+
+  /// `this.isEmpty` returns True if this has no elements.
+  //> {::
+  //>   .check{ESets#[Nat,Nat]{::}.isEmpty .assertTrue}
+  //>   .check{ESets#[Nat,Nat]{::}.add(1).isEmpty .assertFalse}
+  //>   }
+  read .isEmpty: Bool -> this.size == 0;
+
+  /// `this.notEmpty` returns True if this has any elements.
+  //> {::
+  //>   .check{ESets#[Nat,Nat]{::}.notEmpty .assertFalse}
+  //>   .check{ESets#[Nat,Nat]{::}.add(1).notEmpty .assertTrue}
+  //>   }
+  read .notEmpty: Bool -> this.isEmpty.not;
+
+  /// `this.done` returns Void, terminating a method chain.
+  /// Equivalent to `Block#(this, Void)`.
+  //> {::
+  //>   .check{ESets#[Nat,Nat]{::}.add(1).add(2).done .assertEq Void}
+  //>   }
+  read .done: Void -> Void;
+  }

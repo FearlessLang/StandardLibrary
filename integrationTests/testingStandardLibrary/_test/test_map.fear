@@ -1,0 +1,98 @@
+MapBasicsTests: Test {::
+  .check{Maps#[Str,Str,Int] {::} .size .assertEq 0}
+  .check{Maps#[Str,Str,Int] {::} .isEmpty .assertEq True}
+  .check{Maps#[Str,Str,Int] {::} .hash{::} .assertEq 0}
+  .check{Maps#[Str,Str,Int] {::}.orderHash{::} == (Maps#[Str,Str,Int] {::}).assertTrue}
+  .check{Maps#[Str,Str,Int] {::} .close .size .assertEq 0}
+  .check{Maps#[Str,Str,Int] {::} .str{::.str} .assertEq( Maps#({::}, `a`, `x`) .without `a` .str{::.str})}
+  .check{Maps#[Str,Str,Str] {::} .str{::.str} .assertEq( Maps#({::}, `a`, `x`) .without `a` .str{::.str})}
+  .check{Maps#({::}, `a`, `x`) .size .assertEq 1}
+  .check{Maps#({::}, `a`, `x`) .isEmpty .assertEq False}
+  .check{Maps#({::}, `a`, `x`) .get `a` .assertEq `x`}
+  .check{Maps#({::}, `a`, `x`) .opt `a` .isEmpty .assertEq False}
+  .check{Maps#({::}, `a`, `x`) .opt `b` .isEmpty .assertEq True}
+  .check{Maps#({::}, `a`, `x`) .containsKey `a` .assertEq True}
+  .check{Maps#({::}, `a`, `x`) .containsKey `b` .assertEq False}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .size .assertEq 1}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .get `a` .assertEq `x`}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`a`, `y`) .size .assertEq 1}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`a`, `y`) .get `a` .assertEq `y`}
+  .check{Maps#({::}, `a`, `x`) .without `a` .isEmpty .assertEq True}
+  .check{Maps#({::}, `a`, `x`) .without `a` .size .assertEq 0}
+  .check{Maps#({::}, `a`, `x`) .without `a` .opt `a` .isEmpty .assertEq True}
+  .check{Maps#({::}, `a`, `x`) .without `a` .containsKey `a` .assertEq False}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .imm{::.imm} .size .assertEq 2}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .imm{::.imm} .get `a` .assertEq `x`}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .imm{::.imm} .get `bb` .assertEq `y`}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .str{::.str} .assertEq(
+    Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`bb`, `y`) .str{::.str})}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .str{::.str} .assertNotEq( Maps#({::}, `bb`, `y`, `a`, `x`) .str{::.str})}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .opt `a` .isEmpty .assertEq False}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .opt `bb` .isEmpty .assertEq False}
+  .check{Maps#({::}, `a`, `x`, `bb`, `y`) .opt `c` .isEmpty .assertEq True}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .size .assertEq 2}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .get `a` .assertEq `x`}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .get `b` .assertEq `z`}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `a`, `y`, `b`, `z`)) .containsKey `b` .assertEq True}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .size .assertEq 2}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .get `a` .assertEq `x`}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .get `b` .assertEq `y`}
+  .check{Maps#[Str,Str,Str] {::} ++ (Maps#({::}, `a`, `x`)) .size .assertEq 1}
+  .check{Maps#[Str,Str,Str] {::} ++ (Maps#({::}, `a`, `x`)) .get `a` .assertEq `x`}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#[Str,Str,Str] {::}) .size .assertEq 1}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#[Str,Str,Str] {::}) .get `a` .assertEq `x`}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) ++ (Maps#({::}, `c`, `z`)) .size .assertEq 3}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) ++ (Maps#({::}, `c`, `z`)) .get `c` .assertEq `z`}
+  .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .str{::.str} .assertEq(
+    Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .str{::.str})}
+  .check{Maps#[Str,Str,Str] {::} .as {::.size} .size .assertEq 0}
+  .check{Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .size .assertEq 2}
+  .check{Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .get `a` .assertEq 2}
+  .check{Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .get `bb` .assertEq 1}
+  .check{Maps#({::}, `a`, `xx`) .as {::.size} .containsKey `a` .assertEq True}
+  .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#`x`) .size .assertEq 1}
+  .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#`x`) .get `a` .get 0 .assertEq `x`}
+  .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#(`x`,`y`)) .get `a` .size .assertEq 2}
+  .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#(`x`,`y`)) .as {::.size} .get `a` .assertEq 2}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `a` .assertEq False}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `b` .assertEq True}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .size .assertEq 1}
+  .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .get `b` .assertEq `y`}
+  .check{Maps#({::},`a`, `x`,`b`, `y`).info{::}.str.assertEq (`{a: `^`x`^`, b: `^`y`^`}`)}
+  // Proper map equality
+  .check{
+    Maps#({::}, `aa`, `x`, `b`, `y`).flow.withBoth(Maps#({::.imm.size}, `aa`, `x`, `b`, `y`).flow)
+      .fold({True}, {isEq, k, v, k', v' -> isEq && {k==k'} && {v==v'}})
+      .orValue False
+      .assertTrue
+    }
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `b`, `y`, `aa`, `x`), `v3`) .size .assertEq 2}
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .get (Maps#({::}, `aa`, `x`, `b`, `y`)) .assertEq `v1`}
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `aa`, `x`, `b`, `y`), `v2`) .size .assertEq 1}
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `aa`, `x`, `b`, `y`), `v2`)
+    .get (Maps#({::}, `aa`, `x`, `b`, `y`)) .assertEq `v2`}
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::}, `b`, `y`, `aa`, `x`), `v3`) .size .assertEq 2}
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .containsKey (Maps#({::.imm.size.str}, `aa`, `x`, `b`, `y`)) .assertFalse}
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::.imm.size.str}, `aa`, `x`, `b`, `y`), `vS`) .size .assertEq 2}
+  .check{Maps#({::.orderHash{::}}, Maps#({::}, `aa`, `x`, `b`, `y`), `v1`)
+    .with(Maps#({::.imm.size.str}, `aa`, `x`, `b`, `y`), `vS`)
+    .get (Maps#({::.imm.size.str}, `aa`, `x`, `b`, `y`)) .assertEq `vS`}
+  .check{Maps#({::}, `a`, `x`) .orderHash _BySize == (Maps#({::}, `a`, `y`)) .assertTrue}
+  .check{Maps#({::}, `a`, `x`) .orderHash _BySize < (Maps#({::}, `a`, `yy`)) .assertTrue}
+  .check{Maps#({::}, `a`, `x`, `b`, `zz`) .orderHash _BySize < (Maps#({::}, `a`, `x`, `b`, `zzz`)) .assertTrue}
+  }
+
+TestMap: Test {::
+  .test MapBasicsTests
+  }
+
+_BySize: OrderHashBy[Str,Nat] {# s->s.imm.size}
+_BS: DataType[_BS,_BS] {read .s: Str; .str->`Nope`; .info->Todo!; .close->this; .close->::; .imm->Todo!; .hash ->this.s.hash; .cmp a, b, m->a.s<=>(b.s,m);}
+_BSs:{#(s: Str): _BS->{s}}

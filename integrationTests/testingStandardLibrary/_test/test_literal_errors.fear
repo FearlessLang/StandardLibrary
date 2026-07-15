@@ -1,0 +1,55 @@
+ThrowArithTests: Test {::
+  .checkDetErr({i -> True}, {12 .div 0})
+  .checkDetErr({i -> True}, {+12 .div 0})
+  .checkDetErr({i -> True}, {+12.byteExact .div 0})
+  .checkDetErr({i -> True}, {+12/3 / (+0/1)})
+  .checkDetErr({i -> True}, {Math.maxNat + 1})
+  .checkDetErr({i -> True}, {Math.minNat - 1})
+  .checkDetErr({i -> True}, {4_294_967_296 * 4_294_967_296})
+  .checkDetErr({i -> True}, {Math.maxInt + +1})
+  .checkDetErr({i -> True}, {Math.minInt - +1})
+  .checkDetErr({i -> True}, {Math.maxInt - +2 * +2})
+  .check{Math.minInt.abs.assertEq(Math.maxInt.natExact + 1)}
+  .checkDetErr({i -> True}, {+250.byteExact + (+10.byteExact)})
+  .checkDetErr({i -> True}, {Math.minByte - (+1.byteExact)})
+  .checkDetErr({i -> True}, {+7.wrapIndex 0})
+  .checkDetErr({i -> True}, {Math.minNat.indexOffset -1})
+  .checkDetErr({i -> True}, {Math.maxNat.indexOffset +1})
+  }
+
+ThrowRangeTests: Test {::
+  .checkDetErr({i -> True}, {+3.assertInRange(+5,+1)})
+  .checkDetErr({i -> True}, {+3.assertInRange(+5,+7)})
+  .checkDetErr({i -> True}, {+5.assertInRangeOpen(+5,+7)})
+  .checkDetErr({i -> True}, {`b`.assertInRange(`c`,`d`)})
+  .checkDetErr({i -> True}, {+3.clamp(+5,+1)})
+  .checkDetErr({i -> True}, {3.clamp(5,1)})
+  }
+
+ThrowListTests: Test {::
+  .checkDetErr({i -> True}, {List[Str].get 0})
+  .checkDetErr({i -> True}, {List[Str].first})
+  .checkDetErr({i -> True}, {List[Str].last})
+  .checkDetErr({i -> True}, {List[Str].with(0,`x`)})
+  .checkDetErr({i -> True}, {List[Str].without 0})
+  .checkDetErr({i -> True}, {List[Str].withAlso(1,`x`)})
+  .checkDetErr({i -> True}, {Lists#(`a`).get 1})
+  .checkDetErr({i -> True}, {Lists#(`a`).without 1})
+  .checkDetErr({i -> True}, {Lists#(`a`).with(1,`b`)})
+  .checkDetErr({i -> True}, {Lists#(`a`).withAlso(2,`b`)})
+  .checkDetErr({i -> True}, {Lists#(`a`,`b`).subList(0,3)})
+  }
+
+ThrowMapTests: Test {::
+  .checkDetErr({i -> True}, {Maps#[Str,Str,Str] {::}.get `a`})
+  .checkDetErr({i -> True}, {Maps#[Str,Str,Str] {::}.without `a`})
+  .checkDetErr({i -> True}, {Maps#({::}, `a`, `x`).get `b`})
+  .checkDetErr({i -> True}, {Maps#({::}, `a`, `x`).without `b`})
+  }
+
+TestLiteralErrors: Test {::
+  .test ThrowArithTests
+  .test ThrowRangeTests
+  .test ThrowListTests
+  .test ThrowMapTests
+  }
