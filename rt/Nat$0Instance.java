@@ -37,7 +37,6 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
   public static boolean overflowsLong(long unsignedLong){
     return Long.compareUnsigned(unsignedLong, Long.MAX_VALUE) > 0;
   }
-
   private static long n(Object o){ return ((Nat$0Instance)o).val; }
   private static long i(Object o){ return ((Int$0Instance)o).val(); }
 
@@ -84,6 +83,14 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
   /// WARNING - THIS LONG IS UNSIGNED
   public static long unwrap(Object p0) {
     return ((Nat$0Instance) p0).val;
+  }
+
+  public static long getSignedLong(Object p0) {
+    Nat$0Instance nat = (Nat$0Instance) p0;
+    if (nat.val < 0) {
+      throw err("Nat too large to be represented as a signed long.");
+    }
+    return nat.val;
   }
 
   @Override public Object imm$$slash$1(Object p0){
