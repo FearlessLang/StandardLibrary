@@ -23,8 +23,8 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .abs: Nat;                                /// abs; x if x >= 0, -x otherwise. Returns a Nat since Math.minInt.abs is larger than Math.maxInt, so it would be unrepresentable as an Int.
   .negAbs: Int;                             /// absNeg; -x if x >= 0, x otherwise.
 
-  .wrapIndexExact(len: Nat): Nat;           /// normalize into [0,len-1]; throws iff len==0; example: -1.wrapIndex(7) == 6
-  .wrapIndex(len: Nat): Opt[Nat] -> len == 0 .then {this.wrapIndexExact(len)};
+  .getWrapIndex(len: Nat): Nat;           /// normalize into [0,len-1]; throws iff len==0; example: -1.wrapIndex(7) == 6
+  .wrapIndex(len: Nat): Opt[Nat] -> len == 0 .then {this.getWrapIndex(len)};
 
   .num: Num;                                /// converts to Num (note: Num can represent exactly all Int values)
   .nat: Opt[Nat];                           /// .some if this >= 0; .empty otherwise
@@ -54,31 +54,39 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
 
   /// `this~~n` returns a range from this+1 to n-1
-  ~~(end: Int): read Range[Int] -> this.imm.succ =~~= (end.pred);
+  ~~(end: Int): read Range[Int] -> Block#
+    .if {this == (Math.maxInt)} .error{"Int ~~: Start of open range cannot be Math.maxInt"}
+    .if {end == (Math.minInt)} .error{"Int ~~: End of open range cannot be Math.minInt"}
+    .return {this.imm.succ =~~= (end.pred)};
 
-  /// `this~~n` returns a range from `this+1` to `n`
-  ~~=(endInclusive: Int): read Range[Int] -> this.imm.succ =~~= endInclusive;
+  /// `this~~=n` returns a range from `this+1` to `n`
+  ~~=(endInclusive: Int): read Range[Int] -> Block#
+    .if {this == (Math.maxInt)} .error{"Int ~~=: Start of open range cannot be Math.maxInt"}
+    .return {this.imm.succ =~~= endInclusive};
 
   /// `this=~~n` returns a range from `this` to `n-1`
-  =~~(end: Int): read Range[Int] -> this =~~=(end.pred);
+  =~~(end: Int): read Range[Int] -> Block#
+    .if {end == (Math.minInt)} .error{"Int =~~: End of open range cannot be Math.minInt"}
+    .return {this =~~= (end.pred)};
 
   /// `this=~~=n` returns a range from `this` to `n`
-  =~~=(endInclusive: Int): read Range[Int] -> Block#(
-    Assert!(this <= endInclusive),
-    {'self
-      .size -> this.imm - endInclusive .getNat;
-      .start -> this;
-      .end -> endInclusive;
-      .flow -> _NumFlow.ints(this.imm, endInclusive);
-      // Performance question here, should this be magic
-      .flow step -> self.flow.filter{(:: - (this.imm)).getRem(step.getNat) == (0.getInt)};
-      .contains n -> this <= n && { n <= endInclusive};
-      .clamp n -> Block#
-        .if {n <= this} .return {this.imm}
-        .if {n >= endInclusive} .return {endInclusive}
-        .return {n.imm};
-      });
-
+  =~~=(endInclusive: Int): read Range[Int] ->
+    this > endInclusive .if {
+      .then -> Error.msg("Int =~~=: invalid range start (" + this + ") > end (" + endInclusive + ")");
+      .else -> {'self
+        .size -> this.imm - endInclusive .getNat;
+        .start -> this;
+        .end -> endInclusive;
+        .flow -> _NumFlow.ints(this.imm, endInclusive);
+        // Performance question here, should this be magic
+        .flow step -> self.flow.filter{(:: - (this.imm)).getRem(step.getNat) == (0.getInt)};
+        .contains n -> this <= n && { n <= endInclusive};
+        .clamp n -> Block#
+          .if {n <= this} .return {this.imm}
+          .if {n >= endInclusive} .return {endInclusive}
+          .return {n.imm};
+        }
+      };
 
   .inRange(range: Range[Int]): Bool -> range.contains(this);
   .assertInRange(range: Range[Int]): Void -> this.assertInRange(range, {``});

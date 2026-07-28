@@ -90,7 +90,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       .clamp n -> Block#
         .if {n >= endInclusive} .return {endInclusive}
         .if {n <= this} .return {this}
-        .return {endInclusive}
+        .return {n}
       });
 
   .inRange(range: ComparisonRange[Num]): Bool -> range.contains(this);

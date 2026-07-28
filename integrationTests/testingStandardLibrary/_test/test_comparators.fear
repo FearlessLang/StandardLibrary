@@ -87,8 +87,8 @@ Data: {
 Grid: {
   .inner: List[Nat];
   .get(x: Nat, y: Nat): Nat -> this.inner.get(y * 5 + x);
-  .y(index: Nat): Nat -> index.divExact 5;
-  .x(index: Nat): Nat -> index.remExact 5;
+  .y(index: Nat): Nat -> index.getDiv 5;
+  .x(index: Nat): Nat -> index.getRem 5;
   }
 
 Grids: {
@@ -186,14 +186,14 @@ TestOrderBasicsTests: Test {::
   .check{CPoints#(1,2) != (CPoints#(1,3)).assertTrue}
   .check{CPoints#(1,2) <  (CPoints#(1,3)).assertTrue}
   .check{CPoints#(1,9) >  (CPoints#(0,99)).assertTrue}
-  .check{5.inRange(0,10).assertTrue}
-  .check{5.inRangeOpen(0,10).assertTrue}
-  .check{0.inRangeOpen(0,10).assertFalse}
-  .check{10.inRangeOpen(0,10).assertFalse}
-  .check{0.inRangeHiOpen(0,10).assertTrue}
-  .check{10.inRangeHiOpen(0,10).assertFalse}
-  .check{0.inRangeLoOpen(0,10).assertFalse}
-  .check{10.inRangeLoOpen(0,10).assertTrue}
+  .check{5.inRange(0=~~=10).assertTrue}
+  .check{5.inRange(0~~10).assertTrue}
+  .check{0.inRange(0~~10).assertFalse}
+  .check{10.inRange(0~~10).assertFalse}
+  .check{0.inRange(0=~~10).assertTrue}
+  .check{10.inRange(0=~~10).assertFalse}
+  .check{0.inRange(0~~=10).assertFalse}
+  .check{10.inRange(0~~=10).assertTrue}
   }
 
 TestOrderByAndFlowsTests: Test {::
@@ -250,18 +250,19 @@ TestMapsAndSetsTests: Test {::
       Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
       ).opt(Persons#(38,`Neil Armstrong`,List[Cat])).orValue(`Moon`).assertEq `Moon`
     }
-  .check{
-    Maps#({::},
-      Persons#(25,`Bob`,List[Cat]), `A`,
-      Persons#(34,`Alice`,List[Cat]), `B`
-      ).flow.zipExact{k, v -> k.name + v}.list.get(0).assertEq `BobA`
-    }
-  .check{
-    Maps#({::},
-      Persons#(25,`Bob`,List[Cat]), `A`,
-      Persons#(34,`Alice`,List[Cat]), `B`
-      ).flow.zipExact{k, v -> k.name + v}.list.get(1).assertEq `AliceB`
-    }
+// Coming with multiflows
+//  .check{
+//    Maps#({::},
+//      Persons#(25,`Bob`,List[Cat]), `A`,
+//      Persons#(34,`Alice`,List[Cat]), `B`
+//      ).flow.zipExact{k, v -> k.name + v}.list.get(0).assertEq `BobA`
+//    }
+//  .check{
+//    Maps#({::},
+//      Persons#(25,`Bob`,List[Cat]), `A`,
+//      Persons#(34,`Alice`,List[Cat]), `B`
+//      ).flow.zipExact{k, v -> k.name + v}.list.get(1).assertEq `AliceB`
+//    }
   .check{
     Data.ps.flow.mapping({::},{
       .key  p -> p.name;

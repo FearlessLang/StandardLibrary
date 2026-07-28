@@ -122,19 +122,19 @@ StrParseNatTests: Test {::
 
 StrParseByteTests: Test {::
   .check{`` .byte .assertEq({::}, Opt[Byte])}
-  .check{`0` .byte .assertEq({::}, Opts#(+0 .byteExact))}
-  .check{`1` .byte .assertEq({::}, Opts#(+1 .byteExact))}
-  .check{`10` .byte .assertEq({::}, Opts#(+10 .byteExact))}
-  .check{`255` .byte .assertEq({::}, Opts#(+255 .byteExact))}
-  .check{`000` .byte .assertEq({::}, Opts#(+0 .byteExact))}
-  .check{`001` .byte .assertEq({::}, Opts#(+1 .byteExact))}
+  .check{`0` .byte .assertEq({::}, Opts#(+0 .getByte))}
+  .check{`1` .byte .assertEq({::}, Opts#(+1 .getByte))}
+  .check{`10` .byte .assertEq({::}, Opts#(+10 .getByte))}
+  .check{`255` .byte .assertEq({::}, Opts#(+255 .getByte))}
+  .check{`000` .byte .assertEq({::}, Opts#(+0 .getByte))}
+  .check{`001` .byte .assertEq({::}, Opts#(+1 .getByte))}
   .check{`256` .byte .assertEq({::}, Opt[Byte])}
   .check{`4_294_967_295` .byte .assertEq({::}, Opt[Byte])}
   .check{`+1` .byte .assertEq({::}, Opt[Byte])}
   .check{`-1` .byte .assertEq({::}, Opt[Byte])}
-  .check{`1_0` .byte .assertEq({::}, Opts#(+10 .byteExact))}
-  .check{`2_5_5` .byte .assertEq({::}, Opts#(+255 .byteExact))}
-  .check{`25_5` .byte .assertEq({::}, Opts#(+255 .byteExact))}
+  .check{`1_0` .byte .assertEq({::}, Opts#(+10 .getByte))}
+  .check{`2_5_5` .byte .assertEq({::}, Opts#(+255 .getByte))}
+  .check{`25_5` .byte .assertEq({::}, Opts#(+255 .getByte))}
   .check{`25_6` .byte .assertEq({::}, Opt[Byte])}
   .check{`_1` .byte .assertEq({::}, Opt[Byte])}
   .check{`1_` .byte .assertEq({::}, Opt[Byte])}
@@ -210,8 +210,8 @@ StrParseIeeeFloatTests: Test {::
   .check{`NaN` .float .isEmpty .assertEq True}
   .check{`Infinity` .float .isEmpty .assertEq True}
   .check{`-Infinity` .float .isEmpty .assertEq True}
-  .check{`+0.1`.ieeeFloat!.num!.inRange(`0.100000000000000005/1`.num!, +2/1).assertEq True}
-  .check{`+0.1`.ieeeFloat!.num!.inRange(`+0.1/1`.num! , `+0.100000000000000005/1`.num!).assertEq False}
+  .check{`+0.1`.ieeeFloat!.num!.inRange(`0.100000000000000005/1`.num! =~~= (+2/1)).assertEq True}
+  .check{`+0.1`.ieeeFloat!.num!.inRange(`+0.1/1`.num! =~~= (`+0.100000000000000005/1`.num!)).assertEq False}
   }
 
 TestStr: Test {::

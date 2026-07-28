@@ -85,10 +85,19 @@ public record Str$0Instance(String val) implements Str$0,Norm$1{
     "[+-]?(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)/(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)");
   static final long maxNatU= -1;
   static final long maxByteU= 255L;
-  @Override public Object imm$getInt$0(){
+  @Override public Object imm$int$0(){
     if (!signedInt.matcher(val).matches()){ return optEmpty(); }
     try{ return optSome(Int$0Instance.instance(Long.parseLong(no_(val)))); }
     catch(NumberFormatException e){ return optEmpty(); }
+  }
+  @Override public Object imm$getInt$0(){
+    if (!signedInt.matcher(val).matches()){
+      throw err("Str.int: Str \""+val+"\" is not correctly formatted as an Int");
+    }
+    try{ return optSome(Int$0Instance.instance(Long.parseLong(no_(val)))); }
+    catch(NumberFormatException e){
+      throw err("Str.int: Str \""+val+"\" is too large to store in an Int");
+    }
   }
   @Override public Object imm$indexOf$1(Object p1){
     String text= ((Str$0Instance)p1).val();
@@ -130,14 +139,27 @@ public record Str$0Instance(String val) implements Str$0,Norm$1{
     try{ return optSome(Float$0Instance.instance(Double.parseDouble(val))); }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getNat$0(){
+  @Override public Object imm$nat$0(){
     if (!unsignedInt.matcher(val).matches()){ return optEmpty(); }
     try{
       return optSome(Nat$0Instance.instance(Long.parseUnsignedLong(no_(val))));
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getByte$0(){
+
+  @Override public Object imm$getNat$0(){
+    if (!unsignedInt.matcher(val).matches()){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to Nat, as it is in an invalid format.");
+    }
+    try{
+      return optSome(Nat$0Instance.instance(Long.parseUnsignedLong(no_(val))));
+    }
+    catch(NumberFormatException e){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to Byte, as it is in an invalid format.");
+    }
+  }
+
+  @Override public Object imm$byte$0(){
     if (!unsignedInt.matcher(val).matches()){ return optEmpty(); }
     try{
       int x= Integer.parseInt(no_(val));
@@ -146,7 +168,22 @@ public record Str$0Instance(String val) implements Str$0,Norm$1{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getNum$0(){
+
+  @Override public Object imm$getByte$0(){
+    if (!unsignedInt.matcher(val).matches()){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to Byte, as it is in an invalid format.");
+    }
+    try{
+      int x= Integer.parseInt(no_(val));
+      if (x > 255){ return optEmpty(); }
+      return optSome(Byte$0Instance.instance((byte)x));
+    }
+    catch(NumberFormatException e){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to Byte, as it is in an invalid format.");
+    }
+  }
+
+  @Override public Object imm$num$0(){
     if (!signedRational.matcher(val).matches()){ return optEmpty(); }
     try{
       String t= no_(val);
@@ -163,6 +200,28 @@ public record Str$0Instance(String val) implements Str$0,Norm$1{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
+
+  @Override public Object imm$getNum$0(){
+    if (!signedRational.matcher(val).matches()){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to Num, as it is in an invalid format.");
+    }
+    try{
+      String t= no_(val);
+      boolean neg= t.charAt(0) == '-';
+      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t= t.substring(1); }
+      int slash= t.indexOf('/');
+      Dec a= Dec.parse(t.substring(0,slash));
+      Dec b= Dec.parse(t.substring(slash+1));
+      if (b.u.signum() == 0){ return optEmpty(); }
+      BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
+      BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
+      if (neg){ num= num.negate(); }
+      return optSome(Num$0Instance.instance(num,den));
+    }
+    catch(NumberFormatException e){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to Num, as it is in an invalid format.");
+    }
+  }
   static record Dec(BigInteger u,int scale){
     static Dec parse(String s){
       int dot= s.indexOf('.');
@@ -170,7 +229,7 @@ public record Str$0Instance(String val) implements Str$0,Norm$1{
       return new Dec(new BigInteger(s.substring(0,dot)+s.substring(dot+1)), s.length()-dot-1);
     }
   }
-  @Override public Object imm$getFloat$0(){
+  @Override public Object imm$float$0(){
     if (!signedFloat.matcher(val).matches()){ return optEmpty(); }
     try{
       String x= no_(val);
@@ -181,6 +240,22 @@ public record Str$0Instance(String val) implements Str$0,Norm$1{
       return optSome(Float$0Instance.instance(d));
     }
     catch(NumberFormatException e){ return optEmpty(); }
+  }
+  @Override public Object imm$getFloat$0(){
+    if (!signedFloat.matcher(val).matches()){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to float, as it is in an invalid format.");
+    }
+    try{
+      String x= no_(val);
+      double d= Double.parseDouble(x);
+      if (!Double.isFinite(d)){ return optEmpty(); }
+      if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return optEmpty(); }
+      if (d == 0.0d){ d= 0.0d; }
+      return Float$0Instance.instance(d);
+    }
+    catch(NumberFormatException e){
+      throw err("Str.getFloat: cannot convert String \""+val+"\" to float, as it is in an invalid format.");
+    }
   }
   @Override public Object read$hash$0(){
     return Nat$0Instance.instance(val.hashCode());

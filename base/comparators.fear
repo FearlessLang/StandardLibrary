@@ -43,9 +43,6 @@ Order[T]: {
   }
 
 
-_LE: { #[T](o: read Order[T], a: read T, b: read T): Bool -> o.cmp(a,b,{ .lt->True; .eq->True; .gt->False }) }
-_LT: { #[T](o: read Order[T], a: read T, b: read T): Bool -> o.cmp(a,b,{ .lt->True; .eq->False; .gt->False }) }
-
 OrderBy[T,K]: {                       /// order values of T by a component/key K
   #(read T): read Order[K];          /// build a closed Order[K] for t's key (key is .close of the result)
 
@@ -80,8 +77,8 @@ OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr. 
   read .assertEq(expected: read T, msg: read LazyInfo): Void ->
     Assert.expectedActual(this == expected, msg,(this.close expected), this);
 
-  read .assertNe(expected: read T): Void -> this.assertNe(expected,{``});
-  read .assertNe(expected: read T, msg: read LazyInfo): Void -> Assert!(
+  read .assertNotEq(expected: read T): Void -> this.assertNotEq(expected,{``});
+  read .assertNotEq(expected: read T, msg: read LazyInfo): Void -> Assert!(
     this != expected,
     { msg#.info + (`Unexpected equality between` | `Expected: `+(this.close(expected)) | `Actual: `+this .info) });
 
@@ -120,8 +117,8 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
   read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertEq(expected);
   read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertEq(expected,msg);
 
-  read .assertNe[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertNe(expected);
-  read .assertNe[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertNe(expected,msg);
+  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertNotEq(expected);
+  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertNotEq(expected,msg);
 
   read .assertLt[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertLt(x);
   read .assertLt[K](by: OrderHashBy[imm E,K], x: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertLt(x,msg);

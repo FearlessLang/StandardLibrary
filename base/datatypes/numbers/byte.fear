@@ -31,23 +31,39 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   .aluAnd(x: Byte): Byte;                      /// u8 and
   .aluOr(x: Byte): Byte;                       /// u8 or
 
+  // desired behaviour:
+  // do we want 0~~0? currently 1=~~=-1 -1 is invalid byte:
+  // option 1: ban 0 open end point, option 2: clamp endpoint to 0 so 0~~0 -> 1=~~=0
+
+  // currently this setup bans empty ranges i.e. a~~a = (a+1)=~~=(a-1) and a=~~=b throws if a>b
+  // do we want this? - empty ranges make clamping invalid 2~~2.clamp(4) === 3=~~=1.clamp(4) === 1
+
+
   /// `this~~n` returns a range from this+1 to n-1
   //> .check{2.getByte~~(5.getByte).list .assertEq({::}, Lists#(3.getByte, 4.getByte))}
-  ~~(end: Byte): Range[Byte] -> this + (1.getByte) =~~= (end - (1.getByte));
+  ~~(end: Byte): Range[Byte] -> Block#
+    .if {this == (Math.maxByte)} .error{"Byte ~~: Start of open range cannot be Math.maxByte (255)"}
+    .if {end == (Math.minByte)} .error{"Byte ~~: End of open range cannot be Math.minByte (0)"}
+    .return {this + (1.getByte) =~~= (end - (1.getByte))};
 
   /// `this~~n` returns a range from `this+1` to `n`
   //> .check{2.getByte~~(5.getByte).list .assertEq({::}, Lists#(3.getByte, 4.getByte, 5.getByte))}
-  ~~=(endInclusive: Byte): Range[Byte] -> this + (1.getByte) =~~= endInclusive;
+  ~~=(endInclusive: Byte): Range[Byte] -> Block#
+    .if {this == (Math.maxByte)} .error{"Byte ~~=: Start of open range cannot be Math.maxByte (255)"}
+    .return {this + (1.getByte) =~~= endInclusive};
 
   /// `this=~~n` returns a range from `this` to `n-1`
   //> .check{2.getByte~~(5.getByte).list .assertEq({::}, Lists#(2.getByte, 3.getByte, 4.getByte))}
-  =~~(end: Byte): Range[Byte] -> this=~~=(end - (1.getByte));
+  =~~(end: Byte): Range[Byte] -> Block#
+    .if {end == (Math.minByte)} .error{"Byte =~~: End of open range cannot be Math.minByte (0)"}
+    .return {this =~~= (end - (1.getByte))};
 
   /// `this=~~=n` returns a range from `this` to `n`
   //> .check{2.getByte~~(5.getByte).list .assertEq({::}, Lists#(2.getByte, 3.getByte, 4.getByte, 5.getByte))}
-  =~~=(endInclusive: Byte): Range[Byte] -> Block#(
-    Assert!(this <= endInclusive),
-    {'self
+  =~~=(endInclusive: Byte): Range[Byte] ->
+    this > endInclusive .if {
+     .then -> Error.msg("Byte =~~=: invalid range start ("+this+") > end ("+endInclusive+")");
+     .else -> {'self
       .size -> this - endInclusive .nat;
       .start -> this;
       .end -> endInclusive;
@@ -59,7 +75,8 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
         .if {n <= this} .return {this}
         .if {n >= endInclusive} .return {endInclusive}
         .return {n.imm};
-      });
+      }
+    };
 
   .inRange(range: Range[Byte]): Bool -> range.contains(this);
   .assertInRange(range: Range[Byte]): Void -> this.assertInRange(range, {``});

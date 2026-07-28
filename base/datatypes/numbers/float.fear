@@ -158,30 +158,38 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
 
   /// `this~~n` returns a range from this+1 to n-1
-  ~~(end: Float): read Range[Float] -> _FloatNext.succ(this.imm) =~~=(_FloatNext.pred(end));
+  ~~(end: Float): read Range[Float] -> Block#
+    .if {this == (Math.nan)} .error{"Float ~~: Start of open range cannot be Math.nan"}
+    .if {end == (Math.negInf)} .error{"Float ~~: End of open range cannot be Math.negInf"}
+    .return {_FloatNext.succ(this.imm) =~~= (_FloatNext.pred(end))};
 
-  /// `this~~n` returns a range from `this+1` to `n`
-  ~~=(endInclusive: Float): read Range[Float] -> _FloatNext.succ(this.imm) =~~= endInclusive;
+  /// `this~~=n` returns a range from `this+1` to `n`
+  ~~=(endInclusive: Float): read Range[Float] -> Block#
+    .if {this == (Math.nan)} .error{"Float ~~=: Start of open range cannot be Math.nan"}
+    .return {_FloatNext.succ(this.imm) =~~= endInclusive};
 
   /// `this=~~n` returns a range from `this` to `n-1`
-  =~~(end: Float): read Range[Float] -> this =~~=(_FloatNext.pred(end));
+  =~~(end: Float): read Range[Float] -> Block#
+    .if {end == (Math.negInf)} .error{"Float =~~: End of open range cannot be Math.negInf"}
+    .return {this =~~= (_FloatNext.pred(end))};
 
   /// `this=~~=n` returns a range from `this` to `n`
-  =~~=(endInclusive: Float): read Range[Float] -> Block#(
-    Assert!(this <= endInclusive),
-    {'self
-      .size -> this.imm - endInclusive .getNat;
-      .start -> this;
-      .end -> endInclusive;
-      .flow -> _NumFlow.floats(this.imm, endInclusive);
-      .flow step -> _NumFlow.floats(this.imm, endInclusive, step);
-      .contains n -> this <= n && { n <= endInclusive};
-      .clamp n -> Block#
-        .if {n <= this} .return {this.imm}
-        .if {n >= endInclusive} .return {endInclusive}
-        .return {n.imm};
-      });
-
+  =~~=(endInclusive: Float): read Range[Float] ->
+    this > endInclusive .if {
+      .then -> Error.msg("Float =~~=: invalid range start (" + this + ") > end (" + endInclusive + ")");
+      .else -> {'self
+        .size -> this.imm - endInclusive .getNat;
+        .start -> this;
+        .end -> endInclusive;
+        .flow -> _NumFlow.floats(this.imm, endInclusive);
+        .flow step -> _NumFlow.floats(this.imm, endInclusive, step);
+        .contains n -> this <= n && { n <= endInclusive};
+        .clamp n -> Block#
+          .if {n <= this} .return {this.imm}
+          .if {n >= endInclusive} .return {endInclusive}
+          .return {n.imm};
+        }
+      };
   .inRange(range: Range[Float]): Bool -> range.contains(this);
   .assertInRange(range: Range[Float]): Void -> this.assertInRange(range, {``});
   .assertInRange(range: Range[Float], msg: read LazyInfo): Void -> Assert!(

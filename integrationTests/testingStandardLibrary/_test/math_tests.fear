@@ -34,8 +34,8 @@ MathConstantsTests: Test {::
   .check{Math.maxNat.assertEq(18_446_744_073_709_551_615)}
   .check{Math.natBits.assertEq(64)}
 
-  .check{Math.minByte.assertEq(0.byteExact)}
-  .check{Math.maxByte.assertEq(255.byteExact)}
+  .check{Math.minByte.assertEq(0.getByte)}
+  .check{Math.maxByte.assertEq(255.getByte)}
   .check{Math.byteBits.assertEq(8)}
 
   .check{Math.floatBits.assertEq(64)}
@@ -44,15 +44,15 @@ MathConstantsTests: Test {::
   .check{Math.nan.isNaN.assertTrue}
 
   .check{Math.pi.assertInRange(
-    +3.141592653589793115997963468544185161590576171875,
     +3.141592653589793115997963468544185161590576171875
+    =~~= +3.141592653589793115997963468544185161590576171875
     )}
 
   .check{Math.tau.assertEq(Math.pi * +2.0)}
 
   .check{Math.e.assertInRange(
-    +2.718281828459045090795598298427648842334747314453125,
-    +2.718281828459045978974017998552881181240081787109375
+    +2.718281828459045090795598298427648842334747314453125
+     =~~= +2.718281828459045978974017998552881181240081787109375
     )}
   }
 
@@ -61,8 +61,8 @@ LnTests: Test {::
   .check{Math.ln(-0.0).assertEq(Math.negInf)}
   .check{Math.ln(Math.inf).assertEq(Math.inf)}
   .check{Math.ln(+2.0).assertInRange(
-    +0.693147170000000034661979952943511307239532470703125,
-    +0.69314718055994528622676398299518041312694549560546875
+    +0.693147170000000034661979952943511307239532470703125
+    =~~= +0.69314718055994528622676398299518041312694549560546875
     )}
   .check{Math.ln(Math.e).assertEq(+1.0)}
   .check{Math.ln(+1.0).assertEq(+0.0)}
@@ -78,8 +78,8 @@ LogTests: Test {::
   .check{Math.log(+10.0).assertEq(+1.0)}
   .check{Math.log(+1.0).assertEq(+0.0)}
   .check{Math.log(+2.0).assertInRange(
-    +0.301029995599999988797890182468108832836151123046875,
-    +0.301029995800000005345964382286183536052703857421875
+    +0.301029995599999988797890182468108832836151123046875
+    =~~= +0.301029995800000005345964382286183536052703857421875
     )}
   .checkDetErr({i -> True}, {Math.log(-1.0)})
   .checkDetErr({i -> True}, {Math.log(Math.nan)})
@@ -104,8 +104,8 @@ Log2Tests: Test {::
   .check{Math.log2(+8.0).assertEq(+3.0)}
   .check{Math.log2(+1.0).assertEq(+0.0)}
   .check{Math.log2(+7.0).assertInRange(
-    +2.8073549209999999476394805242307484149932861328125,
-    +2.8073549230000001131202225224114954471588134765625
+    +2.8073549209999999476394805242307484149932861328125
+    =~~= +2.8073549230000001131202225224114954471588134765625
     )}
   .check{Math.log2(+0.0).assertEq(Math.negInf)}
   .check{Math.log2(Math.inf).assertEq(Math.inf)}
@@ -178,28 +178,28 @@ _Person: {
   }
 
 MaxMinTests: Test {::
-  .check{Math.max(1, 2, {::}).assertEq(2)}
-  .check{Math.min(2, 1, {::}).assertEq(1)}
+  .check{Math.max({::}, 1, 2).assertEq(2)}
+  .check{Math.min({::}, 2, 1).assertEq(1)}
   .check{
-    Math.max(_Persons#(`Alice`, 32), _Persons#(`Bob`, 8), {::.age})
+    Math.max({::.age}, _Persons#(`Alice`, 32), _Persons#(`Bob`, 8))
       .name.assertEq(`Alice`)
     }
   .check{
-    Math.min(_Persons#(`Alice`, 32), _Persons#(`Bob`, 8), {::.age})
+    Math.min({::.age}, _Persons#(`Alice`, 32), _Persons#(`Bob`, 8))
       .name.assertEq(`Bob`)
     }
   .check{
-    Math.min(_Persons#(`Carol`, 32), _Persons#(`Daniel`, 32), {::.age})
+    Math.min({::.age}, _Persons#(`Carol`, 32), _Persons#(`Daniel`, 32))
       .name.assertEq(`Carol`)
     }
   .check{
-    Math.max(_Persons#(`Carol`, 32), _Persons#(`Daniel`, 32), {::.age})
+    Math.max({::.age}, _Persons#(`Carol`, 32), _Persons#(`Daniel`, 32))
       .name.assertEq(`Carol`)
     }
   }
 
 DegreeTests: Test {::
-  .check{(+180.0).deg!.toRad#.assertEq(Math.pi)}
+  .check{(+180.0).deg!.rad#.assertEq(Math.pi)}
   .check{(+360.0).deg!.normalize#.assertEq(+0.0)}
   .check{(-90.0).deg!.normalize#.assertEq(+270.0)}
 
@@ -222,7 +222,7 @@ DegreeTests: Test {::
   }
 
 RadianTests: Test {::
-  .check{Math.pi.rad!.toDeg.assertEq((+180.0).deg!)}
+  .check{Math.pi.rad!.deg.assertEq((+180.0).deg!)}
   .check{Math.tau.rad!.normalize#.assertEq(+0.0)}
   .check{(Math.tau / -4.0).rad!.normalize#.assertEq(Math.tau * +3.0 / +4.0)}
 

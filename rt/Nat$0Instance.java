@@ -1,5 +1,6 @@
 package base;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
@@ -29,7 +30,6 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
   /**
    * The maximum unsigned value that can be represented in a long (2^64 - 1)
    */
-  @SuppressWarnings("NumericOverflow")
   public static final long MAX_UNSIGNED_VALUE = -1;
   public static final double MAX_UNSIGNED_VALUE_FLOAT = 18446744073709551615.0d;
   public static Nat$0 instance(long val){ return NatCache.getNat(val); }
@@ -94,11 +94,36 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     );
   }
 
+  @Override public Object imm$int$0() {
+    if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
+      return optEmpty();
+    }
+    // We are in the long normal range, so we can safely interpret the unsigned long as a signed long
+    return optSome(Int$0Instance.instance(val));
+  }
+
+  @Override public Object imm$byte$0() {
+    if (Long.compareUnsigned(val, 255L) > 0) {
+      return optEmpty();
+    }
+    // We are in the long normal range, so we can safely interpret the unsigned long as a signed long
+    return optSome(Byte$0Instance.instance((byte) val));
+  }
+
+  @Override public Object imm$float$0() {
+    if (!canConvertToFloat(val)) {
+      return optEmpty();
+    }
+    return optSome(Float$0Instance.instance(unsignedLongToDouble(val)));
+  }
+
+
+
   /**
    * Clamp the natural number to the range of int,
    * since that's the largest type we can convert it to without losing information
    */
-  @Override public Object imm$int$0(){
+  @Override public Object imm$softInt$0(){
 
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
       return Int$0Instance.instance(Long.MAX_VALUE);
@@ -107,12 +132,16 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     return Int$0Instance.instance(val);
   }
 
-  @Override public Object imm$byte$0(){
+  @Override public Object imm$softByte$0(){
     long x= Long.compareUnsigned(val,255) > 0 ? 255 : val;
     return Byte$0Instance.instance((byte)x);
   }
 
-  private static double unsignedLongToDouble(long num) {
+  @Override public Object imm$softFloat$0(){
+    return Float$0Instance.instance(unsignedLongToDouble(val));
+  }
+
+  static double unsignedLongToDouble(long num) {
     // Guaranteed to be correct but seems slow..
     // return Double.parseDouble(Long.toUnsignedString(num))
 
@@ -128,19 +157,19 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     // and thus use the regular conversion to double.
     return (double) num;
   }
-  @Override public Object imm$float$0(){
-    return Float$0Instance.instance(unsignedLongToDouble(val));
-  }
 
-  @Override public Object imm$num$0(){
-    return Num$0Instance.instance(
-            toUnsignedBigInteger(val),
-            BigInteger.ONE
-    );
+  static boolean canConvertToFloat(long val) {
+    // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+    // The largest integer that can be exactly represented in a double is 2^53.
+    if (Long.compareUnsigned(val, 9007199254740993L) <= 0) {
+      return true;
+    }
+    BigInteger bigInteger = toUnsignedBigInteger(val);
+    return BigDecimal.valueOf(bigInteger.doubleValue()).toBigInteger().equals(bigInteger);
   }
 
   /**
-   * Code is from using a private method in the open jdk <a href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/Long.java">Long</a> class.
+   * Code is from a private method in the open jdk <a href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/Long.java">Long</a> class.
    * Seen as of <a href="https://github.com/openjdk/jdk/commit/a7507ffa1dda403110a61c4b61143b76e8a7911e">this commit</a>
    * Return a BigInteger equal to the unsigned value of the
    * argument.
@@ -158,20 +187,29 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     }
   }
 
-  /**
-   * Is this method named the right thing?
-   */
+
   @Override public Object imm$getInt$0() {
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
-      return optEmpty();
+      throw err("Nat.getInt: cannot convert to Int, "+Long.toUnsignedString(val)+" is greater than Math.maxInt");
     }
 
-    return optSome(Int$0Instance.instance(val));
+    return Int$0Instance.instance(val);
+  }
+  @Override public Object imm$getByte$0() {
+    if (Long.compareUnsigned(val, 255L) > 0) {
+      throw err("Nat.getByte: cannot convert to Byte, "+Long.toUnsignedString(val)+" is greater than Math.maxByte");
+    }
+
+    return Byte$0Instance.instance((byte) val);
   }
 
-  @Override public Object imm$getByte$0(){
-    return Long.compareUnsigned(val,255) > 0 ? optEmpty() : optSome(Byte$0Instance.instance((byte)val));
+  @Override public Object imm$getFloat$0() {
+    if (!canConvertToFloat(val)) {
+      throw err("Nat.getFloat: cannot convert to Float without losing precision, "+Long.toUnsignedString(val)+" is too large");
+    }
+    return Float$0Instance.instance(unsignedLongToDouble(val));
   }
+
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,n(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,n(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,n(p0))); }
@@ -208,6 +246,17 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     long d= n(p0);
     if (d == 0){ throw err("Nat.rem: d==0"); }
     return instance(Long.remainderUnsigned(val,d));
+  }
+
+  @Override public Object imm$div$1(Object p0){
+    long d= n(p0);
+    if (d == 0){ return optEmpty(); }
+    return optSome(instance(Long.divideUnsigned(val,d)));
+  }
+  @Override public Object imm$rem$1(Object p0){
+    long d= n(p0);
+    if (d == 0){ return optEmpty(); }
+    return optSome(instance(Long.remainderUnsigned(val,d)));
   }
 
   @Override public Object imm$getIndexOffset$1(Object p0){
