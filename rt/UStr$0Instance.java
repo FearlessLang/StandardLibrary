@@ -46,9 +46,16 @@ public record UStr$0Instance(int[] val) implements UStr$0{
   @Override public Object imm$isStr$0(){ return bool(isStr(val)); }
 
   @Override public Object imm$getStr$0(){
+    if (!isStr(val)) {
+      throw err("Cannot convert this "+ Arrays.toString(this.val) + " into a valid fearless Str.");
+    }
+
+    return Str$0Instance.instance(new String(val,0,val.length));
+  }
+  @Override public Object imm$str$0(){
     return isStr(val)
-      ? optSome(Str$0Instance.instance(new String(val,0,val.length)))
-      : optEmpty();
+            ? optSome(Str$0Instance.instance(new String(val,0,val.length)))
+            : optEmpty();
   }
   @Override public Object imm$flow$0(){
     return new Flow$1Instance(Arrays.stream(val).mapToObj(e->Nat$0Instance.instance((long)e)));

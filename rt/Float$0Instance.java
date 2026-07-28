@@ -41,7 +41,7 @@ public record Float$0Instance(double val) implements Float$0{
     return Float$0Instance.instance(Math.signum(this.val));
   }
   @Override public Object imm$$star_star$1(Object p0){ return instance(Math.pow(val,f(p0))); }
-  @Override public Object imm$int$0(){
+  @Override public Object imm$softInt$0(){
     if (Double.isNaN(val)) {
       return Int$0Instance.instance(0);
     }
@@ -54,7 +54,7 @@ public record Float$0Instance(double val) implements Float$0{
     return Int$0Instance.instance((long) val);
   }
   /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
-  @Override public Object imm$nat$0(){
+  @Override public Object imm$softNat$0(){
     if (Double.isNaN(val) || val <= 0.0d) {
       return Nat$0Instance.instance(0);
     }
@@ -63,8 +63,8 @@ public record Float$0Instance(double val) implements Float$0{
     }
     return Nat$0Instance.instance((long) val);
   }
-  @Override public Object imm$byte$0(){ return Byte$0Instance.instance(clampTrunc0ToByteBits(val)); }
-  private static Object numExactFinite(double x){
+  @Override public Object imm$softByte$0(){ return Byte$0Instance.instance(clampTrunc0ToByteBits(val)); }
+  static Num$0 numExactFinite(double x){
     if (x == 0.0d){ return Num$0Instance.instance(BigInteger.ZERO,BigInteger.ONE); } // also -0.0
     long b= Double.doubleToRawLongBits(x);
     boolean neg= (b >>> 63) != 0;
@@ -81,26 +81,70 @@ public record Float$0Instance(double val) implements Float$0{
     if (neg){ n= n.negate(); }
     return Num$0Instance.instance(n,d);
   }
-  @Override public Object imm$getNum$0(){
+  @Override public Object imm$num$0(){
     if (Double.isNaN(val) || Double.isInfinite(val)){ return optEmpty(); }
     return optSome(numExactFinite(val));
   }
 
-  @Override public Object imm$getInt$0(){
+  @Override public Object imm$int$0(){
     if (!isIntegral(val)){ return optEmpty(); }
     if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){ return optEmpty(); }
     return optSome(Int$0Instance.instance((int)val));
   }
-  @Override public Object imm$getNat$0(){
+  @Override public Object imm$nat$0(){
     if (!isIntegral(val)){ return optEmpty(); }
     if (val < 0.0d || val > MAX_UNSIGNED_VALUE_FLOAT){ return optEmpty(); }
     return optSome(Nat$0Instance.instance((int)((long)val)));
   }
-  @Override public Object imm$getByte$0(){
+  @Override public Object imm$byte$0(){
     if (!isIntegral(val)){ return optEmpty(); }
     if (val < 0.0d || val > 255.0d){ return optEmpty(); }
     return optSome(Byte$0Instance.instance((byte)((int)val)));
   }
+
+  @Override public Object imm$getNum$0(){
+    if (Double.isNaN(val) || Double.isInfinite(val)){
+      throw err("Float.getNum: cannot convert non-finite Float " + val + " to Num");
+    }
+    return numExactFinite(val);
+  }
+
+  @Override public Object imm$getInt$0(){
+    if (!isIntegral(val)){
+      throw err("Float.getInt: cannot convert non-integral Float " + val + " to Int");
+    }
+    if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){
+      throw err("Float.getInt: cannot convert Float " + val + " to Int: out of Int range");
+    }
+    return Int$0Instance.instance((int)val);
+  }
+
+  @Override public Object imm$getNat$0(){
+    if (!isIntegral(val)){
+      throw err("Float.getNat: cannot convert non-integral Float " + val + " to Nat");
+    }
+    if (val < 0.0d){
+      throw err("Float.getNat: cannot convert negative Float " + val + " to Nat");
+    }
+    if (val > MAX_UNSIGNED_VALUE_FLOAT){
+      throw err("Float.getNat: cannot convert Float " + val + " to Nat: out of Nat range");
+    }
+    return Nat$0Instance.instance((int)((long)val));
+  }
+
+  @Override public Object imm$getByte$0(){
+    if (!isIntegral(val)){
+      throw err("Float.getByte: cannot convert non-integral Float " + val + " to Byte");
+    }
+    if (val < 0.0d){
+      throw err("Float.getByte: cannot convert to Byte " + val + " is less than 0");
+    }
+    if (val > 255.0d){
+      throw err("Float.getByte: cannot convert to Byte " + val + " is greater than 255");
+    }
+    return Byte$0Instance.instance((byte)((int)val));
+  }
+
   @Override public Object imm$$plus$1(Object p0){ return instance(val + f(p0)); }
   @Override public Object imm$$dash$1(Object p0){ return instance(val - f(p0)); }
   @Override public Object imm$$star$1(Object p0){ return instance(val * f(p0)); }
@@ -126,7 +170,7 @@ public record Float$0Instance(double val) implements Float$0{
     if (d < 0.0d){ throw err("Float.eqDelta: delta<0"); }
     return bool(Math.abs(val - exp) <= d);
   }
-  @Override public Object imm$round$0(){
+  @Override public Object imm$softRound$0(){
     if (Double.isNaN(val)){ return Int$0Instance.instance(0); }
     if (val == Double.POSITIVE_INFINITY){ return Int$0Instance.instance(Int$0Instance.MAX_VALUE); }
     if (val == Double.NEGATIVE_INFINITY){ return Int$0Instance.instance(Int$0Instance.MIN_VALUE); }

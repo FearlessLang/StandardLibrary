@@ -157,10 +157,11 @@ _AddToLog: {
         + `" file="` + (_XmlEscape#(st.get(dept).fileName))
         + `" line="` + (st.get(dept).lineNumber)
         + `"></testcase>` |;
-      .info i ->Block#(
-        Debug#(`Test failure`
+      .info i -> Block#(
+        Debug#(`Test failure `
           + (st.get(dept).typeName) + ` at line: ` 
           + (st.get(dept).lineNumber) + ` in file: `+ (st.get(dept).fileName)
+          + ` ` + i
           ),
         `<testcase classname="` + (_XmlEscape#(st.get(dept).typeName))
         + `" name="` + (_XmlEscape#(st.get(dept).typeName)) + ` at line: ` + (st.get(dept).lineNumber)

@@ -34,7 +34,7 @@ Block[R:*]: Sealed {
   mut .if(p: mut F[Bool]): mut BlockIf[R] -> p# ? {
     .then -> {
       .return a -> _DecidedBlock#(a#);
-      .error  i -> Error!(i#);
+      .error  i -> Error!(i#.info);
       .do     r -> Block#(r#,this);
       .done     -> _DecidedBlock#(Void);
       };
@@ -55,7 +55,7 @@ Block[R:*]: Sealed {
 BlockIf[R:*]: {
   mut .return(a: mut MF[R]): mut Block[R];
   mut .do(r: mut MF[Void]): mut Block[R];
-  mut .error(info: mut MF[Info]): mut Block[R];
+  mut .error(info: mut MutLazyInfo): mut Block[R];
   mut .done: mut Block[Void];
   }
 

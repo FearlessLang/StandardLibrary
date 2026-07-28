@@ -1,71 +1,74 @@
 ByteArithTests: Test {::
-  .check{+1.byteExact + (+2.byteExact) .assertEq (+3.byteExact)}
-  .check{+5.byteExact - (+2.byteExact) .assertEq (+3.byteExact)}
-  .check{+3.byteExact * (+4.byteExact) .assertEq (+12.byteExact)}
-  .check{+9.byteExact.sqrt .assertEq +3.0}
-  .check{3.byteExact ** (3.byteExact) .assertEq (27.byteExact)}
-  .check{+255.byteExact .assertGt (+0.byteExact)}
-  .check{+0.byteExact .assertLt (+255.byteExact)}
+  .check{+1.getByte + (+2.getByte)  .assertEq (+3.getByte)}
+  .check{+5.getByte - (+2.getByte) .assertEq (+3.getByte)}
+  .check{+3.getByte * (+4.getByte) .assertEq (+12.getByte)}
+  .check{+9.getByte.softSqrt .assertEq +3.0}
+  .check{3.getByte ** (3.getByte) .assertEq (27.getByte)}
+  .check{+255.getByte .assertGt (+0.getByte)}
+  .check{+0.getByte .assertLt (+255.getByte)}
   }
 
 ByteDivRemTests: Test {::
-  .check{+7.byteExact.divExact 3 .assertEq (+2.byteExact)}
-  .check{+7.byteExact.remExact 3 .assertEq (+1.byteExact)}
-  .check{+6.byteExact.div 3 .assertEq ({::},Opts#(+2.byteExact))}
-  .check{+7.byteExact.div 3 .assertEq ({::},Opt[Byte])}
-  .check{+7.byteExact.div 0 .assertEq ({::},Opt[Byte])}
+  .check{+7.getByte.getDiv 3 .assertEq (+2.getByte)}
+  .check{+7.getByte.getRem 3 .assertEq (+1.getByte)}
+  .check{+6.getByte.div 3 .assertEq ({::},Opts#(+2.getByte))}
+  .check{+7.getByte.div 3 .assertEq ({::},Opt[Byte])}
+  .check{+7.getByte.div 0 .assertEq ({::},Opt[Byte])}
   }
 
 ByteConvTests: Test {::
-  .check{+0.byteExact.nat .assertEq 0}
-  .check{+0.byteExact.int .assertEq +0}
-  .check{+255.byteExact.nat .assertEq 255}
-  .check{+255.byteExact.int .assertEq +255}
-  .check{+5.byteExact.float .assertEq +5.0}
-  .check{+255.byteExact.float .assertEq +255.0}
-  .check{+5.byteExact.num .assertEq (+5.num)}
+  .check{+0.getByte.nat .assertEq 0}
+  .check{+0.getByte.int .assertEq +0}
+  .check{+255.getByte.nat .assertEq 255}
+  .check{+255.getByte.int .assertEq +255}
+  .check{+5.getByte.float .assertEq +5.0}
+  .check{+255.getByte.float .assertEq +255.0}
+  .check{+5.getByte.num .assertEq (+5.num)}
   }
 
 ByteAluTests: Test {::
-  .check{+250.byteExact.aluAddWrap(+10.byteExact) .assertEq (+4.byteExact)}
-  .check{+0.byteExact.aluSubWrap(+1.byteExact) .assertEq (+255.byteExact)}
-  .check{+16.byteExact.aluMulWrap(+16.byteExact) .assertEq (+0.byteExact)}
-  .check{+1.byteExact.aluShiftLeft 8 .assertEq (+1.byteExact)}
-  .check{+1.byteExact.aluShiftLeft 9 .assertEq (+2.byteExact)}
-  .check{+128.byteExact.aluShiftRight 1 .assertEq (+64.byteExact)}
-  .check{+2.byteExact.aluShiftRight 9 .assertEq (+1.byteExact)}
-  .check{+5.byteExact.aluXor(+3.byteExact) .assertEq (+6.byteExact)}
-  .check{+5.byteExact.aluAnd(+3.byteExact) .assertEq (+1.byteExact)}
-  .check{+5.byteExact.aluOr(+2.byteExact) .assertEq (+7.byteExact)}
-  .check{+250.byteExact.aluDiv(+10.byteExact) .assertEq (+25.byteExact)}
-  .check{+250.byteExact.aluRem(+10.byteExact) .assertEq (+0.byteExact)}
-  .check{+255.byteExact.aluDiv(+2.byteExact) .assertEq (+127.byteExact)}
-  .check{+255.byteExact.aluRem(+2.byteExact) .assertEq (+1.byteExact)}
+  .check{+250.getByte.aluAddWrap(+10.getByte) .assertEq (+4.getByte)}
+  .check{+0.getByte.aluSubWrap(+1.getByte) .assertEq (+255.getByte)}
+  .check{+16.getByte.aluMulWrap(+16.getByte) .assertEq (+0.getByte)}
+  .check{+1.getByte.aluShiftLeft 8 .assertEq (+1.getByte)}
+  .check{+1.getByte.aluShiftLeft 9 .assertEq (+2.getByte)}
+  .check{+128.getByte.aluShiftRight 1 .assertEq (+64.getByte)}
+  .check{+2.getByte.aluShiftRight 9 .assertEq (+1.getByte)}
+  .check{+5.getByte.aluXor(+3.getByte) .assertEq (+6.getByte)}
+  .check{+5.getByte.aluAnd(+3.getByte) .assertEq (+1.getByte)}
+  .check{+5.getByte.aluOr(+2.getByte) .assertEq (+7.getByte)}
+  .check{+250.getByte.aluDiv(+10.getByte) .assertEq (+25.getByte)}
+  .check{+250.getByte.aluRem(+10.getByte) .assertEq (+0.getByte)}
+  .check{+255.getByte.aluDiv(+2.getByte) .assertEq (+127.getByte)}
+  .check{+255.getByte.aluRem(+2.getByte) .assertEq (+1.getByte)}
   }
 
 ByteRangeChecksTests: Test {::
-  .check{+3.byteExact.assertInRange(+1.byteExact,+5.byteExact)}
-  .check{+3.byteExact.assertInRangeOpen(+1.byteExact,+5.byteExact)}
-  .check{+3.byteExact.assertInRangeLoOpen(+1.byteExact,+3.byteExact)}
-  .check{+3.byteExact.assertInRangeHiOpen(+3.byteExact,+5.byteExact)}
-  .check{+0.byteExact.clamp(+1.byteExact,+5.byteExact) .assertEq (+1.byteExact)}
-  .check{+6.byteExact.clamp(+1.byteExact,+5.byteExact) .assertEq (+5.byteExact)}
-  .check{+3.byteExact.clamp(+1.byteExact,+5.byteExact) .assertEq (+3.byteExact)}
-  .check{+3.byteExact.clamp(+3.byteExact,+3.byteExact) .assertEq (+3.byteExact)}
+  .check{+3.getByte.assertInRange(+1.getByte =~~= (+5.getByte))}
+  .check{+3.getByte.assertInRange(+1.getByte =~~= (+5.getByte))}
+  .check{+3.getByte.assertInRange(+1.getByte~~=(+3.getByte))}
+  .check{+3.getByte.assertInRange(+3.getByte=~~(+5.getByte))}
+  .check{+0.getByte.clamp(+1.getByte=~~=(+5.getByte)) .assertEq (+1.getByte)}
+  .check{+6.getByte.clamp(+1.getByte=~~=(+5.getByte)) .assertEq (+5.getByte)}
+  .check{+3.getByte.clamp(+1.getByte=~~=(+5.getByte)) .assertEq (+3.getByte)}
+  .check{+3.getByte.clamp(+3.getByte=~~=(+3.getByte)) .assertEq (+3.getByte)}
   }
 
 ByteBoundaryAndBoundedVsAluTests: Test {::
-  .check{+250.byteExact.aluAddWrap(+10.byteExact) .assertEq (+4.byteExact)}
-  .check{+0.byteExact.aluSubWrap(+1.byteExact) .assertEq (+255.byteExact)}
-  .check{+16.byteExact.aluMulWrap(+16.byteExact) .assertEq (+0.byteExact)}
-  .check{+255.byteExact.aluAddWrap(+1.byteExact) .assertEq (+0.byteExact)}
+  .check{+250.getByte.aluAddWrap(+10.getByte) .assertEq (+4.getByte)}
+  .check{+0.getByte.aluSubWrap(+1.getByte) .assertEq (+255.getByte)}
+  .check{+16.getByte.aluMulWrap(+16.getByte) .assertEq (+0.getByte)}
+  .check{+255.getByte.aluAddWrap(+1.getByte) .assertEq (+0.getByte)}
   }
 
 ByteRangeTests: Test {::
-  .check{0.byteExact~~(0.byteExact).size .assertEq 0}
-  .check{0.byteExact~~(1.byteExact).list .assertEq({::},  Lists#(0.byteExact))}
-  .check{0.byteExact~~=(1.byteExact).list .assertEq({::},  Lists#(0.byteExact, 1.byteExact))}
-  .check{0.byteExact~~(2.byteExact).list .assertEq({::},  Lists#(0.byteExact, 1.byteExact))}
+  .check{0.getByte=~~=(0.getByte).list .assertEq({::},  Lists#(0.getByte))}
+  .checkDetErr({_ -> True}, {0.getByte~~(1.getByte)})
+  .checkDetErr({_ -> True}, {1.getByte~~(2.getByte)})
+  .checkDetErr({_ -> True}, {2.getByte~~(2.getByte)})
+  .check{0.getByte~~=(1.getByte).list .assertEq({::},  Lists#(1.getByte))}
+  .check{0.getByte~~(2.getByte).list .assertEq({::},  Lists#(1.getByte))}
+  .check{0.getByte~~=(5.getByte).list .assertEq({::},  Flows#(1,2,3,4,5).map{::.getByte}.list)}
   }
 
 TestByte: Test {::

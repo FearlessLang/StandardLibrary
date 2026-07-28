@@ -120,7 +120,6 @@ Angle[Self]: F[Float],Sealed,DataType[Self, Self] {
   .sec: Float -> +1.0 / (this.cos);     /// The secant of the given angle.
   .cot: Float -> +1.0 / (this.tan);     /// The co-tangent of the given angle.
 
-
   .info -> Infos.msg(this.str);
 }
 
@@ -133,7 +132,9 @@ Degree: Angle[Degree] {
   .tan: Float -> this.rad.tan;
 
   .rad: Radian -> this# * (Math.pi) / +180.0 .rad!;
-  /// Wrap this angle into the range [0, 360);
+  /// `this.normalize` returns a new angle into converted into the range [0, 360);
+  //>   .check{ -45.0.degree.normalize .assertEq(315.0.degree) }
+  //>   .check{ 40.degree.normalize .assertEq(40.0.degree) }
   .normalize -> Math.euclideanMod(this#, +360.0).deg!;
 
   .close -> this;

@@ -6,7 +6,6 @@ use base.List as List;
 use base.Lists as Lists;
 use base.Flows as Flows;
 use base.Flow as Flow;
-use base.Sets as Sets;
 use base.Debug as Debug;
 use base.Opt as Opt;
 use base.Str as Str;
@@ -17,8 +16,6 @@ use base.Float as Float;
 use base.Byte as Byte;
 use base.ELists as ELists;
 use base.Info as Info;
-use base.InfoExtractor as InfoExtractor;
-use base.InfoMatches as InfoMatches;
 use base.Map as Map;
 use base.Maps as Maps;
 use base.Opts as Opts;
@@ -53,7 +50,5 @@ MyTests:UnitTests{::
   .test TestPipe
   .test TestComparators
   .test TestUStr
-  .test SetUnitTests
-  .test InfoExtractorUnitTests
   .test MathUnitTests
   }

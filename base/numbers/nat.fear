@@ -30,7 +30,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
 
   .num: Num -> this / 1;                   /// converts to Num. Note Num can safely represent all `Nat`'s
 
-  /// .some if this <= maxInt; .empty otherwise
+  /// `this.int` returns .some if this <= maxInt; .empty otherwise
   .int: Opt[Int] -> this <= (Math.maxInt.getNat)
     .then {this.softInt};
   /// .some if this <= maxByte; .empty otherwise
@@ -59,32 +59,39 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
   .aluByte: Byte;                          /// low 8 bits (wrap), not clamp
 
   /// `this~~n` returns a range from this+1 to n-1
-  ~~(end: Nat): read Range[Nat] -> this.imm + 1 =~~= (end - 1);
+  ~~(end: Nat): read Range[Nat] -> Block#
+    .if {this == (Math.maxNat)} .error{"Nat ~~: Start of open range cannot be Math.maxNat"}
+    .if {end == 0} .error{"Nat ~~: End of open range cannot be 0"}
+    .return {this.imm + 1 =~~= (end - 1)};
 
-  /// `this~~n` returns a range from `this+1` to `n`
-  ~~=(endInclusive: Nat): read Range[Nat] -> this.imm + 1 =~~= endInclusive;
+  /// `this~~=n` returns a range from `this+1` to `n`
+  ~~=(endInclusive: Nat): read Range[Nat] -> Block#
+    .if {this == (Math.maxNat)} .error{"Nat ~~=: Start of open range cannot be Math.maxNat"}
+    .return {this.imm + 1 =~~= endInclusive};
 
   /// `this=~~n` returns a range from `this` to `n-1`
-  =~~(end: Nat): read Range[Nat] -> this =~~=(end - 1);
+  =~~(end: Nat): read Range[Nat] -> Block#
+    .if {end == 0} .error{"Nat =~~: End of open range cannot be 0"}
+    .return {this =~~= (end - 1)};
 
   /// `this=~~=n` returns a range from `this` to `n`
-  =~~=(endInclusive: Nat): read Range[Nat] -> Block#(
-    Assert!(this <= endInclusive),
-    {'self
-      .size -> this.imm - endInclusive;
-      .start -> this;
-      .end -> endInclusive;
-      .flow -> _NumFlow.nats(this.imm, endInclusive);
-      // Performance question here, should this be magic
-      .flow step -> self.flow.filter{(:: - (this.imm)).getRem(step) == 0};
-      .contains n -> this <= n && { n <= endInclusive};
-      .clamp n -> Block#
-        .if {n <= this} .return {this.imm}
-        .if {n >= endInclusive} .return {endInclusive}
-        .return {n.imm};
-    });
-
-
+  =~~=(endInclusive: Nat): read Range[Nat] ->
+    this > endInclusive .if {
+      .then -> Error.msg("Nat =~~=: invalid range start (" + this + ") > end (" + endInclusive + ")");
+      .else -> {'self
+        .size -> this.imm - endInclusive;
+        .start -> this;
+        .end -> endInclusive;
+        .flow -> _NumFlow.nats(this.imm, endInclusive);
+        // Performance question here, should this be magic
+        .flow step -> self.flow.filter{(:: - (this.imm)).getRem(step) == 0};
+        .contains n -> this <= n && { n <= endInclusive};
+        .clamp n -> Block#
+          .if {n <= this} .return {this.imm}
+          .if {n >= endInclusive} .return {endInclusive}
+          .return {n.imm};
+      }
+    };
   .inRange(range: Range[Nat]): Bool -> range.contains(this);
   .assertInRange(range: Range[Nat]): Void -> this.assertInRange(range, {``});
   .assertInRange(range: Range[Nat], msg: read LazyInfo): Void -> Assert!(

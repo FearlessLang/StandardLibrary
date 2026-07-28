@@ -2,7 +2,6 @@ package base;
 
 import java.math.BigInteger;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import static base.Util.*;
 
@@ -73,27 +72,37 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
 
   @Override public Object imm$div$1(Object p0){
     long d= natBits(p0);
-
-    if (d == 0L){ throw err("Byte.div: d==0"); }
-    return instance((byte)(u8(val) / d));
-  }
-  /// if b >= a, then a % b
-  /// Therefore we can clamp b to 255
-  /// as this can not be larger than that
-  @Override public Object imm$rem$1(Object p0){
-    long d= natBits(p0);
-    if (d == 0){ throw err("Byte.rem: d==0"); }
-    return instance(
-            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
-    );
-  }
-  @Override public Object imm$getDiv$1(Object p0){
-    long d= natBits(p0);
     if (d == 0L){ return optEmpty(); }
     int x= u8(val);
     if (Long.remainderUnsigned(x, d) != 0L){ return optEmpty(); }
     return optSome(instance((byte)(x / d)));
   }
+
+  @Override public Object imm$rem$1(Object p0){
+    long d= natBits(p0);
+    if (d == 0){ return optEmpty(); }
+    return optSome(instance(
+            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
+    ));
+  }
+
+  @Override public Object imm$getDiv$1(Object p0){
+    long d= natBits(p0);
+
+    if (d == 0L){ throw err("Byte.div: d==0"); }
+    return instance((byte)(u8(val) / d));
+  }
+
+  /// for a % b = c, c <= a.
+  /// Therefore it is safe to cast this % nat to byte
+  @Override public Object imm$getRem$1(Object p0){
+    long d= Nat$0Instance.unwrap(p0);
+    if (d == 0){ throw err("Byte.rem: d==0"); }
+    return instance(
+            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
+    );
+  }
+
   @Override public Object imm$softSqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)u8(val))); }
   @Override public Object imm$nat$0(){ return Nat$0Instance.instance(u8(val)); }
   @Override public Object imm$int$0(){ return Int$0Instance.instance(u8(val)); }
