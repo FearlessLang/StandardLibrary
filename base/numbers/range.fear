@@ -38,7 +38,8 @@ ClampableRange[N]: FlowableRange[N] {
 
 
 /// A datatype to represent a discrete range of numeric values.
-Range[N]: ClampableRange[N] {
+Range[N]: ClampableRange[N], Pipe[Range[N]] {
+  .close -> this;
   /// `this.size` returns the number of elements in this range.
   .size: Nat;
   .isEmpty: Bool -> this.size == 0;
