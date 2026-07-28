@@ -43,9 +43,6 @@ Order[T]: {
   }
 
 
-_LE: { #[T](o: read Order[T], a: read T, b: read T): Bool -> o.cmp(a,b,{ .lt->True; .eq->True; .gt->False }) }
-_LT: { #[T](o: read Order[T], a: read T, b: read T): Bool -> o.cmp(a,b,{ .lt->True; .eq->False; .gt->False }) }
-
 OrderBy[T,K]: {                       /// order values of T by a component/key K
   #(read T): read Order[K];          /// build a closed Order[K] for t's key (key is .close of the result)
 
