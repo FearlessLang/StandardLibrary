@@ -1,7 +1,33 @@
+/// A Factory class for making sets of elements.
+Sets: Sealed {
+  #[E,K](OrderHashBy[E,K]): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  }
+
 /// The implementation of a Set[E] the set keys must be imm to prevent breaking set invariants through mutating it's contents.
 /// This set is immutable so this + e will produce a new set with e included, and will not change this.
+/// This set maintains a sorted list of elements, such that the set ordering is predictable given the OrderHash.
 Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   .close -> this; .close -> ::;
+
+  /// `this.imm` returns `this` recovering imm reference capability.
+  /// This is used to make the type system happy as many things take `read`s.
+  read .imm: imm Set[E];
 
   /// `this.size` returns the number of elements in `this`.
   //>   .check{Sets#({::}, 1, 2, 3).size .assertEq 3}
@@ -17,10 +43,6 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   //>   .check{Sets#[Nat, Nat]({::}).notEmpty .assertFalse}
   //>   .check{Sets#({::}, 1).notEmpty .assertTrue}
   .notEmpty: Bool -> this.isEmpty.not;
-
-  /// `this.imm` returns `this` recovering imm reference capability.
-  /// This is used to make the type system happy as many things take `read`s.
-  read .imm: imm Set[E];
 
   /// The orderHash used to determine equality, hashing and potentially ordering of elements in this set.
   .orderHash: OrderHashBy[E];
@@ -54,7 +76,7 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   /// `this + e` returns a new Set[E] containing all elements of this plus `e`.
   /// Adding an element already present under the orderHash has no effect.
   //>   .check{Sets#({::}, 1) + 2 .assertEq({::}, Sets#({::}, 1, 2))}
-  //>   .check{Sets#({::.imm.abs.intExact}, +1) + -1 .assertEq({::}, Sets#({::}, +1))}
+  //>   .check{Sets#({::.imm.abs.getInt}, +1) + -1 .assertEq({::}, Sets#({::}, +1))}
   +(E): Set[E];
 
   /// `this - e` returns a new Set[E] containing all elements of this except `e`.
@@ -68,7 +90,7 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   //>   .let s1={Sets#({::}, +1, +2)}
   //>   .let s2={Sets#({::}, +2, +3)}
   //>   .check{s1.union({::}, s2) .assertEq({::}, Sets#({::}, +1, +2, +3))}
-  //>   .check{s1.union({::.imm.abs.intExact}, Sets#({::}, -1, -2)) .assertEq({::}, s1)}
+  //>   .check{s1.union({::.imm.abs.getInt}, Sets#({::}, -1, -2)) .assertEq({::}, s1)}
   .union[K](by: OrderHashBy[E, K], other: Set[E]): Set[E];
 
 
@@ -99,9 +121,11 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   /// using the given `by` to determine equality.
   //>   .let s1={Sets#({::}, +1, +2, +3)}
   //>   .let s2={Sets#({::}, +2)}
-  //>   .check{s1 -- ({::}, s2) .assertEq({::}, Sets#({::}, +1, +3))}
-  //>   .check{s1 -- ({::.imm.abs.intExact}, Sets#({::}, -2)) .assertEq({::}, Sets#({::}, +1, +3))}
-  .difference[K](by: OrderHashBy[E, K], other: Set[E]): Set[E];
+  //>   .check{s1.difference({::}, s2) .assertEq({::}, Sets#({::}, +1, +3))}
+  //>   .check{s1.difference({::.imm.abs.getInt}, Sets#({::}, -2)) .assertEq({::}, Sets#({::}, +1, +3))}
+  .difference[K](by: OrderHashBy[E, K], other: Set[E]): Set[E] -> Block#
+    .let other'={other.distinctBy by}
+    .return {this.flow.filter{e -> other'.contains(e).not}.set({::}, by)};
 
   /// `this -- other` returns a set containing the elements in this that are not in other,
   /// using this's orderHash.
@@ -245,9 +269,9 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   /// Equivalent to `this.cmp(this.orderHash, a, b, m)`.
   /// Note the ordering of the set elements is given by their orderHash, not the given `by`.
   /// if you want two sets ignoring their original order, you should use `this.setCmp`
-  //>   .let s1=Sets#({::}, +1, +2, +3)
-  //>   .let s2=Sets#({::}, -2, -3, -1)
-  //>   .check{Sets#[Int,Int]({::.imm.abs.int}).cmp(s1, s2, {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 1}
+  //>   .let s1={Sets#({::}, +1, +2, +3)}
+  //>   .let s2={Sets#({::}, -2, -3, -1)}
+  //>   .check{Sets#[Int,Int]({::.imm.abs.getInt}).cmp(s1, s2, {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 1}
   .cmp[R:**](a: read Set[E], b: read Set[E], m: mut OrderMatch[R]): R
     -> this.cmp(this.orderHash, a, b, m);
 
@@ -260,26 +284,4 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   /// Note: This list is zero cost as this collection maintains a sorted list.
   //>   .check{ Sets#({::.imm.abs}, -3, +2, -1).list.assertEq({::}, Lists#(-1, +2, -3)) }
   .list: mut List[imm E];
-  }
-
-
-/// A Factory class for making sets of elements.
-Sets: Sealed {
-  #[E,K](OrderHashBy[E,K]): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
   }

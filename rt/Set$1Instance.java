@@ -32,13 +32,17 @@ public final class Set$1Instance implements Set$1 {
     this.set = sortedList.stream().map(k -> mapKey(ordering, k))
             .collect(Collectors.toCollection(HashSet::new));
   }
-
+  Set$1Instance(OrderHashBy$2 ordering, ArrayList<Object> sortedList, HashSet<MapKey> set) {
+    this.ordering = ordering;
+    this.sortedList = sortedList;
+    this.set = set;
+  }
   Set$1Instance(OrderHashBy$2 ordering, HashSet<MapKey> values) {
     this.ordering = ordering;
     this.sortedList = values.stream().map(Set$1Instance::extractKey)
-      .collect(Collectors.toCollection(ArrayList::new));
+            .sorted((a, b) -> cmp(ordering, a, b))
+            .collect(Collectors.toCollection(ArrayList::new));
 
-    this.sortedList.sort((a, b) -> cmp(ordering,a,b));
     this.set = values;
   }
 
@@ -55,22 +59,26 @@ public final class Set$1Instance implements Set$1 {
   }
 
 
-  @Override public Object read$size$0(){ return Nat$0Instance.instance(set.size()); }
+  @Override public Object imm$size$0(){ return Nat$0Instance.instance(set.size()); }
 
   @Override public Object read$imm$0() {return this;}
 
 
-  @Override public Object imm$orderHash$0() { return ordering; }
+  @Override public Object imm$orderHash$0() { return ordering.imm$hideKey$0(); }
 
   @Override public Object imm$contains$1(Object p0) {
     return bool(set.contains(mapKey(ordering, p0)));
   }
 
   @Override public Object imm$$plus$1(Object p0){
+    var key = mapKey(this.ordering, p0);
+    if (this.set.contains(key)) {
+      return this;
+    }
     var list = new ArrayList<>(set.size() + 1);
     list.addAll(sortedList);
     insertInSortedPosition(list, p0, Util.toComparator(ordering));
-    return new Set$1Instance(ordering, list);
+    return new Set$1Instance(ordering, list, this.set);
   }
 
   static <T> void insertInSortedPosition(ArrayList<T> list, T t, Comparator<T> comparator) {
@@ -183,53 +191,19 @@ public final class Set$1Instance implements Set$1 {
     );
   }
 
-  @Override public Object imm$$dash_dash$2(Object p0, Object p1) {
-    if (this.set.isEmpty()) {return Sets$0.instance.imm$$hash$1(p1);}
-    var newOrdering = ordering(p0);
-    Set$1Instance other = toSet(p1);
-
-
-    if (this.ordering.equals(newOrdering)) {
-        // Don't have to rehash the elements from this
-        return new Set$1Instance(
-          newOrdering,
-          (HashSet<MapKey>) this.set.stream()
-            .filter(k -> !other.set.contains(mapKey(
-                        other.ordering,
-                        extractKey(k)
-            ))).collect(Collectors.toCollection(HashSet::new))
-        );
-    }
-    if (other.ordering.equals(newOrdering)) {
-       return fromSet(
-          newOrdering,
-          this.set.stream()
-             // rehash the current elements
-            .map(k -> mapKey(newOrdering, extractKey(k)))
-            // Don't need to rehash to match other.
-            .filter(k -> !other.set.contains(k))
-            .collect(Collectors.toCollection(HashSet::new))
-        );
-    }
-
-    // should investigate whether keep in this if not in other, or
-    // remove from this if in other is better
-    return fromSet(
-        newOrdering,
-          this.set.stream()
-            .filter(k -> !other.set.contains(
-                    mapKey(other.ordering, extractKey(k))
-            ))
-            .map(k -> mapKey(newOrdering, extractKey(k)))
-            .collect(Collectors.toCollection(HashSet::new))
-        );
-  }
-
   private static HashSet<MapKey> rehash(HashSet<MapKey> s, OrderHashBy$2 ordering) {
     return s.stream()
           .map(Set$1Instance::extractKey)
           .map(k -> mapKey(ordering, k))
           .collect(Collectors.toCollection(HashSet::new));
+  }
+
+  private static HashSet<MapKey> rehashSet(Set$1Instance set, OrderHashBy$2 ordering) {
+    if (set.ordering.equals(ordering)) {
+      return set.set;
+    }
+
+    return rehash(set.set, ordering);
   }
 
   @Override public Object imm$containsAll$2(Object p0, Object p1) {

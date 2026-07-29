@@ -25,6 +25,10 @@ public final class ESet$1Instance implements ESet$1 {
         )));
         this.ordering= ordering;
     }
+    ESet$1Instance(LinkedHashMap<MapKey, Object> s, OrderHashBy$2 ordering){
+        set = s;
+        this.ordering= ordering;
+    }
 
     ESet$1Instance(OrderHashBy$2 ordering) {
         this.ordering=ordering;
@@ -89,7 +93,7 @@ public final class ESet$1Instance implements ESet$1 {
     }
 
 
-    @Override public Object read$addAll$1(Object p0) {
+    @Override public Object mut$addAll$1(Object p0) {
         ESet$1Instance eset = (ESet$1Instance) p0;
         if (eset.ordering.equals(this.ordering)) {
             this.set.putAll(eset.set);
@@ -103,7 +107,7 @@ public final class ESet$1Instance implements ESet$1 {
         return this;
     }
 
-    @Override public Object read$removeIf$1(Object p0) {
+    @Override public Object mut$removeIf$1(Object p0) {
         ESet$1Instance eset = (ESet$1Instance) p0;
         for (MapKey m : eset.set.keySet()) {
             if (isTrue(callMF$2(p0, extractKey(m)))) {
@@ -136,9 +140,8 @@ public final class ESet$1Instance implements ESet$1 {
     }
 
     private void reOrderHash(OrderHashBy$2 ordering) {
-        set = set.stream()
-                .map(Set$1Instance::extractKey)
-                .map(e -> mapKey(ordering, e))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashMap<MapKey, Object> newSet = new LinkedHashMap<>();
+        set.forEach((k, v) -> newSet.put(mapKey(ordering, extractKey(k)), v));
+        this.set = newSet;
     }
 }

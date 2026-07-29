@@ -15,6 +15,7 @@ use base.Int as Int;
 use base.Float as Float;
 use base.Byte as Byte;
 use base.ELists as ELists;
+use base.Sets as Sets;
 use base.Info as Info;
 use base.Map as Map;
 use base.Maps as Maps;
@@ -35,6 +36,8 @@ use base.DataTypeBy as DataTypeBy;
 use base.Pipe as Pipe;
 use base.Operation as Operation;
 use base.Todo as Todo;
+use base.ESet as ESet;
+use base.ESets as ESets;
 
 MyTests:UnitTests{::
   .test TestByte
@@ -51,4 +54,5 @@ MyTests:UnitTests{::
   .test TestComparators
   .test TestUStr
   .test MathUnitTests
+  .test Set1ImmTests
   }

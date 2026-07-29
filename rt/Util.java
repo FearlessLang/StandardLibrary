@@ -55,7 +55,7 @@ public class Util{
     return i<0?m.mut$lt$0() : i==0? m.mut$eq$0() : m.mut$gt$0();
   }
   public static Opt$1 optEmpty(){ return Opt$1.instance; }
-  public static Opt$1 optSome(Object x){ return Opts$0.instance.imm$$hash$1(x); }
+  public static Opt$1 optSome(Object x){ return (Opt$1) Opts$0.instance.imm$$hash$1(x); }
   public static Opt$1 optNullable(Object o) {
       if (o == null) {
         return optSome(0);
@@ -84,7 +84,7 @@ public class Util{
   public static int natToInt(Object n){
     long nat = ((Nat$0Instance)n).val();
     if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {
-      throw err("Nat is too large to represented as an integer");
+      throw err("Nat "+Long.toUnsignedString(nat)+"is too large to represented as an integer");
     }
     return (int) nat;
   }
@@ -128,7 +128,7 @@ public class Util{
       key= k;
       ord= (OrderHash$1)oh.imm$$hash$1(k);
       close= ((Order$1)ord).read$close$0();
-      hc= natToInt(ord.read$hash$0());
+      hc= natToLong(ord.read$hash$0());
   }
   @Override public int hashCode(){ return Long.hashCode(hc); }
   @Override public boolean equals(Object o){

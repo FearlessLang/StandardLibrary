@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Gatherer;
 import java.util.stream.Stream;
 
@@ -66,6 +67,29 @@ public record Flow$1Instance(Stream<Object> s) implements Flow$1 {
         try{ return EList$1Instance.wrap(s.toList()); }
         catch(IllegalStateException e){ throw consumed(); }
     }
+
+    @Override public Object mut$set$2(Object p0, Object p1){
+        OrderHashBy$2 ordering = Set$1Instance.ordering(p1);
+        AsImm$2 toImm = (AsImm$2) p0;
+
+        try{ return new Set$1Instance(
+                ordering,
+                s.map(e -> toImm.mut$$hash$1(e))
+                        .collect(Collectors.toCollection(ArrayList::new))
+        );}
+        catch(IllegalStateException e){ throw consumed(); }
+    }
+
+    @Override public Object mut$eSet$2(Object p0, Object p1){
+        OrderHashBy$2 ordering = Set$1Instance.ordering(p1);
+        AsImm$2 toImm = (AsImm$2) p0;
+        LinkedHashMap<MapKey, Object> map = new LinkedHashMap<>();
+        s.forEach(e -> map.put(mapKey(ordering, e), e));
+        try{return new ESet$1Instance(map, ordering);}
+        catch(IllegalStateException e){ throw consumed(); }
+    }
+
+
     @Override public Object mut$fold$2(Object p0,Object p1){
         try{
             var it= s.iterator();

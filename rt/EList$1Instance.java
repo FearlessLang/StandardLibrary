@@ -31,7 +31,7 @@ public final class EList$1Instance implements EList$1 {
     }
 
     private int idx(Object p0) {
-        long i = natToInt(p0);
+        long i = natToLong(p0);
         // Lists cannot get larger than an int
         check(0 <= i && i < xs.size(), "EList index out of range");
         return (int) i;

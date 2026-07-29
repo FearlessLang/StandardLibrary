@@ -1,0 +1,37 @@
+MutBlock: {
+  #[A:*, B:*](_: A, b: B): B -> b;
+  }
+
+MutTestBoxs: {
+  #[T: mut](item: T): mut MutTestBox[T]  -> {
+    .item -> item;
+    }
+  }
+
+MutTestBox[T: mut]: {
+   mut .item: T;
+   mut .update[R](f: mut MF[T, R]): mut MutTestBox[T] -> MutBlock#(
+    f#(this.item),
+    this
+    );
+   mut .check(f: mut MF[T, Void]): mut MutTestBox[T] -> MutBlock#(
+    f#(this.item),
+    this
+    );
+    read .void: Void -> Void;
+  }
+// TODO: Find better way of testing mutable collections
+ESet1Read0Size0Test: Test {::
+    .check{
+      MutTestBoxs#(ESets#[Nat, Nat] {::})
+        .check{::.size .assertEq 0}
+        .update{::.add(1).add(2).add(3)}
+        .check{::.size .assertEq 3}
+        .check{::.flow.list .assertEq({::}, Lists#(1,2,3))}
+        .void;
+      }
+  }
+
+ESet1ImmTests: Test {::
+  .test ESet1Read0Size0Test
+  }

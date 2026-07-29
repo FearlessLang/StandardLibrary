@@ -3,7 +3,7 @@ ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E] -> Magic! }
 
 /// A mutable set, allows for in place updates.
 /// In general this collection is built up with `.add` and similar methods and then consumed into a list.
-/// **NOTE:** Unlike Set this collection does not maintain a sorted order for performance costs.
+/// **NOTE:** Unlike Set this collection does not maintain a sorted order for performance.
 ESet[E]: Pipe[ESet[E]] {
   /// `this.size` returns the number of elements in `this`.
   //>   .check{ESets#[Nat, Nat]({::}).add(1).add(2).add(3).size .assertEq 3}
@@ -12,14 +12,14 @@ ESet[E]: Pipe[ESet[E]] {
 
   /// `this.isEmpty` returns True if `this` has no elements.
   /// Equivalent to: `this.size == 0`
-  //>   .let s=ESets#[Nat, Nat]{::}
+  //>   .let s={ESets#[Nat, Nat]{::}}
   //>   .check{s.isEmpty .assertTrue}
   //>   .check{s.add(1).isEmpty .assertFalse}
   read .isEmpty: Bool -> this.size == 0;
 
   /// `this.notEmpty` returns True if `this` has any elements.
   /// Equivalent to: `this.isEmpty.not`
-  //>   .let s=ESets#[Nat, Nat]({::})
+  //>   .let s={ESets#[Nat, Nat] {::}}
   //>   .check{s.notEmpty .assertFalse}
   //>   .check{s.add(1).notEmpty .assertTrue}
   read .notEmpty: Bool -> this.isEmpty.not;
