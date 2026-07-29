@@ -1,0 +1,326 @@
+_MultiFlow[Self]: Sealed {
+  mut .cutToSmallest: mut Self;
+
+  /// `this.limit(n)` returns `.some` of a BiFlow limited to the first `n` elements
+  /// if `n <= this.minSize`, otherwise `.empty`.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.limit(2)!.mergeExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7))}
+  //>   .check{bf.limit(10).isEmpty .assertTrue}
+  mut .noMoreThan(n: Nat): mut Self;
+  }
+
+BiFlow[A:*,B:*]: Pipe[BiFlow[A,B]], _MultiFlow[BiFlow[A,B]] {
+
+  /// `this.with(flow)` returns a TriFlow with `flow` added as a new channel.
+  mut .with[C:*](flow: mut Flow[C]): mut TriFlow[A,B,C];
+
+  /// `this.withBoth(flow)` returns a QuadFlow with both channels from `flow` added.
+  //>   .let bf1={Lists#(1,2).flow.with(Lists#(3,4).flow)}
+  //>   .let bf2={Lists#(5,6).flow.with(Lists#(7,8).flow)}
+  //>   .check{bf1.withBoth(bf2).mergeExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(16,20))}
+  mut .withBoth[C:*,D:*](flow: mut BiFlow[C,D]): mut QuadFlow[A,B,C,D];
+
+  /// `this.enumerate` returns a TriFlow with a channel of indices (starting from 0) prepended.
+  /// The index channel has size equal to `this.maxSize`.
+  /// Note: this mutates this BiFlow; references to it before this call will be broken.
+  //>   .let bf={Lists#(10,20,30).flow.with(Lists#(40,50,60).flow)}
+  //>   .check{bf.enumerate.mergeExact{i,a,b -> i+a+b}.list
+  //>     .assertEq({::}, Lists#(50,72,96))}
+  mut .enumerate: mut TriFlow[Nat,A,B];
+
+  /// `this.mergeExact(f)` merges both channels using `f`.
+  /// Throws if the channels differ in size.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.mergeExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7,9))}
+  mut .mergeExact[R:*](f: read F[A,B,R]): mut Flow[R];
+
+  /// `this.merge(f)` returns `.some` of the mergeped flow if the channels are the same size,
+  /// otherwise `.empty`.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.merge{a,b -> a+b}!.list
+  //>     .assertEq({::}, Lists#(5,7,9))}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow)
+  //>     .merge{a,b -> a+b}.isEmpty .assertTrue}
+  mut .merge[R:*](f: read F[A,B,R]): mut Opt[mut Flow[R]];
+
+  /// `this.mergeOpts(f)` merges both channels using `f`, passing `.empty` for missing values.
+  /// Continues until all channels are exhausted.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)}
+  //>   .check{bf.mergeOpts{a,b -> a.or{0}+b.or{0}}.list
+  //>     .assertEq({::}, Lists#(5,7,3))}
+  mut .mergeOpts[R:*](f: read F[Opt[A],Opt[B],R]): mut Flow[R];
+
+  /// `this.getFold(acc, f)` folds both channels pairwise from left to right, starting from `acc`.
+  /// For each pair `(a, b)` the accumulator is updated to `f#(acc, a, b)`.
+  /// Throws if the channels differ in size.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.getFold({0}, {acc,a,b -> acc+a+b}) .assertEq 21}
+  mut .getFold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,R]): R;
+
+  /// `this.fold(acc, f)` returns `.some` of the fold result if the channels are the same size,
+  /// otherwise `.empty`.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow)}
+  //>   .check{bf.fold({0}, {acc,a,b -> acc+a+b})! .assertEq 21}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow)
+  //>     .fold({0}, {acc,a,b -> acc+a+b}).isEmpty .assertTrue}
+  mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,R]): mut Opt[R];
+
+  /// `this.foldOpts(acc, f)` folds both channels pairwise from left to right, starting from `acc`,
+  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)}
+  //>   .check{bf.foldOpts({0}, {acc,a,b -> acc+a.or{0}+b.or{0}}) .assertEq 15}
+  mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],R]): R;
+
+  mut .getFoldUntil[R:*](mut MF[R], read MultiAcc[A,B,R], read F[R, Bool]): R;
+
+  mut .foldUntil[R:*](mut MF[R], read MultiAcc[A,B,R], read F[R, Bool]): mut Opt[R];
+
+  mut .foldOptsUntil[R:*](mut MF[R], read MultiAcc[Opt[A],Opt[B],R], read F[R, Bool]): R;
+
+  /// `this.fillA(f)` returns a BiFlow where missing values in channel A are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //>   .let bf={Lists#(1,2).flow.with(Lists#(3,4,5).flow)}
+  //>   .check{bf.fillA{n -> n.int*10}
+  //>     .mergeExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(4,6,25))}
+  mut .fillA(f: read F[Nat,A]): mut BiFlow[A,B];
+
+  /// `this.fillB(f)` returns a BiFlow where missing values in channel B are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //>   .let bf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)}
+  //>   .check{bf.fillB{n -> n.int*10}
+  //>     .mergeExact{a,b -> a+b}.list
+  //>     .assertEq({::}, Lists#(5,7,23))}
+  mut .fillB(f: read F[Nat,B]): mut BiFlow[A,B];
+  }
+
+
+TriFlow[A:*,B:*,C:*]: Pipe[TriFlow[A,B,C]], _MultiFlow[TriFlow[A,B,C]] {
+
+  /// `this.with(flow)` returns a QuadFlow with `flow` added as a new channel.
+  //- {::
+  //>   .let tf={Lists#(1,2).flow.with(Lists#(3,4).flow).with(Lists#(5,6).flow)}
+  //>   .check{tf.with(Lists#(7,8).flow)
+  //>     .mergeExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(16,20))}
+  //-   }
+  mut .with[D:*](flow: mut Flow[D]): mut QuadFlow[A,B,C,D];
+
+  /// `this.enumerate` returns a QuadFlow with a channel of indices (starting from 0) prepended.
+  /// The index channel has size equal to `this.maxSize`.
+  /// Note: this mutates this TriFlow; references to it before this call will be broken.
+  //- {::
+  //>   .let tf={Lists#(1,2).flow.with(Lists#(3,4).flow).with(Lists#(5,6).flow)}
+  //>   .check{tf.enumerate.mergeExact{i,a,b,c -> i+a+b+c}.list
+  //>     .assertEq({::}, Lists#(9,14))}
+  //-   }
+  mut .enumerate: mut QuadFlow[Nat,A,B,C];
+
+  /// `this.fillA(f)` returns a TriFlow where missing values in channel A are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let tf={Lists#(1,2).flow.with(Lists#(3,4,5).flow).with(Lists#(6,7,8).flow)}
+  //>   .check{tf.fillA{n -> n.int*10}
+  //>     .mergeExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(10,13,25))}
+  //-   }
+  mut .fillA(f: read F[Nat,A]): mut TriFlow[A,B,C];
+
+  /// `this.fillB(f)` returns a TriFlow where missing values in channel B are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6,7,8).flow)}
+  //>   .check{tf.fillB{n -> n.int*10}
+  //>     .mergeExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(11,14,27))}
+  //-   }
+  mut .fillB(f: read F[Nat,B]): mut TriFlow[A,B,C];
+
+  /// `this.fillC(f)` returns a TriFlow where missing values in channel C are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8).flow)}
+  //>   .check{tf.fillC{n -> n.int*10}
+  //>     .mergeExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(12,15,27))}
+  //-   }
+  mut .fillC(f: read F[Nat,C]): mut TriFlow[A,B,C];
+
+  /// `this.mergeExact(f)` merges all three channels using `f`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.mergeExact{a,b,c -> a+b+c}.list
+  //>     .assertEq({::}, Lists#(12,15,18))}
+  //-   }
+  mut .mergeExact[R:*](f: read F[A,B,C,R]): mut Flow[R];
+
+  /// `this.merge(f)` returns `.some` of the mergeped flow if all channels are the same size,
+  /// otherwise `.empty`.
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.merge{a,b,c -> a+b+c}!.list
+  //>     .assertEq({::}, Lists#(12,15,18))}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)
+  //>     .merge{a,b,c -> a+b+c}.isEmpty .assertTrue}
+  mut .merge[R:*](f: read F[A,B,C,R]): mut Opt[mut Flow[R]];
+
+  /// `this.mergeOpts(f)` merges all three channels using `f`, passing `.empty` for missing values.
+  /// Continues until all channels are exhausted.
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6).flow)}
+  //>   .check{tf.mergeOpts{a,b,c -> a.or{0}+b.or{0}+c.or{0}}.list
+  //>     .assertEq({::}, Lists#(11,7,3))}
+  mut .mergeOpts[R:*](f: read F[Opt[A],Opt[B],Opt[C],R]): mut Flow[R];
+
+  /// `this.getFold(acc, f)` folds all three channels from left to right, starting from `acc`.
+  /// For each triple `(a, b, c)` the accumulator is updated to `f#(acc, a, b, c)`.
+  /// Throws if the channels differ in size.
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.getFold(0, {acc,a,b,c -> acc+a+b+c}) .assertEq 45}
+  mut .getFold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,R]): R;
+
+  /// `this.fold(acc, f)` returns `.some` of the fold result if all channels are the same size,
+  /// otherwise `.empty`.
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)}
+  //>   .check{tf.fold(0, {acc,a,b,c -> acc+a+b+c})! .assertEq 45}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow)
+  //>     .fold(0, {acc,a,b,c -> acc+a+b+c}).isEmpty .assertTrue}
+  mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,R]): mut Opt[R];
+
+  /// `this.foldOpts(acc, f)` folds all three channels from left to right, starting from `acc`,
+  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  //>   .let tf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6).flow)}
+  //>   .check{tf.foldOpts(0, {acc,a,b,c -> acc+a.or{0}+b.or{0}+c.or{0}}) .assertEq 27}
+  mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],Opt[C],R]): R;
+
+
+  mut .getFoldUntil[R:*](mut MF[R], read MultiAcc[A,B,C,R], read F[R, Bool]): R;
+
+  mut .foldUntil[R:*](mut MF[R], read MultiAcc[A,B,C,R], read F[R, Bool]): mut Opt[R];
+
+  mut .foldOptsUntil[R:*](mut MF[R], read MultiAcc[Opt[A],Opt[B],Opt[C],R], read F[R, Bool]): R;
+  }
+
+
+QuadFlow[A:*,B:*,C:*,D:*]: Pipe[QuadFlow[A,B,C,D]], _MultiFlow[QuadFlow[A,B,C,D]] {
+
+  /// `this.fillA(f)` returns a QuadFlow where missing values in channel A are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2).flow.with(Lists#(3,4,5).flow).with(Lists#(6,7,8).flow).with(Lists#(9,10,11).flow)}
+  //>   .check{qf.fillA{n -> n.int*10}
+  //>     .mergeExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(19,23,34))}
+  //-   }
+  mut .fillA(f: read F[Nat,A]): mut QuadFlow[A,B,C,D];
+
+  /// `this.fillB(f)` returns a QuadFlow where missing values in channel B are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6,7,8).flow).with(Lists#(9,10,11).flow)}
+  //>   .check{qf.fillB{n -> n.int*10}
+  //>     .mergeExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(20,24,29))}
+  //-   }
+  mut .fillB(f: read F[Nat,B]): mut QuadFlow[A,B,C,D];
+
+  /// `this.fillC(f)` returns a QuadFlow where missing values in channel C are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8).flow).with(Lists#(9,10,11).flow)}
+  //>   .check{qf.fillC{n -> n.int*10}
+  //>     .mergeExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(21,25,30))}
+  //-   }
+  mut .fillC(f: read F[Nat,C]): mut QuadFlow[A,B,C,D];
+
+  /// `this.fillD(f)` returns a QuadFlow where missing values in channel D are filled using `f(n)`
+  /// where `n` is the index of the missing slot.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11).flow)}
+  //>   .check{qf.fillD{n -> n.int*10}
+  //>     .mergeExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(22,26,31))}
+  //-   }
+  mut .fillD(f: read F[Nat,D]): mut QuadFlow[A,B,C,D];
+
+  /// `this.mergeExact(f)` merges all four channels using `f`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.mergeExact{a,b,c,d -> a+b+c+d}.list
+  //>     .assertEq({::}, Lists#(22,26,30))}
+  //-   }
+  mut .mergeExact[R:*](f: read F[A,B,C,D,R]): mut Flow[R];
+
+  /// `this.merge(f)` returns `.some` of the mergeped flow if all channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.merge{a,b,c,d -> a+b+c+d}!.list
+  //>     .assertEq({::}, Lists#(22,26,30))}
+  //>   .check{Lists#(1,2).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)
+  //>     .merge{a,b,c,d -> a+b+c+d}.isEmpty .assertTrue}
+  //-   }
+  mut .merge[R:*](f: read F[A,B,C,D,R]): mut Opt[mut Flow[R]];
+
+  /// `this.mergeOpts(f)` merges all four channels using `f`, passing `.empty` for missing values.
+  /// Continues until all channels are exhausted.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5).flow).with(Lists#(6).flow).with(Lists#(7,8,9,10).flow)}
+  //>   .check{qf.mergeOpts{a,b,c,d -> a.or{0}+b.or{0}+c.or{0}+d.or{0}}.list
+  //>     .assertEq({::}, Lists#(18,15,9,10))}
+  //-   }
+  mut .mergeOpts[R:*](f: read F[Opt[A],Opt[B],Opt[C],Opt[D],R]): mut Flow[R];
+
+  /// `this.getFold(acc, f)` folds all four channels from left to right, starting from `acc`.
+  /// For each tuple `(a, b, c, d)` the accumulator is updated to `f#(acc, a, b, c, d)`.
+  /// Throws if the channels differ in size.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5,6).flow).with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}
+  //>   .check{qf.getFold(0, {acc,a,b,c,d -> acc+a+b+c+d}) .assertEq 78}
+  //-   }
+  mut .getFold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R]): R;
+
+  /// `this.fold(acc, f)` returns `.some` of the fold result if all channels are the same size,
+  /// otherwise `.empty`.
+  //- {::
+  //>   .let qfF={{Lists#(1,2).flow.with(Lists#(4,5,6).flow)
+  //>       .with(Lists#(7,8,9).flow).with(Lists#(10,11,12).flow)}}
+  //>   .check{qf#.fold(0, {acc,a,b,c,d -> acc+a+b+c+d}) .assertEmpty }
+  //>   .check{qf#.fillA{i -> i+1}
+  //>     .fold(0, {acc,a,b,c,d -> acc+a+b+c+d})! .assertEq 78}
+  //-   }
+  mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R]): mut Opt[R];
+
+  /// `this.foldOpts(acc, f)` folds all four channels from left to right, starting from `acc`,
+  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  //- {::
+  //>   .let qf={Lists#(1,2,3).flow.with(Lists#(4,5).flow)
+  //>       .with(Lists#(6).flow).with(Lists#(7,8,9,10).flow)}
+  //>   .check{qf.foldOpts(0, {acc,a,b,c,d -> acc+a.or{0}+b.or{0}+c.or{0}+d.or{0}}) .assertEq 55}
+  //-   }
+  mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],Opt[C],Opt[D],R]): R;
+
+
+  mut .getFoldUntil[R:*](mut MF[R], read MultiAcc[A,B,C,D,R], read F[R, Bool]): R;
+
+  mut .foldUntil[R:*](mut MF[R], read MultiAcc[A,B,C,D,R], read F[R, Bool]): mut Opt[R];
+
+  mut .foldOptsUntil[R:*](mut MF[R], read MultiAcc[Opt[A],Opt[B],Opt[C],Opt[D],R], read F[R, Bool]): R;
+  }
+
+
+MultiAcc[A:**, B:**, R:**]: {
+  read #(R, A, B): R;
+  }
+
+MultiAcc[A:**, B:**, C:**, R:**]: {
+  read #(R, A, B, C): R;
+  }
+
+MultiAcc[A:**, B:**, C:**, D:**, R:**]: {
+  read #(R, A, B, C, D): R;
+  }

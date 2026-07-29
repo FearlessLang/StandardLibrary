@@ -30,6 +30,8 @@ Flow[E:*]: {
   mut ++ (mut Flow[E]): mut Flow[E];
   mut .list: mut List[E];
   mut .eList: mut EList[E];
+  mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
+  mut .eSet[E', K](mut AsImm[E, E'], OrderHashBy[imm E, K]): mut ESet[E'];
   mut .mapping[K,K0,E0:*](OrderHashBy[K,K0], read KeyElemMapper[E,K,E0]): mut Map[K,E0];
   mut .join(js: JoinStr[E]): E -> js.joinStr this;
   mut .sum(sn: SumNumber[E]): E -> sn.sumNumber this;
@@ -45,7 +47,6 @@ Flow[E:*]: {
   mut .all(f: read F[E, Bool]):  Bool;
   mut .none(f: read F[E, Bool]): Bool;
   mut .get:   E;//get the first element if size==1, throws otherwise
-  // TODO: check if it is safe for these to be mut.
   mut .opt:   mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
   mut .first: mut Opt[E]; //opt of the first element, never throws
   mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut Flow[R] -> 
@@ -70,6 +71,8 @@ Flow[E:*]: {
   mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg`TODO`;
   mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg`TODO`;
   }
+
+AsImm[E:*, R]: { mut #(E): R; }
 
 FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
 ELists: { #[E:*]: mut EList[E]-> Magic! }

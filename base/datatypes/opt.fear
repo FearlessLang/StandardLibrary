@@ -1,4 +1,4 @@
-Opt[E:*]: _Opt[E]{
+Opt[E:*]: _Opt[E] {
   .close->this; .close->::;
   .match m    -> m.empty;
   .imm by     -> this.match{.some x -> Opts#(by#x.imm); .empty->{} };
@@ -33,6 +33,7 @@ Opt[E:*]: _Opt[E]{
       .some eb -> by#ea<=>(by#eb, m);
       }
     };
+
   .hash by -> this.match{
     .empty  -> 0;
     .some e -> 31.aluAddWrap(by#e.hash);

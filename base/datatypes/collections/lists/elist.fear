@@ -1,5 +1,5 @@
 
-EList[E:*]: {
+EList[E:*]: Pipe[EList[E]]{
   //I was considering if EList should start with a Num current size AND should allow for 'holes', so .get
   //can give exception in the middle of present items.
   mut .add(E): Void;

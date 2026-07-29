@@ -37,7 +37,7 @@ Flow: Sealed,_FlowExtensions,_FlowConverters {
   .fromMutSource[E:*](source: mut FlowOp[E], size: Nat): mut Flow[E] -> _MutSourceCollection[E]#(source, size),
   }
 
-Flow[E:*]: Sealed,Extensible[Flow[E]],_NonTerminalOps[E],_TerminalOps[E] {
+Flow[E:*]: Sealed,Pipe[Flow[E]],_NonTerminalOps[E],_TerminalOps[E] {
   .self -> this,
   mut .let[DR:*,R:*](x: read F[mut MF[mut Flow[E]],DR], cont: mut Continuation[DR,mut Flow[E],R]): R -> Block#
     .let duplicator = {_LazyFlowDuplicators#this}
