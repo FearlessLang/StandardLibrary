@@ -101,7 +101,20 @@ Math: Sealed, _MagicMath {
   .min[T,K](ordering: OrderBy[T, K], t0: T, t1: T): T -> ordering#t0 <=> (ordering#t1, {
       .lt -> t0; .eq -> t0; .gt -> t1;
     });
+
+  /// `Math.clamp(by, lo, hi, t)` returns `t` clamped between upper and lower.
+  /// Note: `Math.clamp(by, lo, hi, t)` returns `t` in the case where it is equal to lo or hi
+  /// Equivalent to: `Math.max(by, Math.min(by, t, lower), upper)`
+  .clamp[T,K](ordering: OrderBy[T,K], lower: T, upper: T, t: T): T -> Block#
+    .let[Order[K]] lower'={ordering# lower}
+    .let[Order[K]] upper'={ordering# upper}
+    .let[Order[K]] t'={ordering# t}
+    .if {lower' > (upper'.close)} .error{"Math.clamp: lower must be <= to upper"}
+    .if {t' < (lower'.close)} .return {lower}
+    .if {t' > (upper'.close)} .return {upper}
+    .return {t}
   }
+
 
 
 /// The super type of Radians and Degrees, used to enforce common behaviour
@@ -125,20 +138,20 @@ Angle[Self]: F[Float],Sealed,DataType[Self, Self] {
 
 /// An angle measured in degrees
 Degree: Angle[Degree] {
-  + other -> this# + (other#) .deg!;
-  - other -> this# - (other#) .deg!;
+  + other -> this# + (other#) .getDeg;
+  - other -> this# - (other#) .getDeg;
   .sin: Float -> this.rad.sin;
   .cos: Float -> this.rad.cos;
   .tan: Float -> this.rad.tan;
 
-  .rad: Radian -> this# * (Math.pi) / +180.0 .rad!;
+  .rad: Radian -> this# * (Math.pi) / +180.0 .getRad;
   /// `this.normalize` returns a new angle into converted into the range [0, 360);
   //>   .check{ -45.0.degree.normalize .assertEq(315.0.degree) }
   //>   .check{ 40.degree.normalize .assertEq(40.0.degree) }
-  .normalize -> Math.euclideanMod(this#, +360.0).deg!;
+  .normalize -> Math.euclideanMod(this#, +360.0).getDeg;
 
   .close -> this;
-  .imm -> this#.deg!;
+  .imm -> this#.getDeg;
   .str -> `Degree[`+(this#.str)+`]`;
   /// Compare two angles after normalizing them
   .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
@@ -155,11 +168,11 @@ _RadianTrig: Sealed {
 
 /// An angle measured in radians
 Radian: Angle[Radian] {
-  + other -> this# + (other#) .rad!;
-  - other -> this# - (other#) .rad!;
-  .deg: Degree -> this# * +180.0 / (Math.pi) .deg!;
+  + other -> this# + (other#) .getRad;
+  - other -> this# - (other#) .getRad;
+  .deg: Degree -> this# * +180.0 / (Math.pi) .getDeg;
   /// Wrap this angle into the range [0, 2pi)
-  .normalize -> Math.euclideanMod(this#, Math.tau).rad!;
+  .normalize -> Math.euclideanMod(this#, Math.tau).getRad;
 
   .sin -> _RadianTrig.sin this;
   .cos -> _RadianTrig.cos this;

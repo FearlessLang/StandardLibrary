@@ -37,10 +37,42 @@ public record Float$0Instance(double val) implements Float$0{
      return ((Float$0Instance) p0).val;
   }
 
+  @Override public Object imm$succ$0() {
+    if (Double.isNaN(val)) {
+      throw err("Float.succ: NaN does not have a successor");
+    }
+    if (val == Double.POSITIVE_INFINITY) {
+      throw err("Float.succ: Math.posInf, does not have a successor");
+    }
+    return Float$0Instance.instance(Math.nextUp(val));
+  }
+  @Override public Object imm$pred$0() {
+    if (Double.isNaN(val)) {
+      throw err("Float.pred: NaN does not have a predecessor");
+    }
+    if (val == Double.NEGATIVE_INFINITY) {
+      throw err("Float.pred: Math.negInf, does not have a predecessor");
+    }
+    return Float$0Instance.instance(Math.nextDown(val));
+  }
+
   @Override public Object imm$signOrNaN$0() {
     return Float$0Instance.instance(Math.signum(this.val));
   }
-  @Override public Object imm$$star_star$1(Object p0){ return instance(Math.pow(val,f(p0))); }
+  @Override public Object imm$$star_star$1(Object p0){
+    double power = Float$0Instance.unwrap(p0);
+    if (Double.isNaN(this.val) || Double.isNaN(power)) {
+      return Float$0Instance.instance(Double.NaN);
+    }
+
+    if (this.val == 0.0 && power == 0.0
+            || (this.val < 0.0 && power == Double.POSITIVE_INFINITY)
+            || (this.val == Double.POSITIVE_INFINITY && power == 0.0)
+    ) {
+      return Float$0Instance.instance(Double.NaN);
+    }
+    return instance(Math.pow(val,power));
+  }
   @Override public Object imm$softInt$0(){
     if (Double.isNaN(val)) {
       return Int$0Instance.instance(0);
@@ -170,28 +202,70 @@ public record Float$0Instance(double val) implements Float$0{
     if (d < 0.0d){ throw err("Float.eqDelta: delta<0"); }
     return bool(Math.abs(val - exp) <= d);
   }
-  @Override public Object imm$softRound$0(){
-    if (Double.isNaN(val)){ return Int$0Instance.instance(0); }
-    if (val == Double.POSITIVE_INFINITY){ return Int$0Instance.instance(Int$0Instance.MAX_VALUE); }
-    if (val == Double.NEGATIVE_INFINITY){ return Int$0Instance.instance(Int$0Instance.MIN_VALUE); }
-    double r= Math.rint(val); // ties-to-even
-    if (r <= (double)Int$0Instance.MIN_VALUE){ return Int$0Instance.instance(Int$0Instance.MIN_VALUE); }
-    if (r >= (double)Int$0Instance.MAX_VALUE){ return Int$0Instance.instance(Int$0Instance.MAX_VALUE); }
-    return Int$0Instance.instance((int)r);
+  @Override public Object imm$softRoundTiesEven$0(){
+
+    return instance(Math.rint(val));
   }
-  @Override public Object imm$softCeil$0(){ return Int$0Instance.instance((int)Math.ceil(val)); }
-  @Override public Object imm$softFloor$0(){ return Int$0Instance.instance((int)Math.floor(val)); }
-  @Override public Object imm$softTrunc0$0(){ return Int$0Instance.instance(clampTrunc0ToInt(val)); }
+  @Override public Object imm$softRound$0(){
+    if (val < 0.0) {
+      // Hack round -ve -> inf to rounding -ve -> -inf
+      return instance(-Math.round(-val));
+    }
+    return instance(Math.round(val));
+  }
+  @Override public Object imm$softCeil$0(){ return instance(Math.ceil(val)); }
+  @Override public Object imm$softFloor$0(){ return instance(Math.floor(val)); }
+  @Override public Object imm$softTrunc0$0(){
+    if (val < 0) {
+      return instance(Math.ceil(val));
+    }
+    return instance(Math.floor(val));
+  }
   @Override public Object imm$isNaN$0(){ return bool(Double.isNaN(val)); }
   @Override public Object imm$isInfinite$0(){ return bool(Double.isInfinite(val)); }
   @Override public Object imm$isPosInfinity$0(){ return bool(val == Double.POSITIVE_INFINITY); }
   @Override public Object imm$isNegInfinity$0(){ return bool(val == Double.NEGATIVE_INFINITY); }
   @Override public Object imm$isNegZero$0(){ return bool(isNegZero(val)); }
   @Override public Object imm$isPosZero$0(){ return bool(isPosZero(val)); }
-  @Override public Object imm$ieeeEq$1(Object p0){ return bool(val == f(p0)); }
   @Override public Object imm$ieeeSameBits$1(Object p0){ return bool(bits(val) == bits(f(p0))); }
   @Override public Object imm$ieeeStr$0(){ return Str$0Instance.instance(Double.toString(val)); }
   @Override public Object imm$ieeeRemainder$1(Object p0){ return instance(Math.IEEEremainder(val,f(p0))); }
+  /* IEEE standard - note we don't have signalling NaN
+  pow (x, ±0) is 1 if x is not a signaling NaN
+  pow (±0, y) is ±∞ and signals the divideByZero exception for y an odd integer < 0
+  pow (±0, −∞) is +∞ with no exception
+  pow (±0, +∞) is +0 with no exception
+  pow (±0, y) is ±0 for finite y > 0 an odd integer
+  pow (−1, ±∞) is 1 with no exception
+  pow (+1, y) is 1 for any y (even a quiet NaN)
+  pow (x, +∞) is +0 for −1 < x < 1
+  pow (x, +∞) is +∞ for x < −1 or for 1 < x (including ±∞)
+  pow (x, −∞) is +∞ for −1 < x < 1
+  pow (x, −∞) is +0 for x < −1 or for 1 < x (including ±∞)
+  pow (+∞, y) is +0 for a number y < 0
+  pow (+∞, y) is +∞ for a number y > 0
+  pow (−∞, y) is −0 for finite y < 0 an odd integer
+  pow (−∞, y) is −∞ for finite y > 0 an odd integer
+  pow (−∞, y) is +0 for finite y < 0 and not an odd integer
+  pow (−∞, y) is +∞ for finite y > 0 and not an odd integer
+  pow (±0, y) is +∞ and signals the divideByZero exception for finite y < 0 and not an odd integer
+  pow(±0, y) is +0 for finite y > 0 and not an odd integer
+  pow(x, y) signals the invalid operation exception for finite x < 0 and finite non-integer y.
+   */
+  @Override public Object imm$ieeePow$1(Object p0){
+    double f = unwrap(p0);
+    if (f == 0.0) { return Float$0Instance.instance(1.0); }
+    // I think these are the only differences between ieee and Math
+    if (val == 1.0 || val == -1.0 && Double.isInfinite(f)) {
+      return Float$0Instance.instance(1.0);
+    }
+
+    return Float$0Instance.instance(Math.pow(val, f));
+  }
+  @Override public Object imm$ieeeEq$1(Object p0){
+    return bool(val == unwrap(p0));
+  }
+
 
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(cmpFearless(f(p0),f(p1)),p2); }
 }

@@ -12,24 +12,30 @@ FloatArithTests: Test {::
   }
 
 FloatRoundTests: Test {::
-  .check{+0.5.softRound .assertEq +0}
-  .check{+1.5.softRound .assertEq +2}
-  .check{+2.5.softRound .assertEq +2}
-  .check{(-0.5).softRound .assertEq +0}
-  .check{(-1.5).softRound .assertEq -2}
-  .check{(-2.5).softRound .assertEq -2}
-  .check{+1.5 - (+1.0 / +64.0).softRound .assertEq +1}
-  .check{+1.5 + (+1.0 / +64.0).softRound .assertEq +2}
-  .check{(-1.5) - (+1.0 / +64.0).softRound .assertEq -2}
-  .check{+1.5.softFloor .assertEq +1}
-  .check{+1.5.softCeil .assertEq +2}
-  .check{+1.5.softTrunc0 .assertEq +1}
-  .check{(-1.5).softFloor .assertEq -2}
-  .check{(-1.5).softCeil .assertEq -1}
-  .check{(-1.5).softTrunc0 .assertEq -1}
-  .check{Math.nan .softRound .assertEq +0}
-  .check{+1.0 / +0.0 .softRound .assertEq (Math.maxInt)}
-  .check{(-1.0) / +0.0 .softRound .assertEq (Math.minInt)}
+  .check{+0.5.softRoundTiesEven .assertEq +0.0}
+  .check{+1.5.softRoundTiesEven.assertEq +2.0}
+  .check{+2.5.softRoundTiesEven.assertEq +2.0}
+  .check{(-0.5).softRoundTiesEven.assertEq +0.0}
+  .check{(-1.5).softRoundTiesEven.assertEq -2.0}
+  .check{(-2.5).softRoundTiesEven.assertEq -2.0}
+  .check{+0.5.softRound .assertEq +1.0}
+  .check{+1.5.softRound.assertEq +2.0}
+  .check{+2.5.softRound.assertEq +3.0}
+  .check{(-0.5).softRound.assertEq -1.0}
+  .check{(-1.5).softRound.assertEq -2.0}
+  .check{(-2.5).softRound.assertEq -3.0}
+  .check{+1.5 - (+1.0 / +64.0).softRoundTiesEven.assertEq +1.0}
+  .check{+1.5 + (+1.0 / +64.0).softRoundTiesEven.assertEq +2.0}
+  .check{(-1.5) - (+1.0 / +64.0).softRoundTiesEven.assertEq -2.0}
+  .check{+1.5.softFloor .assertEq +1.0}
+  .check{+1.5.softCeil .assertEq +2.0}
+  .check{+1.5.softTrunc0 .assertEq +1.0}
+  .check{(-1.5).softFloor .assertEq -2.0}
+  .check{(-1.5).softCeil .assertEq -1.0}
+  .check{(-1.5).softTrunc0 .assertEq -1.0}
+  .check{Math.nan .softRoundTiesEven.assertEq(Math.nan)}
+  .check{+1.0 / +0.0 .softRoundTiesEven.softInt .assertEq (Math.maxInt)}
+  .check{(-1.0) / +0.0 .softRoundTiesEven.softInt .assertEq (Math.minInt)}
   }
 
 FloatPredTests: Test {::
@@ -91,10 +97,10 @@ FloatRangeCheckTests: Test {::
   .check{+3.0.assertInRange(+1.0~~ +5.0)}
   .check{+3.0.assertInRange(+1.0~~= +3.0)}
   .check{+3.0.assertInRange(+3.0=~~ +5.0)}
-  .check{+0.0.clamp(+1.0=~~= +5.0) .assertEq +1.0}
-  .check{+6.0.clamp(+1.0=~~= +5.0) .assertEq +5.0}
-  .check{+3.0.clamp(+1.0=~~= +5.0) .assertEq +3.0}
-  .check{+3.0.clamp(+3.0=~~= +3.0) .assertEq +3.0}
+  .check{+0.0.clampTo(+1.0=~~= +5.0) .assertEq +1.0}
+  .check{+6.0.clampTo(+1.0=~~= +5.0) .assertEq +5.0}
+  .check{+3.0.clampTo(+1.0=~~= +5.0) .assertEq +3.0}
+  .check{+3.0.clampTo(+3.0=~~= +3.0) .assertEq +3.0}
   }
 
 FloatLiteralFormsLargeTests: Test {::
@@ -115,7 +121,9 @@ FloatSignNumTests: Test {::
   }
 
 FloatRangeTests: Test {::
+  .check{1.0.pred  < 1.0.assertTrue}
   .check{+0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
+  .check{-0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
   .check{
     +0.0=~~= +1.0.flow +0.25 .list
       .assertEq({::}, Lists#(+0.0,+0.25,+0.5,+0.75,+1.0))}
@@ -145,6 +153,64 @@ FloatRangeTests: Test {::
   .check{Math.negInf ~~ +1.0 .void}
   }
 
+FloatIEEEPowTests: Test {::
+  .check{5.0 .ieeePow(0.0) .assertEq 1.0}
+  .check{5.0 .ieeePow(-0.0) .assertEq 1.0}
+  .check{(Math.nan) .ieeePow(0.0) .assertEq 1.0}
+
+  .check{0.0 .ieeePow(-3.0) .assertEq(Math.inf)}
+  .check{(-0.0) .ieeePow(-3.0) .assertEq(Math.negInf)}
+
+  .check{0.0 .ieeePow(Math.negInf) .assertEq(Math.inf)}
+  .check{(-0.0) .ieeePow(Math.negInf) .assertEq(Math.inf)}
+
+  .check{0.0 .ieeePow(Math.inf) .assertEq 0.0}
+  .check{(-0.0) .ieeePow(Math.inf) .isPosZero .assertTrue}
+
+  .check{0.0 .ieeePow(3.0) .assertEq 0.0}
+  .check{(-0.0) .ieeePow(3.0) .assertEq(-0.0)}
+
+  .check{(-1.0) .ieeePow(Math.inf) .assertEq 1.0}
+  .check{(-1.0) .ieeePow(Math.negInf) .assertEq 1.0}
+
+  .check{1.0 .ieeePow(5.0) .assertEq 1.0}
+  .check{1.0 .ieeePow(Math.nan) .assertEq 1.0}
+
+  .check{0.5 .ieeePow(Math.inf) .assertEq 0.0}
+  .check{(-0.5) .ieeePow(Math.inf) .assertEq 0.0}
+
+  .check{2.0 .ieeePow(Math.inf) .assertEq(Math.inf)}
+  .check{(-2.0) .ieeePow(Math.inf) .assertEq(Math.inf)}
+  .check{(Math.inf) .ieeePow(Math.inf) .assertEq(Math.inf)}
+  .check{(Math.negInf) .ieeePow(Math.inf) .assertEq(Math.inf)}
+
+  .check{0.5 .ieeePow(Math.negInf) .assertEq(Math.inf)}
+  .check{(-0.5) .ieeePow(Math.negInf) .assertEq(Math.inf)}
+
+  .check{2.0 .ieeePow(Math.negInf) .assertEq 0.0}
+  .check{(Math.inf) .ieeePow(Math.negInf) .assertEq 0.0}
+
+  .check{(Math.inf) .ieeePow(-3.0) .assertEq 0.0}
+
+  .check{(Math.inf) .ieeePow(3.0) .assertEq(Math.inf)}
+
+  .check{(Math.negInf) .ieeePow(-3.0) .assertEq(-0.0)}
+
+  .check{(Math.negInf) .ieeePow(3.0) .assertEq(Math.negInf)}
+
+  .check{(Math.negInf) .ieeePow(-4.0) .assertEq 0.0}
+
+  .check{(Math.negInf) .ieeePow(4.0) .assertEq(Math.inf)}
+
+  .check{0.0 .ieeePow(-4.0) .assertEq(Math.inf)}
+  .check{(-0.0) .ieeePow(-4.0) .assertEq(Math.inf)}
+
+  .check{0.0 .ieeePow(4.0) .assertEq 0.0}
+  .check{(-0.0) .ieeePow(4.0) .assertEq 0.0}
+
+  .check{(-2.0) .ieeePow(0.5) .isNaN .assertTrue}
+  }
+
 TestFloat: Test {::
   .test FloatArithTests
   .test FloatRoundTests
@@ -155,4 +221,5 @@ TestFloat: Test {::
   .test FloatRangeTests
   .test FloatLiteralFormsLargeTests
   .test FloatSignNumTests
+  .test FloatIEEEPowTests
   }

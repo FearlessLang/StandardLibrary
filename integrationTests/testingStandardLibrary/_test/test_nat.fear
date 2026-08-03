@@ -58,10 +58,10 @@ NatRangeChecksTests: Test {::
   .check{3.assertInRange(1~~5)}
   .check{3.assertInRange(1~~=3)}
   .check{3.assertInRange(3=~~5)}
-  .check{0.clamp(1=~~=5) .assertEq 1}
-  .check{6.clamp(1=~~=5) .assertEq 5}
-  .check{3.clamp(1=~~=5) .assertEq 3}
-  .check{3.clamp(3=~~=3) .assertEq 3}
+  .check{0.clampTo(1=~~=5) .assertEq 1}
+  .check{6.clampTo(1=~~=5) .assertEq 5}
+  .check{3.clampTo(1=~~=5) .assertEq 3}
+  .check{3.clampTo(3=~~=3) .assertEq 3}
   }
 
 NatLiteralFormsTests: Test {::

@@ -177,6 +177,18 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
     var q= n.divide(denominator);
     var r= n.remainder(denominator);
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
+    if (c >= 0 ){ q= q.add(one); } // tie -> bump if odd
+    if (numerator.signum() < 0){ q= q.negate(); }
+    return instance(q,one);
+  }
+
+  @Override public Object imm$roundTiesEven$0(){
+    if (numerator.signum() == 0){ return this; }
+    var n= numerator.abs();
+    var q= n.divide(denominator); //
+
+    var r= n.remainder(denominator);
+    int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
     if (c > 0 || (c == 0 && q.testBit(0))){ q= q.add(one); } // tie -> bump if odd
     if (numerator.signum() < 0){ q= q.negate(); }
     return instance(q,one);
@@ -310,6 +322,8 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
   @Override public Object imm$softFloat$0(){
     return Float$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
   }
+
+
 
   String asString() {
     String sn= (numerator.signum() < 0 ? "" : "+")+ numerator;

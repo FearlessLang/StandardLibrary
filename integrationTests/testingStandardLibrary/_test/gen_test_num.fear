@@ -1,0 +1,175 @@
+Num0Imm0Plus1Test: Test {::
+    .check{2/3 + (3/2) .assertEq(13/6)}
+  }
+
+Num0Imm0Dash1Test: Test {::
+    .check{5/1 - (3/1) .assertEq(2/1)}
+  }
+
+Num0Imm0Star1Test: Test {::
+    .check{2/3 * (3/7) .assertEq(6/21)}
+  }
+
+Num0Imm0Slash1Test: Test {::
+    .check{2 / 6 / (4/3) .assertEq((2*3) / (6*4))}
+    .checkDetErr({_ -> True}, {1 / 0})
+  }
+
+Num0Imm0StarStar1Test: Test {::
+    .check{(2/4 ** +3) .assertEq(8 / 64)}
+    .check{(2/1 ** -1) .assertEq(1 / 2)}
+  }
+
+Num0Imm0Abs0Test: Test {::
+    .check{3/1 .abs .assertEq(3/1)}
+    .check{-3/4 .abs .assertEq(3/4)}
+  }
+
+Num0Imm0AbsNeg0Test: Test {::
+    .check{3/1 .absNeg .assertEq(-3/1)}
+    .check{-3/4 .absNeg .assertEq(-3/4)}
+  }
+
+Num0Imm0Sign0Test: Test {::
+    .check{5/1 .sign .assertEq(1/1)}
+    .check{(-5/1) .sign .assertEq(-1/1)}
+    .check{0/1 .sign .assertEq(0/1)}
+  }
+
+Num0Imm0Floor0Test: Test {::
+    .check{(7 / 2) .floor .assertEq(3/1)}
+    .check{(-7 / 2) .floor .assertEq(-4/1)}
+  }
+
+Num0Imm0Ceil0Test: Test {::
+    .check{(7 / 2) .ceil .assertEq(4/1)}
+    .check{((-7) / 2) .ceil .assertEq(-3/1)}
+  }
+
+Num0Imm0Trunc00Test: Test {::
+    .check{(7 / 2) .trunc0 .assertEq(3/1)}
+    .check{((-7) / 2) .trunc0 .assertEq(-3/1)}
+  }
+
+Num0Imm0Round0Test: Test {::
+    .check{(5 / 2) .round .assertEq(3/1)}
+    .check{((-5) / 2) .round .assertEq(-3/1)}
+  }
+
+Num0Imm0RoundTiesEven0Test: Test {::
+    .check{(5 / 2) .roundTiesEven .assertEq(2/1)}
+    .check{(7 / 2) .roundTiesEven .assertEq(4/1)}
+  }
+
+Num0Imm0IsInteger0Test: Test {::
+    .check{5/1 .isInteger .assertTrue}
+    .check{1 / 2 .isInteger .assertFalse}
+  }
+
+Num0Imm0Int0Test: Test {::
+    .check{5 .int .assertEq({::}, Opts# +5)}
+    .check{1 / 2 .int .assertEmpty}
+  }
+
+Num0Imm0Nat0Test: Test {::
+    .check{5/1 .nat .assertEq({::}, Opts# 5)}
+    .check{-5/1 .nat .assertEmpty}
+  }
+
+Num0Imm0Byte0Test: Test {::
+    .check{5/1 .byte .assertEq({::}, Opts# (5.getByte))}
+    .check{300/1 .byte .assertEmpty}
+  }
+
+Num0Imm0Float0Test: Test {::
+    .check{5/1 .float .assertEq({::}, Opts# 5.0)}
+    .check{(1 / 3) .float .assertEmpty}
+  }
+
+Num0Imm0GetInt0Test: Test {::
+    .check{5/1 .getInt .assertEq +5}
+    .checkDetErr({_ -> True}, {(1 / 2) .getInt})
+  }
+
+Num0Imm0GetNat0Test: Test {::
+    .check{5/1 .getNat .assertEq 5}
+    .checkDetErr({_ -> True}, {(-5) .getNat})
+  }
+
+Num0Imm0GetByte0Test: Test {::
+    .check{5/1 .getByte .assertEq(5.getByte)}
+    .checkDetErr({_ -> True}, {300 .getByte})
+  }
+
+Num0Imm0GetFloat0Test: Test {::
+    .check{5/1 .getFloat .assertEq 5.0}
+    .checkDetErr({_ -> True}, {(1 / 3) .getFloat})
+  }
+
+Num0Imm0SoftInt0Test: Test {::
+    .check{7 / 2 .softInt .assertEq +3}
+  }
+
+Num0Imm0SoftNat0Test: Test {::
+    .check{7 / 2 .softNat .assertEq 3}
+    .check{-5/1 .softNat .assertEq 0}
+  }
+
+Num0Imm0SoftByte0Test: Test {::
+    .check{7 / 2 .softByte .assertEq(3.getByte)}
+  }
+
+Num0Imm0SoftFloat0Test: Test {::
+    .check{1 / 3 .softFloat .assertEq +0.33333299999999999041477849459624849259853363037109375}
+  }
+
+Num0Imm0InRange1Test: Test {::
+    .check{2 .inRange(1=~~=4) .assertTrue}
+    .check{5 .inRange(1=~~=4) .assertFalse}
+  }
+
+Num0Imm0AssertInRange1Test: Test {::
+    .check{2 .assertInRange(1=~~=4)}
+  }
+
+Num0Imm0AssertInRange2Test: Test {::
+    .check{2 .assertInRange(1=~~=4, {`custom context`})}
+  }
+
+Num0Imm0ClampTo1Test: Test {::
+    .check{0/1 .clampTo(1/1=~~=(4/1)) .assertEq(1/1)}
+    .check{9/1 .clampTo(1/1=~~=(4/1)) .assertEq(4/1)}
+  }
+
+Num0ImmTests: Test {::
+  .test Num0Imm0Plus1Test
+  .test Num0Imm0Dash1Test
+  .test Num0Imm0Star1Test
+  .test Num0Imm0Slash1Test
+  .test Num0Imm0StarStar1Test
+  .test Num0Imm0Abs0Test
+  .test Num0Imm0AbsNeg0Test
+  .test Num0Imm0Sign0Test
+  .test Num0Imm0Floor0Test
+  .test Num0Imm0Ceil0Test
+  .test Num0Imm0Trunc00Test
+  .test Num0Imm0Round0Test
+  .test Num0Imm0RoundTiesEven0Test
+  .test Num0Imm0IsInteger0Test
+  .test Num0Imm0Int0Test
+  .test Num0Imm0Nat0Test
+  .test Num0Imm0Byte0Test
+  .test Num0Imm0Float0Test
+  .test Num0Imm0GetInt0Test
+  .test Num0Imm0GetNat0Test
+  .test Num0Imm0GetByte0Test
+  .test Num0Imm0GetFloat0Test
+  .test Num0Imm0SoftInt0Test
+  .test Num0Imm0SoftNat0Test
+  .test Num0Imm0SoftByte0Test
+  .test Num0Imm0SoftFloat0Test
+  .test Num0Imm0InRange1Test
+  .test Num0Imm0AssertInRange1Test
+  .test Num0Imm0AssertInRange2Test
+  .test Num0Imm0ClampTo1Test
+  }

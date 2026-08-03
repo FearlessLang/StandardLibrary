@@ -5,6 +5,8 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .close->this; .close->::;
   .size->0;
   .isEmpty->True;
+
+  /// Only assert if the method is .assertXXX
   .get(i)->Error.msg `.get called on empty list`;
   .opt(i)->{};
 

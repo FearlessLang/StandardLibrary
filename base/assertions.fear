@@ -1,5 +1,4 @@
 LazyInfo: F[read ToInfo] {}
-MutLazyInfo: MF[read ToInfo] {}
 
 Assert: Sealed {
   !(assertion: Bool): Void -> this!(assertion,{``}, { Void });
