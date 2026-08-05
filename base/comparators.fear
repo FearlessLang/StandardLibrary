@@ -38,16 +38,9 @@ Order[T]: {
   read >   (other: read T): Bool -> this.cmp(this.close, other,{.lt ->False;.eq ->False; .gt -> True});
   read !=  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->True;.eq ->False; .gt -> True});
 
-  read .inRange(lo: read T, hi: read T): Bool-> Block#(Assert!(_LE#(this,lo,hi)), this >= lo  &&{ this <= hi });        /// true iff this in [lo,hi]; throws if lo>hi. For Float also throws if lo/hi are NaN
-  read .inRangeOpen(lo: read T, hi: read T): Bool-> Block#(Assert!(_LE#(this,lo,hi)), this > lo  &&{ this < hi });      /// true iff this in (lo,hi); throws if lo>hi. For Float also throws if lo/hi are NaN
-  read .inRangeLoOpen(lo: read T, hi: read T): Bool-> Block#(Assert!(_LE#(this,lo,hi)), this > lo  &&{ this <= hi });   /// true iff this in (lo,hi]; throws if lo>hi. For Float also throws if lo/hi are NaN
-  read .inRangeHiOpen(lo: read T, hi: read T): Bool-> Block#(Assert!(_LE#(this,lo,hi)), this >= lo  &&{ this < hi });   /// true iff this in [lo,hi); throws if lo>hi. For Float also throws if lo/hi are NaN
-
   read <=>[R:**](other: read Order[T], m: mut OrderMatch[R]): R ->  /// compare two closed Orders
     this.cmp(this.close, other.close, m);
   }
-
-_LE: { #[T](o: read Order[T], a: read T, b: read T): Bool -> o.cmp(a,b,{ .lt->True; .eq->True; .gt->False }) }
 
 
 OrderBy[T,K]: {                       /// order values of T by a component/key K
@@ -84,8 +77,8 @@ OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr. 
   read .assertEq(expected: read T, msg: read LazyInfo): Void ->
     Assert.expectedActual(this == expected, msg,(this.close expected), this);
 
-  read .assertNe(expected: read T): Void -> this.assertNe(expected,{``});
-  read .assertNe(expected: read T, msg: read LazyInfo): Void -> Assert!(
+  read .assertNotEq(expected: read T): Void -> this.assertNotEq(expected,{``});
+  read .assertNotEq(expected: read T, msg: read LazyInfo): Void -> Assert!(
     this != expected,
     { msg#.info + (`Unexpected equality between` | `Expected: `+(this.close(expected)) | `Actual: `+this .info) });
 
@@ -108,42 +101,6 @@ OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr. 
   read .assertGe(x: read T, msg: read LazyInfo): Void -> Assert!(
     this >= x,
     { msg#.info + ( `Expected: `+this | ` >= `+(this.close(x)) .info) });
-        
-  read .assertInRange(lo: read T, hi: read T): Void -> this.assertInRange(lo,hi,{``});
-  read .assertInRange(lo: read T, hi: read T, msg: read LazyInfo): Void -> Assert!(
-    this.inRange(lo,hi),
-    { msg#.info + ( `Expected in [lo,hi]`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this 
-      .info) });
-  
-  read .assertInRangeOpen(lo: read T, hi: read T): Void -> this.assertInRangeOpen(lo,hi,{``});
-  read .assertInRangeOpen(lo: read T, hi: read T, msg: read LazyInfo): Void -> Assert!(
-    this.inRangeOpen(lo,hi),
-    { msg#.info + (`Expected in (lo,hi)`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this 
-      .info) });
-      
-  read .assertInRangeLoOpen(lo: read T, hi: read T): Void -> this.assertInRangeLoOpen(lo,hi,{``});
-  read .assertInRangeLoOpen(lo: read T, hi: read T, msg: read LazyInfo): Void -> Assert!(
-    this.inRangeLoOpen(lo,hi),
-    { msg#.info + (`Expected in (lo,hi]`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this 
-      .info) });
-      
-  read .assertInRangeHiOpen(lo: read T, hi: read T): Void -> this.assertInRangeHiOpen(lo,hi,{``});
-  read .assertInRangeHiOpen(lo: read T, hi: read T, msg: read LazyInfo): Void -> Assert!(
-    this.inRangeHiOpen(lo,hi),
-    { msg#.info + (`Expected in [lo,hi)`
-      | `lo: `+(this.close(lo))
-      | `hi: `+(this.close(hi))
-      | `actual: `+this 
-      .info)});
   }
 
 OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashable+printable
@@ -160,8 +117,8 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
   read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertEq(expected);
   read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertEq(expected,msg);
 
-  read .assertNe[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertNe(expected);
-  read .assertNe[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertNe(expected,msg);
+  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertNotEq(expected);
+  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertNotEq(expected,msg);
 
   read .assertLt[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertLt(x);
   read .assertLt[K](by: OrderHashBy[imm E,K], x: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertLt(x,msg);
@@ -174,18 +131,6 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
 
   read .assertGe[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertGe(x);
   read .assertGe[K](by: OrderHashBy[imm E,K], x: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertGe(x,msg);
-
-  read .assertInRange[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRange(lo,hi);
-  read .assertInRange[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertInRange(lo,hi,msg);
-
-  read .assertInRangeOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRangeOpen(lo,hi);
-  read .assertInRangeOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertInRangeOpen(lo,hi,msg);
-      
-  read .assertInRangeLoOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRangeLoOpen(lo,hi);
-  read .assertInRangeLoOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertInRangeLoOpen(lo,hi,msg);
-     
-  read .assertInRangeHiOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T): Void -> this.orderHash(by).assertInRangeHiOpen(lo,hi);
-  read .assertInRangeHiOpen[K](by: OrderHashBy[imm E,K], lo: read T, hi: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertInRangeHiOpen(lo,hi,msg);  
   }
 
 OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-value printing of T

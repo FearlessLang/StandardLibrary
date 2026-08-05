@@ -18,6 +18,14 @@ Bool: Sealed,DataType[Bool,Bool] {
 
   .match[R:**](m: mut BoolMatch[R]): R -> this?{.then->m.true; .else->m.false};
 
+  /// `this.toOpt(f)` returns `.some f#` if `this == True` otherwise `.empty`.
+  /// Note: this name is unstable, other names could be:
+  ///   - `.ifTrue`, but reads like a thing that takes a void
+  ///   - `.then`, simpler but less expressive
+  ///   - `.toOpt`, simple but doesn't describe how it converts it
+  ///   - `.thenSome`, `trueToSome`, `mapTrue` ...
+  .toOpt[R:*](mut MF[R]): mut Opt[R];
+
   .close -> this; .close -> ::;
 
   .cmp a, b, m -> a.imm?{
@@ -32,6 +40,8 @@ Bool: Sealed,DataType[Bool,Bool] {
   .info -> Infos.msg(this.str);
   .assertTrue: Void -> this.assertEq True;
   .assertFalse: Void -> this.assertEq False;
+  .assertTrue(msg: read LazyInfo): Void -> this.assertEq(True, msg);
+  .assertFalse(msg: read LazyInfo): Void -> this.assertEq(False, msg);
   }
 
 True: Bool {
@@ -41,6 +51,7 @@ True: Bool {
   || b -> this;
   .not -> False;
   .if f -> f.then;
+  .toOpt f -> Opts#(f#);
   .imm -> True;
   }
 
@@ -51,5 +62,6 @@ False: Bool {
   || b -> b#;
   .not -> True;
   .if f -> f.else;
+  .toOpt _ -> {};
   .imm -> False;
   }

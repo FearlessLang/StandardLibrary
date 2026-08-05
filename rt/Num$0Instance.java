@@ -1,6 +1,7 @@
 package base;
 
 import static base.Util.*;
+
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
@@ -22,7 +23,7 @@ class NumCache {
       return new Num$0Instance(BigInteger.valueOf(i), BigInteger.ONE);
     }
     // shift the index so that min is 0
-    int index = (int) (i - min);
+    int index = (i - min);
     return intCache[index];
   }
 
@@ -58,12 +59,12 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
   private static final BigInteger zero= BigInteger.ZERO;
   private static final BigInteger minInt= BigInteger.valueOf(Integer.MIN_VALUE);
   private static final BigInteger maxInt= BigInteger.valueOf(Integer.MAX_VALUE);
-  private static final BigInteger maxNat= one.shiftLeft(32).subtract(one);
+  private static final BigInteger maxNat= one.shiftLeft(64).subtract(one);
   private static final BigInteger maxByte= BigInteger.valueOf(255);
 
   private static Num$0Instance num(Object o){ return (Num$0Instance)o; }
 
-  private static int cmp(Num$0Instance a, Num$0Instance b){
+  static int cmp(Num$0Instance a, Num$0Instance b){
     return a.numerator.multiply(b.denominator).compareTo(b.numerator.multiply(a.denominator));
   }
   private static boolean lt(Num$0Instance a, Num$0Instance b){ return cmp(a,b) < 0; }
@@ -162,7 +163,6 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
     return instance(numerator.multiply(o.denominator), denominator.multiply(o.numerator));
   }
   @Override public Object imm$abs$0(){ return numerator.signum() < 0 ? instance(numerator.negate(), denominator) : this; }
-  @Override public Object imm$sqrt$0(){ return Float$0Instance.instance(Math.sqrt(numerator.doubleValue() / denominator.doubleValue())); }
   @Override public Object imm$floor$0(){ return instance(floorZ(numerator, denominator), one); }
   @Override public Object imm$ceil$0(){ return instance(ceilZ(numerator, denominator), one); }
   @Override public Object imm$trunc0$0(){ return instance(trunc0Z(numerator, denominator), one); }
@@ -177,54 +177,165 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
     var q= n.divide(denominator);
     var r= n.remainder(denominator);
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
+    if (c >= 0 ){ q= q.add(one); } // tie -> bump if odd
+    if (numerator.signum() < 0){ q= q.negate(); }
+    return instance(q,one);
+  }
+
+  @Override public Object imm$roundTiesEven$0(){
+    if (numerator.signum() == 0){ return this; }
+    var n= numerator.abs();
+    var q= n.divide(denominator); //
+
+    var r= n.remainder(denominator);
+    int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
     if (c > 0 || (c == 0 && q.testBit(0))){ q= q.add(one); } // tie -> bump if odd
     if (numerator.signum() < 0){ q= q.negate(); }
     return instance(q,one);
   }
-  @Override public Object imm$isInteger$0(){ return bool(denominator.equals(one)); }
-  @Override public Object imm$int$0(){
+
+  public boolean isRepresentableAsDouble() {
+    // relies on the assumption that all Num's that are numerically equal are the same fraction
+    // i.e. Num(1, 2).equals(Num(2, 4));
+    return Float$0Instance.numExactFinite(
+            numerator.doubleValue() / denominator.doubleValue()
+    ).equals(this);
+  }
+  public boolean isInteger() {
+    return this.denominator.equals(one);
+  }
+  @Override public Object imm$isInteger$0(){ return bool(this.isInteger()); }
+
+   @Override public Object imm$int$0() {
+    if (!this.isInteger()) {
+      return optEmpty();
+    }
+    if (this.numerator.compareTo(maxInt) > 0 || this.numerator.compareTo(minInt) < 0) {
+      return optEmpty();
+    }
+
+    return optSome(Int$0Instance.instance(this.numerator.longValue()));
+  }
+
+
+  @Override public Object imm$nat$0() {
+    if (!this.isInteger() || this.numerator.compareTo(maxNat) > 0 || this.numerator.compareTo(zero) < 0) {
+      return optEmpty();
+    }
+    // correct handles unsigned integer apparently
+    return optSome(Nat$0Instance.instance(this.numerator.longValue()));
+  }
+
+
+
+  @Override public Object imm$byte$0() {
+    if (!this.isInteger() || this.numerator.compareTo(maxByte) > 0 || this.numerator.compareTo(zero) < 0) {
+      return optEmpty();
+    }
+    return optSome(Byte$0Instance.instance(this.numerator.byteValue()));
+  }
+
+
+  @Override public Object imm$float$0(){
+    if (!isRepresentableAsDouble()) {
+      return optEmpty();
+    }
+    return optSome(Float$0Instance.instance(
+            numerator.doubleValue() / denominator.doubleValue()
+    ));
+  }
+
+  @Override public Object imm$getInt$0() {
+    if (!this.isInteger()) {
+      throw err(
+              "Num.getInt: cannot convert Num "
+                      + this.asString()
+                      + " to Int as the denominator is not 1"
+      );
+    }
+    if (this.numerator.compareTo(maxInt) > 0 || this.numerator.compareTo(minInt) < 0) {
+      throw err("Num.getInt: cannot convert Num "
+              + this.asString()
+              + " to Int as the numerator is too large to be represented."
+      );
+    }
+
+    return Int$0Instance.instance(this.numerator.longValue());
+  }
+
+
+  @Override public Object imm$getNat$0() {
+    if (!this.isInteger()) {
+      throw err(
+              "Num.getInt: cannot convert Num "
+                      + this.asString()
+                      + " to Nat as the denominator is not 1"
+      );
+    }
+    if (this.numerator.compareTo(maxNat) > 0 || this.numerator.compareTo(zero) < 0) {
+      throw err("Nat.getInt: cannot convert Num"
+              + this.asString()
+              + " to Nat as the numerator is too large to be represented."
+      );
+    }
+    return Nat$0Instance.instance(this.numerator.longValue());
+  }
+
+
+  @Override public Object imm$getByte$0() {
+    if (!this.isInteger()) {
+      throw err(
+              "Num.getInt: cannot convert Num "
+                      + this.asString()
+                      + " to Byte as the denominator is not 1"
+      );
+    }
+    if (this.numerator.compareTo(maxByte) > 0 || this.numerator.compareTo(zero) < 0) {
+      throw err("Nat.getInt: cannot convert Num"
+              + this.asString()
+              + " to Byte as the numerator is too large to be represented."
+      );
+    }
+    return Byte$0Instance.instance(this.numerator.byteValue());
+  }
+
+
+  @Override public Object imm$getFloat$0(){
+    if (!isRepresentableAsDouble()) {
+      throw err(read$str$0()+" is not exactly representable as a Float");
+    }
+    return Float$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
+  }
+
+  @Override public Object imm$softInt$0(){
     var z= trunc0Z(numerator, denominator);
     return Int$0Instance.instance(clampIntZ(z));
   }
-  @Override public Object imm$nat$0(){
+  @Override public Object imm$softNat$0(){
     var z= trunc0Z(numerator, denominator);
     return Nat$0Instance.instance(clampNatBitsZ(z));
   }
-  @Override public Object imm$byte$0(){
+  @Override public Object imm$softByte$0(){
     var z= trunc0Z(numerator, denominator);
     return Byte$0Instance.instance(clampByteBitsZ(z));
   }
-  @Override public Object imm$float$0(){
+  @Override public Object imm$softFloat$0(){
     return Float$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
   }
-  @Override public Object imm$intExact$0(){
-    if (!denominator.equals(one)){ return optEmpty(); }
-    if (numerator.compareTo(minInt) < 0 || numerator.compareTo(maxInt) > 0){ return optEmpty(); }
-    return optSome(Int$0Instance.instance(numerator.intValue()));
-  }
-  @Override public Object imm$natExact$0(){
-    if (!denominator.equals(one)){ return optEmpty(); }
-    if (numerator.signum() < 0 || numerator.compareTo(maxNat) > 0){ return optEmpty(); }
-    return optSome(Nat$0Instance.instance((int) numerator.longValue()));
-  }
-  @Override public Object imm$byteExact$0(){
-    if (!denominator.equals(one)){ return optEmpty(); }
-    if (numerator.signum() < 0 || numerator.compareTo(maxByte) > 0){ return optEmpty(); }
-    return optSome(Byte$0Instance.instance((byte) numerator.intValue()));
-  }
-  @Override public Object read$str$0(){
+
+
+
+  String asString() {
     String sn= (numerator.signum() < 0 ? "" : "+")+ numerator;
-    return Str$0Instance.instance(sn+"/"+ denominator);
+    return sn+"/"+ denominator;
+  }
+
+  @Override public Object read$str$0(){
+    return Str$0Instance.instance(this.asString());
   }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$clamp$2(Object p0, Object p1){
-    var lo= num(p0); var hi= num(p1);
-    if (lt(hi,lo)){ throw err("Num.clamp: lo>hi"); }
-    if (lt(this,lo)){ return lo; }
-    if (lt(hi,this)){ return hi; }
-    return this;
-  }
+
   @Override public Object imm$eqDelta$2(Object p0, Object p1){
     var exp= num(p0);
     var d= num(p1);

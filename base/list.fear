@@ -5,13 +5,15 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .close->this; .close->::;
   .size->0;
   .isEmpty->True;
-  .get(i)->Assert.msg `.get called on empty list`;
+
+  /// Only assert if the method is .assertXXX
+  .get(i)->Error.msg `.get called on empty list`;
   .opt(i)->{};
 
-  .first->Assert.msg `.first called on empty list`;
-  .last->Assert.msg `.last called on empty list`;
-  .firstOpt->{};
-  .lastOpt->{};
+  .getFirst->Error.msg `.first called on empty list`;
+  .getLast->Error.msg `.last called on empty list`;
+  .first->{};
+  .last->{};
 
   ++(xs)->xs;
 
@@ -21,20 +23,21 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   mut  +> e->Lists#(e);
   read +> e->Lists.singletonRead[E](e);
   
-  .subList(start,end)->Block#(
-    Assert!(start==0 && {end==0},{`.subList(`+start+`, `+end+`) called on empty list`}),
-    {});
+  .subList(start,end) -> Block#
+    .if{start!=0 && {end!=0}} .error{`.subList(`+start+`, `+end+`) called on empty list`}
+    .return {{}};
+
   .subList(start)->this.subList(start,this.size);
 
-  .with(i,e)->Assert.msg `.with called on empty list`;
-  mut .withAlso(i,e)->Block#(
-    Assert!(i==0,{`.withAlso(`+i+`, _) called on empty list`}),
-    Lists#e);
-  read .withAlso(i,e)->Block#(
-    Assert!(i==0,{`.withAlso(`+i+`, _) called on empty list`}),
-    Lists.singletonRead[E]e);
+  .with(i,e)->Error.msg `.with called on empty list`;
+  mut .withAlso(i,e)->Block#
+    .if {i!=0} .error{`.withAlso(`+i+`, _) called on empty list`}
+    .return{Lists#e};
+  read .withAlso(i,e)->Block#
+    .if {i!=0} .error{`.withAlso(`+i+`, _) called on empty list`}
+    .return{Lists.singletonRead[E]e};
 
-  .without(i)->Assert.msg `.without called on empty list`;
+  .without(i)->Error.msg `.without called on empty list`;
 
   .reverse->{};
 
@@ -86,19 +89,19 @@ _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E] {
   read .opt(i: Nat): mut Opt[read/imm E];    /// .some(get(i)) if i < size; .empty otherwise
   imm  .opt(i: Nat): mut Opt[imm E];         /// .some(get(i)) if i < size; .empty otherwise
 
-  mut  .first: E;                            /// get(0); throws iff empty
-  read .first: read/imm E;                   /// get(0); throws iff empty
+  mut  .getFirst: E;                            /// get(0); throws iff empty
+  read .getFirst: read/imm E;                   /// get(0); throws iff empty
 
-  mut  .last: E;                             /// get(size-1); throws iff empty
-  read .last: read/imm E;                    /// get(size-1); throws iff empty
+  mut  .getLast: E;                             /// get(size-1); throws iff empty
+  read .getLast: read/imm E;                    /// get(size-1); throws iff empty
 
-  mut  .firstOpt: mut Opt[E];                /// .some(first) if non-empty; .empty otherwise
-  read .firstOpt: mut Opt[read/imm E];       /// .some(first) if non-empty; .empty otherwise
-  imm  .firstOpt: mut Opt[imm E];            /// .some(first) if non-empty; .empty otherwise
+  mut  .first: mut Opt[E];                /// .some(first) if non-empty; .empty otherwise
+  read .first: mut Opt[read/imm E];       /// .some(first) if non-empty; .empty otherwise
+  imm  .first: mut Opt[imm E];            /// .some(first) if non-empty; .empty otherwise
 
-  mut  .lastOpt: mut Opt[E];                 /// .some(last) if non-empty; .empty otherwise
-  read .lastOpt: mut Opt[read/imm E];        /// .some(last) if non-empty; .empty otherwise
-  imm  .lastOpt: mut Opt[imm E];             /// .some(last) if non-empty; .empty otherwise
+  mut  .last: mut Opt[E];                 /// .some(last) if non-empty; .empty otherwise
+  read .last: mut Opt[read/imm E];        /// .some(last) if non-empty; .empty otherwise
+  imm  .last: mut Opt[imm E];             /// .some(last) if non-empty; .empty otherwise
 
   mut  ++ (xs: mut List[E]): mut List[E];    /// concat: this followed by xs
   read ++ (xs: read List[E]): read List[E];  /// concat: this followed by xs

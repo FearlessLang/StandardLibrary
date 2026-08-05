@@ -7,37 +7,37 @@
 ///The methods ^ and | can be used to obtain a string including new lines or backticks (`).
 
 /// Relations of parsers and printers.
-/// Methods .intExact/.floatExact/.numExact/.byteExact below accept exactly the numeric type names
+/// Methods .getInt/.getFloat/.getNum/.getByte below accept exactly the numeric type names
 /// accepted by the Fearless syntax, including the allowed `_` as for the Fearless syntax.
 /// They *do not* evaluate expressions.
 /// Str.escape, Float.str and Float.ieeeStr  instead output Fearless code when there is no literal represing the value.
 ///
-/// Str.intExact:
-/// - rejected: `12`.intExact  `+1_`.intExact  `+_1`.intExact
-//  - accepted: `+12`.intExact, `+1_000`.intExact  `+0__10`.intExact  `+01__0`.intExact `+1__0`.intExact `+00`.intExact `-00`.intExact `-001`.intExact `+001`.intExact
-/// - canonicalization: `+00_12`.intExact.str ==`+12`
+/// Str.getInt:
+/// - rejected: `12`.getInt  `+1_`.getInt  `+_1`.getInt
+//  - accepted: `+12`.getInt, `+1_000`.getInt  `+0__10`.getInt  `+01__0`.getInt `+1__0`.getInt `+00`.getInt `-00`.getInt `-001`.getInt `+001`.getInt
+/// - canonicalization: `+00_12`.getInt.str ==`+12`
 ///
-/// Str.natExact:
-/// - rejected: `+12`.natExact  `-1`.natExact  `1_`.natExact  `_1`.natExact    `4_294_967_296`.natExact (range)
-/// - accepted: `0`.natExact  `00`.natExact  `0__10`.natExact  `4_294_967_295`.natExact
+/// Str.getNat:
+/// - rejected: `+12`.getNat  `-1`.getNat  `1_`.getNat  `_1`.getNat    `4_294_967_296`.getNat (range)
+/// - accepted: `0`.getNat  `00`.getNat  `0__10`.getNat  `4_294_967_295`.getNat
 /// - canonicalization: `000_255`.nat.str ==`255`  and `4_294_967_295`.nat.str==`4294967295`
 ///
-/// Str.byteExact:
-/// - rejected: `+12`.byteExact  `-1`.byteExact  `1_`.byteExact  `_1`.byteExact  `256`.byteExact
-/// - accepted: `0`.byteExact  `00`.byteExact  `0__10`.byteExact  `255`.byteExact  `000_255`.byteExact
-/// - canonicalization: `000_255`.byteExact.str==`255`
+/// Str.getByte:
+/// - rejected: `+12`.getByte  `-1`.getByte  `1_`.getByte  `_1`.getByte  `256`.getByte
+/// - accepted: `0`.getByte  `00`.getByte  `0__10`.getByte  `255`.getByte  `000_255`.getByte
+/// - canonicalization: `000_255`.getByte.str==`255`
 ///
-/// Str.numExact:
-/// - rejected: `12`.numExact  `+12`.numExact  `+1/`.numExact  `+1./2`.numExact  `+1/_2`.numExact  `+1/0`.numExact  `+1.0/0.0`.numExact
-/// - accepted: `+12/1`.numExact  `-00_12/000_3`.numExact  `+12.4/3.2`.numExact  `+0/1`.numExact  `-0/1`.numExact
-/// - canonicalization: `+12.4/3.2`.numExact!.str==`+31/8`  `+12/2`.numExact!.str==`+6/1`
+/// Str.getNum:
+/// - rejected: `12`.getNum  `+12`.getNum  `+1/`.getNum  `+1./2`.getNum  `+1/_2`.getNum  `+1/0`.getNum  `+1.0/0.0`.getNum
+/// - accepted: `+12/1`.getNum  `-00_12/000_3`.getNum  `+12.4/3.2`.getNum  `+0/1`.getNum  `-0/1`.getNum
+/// - canonicalization: `+12.4/3.2`.getNum!.str==`+31/8`  `+12/2`.getNum!.str==`+6/1`
 ///
-/// Str.floatExact (IEEE 754 binary 64):
-/// - rejected (syntax): `1.0`.floatExact  `+1`.floatExact  `+1.`.floatExact  `+.1`.floatExact  `+1e0`.floatExact
-/// - rejected (value): `+NaN`.floatExact  `+Infinity`.floatExact  `-Infinity`.floatExact  `+0.1`.floatExact
+/// Str.getFloat (IEEE 754 binary 64):
+/// - rejected (syntax): `1.0`.getFloat  `+1`.getFloat  `+1.`.getFloat  `+.1`.getFloat  `+1e0`.getFloat
+/// - rejected (value): `+NaN`.getFloat  `+Infinity`.getFloat  `-Infinity`.getFloat  `+0.1`.getFloat
 /// - Float value 0.1 (and many others) do not exist; so it is rejected.
-/// - accepted: `+0.5`.floatExact  `+1.25`.floatExact  `+01__0.00__1`.floatExact  `+1.0e-3`.floatExact
-/// - canonicalization: `-0.0`.floatExact.str==`+0.0`
+/// - accepted: `+0.5`.getFloat  `+1.25`.getFloat  `+01__0.00__1`.getFloat  `+1.0e-3`.getFloat
+/// - canonicalization: `-0.0`.getFloat.str==`+0.0`
 ///
 /// Str.ieeeFloat:
 /// - rejected: `duck`.ieeeFloat
@@ -51,8 +51,8 @@
 ///   it choses to print a near value that has a compact representation instead of the actual content of the float
 ///   Another example: `0.100000000000000005`.ieeeFloat!.ieeeStr == `0.1`
 ///   But, `0.100000000000000005` is closer to the actual representable Float value. That is,
-///   `+0.1`.ieeeFloat!.numExact!.inRange(+0.100000000000000005/1, +2/1) holds
-///   `+0.1`.ieeeFloat!.numExact!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
+///   `+0.1`.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
+///   `+0.1`.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
 Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
@@ -68,13 +68,25 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
   .sub(from: Nat, to: Nat): Str;    /// substring [from,to); throws on from/to out of the string boundaries or from > to
   .replaceSimultaneous(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement; throws on empty keys, duplicated keys, odd sized lists, keys with prefixes
   .replaceSimultaneousOrdered(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement where the first matching rule wins; throws on empty keys, duplicated keys, odd sized lists
-  .ieeeFloat: Opt[Float];           /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
-  .floatExact: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
 
-  .intExact: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
-  .numExact: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
-  .natExact: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
-  .byteExact: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
+  .ieeeFloat: Opt[Float];           /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .float: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+
+  .int: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
+  .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
+  .nat: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
+  .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
+
+
+  .getIeeeFloat: Opt[Float];           /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .getFloat: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+
+  .getInt: Int;              /// parse a string representing a valid Fearless Int, throws if invalid (this includes out of range)
+  .getNum: Num;              /// parse a string representing a valid Fearless Num; throws if invalid (this includes denominator == 0)
+  .getNat: Nat;              /// parse a string representing a valid Fearless Nat; throws if invalid (this includes out of range)
+  .getByte: Byte;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
+
+
   .startsWith(Str): Bool;            /// this string starts with the other string
   .lower: Str;                      /// this string but all lowercase
   .upper: Str;                      /// this string but all uppercase

@@ -92,6 +92,15 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
   mut .disabledCheck(Check): mut TestCap; 
   mut .checkWithSys(CheckSys): mut TestCap;
   mut .disabledCheckWithSys(CheckSys): mut TestCap;  
+  mut .checkDetErr[T](errorMatch: F[Info, Bool], f: F[T]): mut TestCap -> this.check{
+     Try#(f).run {
+       .ok _ -> Error.msg "Expected error but got success";
+       .info i -> errorMatch#i .if {
+         .then -> Void;
+         .else -> Error.msg("Error did not match expected: " + (i.str));
+         }
+       }
+     };
   }
 
 TestCont[T]: { #(t: T, self: mut TestCap): mut TestCap }
@@ -148,10 +157,11 @@ _AddToLog: {
         + `" file="` + (_XmlEscape#(st.get(dept).fileName))
         + `" line="` + (st.get(dept).lineNumber)
         + `"></testcase>` |;
-      .info i ->Block#(
-        Debug#(`Test failure`
+      .info i -> Block#(
+        Debug#(`Test failure `
           + (st.get(dept).typeName) + ` at line: ` 
           + (st.get(dept).lineNumber) + ` in file: `+ (st.get(dept).fileName)
+          + ` ` + i
           ),
         `<testcase classname="` + (_XmlEscape#(st.get(dept).typeName))
         + `" name="` + (_XmlEscape#(st.get(dept).typeName)) + ` at line: ` + (st.get(dept).lineNumber)

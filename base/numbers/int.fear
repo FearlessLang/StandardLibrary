@@ -1,0 +1,311 @@
+/// Int: signed 64-bit.
+/// Note: / is not provided; use div/rem (divisor is Nat).
+Int: Sealed,DataType[Int,Int],SumNumber[Int] {
+  /// `this.succ` returns `this + +1`. Throws if `this` is `Math.maxInt` (overflow).
+  //>   .check{+5 .succ .assertEq +6}
+  //>   .checkDetErr({_ -> True}, {(Math.maxInt) .succ})
+  .succ: Int -> this + +1;
+
+  /// `this.pred` returns `this - +1`. Throws if `this` is `Math.minInt` (underflow).
+  //>   .check{+5 .pred .assertEq +4}
+  //>   .checkDetErr({_ -> True}, {(Math.minInt) .pred})
+  .pred: Int -> this + -1;
+
+  /// `this + x` returns the checked sum of `this` and `x`. Throws on overflow/underflow.
+  //>   .check{(+2 + +3) .assertEq +5}
+  //>   .checkDetErr({_ -> True}, {(Math.maxInt) + +1})
+  +(x: Int): Int;
+
+  /// `this - x` returns the checked difference of `this` and `x`. Throws on overflow/underflow.
+  //>   .check{(+5 - +3) .assertEq +2}
+  //>   .checkDetErr({_ -> True}, {(Math.minInt) - +1})
+  -(x: Int): Int;
+
+  /// `this * x` returns the checked product of `this` and `x`. Throws on overflow/underflow.
+  //>   .check{(+6 * +7) .assertEq +42}
+  //>   .checkDetErr({_ -> True}, {(Math.maxInt) * +2})
+  *(x: Int): Int;
+
+  /// `this ** x` returns the checked power of `this` raised to `x`.
+  /// Note: `x` is `Nat` (not `Int`), as negative exponents would produce fractional results.
+  /// Throws on overflow/underflow.
+  //>   .check{(+2 ** 6) .assertEq +64}
+  //>   .checkDetErr({_ -> True}, {(Math.maxInt) ** 2})
+  **(x: Nat): Int;
+
+  /// `this / d` returns the exact rational quotient of `this` and `d` as a `Num`. Throws iff `d == 0`.
+  //>   .check{(+7 / 2) .assertEq 3.5}
+  //>   .checkDetErr({_ -> True}, {+7 / 0})
+  / (d: Nat) : Num;
+
+  /// `this.getDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
+  /// Note: negative divisors are not allowed, if you need this use `this.aluDiv`.
+  //>   .check{+7 .getDiv 2 .assertEq +3}
+  //>   .check{-7 .getDiv 2 .assertEq -3}
+  //>   .checkDetErr({_ -> True}, {+7 .getDiv 0})
+  .getDiv(d: Nat): Int;
+
+  /// `this.getRem(d)` returns the remainder `this - (this.getDiv(d)) * d`. Throws iff `d == 0`.
+  //>   .check{+7 .getRem 2 .assertEq +1}
+  //>   .checkDetErr({_ -> True}, {+7 .getRem 0})
+  .getRem(d: Nat): Int;
+
+  /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` iff `d == 0`.
+  //>   .check{+7 .rem 2 .assertEq({::}, Opts# +1)}
+  //>   .check{+7 .rem 0 .assertEmpty}
+  .rem(d: Nat): Opt[Int] -> d == 0 .toOpt {this.getRem(d)};
+
+  /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, rounding towards 0.
+  //>   .check{+6 .div(2) .assertEq({::}, Opts# +3)}
+  //>   .check{+7 .div(2) .assertEq({::}, Opts# +3)}
+  //>   .check{+7 .div(0) .assertEmpty}
+  .div(d: Nat): Opt[Int]
+    -> d != 0 .toOpt{this.getDiv d};
+
+  /// `this.exactDiv(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`, that is if:
+  ///  `d != 0` and `this.rem(d) == 0` otherwise returns .empty` otherwise.
+  //>   .check{+6 .div(2) .assertEq({::}, Opts# +3)}
+  //>   .check{+7 .div(2) .assertEmpty}
+  //>   .check{+7 .div(0) .assertEmpty}
+  .exactDiv(d: Nat): Opt[Int]
+    -> this.rem(d).match {
+      .empty -> {};
+      .some r -> r == +0 .toOpt {this.getDiv(d)};
+      };
+
+
+  /// `this.sign` returns the sign of `this`: `+0` if `this` is `0`, `+1` if positive, `-1` if negative.
+  //>   .check{+5 .sign .assertEq +1}
+  //>   .check{-5 .sign .assertEq -1}
+  //>   .check{+0 .sign .assertEq +0}
+  .sign: Int;
+
+  /// `this.abs` returns `this` if `this >= 0`, `-this` otherwise, as a `Nat`.
+  /// Note: the result is a `Nat`, not an `Int`, because `-Math.minInt` overflows `Math.maxInt`
+  /// and so cannot always be safely represented back as an `Int`.
+  //>   .check{+5 .abs .assertEq 5}
+  //>   .check{-5 .abs .assertEq 5}
+  //>   .check{Math.minInt .abs .assertEq(Math.maxInt.getNat + 1)}
+  .abs: Nat;
+
+  /// `this.negAbs` returns `this` if `this <= 0`, `-this` otherwise.
+  /// Note:
+  /// - Unlike `.abs`, the result is always safely representable as an `Int`,since `-Math.maxInt` is a valid `Int`.
+  /// - This is not equivalent to `this.abs.getInt * -1`, as for the previous expression it is impossible to get `Math.minInt` as the result
+  //>   .check{+5 .negAbs .assertEq -5}
+  //>   .check{-5 .negAbs .assertEq -5}
+  //>   .check{Math.minInt .negAbs .assertEq(Math.minInt)}
+  .negAbs: Int;
+
+  /// `this.getWrapIndex(len)` normalizes `this` into `[0, len - 1]` (useful for circular-array
+  /// indexing, e.g. `(-1).getWrapIndex(7) == 6`). Throws iff `len == 0`.
+  //>   .check{-1 .getWrapIndex 7 .assertEq 6}
+  //>   .check{+8 .getWrapIndex 7 .assertEq 1}
+  //>   .checkDetErr({_ -> True}, {+5 .getWrapIndex 0})
+  .getWrapIndex(len: Nat): Nat;
+
+  /// `this.wrapIndex(len)` returns `.some` of `this.getWrapIndex(len)` if `len != 0`, `.empty` iff `len == 0`.
+  //>   .check{-1 .wrapIndex 7 .assertEq({::}, Opts# 6)}
+  //>   .check{+5 .wrapIndex 0 .assertEmpty}
+  .wrapIndex(len: Nat): Opt[Nat] -> len == 0 .toOpt {this.getWrapIndex(len)};
+
+  /// `this.num` converts `this` to a `Num`. Always exact; never throws as `Num` can exactly
+  /// represent every `Int` value, so there is no `soft`/`get` variant needed for this conversion.
+  //>   .check{+5 .num .assertEq(5/1)}
+  .num: Num;
+
+  /// `this.nat` returns `.some` of `this` as a `Nat` if `this >= 0`, `.empty` otherwise.
+  //>   .check{+5 .nat .assertEq({::}, Opts# 5)}
+  //>   .check{-5 .nat .assertEmpty}
+  .nat: Opt[Nat];
+
+  /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is in `[0, maxByte]`, `.empty` otherwise.
+  //>   .check{+5 .byte .assertEq({::}, Opts# (5.getByte))}
+  //>   .check{+300 .byte .assertEmpty}
+  .byte: Opt[Byte];
+
+  /// `this.float` returns `.some` of `this` as a `Float` if `this` is exactly representable, `.empty` otherwise.
+  //>   .check{+5 .float .assertEq({::}, Opts# 5.0)}
+  //>   .check{Math.maxInt - +1 .float .assertEmpty}
+  .float: Opt[Float];
+
+  /// `this.getNat` converts `this` to a `Nat`. Throws if `this < 0`.
+  //>   .check{+5 .getNat .assertEq 5}
+  //>   .checkDetErr({_ -> True}, {-5 .getNat})
+  .getNat: Nat;
+
+  /// `this.getByte` converts `this` to a `Byte`. Throws if `this` is not in `[0, maxByte]`.
+  //>   .check{+5 .getByte .assertEq(5.getByte)}
+  //>   .checkDetErr({_ -> True}, {+300 .getByte})
+  .getByte: Byte;
+
+  /// `this.getFloat` converts `this` to a `Float`. Throws if `this` is not exactly representable.
+  //>   .check{+5 .getFloat .assertEq 5.0}
+  //>   .checkDetErr({_ -> True}, {Math.minInt + +1 .getFloat})
+  .getFloat: Float;
+
+  /// `this.softNat` converts `this` to a `Nat` by flooring negative values to `0`. Never throws.
+  //>   .check{+5 .softNat .assertEq 5}
+  //>   .check{-5 .softNat .assertEq 0}
+  .softNat: Nat;
+
+  /// `this.softByte` converts `this` to a `Byte` by clamping into `[0, maxByte]`. Never throws.
+  //>   .check{+5 .softByte .assertEq(5.getByte)}
+  //>   .check{+300 .softByte .assertEq(255.getByte)}
+  .softByte: Byte;
+
+  /// `this.softFloat` converts `this` to the closest representable `Float`. Never throws.
+  //>   .check{+5 .softFloat .assertEq 5.0}
+  //>   .check{Math.maxInt - +1 .softFloat.getInt .assertEq(Math.maxInt.getNat)}
+  .softFloat: Float;
+
+  /// `this.aluAddWrap(x)` returns `this + x` mod `2^32` (i32 wraparound add). Never throws.
+  //>   .check{(Math.maxInt) .aluAddWrap +1 .assertEq(Math.minInt)}
+  .aluAddWrap(x: Int): Int;
+
+  /// `this.aluSubWrap(x)` returns `this - x` mod `2^32` (i32 wraparound sub). Never throws.
+  //>   .check{(Math.minInt) .aluSubWrap +1 .assertEq(Math.maxInt)}
+  .aluSubWrap(x: Int): Int;
+
+  /// `this.aluMulWrap(x)` returns `this * x` mod `2^32` (i32 wraparound mul). Never throws.
+  //>   .check{(Math.maxInt) .aluMulWrap +2 .assertEq -2}
+  .aluMulWrap(x: Int): Int;
+
+  /// `this.aluDiv(x)` returns `this` divided by `x`, truncated toward `0` (i32 semantics).
+  /// Note: unlike `.getDiv`, `x` is a signed `Int`, a negative divisor is allowed. Throws iff `x == 0`.
+  //>   .check{+7 .aluDiv -2 .assertEq -3}
+  //>   .checkDetErr({_ -> True}, {+7 .aluDiv +0})
+  .aluDiv(x: Int): Int;
+
+  /// `this.aluRem(x)` returns the remainder paired with `this.aluDiv(x)`; the result's sign
+  /// follows the dividend (`this`), not the divisor. Throws iff `x == 0`.
+  //>   .check{-7 .aluRem +2 .assertEq -1}
+  //>   .checkDetErr({_ -> True}, {+7 .aluRem +0})
+  .aluRem(x: Int): Int;
+
+  /// `this.aluShiftLeft(bits)` returns `this` shifted left by `bits`, with the effective shift
+  /// taken modulo `32` (`bits & 31`). Never throws.
+  //>   .check{+1 .aluShiftLeft 3 .assertEq +8}
+  .aluShiftLeft(bits: Nat): Int;
+
+  /// `this.aluShiftRight(bits)` returns `this` arithmetically shifted right (sign-extending) by
+  /// `bits`, with the effective shift taken modulo `32` (`bits & 31`). Never throws.
+  //>   .check{-8 .aluShiftRight 1 .assertEq -4}
+  .aluShiftRight(bits: Nat): Int;
+
+  /// `this.aluXor(x)` returns the bitwise XOR of `this` and `x` (i32). Never throws.
+  //>   .check{+5 .aluXor +3 .assertEq +6}
+  .aluXor(x: Int): Int;
+
+  /// `this.aluAnd(x)` returns the bitwise AND of `this` and `x` (i32). Never throws.
+  //>   .check{+5 .aluAnd +3 .assertEq +1}
+  .aluAnd(x: Int): Int;
+
+  /// `this.aluOr(x)` returns the bitwise OR of `this` and `x` (i32). Never throws.
+  //>   .check{+5 .aluOr +2 .assertEq +7}
+  .aluOr(x: Int): Int;
+
+  /// `this.aluNat` reinterprets the raw i32 bits of `this` as an unsigned u32 `Nat` (bit-cast, not a value conversion).
+  //>   .check{-1 .aluNat .assertEq 4294967295}
+  .aluNat: Nat;
+
+  /// `this.aluByte` returns the low 8 bits of `this`, wrapped (not clamped).
+  //>   .check{+257 .aluByte .assertEq(1.getByte)}
+  .aluByte: Byte;
+
+  /// `this~~end` returns the open range `(this, end)`.
+  /// Throws if `this` is `Math.maxInt`, `end` is `Math.minInt`, or the resulting range would be empty.
+  //>   .check{(+1~~ +4) .start .assertEq +2}
+  //>   .checkDetErr({_ -> True}, {+1~~ +2})
+  ~~(end: Int): Range[Int] -> Block#
+    .if {this == (Math.maxInt)} .error{"Int ~~: Start of open range cannot be Math.maxInt"}
+    .if {end == (Math.minInt)} .error{"Int ~~: End of open range cannot be Math.minInt"}
+    .let endInclusive={end.pred}
+    .let startInclusive={this.succ}
+    .if {startInclusive > endInclusive } .error {
+      "Int ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
+      }
+    .return {_IntRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
+
+  /// `this~~=endInclusive` returns the range `(this, endInclusive]`.
+  /// Throws if `this` is `Math.maxInt`, or the range would be empty (`this >= endInclusive`).
+  //>   .check{(+1~~= +4) .end .assertEq +4}
+  //>   .checkDetErr({_ -> True}, {+1~~= +1})
+  ~~=(endInclusive: Int): Range[Int] -> Block#
+    .if {this == (Math.maxInt)} .error{"Int ~~=: Start of open range cannot be Math.maxInt"}
+    .if {this >= endInclusive } .error {
+      "Int ~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
+      }
+    .return {_IntRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
+
+  /// `this=~~end` returns the range `[this, end)`.
+  /// Throws if `end` is `Math.minInt`, or the range would be empty (`this >= end`).
+  //>   .check{(+1=~~ +4) .start .assertEq +1}
+  //>   .checkDetErr({_ -> True}, {+1=~~ +1})
+  =~~(end: Int): Range[Int] -> Block#
+    .if {end == (Math.minInt)} .error{
+      "Int =~~: End of open range cannot be Math.minInt"
+      }
+    .if {this >= end } .error {
+      "Int =~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
+      }
+    .return {_IntRanges#(this, end.pred, "["+this+", "+end+")")};
+
+  /// `this=~~=endInclusive` returns the inclusive range `[this, endInclusive]`.
+  /// Throws if the range would be empty (`this > endInclusive`).
+  //>   .check{(+1=~~= +4) .start .assertEq +1}
+  //>   .checkDetErr({_ -> True}, {+4=~~= +1})
+  =~~=(endInclusive: Int): Range[Int] -> Block#
+    .if {this > endInclusive } .error {
+      "Int =~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
+      }
+    .return {_IntRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
+
+  /// `this.inRange(range)` returns `True` iff `range.start <= this <= range.end`.
+  //>   .check{+2 .inRange(+1=~~= +4) .assertTrue}
+  //>   .check{+5 .inRange(+1=~~= +4) .assertFalse}
+  .inRange(range: Range[Int]): Bool -> range.start <= this && {this <= (range.end)};
+
+  /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
+  //>   .check{+2 .assertInRange(+1=~~= +4)}
+  //>   .checkDetErr({_ -> True}, {+5 .assertInRange(+1=~~= +4)})
+  .assertInRange(range: Range[Int]): Void -> this.assertInRange(range, {``});
+
+  /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.
+  //>   .check{+2 .assertInRange(+1=~~= +4, {`custom context`})}
+  .assertInRange(range: Range[Int], msg: read LazyInfo): Void -> Assert!(
+    this.inRange(range),
+    { msg#.info + (`Expected in range: `+ (range.str) // technically a DD point...
+      | `lo: `+(range.start)
+      | `hi: `+(range.end)
+      | `actual: `+this
+      .info)});
+
+  /// `this.clampTo(range)` returns `this` clamped into `[range.start, range.end]`. Never throws.
+  //>   .check{+0 .clampTo(+1=~~= +4) .assertEq +1}
+  //>   .check{+9 .clampTo(+1=~~= +4) .assertEq +4}
+  .clampTo(range: Range[Int]): Int -> Block#
+      .if {this <= (range.start)} .return {range.start}
+      .if {this >= (range.end)} .return {range.end}
+      .return {this};
+
+  .hash -> this.str.hash;                   /// hash via str
+  .info -> Infos.msg(this.str);              /// info via str
+  .close -> ::; .close -> this;             /// fixpoint type closed
+  .sumNumber xs ->                          /// summing all numbers starting from this
+    xs.fold( {this}, {acc,e -> acc + e} );
+  .norm: Norm[Int];
+  }
+
+_IntRanges: Sealed {
+  #(startInclusive: Int, endInclusive: Int, str: Str): Range[Int] -> {'self
+    .size -> endInclusive - startInclusive .getNat; // Cheap enough that computing everytime is okay
+    .start -> startInclusive;
+    .end -> endInclusive;
+    .flow -> _NumFlow.ints(startInclusive, endInclusive);
+    .flow step -> _NumFlow.ints(startInclusive, endInclusive, step);
+    .contains n -> n.inRange(self);
+    .clamp n -> n.clampTo(self);
+    .str -> str;
+    };
+  }

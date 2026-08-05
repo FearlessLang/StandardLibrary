@@ -99,7 +99,9 @@ public class Util{
     var ohB= (Order$1)by.imm$$hash$1(b);
     return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
   }
-  public static final class MapKey{
+
+
+    public static final class MapKey{
     public final OrderHash$1 ord; // OrderHash[K0] closed at this key's projection
     public final Object key;      // representative K (first inserted)
     public final Object close;    // K0

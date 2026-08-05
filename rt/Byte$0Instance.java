@@ -2,7 +2,6 @@ package base;
 
 import java.math.BigInteger;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import static base.Util.*;
 
@@ -49,6 +48,11 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
     if (r > 255){ throw err("Byte.* overflow"); }
     return (byte)r;
   }
+
+  public static byte unwrap(Object p0) {
+    return ((Byte$0Instance) p0).val;
+  }
+
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,b(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
@@ -68,28 +72,38 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
 
   @Override public Object imm$div$1(Object p0){
     long d= natBits(p0);
-
-    if (d == 0L){ throw err("Byte.div: d==0"); }
-    return instance((byte)(u8(val) / d));
-  }
-  /// if b >= a, then a % b
-  /// Therefore we can clamp b to 255
-  /// as this can not be larger than that
-  @Override public Object imm$rem$1(Object p0){
-    long d= natBits(p0);
-    if (d == 0){ throw err("Byte.rem: d==0"); }
-    return instance(
-            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
-    );
-  }
-  @Override public Object imm$divExact$1(Object p0){
-    long d= natBits(p0);
     if (d == 0L){ return optEmpty(); }
     int x= u8(val);
     if (Long.remainderUnsigned(x, d) != 0L){ return optEmpty(); }
     return optSome(instance((byte)(x / d)));
   }
-  @Override public Object imm$sqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)u8(val))); }
+
+  @Override public Object imm$rem$1(Object p0){
+    long d= natBits(p0);
+    if (d == 0){ return optEmpty(); }
+    return optSome(instance(
+            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
+    ));
+  }
+
+  @Override public Object imm$getDiv$1(Object p0){
+    long d= natBits(p0);
+
+    if (d == 0L){ throw err("Byte.div: d==0"); }
+    return instance((byte)(u8(val) / d));
+  }
+
+  /// for a % b = c, c <= a.
+  /// Therefore it is safe to cast this % nat to byte
+  @Override public Object imm$getRem$1(Object p0){
+    long d= Nat$0Instance.unwrap(p0);
+    if (d == 0){ throw err("Byte.rem: d==0"); }
+    return instance(
+            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
+    );
+  }
+
+  @Override public Object imm$softSqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)u8(val))); }
   @Override public Object imm$nat$0(){ return Nat$0Instance.instance(u8(val)); }
   @Override public Object imm$int$0(){ return Int$0Instance.instance(u8(val)); }
   @Override public Object imm$float$0(){ return Float$0Instance.instance((double)u8(val)); }
@@ -98,13 +112,7 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
   @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toString(u8(val))); }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$clamp$2(Object p0, Object p1){
-    int lo= u8(p0), hi= u8(p1), x= u8(val);
-    if (lo > hi){ throw err("Byte.clamp: lo>hi"); }
-    if (x < lo){ return instance((byte)lo); }
-    if (x > hi){ return instance((byte)hi); }
-    return this;
-  }
+
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance((byte)(val + b(p0))); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance((byte)(val - b(p0))); }
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance((byte)(val * b(p0))); }
@@ -132,26 +140,8 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
 
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Integer.compare(u8(p0),u8(p1)),p2); }
 
-  @Override public Object imm$$tilde_tilde$1(Object p0) {
-    byte start = this.val;
-    byte end = b(p0);
-    if (end < start) {
-      throw detErr("Valid ranges require end ("+end+") >= start ("+start+")");
-    }
-    return new Flow$1Instance(
-            LongStream.range(start, end).mapToObj(i -> Byte$0Instance.instance((byte) i))
-    );
-  }
-  @Override public Object imm$$tilde_tilde_eq$1(Object p0) {
-    byte start = this.val;
-    byte end = b(p0);
-    if (end < start) {
-      throw detErr("Valid ranges require end ("+end+") >= start ("+start+")");
-    }
-    return new Flow$1Instance(
-            IntStream.rangeClosed(start, end).mapToObj(i -> Byte$0Instance.instance((byte) i))
-    );
-  }
+
+
   @Override public Object imm$norm$0(){ return this; }
   @Override public Object imm$get$0(){ return this; }
 }
