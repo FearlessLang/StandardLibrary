@@ -74,7 +74,7 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
   }
 
   /**
-   * WARNING - THIS LONG IS UNSIGNED
+   * Unwraps the given Nat$0Instance into an unsigned long
    */
   public static long unwrap(Object p0) {
     return ((Nat$0Instance) p0).val;
