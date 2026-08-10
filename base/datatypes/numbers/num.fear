@@ -1,109 +1,221 @@
-_NumAs: {
-  .int(n: Num): Bool -> n.isInteger && {n >= (Math.minInt.num)} && {n <= (Math.maxInt.num)};
-  .nat(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxNat.num)};
-  .byte(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxByte.num)};
-  }
-
-
 /// Num: unlimited-precision rational (exact arithmetic).
 Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
-  +(x: Num): Num;                    /// exact add
-  -(x: Num): Num;                    /// exact sub
-  *(x: Num): Num;                    /// exact mul
-  /(x: Num): Num;                    /// exact div; throws iff x==0
-  **(x: Int): Num;                   /// Raise this to the power of x. x is an int because fraction powers could lead to inexpressible numbers.
-  .abs: Num;                         /// exact abs
-  .absNeg: Num;                      /// exact absNeg
-  .sign: Num;                        /// Return the sign of this number: +0/1 if x is 0, +1/1 if x is positive, -1/1 if x is negative.
-  .floor: Num;                       /// floor(this);
-  .ceil: Num;                        /// ceil(this);
-  .trunc0: Num;                      /// trunc toward 0;
-  .round: Num;                       /// round-to-nearest integer, ties-to-even (exact on rationals); result is an integer (denominator == 1)
-  .isInteger: Bool;                  /// true iff denominator == 1
 
-  /// `this.int` returns `.some` of `this` if this is an integer in [Math.minInt, Math.maxInt]; `.empty` otherwise
-  .int: Opt[Int] -> _NumAs.int this .then{this.softInt};
+  /// `this + x` returns the exact sum of `this` and `x`.
+  //>   .check{2/3 + (3/2) .assertEq(13/6)}
+  +(x: Num): Num;
 
-  /// `this.nat` returns `.some` of `this` if this is an integer in [0, Math.maxNat]; `.empty` otherwise
-  .nat: Opt[Nat] -> _NumAs.nat this .then{this.softNat};
+  /// `this - x` returns the exact difference of `this` and `x`.
+  //>   .check{5/1 - (3/1) .assertEq(2/1)}
+  -(x: Num): Num;
 
-  /// `this.byte` returns `.some` of `this` if this is an integer in [0, Math.maxByte]; `.empty` otherwise
-  .byte: Opt[Byte] -> _NumAs.byte this .then{this.softByte};
+  /// `this * x` returns the exact product of `this` and `x`.
+  //>   .check{2/3 * (3/7) .assertEq(6/21)}
+  *(x: Num): Num;
 
-  /// `this.float` returns `.some` of `this` if this is exactly representable as a 64bit float, `.empty` otherwise.
+  /// `this / x` returns the exact quotient of `this` and `x`. Throws iff `x == 0`.
+  //>   .check{2 / 6 / (4/3) .assertEq((2*3) / (6*4))}
+  //>   .checkDetErr({_ -> True}, {1 / 0})
+  /(x: Num): Num;
+
+  /// `this ** x` raises `this` to the power `x`. `x` is an `Int` (not `Num`), since fractional
+  /// exponents could produce results that aren't expressible as an exact rational.
+  //>   .check{(2/4 ** +3) .assertEq(8 / 64)}
+  //>   .check{(2/1 ** -1) .assertEq(1 / 2)}
+  **(x: Int): Num;
+
+  /// `this.abs` returns the exact absolute value of `this`: `this` if `this >= 0`, `-this` otherwise.
+  //>   .check{3/1 .abs .assertEq(3/1)}
+  //>   .check{-3/4 .abs .assertEq(3/4)}
+  .abs: Num;
+
+  /// `this.absNeg` returns the exact negative absolute value of `this`: `this` if `this <= 0`, `-this` otherwise.
+  //>   .check{3/1 .absNeg .assertEq(-3/1)}
+  //>   .check{-3/4 .absNeg .assertEq(-3/4)}
+  .absNeg: Num;
+
+  /// `this.sign` returns the sign of `this` as an exact rational: `0/1` if `this` is `0`,
+  /// `1/1` if positive, `-1/1` if negative.
+  //>   .check{5/1 .sign .assertEq(1/1)}
+  //>   .check{(-5/1) .sign .assertEq(-1/1)}
+  //>   .check{0/1 .sign .assertEq(0/1)}
+  .sign: Num;
+
+  /// `this.floor` returns `this` rounded down to the nearest integer (exact).
+  //>   .check{(7 / 2) .floor .assertEq(3/1)}
+  //>   .check{(-7 / 2) .floor .assertEq(-4/1)}
+  .floor: Num;
+
+  /// `this.ceil` returns `this` rounded up to the nearest integer (exact).
+  //>   .check{(7 / 2) .ceil .assertEq(4/1)}
+  //>   .check{((-7) / 2) .ceil .assertEq(-3/1)}
+  .ceil: Num;
+
+  /// `this.trunc0` returns `this` rounded towards `0` (exact).
+  //>   .check{(7 / 2) .trunc0 .assertEq(3/1)}
+  //>   .check{((-7) / 2) .trunc0 .assertEq(-3/1)}
+  .trunc0: Num;
+
+  /// `this.round` returns `this` rounded to the nearest integer, ties rounded away from `0` (exact).
+  //>   .check{(5 / 2) .round .assertEq(3/1)}
+  //>   .check{((-5) / 2) .round .assertEq(-3/1)}
+  .round: Num;
+
+  /// `this.roundTiesEven` returns `this` rounded to the nearest integer, ties rounded to even
+  /// (exact on rationals). The result is always an integer (denominator == 1).
+  //>   .check{(5 / 2) .roundTiesEven .assertEq(2/1)}
+  //>   .check{(7 / 2) .roundTiesEven .assertEq(4/1)}
+  .roundTiesEven: Num;
+
+  /// `this.isInteger` returns `True` iff `this` has denominator `1`.
+  //>   .check{5/1 .isInteger .assertTrue}
+  //>   .check{1 / 2 .isInteger .assertFalse}
+  .isInteger: Bool;
+
+  /// `this.int` returns `.some` of `this` as an `Int` if `this` is an integer in
+  /// `[Math.minInt, Math.maxInt]`, `.empty` otherwise.
+  //>   .check{5 .int .assertEq({::}, Opts# +5)}
+  //>   .check{1 / 2 .int .assertEmpty}
+  .int: Opt[Int] -> _NumIs.int this .toOpt {this.softInt};
+
+  /// `this.nat` returns `.some` of `this` as a `Nat` if `this` is an integer in `[0, Math.maxNat]`, `.empty` otherwise.
+  //>   .check{5/1 .nat .assertEq({::}, Opts# 5)}
+  //>   .check{-5/1 .nat .assertEmpty}
+  .nat: Opt[Nat] -> _NumIs.nat this .toOpt {this.softNat};
+
+  /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is an integer in `[0, Math.maxByte]`, `.empty` otherwise.
+  //>   .check{5/1 .byte .assertEq({::}, Opts# (5.getByte))}
+  //>   .check{300/1 .byte .assertEmpty}
+  .byte: Opt[Byte] -> _NumIs.byte this .toOpt {this.softByte};
+
+  /// `this.float` returns `.some` of `this` as a `Float` if `this` is exactly representable
+  /// as a 64-bit float, `.empty` otherwise.
+  //>   .check{5/1 .float .assertEq({::}, Opts# 5.0)}
+  //>   .check{(1 / 3) .float .assertEmpty}
   .float: Opt[Float];
 
-  /// `this.getInt` converts `this` to `Int` if this is an integer in [Math.minInt, Math.maxInt]; throws otherwise
+  /// `this.getInt` converts `this` to an `Int` if it's an integer in `[Math.minInt, Math.maxInt]`; throws otherwise.
+  //>   .check{5/1 .getInt .assertEq +5}
+  //>   .checkDetErr({_ -> True}, {(1 / 2) .getInt})
   .getInt: Int;
 
-  /// `this.getNat` converts `this` to `Nat` if this is an integer in [0, Math.maxNat]; throws otherwise
+  /// `this.getNat` converts `this` to a `Nat` if it's an integer in `[0, Math.maxNat]`; throws otherwise.
+  //>   .check{5/1 .getNat .assertEq 5}
+  //>   .checkDetErr({_ -> True}, {(-5) .getNat})
   .getNat: Nat;
 
-  /// `this.getByte` converts `this` to `Byte` if this is an integer in [0, Math.maxByte]; throws otherwise
+  /// `this.getByte` converts `this` to a `Byte` if it's an integer in `[0, Math.maxByte]`; throws otherwise.
+  //>   .check{5/1 .getByte .assertEq(5.getByte)}
+  //>   .checkDetErr({_ -> True}, {300 .getByte})
   .getByte: Byte;
-  /// `this.getByte` converts `this` to `Float`, throws if not exactly representable.
+
+  /// `this.getFloat` converts `this` to a `Float`. Throws if not exactly representable.
+  //>   .check{5/1 .getFloat .assertEq 5.0}
+  //>   .checkDetErr({_ -> True}, {(1 / 3) .getFloat})
   .getFloat: Float;
 
-  .softInt: Int;                         /// clamp to [minInt,maxInt] after trunc0 (never throws)
-  .softNat: Nat;                         /// clamp to [0,maxNat] after trunc0 (never throws)
-  .softByte: Byte;                       /// clamp to [0,maxByte] after trunc0 (never throws)
-  .softFloat: Float;                     /// approximate; (never throws)
+  /// `this.softInt` converts `this` to an `Int` by truncating towards `0`, then clamping into
+  /// `[minInt, maxInt]`.
+  //>   .check{7 / 2 .softInt .assertEq +3}
+  .softInt: Int;
 
+  /// `this.softNat` converts `this` to a `Nat` by truncating towards `0`, then clamping into
+  /// `[0, maxNat]`.
+  //>   .check{7 / 2 .softNat .assertEq 3}
+  //>   .check{-5/1 .softNat .assertEq 0}
+  .softNat: Nat;
 
-  ~~(end: Num): ComparisonRange[Num] -> Block#(
-    Assert!(this <= end),
-    {
+  /// `this.softByte` converts `this` to a `Byte` by truncating towards `0`, then clamping into
+  /// `[0, maxByte]`.
+  //>   .check{7 / 2 .softByte .assertEq(3.getByte)}
+  .softByte: Byte;
+
+  /// `this.softFloat` converts `this` to the closest representable `Float`.
+  //>   .check{1 / 3 .softFloat .assertEq +0.33333299999999999041477849459624849259853363037109375}
+  .softFloat: Float;
+
+  /// `this~~end` returns the open range `(this, end)`.
+  /// Throws if the range would be empty (`this >= end`).
+  //>   .check{1/1 ~~ (4/3) .contains 2 .assertTrue}
+  //>   .check{1/1 ~~ (4/3) .contains 1 .assertFalse}
+  //>   .checkDetErr({_ -> True}, {1/1~~(1/1)})
+  ~~(end: Num): NumRange -> Block#
+    .if {this >= end } .error {"Num ~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
+    .return {{
       .start -> this;
       .end -> end;
       .contains n -> this < n && {n < end};
+      .str -> "("+this+", "+end+")";
+      }};
 
-      .leftClosed: False -> False;
-      .rightClosed: False -> False;
-      });
-
-  ~~=(endInclusive: Num): ComparisonRange[Num] -> Block#(
-    Assert!(this <= endInclusive),
-    {
+  /// `this~~=endInclusive` returns the range `(this, endInclusive]`.
+  /// Throws if the range would be empty (`this >= endInclusive`).
+  //>   .check{(1/1~~=(4/3)) .contains(4/3) .assertTrue}
+  //>   .check{(1/1~~=(4/3)) .contains(1/1) .assertFalse}
+  //>   .checkDetErr({_ -> True}, {1/1~~=(1/1)})
+  ~~=(endInclusive: Num): NumRange -> Block#
+    .if {this >= endInclusive } .error {"Num ~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive ("+endInclusive+")"}
+    .return {{
       .start -> this;
       .end -> endInclusive;
       .contains n -> this < n && {n <= endInclusive};
-      .leftClosed: False -> False;
-      .rightClosed: True -> True;
-      });
+      .str -> "("+this+", "+endInclusive+"]";
+      }};
 
-  =~~(end: Num): FlowableRange[Num] -> Block#(
-    Assert!(this <= end),
-    {
+  /// `this=~~end` returns the range `[this, end)`.
+  /// Throws if the range would be empty (`this >= end`).
+  //>   .check{1/1=~~(4/3) .contains(1/1) .assertTrue}
+  //>   .check{1/1=~~(4/3) .contains(4/3) .assertFalse}
+  //>   .checkDetErr({_ -> True}, {1/1=~~(1/1)})
+  =~~(end: Num): NumRange -> Block#
+    .if {this >= end } .error {"Num =~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
+    .return {{
       .start -> this;
       .end -> end;
       .contains n -> this <= n && {n < end};
-      .flow step -> _NumFlow.numsOpen(this.imm, end, step)
-      });
+      .str -> "["+this+", "+end+")";
+      }};
 
-  =~~=(endInclusive: Num): ClampableRange[Num] -> Block#(
-    Assert!(this <= endInclusive),
-    {
+  /// `this=~~=endInclusive` returns the inclusive range `[this, endInclusive]`. Unlike the other
+  /// range operators, this returns a `ClosedNumRange`, which supports `.clampTo`.
+  /// Throws if the range would be empty (`this > endInclusive`).
+  //>   .check{(1/1=~~=(4/3)) .contains(4/3) .assertTrue}
+  //>   .check{(1/1=~~=(4/3)) .contains(1/1) .assertTrue}
+  //>   .checkDetErr({_ -> True}, {4/1=~~=(1/1)})
+  =~~=(endInclusive: Num): ClosedNumRange -> Block#
+    .if {this > endInclusive } .error {"Num =~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive ("+endInclusive+")"}
+    .return {{
       .start -> this;
       .end -> endInclusive;
       .contains n -> this <= n && {n <= endInclusive};
-      .flow step -> _NumFlow.numsClosed(this.imm, endInclusive, step);
-      .clamp n -> Block#
-        .if {n >= endInclusive} .return {endInclusive}
-        .if {n <= this} .return {this}
-        .return {n}
-      });
+      .str -> "["+this+", "+endInclusive+"]";
+      }};
 
-  .inRange(range: ComparisonRange[Num]): Bool -> range.contains(this);
-  .assertInRange(range: ComparisonRange[Num]): Void -> this.assertInRange(range, {``});
-  .assertInRange(range: ComparisonRange[Num], msg: read LazyInfo): Void -> Assert!(
+  /// `this.inRange(range)` returns `range.contains(this)`. Uses a sealed `NumRange` so callers
+  /// don't have to specify open/closed endpoints explicitly.
+  //>   .check{2 .inRange(1=~~=4) .assertTrue}
+  //>   .check{5 .inRange(1=~~=4) .assertFalse}
+  .inRange(range: NumRange): Bool -> range.contains(this);
+
+  /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
+  //>   .check{2/1 .assertInRange((1/1)=~~=(4/1))}
+  .assertInRange(range: NumRange): Void -> this.assertInRange(range, {``});
+
+  /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.
+  //>   .check{(2/1) .assertInRange((1/1)=~~=(4/1), {`custom context`})}
+  .assertInRange(range: NumRange, msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
-    { msg#.info + (`Expected in range: `+ (_RangeToString#(range))
+    { msg#.info + (`Expected in range: `+ (range.str)
       | `lo: `+(range.start)
       | `hi: `+(range.end)
       | `actual: `+ this
       .info)});
 
-  .clamp(range: ClampableRange[Num]): Num -> range.clamp(this);
+  /// `this.clampTo(range)` returns `this` clamped into `range` (delegates to `range.clamp`).
+  /// Only accepts a `ClosedNumRange` (from `=~~=`), since clamping to an open range is ill-defined.
+  //>   .check{0/1 .clampTo(1/1=~~=(4/1)) .assertEq(1/1)}
+  //>   .check{9/1 .clampTo(1/1=~~=(4/1)) .assertEq(4/1)}
+  .clampTo(range: ClosedNumRange): Num -> range.clamp(this);
 
   .hash -> this.str.hash;           /// hash via string
   .info -> Infos.msg(this.str);      /// info via string
@@ -113,9 +225,8 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   .norm: Norm[Num];
   }
 
-_RangeToString: {
-  #[N](range: ComparisonRange[N]): Str ->
-    range.rightClosed.match[Str]{.true -> "["; .false -> "("}
-      + "lo, hi"
-      + (range.rightClosed.match[Str]{.true -> "]"; .false -> ")"});
-}
+_NumIs: {
+  .int(n: Num): Bool -> n.isInteger && {n >= (Math.minInt.num)} && {n <= (Math.maxInt.num)};
+  .nat(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxNat.num)};
+  .byte(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxByte.num)};
+  }

@@ -1,7 +1,10 @@
 _NumFlow: {
   .bytes(startInclusive: Byte, endInclusive: Byte): mut Flow[Byte] -> Magic!;
+  .bytes(startInclusive: Byte, endInclusive: Byte, step: Byte): mut Flow[Byte] -> Magic!;
   .ints(startInclusive: Int, endInclusive: Int): mut Flow[Int] -> Magic!;
+  .ints(startInclusive: Int, endInclusive: Int, step: Int): mut Flow[Int] -> Magic!;
   .nats(startInclusive: Nat, endInclusive: Nat): mut Flow[Nat] -> Magic!;
+  .nats(startInclusive: Nat, endInclusive: Nat, step: Nat): mut Flow[Nat] -> Magic!;
   .floats(startInclusive: Float, end: Float): mut Flow[Float] -> Magic!;
   .floats(startInclusive: Float, end: Float, step: Float): mut Flow[Float] -> Magic!;
   .numsOpen(startInclusive: Num, end: Num, step: Num): mut Flow[Num] -> Magic!;

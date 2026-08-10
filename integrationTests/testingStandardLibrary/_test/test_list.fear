@@ -59,6 +59,12 @@ ListBasicsTests: Test {::
   .check{Lists#(Lists#`a`) ++ (Lists#(Lists#`b`)) .get 0 .get 0 .assertEq `a`}
   .check{Lists#(Lists#`a`) ++ (Lists#(Lists#`b`)) .get 1 .get 0 .assertEq `b`}
   .check{List[List[Str]] .withAlso(0, Lists#`a`) .str{::.str{::.str}} .assertEq( Lists#(Lists#`a`) .str{::.str{::.str}})}
+  .check{Block#
+    .let elist={ELists#[Nat]}
+    .do{elist.add(1)}
+    .do{elist.size .assertEq 1}
+    .done
+    }
   }
 
 TestList: Test {::

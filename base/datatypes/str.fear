@@ -69,7 +69,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
   .replaceSimultaneous(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement; throws on empty keys, duplicated keys, odd sized lists, keys with prefixes
   .replaceSimultaneousOrdered(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement where the first matching rule wins; throws on empty keys, duplicated keys, odd sized lists
 
-  .ieeeFloat: Opt[Float];           /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .ieeeFloat: Opt[Float];      /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
   .float: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
 
   .int: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
@@ -78,9 +78,9 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
   .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
 
 
-  .getIeeeFloat: Opt[Float];           /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
-  .getFloat: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
-
+  .getIeeeFloat: Float;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .getFloat: Float;          /// parse a string representing a valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  .getSoftFloat: Float;      /// parse a string representing to the closest valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, but *not* values that would round)
   .getInt: Int;              /// parse a string representing a valid Fearless Int, throws if invalid (this includes out of range)
   .getNum: Num;              /// parse a string representing a valid Fearless Num; throws if invalid (this includes denominator == 0)
   .getNat: Nat;              /// parse a string representing a valid Fearless Nat; throws if invalid (this includes out of range)

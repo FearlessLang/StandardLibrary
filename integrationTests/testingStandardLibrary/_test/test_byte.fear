@@ -48,10 +48,10 @@ ByteRangeChecksTests: Test {::
   .check{+3.getByte.assertInRange(+1.getByte =~~= (+5.getByte))}
   .check{+3.getByte.assertInRange(+1.getByte~~=(+3.getByte))}
   .check{+3.getByte.assertInRange(+3.getByte=~~(+5.getByte))}
-  .check{+0.getByte.clamp(+1.getByte=~~=(+5.getByte)) .assertEq (+1.getByte)}
-  .check{+6.getByte.clamp(+1.getByte=~~=(+5.getByte)) .assertEq (+5.getByte)}
-  .check{+3.getByte.clamp(+1.getByte=~~=(+5.getByte)) .assertEq (+3.getByte)}
-  .check{+3.getByte.clamp(+3.getByte=~~=(+3.getByte)) .assertEq (+3.getByte)}
+  .check{+0.getByte.clampTo(+1.getByte=~~=(+5.getByte)) .assertEq (+1.getByte)}
+  .check{+6.getByte.clampTo(+1.getByte=~~=(+5.getByte)) .assertEq (+5.getByte)}
+  .check{+3.getByte.clampTo(+1.getByte=~~=(+5.getByte)) .assertEq (+3.getByte)}
+  .check{+3.getByte.clampTo(+3.getByte=~~=(+3.getByte)) .assertEq (+3.getByte)}
   }
 
 ByteBoundaryAndBoundedVsAluTests: Test {::

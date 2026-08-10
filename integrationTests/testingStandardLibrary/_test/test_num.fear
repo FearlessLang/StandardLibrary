@@ -13,15 +13,15 @@ NumArithTests: Test {::
   }
 
 NumRoundTests: Test {::
-  .check{+1.num / (+2.num).round .assertEq (+0.num)}
-  .check{+3.num / (+2.num).round .assertEq (+2.num)}
-  .check{+5.num / (+2.num).round .assertEq (+2.num)}
-  .check{(-1.num) / (+2.num).round .assertEq (+0.num)}
-  .check{(-3.num) / (+2.num).round .assertEq (-2.num)}
-  .check{(-5.num) / (+2.num).round .assertEq (-2.num)}
-  .check{+1.num / (+3.num).round .assertEq (+0.num)}
-  .check{+2.num / (+3.num).round .assertEq (+1.num)}
-  .check{+1.num / (+2.num).round.isInteger .assertEq True}
+  .check{+1.num / (+2.num).roundTiesEven .assertEq (+0.num)}
+  .check{+3.num / (+2.num).roundTiesEven .assertEq (+2.num)}
+  .check{+5.num / (+2.num).roundTiesEven .assertEq (+2.num)}
+  .check{(-1.num) / (+2.num).roundTiesEven .assertEq (+0.num)}
+  .check{(-3.num) / (+2.num).roundTiesEven .assertEq (-2.num)}
+  .check{(-5.num) / (+2.num).roundTiesEven .assertEq (-2.num)}
+  .check{+1.num / (+3.num).roundTiesEven .assertEq (+0.num)}
+  .check{+2.num / (+3.num).roundTiesEven .assertEq (+1.num)}
+  .check{+1.num / (+2.num).roundTiesEven.isInteger .assertEq True}
   }
 
 NumFloorCeilTruncTests: Test {::
@@ -64,10 +64,10 @@ NumRangeTests: Test {::
   .check{+3.num.assertInRange(+1.num ~~ (+5.num))}
   .check{+3.num.assertInRange(+1.num ~~= (+3.num))}
   .check{+3.num.assertInRange(+3.num =~~ (+5.num))}
-  .check{+0.num.clamp(+1.num =~~= (+5.num)) .assertEq (+1.num)}
-  .check{+6.num.clamp(+1.num =~~= (+5.num)) .assertEq (+5.num)}
-  .check{+3.num.clamp(+1.num =~~= (+5.num)) .assertEq (+3.num)}
-  .check{+3.num.clamp(+3.num =~~= (+3.num)) .assertEq (+3.num)}
+  .check{+0.num.clampTo(+1.num =~~= (+5.num)) .assertEq (+1.num)}
+  .check{+6.num.clampTo(+1.num =~~= (+5.num)) .assertEq (+5.num)}
+  .check{+3.num.clampTo(+1.num =~~= (+5.num)) .assertEq (+3.num)}
+  .check{+3.num.clampTo(+3.num =~~= (+3.num)) .assertEq (+3.num)}
   }
 
 NumRationalLiteralFormsTests: Test {::

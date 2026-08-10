@@ -1,0 +1,237 @@
+Nat0Imm0Succ0Test: Test {::
+    .check{5 .getSucc .assertEq 6}
+    .checkDetErr({_ -> True}, {(Math.maxNat) .getSucc})
+  }
+
+Nat0Imm0Pred0Test: Test {::
+    .check{5 .getPred .assertEq 4}
+    .checkDetErr({_ -> True}, {0 .getPred})
+  }
+
+Nat0Imm0Plus1Test: Test {::
+    .check{(2 + 3) .assertEq 5}
+    .checkDetErr({_ -> True}, {(Math.maxNat - 1) + 2})
+  }
+
+Nat0Imm0Dash1Test: Test {::
+    .check{(5 - 3) .assertEq 2}
+    .checkDetErr({_ -> True}, {0 - 1})
+  }
+
+Nat0Imm0Star1Test: Test {::
+    .check{(6 * 7) .assertEq 42}
+    .checkDetErr({_ -> True}, {(Math.maxNat) * 2})
+  }
+
+Nat0Imm0StarStar1Test: Test {::
+    .check{(2 ** 6) .assertEq 64}
+    .checkDetErr({_ -> True}, {(Math.maxNat) ** 2})
+  }
+
+Nat0Imm0Slash1Test: Test {::
+    .check{(7 / 2) .softFloat .assertEq 3.5}
+    .checkDetErr({_ -> True}, {7 / 0})
+  }
+
+Nat0Imm0GetDiv1Test: Test {::
+    .check{7 .getDiv 2 .assertEq 3}
+    .checkDetErr({_ -> True}, {7 .getDiv 0})
+  }
+
+Nat0Imm0GetRem1Test: Test {::
+    .check{7 .getRem 2 .assertEq 1}
+    .checkDetErr({_ -> True}, {7 .getRem 0})
+  }
+
+Nat0Imm0Rem1Test: Test {::
+    .check{7 .rem 2 .assertEq({::}, Opts# 1)}
+    .check{7 .rem 0 .assertEmpty}
+  }
+
+Nat0Imm0Div1Test: Test {::
+    .check{(7.getByte) .div(2) .assertEq({::}, Opts# (3.getByte))}
+    .check{(7.getByte) .div(0) .assertEmpty}
+  }
+
+Nat0Imm0ExactDiv1Test: Test {::
+    .check{6 .exactDiv 2 .assertEq({::}, Opts# 3)}
+    .check{7 .exactDiv 2 .assertEmpty}
+    .check{7 .exactDiv 0 .assertEmpty}
+  }
+
+Nat0Imm0SoftSqrt0Test: Test {::
+    .check{9 .softSqrt .assertEq 3.0}
+    .check{0 .softSqrt .assertEq 0.0}
+  }
+
+Nat0Imm0GetIndexOffset1Test: Test {::
+    .check{5 .getIndexOffset(+3) .assertEq 8}
+    .check{5 .getIndexOffset(-3) .assertEq 2}
+    .checkDetErr({_ -> True}, {5 .getIndexOffset(-10)})
+  }
+
+Nat0Imm0IndexOffset1Test: Test {::
+    .check{5 .indexOffset(+3) .assertEq({::}, Opts# 8)}
+    .check{5 .indexOffset(-10) .assertEmpty}
+  }
+
+Nat0Imm0Num0Test: Test {::
+    .check{5 .num .assertEq(5/1)}
+  }
+
+Nat0Imm0Int0Test: Test {::
+    .check{5 .int .assertEq({::}, Opts# +5)}
+    .check{(Math.maxNat) .int .assertEmpty}
+  }
+
+Nat0Imm0Byte0Test: Test {::
+    .check{5 .byte .assertEq({::}, Opts# (5.getByte))}
+    .check{300 .byte .assertEmpty}
+  }
+
+Nat0Imm0Float0Test: Test {::
+    .check{5 .float .assertEq({::}, Opts# 5.0)}
+    .check{Math.maxNat.float .assertEmpty}
+  }
+
+Nat0Imm0GetInt0Test: Test {::
+    .check{5 .getInt .assertEq +5}
+    .checkDetErr({_ -> True}, {Math.maxNat .getInt})
+  }
+
+Nat0Imm0GetByte0Test: Test {::
+    .check{5 .getByte .assertEq(5.getByte)}
+    .checkDetErr({_ -> True}, {300 .getByte})
+  }
+
+Nat0Imm0GetFloat0Test: Test {::
+    .check{5 .getFloat .assertEq 5.0}
+    .checkDetErr({_ -> True}, {Math.maxNat.getFloat})
+  }
+
+Nat0Imm0SoftInt0Test: Test {::
+    .check{5 .softInt .assertEq +5}
+    .check{(Math.maxNat) .softInt .assertEq(Math.maxInt)}
+  }
+
+Nat0Imm0SoftByte0Test: Test {::
+    .check{5 .softByte .assertEq(5.getByte)}
+    .check{300 .softByte .assertEq(255.getByte)}
+  }
+
+Nat0Imm0SoftFloat0Test: Test {::
+    .check{5 .softFloat .assertEq 5.0}
+  }
+
+Nat0Imm0AluAddWrap1Test: Test {::
+    .check{(Math.maxNat) .aluAddWrap 1 .assertEq 0}
+  }
+
+Nat0Imm0AluSubWrap1Test: Test {::
+    .check{0 .aluSubWrap 1 .assertEq(Math.maxNat)}
+  }
+
+Nat0Imm0AluMulWrap1Test: Test {::
+    .check{(Math.maxNat) .aluMulWrap 2 .assertEq(Math.maxNat - 1)}
+  }
+
+Nat0Imm0AluDiv1Test: Test {::
+    .check{7 .aluDiv 2 .assertEq 3}
+    .checkDetErr({_ -> True}, {7 .aluDiv 0})
+  }
+
+Nat0Imm0AluRem1Test: Test {::
+    .check{7 .aluRem 2 .assertEq 1}
+    .checkDetErr({_ -> True}, {7 .aluRem 0})
+  }
+
+Nat0Imm0AluShiftLeft1Test: Test {::
+    .check{1 .aluShiftLeft 3 .assertEq 8}
+  }
+
+Nat0Imm0AluShiftRight1Test: Test {::
+    .check{8 .aluShiftRight 3 .assertEq 1}
+  }
+
+Nat0Imm0AluXor1Test: Test {::
+    .check{5 .aluXor 3 .assertEq 6}
+  }
+
+Nat0Imm0AluAnd1Test: Test {::
+    .check{5 .aluAnd 3 .assertEq 1}
+  }
+
+Nat0Imm0AluOr1Test: Test {::
+    .check{5 .aluOr 2 .assertEq 7}
+  }
+
+Nat0Imm0AluInt0Test: Test {::
+    .check{(Math.maxNat) .aluInt .assertEq -1}
+  }
+
+Nat0Imm0AluByte0Test: Test {::
+    .check{257 .aluByte .assertEq(1.getByte)}
+  }
+
+Nat0Imm0InRange1Test: Test {::
+    .check{2 .inRange(1=~~=4) .assertTrue}
+    .check{5 .inRange(1=~~=4) .assertFalse}
+  }
+
+Nat0Imm0AssertInRange1Test: Test {::
+    .check{2 .assertInRange(1=~~=4)}
+    .checkDetErr({_ -> True}, {5 .assertInRange(1=~~=4)})
+  }
+
+Nat0Imm0AssertInRange2Test: Test {::
+    .check{2 .assertInRange(1=~~=4, {`custom context`})}
+  }
+
+Nat0Imm0ClampTo1Test: Test {::
+    .check{0 .clampTo(1=~~=4) .assertEq 1}
+    .check{9 .clampTo(1=~~=4) .assertEq 4}
+  }
+
+Nat0ImmTests: Test {::
+  .test Nat0Imm0Succ0Test
+  .test Nat0Imm0Pred0Test
+  .test Nat0Imm0Plus1Test
+  .test Nat0Imm0Dash1Test
+  .test Nat0Imm0Star1Test
+  .test Nat0Imm0StarStar1Test
+  .test Nat0Imm0Slash1Test
+  .test Nat0Imm0GetDiv1Test
+  .test Nat0Imm0GetRem1Test
+  .test Nat0Imm0Rem1Test
+  .test Nat0Imm0Div1Test
+  .test Nat0Imm0ExactDiv1Test
+  .test Nat0Imm0SoftSqrt0Test
+  .test Nat0Imm0GetIndexOffset1Test
+  .test Nat0Imm0IndexOffset1Test
+  .test Nat0Imm0Num0Test
+  .test Nat0Imm0Int0Test
+  .test Nat0Imm0Byte0Test
+  .test Nat0Imm0Float0Test
+  .test Nat0Imm0GetInt0Test
+  .test Nat0Imm0GetByte0Test
+  .test Nat0Imm0GetFloat0Test
+  .test Nat0Imm0SoftInt0Test
+  .test Nat0Imm0SoftByte0Test
+  .test Nat0Imm0SoftFloat0Test
+  .test Nat0Imm0AluAddWrap1Test
+  .test Nat0Imm0AluSubWrap1Test
+  .test Nat0Imm0AluMulWrap1Test
+  .test Nat0Imm0AluDiv1Test
+  .test Nat0Imm0AluRem1Test
+  .test Nat0Imm0AluShiftLeft1Test
+  .test Nat0Imm0AluShiftRight1Test
+  .test Nat0Imm0AluXor1Test
+  .test Nat0Imm0AluAnd1Test
+  .test Nat0Imm0AluOr1Test
+  .test Nat0Imm0AluInt0Test
+  .test Nat0Imm0AluByte0Test
+  .test Nat0Imm0InRange1Test
+  .test Nat0Imm0AssertInRange1Test
+  .test Nat0Imm0AssertInRange2Test
+  .test Nat0Imm0ClampTo1Test
+  }

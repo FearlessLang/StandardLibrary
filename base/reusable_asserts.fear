@@ -6,49 +6,50 @@ _AssertApprox[T]: DataType[T,T] {
       | `expected: `+(this.close(expected))
       | `delta: `+(this.close(delta))
       | `actual: `+this });
-  .assertEqDelta(expected: T, delta: T, msg: F[Str]): Void -> Assert!(
+  .assertEqDelta(expected: T, delta: T, msg: read LazyInfo): Void -> Assert!(
     this.eqDelta(expected,delta),
-    { msg#
+    { msg#.info + (""
       | `expected: `+(this.close(expected))
       | `delta: `+(this.close(delta))
-      | `actual: `+this });
+      | `actual: `+this .info)});
   }
   
 _AssertSize: {
   read .size: Nat;
 
   read .assertSize(expected: Nat): Void -> this.assertSize(expected,{``});
-  read .assertSize(expected: Nat, msg: F[Str]): Void -> Assert!(
+  read .assertSize(expected: Nat, msg: read LazyInfo): Void -> Assert!(
     this.size == expected,
-    { msg#
-      | `Expected size: `+expected
-      | `Actual size: `+(this.size) });
+    { msg#.info + (""
+      | "Expected size: "+expected
+      | "Actual size: "+(this.size) .info)});
   }
 
 _AssertImmSize: {
   imm .size: Nat;
 
   imm .assertSize(expected: Nat): Void -> this.assertSize(expected,{``});
-  imm .assertSize(expected: Nat, msg: F[Str]): Void -> Assert!(
+  imm .assertSize(expected: Nat, msg: read LazyInfo): Void -> Assert!(
     this.size == expected,
-    { msg#
+    { msg#.info + (""
       | `Expected size: `+expected
-      | `Actual size: `+(this.size) });
+      | `Actual size: `+(this.size) .info) });
   }
 
 _AssertEmpty: {
   read .isEmpty: Bool;
 
   read .assertEmpty: Void -> this.assertEmpty({``});
-  read .assertEmpty(msg: F[Str]): Void -> Assert!(
+  read .assertEmpty(msg: read LazyInfo): Void -> Assert!(
     this.isEmpty,
-    { msg# | `Expected empty` });
+    { msg#.info + ("" | "Expected empty" .info)});
   }
+
 _AssertImmEmpty: {
   imm .isEmpty: Bool;
 
   imm .assertEmpty: Void -> this.assertEmpty({``});
-  imm .assertEmpty(msg: F[Str]): Void -> Assert!(
+  imm .assertEmpty(msg: read LazyInfo): Void -> Assert!(
     this.isEmpty,
-    { msg# | `Expected empty` });
+    { msg#.info + ("" | "Expected empty" .info)});
   }

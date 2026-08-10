@@ -1,0 +1,172 @@
+Byte0Imm0Succ0Test: Test {::
+    .check{5.getByte .getSucc .assertEq(6.getByte)}
+    .checkDetErr({_ -> True}, {(255.getByte) .getSucc})
+  }
+
+Byte0Imm0Pred0Test: Test {::
+    .check{5.getByte .getPred .assertEq(4.getByte)}
+    .checkDetErr({_ -> True}, {(0.getByte) .getPred})
+  }
+
+Byte0Imm0Plus1Test: Test {::
+    .check{(2.getByte + (3.getByte)) .assertEq(5.getByte)}
+    .checkDetErr({_ -> True}, {(255.getByte) + (1.getByte)})
+  }
+
+Byte0Imm0Dash1Test: Test {::
+    .check{5.getByte - (3.getByte) .assertEq(2.getByte)}
+    .checkDetErr({_ -> True}, {0.getByte - (1.getByte)})
+  }
+
+Byte0Imm0Star1Test: Test {::
+    .check{10.getByte * (5.getByte) .assertEq(50.getByte)}
+    .checkDetErr({_ -> True}, {100.getByte * (3.getByte)})
+  }
+
+Byte0Imm0StarStar1Test: Test {::
+    .check{2.getByte ** (6.getByte) .assertEq(64.getByte)}
+    .checkDetErr({_ -> True}, {2.getByte ** (8.getByte)})
+  }
+
+Byte0Imm0Slash1Test: Test {::
+    .check{7.getByte / 2 .getFloat .assertEq 3.5}
+    .checkDetErr({_ -> True}, {7.getByte / 0})
+  }
+
+Byte0Imm0GetDiv1Test: Test {::
+    .check{(7.getByte) .getDiv 2 .assertEq(3.getByte)}
+    .checkDetErr({_ -> True}, {7.getByte .getDiv 0})
+  }
+
+Byte0Imm0GetRem1Test: Test {::
+    .check{7.getByte .getRem 2 .assertEq(1.getByte)}
+    .checkDetErr({_ -> True}, {7.getByte .getRem 0})
+  }
+
+Byte0Imm0Rem1Test: Test {::
+    .check{7.getByte .rem 2 .assertEq({::}, Opts# (1.getByte))}
+    .check{7.getByte .rem 0 .assertEmpty}
+  }
+
+Byte0Imm0Div1Test: Test {::
+    .check{7.getByte .div 2 .assertEq({::}, Opts# (3.getByte))}
+    .check{7.getByte .div 0 .assertEmpty}
+  }
+
+Byte0Imm0ExactDiv1Test: Test {::
+    .check{6.getByte .div(2) .assertEq({::}, Opts#(3.getByte))}
+    .check{7.getByte .div(2) .assertEmpty}
+    .check{7.getByte .div(0) .assertEmpty}
+  }
+
+Byte0Imm0SoftSqrt0Test: Test {::
+    .check{9.getByte .softSqrt .assertEq 3.0}
+    .check{0.getByte .softSqrt .assertEq 0.0}
+  }
+
+Byte0Imm0Nat0Test: Test {::
+    .check{Math.maxByte .nat .assertEq 255}
+  }
+
+Byte0Imm0Int0Test: Test {::
+    .check{Math.maxByte .int .assertEq +255}
+  }
+
+Byte0Imm0Float0Test: Test {::
+    .check{200.getByte .float .assertEq 200.0}
+  }
+
+Byte0Imm0Num0Test: Test {::
+    .check{200.getByte .num .assertEq(200/1)}
+  }
+
+Byte0Imm0AluAddWrap1Test: Test {::
+    .check{250.getByte .aluAddWrap(10.getByte) .assertEq(4.getByte)}
+  }
+
+Byte0Imm0AluSubWrap1Test: Test {::
+    .check{1.getByte .aluSubWrap(2.getByte) .assertEq(255.getByte)}
+  }
+
+Byte0Imm0AluMulWrap1Test: Test {::
+    .check{(200.getByte) .aluMulWrap(2.getByte) .assertEq(144.getByte)}
+  }
+
+Byte0Imm0AluDiv1Test: Test {::
+    .check{7.getByte .aluDiv(2.getByte) .assertEq(3.getByte)}
+    .checkDetErr({_ -> True}, {(7.getByte) .aluDiv(0.getByte)})
+  }
+
+Byte0Imm0AluRem1Test: Test {::
+    .check{7.getByte .aluRem(2.getByte) .assertEq(1.getByte)}
+    .checkDetErr({_ -> True}, {7.getByte .aluRem(0.getByte)})
+  }
+
+Byte0Imm0AluShiftLeft1Test: Test {::
+    .check{1.getByte .aluShiftLeft 3 .assertEq(8.getByte)}
+    .check{1.getByte .aluShiftLeft 8 .assertEq(1.getByte)}
+  }
+
+Byte0Imm0AluShiftRight1Test: Test {::
+    .check{8.getByte .aluShiftRight 3 .assertEq(1.getByte)}
+  }
+
+Byte0Imm0AluXor1Test: Test {::
+    .check{5.getByte .aluXor(3.getByte) .assertEq(6.getByte)}
+  }
+
+Byte0Imm0AluAnd1Test: Test {::
+    .check{5.getByte .aluAnd(3.getByte) .assertEq(1.getByte)}
+  }
+
+Byte0Imm0AluOr1Test: Test {::
+    .check{(5.getByte) .aluOr(2.getByte) .assertEq(7.getByte)}
+  }
+
+Byte0Imm0InRange1Test: Test {::
+    .check{2.getByte .inRange(1.getByte=~~=(4.getByte)) .assertTrue}
+    .check{5.getByte .inRange(1.getByte=~~=(4.getByte)) .assertFalse}
+  }
+
+Byte0Imm0AssertInRange1Test: Test {::
+    .check{2.getByte .assertInRange(1.getByte=~~=(4.getByte))}
+    .checkDetErr({_ -> True}, {5.getByte .assertInRange(1.getByte=~~=(4.getByte))})
+  }
+
+Byte0Imm0ClampTo1Test: Test {::
+    .check{0.getByte .clampTo(1.getByte=~~=(4.getByte)) .assertEq(1.getByte)}
+    .check{9.getByte .clampTo(1.getByte=~~=(4.getByte)) .assertEq(4.getByte)}
+  }
+
+Byte0ImmTests: Test {::
+  .test Byte0Imm0Succ0Test
+  .test Byte0Imm0Pred0Test
+  .test Byte0Imm0Plus1Test
+  .test Byte0Imm0Dash1Test
+  .test Byte0Imm0Star1Test
+  .test Byte0Imm0StarStar1Test
+  .test Byte0Imm0Slash1Test
+  .test Byte0Imm0GetDiv1Test
+  .test Byte0Imm0GetRem1Test
+  .test Byte0Imm0Rem1Test
+  .test Byte0Imm0Div1Test
+  .test Byte0Imm0ExactDiv1Test
+  .test Byte0Imm0SoftSqrt0Test
+  .test Byte0Imm0Nat0Test
+  .test Byte0Imm0Int0Test
+  .test Byte0Imm0Float0Test
+  .test Byte0Imm0Num0Test
+  .test Byte0Imm0AluAddWrap1Test
+  .test Byte0Imm0AluSubWrap1Test
+  .test Byte0Imm0AluMulWrap1Test
+  .test Byte0Imm0AluDiv1Test
+  .test Byte0Imm0AluRem1Test
+  .test Byte0Imm0AluShiftLeft1Test
+  .test Byte0Imm0AluShiftRight1Test
+  .test Byte0Imm0AluXor1Test
+  .test Byte0Imm0AluAnd1Test
+  .test Byte0Imm0AluOr1Test
+  .test Byte0Imm0InRange1Test
+  .test Byte0Imm0AssertInRange1Test
+  .test Byte0Imm0ClampTo1Test
+  }

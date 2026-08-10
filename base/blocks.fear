@@ -55,7 +55,7 @@ Block[R:*]: Sealed {
 BlockIf[R:*]: {
   mut .return(a: mut MF[R]): mut Block[R];
   mut .do(r: mut MF[Void]): mut Block[R];
-  mut .error(info: mut MutLazyInfo): mut Block[R];
+  mut .error(info: LazyInfo): mut Block[R];
   mut .done: mut Block[Void];
   }
 
