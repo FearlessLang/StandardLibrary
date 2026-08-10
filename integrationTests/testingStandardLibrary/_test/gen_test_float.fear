@@ -1,15 +1,15 @@
 Float0Imm0Succ0Test: Test {::
-    .check{1.0 .succ .assertGt 1.0}
-    .check{(-0.0) .succ .assertEq(0.0.succ)}
-    .checkDetErr({_ -> True}, {Math.nan .succ})
-    .checkDetErr({_ -> True}, {Math.inf .succ})
+    .check{1.0 .getSucc .assertGt 1.0}
+    .check{(-0.0) .getSucc .assertEq(0.0.getSucc)}
+    .checkDetErr({_ -> True}, {Math.nan .getSucc})
+    .checkDetErr({_ -> True}, {Math.inf .getSucc})
   }
 
 Float0Imm0Pred0Test: Test {::
-    .check{1.0 .pred .assertLt 1.0}
-    .check{0.0 .pred .assertEq(0.0.succ * -1.0)}
-    .checkDetErr({_ -> True}, {Math.nan .pred})
-    .checkDetErr({_ -> True}, {Math.negInf .pred})
+    .check{1.0 .getPred .assertLt 1.0}
+    .check{0.0 .getPred .assertEq(0.0.getSucc * -1.0)}
+    .checkDetErr({_ -> True}, {Math.nan .getPred})
+    .checkDetErr({_ -> True}, {Math.negInf .getPred})
   }
 
 Float0Imm0Plus1Test: Test {::

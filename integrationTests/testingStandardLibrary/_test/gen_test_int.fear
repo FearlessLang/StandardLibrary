@@ -1,11 +1,11 @@
 Int0Imm0Succ0Test: Test {::
-    .check{+5 .succ .assertEq +6}
-    .checkDetErr({_ -> True}, {(Math.maxInt) .succ})
+    .check{+5 .getSucc .assertEq +6}
+    .checkDetErr({_ -> True}, {(Math.maxInt) .getSucc})
   }
 
 Int0Imm0Pred0Test: Test {::
-    .check{+5 .pred .assertEq +4}
-    .checkDetErr({_ -> True}, {(Math.minInt) .pred})
+    .check{+5 .getPred .assertEq +4}
+    .checkDetErr({_ -> True}, {(Math.minInt) .getPred})
   }
 
 Int0Imm0Plus1Test: Test {::

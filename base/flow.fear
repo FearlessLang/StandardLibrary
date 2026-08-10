@@ -46,7 +46,7 @@ Flow[E:*]: {
   mut .none(f: read F[E, Bool]): Bool;
   mut .get:   E;//get the first element if size==1, throws otherwise
   mut .opt:   Opt[E];//opt of the first element if size in {0,1} throws otherwise
-  mut .first: Opt[E]; //opt of the first element, never throws
+  mut .first: Opt[E]; //opt of the first element
   mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut Flow[R] -> 
     this.map(f)
       .filter{r -> r.isSome}

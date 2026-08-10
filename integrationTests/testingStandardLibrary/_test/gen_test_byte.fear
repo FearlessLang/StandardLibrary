@@ -1,11 +1,11 @@
 Byte0Imm0Succ0Test: Test {::
-    .check{5.getByte .succ .assertEq(6.getByte)}
-    .checkDetErr({_ -> True}, {(255.getByte) .succ})
+    .check{5.getByte .getSucc .assertEq(6.getByte)}
+    .checkDetErr({_ -> True}, {(255.getByte) .getSucc})
   }
 
 Byte0Imm0Pred0Test: Test {::
-    .check{5.getByte .pred .assertEq(4.getByte)}
-    .checkDetErr({_ -> True}, {(0.getByte) .pred})
+    .check{5.getByte .getPred .assertEq(4.getByte)}
+    .checkDetErr({_ -> True}, {(0.getByte) .getPred})
   }
 
 Byte0Imm0Plus1Test: Test {::

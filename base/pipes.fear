@@ -1,10 +1,16 @@
-/// A pipable operation, implements pipe so you can pipe function into other functions,
-/// A very FP flavoured object
+/// An operation is a pipeable function that takes an S -> R, and can be piped into other operations.
+/// This can be useful to improve code readability by avoiding nested function calls.
+/// This allows for function piping from functional languages, is similar to extension methods from OOP languages
+/// Examples:
+//>   .check{Math.ln(Math.asin(Math.clamp({::}, -1.0, +1.0, 12.0))#)
+//>     .assertEq(12.0 |> {Math.clamp({::}, -1.0, +1.0, ::)} |> {Math.asin :: #} |> Math.ln)}
 Operation[S:**, R:**]: Pipe[Operation[S, R]] {
   .close -> this;
   mut #(source: S): R
   }
 
+/// A interface to allow for piping of operations on a source S.
+/// In general it assumed `.close` returns this, but it is not required.
 Pipe[S:*]: {
   mut  .close: mut  S;
   read .close: read S;

@@ -26,10 +26,10 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
   private static byte clampToByte(Object o) {
     return (byte) (((Byte$0Instance)o).val & 255);
   }
+  public static byte unwrap(Object p0) {return ((Byte$0Instance) p0).val;}
   private static int u8(byte b){ return Byte.toUnsignedInt(b); }
   private static int u8(Object o){ return u8(((Byte$0Instance)o).val); }
   private static byte b(Object o){ return ((Byte$0Instance)o).val; }
-
   private static long natBits(Object o){ return ((Nat$0Instance)o).val(); }
 
   private static byte addChecked(byte a, byte b){
@@ -49,27 +49,19 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
     return (byte)r;
   }
 
-  public static byte unwrap(Object p0) {
-    return ((Byte$0Instance) p0).val;
-  }
-
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,b(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
-
   @Override public Object imm$$star_star$1(Object p0) {
     byte power = b(p0);
     if (power == 0) { return Byte$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-
     byte result = 1;
     for (int i = 0; i < power; i++) {
       result = mulChecked(result, this.val);
     }
-
     return Byte$0Instance.instance(result);
   }
-
   @Override public Object imm$div$1(Object p0){
     long d= natBits(p0);
     if (d == 0L){ return optEmpty(); }
@@ -77,42 +69,32 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
     if (Long.remainderUnsigned(x, d) != 0L){ return optEmpty(); }
     return optSome(instance((byte)(x / d)));
   }
-
   @Override public Object imm$rem$1(Object p0){
     long d= natBits(p0);
     if (d == 0){ return optEmpty(); }
-    return optSome(instance(
-            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
-    ));
+    return optSome(instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)));
   }
-
   @Override public Object imm$getDiv$1(Object p0){
     long d= natBits(p0);
 
     if (d == 0L){ throw err("Byte.div: d==0"); }
     return instance((byte)(u8(val) / d));
   }
-
   /// for a % b = c, c <= a.
   /// Therefore it is safe to cast this % nat to byte
   @Override public Object imm$getRem$1(Object p0){
     long d= Nat$0Instance.unwrap(p0);
     if (d == 0){ throw err("Byte.rem: d==0"); }
-    return instance(
-            (byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)
-    );
+    return instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d));
   }
-
   @Override public Object imm$softSqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)u8(val))); }
   @Override public Object imm$nat$0(){ return Nat$0Instance.instance(u8(val)); }
   @Override public Object imm$int$0(){ return Int$0Instance.instance(u8(val)); }
   @Override public Object imm$float$0(){ return Float$0Instance.instance((double)u8(val)); }
   @Override public Object imm$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(u8(val)),BigInteger.ONE); }
-
   @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toString(u8(val))); }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance((byte)(val + b(p0))); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance((byte)(val - b(p0))); }
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance((byte)(val * b(p0))); }
@@ -137,11 +119,7 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
   @Override public Object imm$aluXor$1(Object p0){ return instance((byte)(val ^ b(p0))); }
   @Override public Object imm$aluAnd$1(Object p0){ return instance((byte)(val & b(p0))); }
   @Override public Object imm$aluOr$1(Object p0){ return instance((byte)(val | b(p0))); }
-
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Integer.compare(u8(p0),u8(p1)),p2); }
-
-
-
   @Override public Object imm$norm$0(){ return this; }
   @Override public Object imm$get$0(){ return this; }
 }

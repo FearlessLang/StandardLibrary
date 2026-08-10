@@ -46,19 +46,18 @@ public record UStr$0Instance(int[] val) implements UStr$0{
   @Override public Object imm$isStr$0(){ return bool(isStr(val)); }
 
   @Override public Object imm$getStr$0(){
-    if (!isStr(val)) {
-      throw err("Cannot convert this "+ Arrays.toString(this.val) + " into a valid fearless Str.");
-    }
-
-    return Str$0Instance.instance(new String(val,0,val.length));
+    if (isStr(val)) { return Str$0Instance.instance(new String(val,0,val.length)); }
+    throw err("Cannot convert this "+ Arrays.toString(this.val)
+            + " into a valid fearless Str as it contains invalid unicode characters: "
+            + Arrays.stream(this.val).filter(c -> !isStr(c)).boxed().toList());
   }
   @Override public Object imm$str$0(){
     return isStr(val)
-            ? optSome(Str$0Instance.instance(new String(val,0,val.length)))
-            : optEmpty();
+      ? optSome(Str$0Instance.instance(new String(val,0,val.length)))
+      : optEmpty();
   }
   @Override public Object imm$flow$0(){
-    return new Flow$1Instance(Arrays.stream(val).mapToObj(e->Nat$0Instance.instance((long)e)));
+    return Flow$1Instance.of(Arrays.stream(val).mapToObj(e->Nat$0Instance.instance((long)e)));
   }
   @Override public Object imm$equalRepr$1(Object p0){
     return bool(Arrays.equals(val,((UStr$0Instance)p0).val));

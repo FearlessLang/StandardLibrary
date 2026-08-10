@@ -5,20 +5,17 @@ import static base.Util.*;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
-
+// Cache the integers from -128 to 127, inclusive.
 class NumCache {
   private static final int min = -128;
   private static final int max = 127;
   private static final BigInteger maxInt = BigInteger.valueOf(Integer.MAX_VALUE);
   private static final BigInteger minInt = BigInteger.valueOf(Integer.MIN_VALUE);
-
-
-
-  private final static Num$0Instance[] intCache = LongStream.rangeClosed(min, max)
+  private static final Num$0Instance[] intCache = LongStream.rangeClosed(min, max)
           .mapToObj(l -> new Num$0Instance(BigInteger.valueOf(l), BigInteger.ONE))
           .toArray(Num$0Instance[]::new);
 
-  static Num$0Instance getInt(int i) {
+  static Num$0Instance get(int i) {
     if (i < min || i > max) {
       return new Num$0Instance(BigInteger.valueOf(i), BigInteger.ONE);
     }
@@ -27,7 +24,7 @@ class NumCache {
     return intCache[index];
   }
 
-  static boolean isInteger(BigInteger numerator, BigInteger denominator) {
+  static boolean inCache(BigInteger numerator, BigInteger denominator) {
     if (!denominator.equals(BigInteger.ONE)) {
       return false;
     }
@@ -36,16 +33,14 @@ class NumCache {
 }
 
 public record Num$0Instance(BigInteger numerator, BigInteger denominator) implements Num$0,Norm$1 {
-  public static Num$0 instance(BigInteger numerator, BigInteger denominator) {
-    // if is a small enough integer
-    if (NumCache.isInteger(numerator, denominator)) {
-      return NumCache.getInt(numerator.intValue());
-    }
+  private static final BigInteger one= BigInteger.ONE;
+  private static final BigInteger zero= BigInteger.ZERO;
+  private static final BigInteger minInt= BigInteger.valueOf(Int$0Instance.MIN_VALUE);
+  private static final BigInteger maxInt= BigInteger.valueOf(Int$0Instance.MAX_VALUE);
+  private static final BigInteger maxNat= one.shiftLeft(64).subtract(one);
+  private static final BigInteger maxByte= BigInteger.valueOf(255);
 
-    return new Num$0Instance(numerator, denominator);
-  }
-
-  public Num$0Instance{
+  public Num$0Instance {
     if (denominator.signum() == 0){ throw err("Num: denom==0"); }
     if (numerator.signum() == 0){ numerator = zero; denominator = one; }
     else{
@@ -55,15 +50,11 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
       if (denominator.signum() < 0){ numerator = numerator.negate(); denominator = denominator.negate(); }
     }
   }
-  private static final BigInteger one= BigInteger.ONE;
-  private static final BigInteger zero= BigInteger.ZERO;
-  private static final BigInteger minInt= BigInteger.valueOf(Integer.MIN_VALUE);
-  private static final BigInteger maxInt= BigInteger.valueOf(Integer.MAX_VALUE);
-  private static final BigInteger maxNat= one.shiftLeft(64).subtract(one);
-  private static final BigInteger maxByte= BigInteger.valueOf(255);
-
+  public static Num$0 instance(BigInteger numerator, BigInteger denominator) {
+    if (NumCache.inCache(numerator, denominator)) { return NumCache.get(numerator.intValue()); }
+    return new Num$0Instance(numerator, denominator);
+  }
   private static Num$0Instance num(Object o){ return (Num$0Instance)o; }
-
   static int cmp(Num$0Instance a, Num$0Instance b){
     return a.numerator.multiply(b.denominator).compareTo(b.numerator.multiply(a.denominator));
   }
@@ -109,9 +100,8 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
     var o= num(p0);
     return instance(numerator.multiply(o.numerator), denominator.multiply(o.denominator));
   }
-
-  /// exponent >= 0;
   public static BigInteger pow(BigInteger n, long exponent) {
+    assert exponent >= 0;
     if (exponent <= Integer.MAX_VALUE) {
       // is small enough to safely cast
       return n.pow((int) exponent);
@@ -126,22 +116,18 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
     for (int i = 0; i < timesToDecompose; i++) {
       result = result.multiply(n.pow(Integer.MAX_VALUE));
     }
-
     return result.multiply(n.pow(remainder));
   }
-
   @Override public Object imm$$star_star$1(Object p0) {
     long exponent = ((Int$0Instance) p0).val();
-    if (exponent == 0) {
-      return NumCache.getInt(1);
-    }
+    if (exponent == 0) {return NumCache.get(1);}
+    if (exponent == 1) {return this;}
     if (exponent > 0){
       return Num$0Instance.instance(
               pow(numerator, exponent), pow(denominator, exponent)
       );
     }
     // Since negative flip fraction
-
     if (exponent == Long.MIN_VALUE) {
       // Since |Long.MIN_VALUE| is too large to fit in long
       return new Num$0Instance(
@@ -149,13 +135,11 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
               pow(numerator, Long.MAX_VALUE).multiply(numerator)
       );
     }
-
     return new Num$0Instance(
             pow(denominator, Math.abs(exponent)),
             pow(numerator, Math.abs(exponent))
     );
   }
-
 
   @Override public Object imm$$slash$1(Object p0){
     var o= num(p0);
@@ -168,7 +152,7 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
   @Override public Object imm$trunc0$0(){ return instance(trunc0Z(numerator, denominator), one); }
 
   @Override public Object imm$sign$0() {
-    return NumCache.getInt(numerator.signum() * denominator.signum());
+    return NumCache.get(numerator.signum() * denominator.signum());
   }
 
   @Override public Object imm$round$0(){
@@ -177,7 +161,7 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
     var q= n.divide(denominator);
     var r= n.remainder(denominator);
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
-    if (c >= 0 ){ q= q.add(one); } // tie -> bump if odd
+    if (c >= 0){ q= q.add(one); } // always round up
     if (numerator.signum() < 0){ q= q.negate(); }
     return instance(q,one);
   }
@@ -195,107 +179,65 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
   }
 
   public boolean isRepresentableAsDouble() {
-    // relies on the assumption that all Num's that are numerically equal are the same fraction
+    // Works as all Num's that are numerically equal are the same fraction
     // i.e. Num(1, 2).equals(Num(2, 4));
     return Float$0Instance.numExactFinite(
             numerator.doubleValue() / denominator.doubleValue()
     ).equals(this);
   }
-  public boolean isInteger() {
-    return this.denominator.equals(one);
+  public boolean isInteger() { return this.denominator.equals(one); }
+  public boolean isIntegerInRange(BigInteger min, BigInteger max) {
+    return this.isInteger() && this.numerator.compareTo(min) >= 0 && this.numerator.compareTo(max) <= 0;
   }
   @Override public Object imm$isInteger$0(){ return bool(this.isInteger()); }
-
-   @Override public Object imm$int$0() {
-    if (!this.isInteger()) {
-      return optEmpty();
-    }
-    if (this.numerator.compareTo(maxInt) > 0 || this.numerator.compareTo(minInt) < 0) {
-      return optEmpty();
-    }
-
-    return optSome(Int$0Instance.instance(this.numerator.longValue()));
+  @Override public Object imm$int$0() {
+    // A num can be converted into an int if it an integer in [minInt, maxInt];
+    if (this.isIntegerInRange(minInt, maxInt)) {return optSome(Int$0Instance.instance(this.numerator.longValue()));}
+    return optEmpty();
   }
-
-
   @Override public Object imm$nat$0() {
-    if (!this.isInteger() || this.numerator.compareTo(maxNat) > 0 || this.numerator.compareTo(zero) < 0) {
-      return optEmpty();
+    if (this.isIntegerInRange(zero, maxNat)) {
+      // Numbers larger than Long.MAX_VALUE overflow and thus end up as the correct unsigned value.
+      return optSome(Nat$0Instance.instance(this.numerator.longValue()));
     }
-    // correct handles unsigned integer apparently
-    return optSome(Nat$0Instance.instance(this.numerator.longValue()));
+    return optEmpty();
   }
-
-
-
   @Override public Object imm$byte$0() {
-    if (!this.isInteger() || this.numerator.compareTo(maxByte) > 0 || this.numerator.compareTo(zero) < 0) {
-      return optEmpty();
-    }
-    return optSome(Byte$0Instance.instance(this.numerator.byteValue()));
+    if (this.isIntegerInRange(zero, maxByte)) {return optSome(Byte$0Instance.instance(this.numerator.byteValue()));}
+    return optEmpty();
   }
-
-
   @Override public Object imm$float$0(){
-    if (!isRepresentableAsDouble()) {
-      return optEmpty();
-    }
-    return optSome(Float$0Instance.instance(
-            numerator.doubleValue() / denominator.doubleValue()
-    ));
+    if (!isRepresentableAsDouble()) { return optEmpty(); }
+    return optSome(Float$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
   }
-
+  public void assertInteger(String message) {
+    if (!this.isInteger()) {throw err(message);}
+  }
+  public void assertInRange(String message, BigInteger min, BigInteger max) {
+    if (this.numerator.compareTo(min) < 0 || this.numerator.compareTo(max) > 0) {
+      throw err(message);
+    }
+  }
   @Override public Object imm$getInt$0() {
-    if (!this.isInteger()) {
-      throw err(
-              "Num.getInt: cannot convert Num "
-                      + this.asString()
-                      + " to Int as the denominator is not 1"
-      );
-    }
-    if (this.numerator.compareTo(maxInt) > 0 || this.numerator.compareTo(minInt) < 0) {
-      throw err("Num.getInt: cannot convert Num "
-              + this.asString()
-              + " to Int as the numerator is too large to be represented."
-      );
-    }
-
+    assertInteger("Num.getInt: cannot convert Num " + this.asString() + " to Int as the denominator is not 1.");
+    // We know the denominator must be one.
+    assertInRange(
+      "Num.getInt: cannot convert Num " + this.asString() + " to Int as the numerator is not in the range ["+minInt+", "+maxInt+"]",
+      minInt, maxInt);
     return Int$0Instance.instance(this.numerator.longValue());
   }
 
-
   @Override public Object imm$getNat$0() {
-    if (!this.isInteger()) {
-      throw err(
-              "Num.getInt: cannot convert Num "
-                      + this.asString()
-                      + " to Nat as the denominator is not 1"
-      );
-    }
-    if (this.numerator.compareTo(maxNat) > 0 || this.numerator.compareTo(zero) < 0) {
-      throw err("Nat.getInt: cannot convert Num"
-              + this.asString()
-              + " to Nat as the numerator is too large to be represented."
-      );
-    }
+    assertInteger("Num.getNat: cannot convert Num " + this.asString() + " to Nat as the denominator is not 1.");
+    assertInRange("Num.getNat: cannot convert Num " + this.asString() + " to Nat as the numerator is not in the range [0, "+maxNat+"]", zero, maxNat);
     return Nat$0Instance.instance(this.numerator.longValue());
   }
 
 
   @Override public Object imm$getByte$0() {
-    if (!this.isInteger()) {
-      throw err(
-              "Num.getInt: cannot convert Num "
-                      + this.asString()
-                      + " to Byte as the denominator is not 1"
-      );
-    }
-    if (this.numerator.compareTo(maxByte) > 0 || this.numerator.compareTo(zero) < 0) {
-      throw err("Nat.getInt: cannot convert Num"
-              + this.asString()
-              + " to Byte as the numerator is too large to be represented."
-      );
-    }
+    assertInteger("Num.getInt: cannot convert Num " + this.asString() + " to Byte as the denominator is not 1.");
+    assertInRange("Nat.getInt: cannot convert Num " + this.asString() + " to Byte as the numerator is not in the range [0, "+maxByte+"]",
+      zero, maxByte);
     return Byte$0Instance.instance(this.numerator.byteValue());
   }
 
@@ -322,9 +264,6 @@ public record Num$0Instance(BigInteger numerator, BigInteger denominator) implem
   @Override public Object imm$softFloat$0(){
     return Float$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
   }
-
-
-
   String asString() {
     String sn= (numerator.signum() < 0 ? "" : "+")+ numerator;
     return sn+"/"+ denominator;

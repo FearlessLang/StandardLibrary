@@ -1,15 +1,15 @@
 /// Num: unlimited-precision rational (exact arithmetic).
 Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 
-  /// `this + x` returns the exact sum of `this` and `x`. Never throws.
+  /// `this + x` returns the exact sum of `this` and `x`.
   //>   .check{2/3 + (3/2) .assertEq(13/6)}
   +(x: Num): Num;
 
-  /// `this - x` returns the exact difference of `this` and `x`. Never throws.
+  /// `this - x` returns the exact difference of `this` and `x`.
   //>   .check{5/1 - (3/1) .assertEq(2/1)}
   -(x: Num): Num;
 
-  /// `this * x` returns the exact product of `this` and `x`. Never throws.
+  /// `this * x` returns the exact product of `this` and `x`.
   //>   .check{2/3 * (3/7) .assertEq(6/21)}
   *(x: Num): Num;
 
@@ -115,22 +115,22 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   .getFloat: Float;
 
   /// `this.softInt` converts `this` to an `Int` by truncating towards `0`, then clamping into
-  /// `[minInt, maxInt]`. Never throws.
+  /// `[minInt, maxInt]`.
   //>   .check{7 / 2 .softInt .assertEq +3}
   .softInt: Int;
 
   /// `this.softNat` converts `this` to a `Nat` by truncating towards `0`, then clamping into
-  /// `[0, maxNat]`. Never throws.
+  /// `[0, maxNat]`.
   //>   .check{7 / 2 .softNat .assertEq 3}
   //>   .check{-5/1 .softNat .assertEq 0}
   .softNat: Nat;
 
   /// `this.softByte` converts `this` to a `Byte` by truncating towards `0`, then clamping into
-  /// `[0, maxByte]`. Never throws.
+  /// `[0, maxByte]`.
   //>   .check{7 / 2 .softByte .assertEq(3.getByte)}
   .softByte: Byte;
 
-  /// `this.softFloat` converts `this` to the closest representable `Float`. Never throws.
+  /// `this.softFloat` converts `this` to the closest representable `Float`.
   //>   .check{1 / 3 .softFloat .assertEq +0.33333299999999999041477849459624849259853363037109375}
   .softFloat: Float;
 
@@ -198,11 +198,11 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   .inRange(range: NumRange): Bool -> range.contains(this);
 
   /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
-  //>   .check{2 .assertInRange(1=~~=4)}
+  //>   .check{2/1 .assertInRange((1/1)=~~=(4/1))}
   .assertInRange(range: NumRange): Void -> this.assertInRange(range, {``});
 
   /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.
-  //>   .check{2 .assertInRange(1=~~=4, {`custom context`})}
+  //>   .check{(2/1) .assertInRange((1/1)=~~=(4/1), {`custom context`})}
   .assertInRange(range: NumRange, msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
     { msg#.info + (`Expected in range: `+ (range.str)
