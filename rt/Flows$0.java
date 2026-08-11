@@ -6,30 +6,30 @@ import java.util.stream.Stream;
 import static base.Util.*;
 
 public interface Flows$0 extends Sealed$0{
-  default Object imm$$hash$0(){ return new Flow$1Instance(Stream.empty()); }
-  default Object imm$$hash$1(Object p0){ return new Flow$1Instance(Stream.of(p0)); }
-  default Object imm$$hash$2(Object p0,Object p1){ return new Flow$1Instance(Stream.of(p0,p1)); }
-  default Object imm$$hash$3(Object p0,Object p1,Object p2){ return new Flow$1Instance(Stream.of(p0,p1,p2)); }
-  default Object imm$$hash$4(Object p0,Object p1,Object p2,Object p3){ return new Flow$1Instance(Stream.of(p0,p1,p2,p3)); }
-  default Object imm$$hash$5(Object p0,Object p1,Object p2,Object p3, Object p4){ return new Flow$1Instance(Stream.of(p0,p1,p2,p3,p4)); }
-  default Object imm$$hash$6(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5){ return new Flow$1Instance(Stream.of(p0,p1,p2,p3,p4,p5)); }
-  default Object imm$$hash$7(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6){ return new Flow$1Instance(Stream.of(p0,p1,p2,p3,p4,p5,p6)); }
-  default Object imm$$hash$8(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7){ return new Flow$1Instance(Stream.of(p0,p1,p2,p3,p4,p5,p6,p7)); }
-  default Object imm$$hash$9(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){ return new Flow$1Instance(Stream.of(p0,p1,p2,p3,p4,p5,p6,p7,p8)); }
-  default Object imm$$hash$10(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){ return new Flow$1Instance(Stream.of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9)); }
-  default Object imm$fromMutList$1(Object p0){ return new Flow$1Instance(List$1Instance.asJava(p0).stream()); }//sequential
-  default Object imm$fromMutList$2(Object p0,Object p1){ return new Flow$1Instance(List$1Instance.asJava(p0).stream()); }//maybeparallel
-  default Object imm$fromReadList$1(Object p0){ return new Flow$1Instance(List$1Instance.asJava(p0).stream()); }//maybeparallel
-  default Object imm$fromImmList$1(Object p0){ return new Flow$1Instance(List$1Instance.asJava(p0).stream()); }//maybeparallel
+  default Object imm$$hash$0(){ return Flow$1Instance.of(Stream.empty()); }
+  default Object imm$$hash$1(Object p0){ return Flow$1Instance.of(p0); }
+  default Object imm$$hash$2(Object p0,Object p1){ return Flow$1Instance.of(p0,p1); }
+  default Object imm$$hash$3(Object p0,Object p1,Object p2){ return Flow$1Instance.of(p0,p1,p2); }
+  default Object imm$$hash$4(Object p0,Object p1,Object p2,Object p3){ return Flow$1Instance.of(p0,p1,p2,p3); }
+  default Object imm$$hash$5(Object p0,Object p1,Object p2,Object p3, Object p4){ return Flow$1Instance.of(p0,p1,p2,p3,p4); }
+  default Object imm$$hash$6(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5){ return Flow$1Instance.of(p0,p1,p2,p3,p4,p5); }
+  default Object imm$$hash$7(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6){ return Flow$1Instance.of(p0,p1,p2,p3,p4,p5,p6); }
+  default Object imm$$hash$8(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7){ return Flow$1Instance.of(p0,p1,p2,p3,p4,p5,p6,p7); }
+  default Object imm$$hash$9(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){ return Flow$1Instance.of(p0,p1,p2,p3,p4,p5,p6,p7,p8); }
+  default Object imm$$hash$10(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){ return Flow$1Instance.of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9); }
+  default Object imm$fromMutList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//sequential
+  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//maybeparallel
+  default Object imm$fromReadList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//maybeparallel
+  default Object imm$fromImmList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//maybeparallel
 
   Flows$0 instance= new Flows$0(){};
 }
 
 record Flow$1Instance(Stream<Object> s) implements Flow$1{
   private static Error consumed(){ return err("Flow consumed"); }
-  static Flow$1Instance of(Stream<Object> stream) {
-    return new Flow$1Instance(stream);
-  }
+  static Flow$1Instance of(Object... args){ return Flow$1Instance.of(Stream.of(args)); }
+  static Flow$1Instance of(Stream<Object> stream) {return new Flow$1Instance(stream);}
+
   @Override public Object mut$map$1(Object p0){
     try{ return new Flow$1Instance(s.map(e->callF$2(p0,e))); }
     catch(IllegalStateException e){ throw consumed(); }
@@ -43,9 +43,9 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$$plus_plus$1(Object o){
-  //Note: all those try catches are relying on the JVM enforcing the stream consumptions,
-  //but in the standard it is not guaranteed that it is checked. We need to add tests to all of the flow methods
-  //to check that the current JVM does enforce it.
+    //Note: all those try catches are relying on the JVM enforcing the stream consumptions,
+    //but in the standard it is not guaranteed that it is checked. We need to add tests to all of the flow methods
+    //to check that the current JVM does enforce it.
     var other= ((Flow$1Instance)o).s;
     try{ return new Flow$1Instance(Stream.concat(s, other)); }
     catch(IllegalStateException e){ throw consumed(); }    

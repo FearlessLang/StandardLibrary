@@ -32,8 +32,8 @@ final class EList$1Instance implements EList$1{
   @Override public Object mut$clearAnd$0(){ xs.clear(); return this; }
   @Override public Object mut$get$1(Object p0){ return xs.get(idx(p0)); }
   @Override public Object read$size$0(){ return intToNat(xs.size()); }
-  @Override public Object mut$seqFlow$0(){ return new Flow$1Instance(drain().stream()); }
-  @Override public Object mut$flow$1(Object p0){ return new Flow$1Instance(drain().stream()); }//could be parallel
+  @Override public Object mut$seqFlow$0(){ return Flow$1Instance.of(drain().stream()); }
+  @Override public Object mut$flow$1(Object p0){ return Flow$1Instance.of(drain().stream()); }//could be parallel
   @Override public Object mut$list$0(){ return List$1Instance.wrap(drain()); }
   @Override public Object mut$sort$1(Object p0){
     var by= (OrderBy$2)p0;

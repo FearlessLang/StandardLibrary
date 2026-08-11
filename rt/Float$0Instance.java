@@ -37,21 +37,21 @@ public record Float$0Instance(double val) implements Float$0{
      return ((Float$0Instance) p0).val;
   }
 
-  @Override public Object imm$succ$0() {
+  @Override public Object imm$getSucc$0() {
     if (Double.isNaN(val)) {
       throw err("Float.succ: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY) {
-      throw err("Float.succ: Math.posInf, does not have a successor");
+      throw err("Float.succ: Math.posInf does not have a successor");
     }
     return Float$0Instance.instance(Math.nextUp(val));
   }
-  @Override public Object imm$pred$0() {
+  @Override public Object imm$getPred$0() {
     if (Double.isNaN(val)) {
       throw err("Float.pred: NaN does not have a predecessor");
     }
     if (val == Double.NEGATIVE_INFINITY) {
-      throw err("Float.pred: Math.negInf, does not have a predecessor");
+      throw err("Float.pred: Math.negInf does not have a predecessor");
     }
     return Float$0Instance.instance(Math.nextDown(val));
   }
@@ -203,15 +203,11 @@ public record Float$0Instance(double val) implements Float$0{
     return bool(Math.abs(val - exp) <= d);
   }
   @Override public Object imm$softRoundTiesEven$0(){
-
     return instance(Math.rint(val));
   }
   @Override public Object imm$softRound$0(){
-    if (val < 0.0) {
-      // Hack round -ve -> inf to rounding -ve -> -inf
-      return instance(-Math.round(-val));
-    }
-    return instance(Math.round(val));
+    if (val >= 0.0d) { return instance(Math.floor(val + 0.5)); }
+    return instance(Math.ceil(val - 0.5));
   }
   @Override public Object imm$softCeil$0(){ return instance(Math.ceil(val)); }
   @Override public Object imm$softFloor$0(){ return instance(Math.floor(val)); }
@@ -230,7 +226,7 @@ public record Float$0Instance(double val) implements Float$0{
   @Override public Object imm$ieeeSameBits$1(Object p0){ return bool(bits(val) == bits(f(p0))); }
   @Override public Object imm$ieeeStr$0(){ return Str$0Instance.instance(Double.toString(val)); }
   @Override public Object imm$ieeeRemainder$1(Object p0){ return instance(Math.IEEEremainder(val,f(p0))); }
-  /* IEEE standard - note we don't have signalling NaN
+  /* IEEE standard - note we don't have signalling NaN (I believe all NaN's are quiet NaN's in Java)
   pow (x, ±0) is 1 if x is not a signaling NaN
   pow (±0, y) is ±∞ and signals the divideByZero exception for y an odd integer < 0
   pow (±0, −∞) is +∞ with no exception

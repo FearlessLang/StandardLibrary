@@ -121,7 +121,7 @@ FloatSignNumTests: Test {::
   }
 
 FloatRangeTests: Test {::
-  .check{1.0.pred  < 1.0.assertTrue}
+  .check{1.0.getPred  < 1.0.assertTrue}
   .check{+0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
   .check{-0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
   .check{
