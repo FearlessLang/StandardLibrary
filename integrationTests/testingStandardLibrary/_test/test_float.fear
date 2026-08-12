@@ -151,7 +151,6 @@ FloatRangeTests: Test {::
   .checkDetErr({_ -> True}, {(Math.nan)~~ +1.0})
   .checkDetErr({_ -> True}, {+1.0=~~(Math.negInf)})
   .check{Math.negInf ~~ +1.0 .void}
-  .check{Math.negInf ~~ +1.0 .void}
   }
 
 FloatIEEEPowTests: Test {::
