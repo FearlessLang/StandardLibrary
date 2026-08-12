@@ -2,7 +2,7 @@
 /dbgOut
 /integrationTests/helloWorld/.fearless_out
 /integrationTests/map_a_to_pkc/.fearless_out
-/fearlessArtefact/fearless
+/fearlessArtefact/
 /integrationTests/testUnitTests/.fearless_out
 /integrationTests/helloStackTraces/.fearless_out
 /integrationTests/testingStandardLibrary/.fearless_out
