@@ -14,6 +14,13 @@ Flows: {
   #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R): mut Flow[R]->Magic!;
   #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R): mut Flow[R]->Magic!;
   #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R, r16: R): mut Flow[R]->Magic!;
+
   .fromMutList[R:*](xs: mut List[R]): mut Flow[R]->Magic!;//sequential
   .fromReadList[R:*](xs: read List[R]): mut Flow[read/imm R]->Magic!;
   .fromImmList[R:*](xs: List[R]): mut Flow[imm R]->Magic!;
