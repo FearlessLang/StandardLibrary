@@ -49,22 +49,19 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` otherwise.
   //>   .check{7.getByte .rem 2 .assertEq({::}, Opts# (1.getByte))}
   //>   .check{7.getByte .rem 0 .assertEmpty}
-  .rem(d: Nat): Opt[Byte]
-    -> this == (0.getByte) .toOpt {this.getRem(d)};
+  .rem(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getRem(d)};
 
   /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, `.empty` otherwise.
   //>   .check{7.getByte .div 2 .assertEq({::}, Opts# (3.getByte))}
   //>   .check{7.getByte .div 0 .assertEmpty}
-  .div(d: Nat): Opt[Byte]
-    -> this == (0.getByte) .toOpt {this.getDiv(d)};
+  .div(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getDiv(d)};
 
   /// `this.exactDiv(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`, that is if:
   ///  `d != 0` and `this.rem(d) == 0` otherwise returns .empty` otherwise.
   //>   .check{6.getByte .div(2) .assertEq({::}, Opts#(3.getByte))}
-  //>   .check{7.getByte .div(2) .assertEmpty}
-  //>   .check{7.getByte .div(0) .assertEmpty}
-  .exactDiv(d: Nat): Opt[Byte]
-    -> this.rem(d).match {
+  //>   .check{7.getByte .exactDiv(2) .assertEmpty}
+  //>   .check{7.getByte .exactDiv(0) .assertEmpty}
+  .exactDiv(d: Nat): Opt[Byte] -> this.rem(d).match {
       .empty -> {};
       .some r -> r == (0.getByte) .toOpt {this.getDiv(d)}.as{::};
       };

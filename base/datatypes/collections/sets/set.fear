@@ -55,23 +55,14 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   /// `this.opt(e)` returns .some of the element in `this` equal to `e` under this's orderHash
   /// returns .empty if no such element exists.
   //>   .check{Sets#({::.imm.abs}, +1, -2).opt(-1)! .assertEq +1}
-  //>   .check{Sets#({::}, 1, 2).opt(3).isEmpty .assertTrue}
-  .opt(elem: E): mut Opt[imm E] -> this.contains(elem) .then {
-    this.flow
-      .filter{e -> this.orderHash#elem == e}
-      .get
-    };
+  //>   .check{Sets#({::}, 1, 2).opt(3).assertEmpty {::}}
+  .opt(elem: E): mut Opt[imm E];
 
   /// `this.get(e)` returns the element in `this` equal to `e` under `this`'s orderHash
   /// throws if no such element exists.
   //>   .check{Sets#({::.imm.abs}, +1, -2).get(-1) .assertEq +1}
   //>   .checkDetErr({_ -> True}, {Sets#({::}, 1, 2).get(3)})
-  .get(elem: E): E -> this.contains(elem) .if {
-    .then -> this.flow.filter{
-      e -> this.orderHash#e <=> (this.orderHash#elem, {.eq -> True; .lt -> False; .gt -> False;})
-      }.get;
-    .else -> Error.msg `Element not found in set`;
-    };
+  .get(elem: E): E;
 
   /// `this + e` returns a new Set[E] containing all elements of this plus `e`.
   /// Adding an element already present under the orderHash has no effect.

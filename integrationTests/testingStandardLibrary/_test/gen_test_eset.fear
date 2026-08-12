@@ -1,20 +1,16 @@
-MutBlock: {
-  #[A:*, B:*](_: A, b: B): B -> b;
-  }
-
-MutTestBoxs: {
-  #[T: mut](item: T): mut MutTestBox[T]  -> {
+MutTests: {
+  #[T: mut](item: T): mut MutTest[T]  -> {
     .item -> item;
     }
   }
 
-MutTestBox[T: mut]: {
+MutTest[T: mut]: {
    mut .item: T;
-   mut .update[R](f: mut MF[T, R]): mut MutTestBox[T] -> MutBlock#(
+   mut .update[R](f: mut MF[T, R]): mut MutTest[T] -> Block#(
     f#(this.item),
     this
     );
-   mut .check(f: mut MF[T, Void]): mut MutTestBox[T] -> MutBlock#(
+   mut .check(f: mut MF[T, Void]): mut MutTest[T] -> Block#(
     f#(this.item),
     this
     );
@@ -23,7 +19,7 @@ MutTestBox[T: mut]: {
 // TODO: Find better way of testing mutable collections
 ESet1Read0Size0Test: Test {::
     .check{
-      MutTestBoxs#(ESets#[Nat, Nat] {::})
+      MutTests#(ESets#[Nat, Nat] {::})
         .check{::.size .assertEq 0}
         .update{::.add(1).add(2).add(3)}
         .check{::.size .assertEq 3}

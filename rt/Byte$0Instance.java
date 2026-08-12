@@ -62,12 +62,11 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
     }
     return Byte$0Instance.instance(result);
   }
-  @Override public Object imm$div$1(Object p0){
-    long d= natBits(p0);
-    if (d == 0L){ return optEmpty(); }
-    int x= u8(val);
-    if (Long.remainderUnsigned(x, d) != 0L){ return optEmpty(); }
-    return optSome(instance((byte)(x / d)));
+  @Override public Object imm$$slash$1(Object p0){
+    return Num$0Instance.instance(
+      BigInteger.valueOf(val),
+      unsignedLongToBigInteger(Nat$0Instance.unwrap(p0))
+    );
   }
   @Override public Object imm$rem$1(Object p0){
     long d= natBits(p0);

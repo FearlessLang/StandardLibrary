@@ -50,7 +50,7 @@ Float0Imm0AbsOrNaN0Test: Test {::
 Float0Imm0Abs0Test: Test {::
     .check{4.75 .abs .assertEq({::}, Opts# 4.75)}
     .check{(-4.75) .abs .assertEq({::}, Opts# 4.75)}
-    .check{(Math.nan) .abs .assertEmpty}
+    .check{(Math.nan) .abs .assertEmpty {::}}
   }
 
 Float0Imm0GetAbs0Test: Test {::
@@ -67,7 +67,7 @@ Float0Imm0NegAbsOrNaN0Test: Test {::
 
 Float0Imm0NegAbs0Test: Test {::
     .check{4.75 .negAbs .assertEq({::}, Opts# (-4.75))}
-    .check{(Math.nan) .negAbs .assertEmpty}
+    .check{(Math.nan) .negAbs .assertEmpty {::}}
   }
 
 Float0Imm0GetNegAbs0Test: Test {::
@@ -84,8 +84,8 @@ Float0Imm0SqrtOrNaN0Test: Test {::
 
 Float0Imm0Sqrt0Test: Test {::
     .check{4.0 .sqrt .assertEq({::}, Opts# 2.0)}
-    .check{(-4.0) .sqrt .assertEmpty}
-    .check{(Math.nan) .sqrt .assertEmpty}
+    .check{(-4.0) .sqrt .assertEmpty {::}}
+    .check{(Math.nan) .sqrt .assertEmpty {::}}
   }
 
 Float0Imm0GetSqrt0Test: Test {::
@@ -104,7 +104,7 @@ Float0Imm0SignOrNaN0Test: Test {::
 
 Float0Imm0Sign0Test: Test {::
     .check{4.75 .sign .assertEq({::}, Opts# 1.0)}
-    .check{(Math.nan) .sign .assertEmpty}
+    .check{(Math.nan) .sign .assertEmpty {::}}
   }
 
 Float0Imm0GetSign0Test: Test {::
@@ -113,35 +113,35 @@ Float0Imm0GetSign0Test: Test {::
   }
 
 Float0Imm0SoftFloor0Test: Test {::
-    .check{4.75 .softFloor .assertEq 3.0}
+    .check{4.75 .softFloor .assertEq 4.0}
     .check{(-3.25) .softFloor .assertEq(-4.0)}
     .check{(Math.inf) .softFloor .assertEq(Math.inf)}
     .check{(Math.nan) .softFloor .isNaN .assertTrue}
   }
 
 Float0Imm0Floor0Test: Test {::
-    .check{4.75 .floor .assertEq({::}, Opts# 3.0)}
-    .check{(Math.inf) .floor .assertEmpty}
-    .check{(Math.nan) .floor .assertEmpty}
+    .check{4.75 .floor .assertEq({::}, Opts# 4.0)}
+    .check{(Math.inf) .floor .assertEmpty {::}}
+    .check{(Math.nan) .floor .assertEmpty {::}}
   }
 
 Float0Imm0GetFloor0Test: Test {::
-    .check{4.75 .getFloor .assertEq 3.0}
+    .check{4.75 .getFloor .assertEq 4.0}
     .checkDetErr({_ -> True}, {(Math.inf) .getFloor})
     .checkDetErr({_ -> True}, {(Math.nan) .getFloor})
   }
 
 Float0Imm0SoftCeil0Test: Test {::
     .check{3.25 .softCeil .assertEq 4.0}
-    .check{(-4.75) .softCeil .assertEq(-3.0)}
+    .check{(-4.75) .softCeil .assertEq(-4.0)}
     .check{(Math.negInf) .softCeil .assertEq(Math.negInf)}
     .check{(Math.nan) .softCeil .isNaN .assertTrue}
   }
 
 Float0Imm0Ceil0Test: Test {::
     .check{3.25 .ceil .assertEq({::}, Opts# 4.0)}
-    .check{(Math.negInf) .ceil .assertEmpty}
-    .check{(Math.nan) .ceil .assertEmpty}
+    .check{(Math.negInf) .ceil .assertEmpty {::}}
+    .check{(Math.nan) .ceil .assertEmpty {::}}
   }
 
 Float0Imm0GetCeil0Test: Test {::
@@ -160,8 +160,8 @@ Float0Imm0SoftTrunc00Test: Test {::
 Float0Imm0Trunc00Test: Test {::
     .check{2.75 .trunc0 .assertEq({::}, Opts# 2.0)}
     .check{(-2.75) .trunc0 .assertEq({::}, Opts# (-2.0))}
-    .check{(Math.inf) .trunc0 .assertEmpty}
-    .check{(Math.nan) .trunc0 .assertEmpty}
+    .check{(Math.inf) .trunc0 .assertEmpty {::}}
+    .check{(Math.nan) .trunc0 .assertEmpty {::}}
   }
 
 Float0Imm0GetTrunc00Test: Test {::
@@ -180,8 +180,8 @@ Float0Imm0SoftRound0Test: Test {::
 Float0Imm0Round0Test: Test {::
     .check{2.5 .round .assertEq({::}, Opts# 3.0)}
     .check{(-2.5) .round .assertEq({::}, Opts# (-3.0))}
-    .check{(Math.inf) .round .assertEmpty}
-    .check{(Math.nan) .round .assertEmpty}
+    .check{(Math.inf) .round .assertEmpty {::}}
+    .check{(Math.nan) .round .assertEmpty {::}}
   }
 
 Float0Imm0GetRound0Test: Test {::
@@ -200,8 +200,8 @@ Float0Imm0SoftRoundTiesEven0Test: Test {::
 
 Float0Imm0RoundTiesEven0Test: Test {::
     .check{2.5 .roundTiesEven .assertEq({::}, Opts# 2.0)}
-    .check{(Math.inf) .roundTiesEven .assertEmpty}
-    .check{(Math.nan) .roundTiesEven .assertEmpty}
+    .check{(Math.inf) .roundTiesEven .assertEmpty {::}}
+    .check{(Math.nan) .roundTiesEven .assertEmpty {::}}
   }
 
 Float0Imm0GetRoundTiesEven0Test: Test {::
@@ -269,39 +269,39 @@ Float0Imm0IeeeEq1Test: Test {::
 
 Float0Imm0Int0Test: Test {::
     .check{3.0 .int .assertEq({::}, Opts# +3)}
-    .check{3.5 .int .assertEmpty}
-    .check{(Math.nan) .int .assertEmpty}
+    .check{3.5 .int .assertEmpty {::}}
+    .check{(Math.nan) .int .assertEmpty {::}}
   }
 
 Float0Imm0Nat0Test: Test {::
     .check{3.0 .nat .assertEq({::}, Opts# 3)}
-    .check{(-1.0) .nat .assertEmpty}
+    .check{(-1.0) .nat .assertEmpty {::}}
   }
 
 Float0Imm0Byte0Test: Test {::
     .check{3.0 .byte .assertEq({::}, Opts#(3.getByte))}
-    .check{300.0 .byte .assertEmpty}
+    .check{300.0 .byte .assertEmpty {::}}
   }
 
 Float0Imm0Num0Test: Test {::
     .check{3.5 .num .assertEq({::}, Opts#(7/2))}
-    .check{(Math.inf) .num .assertEmpty}
+    .check{(Math.inf) .num .assertEmpty {::}}
   }
 
 Float0Imm0SoftInt0Test: Test {::
-    .check{4.75 .softInt .assertEq +3}
+    .check{4.75 .softInt .assertEq +4}
     .check{(Math.nan) .softInt .assertEq +0}
     .check{(Math.inf) .softInt .assertEq(Math.maxInt)}
   }
 
 Float0Imm0SoftNat0Test: Test {::
-    .check{4.75 .softNat .assertEq 3}
+    .check{4.75 .softNat .assertEq 4}
     .check{(Math.negInf) .softNat .assertEq 0}
     .check{(Math.inf) .softNat .assertEq(Math.maxNat)}
   }
 
 Float0Imm0SoftByte0Test: Test {::
-    .check{4.75 .softByte .assertEq(3.getByte)}
+    .check{4.75 .softByte .assertEq(4.getByte)}
     .check{(Math.inf) .softByte .assertEq(Math.maxByte)}
   }
 
@@ -335,8 +335,8 @@ Float0Imm1Match1Test: Test {::
 
 Float0Imm0Deg0Test: Test {::
     .check{90.0 .deg .assertEq({::}, Opts#(90.0.getDeg))}
-    .check{(Math.nan) .deg .assertEmpty}
-    .check{(Math.inf) .deg .assertEmpty}
+    .check{(Math.nan) .deg .assertEmpty {::}}
+    .check{(Math.inf) .deg .assertEmpty {::}}
   }
 
 Float0Imm0GetDeg0Test: Test {::
@@ -346,7 +346,7 @@ Float0Imm0GetDeg0Test: Test {::
 
 Float0Imm0Rad0Test: Test {::
     .check{1.5 .rad .assertEq({::}, Opts#(1.5.getRad))}
-    .check{(Math.nan) .rad .assertEmpty}
+    .check{(Math.nan) .rad .assertEmpty {::}}
   }
 
 Float0Imm0GetRad0Test: Test {::
@@ -361,7 +361,7 @@ Float0Imm0InRange1Test: Test {::
 
 Float0Imm0AssertInRange1Test: Test {::
     .check{2.0 .assertInRange(1.0=~~=4.0)}
-    .checkDetErr({_ -> True}, {5.0 .assertInRange(1.0=~~=4.0)})
+    .checkNonDetErr({_ -> True}, {5.0 .assertInRange(1.0=~~=4.0)})
   }
 
 Float0Imm0ClampTo1Test: Test {::

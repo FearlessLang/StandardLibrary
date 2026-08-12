@@ -5,12 +5,13 @@ import base.Util.MapKey;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static base.Util.*;
 import static base.Set$1Instance.extractKey;
 
-public final class ESet$1Instance implements ESet$1 {
-    /// A map so get works efficiently....
+final class ESet$1Instance implements ESet$1 {
+    /// A map to allow for O(1) get
     private LinkedHashMap<MapKey, Object> set;
     private final OrderHashBy$2 ordering;
 
@@ -45,14 +46,11 @@ public final class ESet$1Instance implements ESet$1 {
     private Set<MapKey> set() {
         return this.set.keySet();
     }
-    private Collection<Object> unhashedObjects() {
-        return this.set.values();
+    private Stream<Object> unhashedObjects() {
+        return this.set.keySet().stream().map(k -> k.key);
     }
 
-    @Override public Object read$size$0(){
-        return Nat$0Instance.instance(set.size());
-    }
-
+    @Override public Object read$size$0(){ return Nat$0Instance.instance(set.size()); }
     @Override public Object read$orderHash$0() {
         return this.ordering;
     }
@@ -64,17 +62,12 @@ public final class ESet$1Instance implements ESet$1 {
 
     @Override public Object read$containsAll$1(Object p0) {
         ESet$1Instance eset = (ESet$1Instance) p0;
-        if (eset.set.size() > this.set.size()) {
-            return bool(false);
-        }
-
+        if (eset.set.size() > this.set.size()) { return bool(false); }
         if (eset.ordering.equals(this.ordering)) {
             return bool(this.set.keySet().containsAll(eset.set.keySet()));
         }
 
-        return bool(eset.unhashedObjects().stream()
-                .allMatch(e -> this.set.containsKey(mapKey(this.ordering, e)))
-        );
+        return bool(eset.unhashedObjects().allMatch(e -> this.set.containsKey(mapKey(this.ordering, e))));
     }
 
     @Override public Object mut$add$1(Object p0){
@@ -130,7 +123,7 @@ public final class ESet$1Instance implements ESet$1 {
     }
 
     @Override public Object mut$seqFlow$0(){ return Flow$1Instance.of(drain().stream()); }
-    @Override public Object mut$flow$0(){ return new Flow$1Instance(drain().stream()); }//could be parallel
+    @Override public Object mut$flow$0(){ return Flow$1Instance.of(drain().stream()); }//could be parallel
     @Override public Object mut$set$0(){ return Set$1Instance.of(ordering, drain()); }
 
 

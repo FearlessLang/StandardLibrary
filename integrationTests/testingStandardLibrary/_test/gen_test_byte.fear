@@ -45,18 +45,18 @@ Byte0Imm0GetRem1Test: Test {::
 
 Byte0Imm0Rem1Test: Test {::
     .check{7.getByte .rem 2 .assertEq({::}, Opts# (1.getByte))}
-    .check{7.getByte .rem 0 .assertEmpty}
+    .check{7.getByte .rem 0 .assertEmpty {::}}
   }
 
 Byte0Imm0Div1Test: Test {::
     .check{7.getByte .div 2 .assertEq({::}, Opts# (3.getByte))}
-    .check{7.getByte .div 0 .assertEmpty}
+    .check{7.getByte .div 0 .assertEmpty {::}}
   }
 
 Byte0Imm0ExactDiv1Test: Test {::
     .check{6.getByte .div(2) .assertEq({::}, Opts#(3.getByte))}
-    .check{7.getByte .div(2) .assertEmpty}
-    .check{7.getByte .div(0) .assertEmpty}
+    .check{7.getByte .exactDiv(2) .assertEmpty {::}}
+    .check{7.getByte .exactDiv(0) .assertEmpty {::}}
   }
 
 Byte0Imm0SoftSqrt0Test: Test {::
@@ -130,7 +130,7 @@ Byte0Imm0InRange1Test: Test {::
 
 Byte0Imm0AssertInRange1Test: Test {::
     .check{2.getByte .assertInRange(1.getByte=~~=(4.getByte))}
-    .checkDetErr({_ -> True}, {5.getByte .assertInRange(1.getByte=~~=(4.getByte))})
+    .checkNonDetErr({_ -> True}, {5.getByte .assertInRange(1.getByte=~~=(4.getByte))})
   }
 
 Byte0Imm0ClampTo1Test: Test {::

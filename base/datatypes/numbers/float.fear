@@ -150,14 +150,14 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.floor` returns `.empty` if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise `.some` of `this` rounded down to the nearest integer.
-  //>   .check{4.75 .floor .assertEq({::}, Opts# 3.0)}
+  //>   .check{4.75 .floor .assertEq({::}, Opts# 4.0)}
   //>   .check{Math.inf .floor .assertEmpty}
   //>   .check{Math.nan .floor .assertEmpty}
   .floor: Opt[Float] -> this.isFinite.toOpt{this.softFloor};
 
   /// `this.getFloor` returns `this` rounded down to the nearest integer.
   /// Throws if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`.
-  //>   .check{4.75 .getFloor .assertEq 3.0}
+  //>   .check{4.75 .getFloor .assertEq 4.0}
   //>   .checkDetErr({_ -> True}, {(Math.inf) .getFloor})
   //>   .checkDetErr({_ -> True}, {(Math.nan) .getFloor})
   .getFloor: Float -> this.isFinite .if {
@@ -168,7 +168,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.softCeil` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise returns `this` rounded up to the nearest integer.
   //>   .check{3.25 .softCeil .assertEq 4.0}
-  //>   .check{-4.75 .softCeil .assertEq -3.0)}
+  //>   .check{-4.75 .softCeil .assertEq -4.0)}
   //>   .check{Math.negInf .softCeil .assertEq(Math.negInf)}
   //>   .check{Math.nan .softCeil .isNaN .assertTrue}
   .softCeil: Float;
@@ -377,21 +377,21 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.softInt` clamps and truncates `this` towards `0` into an `Int`.
   /// `Math.nan -> 0`; `Math.inf -> maxInt`; `Math.negInf -> minInt`.
-  //>   .check{4.75 .softInt .assertEq +3}
+  //>   .check{4.75 .softInt .assertEq +4}
   //>   .check{Math.nan .softInt .assertEq +0}
   //>   .check{Math.inf .softInt .assertEq(Math.maxInt)}
   .softInt: Int;
 
   /// `this.softNat` clamps and truncates `this` towards `0` into a `Nat`.
   /// `Math.nan -> 0`; `Math.inf -> maxNat`; `Math.negInf -> 0`.
-  //>   .check{4.75 .softNat .assertEq 3}
+  //>   .check{4.75 .softNat .assertEq 4}
   //>   .check{Math.negInf .softNat .assertEq 0}
   //>   .check{Math.inf .softNat .assertEq(Math.maxNat)}
   .softNat: Nat;
 
   /// `this.softByte` clamps and truncates `this` towards `0` into a `Byte`.
   /// `Math.nan -> 0`; `Math.inf -> maxByte`; `Math.negInf -> 0`.
-  //>   .check{4.75 .softByte .assertEq(3.getByte)}
+  //>   .check{4.75 .softByte .assertEq(4.getByte)}
   //>   .check{Math.inf .softByte .assertEq(Math.maxByte)}
   .softByte: Byte;
 

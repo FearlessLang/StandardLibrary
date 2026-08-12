@@ -1,7 +1,13 @@
 package base;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+
+import static base.Util.*;
+
 public interface ELists$0 extends Sealed$0{
-  default Object imm$$hash$0(){ return EList$1Instance.empty(); }
+  default Object imm$$hash$0(){ return new EList$1Instance(); }
   ELists$0 instance= new ELists$0(){};
 }
 final class EList$1Instance implements EList$1{
@@ -25,7 +31,7 @@ final class EList$1Instance implements EList$1{
   @Override public Object mut$clear$0(){ xs.clear(); return Void$0.instance; }
   @Override public Object mut$clearAnd$0(){ xs.clear(); return this; }
   @Override public Object mut$get$1(Object p0){ return xs.get(idx(p0)); }
-  @Override public Object read$size$0(){ return intToNat(xs.size()); }
+  @Override public Object read$size$0(){ return Nat$0Instance.instance(xs.size()); }
   @Override public Object mut$seqFlow$0(){ return Flow$1Instance.of(drain().stream()); }
   @Override public Object mut$flow$1(Object p0){ return Flow$1Instance.of(drain().stream()); }//could be parallel
   @Override public Object mut$list$0(){ return List$1Instance.wrap(drain()); }

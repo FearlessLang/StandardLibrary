@@ -57,10 +57,8 @@ public class Util{
   public static Opt$1 optEmpty(){ return Opt$1.instance; }
   public static Opt$1 optSome(Object x){ return (Opt$1) Opts$0.instance.imm$$hash$1(x); }
   public static Opt$1 optNullable(Object o) {
-      if (o == null) {
-        return optSome(0);
-      }
-      return optEmpty();
+      if (o == null) {return optEmpty();}
+      return optSome(o);
   }
   public static Error nonDetErr(String msg){
     return (Error)Error$0.instance.imm$nonDeterministic$1(new Str$0Instance(msg));
@@ -78,6 +76,9 @@ public class Util{
       : BigInteger.valueOf(x & Long.MAX_VALUE).setBit(63);
   }
   public static String toS(Object o){return ((Str$0Instance)((ToStr$0)o).read$str$0()).val(); }
+  public static String toStringBy(ToStrBy$1 by, Object p0) {
+    return toS(by.imm$$hash$1(p0));
+  }
   public static long natToLong(Object n){
     return ((Nat$0Instance)n).val();
   }

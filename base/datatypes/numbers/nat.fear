@@ -56,7 +56,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
   //>   .check{(7.getByte) .div(2) .assertEq({::}, Opts# (3.getByte))}
   //>   .check{(7.getByte) .div(0) .assertEmpty}
   .div(d: Nat): Opt[Nat]
-    -> this == 0 .toOpt {this.getDiv(d)};
+    -> d != 0 .toOpt {this.getDiv(d)};
 
   /// `this.exactDiv(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`
   /// if `d != 0` and `this.rem(d) == 0`, `.empty` otherwise.

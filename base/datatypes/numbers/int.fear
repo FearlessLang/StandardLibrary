@@ -53,7 +53,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` iff `d == 0`.
   //>   .check{+7 .rem 2 .assertEq({::}, Opts# +1)}
   //>   .check{+7 .rem 0 .assertEmpty}
-  .rem(d: Nat): Opt[Int] -> d == 0 .toOpt {this.getRem(d)};
+  .rem(d: Nat): Opt[Int] -> d != 0 .toOpt {this.getRem(d)};
 
   /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, rounding towards 0.
   //>   .check{+6 .div(2) .assertEq({::}, Opts# +3)}
@@ -64,9 +64,9 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.exactDiv(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`, that is if:
   ///  `d != 0` and `this.rem(d) == 0` otherwise returns .empty` otherwise.
-  //>   .check{+6 .div(2) .assertEq({::}, Opts# +3)}
-  //>   .check{+7 .div(2) .assertEmpty}
-  //>   .check{+7 .div(0) .assertEmpty}
+  //>   .check{+6 .exactDiv(2) .assertEq({::}, Opts# +3)}
+  //>   .check{+7 .exactDiv(2) .assertEmpty}
+  //>   .check{+7 .exactDiv(0) .assertEmpty}
   .exactDiv(d: Nat): Opt[Int]
     -> this.rem(d).match {
       .empty -> {};
@@ -156,22 +156,22 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.softFloat` converts `this` to the closest representable `Float`
   //>   .check{+5 .softFloat .assertEq 5.0}
-  //>   .check{Math.maxInt - +1 .softFloat.getInt .assertEq(Math.maxInt.getNat)}
+  //>   .check{Math.maxInt - +1 .softFloat.softInt .assertEq(Math.maxInt.getNat)}
   .softFloat: Float;
 
-  /// `this.aluAddWrap(x)` returns `this + x` mod `2^32` (i32 wraparound add)
+  /// `this.aluAddWrap(x)` returns `this + x` mod `2^64` (i64 wraparound add)
   //>   .check{(Math.maxInt) .aluAddWrap +1 .assertEq(Math.minInt)}
   .aluAddWrap(x: Int): Int;
 
-  /// `this.aluSubWrap(x)` returns `this - x` mod `2^32` (i32 wraparound sub)
+  /// `this.aluSubWrap(x)` returns `this - x` mod `2^64` (i64 wraparound sub)
   //>   .check{(Math.minInt) .aluSubWrap +1 .assertEq(Math.maxInt)}
   .aluSubWrap(x: Int): Int;
 
-  /// `this.aluMulWrap(x)` returns `this * x` mod `2^32` (i32 wraparound mul)
+  /// `this.aluMulWrap(x)` returns `this * x` mod `2^64` (i64 wraparound mul)
   //>   .check{(Math.maxInt) .aluMulWrap +2 .assertEq -2}
   .aluMulWrap(x: Int): Int;
 
-  /// `this.aluDiv(x)` returns `this` divided by `x`, truncated toward `0` (i32 semantics).
+  /// `this.aluDiv(x)` returns `this` divided by `x`, truncated toward `0` (i64 semantics).
   /// Note: unlike `.getDiv`, `x` is a signed `Int`, a negative divisor is allowed. Throws iff `x == 0`.
   //>   .check{+7 .aluDiv -2 .assertEq -3}
   //>   .checkDetErr({_ -> True}, {+7 .aluDiv +0})
@@ -184,29 +184,29 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .aluRem(x: Int): Int;
 
   /// `this.aluShiftLeft(bits)` returns `this` shifted left by `bits`, with the effective shift
-  /// taken modulo `32` (`bits & 31`)
+  /// taken modulo `64` (`bits & 33`)
   //>   .check{+1 .aluShiftLeft 3 .assertEq +8}
   .aluShiftLeft(bits: Nat): Int;
 
   /// `this.aluShiftRight(bits)` returns `this` arithmetically shifted right (sign-extending) by
-  /// `bits`, with the effective shift taken modulo `32` (`bits & 31`)
+  /// `bits`, with the effective shift taken modulo `64` (`bits & 64`)
   //>   .check{-8 .aluShiftRight 1 .assertEq -4}
   .aluShiftRight(bits: Nat): Int;
 
-  /// `this.aluXor(x)` returns the bitwise XOR of `this` and `x` (i32)
+  /// `this.aluXor(x)` returns the bitwise XOR of `this` and `x` (i64)
   //>   .check{+5 .aluXor +3 .assertEq +6}
   .aluXor(x: Int): Int;
 
-  /// `this.aluAnd(x)` returns the bitwise AND of `this` and `x` (i32)
+  /// `this.aluAnd(x)` returns the bitwise AND of `this` and `x` (i64)
   //>   .check{+5 .aluAnd +3 .assertEq +1}
   .aluAnd(x: Int): Int;
 
-  /// `this.aluOr(x)` returns the bitwise OR of `this` and `x` (i32)
+  /// `this.aluOr(x)` returns the bitwise OR of `this` and `x` (i64)
   //>   .check{+5 .aluOr +2 .assertEq +7}
   .aluOr(x: Int): Int;
 
-  /// `this.aluNat` reinterprets the raw i32 bits of `this` as an unsigned u32 `Nat` (bit-cast, not a value conversion).
-  //>   .check{-1 .aluNat .assertEq 4294967295}
+  /// `this.aluNat` reinterprets the raw i64 bits of `this` as an unsigned u64 `Nat` (bit-cast, not a value conversion).
+  //>   .check{-1 .aluNat .assertEq (Math.maxInt)}
   .aluNat: Nat;
 
   /// `this.aluByte` returns the low 8 bits of `this`, wrapped (not clamped).

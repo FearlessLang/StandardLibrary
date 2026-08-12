@@ -4,10 +4,15 @@ Opt[E:*]: _Opt[E] {
   .imm by     -> this.match{.some x -> Opts#(by#x.imm); .empty->{} };
   .isEmpty    -> this.match{.some _ -> False; .empty -> True};
   .isSome     -> this.match{.some _ -> True; .empty -> False};
-  .assertEmpty -> this.assertEmpty {``};
-  .assertEmpty msg -> this.isEmpty.assertTrue msg;
+
+  .assertEmpty by -> this.assertEmpty(by, {``});
+  .assertEmpty by, msg -> this.match {
+    .some x -> Assert.expectedActual(False, msg, ".empty", ".some "+(by#(x)));
+    .empty -> Void;
+    };
   .assertSome -> this.assertSome {``};
-  .assertSome msg -> this.isSome.assertTrue msg;
+  .assertSome msg -> Assert.expectedActual(this.isSome, msg, ".some _", ".empty ");
+
   !           -> this.match{.some x -> x; .empty -> Error.msg `Opt was empty`};
   ! msg       -> this.match{.some x -> x; .empty -> Error.msg msg};
 
@@ -46,7 +51,7 @@ Opt[E:*]: _Opt[E] {
     };
   }
   
-_Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E],_AssertEmpty {
+_Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E] {
   mut  .match[R:**](mut OptMatch[E, R]): R;
   read .match[R:**](mut OptMatch[read/imm E, R]): R;
   imm  .match[R:**](mut OptMatch[imm E, R]): R;
@@ -88,8 +93,8 @@ _Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E],_AssertEmpty {
 
   read .isEmpty: Bool;
   read .isSome: Bool;
-  read .assertEmpty: Void;
-  read .assertEmpty(read LazyInfo): Void;
+  read .assertEmpty(by: ToStrBy[imm E]): Void;
+  read .assertEmpty(ToStrBy[imm E], read LazyInfo): Void;
   read .assertSome: Void;
   read .assertSome(read LazyInfo): Void;
   read .as[R:imm](mut MF[read/imm E, R]): Opt[R];

@@ -55,4 +55,9 @@ MyTests:UnitTests{::
   .test TestUStr
   .test MathUnitTests
   .test Set1ImmTests
+  .test Byte0ImmTests
+  .test Float0ImmTests
+  .test Int0ImmTests
+  .test Nat0ImmTests
+  .test ESet1ImmTests
   }

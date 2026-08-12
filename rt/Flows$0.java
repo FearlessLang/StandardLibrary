@@ -1,6 +1,14 @@
 package base;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Gatherer;
 import java.util.stream.Stream;
+
+import static base.Util.*;
 
 public interface Flows$0 extends Sealed$0{
   default Object imm$$hash$0(){ return Flow$1Instance.of(Stream.empty()); }
@@ -59,6 +67,24 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     try{ return EList$1Instance.wrap(s.toList()); }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$set$2(Object p0, Object p1){
+    OrderHashBy$2 ordering = Set$1Instance.ordering(p1);
+    AsImm$2 toImm = (AsImm$2) p0;
+    try{ return Set$1Instance.ofMutableList(
+      ordering,
+      s.map(e -> toImm.mut$$hash$1(e))
+        .collect(Collectors.toCollection(ArrayList::new))
+    );}
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$eSet$2(Object p0, Object p1){
+    OrderHashBy$2 ordering = Set$1Instance.ordering(p1);
+    AsImm$2 toImm = (AsImm$2) p0;
+    LinkedHashMap<Util.MapKey, Object> map = new LinkedHashMap<>();
+    s.forEach(e -> map.put(mapKey(ordering, e), e));
+    try{return new ESet$1Instance(map, ordering);}
+    catch(IllegalStateException e){ throw consumed(); }
+  }
   @Override public Object mut$fold$2(Object p0,Object p1){
     try{
       var it= s.iterator();
@@ -105,7 +131,19 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     }
     catch(IllegalStateException e){ throw consumed(); }
   }
-  @Override public Object mut$opt$0(){
+  @Override public Object mut$min$1(Object p0){
+    try {
+      return Flow$1Instance.of(s.gather(new MinGatherer((OrderBy$2) p0)));
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$max$1(Object p0){
+    try {
+      return Flow$1Instance.of(s.gather(new MaxGatherer((OrderBy$2) p0)));
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$getOpt$0(){
     try{
       var it= s.iterator();
       if(!it.hasNext()){ return optEmpty(); }
@@ -121,5 +159,101 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
       return it.hasNext() ? optSome(it.next()) : optEmpty();
     }
     catch(IllegalStateException e){ throw consumed(); }
+  }
+}
+
+
+final class MinGatherer implements Gatherer<Object, ArrayList<Object>, Object> {
+  private final OrderBy$2 ordering;
+  private Object min = null;
+
+  MinGatherer(OrderBy$2 ordering) {
+    this.ordering = ordering;
+  }
+
+  @Override
+  public Supplier<ArrayList<Object>> initializer() {
+    return ArrayList::new;
+  }
+
+  @Override
+  public Integrator<ArrayList<Object>, Object, Object> integrator() {
+    return (state, element, _) -> {
+      if (this.min == null) {
+        this.min = element;
+        state.add(element);
+        return true;
+      }
+      int cmp = cmp(ordering, element, min);
+      if (cmp < 0) {
+        this.min = element;
+        state.clear();
+        state.add(element);
+        return true;
+      }
+      if (cmp == 0) {
+        state.add(element);
+      }
+      return true;
+    };
+  }
+
+
+  @Override
+  public BiConsumer<ArrayList<Object>, Downstream<? super Object>> finisher() {
+    return (state, downstream) -> {
+      if (!downstream.isRejecting()) {
+        state.forEach(downstream::push);
+        state.clear();
+      }
+    };
+  }
+}
+
+
+final class MaxGatherer implements Gatherer<Object, ArrayList<Object>, Object> {
+  private final OrderBy$2 ordering;
+  private Object max = null;
+
+  MaxGatherer(OrderBy$2 ordering) {
+    this.ordering = ordering;
+  }
+
+  @Override
+  public Supplier<ArrayList<Object>> initializer() {
+    return ArrayList::new;
+  }
+
+  @Override
+  public Integrator<ArrayList<Object>, Object, Object> integrator() {
+    return (state, element, _) -> {
+      if (this.max == null) {
+        this.max = element;
+        state.add(element);
+        return true;
+      }
+      int cmp = cmp(ordering, element, max);
+      if (cmp > 0) {
+        this.max = element;
+        state.clear();
+        state.add(element);
+        return true;
+      }
+      if (cmp == 0) {
+        state.add(element);
+      }
+      return true;
+    };
+  }
+
+
+  @Override
+  public BiConsumer<ArrayList<Object>, Downstream<? super Object>> finisher() {
+    return (state, downstream) -> {
+      if (!downstream.isRejecting()) {
+        state.forEach(downstream::push);
+        state.clear();
+      }
+    };
   }
 }

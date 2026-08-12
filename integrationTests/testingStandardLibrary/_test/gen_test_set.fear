@@ -20,7 +20,7 @@ Set1Imm0Contains1Test: Test {::
 
 Set1Imm0Opt1Test: Test {::
     .check{Sets#[Int, Nat]({::.imm.abs}, +1, -2).opt(-1)! .assertEq +1}
-    .check{Sets#({::}, 1, 2).opt(3).isEmpty .assertTrue}
+    .check{Sets#({::}, 1, 2).opt(3).assertEmpty {::}}
   }
 
 Set1Imm0Get1Test: Test {::
@@ -121,8 +121,8 @@ Set1Imm1IsDisjoint2Test: Test {::
   }
 
 Set1Imm0IsDisjoint1Test: Test {::
-    .check{Sets#({::}, 1, 2).isDisjoint(Sets#({::}, 3, 4)) .assertTrue}
-    .check{Sets#({::}, 1, 2).isDisjoint(Sets#({::}, 2, 3)) .assertFalse}
+  .check{Sets#({::}, 1, 2).isDisjoint(Sets#({::}, 3, 4)) .assertTrue}
+  .check{Sets#({::}, 1, 2).isDisjoint(Sets#({::}, 2, 3)) .assertFalse}
   }
 
 Set1Imm1DistinctBy1Test: Test {::

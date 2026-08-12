@@ -45,18 +45,18 @@ Nat0Imm0GetRem1Test: Test {::
 
 Nat0Imm0Rem1Test: Test {::
     .check{7 .rem 2 .assertEq({::}, Opts# 1)}
-    .check{7 .rem 0 .assertEmpty}
+    .check{7 .rem 0 .assertEmpty {::}}
   }
 
 Nat0Imm0Div1Test: Test {::
     .check{(7.getByte) .div(2) .assertEq({::}, Opts# (3.getByte))}
-    .check{(7.getByte) .div(0) .assertEmpty}
+    .check{(7.getByte) .div(0) .assertEmpty {::}}
   }
 
 Nat0Imm0ExactDiv1Test: Test {::
     .check{6 .exactDiv 2 .assertEq({::}, Opts# 3)}
-    .check{7 .exactDiv 2 .assertEmpty}
-    .check{7 .exactDiv 0 .assertEmpty}
+    .check{7 .exactDiv 2 .assertEmpty {::}}
+    .check{7 .exactDiv 0 .assertEmpty {::}}
   }
 
 Nat0Imm0SoftSqrt0Test: Test {::
@@ -72,7 +72,7 @@ Nat0Imm0GetIndexOffset1Test: Test {::
 
 Nat0Imm0IndexOffset1Test: Test {::
     .check{5 .indexOffset(+3) .assertEq({::}, Opts# 8)}
-    .check{5 .indexOffset(-10) .assertEmpty}
+    .check{5 .indexOffset(-10) .assertEmpty {::}}
   }
 
 Nat0Imm0Num0Test: Test {::
@@ -81,17 +81,17 @@ Nat0Imm0Num0Test: Test {::
 
 Nat0Imm0Int0Test: Test {::
     .check{5 .int .assertEq({::}, Opts# +5)}
-    .check{(Math.maxNat) .int .assertEmpty}
+    .check{(Math.maxNat) .int .assertEmpty {::}}
   }
 
 Nat0Imm0Byte0Test: Test {::
     .check{5 .byte .assertEq({::}, Opts# (5.getByte))}
-    .check{300 .byte .assertEmpty}
+    .check{300 .byte .assertEmpty {::}}
   }
 
 Nat0Imm0Float0Test: Test {::
     .check{5 .float .assertEq({::}, Opts# 5.0)}
-    .check{Math.maxNat.float .assertEmpty}
+    .check{Math.maxNat.float .assertEmpty {::}}
   }
 
 Nat0Imm0GetInt0Test: Test {::
@@ -180,7 +180,7 @@ Nat0Imm0InRange1Test: Test {::
 
 Nat0Imm0AssertInRange1Test: Test {::
     .check{2 .assertInRange(1=~~=4)}
-    .checkDetErr({_ -> True}, {5 .assertInRange(1=~~=4)})
+    .checkNonDetErr({_ -> True}, {5 .assertInRange(1=~~=4)})
   }
 
 Nat0Imm0AssertInRange2Test: Test {::
