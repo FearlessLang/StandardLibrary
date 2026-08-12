@@ -97,7 +97,6 @@ public class Util{
   public static Object callF$2(Object f, Object x){ return ((F$2)f).read$$hash$1(x); }
   public static Object callF$3(Object f,Object x,Object y){ return ((F$3)f).read$$hash$2(x,y); }
 
-
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }
   }
@@ -112,14 +111,9 @@ public class Util{
     var ohB= (Order$1)by.imm$$hash$1(b);
     return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
   }
-
   public static Comparator<Object> toComparator(OrderBy$2 ordering) {
     return (a, b) -> cmp(ordering, a, b);
   }
-
-
-
-
   public static final class MapKey{
     public final OrderHash$1 ord; // OrderHash[K0] closed at this key's projection
     public final Object key;      // representative K (first inserted)

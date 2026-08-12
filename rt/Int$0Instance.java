@@ -207,7 +207,7 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
     }
 
     // Long.MIN_VALUE + (Long.MAX_VALUE + 1) == 0, so this handles 4.
-    // Otherwise,gen_test_flval is negative, so we can
+    // Otherwise, val is negative, so we can
     // add len to it to get the correct result.
     return Nat$0Instance.instance(len + val);
   }
