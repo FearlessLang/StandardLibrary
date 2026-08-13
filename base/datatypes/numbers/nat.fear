@@ -36,10 +36,20 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
   //>   .checkDetErr({_ -> True}, {7 / 0})
   /(d: Nat) : Num;
 
-  /// `this.getDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
-  //>   .check{7 .getDiv 2 .assertEq 3}
+  /// `this.getTruncDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
+  //>   .check{7 .getTruncDiv 2 .assertEq 3}
   //>   .checkDetErr({_ -> True}, {7 .getDiv 0})
-  .getDiv(d: Nat): Nat;
+  .getTruncDiv(d: Nat): Nat;
+
+  /// `this.getDiv(d)` returns `this` exactly divided by `d`. Throws iff `d == 0` or `rem != 0`.
+  //>   .check{6 .getDiv 2 .assertEq 3}
+  //>   .checkDetErr({_ -> True}, {7 .getDiv 2})
+  //>   .checkDetErr({_ -> True}, {7 .getDiv 0})
+  .getDiv(d: Nat): Nat -> Block#
+    .if {d == 0} .error {"Nat.getDiv: Cannot divide by 0"}
+    .let[Nat] rem = {this.getRem d}
+    .if {rem != 0} .error {"Nat.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
+    .return {this.getTruncDiv d};
 
   /// `this.getRem(d)` returns the remainder `this - (this.getDiv(d)) * d`. Throws iff `d == 0`.
   //>   .check{7 .getRem 2 .assertEq 1}
@@ -48,26 +58,23 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
 
   /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` iff `d == 0`.
   //>   .check{7 .rem 2 .assertEq({::}, Opts# 1)}
-  //>   .check{7 .rem 0 .assertEmpty}
+  //>   .check{7 .rem 0 .assertEmpty {::}}
   .rem(d: Nat): Opt[Nat] ->
       d != 0 .toOpt {this.getRem(d)};
 
-  /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, `.empty` otherwise.
-  //>   .check{(7.getByte) .div(2) .assertEq({::}, Opts# (3.getByte))}
-  //>   .check{(7.getByte) .div(0) .assertEmpty}
-  .div(d: Nat): Opt[Nat]
-    -> d != 0 .toOpt {this.getDiv(d)};
+  /// `this.truncDiv(d)` returns `.some` of `this.getTruncDiv(d)` if `d != 0`, `.empty` otherwise.
+  //>   .check{7 .truncDiv 2 .assertEq({::}, Opts# (3))}
+  //>   .check{7 .truncDiv 0 .assertEmpty {::}}
+  .truncDiv(d: Nat): Opt[Nat]
+    -> d != 0 .toOpt {this.getTruncDiv(d)};
 
-  /// `this.exactDiv(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`
+  /// `this.div(d)` returns `.some` of `this.getTruncDiv(d)` if `d` evenly divides `this`
   /// if `d != 0` and `this.rem(d) == 0`, `.empty` otherwise.
-  //>   .check{6 .exactDiv 2 .assertEq({::}, Opts# 3)}
-  //>   .check{7 .exactDiv 2 .assertEmpty}
-  //>   .check{7 .exactDiv 0 .assertEmpty}
-  .exactDiv(d: Nat): Opt[Nat]
-    -> this.rem(d).match {
-      .empty -> {};
-      .some r -> r == 0 .toOpt {this.getDiv(d)}.as{::};
-      };
+  //>   .check{6 .div 2 .assertEq({::}, Opts# 3)}
+  //>   .check{7 .div 2 .assertEmpty {::}}
+  //>   .check{7 .div 0 .assertEmpty {::}}
+  .div(d: Nat): Opt[Nat] ->
+    (d != 0) && {this.getRem d == 0} .toOpt {this.getTruncDiv(d)};
 
   /// `this.softSqrt` returns an approximate `Float` square root of `this`.
   //>   .check{9 .softSqrt .assertEq 3.0}
@@ -84,7 +91,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
   /// `this.indexOffset(delta)` returns `.some` of `this + delta` if it would neither underflow
   /// nor overflow, `.empty` otherwise.
   //>   .check{5 .indexOffset(+3) .assertEq({::}, Opts# 8)}
-  //>   .check{5 .indexOffset(-10) .assertEmpty}
+  //>   .check{5 .indexOffset(-10) .assertEmpty {::}}
   .indexOffset(delta: Int): Opt[Nat] -> delta >= +0 .if {
       // See if this + delta.nat would overflow
       .then -> delta.getNat <= (Math.maxNat - this) .toOpt {this.getIndexOffset(delta)};
@@ -100,17 +107,17 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
 
   /// `this.int` returns `.some` of `this` as an `Int` if `this <= maxInt`, `.empty` otherwise.
   //>   .check{5 .int .assertEq({::}, Opts# +5)}
-  //>   .check{(Math.maxNat) .int .assertEmpty}
+  //>   .check{(Math.maxNat) .int .assertEmpty {::}}
   .int: Opt[Int];
 
   /// `this.byte` returns `.some` of `this` as a `Byte` if `this <= maxByte`, `.empty` otherwise.
   //>   .check{5 .byte .assertEq({::}, Opts# (5.getByte))}
-  //>   .check{300 .byte .assertEmpty}
+  //>   .check{300 .byte .assertEmpty {::}}
   .byte: Opt[Byte];
 
   /// `this.float` returns `.some` of `this` as a `Float` if `this` is exactly representable, `.empty` otherwise.
   //>   .check{5 .float .assertEq({::}, Opts# 5.0)}
-  //>   .check{Math.maxNat.float .assertEmpty}
+  //>   .check{Math.maxNat.float .assertEmpty {::}}
   .float: Opt[Float];
 
   /// `this.getInt` converts `this` to an `Int`. Throws if `this > maxInt`.
@@ -251,7 +258,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
   /// Note: This method calls `.str` method on the non-sealed range, meaning you should be careful to call this on a
   ///   range you do not control, as doing so may invoke arbitrary code.
   //>   .check{2 .assertInRange(1=~~=4)}
-  //>   .checkDetErr({_ -> True}, {5 .assertInRange(1=~~=4)})
+  //>   .checkNonDetErr({_ -> True}, {5 .assertInRange(1=~~=4)})
   .assertInRange(range: Range[Nat]): Void -> this.assertInRange(range, {``});
 
   /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.

@@ -148,9 +148,9 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
 
-  @Override public Object imm$getDiv$1(Object p0){
+  @Override public Object imm$getTruncDiv$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw err("Int.div: d==0"); }
+    if (d == 0L){ throw err("Int.getTruncDiv: d==0"); }
 
     // if a > b then a / b == 0.
     // We can't directly compare val and d since val is signed,
@@ -172,7 +172,7 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
   }
   @Override public Object imm$getRem$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw err("Int.rem: d==0"); }
+    if (d == 0L){ throw err("Int.getRem: d==0"); }
     return instance(remainderWithUnsignedLong(val, d));
   }
 

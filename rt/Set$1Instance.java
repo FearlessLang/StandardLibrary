@@ -30,7 +30,7 @@ public final class Set$1Instance implements Set$1 {
       ordering,
       set.keySet().stream().map(Set$1Instance::extractKey)
         .sorted(toComparator(ordering))
-        .collect(Collectors.toList()),
+        .toList(),
       set
     );
   }

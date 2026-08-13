@@ -9,10 +9,10 @@ NatArithTests: Test {::
   }
 
 NatDivRemTests: Test {::
-  .check{7 .getDiv 3 .assertEq 2}
+  .check{7 .getTruncDiv 3 .assertEq 2}
   .check{7 .getRem 3 .assertEq 1}
   .check{6 .div 3 .assertEq ({::},Opts#(2))}
-  .check{7 .div 3 .assertEq ({::},Opts#(2))}
+  .check{7 .truncDiv 3 .assertEq ({::},Opts#(2))}
   .check{7 .div 0 .assertEq ({::},Opt[Nat])}
   .check{9 .softSqrt .assertEq +3.0}
   }

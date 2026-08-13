@@ -82,7 +82,7 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
   public static long getSignedLong(Object p0) {
     Nat$0Instance nat = (Nat$0Instance) p0;
     if (nat.val < 0) {
-      throw err("Nat too large to be represented as a signed long.");
+      throw err("Nat too large to be represented by an Int");
     }
     return nat.val;
   }
@@ -214,25 +214,15 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
   @Override public Object read$str$0(){ return Str$0Instance.instance(Long.toUnsignedString(val)); }
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
-  @Override public Object imm$getDiv$1(Object p0){
+  @Override public Object imm$getTruncDiv$1(Object p0){
     long d= n(p0);
-    if (d == 0){ throw err("Nat.div: d==0"); }
+    if (d == 0){ throw err("Nat.getTruncDiv: d==0"); }
     return instance(Long.divideUnsigned(val,d));
   }
   @Override public Object imm$getRem$1(Object p0){
     long d= n(p0);
-    if (d == 0){ throw err("Nat.rem: d==0"); }
+    if (d == 0){ throw err("Nat.getRem: d==0"); }
     return instance(Long.remainderUnsigned(val,d));
-  }
-  @Override public Object imm$div$1(Object p0){
-    long d= n(p0);
-    if (d == 0){ return optEmpty(); }
-    return optSome(instance(Long.divideUnsigned(val,d)));
-  }
-  @Override public Object imm$rem$1(Object p0){
-    long d= n(p0);
-    if (d == 0){ return optEmpty(); }
-    return optSome(instance(Long.remainderUnsigned(val,d)));
   }
   @Override public Object imm$getIndexOffset$1(Object p0){
     long offset = i(p0);

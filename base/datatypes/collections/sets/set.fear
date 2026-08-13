@@ -65,13 +65,13 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   .get(elem: E): E;
 
   /// `this + e` returns a new Set[E] containing all elements of this plus `e`.
-  /// Adding an element already present under the orderHash has no effect.
+  /// Returns `this` if `this.contains e`.
   //>   .check{Sets#({::}, 1) + 2 .assertEq({::}, Sets#({::}, 1, 2))}
   //>   .check{Sets#({::.imm.abs.getInt}, +1) + -1 .assertEq({::}, Sets#({::}, +1))}
   +(E): Set[E];
 
   /// `this - e` returns a new Set[E] containing all elements of this except `e`.
-  /// Removing an absent element leaves the set unchanged.
+  /// Returns `this` if this did not contain `e`.
   //>   .check{Sets#({::}, 2, 3) - 2 - 3 .isEmpty .assertTrue}
   //>   .check{Sets#({::}, 1) - 2 .assertEq({::}, Sets#({::}, 1))}
   -(E): Set[E];

@@ -87,7 +87,7 @@ Data: {
 Grid: {
   .inner: List[Nat];
   .get(x: Nat, y: Nat): Nat -> this.inner.get(y * 5 + x);
-  .y(index: Nat): Nat -> index.getDiv 5;
+  .y(index: Nat): Nat -> index.getTruncDiv 5;
   .x(index: Nat): Nat -> index.getRem 5;
   }
 

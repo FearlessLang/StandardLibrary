@@ -73,17 +73,17 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
     if (d == 0){ return optEmpty(); }
     return optSome(instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)));
   }
-  @Override public Object imm$getDiv$1(Object p0){
+  @Override public Object imm$getTruncDiv$1(Object p0){
     long d= natBits(p0);
 
-    if (d == 0L){ throw err("Byte.div: d==0"); }
+    if (d == 0L){ throw err("Byte.getTruncDiv: d==0"); }
     return instance((byte)(u8(val) / d));
   }
   /// for a % b = c, c <= a.
   /// Therefore it is safe to cast this % nat to byte
   @Override public Object imm$getRem$1(Object p0){
     long d= Nat$0Instance.unwrap(p0);
-    if (d == 0){ throw err("Byte.rem: d==0"); }
+    if (d == 0){ throw err("Byte.getRem: d==0"); }
     return instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d));
   }
   @Override public Object imm$softSqrt$0(){ return Float$0Instance.instance(Math.sqrt((double)u8(val))); }

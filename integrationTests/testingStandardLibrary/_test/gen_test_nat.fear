@@ -1,9 +1,9 @@
-Nat0Imm0Succ0Test: Test {::
+Nat0Imm0GetSucc0Test: Test {::
     .check{5 .getSucc .assertEq 6}
     .checkDetErr({_ -> True}, {(Math.maxNat) .getSucc})
   }
 
-Nat0Imm0Pred0Test: Test {::
+Nat0Imm0GetPred0Test: Test {::
     .check{5 .getPred .assertEq 4}
     .checkDetErr({_ -> True}, {0 .getPred})
   }
@@ -33,8 +33,14 @@ Nat0Imm0Slash1Test: Test {::
     .checkDetErr({_ -> True}, {7 / 0})
   }
 
+Nat0Imm0GetTruncDiv1Test: Test {::
+    .check{7 .getTruncDiv 2 .assertEq 3}
+    .checkDetErr({_ -> True}, {7 .getDiv 0})
+  }
+
 Nat0Imm0GetDiv1Test: Test {::
-    .check{7 .getDiv 2 .assertEq 3}
+    .check{6 .getDiv 2 .assertEq 3}
+    .checkDetErr({_ -> True}, {7 .getDiv 2})
     .checkDetErr({_ -> True}, {7 .getDiv 0})
   }
 
@@ -48,15 +54,15 @@ Nat0Imm0Rem1Test: Test {::
     .check{7 .rem 0 .assertEmpty {::}}
   }
 
-Nat0Imm0Div1Test: Test {::
-    .check{(7.getByte) .div(2) .assertEq({::}, Opts# (3.getByte))}
-    .check{(7.getByte) .div(0) .assertEmpty {::}}
+Nat0Imm0TruncDiv1Test: Test {::
+    .check{7 .truncDiv 2 .assertEq({::}, Opts# (3))}
+    .check{7 .truncDiv 0 .assertEmpty {::}}
   }
 
-Nat0Imm0ExactDiv1Test: Test {::
-    .check{6 .exactDiv 2 .assertEq({::}, Opts# 3)}
-    .check{7 .exactDiv 2 .assertEmpty {::}}
-    .check{7 .exactDiv 0 .assertEmpty {::}}
+Nat0Imm0Div1Test: Test {::
+    .check{6 .div 2 .assertEq({::}, Opts# 3)}
+    .check{7 .div 2 .assertEmpty {::}}
+    .check{7 .div 0 .assertEmpty {::}}
   }
 
 Nat0Imm0SoftSqrt0Test: Test {::
@@ -193,18 +199,19 @@ Nat0Imm0ClampTo1Test: Test {::
   }
 
 Nat0ImmTests: Test {::
-  .test Nat0Imm0Succ0Test
-  .test Nat0Imm0Pred0Test
+  .test Nat0Imm0GetSucc0Test
+  .test Nat0Imm0GetPred0Test
   .test Nat0Imm0Plus1Test
   .test Nat0Imm0Dash1Test
   .test Nat0Imm0Star1Test
   .test Nat0Imm0StarStar1Test
   .test Nat0Imm0Slash1Test
+  .test Nat0Imm0GetTruncDiv1Test
   .test Nat0Imm0GetDiv1Test
   .test Nat0Imm0GetRem1Test
   .test Nat0Imm0Rem1Test
+  .test Nat0Imm0TruncDiv1Test
   .test Nat0Imm0Div1Test
-  .test Nat0Imm0ExactDiv1Test
   .test Nat0Imm0SoftSqrt0Test
   .test Nat0Imm0GetIndexOffset1Test
   .test Nat0Imm0IndexOffset1Test
@@ -235,3 +242,4 @@ Nat0ImmTests: Test {::
   .test Nat0Imm0AssertInRange2Test
   .test Nat0Imm0ClampTo1Test
   }
+

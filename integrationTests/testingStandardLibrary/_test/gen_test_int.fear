@@ -1,9 +1,9 @@
-Int0Imm0Succ0Test: Test {::
+Int0Imm0GetSucc0Test: Test {::
     .check{+5 .getSucc .assertEq +6}
     .checkDetErr({_ -> True}, {(Math.maxInt) .getSucc})
   }
 
-Int0Imm0Pred0Test: Test {::
+Int0Imm0GetPred0Test: Test {::
     .check{+5 .getPred .assertEq +4}
     .checkDetErr({_ -> True}, {(Math.minInt) .getPred})
   }
@@ -28,9 +28,15 @@ Int0Imm0StarStar1Test: Test {::
     .checkDetErr({_ -> True}, {(Math.maxInt) ** 2})
   }
 
+Int0Imm0GetTruncDiv1Test: Test {::
+    .check{+7 .getTruncDiv 2 .assertEq +3}
+    .check{-7 .getTruncDiv 2 .assertEq -3}
+    .checkDetErr({_ -> True}, {+7 .getTruncDiv 0})
+  }
+
 Int0Imm0GetDiv1Test: Test {::
-    .check{+7 .getDiv 2 .assertEq +3}
-    .check{-7 .getDiv 2 .assertEq -3}
+    .check{(+6) .getDiv 2 .assertEq(+3)}
+    .checkDetErr({_ -> True}, {+7 .getDiv 3})
     .checkDetErr({_ -> True}, {+7 .getDiv 0})
   }
 
@@ -44,16 +50,16 @@ Int0Imm0Rem1Test: Test {::
     .check{+7 .rem 0 .assertEmpty {::}}
   }
 
-Int0Imm0Div1Test: Test {::
-    .check{+6 .div(2) .assertEq({::}, Opts# +3)}
-    .check{+7 .div(2) .assertEq({::}, Opts# +3)}
-    .check{+7 .div(0) .assertEmpty {::}}
+Int0Imm0TruncDiv1Test: Test {::
+    .check{+6 .truncDiv(2) .assertEq({::}, Opts# +3)}
+    .check{+7 .truncDiv(2) .assertEq({::}, Opts# +3)}
+    .check{+7 .truncDiv(0) .assertEmpty {::}}
   }
 
-Int0Imm0ExactDiv1Test: Test {::
-    .check{+6 .exactDiv(2) .assertEq({::}, Opts# +3)}
-    .check{+7 .exactDiv(2) .assertEmpty {::}}
-    .check{+7 .exactDiv(0) .assertEmpty {::}}
+Int0Imm0Div1Test: Test {::
+    .check{+6 .div(2) .assertEq({::}, Opts# +3)}
+    .check{+7 .div(2) .assertEmpty {::}}
+    .check{+7 .div(0) .assertEmpty {::}}
   }
 
 Int0Imm0Sign0Test: Test {::
@@ -131,7 +137,7 @@ Int0Imm0SoftByte0Test: Test {::
 
 Int0Imm0SoftFloat0Test: Test {::
     .check{+5 .softFloat .assertEq 5.0}
-    .check{Math.maxInt - +1 .softFloat.softInt .assertEq(Math.maxInt)}
+    .check{Math.maxInt - +1 .softFloat.softNat .assertEq(Math.maxInt.getNat)}
   }
 
 Int0Imm0AluAddWrap1Test: Test {::
@@ -177,7 +183,7 @@ Int0Imm0AluOr1Test: Test {::
   }
 
 Int0Imm0AluNat0Test: Test {::
-    .check{-1 .aluNat .assertEq(Math.maxNat)}
+    .check{-1 .aluNat .assertEq (Math.maxNat)}
   }
 
 Int0Imm0AluByte0Test: Test {::
@@ -204,17 +210,18 @@ Int0Imm0ClampTo1Test: Test {::
   }
 
 Int0ImmTests: Test {::
-  .test Int0Imm0Succ0Test
-  .test Int0Imm0Pred0Test
+  .test Int0Imm0GetSucc0Test
+  .test Int0Imm0GetPred0Test
   .test Int0Imm0Plus1Test
   .test Int0Imm0Dash1Test
   .test Int0Imm0Star1Test
   .test Int0Imm0StarStar1Test
+  .test Int0Imm0GetTruncDiv1Test
   .test Int0Imm0GetDiv1Test
   .test Int0Imm0GetRem1Test
   .test Int0Imm0Rem1Test
+  .test Int0Imm0TruncDiv1Test
   .test Int0Imm0Div1Test
-  .test Int0Imm0ExactDiv1Test
   .test Int0Imm0Sign0Test
   .test Int0Imm0Abs0Test
   .test Int0Imm0NegAbs0Test
