@@ -274,6 +274,13 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
       .if {this >= (range.end)} .return {range.end}
       .return {this}; .hash -> this.str.hash;                 /// hash via str
 
+
+  /// `this.indexInfo info`
+  .indexInto info -> info.match {
+    .empty -> {}; .msg _ -> {}; .map _ -> {};
+    .list list -> list.opt(this);
+    }
+
   .info -> Infos.msg(this.str);            /// info via str
   .close->::; .close->this;               /// fixpoint type closed
   .sumNumber xs ->                        /// summing all numbers starting from this

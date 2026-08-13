@@ -51,6 +51,15 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
       .map  m2 -> _InfoMapPlus#(m1, m2) .info {::};
       };
     };
+
+  &: InfoMatches -> {Opts#(this)};
+  ~: InfoExtractor -> {Opts#(this)};
+  }
+
+/// Allow indexing into an info,
+/// Union of Str (index into map) and Nat (index into list)
+InfoKey: Sealed {
+  .indexInto(Info): mut Opt[Info];
   }
 
 _InfoMapPlus: { #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->
