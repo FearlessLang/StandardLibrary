@@ -13,30 +13,37 @@ public final class Set$1Instance implements Set$1 {
   private final Map<MapKey, Object> set;
   private final List<Object> sortedList;
 
-  static Set$1Instance of(OrderHashBy$2 ordering, List<Object> values) { return new Set$1Instance(ordering, new ArrayList<>(values)); }
-  static Set$1Instance ofMutableList(OrderHashBy$2 ordering, ArrayList<Object> values) { return new Set$1Instance(ordering, values); }
-
-  Set$1Instance(OrderHashBy$2 ordering, ArrayList<Object> values) {
-    this.ordering = ordering;
-    values.sort((a, b) -> cmp(ordering, a, b));
-    this.sortedList = values;
-    this.set = sortedList.stream().collect(Collectors.toMap(
-      o -> mapKey(ordering, o),
-      o -> o
-    ));
+  static Set$1Instance of(OrderHashBy$2 ordering, Map<MapKey, Object> set) { return new Set$1Instance(ordering, set); }
+  static Set$1Instance fromSortedList(OrderHashBy$2 ordering, List<Object> sortedList) {return new Set$1Instance(ordering, sortedList);}
+  static Set$1Instance fromUnsortedList(OrderHashBy$2 ordering, ArrayList<Object> unsortedList) {
+    unsortedList.sort(Util.toComparator(ordering));
+    return Set$1Instance.fromSortedList(ordering, unsortedList);
   }
-  Set$1Instance(OrderHashBy$2 ordering, ArrayList<Object> sortedList, Map<MapKey, Object> set) {
+  public Set$1Instance(OrderHashBy$2 ordering, List<Object> sortedList, Map<MapKey, Object> set) {
     this.ordering = ordering;
+    this.set = set;
     this.sortedList = sortedList;
-    this.set = set;
   }
-  Set$1Instance(OrderHashBy$2 ordering, Map<MapKey, Object> set) {
-    this.ordering = ordering;
-    this.sortedList = set.keySet().stream().map(Set$1Instance::extractKey)
-      .sorted((a, b) -> cmp(ordering, a, b))
-      .collect(Collectors.toCollection(ArrayList::new));
 
-    this.set = set;
+  Set$1Instance(OrderHashBy$2 ordering, Map<MapKey, Object> set) {
+    this(
+      ordering,
+      set.keySet().stream().map(Set$1Instance::extractKey)
+        .sorted(toComparator(ordering))
+        .collect(Collectors.toList()),
+      set
+    );
+  }
+
+  Set$1Instance(OrderHashBy$2 ordering, List<Object> sortedList) {
+    this(
+      ordering,
+      sortedList,
+      sortedList.stream().collect(Collectors.toMap(
+        o -> mapKey(ordering, o),
+        o -> o
+      ))
+    );
   }
 
   static Object extractKey(MapKey mapKey) { return mapKey.key; }
@@ -55,7 +62,8 @@ public final class Set$1Instance implements Set$1 {
   public Object imm$get$1(Object p0) {
     Object key = set.get(mapKey(ordering, p0));
     if (key == null) { throw err(
-      "Set.get: Inputted value "+toStringBy(ordering, p0)+" is not contained in this set"
+      "Set.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
+      + " Consider using `Set.opt` to properly handle the failure case"
     );}
     return key;
   }
@@ -68,28 +76,26 @@ public final class Set$1Instance implements Set$1 {
       return this;
     }
     var list = new ArrayList<>(set.size() + 1);
-    list.addAll(sortedList);
-    insertInSortedPosition(list, p0, Util.toComparator(ordering));
-    return new Set$1Instance(ordering, list, this.set);
+    int insertionPoint = insertionPosition(this.sortedList, p0, Util.toComparator(ordering));
+    list.addAll(sortedList.subList(0,  insertionPoint));
+    list.add(p0);
+    list.addAll(sortedList.subList(insertionPoint, sortedList.size()));
+    Map<MapKey, Object> map = new HashMap<>(this.set);
+    map.put(mapKey(ordering, p0), p0);
+    return new Set$1Instance(ordering, list, map);
   }
-  static <T> void insertInSortedPosition(ArrayList<T> list, T t, Comparator<T> comparator) {
+  static <T> int insertionPosition(List<T> list, T t, Comparator<T> comparator) {
     /*
     the index of the search key, if it is contained in the list; otherwise:
     (-(insertion point) - 1). The insertion point is defined as the point at which
     the key would be inserted into the list: the index of the first element greater
     than the key, or list.size()
-    i =
+    i = -insertion_point - 1
+    => insertion_point = -(i+1)
      */
     int index = Collections.binarySearch(list, t, comparator);
-    if (index < 0) {
-      // not in the original index.
-      //i = -(insertion point) - 1
-      // => insertion point = -(i + 1)
-      list.add(-(index + 1), t);
-    } else {
-      // put it after the current element
-      list.add(index + 1, t);
-    }
+    assert index <= 0 : "Element should be not in the list";
+    return -(index+1);
   }
   @Override
   public Object imm$$dash$1(Object p0) {

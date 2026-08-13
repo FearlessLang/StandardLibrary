@@ -107,44 +107,35 @@ record List$1Instance(List<Object> val) implements List$1{
 
   @Override public Object read$size$0(){ return Nat$0Instance.instance(val.size()); }
   @Override public Object read$isEmpty$0(){ return bool(val.isEmpty()); }
-
   @Override public Object read$str$1(Object p0){
     var by= (ToStrBy$1)p0;
     String res= val.stream().map(e->toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ","[","]"));
     return Str$0Instance.instance(res);
   }
-
-
   @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
   @Override public Object read$get$1(Object p0){ return val.get(idx(p0)); }
-
   @Override public Object mut$opt$1(Object p0){
     long i= natToLong(p0);
     return (0 <= i && i < val.size()) ? optSome(val.get((int) i)) : optEmpty();
   }
   @Override public Object read$opt$1(Object p0){ return mut$opt$1(p0); }
   @Override public Object imm$opt$1(Object p0){ return mut$opt$1(p0); }
-
   @Override public Object mut$getFirst$0(){
     //can not be empty check(!val.isEmpty(), "List was empty");
     return val.getFirst();
   }
   @Override public Object read$getFirst$0(){ return mut$getFirst$0(); }
-
   @Override public Object mut$getLast$0(){
     //can not be empty check(!val.isEmpty(), "List was empty");
     return val.getLast();
   }
   @Override public Object read$getLast$0(){ return mut$getLast$0(); }
-
   @Override public Object mut$first$0(){ return optSome(val.getFirst()); }
   @Override public Object read$first$0(){ return mut$first$0(); }
   @Override public Object imm$first$0(){ return mut$first$0(); }
-
   @Override public Object mut$last$0(){ return optSome(val.getLast()); }
   @Override public Object read$last$0(){ return mut$last$0(); }
   @Override public Object imm$last$0(){ return mut$last$0(); }
-
   @Override public Object mut$$plus_plus$1(Object p0){
     var xs= asJava(p0);
     if (xs.isEmpty()){ return this; }
@@ -154,7 +145,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
-
   @Override public Object mut$$lt_plus$1(Object p0){
     var l= new ArrayList<Object>(val.size()+1);
     l.add(p0);
@@ -162,7 +152,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$$lt_plus$1(Object p0){ return mut$$lt_plus$1(p0); }
-
   @Override public Object mut$$plus_gt$1(Object p0){
     var l= new ArrayList<Object>(val.size()+1);
     l.addAll(val);
@@ -170,17 +159,14 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$$plus_gt$1(Object p0){ return mut$$plus_gt$1(p0); }
-
   @Override public Object mut$subList$2(Object p0, Object p1){
     long s= Util.natToLong(p0); long e= Util.natToLong(p1);
     check(0 <= s && s <= e && e <= val.size(), "List subList out of range");
     return wrap(val.subList((int) s, (int) e));
   }
   @Override public Object read$subList$2(Object p0, Object p1){ return mut$subList$2(p0,p1); }
-
   @Override public Object mut$subList$1(Object p0){ return mut$subList$2(p0, Nat$0Instance.instance(val.size())); }
   @Override public Object read$subList$1(Object p0){ return mut$subList$1(p0); }
-
   @Override public Object mut$with$2(Object p0, Object p1){
     int i= idx(p0);
     var l= new ArrayList<Object>(val);
@@ -188,7 +174,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0,p1); }
-
   @Override public Object mut$withAlso$2(Object p0, Object p1){
     long i= natToLong(p0);
     check(0 <= i && i <= val.size(), "List withAlso out of range");
@@ -200,7 +185,6 @@ record List$1Instance(List<Object> val) implements List$1{
     return wrap(l);
   }
   @Override public Object read$withAlso$2(Object p0, Object p1){ return mut$withAlso$2(p0,p1); }
-
   @Override public Object mut$without$1(Object p0){
     int i= idx(p0);
     if (val.size() == 1 && i == 0){ return List$1.instance; }

@@ -33,11 +33,10 @@ final class ESet$1Instance implements ESet$1 {
         set= new LinkedHashMap<>();
     }
 
-    private ArrayList<Object> drain(){
+    private Map<MapKey, Object> drain(){
         var r= set;
         set= new LinkedHashMap<>();
-        return r.keySet().stream().map(k -> k.key)
-                .collect(Collectors.toCollection(ArrayList::new));
+        return r;
     }
 
     private Set<MapKey> set() {
@@ -94,10 +93,13 @@ final class ESet$1Instance implements ESet$1 {
     @Override public Object mut$get$1(Object p0) {
         Object key = this.set.get(mapKey(this.ordering, p0));
         if (key != null) { return key; }
-        throw err("Eset.get: Tried to get an Object that is not in the set");
+         throw err(
+           "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
+             + " Consider using `ESet.opt` to properly handle the failure case."
+         );
     }
-    @Override public Object mut$seqFlow$0(){ return Flow$1Instance.of(drain().stream()); }
-    @Override public Object mut$flow$0(){ return Flow$1Instance.of(drain().stream()); }//could be parallel
+    @Override public Object mut$seqFlow$0(){ return Flow$1Instance.of(drain().keySet().stream().map(Set$1Instance::extractKey)); }
+    @Override public Object mut$flow$0(){ return Flow$1Instance.of(drain().keySet().stream().map(Set$1Instance::extractKey).parallel()); }
     @Override public Object mut$set$0(){ return Set$1Instance.of(ordering, drain()); }
     @Override public Object mut$distinctBy$1(Object p0){
         reOrderHash((OrderHashBy$2) p0);

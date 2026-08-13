@@ -1,0 +1,34 @@
+AsImm[E:*, R]: { mut #(E): R; }
+
+FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
+ELists: { #[E:*]: mut EList[E]-> Magic! }
+
+JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
+SumNumber[E:*]: { .sumNumber(mut Flow[E]): E }
+
+FlowMode[T:*]:Sealed{.flowMode:FlowMode[T];}
+Par:Sealed{#[T:imm,read]:Par[T]->Par[T]}
+Par[T:imm,read]:FlowMode[T]{this}
+ParRepr:Sealed{#[T]:ParRepr[T]->ParRepr[T]}
+ParRepr[T]:FlowMode[mut Repr[T]]{this}
+ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
+ParPod[T]:FlowMode[mut IsoPod[T]]{this}
+
+ActorImpl[S:*,E:*,R]: {
+  read #(downstream: mut ActorSink[R], state: S, e: E, m: ActorMatch[R]): R
+  }
+ActorImplMut[S:*,E:*,R:*]: {
+  read #(downstream: mutH ActorSink[R], state: mutH S, e: E, m: ActorMatch[R]): R
+  }
+ActorMatch[R:*]: { mut .continue: R; mut .stop: R; }//Should we instead just have a 'stopper'?
+
+_ActorSinks: {#[T:*](sink: mut _Sink[T]): mut ActorSink[T] -> mut ActorSink[T:*]: {
+  mut #(x: T): Void -> sink#x;
+  mut .pushError(info: Info): Void -> sink.pushError(info);
+  }}
+
+_Sink[T:*]: {
+  mut #(x: T): Void;
+  mut .pushError(info: Info): Void;
+  mut .stopDown: Void;
+  }

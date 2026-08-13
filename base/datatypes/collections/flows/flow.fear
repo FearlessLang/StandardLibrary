@@ -56,6 +56,10 @@ Flow[E:*]: {
   mut .get:   E;//get the first element if size==1, throws otherwise
   mut .getOpt:   mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
   mut .first: mut Opt[E]; //opt of the first element
+  /// `this.last` returns the last element in the flow, consuming this.
+  /// Equivalent to: `this.fold({}, (_, e) -> Opts#(a))`
+  /// Complexity: O(n)
+  mut .last: Opt[E];
   mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut Flow[R] ->
     this.map(f)
       .filter{r -> r.isSome}
@@ -64,6 +68,8 @@ Flow[E:*]: {
     this.map{e -> Block#(f#e, e)};
   mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut Flow[E] -> //crucial to do IO side effects while flowing
     this.map(ctx, {c, e -> Block#(f#(c, e), e)});
+  mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S];
+  mut .limit(n: Nat): mut Flow[E];
   //--Still to implement
   mut .let[DR:*,R:*](
     x: read F[mut MF[mut Flow[E]],DR],
@@ -72,45 +78,6 @@ Flow[E:*]: {
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
   mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
   mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg`TODO`;
-  mut .limit(n: Nat): mut Flow[E]->Error.msg`TODO`;
-  mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S]->Error.msg`TODO`;
-  mut .last: Opt[E]->Error.msg`TODO`;
   mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg`TODO`;
   mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg`TODO`;
   }
-
-AsImm[E:*, R]: { mut #(E): R; }
-
-FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
-ELists: { #[E:*]: mut EList[E]-> Magic! }
-
-JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
-SumNumber[E:*]: { .sumNumber(mut Flow[E]): E }
-
-FlowMode[T:*]:Sealed{.flowMode:FlowMode[T];}
-Par:Sealed{#[T:imm,read]:Par[T]->Par[T]}
-Par[T:imm,read]:FlowMode[T]{this}
-ParRepr:Sealed{#[T]:ParRepr[T]->ParRepr[T]}
-ParRepr[T]:FlowMode[mut Repr[T]]{this}
-ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
-ParPod[T]:FlowMode[mut IsoPod[T]]{this}
-
-ActorImpl[S:*,E:*,R]: { 
-  read #(downstream: mut ActorSink[R], state: S, e: E, m: ActorMatch[R]): R
-  }
-ActorImplMut[S:*,E:*,R:*]: { 
-  read #(downstream: mutH ActorSink[R], state: mutH S, e: E, m: ActorMatch[R]): R
-  }
-ActorMatch[R:*]: { mut .continue: R; mut .stop: R; }//Should we instead just have a 'stopper'?
-
-_ActorSinks: {#[T:*](sink: mut _Sink[T]): mut ActorSink[T] -> mut ActorSink[T:*]: {
-  mut #(x: T): Void -> sink#x;
-  mut .pushError(info: Info): Void -> sink.pushError(info);
-  }}
-
-_Sink[T:*]: {
-  mut #(x: T): Void;
-  mut .pushError(info: Info): Void;
-  mut .stopDown: Void;
-  }
-  

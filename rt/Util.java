@@ -2,6 +2,7 @@ package base;
 
 import java.math.BigInteger;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 public class Util{
   private static final AtomicBoolean parentLifelineStarted= new AtomicBoolean();
@@ -59,6 +60,9 @@ public class Util{
   public static Opt$1 optNullable(Object o) {
       if (o == null) {return optEmpty();}
       return optSome(o);
+  }
+  public static Opt$1 toOpt(Optional<?> opt) {
+    return optNullable(opt.orElse(null));
   }
   public static Error nonDetErr(String msg){
     return (Error)Error$0.instance.imm$nonDeterministic$1(new Str$0Instance(msg));

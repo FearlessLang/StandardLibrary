@@ -12,6 +12,9 @@ public interface ELists$0 extends Sealed$0{
 }
 final class EList$1Instance implements EList$1{
   static Object wrap(List<Object> l){ return new EList$1Instance(new ArrayList<>(l)); }
+  /// unsafeWrap takes assumes sole ownership of l. This should never be called on a list which can have other aliases to it,
+  /// Avoid an unnecessary clone of the list compared to wrap.
+  static Object unsafeWrap(ArrayList<Object> l){ return new EList$1Instance(l); }
   EList$1Instance(ArrayList<Object> l){ xs= l; }
   EList$1Instance(){ xs= new ArrayList<>(); }
   private ArrayList<Object> xs;
@@ -33,7 +36,7 @@ final class EList$1Instance implements EList$1{
   @Override public Object mut$get$1(Object p0){ return xs.get(idx(p0)); }
   @Override public Object read$size$0(){ return Nat$0Instance.instance(xs.size()); }
   @Override public Object mut$seqFlow$0(){ return Flow$1Instance.of(drain().stream()); }
-  @Override public Object mut$flow$1(Object p0){ return Flow$1Instance.of(drain().stream()); }//could be parallel
+  @Override public Object mut$flow$1(Object p0){ return Flow$1Instance.of(drain().stream().parallel()); }
   @Override public Object mut$list$0(){ return List$1Instance.wrap(drain()); }
   @Override public Object mut$sort$1(Object p0){
     var by= (OrderBy$2)p0;

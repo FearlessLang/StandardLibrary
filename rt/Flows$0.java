@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Gatherer;
+import java.util.stream.Gatherers;
 import java.util.stream.Stream;
 
 import static base.Util.*;
@@ -30,9 +31,9 @@ public interface Flows$0 extends Sealed$0{
   default Object imm$$hash$16(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return Flow$1Instance.of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15); }
 
   default Object imm$fromMutList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//sequential
-  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//maybeparallel
-  default Object imm$fromReadList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//maybeparallel
-  default Object imm$fromImmList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream()); }//maybeparallel
+  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream().parallel()); }//parallel!
+  default Object imm$fromReadList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream().parallel()); }//parallel!
+  default Object imm$fromImmList$1(Object p0){ return Flow$1Instance.of(List$1Instance.asJava(p0).stream().parallel()); }//parallel!
 
   Flows$0 instance= new Flows$0(){};
 }
@@ -71,25 +72,28 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$eList$0(){
-    try{ return EList$1Instance.wrap(s.toList()); }
+    try{ return EList$1Instance.unsafeWrap(s.collect(Collectors.toCollection(ArrayList::new))); }
     catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$set$2(Object p0, Object p1){
     OrderHashBy$2 ordering = Set$1Instance.ordering(p1);
     AsImm$2 toImm = (AsImm$2) p0;
-    try{ return Set$1Instance.ofMutableList(
-      ordering,
-      s.map(e -> toImm.mut$$hash$1(e))
-        .collect(Collectors.toCollection(ArrayList::new))
-    );}
+    try{
+      return Set$1Instance.fromSortedList(
+        ordering,
+        s.map(toImm::mut$$hash$1).sorted(Util.toComparator(ordering)).toList()
+      );
+    }
     catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$eSet$2(Object p0, Object p1){
     OrderHashBy$2 ordering = Set$1Instance.ordering(p1);
     AsImm$2 toImm = (AsImm$2) p0;
     LinkedHashMap<Util.MapKey, Object> map = new LinkedHashMap<>();
-    s.forEach(e -> map.put(mapKey(ordering, e), e));
-    try{return new ESet$1Instance(map, ordering);}
+    try{
+      s.map(toImm::mut$$hash$1).forEach(e -> map.put(mapKey(ordering, e), e));
+      return new ESet$1Instance(map, ordering);
+    }
     catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$fold$2(Object p0,Object p1){
@@ -167,45 +171,63 @@ record Flow$1Instance(Stream<Object> s) implements Flow$1{
     }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$last$0(){
+    try{ return Util.toOpt(s.reduce((_, b) -> b)); }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$scan$2(Object p0, Object p1){
+    try{
+      return Flow$1Instance.of(
+        s.gather(Gatherers.scan(() -> p0, (a,b) -> callF$3(p1,a,b)))
+      );
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$limit$1(Object p0){
+    try{
+      long limit = Nat$0Instance.unwrap(p0);
+      if (limit < 0) { // check if overflows long
+        // Potentially better to clamp here and hide it - the caller will likely die before they hit Long.MAX_VALUE.
+        // It's dishonest but if each operation takes 1ns:  9223372036854775807 × (1 nanosecond) ≈ 106752 d ≈ 292 years
+        throw err("Flow.limit: Cannot limit to more than "+Long.MAX_VALUE+" values, got "+Long.toUnsignedString(limit));
+      }
+      return Flow$1Instance.of(
+        s.limit(limit)
+      );
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
 }
 
-
-final class MinGatherer implements Gatherer<Object, ArrayList<Object>, Object> {
+sealed abstract class BestGatherer implements Gatherer<Object, ArrayList<Object>, Object> {
   private final OrderBy$2 ordering;
-  private Object min = null;
+  private Object best = null;
 
-  MinGatherer(OrderBy$2 ordering) {
-    this.ordering = ordering;
-  }
+  BestGatherer(OrderBy$2 ordering) { this.ordering = ordering; }
+
+  abstract boolean better(int cmpResult);
 
   @Override
-  public Supplier<ArrayList<Object>> initializer() {
-    return ArrayList::new;
-  }
-
+  public Supplier<ArrayList<Object>> initializer() { return ArrayList::new; }
   @Override
   public Integrator<ArrayList<Object>, Object, Object> integrator() {
     return (state, element, _) -> {
-      if (this.min == null) {
-        this.min = element;
+      if (this.best == null) {
+        this.best = element;
         state.add(element);
         return true;
       }
-      int cmp = cmp(ordering, element, min);
-      if (cmp < 0) {
-        this.min = element;
+      int cmp = cmp(ordering, element, best);
+      if (better(cmp)) {
+        this.best = element;
         state.clear();
         state.add(element);
         return true;
       }
-      if (cmp == 0) {
-        state.add(element);
-      }
+      if (cmp == 0) { state.add(element); }
       return true;
     };
   }
-
-
   @Override
   public BiConsumer<ArrayList<Object>, Downstream<? super Object>> finisher() {
     return (state, downstream) -> {
@@ -217,50 +239,16 @@ final class MinGatherer implements Gatherer<Object, ArrayList<Object>, Object> {
   }
 }
 
-
-final class MaxGatherer implements Gatherer<Object, ArrayList<Object>, Object> {
-  private final OrderBy$2 ordering;
-  private Object max = null;
-
-  MaxGatherer(OrderBy$2 ordering) {
-    this.ordering = ordering;
-  }
+final class MinGatherer extends BestGatherer {
+  MinGatherer(OrderBy$2 ordering) { super(ordering); }
 
   @Override
-  public Supplier<ArrayList<Object>> initializer() {
-    return ArrayList::new;
-  }
+  boolean better(int cmpResult) { return cmpResult < 0; }
+}
+
+final class MaxGatherer extends BestGatherer {
+  MaxGatherer(OrderBy$2 ordering) { super(ordering); }
 
   @Override
-  public Integrator<ArrayList<Object>, Object, Object> integrator() {
-    return (state, element, _) -> {
-      if (this.max == null) {
-        this.max = element;
-        state.add(element);
-        return true;
-      }
-      int cmp = cmp(ordering, element, max);
-      if (cmp > 0) {
-        this.max = element;
-        state.clear();
-        state.add(element);
-        return true;
-      }
-      if (cmp == 0) {
-        state.add(element);
-      }
-      return true;
-    };
-  }
-
-
-  @Override
-  public BiConsumer<ArrayList<Object>, Downstream<? super Object>> finisher() {
-    return (state, downstream) -> {
-      if (!downstream.isRejecting()) {
-        state.forEach(downstream::push);
-        state.clear();
-      }
-    };
-  }
+  boolean better(int cmpResult) { return cmpResult > 0; }
 }
