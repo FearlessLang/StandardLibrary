@@ -1,5 +1,8 @@
 package base;
+
 import java.math.BigInteger;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 public class Util{
   private static final AtomicBoolean parentLifelineStarted= new AtomicBoolean();
@@ -53,7 +56,14 @@ public class Util{
     return i<0?m.mut$lt$0() : i==0? m.mut$eq$0() : m.mut$gt$0();
   }
   public static Opt$1 optEmpty(){ return Opt$1.instance; }
-  public static Object optSome(Object x){ return Opts$0.instance.imm$$hash$1(x); }
+  public static Opt$1 optSome(Object x){ return (Opt$1) Opts$0.instance.imm$$hash$1(x); }
+  public static Opt$1 optNullable(Object o) {
+      if (o == null) {return optEmpty();}
+      return optSome(o);
+  }
+  public static Opt$1 toOpt(Optional<?> opt) {
+    return optNullable(opt.orElse(null));
+  }
   public static Error nonDetErr(String msg){
     return (Error)Error$0.instance.imm$nonDeterministic$1(new Str$0Instance(msg));
     }
@@ -70,20 +80,26 @@ public class Util{
       : BigInteger.valueOf(x & Long.MAX_VALUE).setBit(63);
   }
   public static String toS(Object o){return ((Str$0Instance)((ToStr$0)o).read$str$0()).val(); }
-  public static long natToInt(Object n){
+  public static String toStringBy(ToStrBy$1 by, Object p0) {
+    return toS(by.imm$$hash$1(p0));
+  }
+  public static long natToLong(Object n){
     return ((Nat$0Instance)n).val();
   }
-  public static Object intToNat(int i){
-    assert i >= 0;
-    return new Nat$0Instance(i);
+  public static int natToInt(Object n){
+    long nat = ((Nat$0Instance)n).val();
+    if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {
+      throw err("Nat "+Long.toUnsignedString(nat)+"is too large to represented as an integer");
+    }
+    return (int) nat;
   }
+
   public static Object callMF$1(Object f){ return ((MF$1)f).mut$$hash$0(); }
   public static Object callMF$2(Object f, Object x){ return ((MF$2)f).mut$$hash$1(x); }
   public static Object callMF$3(Object f,Object x,Object y){ return ((MF$3)f).mut$$hash$2(x,y); }
   public static Object callF$1(Object f){ return ((F$1)f).read$$hash$0(); }
   public static Object callF$2(Object f, Object x){ return ((F$2)f).read$$hash$1(x); }
   public static Object callF$3(Object f,Object x,Object y){ return ((F$3)f).read$$hash$2(x,y); }
-
 
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }
@@ -99,9 +115,10 @@ public class Util{
     var ohB= (Order$1)by.imm$$hash$1(b);
     return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
   }
-
-
-    public static final class MapKey{
+  public static Comparator<Object> toComparator(OrderBy$2 ordering) {
+    return (a, b) -> cmp(ordering, a, b);
+  }
+  public static final class MapKey{
     public final OrderHash$1 ord; // OrderHash[K0] closed at this key's projection
     public final Object key;      // representative K (first inserted)
     public final Object close;    // K0
@@ -110,7 +127,7 @@ public class Util{
       key= k;
       ord= (OrderHash$1)oh.imm$$hash$1(k);
       close= ((Order$1)ord).read$close$0();
-      hc= natToInt(ord.read$hash$0());
+      hc= natToLong(ord.read$hash$0());
   }
   @Override public int hashCode(){ return Long.hashCode(hc); }
   @Override public boolean equals(Object o){

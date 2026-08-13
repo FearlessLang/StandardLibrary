@@ -82,7 +82,12 @@ UnitTests: Main {
   .tests(t: mut TestCap): mut TestCap;
   }
 
+LazyToString: MF[read ToStr] {}
+
 TestCap: Sealed {//by making it sealed we can guaranteed the output of the function is the same of the original input
+  // Useful for debug expressions in tests
+  mut .do[T](f: mut MF[T]): mut TestCap -> Block#(f#, this);
+  mut .debug(f: mut LazyToString): mut TestCap -> Block#(Debug#(f#.str), this);
   //so we can use subtyping to get more methods on that object/rely on the injected EList
   mut .let[T](f: F[T],c: TestCont[T]): mut TestCap -> c#(f#,this);
   //so .let must be just imm stuff, nothing else makes sense.
@@ -93,8 +98,20 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
   mut .checkWithSys(CheckSys): mut TestCap;
   mut .disabledCheckWithSys(CheckSys): mut TestCap;  
   mut .checkDetErr[T](errorMatch: F[Info, Bool], f: F[T]): mut TestCap -> this.check{
-     Try#(f).run {
-       .ok _ -> Error.msg "Expected error but got success";
+    Try#(f).run {
+     .ok _ -> Error.msg "Expected error but got success";
+     .info i -> errorMatch#i .if {
+       .then -> Void;
+       .else -> Error.msg("Error did not match expected: " + (i.str));
+       }
+     }
+    };
+  mut .checkNonDetErr[T](errorMatch: F[Info, Bool], f: F[T]): mut TestCap -> this.checkWithSys{
+    sys -> sys.try#({Try#(f).run {
+      .ok _ -> "Expected error but got success";
+      .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
+    }}).run {
+       .ok errMsg -> Error.msg errMsg;
        .info i -> errorMatch#i .if {
          .then -> Void;
          .else -> Error.msg("Error did not match expected: " + (i.str));

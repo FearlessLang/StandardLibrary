@@ -148,9 +148,9 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
   @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
 
-  @Override public Object imm$getDiv$1(Object p0){
+  @Override public Object imm$getTruncDiv$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw err("Int.div: d==0"); }
+    if (d == 0L){ throw err("Int.getTruncDiv: d==0"); }
 
     // if a > b then a / b == 0.
     // We can't directly compare val and d since val is signed,
@@ -172,19 +172,8 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
   }
   @Override public Object imm$getRem$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw err("Int.rem: d==0"); }
+    if (d == 0L){ throw err("Int.getRem: d==0"); }
     return instance(remainderWithUnsignedLong(val, d));
-  }
-  @Override public Object imm$div$1(Object p0){
-    long d= unsignedLongFromNat(p0);
-    if (d == 0L){ return optEmpty(); }
-    if ((val % d) != 0L){ return optEmpty(); }
-    return optSome(imm$getDiv$1(p0));
-  }
-  @Override public Object imm$rem$1(Object p0){
-    long d = unsignedLongFromNat(p0);
-    if (d == 0L){ return optEmpty(); }
-    return optSome(instance(remainderWithUnsignedLong(val, d)));
   }
 
   /**
@@ -218,25 +207,17 @@ public record Int$0Instance(long val) implements Int$0,Norm$1{
     }
 
     // Long.MIN_VALUE + (Long.MAX_VALUE + 1) == 0, so this handles 4.
-    // Otherwise,val is negative, so we can
+    // Otherwise, val is negative, so we can
     // add len to it to get the correct result.
     return Nat$0Instance.instance(len + val);
   }
-
   @Override public Object imm$wrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ return optEmpty(); }
-    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {
-      return Nat$0Instance.instance(Math.floorMod(val, len));
-    }
-
-    if (val >= 0) {
-      return Nat$0Instance.instance(val);
-    }
-
-    return Nat$0Instance.instance(len + val);
+    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {return optSome(Nat$0Instance.instance(Math.floorMod(val, len))); }
+    if (val >= 0) { return optSome(Nat$0Instance.instance(val)); }
+    return optSome(Nat$0Instance.instance(len + val));
   }
-
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance(val + unwrap(p0)); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance(val - unwrap(p0)); }
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance(val * unwrap(p0)); }

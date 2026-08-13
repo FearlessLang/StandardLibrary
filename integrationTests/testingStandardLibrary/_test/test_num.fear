@@ -78,7 +78,7 @@ NumRationalLiteralFormsTests: Test {::
   }
 
 NumRationalTokenizationWitnessTests: Test {::
-  .check{+3/2 - (((+3).getDiv 2).num) .assertEq (+1/2)}
+  .check{+3/2 - (((+3).getTruncDiv 2).num) .assertEq (+1/2)}
   }
 
 NumSignTests: Test {::

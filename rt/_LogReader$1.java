@@ -13,7 +13,7 @@ public record _LogReader$1(InMemoryLog$1 o,ArrayList<Object> log) implements Log
   }
   public Object mut$read$0(){
     if (log.isEmpty()){ return List$1.instance; }
-    return new List$1Instance(List.copyOf(log)); 
+    return new List$1Instance(List.copyOf(log));
   }
   public Object mut$consume$0(){
     if (log.isEmpty()){ return List$1.instance; }

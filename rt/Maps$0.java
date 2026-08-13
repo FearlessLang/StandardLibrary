@@ -156,7 +156,7 @@ public interface Maps$0 extends Sealed$0{
 
 record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) implements Map$2{
 
-  @Override public Object read$size$0(){ return intToNat(elems.size()); }
+  @Override public Object read$size$0(){ return Nat$0Instance.instance(elems.size()); }
   @Override public Object read$isEmpty$0(){ return bool(elems.isEmpty()); }
   @Override public Object read$keyOh$0(){ return keyOh; }
 
@@ -201,7 +201,7 @@ record Map$2Instance(OrderHashBy$1 keyOh, LinkedHashMap<MapKey,Object> elems) im
     long h= 0;
     for(var e: elems.entrySet()){
       long kh= e.getKey().hashCode();
-      long vh= natToInt(((base.OrderHash$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
+      long vh= natToLong(((base.OrderHash$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
       h += kh ^ vh;
     }
     return new Nat$0Instance(h);

@@ -1,0 +1,112 @@
+Opt[E:*]: _Opt[E] {
+  .close->this; .close->::;
+  .match m    -> m.empty;
+  .imm by     -> this.match{.some x -> Opts#(by#x.imm); .empty->{} };
+  .isEmpty    -> this.match{.some _ -> False; .empty -> True};
+  .isSome     -> this.match{.some _ -> True; .empty -> False};
+
+  .assertEmpty by -> this.assertEmpty(by, {``});
+  .assertEmpty by, msg -> this.match {
+    .some x -> Assert.expectedActual(False, msg, ".empty", ".some "+(by#(x)));
+    .empty -> Void;
+    };
+  .assertSome -> this.assertSome {``};
+  .assertSome msg -> Assert.expectedActual(this.isSome, msg, ".some _", ".empty ");
+
+  !           -> this.match{.some x -> x; .empty -> Error.msg `Opt was empty`};
+  ! msg       -> this.match{.some x -> x; .empty -> Error.msg msg};
+
+  .or other -> this.match{.some _ -> this; .empty -> other};
+  |   other -> this.or(other);
+
+  ||  other -> this.match{.some _ -> this; .empty -> other#};
+
+  .orValue default -> this.match{.some x -> x; .empty -> default};
+
+  .orLazy default -> this.match{.some x -> x; .empty -> default#};
+  
+  .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
+
+  .as[R] f    -> this.match{.some x->Opts#(f#x); .empty->{}};
+  /// `this.mapSome(f)` returns .empty if this is .empty otherwise .some of `this`'s value mapped by `f`.
+  /// Equivalent to: `this.rem(d).flow.map(f).opt` but avoids extra object creation
+  .mapSome f  -> this.match{.some x->Opts#(f#x); .empty->{}};
+  .ifSome  f  -> this.match{.some x -> f#x; .empty -> {}};
+  .ifEmpty f  -> this.match{.some _ -> {}; .empty -> f#};
+
+  .str  f  -> this.match{ .some x -> `Opt[`+(f#x)+`]`; .empty -> `Opt[]` };
+  .info f  -> this.match{ .some x -> Infos.list(f#x); .empty -> {} };
+  
+  .cmp by, a, b, m -> a.match{
+    .empty -> b.match{ .empty -> m.eq; .some _ -> m.lt; };
+    .some ea -> b.match{
+      .empty   -> m.gt;
+      .some eb -> by#ea<=>(by#eb, m);
+      }
+    };
+
+  .hash by -> this.match{
+    .empty  -> 0;
+    .some e -> 31.aluAddWrap(by#e.hash);
+    };
+  }
+  
+_Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E] {
+  mut  .match[R:**](mut OptMatch[E, R]): R;
+  read .match[R:**](mut OptMatch[read/imm E, R]): R;
+  imm  .match[R:**](mut OptMatch[imm E, R]): R;
+
+  mut  .or(mut Opt[E]): mut Opt[E];
+  read .or(read Opt[E]): read Opt[E];
+  imm  .or(Opt[E]): imm Opt[E];
+
+  mut  |(mut Opt[E]): mut Opt[E];
+  read |(read Opt[E]): read Opt[E];
+  imm  |(imm Opt[E]): imm Opt[E];
+
+  mut  ||(mut MF[mut Opt[E]]): mut Opt[E];
+  read ||(mut MF[read Opt[E]]): read Opt[E];
+  imm  ||(mut MF[imm Opt[E]]): imm Opt[E];
+
+  mut  .orValue(E): E;
+  read .orValue(read/imm E): read/imm E;
+
+  mut  .orLazy(mut MF[E]): E;
+  read .orLazy(mut MF[read/imm E]): read/imm E;
+  imm  .orLazy(mut MF[imm E]): imm E;
+
+  mut  !: E;
+  read !: read/imm E;
+
+  mut  !(Str): E;
+  read !(Str): read/imm E;
+
+  mut  .flow: mut Flow[E];
+  read .flow: mut Flow[read/imm E];
+  imm  .flow: mut Flow[imm E];
+
+  mut  .ifSome(mut MF[E, Void]): Void;
+  read .ifSome(mut MF[read/imm E, Void]): Void;
+  imm  .ifSome(mut MF[imm E, Void]): Void;
+
+  read .ifEmpty(mut MF[Void]): Void;
+
+  read .isEmpty: Bool;
+  read .isSome: Bool;
+  read .assertEmpty(by: ToStrBy[imm E]): Void;
+  read .assertEmpty(ToStrBy[imm E], read LazyInfo): Void;
+  read .assertSome: Void;
+  read .assertSome(read LazyInfo): Void;
+  read .as[R:imm](mut MF[read/imm E, R]): Opt[R];
+  mut .mapSome[R:*](mut MF[E, R]): mut Opt[R];
+  read .mapSome[R:*](mut MF[read/imm E, R]): mut Opt[R];
+  }
+
+Opts: {
+  #[E:*](x: E): mut Opt[E] -> { .match m -> m.some(x) };
+  }
+
+OptMatch[E:*,R:**]: {
+  mut .some(E): R;
+  mut .empty: R;
+  }

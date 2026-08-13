@@ -1,0 +1,83 @@
+//For read/imm sources, .flow is already parallel-eligible.
+//For mut sources, .seqFlow is sequential and .flow(mode) requires proof.
+//Parallel flows preserve coherent underspecification.
+//This means that for max/min/sort the tournament details have to be fixed across modes.
+Flows: {
+  #[R:*]: mut Flow[R]->Magic!;
+  #[R:*](r1: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R): mut Flow[R]->Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R, r16: R): mut Flow[R]->Magic!;
+
+  .fromMutList[R:*](xs: mut List[R]): mut Flow[R]->Magic!;//sequential
+  .fromReadList[R:*](xs: read List[R]): mut Flow[read/imm R]->Magic!;
+  .fromImmList[R:*](xs: List[R]): mut Flow[imm R]->Magic!;
+  .fromMutList[R:*](xs: mut List[R],mode: FlowMode[R]): mut Flow[R]->Magic!;//parallel
+  }
+
+Flow[E:*]: {
+  mut .forEach[R:*](f: mut MF[E,Void]): Void;
+  mut .map[R:*](f: read F[E, R]): mut Flow[R];
+  mut .flatMap[R:*](f: read F[E, Flow[R]]): mut Flow[R];
+  mut .filter(f: read F[E, Bool]): mut Flow[E];
+  mut .size: Nat;
+  mut .isEmpty: Bool -> this.size == 0;
+  mut ++ (mut Flow[E]): mut Flow[E];
+  mut .list: mut List[E];
+  mut .eList: mut EList[E];
+  mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
+  mut .eSet[E', K](mut AsImm[E, E'], OrderHashBy[imm E, K]): mut ESet[E'];
+  mut .mapping[K,K0,E0:*](OrderHashBy[K,K0], read KeyElemMapper[E,K,E0]): mut Map[K,E0];
+  mut .join(js: JoinStr[E]): E -> js.joinStr this;
+  mut .sum(sn: SumNumber[E]): E -> sn.sumNumber this;
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
+  mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R ->
+    this.fold(acc,{a,e->a.acc e}).result;
+  mut .max[K](by: OrderBy[imm E,K]):          mut Flow[E] -> Magic!;
+  mut .min[K](by: OrderBy[imm E,K]):          mut Flow[E] -> Magic!;
+  mut .sort[K](by: OrderBy[imm E,K]):         mut Flow[E]-> this.eList.sortAnd by .seqFlow; //can be parallel?
+  mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[E]-> this.eList.distinctAnd by .seqFlow; //can be parallel?
+  mut .sortDistinct[K](by: OrderBy[imm E,K]): mut Flow[E]-> this.eList.sortDistinctAnd by .seqFlow; //can be parallel?
+  mut .any(f: read F[E, Bool]):  Bool;
+  mut .all(f: read F[E, Bool]):  Bool;
+  mut .none(f: read F[E, Bool]): Bool;
+  mut .get:   E;//get the first element if size==1, throws otherwise
+  mut .getOpt:   mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
+  mut .first: mut Opt[E]; //opt of the first element
+  /// `this.last` returns the last element in the flow, consuming this.
+  /// Equivalent to: `this.fold({}, (_, e) -> Opts#(a))`
+  /// Complexity: O(n)
+  mut .last: Opt[E];
+  mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut Flow[R] ->
+    this.map(f)
+      .filter{r -> r.isSome}
+      .map{r -> r!};
+  mut .peek(f: read F[E, Void]): mut Flow[E] ->//Only useful for invarians+debug, wonder if we should have a better name
+    this.map{e -> Block#(f#e, e)};
+  mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut Flow[E] -> //crucial to do IO side effects while flowing
+    this.map(ctx, {c, e -> Block#(f#(c, e), e)});
+  mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S];
+  mut .limit(n: Nat): mut Flow[E];
+  //--Still to implement
+  mut .let[DR:*,R:*](
+    x: read F[mut MF[mut Flow[E]],DR],
+    cont: mut FlowContinuation[DR,R]
+  ): R->Error.msg`TODO`;
+  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
+  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
+  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg`TODO`;
+  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg`TODO`;
+  mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg`TODO`;
+  }

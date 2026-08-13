@@ -87,7 +87,7 @@ Data: {
 Grid: {
   .inner: List[Nat];
   .get(x: Nat, y: Nat): Nat -> this.inner.get(y * 5 + x);
-  .y(index: Nat): Nat -> index.getDiv 5;
+  .y(index: Nat): Nat -> index.getTruncDiv 5;
   .x(index: Nat): Nat -> index.getRem 5;
   }
 
@@ -197,13 +197,13 @@ TestOrderBasicsTests: Test {::
   }
 
 TestOrderByAndFlowsTests: Test {::
-  .check{Data.natsDup.flow.max{::}.list.orderHash{::} == (Lists#(3,3)).assertTrue}
+  .check{Data.natsDup.flow.max{::}.list.assertEq({::}, Lists#(3,3))}
   .check{List[Nat].flow.max{::}.list.isEmpty.assertEq True}
   .check{Lists#(1,2,3).flow.max{::}.get.assertEq 3}
-  .check{Lists#(0,1,0,2).flow.min{::}.list.orderHash{::} == (Lists#(0,0)).assertTrue}
-  .check{Data.natsDup.flow.sort{::}.list.orderHash{::} == (Lists#(0,1,1,1,2,2,3,3)).assertTrue}
-  .check{Data.natsDup.flow.distinct{::}.list.orderHash{::} == (Lists#(1,2,3,0)).assertTrue}
-  .check{Data.natsDup.flow.sortDistinct{::}.list.orderHash{::} == (Lists#(0,1,2,3)).assertTrue}
+  .check{Lists#(0,1,0,2).flow.min{::}.list.assertEq({::}, Lists#(0,0))}
+  .check{Data.natsDup.flow.sort{::}.list.assertEq({::}, Lists#(0,1,1,1,2,2,3,3))}
+  .check{Data.natsDup.flow.distinct{::}.list.assertEq({::}, Lists#(1,2,3,0))}
+  .check{Data.natsDup.flow.sortDistinct{::}.list.assertEq({::}, Lists#(0,1,2,3))}
   .check{
     Lists#(
       Persons#(25,`Bob`,List[Cat]),

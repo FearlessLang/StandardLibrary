@@ -14,9 +14,9 @@ IntArithTests: Test {::
   }
 
 IntDivRemTests: Test {::
-  .check{(-7).getDiv 3 .assertEq -2}
+  .check{(-7).getTruncDiv 3 .assertEq -2}
   .check{(-7).getRem 3 .assertEq -1}
-  .check{+7.getDiv 3 .assertEq +2}
+  .check{+7.getTruncDiv 3 .assertEq +2}
   .check{+7.getRem 3 .assertEq +1}
   .check{+6.div 3 .assertEq ({::},Opts#(+2))}
   .check{+7.div 3 .assertEq ({::},Opt[Int])}

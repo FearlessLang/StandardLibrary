@@ -9,7 +9,7 @@ ByteArithTests: Test {::
   }
 
 ByteDivRemTests: Test {::
-  .check{+7.getByte.getDiv 3 .assertEq (+2.getByte)}
+  .check{+7.getByte.getTruncDiv 3 .assertEq (+2.getByte)}
   .check{+7.getByte.getRem 3 .assertEq (+1.getByte)}
   .check{+6.getByte.div 3 .assertEq ({::},Opts#(+2.getByte))}
   .check{+7.getByte.div 3 .assertEq ({::},Opt[Byte])}
