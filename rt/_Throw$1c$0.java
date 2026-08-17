@@ -31,14 +31,16 @@ public interface _Throw$1c$0{
     if (dot < 0 || cn.indexOf('.',dot + 1) != -1){ return null; }
     var ty= cn.substring(dot + 1);
     int dol= ty.lastIndexOf('$');
-    if (dol < 0 || dol == ty.length() - 1 || ty.indexOf('$') != dol){ return null; }
+    if (dol < 0 || dol == ty.length() - 1){ return null; }
+    int tag= ty.lastIndexOf('$', dol - 1);
+    if (tag <= 0 || ty.indexOf('$') != tag){ return null; }
     var ds= ty.substring(dol + 1);
     for (int i= 0; i < ds.length(); i++){
       char c= ds.charAt(i);
       if (c < '0' || c > '9'){ return null; }
     }
     int targs= Integer.parseInt(ds);
-    var type= ty.substring(0,dol) + holes('[',']',targs);
+    var type= ty.substring(0,tag) + holes('[',']',targs);
     var meth= fmtMethodName(e.getMethodName());
     return (StackFrame$174$0)StackFrames$2e8$0.instance.read$$hash$4(
       new Str$c$0Instance(e.getFileName()),
