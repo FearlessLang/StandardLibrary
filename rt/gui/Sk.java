@@ -65,7 +65,7 @@ interface Sk{
     return f;
   }
 
-  static int color(Color$0 c){
+  static int color(Color$1c$0 c){
     return alpha(c.read$alpha$0()) << 24 | red(c.read$red$0()) << 16
       | green(c.read$green$0()) << 8 | blue(c.read$blue$0());
   }

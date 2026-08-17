@@ -23,7 +23,7 @@ final class AssetImageRead{
       );
   }
   static Object readImage(String path,String diskPath,String zipSteps,String zipEntry,long maxPixels){
-    return new Image$0Instance(
+    return new Image$1c$0Instance(
       decode(path,AssetBytesRead.bytes(path,diskPath,zipSteps,zipEntry),maxPixels));
   }
 

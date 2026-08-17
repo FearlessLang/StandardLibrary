@@ -1,6 +1,6 @@
 package base;
 
-public interface _FloatsBetween extends base.Sealed$0 {
+public interface _FloatsBetween extends base.Sealed$2o$0 {
   _FloatsBetween instance = new _FloatsBetween() {};
 
   // Other than at -0.0 and 0.0:
@@ -13,19 +13,19 @@ public interface _FloatsBetween extends base.Sealed$0 {
   // Method from:
   // https://stackoverflow.com/questions/39258119/how-could-i-determine-the-number-of-unique-floating-point-numbers-in-between-two
   default Object imm$$hash$2(Object p0, Object p1) {
-    double start = Float$0Instance.unwrap(p0);
-    double end = Float$0Instance.unwrap(p1);
+    double start = Float$1c$0Instance.unwrap(p0);
+    double end = Float$1c$0Instance.unwrap(p1);
     assert !Double.isNaN(start) && !Double.isNaN(end);
     assert start <= end;
     boolean startNeg = Double.doubleToRawLongBits(start) < 0; // true for negatives AND -0.0
     boolean endNeg = Double.doubleToRawLongBits(end) < 0;
     if (startNeg && !endNeg) {
-      return Nat$0Instance.instance(
+      return Nat$c$0Instance.instance(
         doublesBetweenSameSign(start, -0.0)
           + doublesBetweenSameSign(Math.nextUp(0.0), end) // We don't want to include both -0.0 and 0.0
       );
     }
-    return Nat$0Instance.instance(doublesBetweenSameSign(start, end));
+    return Nat$c$0Instance.instance(doublesBetweenSameSign(start, end));
   }
 
   /**
