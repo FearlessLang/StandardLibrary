@@ -155,7 +155,7 @@ public class Util{
     var st= d.getStackTrace();
     for(int j= 3; j < st.length; j += 1){
       var stj= _Throw$1c$0.frameData(st[j]);
-      if (stj != null){ System.err.println(_Throw$1c$0.fmtFrame(stj)); }
+      if (stj != null){ System.err.print(_Throw$1c$0.fmtFrame(stj)+"\n"); }
     }
   }
   public static boolean is(MapKey k,String label){
@@ -164,15 +164,15 @@ public class Util{
   public static void printInfoMsg(String prefix, String indent, Info$o$0 i){
     var msg= ((Str$c$0Instance)i.imm$msg$0()).val();
     msg = msg.replace("\n","\n"+indent);
-    System.err.println(prefix+msg);
+    System.err.print(prefix+msg+"\n");
   }
   public static void printInfoList(Info$o$0 i){ 
     var fList= (List$o$1)i.imm$list$0();
     if (isTrue(fList.read$isEmpty$0())){
-      System.err.println("\nEmpty stack trace");  
+      System.err.print("\nEmpty stack trace\n");
       return;
     }
-    System.err.println("\nStack trace:");
+    System.err.print("\nStack trace:\n");
     var jList= ((List$o$1Instance)fList).val();
     for(var e : jList){ printInfoMsg("- ","  ",(Info$o$0)e); }
   }
