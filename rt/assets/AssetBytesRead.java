@@ -38,9 +38,9 @@ final class AssetBytesRead{
       );
   }
 
-  static String str(Object o){ return ((Str$0Instance)o).val(); }
+  static String str(Object o){ return ((Str$c$0Instance)o).val(); }
 
-  static long nat(Object o){ return ((Nat$0Instance)o).val(); }
+  static long nat(Object o){ return ((Nat$c$0Instance)o).val(); }
 
   static byte[] bytes(String path,String diskPath,String zipSteps,String zipEntry){
     var full= localAssetPath(diskPath);

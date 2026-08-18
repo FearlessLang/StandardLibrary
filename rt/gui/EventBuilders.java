@@ -14,14 +14,14 @@ import static base.MouseKind.*;
 enum MouseKind{ Clicked, Pressed, Released, Moved, Dragged, Entered, Exited }
 
 record CMouseCtx(
-  Time$0 elapsed,
-  XNat$0 mouseX,
-  YNat$0 mouseY,
-  WidthNat$0 screenWidth,
-  HeightNat$0 screenHeight,
-  WidthNat$0 panelWidth,
-  HeightNat$0 panelHeight
-) implements MouseEvent$0{
+  Time$o$0 elapsed,
+  XNat$s$0 mouseX,
+  YNat$s$0 mouseY,
+  WidthNat$as$0 screenWidth,
+  HeightNat$lg$0 screenHeight,
+  WidthNat$as$0 panelWidth,
+  HeightNat$lg$0 panelHeight
+) implements MouseEvent$174$0{
   public Object imm$elapsed$0(){ return elapsed; }
   public Object imm$mouseX$0(){ return mouseX; }
   public Object imm$mouseY$0(){ return mouseY; }
@@ -32,10 +32,10 @@ record CMouseCtx(
 }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
-record CMouseBuilder(AWidget panel) implements Mouse$0{
-  private Mouse$0 add(MouseKind k, Object a){
+record CMouseBuilder(AWidget panel) implements Mouse$1c$0{
+  private Mouse$1c$0 add(MouseKind k, Object a){
     panel.frame.onEdtAndWait(() ->
-      panel.handlers.computeIfAbsent(k, _ -> new ArrayList<>()).add((Consumer$1) a));
+      panel.handlers.computeIfAbsent(k, _ -> new ArrayList<>()).add((Consumer$ao$1) a));
     return this;
   }
   @Override public Object mut$clicked$1(Object a){ return add(Clicked, a); }
@@ -194,17 +194,17 @@ final class SkMouse extends MouseAdapter{
     if (hs == null || hs.isEmpty()){ return false; }
     var ctx = ctx(t, p);
     for (var h : hs){
-      frame.frame.queue.submit(new MF$1(){
+      frame.frame.queue.submit(new MF$7$1(){
         @Override public Object mut$$hash$0(){
           h.mut$accept$1(ctx);
-          return Void$0.instance;
+          return Void$o$0.instance;
         }
       });
     }
     return true;
   }
 
-  private MouseEvent$0 ctx(AWidget t, Point p){
+  private MouseEvent$174$0 ctx(AWidget t, Point p){
     var q = SwingUtilities.convertPoint(top(), p, t.component);
     int pw = t.component.getWidth();
     int ph = t.component.getHeight();

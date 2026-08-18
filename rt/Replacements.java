@@ -3,15 +3,15 @@ package base;
 import java.util.List;
 
 public final class Replacements{
-  public static String replaceSimultaneousOrdered(List<Str$0Instance> rules, String text){
+  public static String replaceSimultaneousOrdered(List<Str$c$0Instance> rules, String text){
     validateRules(rules,false);
     return applyOrdered(rules,text);
   }
-  public static String replaceSimultaneous(List<Str$0Instance> rules, String text){
+  public static String replaceSimultaneous(List<Str$c$0Instance> rules, String text){
     validateRules(rules,true);
     return applyOrdered(rules,text);
   }
-  private static String applyOrdered(List<Str$0Instance> rules, String text){
+  private static String applyOrdered(List<Str$c$0Instance> rules, String text){
     var out= new StringBuilder(text.length());
     for (int i= 0; i < text.length();){
       var next= tryRule(rules,text,i,out);
@@ -21,7 +21,7 @@ public final class Replacements{
     }
     return out.toString();
   }
-  private static int tryRule(List<Str$0Instance> rules, String text, int i, StringBuilder out){
+  private static int tryRule(List<Str$c$0Instance> rules, String text, int i, StringBuilder out){
     for (int r= 0; r < rules.size(); r += 2){
       String from= rules.get(r).val();
       if (!text.startsWith(from,i)){ continue; }
@@ -30,7 +30,7 @@ public final class Replacements{
     }
     return -1;
   }
-  private static void validateRules(List<Str$0Instance> rules, boolean checkPrefixes){
+  private static void validateRules(List<Str$c$0Instance> rules, boolean checkPrefixes){
     if ((rules.size() & 1) != 0){ throw Util.err("Odd number of strings"); }
     for (int i= 0; i < rules.size(); i += 2){
       var ki= rules.get(i).val();
