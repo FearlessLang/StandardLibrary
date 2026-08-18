@@ -1,0 +1,132 @@
+Balls: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Ball -> Block#
+  .var bx          = { startX.softFloat }
+  .var by          = { startY.softFloat }
+  .var vx          = { 0.0 }
+  .var vy          = { 0.0 }
+  .var alive       = { True }
+  .let ballBounds  = { BallBounds#(0, 0, Width#width, Height#height) }
+  .let gravity = { "0.4".ieeeFloat! }
+  .let maxVel  = { 12.0 }
+  .let ballW   = { ballBounds.width.get.softFloat }
+  .return { mut Ball: {
+    read .x: Nat -> bx.get.softNat;
+    read .y: Nat -> by.get.softNat;
+    read .alive: Bool -> alive.get;
+     mut .tick(player: mut Player, square: mut Square): Void -> Block#
+    .do { vy.set((vy.get + gravity).clampTo(0.0 - maxVel =~~= maxVel)) }
+    .do { bx.set(bx.get + (vx.get)) }
+    .do { by.set(by.get + (vy.get)) }
+    .if { bx.get < 0.0 }
+        .do { Block#(bx.set(+0.0), vx.set(vx.get.getAbs)) }
+    .if { bx.get + ballW > (width.softFloat) }
+        .do { Block#(bx.set(width.softFloat - ballW), vx.set(+0.0 - (vx.get.getAbs))) }
+    .if { by.get < (0.0) }
+        .do { Block#(by.set(0.0), vy.set(vy.get.getAbs)) }
+    .if { by.get + ballW > (height.softFloat) }
+        .do { Block#(by.set(height.softFloat - ballW), vy.set(0.0 - (vy.get.getAbs))) }
+    .if { ballBounds.overlapsRect(bx.get, by.get, PlayerBounds#(player.x, player.y, Width#width, Height#height)) }
+        .do { Block#(
+          vx.set(ballBounds.bounceOffPlayer(bx.get, player)),
+          vy.set(0.0 - (vy.get.getAbs + 1.0))
+        )}
+    .if { ballBounds.overlapsRect(bx.get, by.get, SquareBounds#(square.x, square.y, Width#width, Height#height)) }
+        .do { alive.set False }
+    .done;
+    }}}
+
+Players: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Player -> Block#
+  .var px                = { startX.softFloat }
+  .var py                = { startY.softFloat }
+  .var vy                = { 0.0 }
+  .var left                   = { False }
+  .var right                  = { False }
+  .let playerBounds           = { PlayerBounds#(0, 0, Width#width, Height#height) }
+  .let speed         = { 8.0 }
+  .let gravity       = { "0.4".ieeeFloat! }
+  .let jumpStrength  = { -12.0 }
+  .let groundY       = { startY.softFloat }
+  .let playerW       = { playerBounds.width.get.softFloat }
+  .return { mut Player: {
+    read .x: Nat -> px.get.softNat;
+    read .y: Nat -> py.get.softNat;
+    mut .left(b: Bool): Void -> left.set b;
+    mut .right(b: Bool): Void -> right.set b;
+    mut .jump: Void -> Block#.if { py.get >= groundY }.do { vy.set jumpStrength }.done;
+    mut .tick: Void -> Block#
+      .let curVy = { vy.get + gravity }
+      .do { vy.set curVy }
+      .if { left.get }
+          .do { px.set((px.get - speed).clampTo(0.0 =~~= ( width.softFloat - playerW))) }
+      .if { right.get }
+          .do { px.set((px.get + speed).clampTo(0.0 =~~= ( width.softFloat - playerW))) }
+      .do { py.set(py.get + curVy) }
+      .if { (py.get + curVy) > groundY }
+          .do { Block#(py.set groundY, vy.set(0.0)) }
+      .done;
+    }}}
+Squares: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Square -> Block#
+  .var sx          = { startX.softFloat }
+  .var right            = { False }
+  .let bounds           = { SquareBounds#(0, 0, Width#width, Height#height) }
+  .let speed   = { 5.0 }
+  .let squareW = { bounds.width.get.softFloat }
+  .let minX    = { width.softFloat / 10.0 }
+  .let maxX    = { width.softFloat * 9.0 / 10.0 - squareW }
+  .return { mut Square: {
+    read .x: Nat -> sx.get.softNat;
+    read .y: Nat -> startY;
+    mut .tick: Void -> Block#
+      .if { right.get }
+          .do { sx.set((sx.get + speed).clampTo(minX =~~= maxX)) }
+      .if { sx.get >= maxX }
+          .do { right.set False }
+      .if { right.get.not }
+          .do { sx.set((sx.get - speed).clampTo(minX =~~= maxX)) }
+      .if { sx.get <= minX }
+          .do { right.set True }
+      .done;
+    }}}
+Models: { #(gui: mut Gui, width: Nat, height: Nat): mut Model -> Block#
+  .var playing      = { False }
+  .let playerBounds = { PlayerBounds#(0, 0, Width#width, Height#height) }
+  .let playerW      = { playerBounds.width.get }
+  .let playerH      = { playerBounds.height.get }
+  .let playerX      = { (width.aluDiv 2) - (playerW.aluDiv 2) }
+  .let playerY      = { height - playerH } 
+  .let player       = { Players#(playerX, playerY, width, height) }
+  .let ballBounds   = { BallBounds#(0, 0, Width#width, Height#height) }
+  .let ballW        = { playerBounds.width.get }
+  .let ballH        = { playerBounds.height.get }
+  .let ballX        = { (width.aluDiv 2) - (ballW.aluDiv 2) }
+  .let ballY        = { (height.aluDiv 4) - (ballH.aluDiv 2) } 
+  .let ball         = { Balls#(ballX, ballY, width, height) }
+  .let squareBounds = { SquareBounds#(0, 0, Width#width, Height#height) }
+  .let squareW      = { squareBounds.width.get }
+  .let squareH      = { squareBounds.height.get }
+  .let squareX      = { (width.aluDiv 4) - (squareW.aluDiv 2) }
+  .let squareY      = { (height.aluDiv 4) - ((squareH * 3) .aluDiv 4) }
+  .let square       = { Squares#(squareX, squareY, width, height) }
+  .return { mut Model: {
+    mut .player: mut Player -> player;
+    mut .square: mut Square -> square;
+    mut .play: Void -> playing.set True;
+    mut .tick: Void -> Block#
+      .let state = { States#(player.x, player.y, ball.x, ball.y, square.x, square.y) }
+      .if { playing.get } .do { Block#(
+        player.tick,
+        ball.tick(player, square),
+        square.tick,
+        gui.set Game{ state }) }
+      .if { ball.alive.not }
+        .do { playing.set False }
+      .done;
+    }}}
+States: { #(px: Nat, py: Nat, bx: Nat, by: Nat, sx: Nat, sy: Nat): State -> 
+  State: {
+    .px: Nat -> px;
+    .py: Nat -> py;
+    .bx: Nat -> bx;
+    .by: Nat -> by;
+    .sx: Nat -> sx;
+    .sy: Nat -> sy;
+    }}

@@ -1,0 +1,54 @@
+use base.Main as Main;
+use base.Float as Float;
+use base.Alpha as Alpha;
+use base.Red as Red;
+use base.Green as Green;
+use base.Blue as Blue;
+use base.Void as Void;
+use base.ToStr as ToStr;
+use base.Str as Str;
+use base.Nat as Nat;
+use base.Gui as GuiC;
+use base.Block as Block;
+use base.Math as Math;
+use base.Bool as Bool;
+use base.True as True;
+use base.False as False;
+use base.Consumer as Consumer;
+use base.Opt as Opt;
+use base.Opts as Opts;
+use base.Vars as Vars;
+use base.Var as Var;
+use base.Frame as Frame;
+use base.Debug as Debug;
+use base.Color as Color;
+use base.WidenTo as WidenTo;
+use base.CacheF as CacheF;
+use base.Image as Image;
+use base.List as List;
+use base.Lists as Lists;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
+use base.XNat as X;
+use base.YNat as Y;
+use base.KeyStroke as Key;
+use base.Label as Label;
+use base.Slot as Slot;
+use base.Slots as Slots;
+use base.Pane as Pane;
+use base.Border as Border;
+use base.Scope as Scope;
+use base.Painter as Painter;
+use base.Cache as Cache;
+
+Presentation2: base.Main { sys -> Block#
+  .let height = { 500 }
+  .let width  = { (height * 5).aluDiv 2 }
+  .let model  = { Slots#[mut Model] }
+  .let canvas = { Slots#[Pane] }
+  .let gui    = { Guis#(model, canvas, width, height) }
+  .do { model.fill(Models#(gui, width, height)) }
+  .do { sys.gui.run gui }
+  .done
+  }
+
