@@ -78,7 +78,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .norm f ->_ListNorm#(this,f);
   }
 
-_List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E] {
+_List[E:*]: Sealed,BaseContainer[imm E],DataType[List[E],List[imm E],E,imm E] {
   read .size: Nat;                           /// number of elements
   read .isEmpty: Bool;                       /// True iff size == 0
 
@@ -140,7 +140,7 @@ _List[E:*]: Sealed,DataType[List[E],List[imm E],E,imm E] {
 
   mut  .as[R: imm](f: mut MF[E,R]): List[R];          /// map to imm list (optimized vs flow.map.list)
   read .as[R: imm](f: mut MF[read/imm E,R]): List[R]; /// map to imm list (optimized vs flow.map.list)
-  imm  .as[R: imm](f: mut MF[imm E,R]): List[R];      /// map to imm list (optimized vs flow.map.list)
+  imm  .as[T2](f: BaseId[imm E,T2]): List[T2];        /// zero cost retyping, returns this
   imm .norm[R](mut MF[E,Norm[R]]):Norm[List[Norm[R]]];/// list normalization
   }
 

@@ -27,6 +27,9 @@ Debug: Sealed {
 
 As[X:**]: Sealed { #(x: X): X -> x }
 
+BaseId[T1:*,T2]: CaptureFree{ #(x: T1): T2 }
+BaseContainer[T1:*]: Sealed{ imm .as[T2](f: BaseId[T1,T2]): BaseContainer[T2] }
+
 Let: { #[A:*,R:**](l: mut Let[A, R]): R -> l.in(l.let); }
 Let[A:*,R:**]: { mut .let: A; mut .in(a: A): R }
 

@@ -1,0 +1,28 @@
+AsPerson: { .name: Str }
+AsCustomer: AsPerson { .name -> `c` }
+
+AsWiden: {
+  .list(cs: List[AsCustomer]): List[AsPerson] -> cs.as{::};
+  .nested(css: List[List[AsCustomer]]): List[List[AsPerson]] -> css.as{::.as{::}};
+  .map(m: Map[Str,AsCustomer]): Map[Str,AsPerson] -> m.as{::};
+  .mapInList(ms: List[Map[Str,AsCustomer]]): List[Map[Str,AsPerson]] -> ms.as{::.as{::}};
+  .norm(n: Norm[AsCustomer]): Norm[AsPerson] -> n.as{::};
+  .same(cs: List[AsCustomer]): List[AsCustomer] -> cs.as{::};
+  }
+
+AsCustomerNorm: { #(s: Norm[Str]): Norm[AsCustomer] -> Cache.ofMemo(s, {_ -> AsCustomer}) }
+
+AsTests: Test {::
+  .check{AsWiden.list(Lists#(AsCustomer)) .size .assertEq 1}
+  .check{AsWiden.list(Lists#(AsCustomer)) .get 0 .name .assertEq `c`}
+  .check{AsWiden.same(Lists#(AsCustomer)) .get 0 .name .assertEq `c`}
+  .check{AsWiden.nested(Lists#(Lists#(AsCustomer))) .get 0 .get 0 .name .assertEq `c`}
+  .check{AsWiden.map(Maps#({::}, `k`, AsCustomer)) .get `k` .name .assertEq `c`}
+  .check{AsWiden.map(Maps#({::}, `k`, AsCustomer)) .size .assertEq 1}
+  .check{AsWiden.mapInList(Lists#(Maps#({::}, `k`, AsCustomer))) .get 0 .get `k` .name .assertEq `c`}
+  .check{AsWiden.norm(AsCustomerNorm#(`k`.norm)) .get .name .assertEq `c`}
+  }
+
+TestAs: Test {::
+  .test AsTests
+  }
