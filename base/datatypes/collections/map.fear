@@ -59,8 +59,6 @@ Map[K,E:*]: Sealed,BaseContainer[imm E],DataType[Map[K,E],Map[K,imm E],E,imm E],
   read .keys: mut Flow[K];               /// keys as a flow (same iteration order as .flow)
   read .elems: mut Flow[read/imm E];     /// values as a flow (same iteration order as .flow)
 
-  mut  .as[R:imm](f: mut MF[E,R]): Map[K,R];          /// map elements to an imm map with same keys
-  read .as[R:imm](f: mut MF[read/imm E,R]): Map[K,R]; /// map elements to an imm map with same keys
   imm  .as[T2](f: BaseId[imm E,T2]): Map[K,T2];       /// zero cost retyping, returns this
 
   //TODO: for the future, we need to consider the variants of this (update, computeIfAbsent, etc)

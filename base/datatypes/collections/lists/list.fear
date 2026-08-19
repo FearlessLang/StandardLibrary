@@ -52,7 +52,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .str by->`[]`;
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let list= {this.flow.map{e->by#e.info}.list.as{::}}
+    .let list= {this.flow.map{e->by#e.info}.list}
     //.return{list.info{::}};This would go in stack overflow
     .return{Info{'i
       .match->::.list list;
@@ -138,8 +138,6 @@ _List[E:*]: Sealed,BaseContainer[imm E],DataType[List[E],List[imm E],E,imm E] {
   imm  .flow: mut Flow[imm E];               /// view as flow
   mut  .flow(mode:FlowMode[E]): mut Flow[E]; /// sequential flow
 
-  mut  .as[R: imm](f: mut MF[E,R]): List[R];          /// map to imm list (optimized vs flow.map.list)
-  read .as[R: imm](f: mut MF[read/imm E,R]): List[R]; /// map to imm list (optimized vs flow.map.list)
   imm  .as[T2](f: BaseId[imm E,T2]): List[T2];        /// zero cost retyping, returns this
   imm .norm[R](mut MF[E,Norm[R]]):Norm[List[Norm[R]]];/// list normalization
   }

@@ -200,12 +200,6 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object mut$reverse$0(){ return wrap(val.reversed()); }
   @Override public Object read$reverse$0(){ return mut$reverse$0(); }
 
-  @Override public Object mut$as$1(Object p0){
-    var l= new ArrayList<Object>(val.size());
-    for (var e: val){ l.add(callMF$2(p0,e)); }
-    return wrap(l);
-  }
-  @Override public Object read$as$1(Object p0){ return mut$as$1(p0); }
   @Override public Object imm$as$1(Object p0){ return this; }
   @Override public Object read$imm$1(Object p0){
     var by= (ToImmBy$5u$2)p0;

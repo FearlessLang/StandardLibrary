@@ -6,6 +6,8 @@ AsWiden: {
   .nested(css: List[List[AsCustomer]]): List[List[AsPerson]] -> css.as{::.as{::}};
   .map(m: Map[Str,AsCustomer]): Map[Str,AsPerson] -> m.as{::};
   .mapInList(ms: List[Map[Str,AsCustomer]]): List[Map[Str,AsPerson]] -> ms.as{::.as{::}};
+  .opt(o: Opt[AsCustomer]): Opt[AsPerson] -> o.as{::};
+  .optOfList(o: Opt[List[AsCustomer]]): Opt[List[AsPerson]] -> o.as{::.as{::}};
   .norm(n: Norm[AsCustomer]): Norm[AsPerson] -> n.as{::};
   .same(cs: List[AsCustomer]): List[AsCustomer] -> cs.as{::};
   }
@@ -20,9 +22,25 @@ AsTests: Test {::
   .check{AsWiden.map(Maps#({::}, `k`, AsCustomer)) .get `k` .name .assertEq `c`}
   .check{AsWiden.map(Maps#({::}, `k`, AsCustomer)) .size .assertEq 1}
   .check{AsWiden.mapInList(Lists#(Maps#({::}, `k`, AsCustomer))) .get 0 .get `k` .name .assertEq `c`}
+  .check{AsWiden.opt(Opts#AsCustomer) ! .name .assertEq `c`}
+  .check{AsWiden.optOfList(Opts#(Lists#(AsCustomer))) ! .get 0 .name .assertEq `c`}
   .check{AsWiden.norm(AsCustomerNorm#(`k`.norm)) .get .name .assertEq `c`}
+  }
+
+/// The empty cases go through the fearless level implementations of .as,
+/// not through the magically created non empty ones.
+AsEmptyTests: Test {::
+  .check{AsWiden.list({}) .size .assertEq 0}
+  .check{AsWiden.list(List[AsCustomer]) .isEmpty .assertEq True}
+  .check{AsWiden.nested({}) .size .assertEq 0}
+  .check{AsWiden.nested(Lists#(List[AsCustomer])) .get 0 .size .assertEq 0}
+  .check{AsWiden.map(Maps#[Str,Str,AsCustomer]{::}) .size .assertEq 0}
+  .check{AsWiden.opt({}) .isEmpty .assertEq True}
+  .check{AsWiden.optOfList({}) .isEmpty .assertEq True}
+  .check{AsWiden.optOfList(Opts#({})) ! .size .assertEq 0}
   }
 
 TestAs: Test {::
   .test AsTests
+  .test AsEmptyTests
   }
