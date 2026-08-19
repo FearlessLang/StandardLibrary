@@ -149,11 +149,11 @@ TestListsBasicsTests: Test {::
   .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).y(13).assertEq 2}
   .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).x(13).assertEq 3}
   .check{
-    Lists#(1,2,3).as{::+ 2 .str}.orderHash{::} ==
-      (Lists#(1,2,3).flow.map{::+ 2 .str}.list)
+    Lists#(1,2,3).flow.map{::+ 2 .str}.list.orderHash{::} ==
+      (Lists#(`3`,`4`,`5`))
     .assertTrue
     }
-  .check{Lists#(1,2,3).as{::}.orderHash{::} == (Lists#(1,2,3)).assertTrue}
+  .check{Lists#(1,2,3).orderHash{::} == (Lists#(1,2,3)).assertTrue}
   }
 
 TestListOpsTests: Test {::

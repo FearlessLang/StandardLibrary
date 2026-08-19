@@ -27,7 +27,7 @@ Opt[E:*]: _Opt[E] {
   
   .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
 
-  .as[R] f    -> this.match{.some x->Opts#(f#x); .empty->{}};
+  .as f       -> _OptAs#this;
   /// `this.mapSome(f)` returns .empty if this is .empty otherwise .some of `this`'s value mapped by `f`.
   /// Equivalent to: `this.rem(d).flow.map(f).opt` but avoids extra object creation
   .mapSome f  -> this.match{.some x->Opts#(f#x); .empty->{}};
@@ -51,7 +51,7 @@ Opt[E:*]: _Opt[E] {
     };
   }
   
-_Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E] {
+_Opt[E:*]: BaseContainer[imm E],DataType[Opt[E],Opt[imm E],E,imm E] {
   mut  .match[R:**](mut OptMatch[E, R]): R;
   read .match[R:**](mut OptMatch[read/imm E, R]): R;
   imm  .match[R:**](mut OptMatch[imm E, R]): R;
@@ -97,7 +97,7 @@ _Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E] {
   read .assertEmpty(ToStrBy[imm E], read LazyInfo): Void;
   read .assertSome: Void;
   read .assertSome(read LazyInfo): Void;
-  read .as[R:imm](mut MF[read/imm E, R]): Opt[R];
+  imm  .as[T2](f: BaseId[imm E,T2]): Opt[T2];
   mut .mapSome[R:*](mut MF[E, R]): mut Opt[R];
   read .mapSome[R:*](mut MF[read/imm E, R]): mut Opt[R];
   }
@@ -105,6 +105,8 @@ _Opt[E:*]: DataType[Opt[E],Opt[imm E],E,imm E] {
 Opts: {
   #[E:*](x: E): mut Opt[E] -> { .match m -> m.some(x) };
   }
+
+_OptAs: { #[T1:*,T2](x: Opt[T1]): Opt[T2] -> Magic! }
 
 OptMatch[E:*,R:**]: {
   mut .some(E): R;

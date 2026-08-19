@@ -1,6 +1,6 @@
 CaptureFree: {}//special type rule will make sure zero captures
 CacheHandler:CaptureFree{}
-Norm[T]:Sealed{ .get: T; }//this means only base can make norms, so we control production of Norms
+Norm[T]:Sealed,BaseContainer[T]{ .get: T; imm .as[T2](f: BaseId[T,T2]): Norm[T2]; }//this means only base can make norms, so we control production of Norms
 CacheF[R]: CacheHandler{//Any instantiated type implementing CacheF will be a singleton (becase of NonCaputure)
   #: R;
   ._get: R -> Magic!//this.myCache.get()

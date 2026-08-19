@@ -1,3 +1,6 @@
+MapStrSizes: { #(m: mut Map[Str,Str]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key ke->ke.key; .elem ke->ke.elem.size}) }
+MapListSizes: { #(m: mut Map[Str,List[Str]]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key ke->ke.key; .elem ke->ke.elem.size}) }
+
 MapBasicsTests: Test {::
   .check{Maps#[Str,Str,Int] {::} .size .assertEq 0}
   .check{Maps#[Str,Str,Int] {::} .isEmpty .assertEq True}
@@ -45,15 +48,15 @@ MapBasicsTests: Test {::
   .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) ++ (Maps#({::}, `c`, `z`)) .get `c` .assertEq `z`}
   .check{Maps#({::}, `a`, `x`) ++ (Maps#({::}, `b`, `y`)) .str{::.str} .assertEq(
     Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .str{::.str})}
-  .check{Maps#[Str,Str,Str] {::} .as {::.size} .size .assertEq 0}
-  .check{Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .size .assertEq 2}
-  .check{Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .get `a` .assertEq 2}
-  .check{Maps#({::}, `a`, `xx`, `bb`, `y`) .as {::.size} .get `bb` .assertEq 1}
-  .check{Maps#({::}, `a`, `xx`) .as {::.size} .containsKey `a` .assertEq True}
+  .check{MapStrSizes#(Maps#[Str,Str,Str] {::}) .size .assertEq 0}
+  .check{MapStrSizes#(Maps#({::}, `a`, `xx`, `bb`, `y`)) .size .assertEq 2}
+  .check{MapStrSizes#(Maps#({::}, `a`, `xx`, `bb`, `y`)) .get `a` .assertEq 2}
+  .check{MapStrSizes#(Maps#({::}, `a`, `xx`, `bb`, `y`)) .get `bb` .assertEq 1}
+  .check{MapStrSizes#(Maps#({::}, `a`, `xx`)) .containsKey `a` .assertEq True}
   .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#`x`) .size .assertEq 1}
   .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#`x`) .get `a` .get 0 .assertEq `x`}
   .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#(`x`,`y`)) .get `a` .size .assertEq 2}
-  .check{Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#(`x`,`y`)) .as {::.size} .get `a` .assertEq 2}
+  .check{MapListSizes#(Maps#[Str,Str,List[Str]] {::} .with(`a`, Lists#(`x`,`y`))) .get `a` .assertEq 2}
   .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `a` .assertEq False}
   .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .containsKey `b` .assertEq True}
   .check{Maps#[Str,Str,Str] {::} .with(`a`, `x`) .with(`b`, `y`) .without `a` .size .assertEq 1}
