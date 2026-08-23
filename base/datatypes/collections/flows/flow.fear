@@ -56,8 +56,8 @@ Flow[E:*]: {
   mut .get:   E;//get the first element if size==1, throws otherwise
   mut .getOpt:   mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
   mut .first: mut Opt[E]; //opt of the first element
-  /// `this.last` returns the last element in the flow, consuming this.
-  /// Equivalent to: `this.fold({}, (_, e) -> Opts#(a))`
+  /// `this.last` returns the last element in the flow, consuming `this`.
+  /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(a))``
   /// Complexity: O(n)
   mut .last: Opt[E];
   mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut Flow[R] ->

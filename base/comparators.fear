@@ -1,7 +1,7 @@
 /// Ordering + hashing via "closed fixpoints".
 /// Intuition:
 /// - An Order[T] is a comparator that is also a *closed* value: .close: T.
-/// - Most concrete T implement Order[T] with .close->this.
+/// - Most concrete T implement Order[T] with .close->`this`.
 /// - OrderBy[T,K] is a projection: given t: T, build a closed Order[K] for its key.
 /// - OrderHash adds hashing and ToStr. This is all the Maps/Set may need.
 

@@ -5,7 +5,7 @@
 Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.getSucc` returns the closest Floating point number larger than `this`.
   /// Throws if `this` is `Math.nan` or `Math.inf` (there is no larger value).
-  /// Note: Unlike `.succ` for the other numeric types this does not return `this + 1`.
+  /// Note: Unlike `.getSucc` for the other numeric types this does not return ``this + 1``.
   //>   .check{1.0 .getSucc .assertGt 1.0}
   //>   .check{-0.0 .getSucc .assertEq(+0.0.getSucc)}
   //>   .checkDetErr({_ -> True}, {Math.nan .getSucc})
@@ -14,61 +14,61 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.getPred` returns the closest Floating point number smaller than `this`.
   /// Throws if `this` is `Math.nan` or `Math.negInf` (there is no smaller value).
-  /// Note: Unlike `.pred` for the other numeric types this does not return `this - 1`.
+  /// Note: Unlike `.getPred` for the other numeric types this does not return ``this - 1``.
   //>   .check{1.0 .getPred .assertLt 1.0}
   //>   .check{0.0 .getPred .assertEq(-0.0.getPred)}
   //>   .checkDetErr({_ -> True}, {Math.nan .getPred})
   //>   .checkDetErr({_ -> True}, {Math.negInf .getPred})
   .getPred: Float;
 
-  /// `this + x` returns the IEEE 754 sum of `this` and `x`. Never throws; NaN propagates.
+  /// ``this + x`` returns the IEEE 754 sum of `this` and ``x``. Never throws; NaN propagates.
   //>   .check{2.0 + 3.0 .assertEq 5.0}
   //>   .check{Math.inf + 1.0 .assertEq(Math.inf)}
   //>   .check{Math.nan + 1.0 .isNaN .assertTrue}
   +(x: Float): Float;
 
-  /// `this - x` returns the IEEE 754 difference of `this` and `x`. Never throws; NaN propagates.
+  /// ``this - x`` returns the IEEE 754 difference of `this` and ``x``. Never throws; NaN propagates.
   //>   .check{5.0 - 3.0 .assertEq 2.0}
   //>   .check{Math.inf - (Math.inf) .isNaN .assertTrue}
   -(x: Float): Float;
 
-  /// `this * x` returns the IEEE 754 product of `this` and `x`. Never throws; NaN propagates.
+  /// ``this * x`` returns the IEEE 754 product of `this` and ``x``. Never throws; NaN propagates.
   //>   .check{2.0 * 3.0 .assertEq 6.0}
   //>   .check{0.0 * (Math.inf) .isNaN .assertTrue}
   *(x: Float): Float;
 
-  /// `this / x` returns the IEEE 754 quotient of `this` and `x`.
-  /// Division by 0 never throws: yields `Math.inf`/`Math.negInf` (signed by operand signs) or NaN for `0.0 / 0.0`.
+  /// ``this / x`` returns the IEEE 754 quotient of `this` and ``x``.
+  /// Division by 0 never throws: yields `Math.inf`/`Math.negInf` (signed by operand signs) or NaN for ``0.0 / 0.0``.
   //>   .check{6.0 / 3.0 .assertEq 2.0}
   //>   .check{1.0 / 0.0 .assertEq(Math.inf)}
   //>   .check{-1.0 / 0.0 .assertEq(Math.negInf)}
   //>   .check{0.0 / 0.0 .isNaN .assertTrue}
   /(x: Float): Float;
 
-  /// `this ** x` returns the `this` raised to the power `x`. Never throws; NaN propagates
+  /// ``this ** x`` returns the `this` raised to the power ``x``. Never throws; NaN propagates
   /// Note: This differs from `this.ieeePow` as it relaxes the assumption that infinities are effectively large even integers,
   ///   and removes special rules precedence, in general if a**x = b for all x, and y**c = d for all y, then y**x == (Math.nan) if c!=d:
-  ///  - `x**(Math.inf) for `x < 0.0`, `+/-0.0 ** +/-0.0`, Math.inf ** 0.0 all return `Math.nan`
+  ///  - ``x**(Math.inf) for ``x < 0.0``, ``+/-0.0 ** +/-0.0``, Math.inf ** 0.0 all return ``Math.nan`
   //>   .check{2.0 ** 3.0 .assertEq 8.0}
   //>   .check{Math.nan ** 0.0 .isNaN .assertTrue} // not true of ieee
   //>   .check{0.0 ** -0.0 .isNaN .assertTrue}  // not true of ieee
   **(x: Float): Float;
 
-  /// `this.absOrNaN` returns the IEEE absolute value of `this`: `this` if `this >= 0`,
-  /// `-this` if `this < 0`, and `Math.nan` if `this` is NaN (payload preserved semantics not guaranteed).
+  /// `this.absOrNaN` returns the IEEE absolute value of `this`: `this` if ``this >= 0``,
+  /// ``-this`` if ``this < 0``, and `Math.nan` if `this` is NaN (payload preserved semantics not guaranteed).
   //>   .check{4.75 .absOrNaN .assertEq 4.75}
   //>   .check{-4.75 .absOrNaN .assertEq 4.75}
   //>   .check{Math.nan .absOrNaN .isNaN .assertTrue}
   .absOrNaN: Float;
 
-  /// `this.abs` returns `.some` of `this` if `this >= 0`, `.some` of `-this` if `this < 0`,
+  /// `this.abs` returns `.some` of `this` if ``this >= 0``, `.some` of ``-this`` if ``this < 0``,
   /// `.empty` if `this` is NaN.
   //>   .check{4.75 .abs .assertEq({::}, Opts# 4.75)}
   //>   .check{-4.75 .abs .assertEq({::}, Opts# 4.75)}
   //>   .check{Math.nan .abs .assertEmpty}
   .abs: Opt[Float] -> this.isNaN.not .toOpt {this.absOrNaN};
 
-  /// `this.getAbs` returns `this` if `this >= 0`, `-this` otherwise. Throws if `this` is NaN.
+  /// `this.getAbs` returns `this` if ``this >= 0``, ``-this`` otherwise. Throws if `this` is NaN.
   //>   .check{4.75 .getAbs .assertEq 4.75}
   //>   .check{-4.75 .getAbs .assertEq 4.75}
   //>   .checkDetErr({_ -> True}, {Math.nan .getAbs})
@@ -79,37 +79,37 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       };
 
   /// `this.negAbsOrNaN` returns the negative of the absolute value of `this`
-  /// (i.e. `-|this|`), or `Math.nan` if `this` is NaN.
+  /// (i.e. ``-|this|``), or `Math.nan` if `this` is NaN.
   //>   .check{4.75 .negAbsOrNaN .assertEq -4.75}
   //>   .check{-4.75 .negAbsOrNaN .assertEq -4.75}
   //>   .check{Math.nan .negAbsOrNaN .isNaN .assertTrue}
   .negAbsOrNaN: Float -> this.absOrNaN * -1.0;
 
-  /// `this.negAbs` returns `.some` of `-|this|` if `this` is not NaN, `.empty` otherwise.
+  /// `this.negAbs` returns `.some` of ``-|this|`` if `this` is not NaN, `.empty` otherwise.
   //>   .check{4.75 .negAbs .assertEq({::}, Opts# -4.75)}
   //>   .check{Math.nan .negAbs .assertEmpty}
   .negAbs: Opt[Float] -> this.isNaN.not .toOpt {this.absOrNaN * -1.0};
 
-  /// `this.getNegAbs` returns `-|this|`. Throws if `this` is NaN.
+  /// `this.getNegAbs` returns ``-|this|``. Throws if `this` is NaN.
   //>   .check{4.75 .getNegAbs .assertEq(-4.75)}
   //>   .checkDetErr({_ -> True}, {(Math.nan) .getNegAbs})
   .getNegAbs: Float -> this.getAbs * -1.0;
 
   /// `this.sqrtOrNaN` returns the IEEE square root of `this`.
-  /// Returns `Math.nan` iff `this` is negative (excluding `-0.0`, whose sqrt is `-0.0`) or NaN.
+  /// Returns `Math.nan` iff `this` is negative (excluding ``-0.0``, whose sqrt is ``-0.0``) or NaN.
   //>   .check{4.0 .sqrtOrNaN .assertEq 2.0}
   //>   .check{-0.0 .sqrtOrNaN .assertEq -0.0}
   //>   .check{-4.0 .sqrtOrNaN .isNaN .assertTrue}
   //>   .check{Math.nan .sqrtOrNaN .isNaN .assertTrue}
   .sqrtOrNaN: Float;
 
-  /// `this.sqrt` returns `.some` of the IEEE sqrt of `this` if `this >= 0.0` and not NaN, `.empty` otherwise.
+  /// `this.sqrt` returns `.some` of the IEEE sqrt of `this` if ``this >= 0.0`` and not NaN, `.empty` otherwise.
   //>   .check{4.0 .sqrt .assertEq({::}, Opts# 2.0)}
   //>   .check{-4.0 .sqrt .assertEmpty}
   //>   .check{Math.nan .sqrt .assertEmpty}
   .sqrt: Opt[Float] -> this.isNaN.not && {this >= 0.0} .toOpt {this.sqrtOrNaN};
 
-  /// `this.getSqrt` returns the IEEE sqrt of `this`. Throws if `this` is NaN or negative (excluding `-0.0`).
+  /// `this.getSqrt` returns the IEEE sqrt of `this`. Throws if `this` is NaN or negative (excluding ``-0.0``).
   //>   .check{4.0 .getSqrt .assertEq 2.0}
   //>   .checkDetErr({_ -> True}, {-4.0 .getSqrt})
   //>   .checkDetErr({_ -> True}, {Math.nan .getSqrt})
@@ -118,8 +118,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .else -> this.sqrtOrNaN;
     };
 
-  /// `this.signOrNaN` returns the sign of `this`: `+0.0`/`-0.0` if `this` is `+0.0`/`-0.0`,
-  /// `1.0` if `this` is positive, `-1.0` if `this` is negative, `Math.nan` if `this` is NaN.
+  /// `this.signOrNaN` returns the sign of `this`: ``+0.0``/``-0.0`` if `this` is ``+0.0``/``-0.0``,
+  /// ``1.0`` if `this` is positive, ``-1.0`` if `this` is negative, `Math.nan` if `this` is NaN.
   //>   .check{4.75 .signOrNaN .assertEq 1.0}
   //>   .check{-4.75 .signOrNaN .assertEq -1.0}
   //>   .check{0.0 .signOrNaN .isPosZero .assertTrue}
@@ -191,7 +191,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     };
 
   /// `this.softTrunc0` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
-  /// otherwise returns `this` rounded towards `0`.
+  /// otherwise returns `this` rounded towards ``0``.
   //>   .check{2.75 .softTrunc0 .assertEq 2.0}
   //>   .check{-2.75 .softTrunc0 .assertEq -2.0}
   //>   .check{Math.inf .softTrunc0 .assertEq(Math.inf)}
@@ -199,14 +199,14 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .softTrunc0: Float;
 
   /// `this.trunc0` returns `.empty` if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
-  /// otherwise `.some` of `this` rounded towards `0`.
+  /// otherwise `.some` of `this` rounded towards ``0``.
   //>   .check{2.75 .trunc0 .assertEq({::}, Opts# 2.0)}
   //>   .check{-2.75 .trunc0 .assertEq({::}, Opts# -2.0)}
   //>   .check{Math.inf .trunc0 .assertEmpty}
   //>   .check{Math.nan .trunc0 .assertEmpty}
   .trunc0: Opt[Float] -> this.isFinite.toOpt{this.softTrunc0};
 
-  /// `this.getTrunc0` returns `this` rounded towards `0`. Throws if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`.
+  /// `this.getTrunc0` returns `this` rounded towards ``0``. Throws if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`.
   //>   .check{-2.75 .getTrunc0 .assertEq -2.0}
   //>   .checkDetErr({_ -> True}, {(Math.inf) .getTrunc0})
   //>   .checkDetErr({_ -> True}, {(Math.nan) .getTrunc0})
@@ -216,7 +216,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     };
 
   /// `this.softRound` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
-  /// otherwise returns `this` rounded to the nearest integer, with ties rounded away from `0`.
+  /// otherwise returns `this` rounded to the nearest integer, with ties rounded away from ``0``.
   //>   .check{2.5 .softRound .assertEq 3.0}
   //>   .check{-2.5 .softRound .assertEq(-3.0)}
   //>   .check{Math.inf .softRound .assertEq(Math.inf)}
@@ -224,14 +224,14 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .softRound: Float;
 
   /// `this.round` returns `.empty` if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
-  /// otherwise `.some` of `this` rounded to the nearest integer, ties rounded away from `0`.
+  /// otherwise `.some` of `this` rounded to the nearest integer, ties rounded away from ``0``.
   //>   .check{2.5 .round .assertEq({::}, Opts# 3.0)}
   //>   .check{-2.5 .round .assertEq({::}, Opts# (-3.0))}
   //>   .check{Math.inf .round .assertEmpty}
   //>   .check{Math.nan .round .assertEmpty}
   .round: Opt[Float] -> this.isFinite.toOpt{this.softRound};
 
-  /// `this.getRound` returns `this` rounded to the nearest integer, ties rounded away from `0`.
+  /// `this.getRound` returns `this` rounded to the nearest integer, ties rounded away from ``0``.
   /// Throws if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`.
   //>   .check{-2.5 .getRound .assertEq(-3.0)}
   //>   .checkDetErr({_ -> True}, {(Math.inf) .getRound})
@@ -288,19 +288,19 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{Math.inf .isNegInfinity .assertFalse}
   .isNegInfinity: Bool;
 
-  /// `this.isNegZero` returns `True` iff the raw bits of `this` are exactly `-0.0`
-  /// (distinct from `+0.0` at the bit level, even though `-0.0 == +0.0`).
+  /// `this.isNegZero` returns `True` iff the raw bits of `this` are exactly ``-0.0``
+  /// (distinct from ``+0.0`` at the bit level, even though ``-0.0 == +0.0``).
   //>   .check{-0.0 .isNegZero .assertTrue}
   //>   .check{0.0 .isNegZero .assertFalse}
   .isNegZero: Bool;
 
-  /// `this.isPosZero` returns `True` iff the raw bits of `this` are exactly `+0.0`.
+  /// `this.isPosZero` returns `True` iff the raw bits of `this` are exactly ``+0.0``.
   //>   .check{0.0 .isPosZero .assertTrue}
   //>   .check{-0.0 .isPosZero .assertFalse}
   .isPosZero: Bool;
 
   /// `this.isFinite` returns `True` if `this` is not `Math.nan`, `Math.inf`, or `Math.negInf`.
-  /// Note: this is not equivalent to `this.isInfinite.not`, since both are `False` for `Math.nan`.
+  /// Note: this is not equivalent to ``this.isInfinite.not``, since both are `False` for `Math.nan`.
   //>   .check{1.0 .isFinite .assertTrue}
   //>   .check{0.0 .isFinite .assertTrue}
   //>   .check{Math.inf .isFinite .assertFalse}
@@ -312,59 +312,59 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       .regular x -> True;
       });
 
-  /// `this.ieeePow(x)` returns the IEEE 754-2008 `pow(this, x)`, following the full IEEE special-value rules
-  ///  unlike `**` - see its docs for how the two differ. Rules apply top down
-  ///   - `x.ieeePow(+/-0.0)` is `+1.0` for any `x` including `Math.nan`, `+/-0.0`, ;
-  ///   - `(+/-0.0).ieeePow(y)` is:
-  ///         - `+/-Math.inf` if `y` is negative odd integer,
+  /// ``this.ieeePow(x)`` returns the IEEE 754-2008 ``pow(this, x)``, following the full IEEE special-value rules
+  ///  unlike ``**`` - see its docs for how the two differ. Rules apply top down
+  ///   - ``x.ieeePow(+/-0.0)`` is ``+1.0`` for any ``x`` including `Math.nan`, ``+/-0.0``, ;
+  ///   - ``(+/-0.0).ieeePow(y)`` is:
+  ///         - ``+/-Math.inf`` if ``y`` is negative odd integer,
   ///         - `Math.inf` if y is `Math.negInf`,
   ///         - +0.0 if y is `Math.inf` - `Math.inf` is considered a large positive integer,
-  ///         - `Math.inf` for finite `y < 0` that is not an odd integer,
-  ///         - `+/-0.0` for finite `y > 0` an odd integer
-  ///         - `+0.0` for finite `y > 0` that is not an odd integer;
-  ///   - `-1.0.ieeePow(+/-Math.inf)` is `1.0`;
-  ///   - `1.0.ieeePow(y)` is `1.0` for any `y` - even `Math.nan`;
-  ///   - `x.ieeePow(y)` is `Math.nan` for finite `x < 0` and finite non-integer `y`.
+  ///         - `Math.inf` for finite ``y < 0`` that is not an odd integer,
+  ///         - ``+/-0.0`` for finite ``y > 0`` an odd integer
+  ///         - ``+0.0`` for finite ``y > 0`` that is not an odd integer;
+  ///   - ``-1.0.ieeePow(+/-Math.inf)`` is ``1.0``;
+  ///   - ``1.0.ieeePow(y)`` is ``1.0`` for any ``y`` - even `Math.nan`;
+  ///   - ``x.ieeePow(y)`` is `Math.nan` for finite ``x < 0`` and finite non-integer ``y``.
   .ieeePow(x: Float): Float;
 
-  /// `this.ieeeSameBits(x)` compares raw bit patterns: distinguishes NaN payloads and signed zero
-  /// (unlike `ieeeEq` and the type's own `==`).
+  /// ``this.ieeeSameBits(x)`` compares raw bit patterns: distinguishes NaN payloads and signed zero
+  /// (unlike ``ieeeEq`` and the type's own ``==``).
   //>   .check{(0.0 .ieeeSameBits(-0.0)) .assertFalse}
   //>   .check{(1.0 .ieeeSameBits 1.0) .assertTrue}
   .ieeeSameBits(x: Float): Bool;
 
   /// `this.ieeeStr` returns an IEEE 754 round-trip decimal string for `this` (includes NaN/Inf).
-  /// NaN payloads are not distinguished (all NaNs render identically); use `ieeeSameBits` for that.
+  /// NaN payloads are not distinguished (all NaNs render identically); use ``ieeeSameBits`` for that.
   //>   .check{1.5 .ieeeStr .assertEq "1.5"}
   //>   .check{Math.nan .ieeeStr .assertEq `NaN`}
   //>   .check{Math.inf .ieeeStr .assertEq `Infinity`}
   .ieeeStr: Str;
 
-  /// `this.ieeeRemainder(d)` returns the IEEE remainder `r = this - n*d`, where `n` is the
-  /// integer nearest `this/d` (ties-to-even).
+  /// ``this.ieeeRemainder(d)`` returns the IEEE remainder ``r = this - n*d``, where ``n`` is the
+  /// integer nearest ``this/d`` (ties-to-even).
   //>   .check{5.0 .ieeeRemainder 3.0 .assertEq -1.0}
   .ieeeRemainder(d: Float): Float;
 
-  /// `this.ieeeEq(x)` return true if `this` equals `x` according to the IEEE standard.
-  /// Note: this differs from Fearless `==` as `Math.nan.ieeeEq(Math.nan) is false`
+  /// ``this.ieeeEq(x)`` return true if `this` equals ``x`` according to the IEEE standard.
+  /// Note: this differs from Fearless ``==`` as ``Math.nan.ieeeEq(Math.nan) is false``
   //>   .check{Math.nan.ieeeEq(Math.nan).assertFalse}
   //>   .check{+0.0 .ieeeEq -0.0  .assertTrue}
   .ieeeEq(x: Float): Bool;
 
-  /// `this.int` returns `.some` of `this` as an `Int` if `this` is an integer in `[minInt, maxInt]`,
+  /// `this.int` returns `.some` of `this` as an `Int` if `this` is an integer in ``[minInt, maxInt]``,
   /// `.empty` otherwise (non-integral, out of range, NaN, or infinite).
   //>   .check{3.0 .int .assertEq({::}, Opts# +3)}
   //>   .check{3.5 .int .assertEmpty}
   //>   .check{Math.nan .int .assertEmpty}
   .int: Opt[Int];
 
-  /// `this.nat` returns `.some` of `this` as a `Nat` if `this` is an integer in `[0, maxNat]`,
+  /// `this.nat` returns `.some` of `this` as a `Nat` if `this` is an integer in ``[0, maxNat]``,
   /// `.empty` otherwise.
   //>   .check{3.0 .nat .assertEq({::}, Opts# 3)}
   //>   .check{-1.0 .nat .assertEmpty}
   .nat: Opt[Nat];
 
-  /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is an integer in `[0, maxByte]`,
+  /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is an integer in ``[0, maxByte]``,
   /// `.empty` otherwise.
   //>   .check{3.0 .byte .assertEq({::}, Opts#(3.getByte))}
   //>   .check{300.0 .byte .assertEmpty}
@@ -375,38 +375,38 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{Math.inf .num .assertEmpty}
   .num: Opt[Num];
 
-  /// `this.softInt` clamps and truncates `this` towards `0` into an `Int`.
-  /// `Math.nan -> 0`; `Math.inf -> maxInt`; `Math.negInf -> minInt`.
+  /// `this.softInt` clamps and truncates `this` towards ``0`` into an `Int`.
+  /// ``Math.nan -> 0``; ``Math.inf -> maxInt``; ``Math.negInf -> minInt``.
   //>   .check{4.75 .softInt .assertEq +4}
   //>   .check{Math.nan .softInt .assertEq +0}
   //>   .check{Math.inf .softInt .assertEq(Math.maxInt)}
   .softInt: Int;
 
-  /// `this.softNat` clamps and truncates `this` towards `0` into a `Nat`.
-  /// `Math.nan -> 0`; `Math.inf -> maxNat`; `Math.negInf -> 0`.
+  /// `this.softNat` clamps and truncates `this` towards ``0`` into a `Nat`.
+  /// ``Math.nan -> 0``; ``Math.inf -> maxNat``; ``Math.negInf -> 0``.
   //>   .check{4.75 .softNat .assertEq 4}
   //>   .check{Math.negInf .softNat .assertEq 0}
   //>   .check{Math.inf .softNat .assertEq(Math.maxNat)}
   .softNat: Nat;
 
-  /// `this.softByte` clamps and truncates `this` towards `0` into a `Byte`.
-  /// `Math.nan -> 0`; `Math.inf -> maxByte`; `Math.negInf -> 0`.
+  /// `this.softByte` clamps and truncates `this` towards ``0`` into a `Byte`.
+  /// ``Math.nan -> 0``; ``Math.inf -> maxByte``; ``Math.negInf -> 0``.
   //>   .check{4.75 .softByte .assertEq(4.getByte)}
   //>   .check{Math.inf .softByte .assertEq(Math.maxByte)}
   .softByte: Byte;
 
-  /// `this.getInt` converts `this` to an `Int` if it is an integer in `[minInt, maxInt]`; throws otherwise.
+  /// `this.getInt` converts `this` to an `Int` if it is an integer in ``[minInt, maxInt]``; throws otherwise.
   //>   .check{3.0 .getInt .assertEq +3}
   //>   .checkDetErr({_ -> True}, {3.5 .getInt})
   //>   .checkDetErr({_ -> True}, {(Math.nan) .getInt})
   .getInt: Int;
 
-  /// `this.getNat` converts `this` to a `Nat` if it is an integer in `[0, maxNat]`; throws otherwise.
+  /// `this.getNat` converts `this` to a `Nat` if it is an integer in ``[0, maxNat]``; throws otherwise.
   //>   .check{3.0 .getNat .assertEq 3}
   //>   .checkDetErr({_ -> True}, {(-1.0) .getNat})
   .getNat: Nat;
 
-  /// `this.getByte` converts `this` to a `Byte` if it is an integer in `[0, maxByte]`; throws otherwise.
+  /// `this.getByte` converts `this` to a `Byte` if it is an integer in ``[0, maxByte]``; throws otherwise.
   //>   .check{3.0 .getByte.nat .assertEq 3}
   //>   .checkDetErr({_ -> True}, {300.0 .getByte})
   .getByte: Byte;
@@ -417,8 +417,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({_ -> True}, {(Math.nan) .getNum})
   .getNum: Num;
 
-  /// `this.hash` returns a hash consistent with `==`: `-0.0` hashes the same as `+0.0`, and every
-  /// NaN hashes the same as every other NaN (since `ieeeStr` does not distinguish NaN payloads).
+  /// `this.hash` returns a hash consistent with ``==``: ``-0.0`` hashes the same as ``+0.0``, and every
+  /// NaN hashes the same as every other NaN (since ``ieeeStr`` does not distinguish NaN payloads).
   //>   .check{0.0 .hash .assertEq((-0.0) .hash)}
   //>   .check{Math.nan .hash .assertEq((Math.nan.negAbsOrNaN) .hash)}
   //>   .check{1.0 .hash .assertNe(2.0 .hash)}
@@ -427,14 +427,14 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// fixpoint type closed
   .close->::; .close->this;
 
-  /// `this.sumNumber(xs)` sums all numbers in `xs` starting from `this`.
+  /// ``this.sumNumber(xs)`` sums all numbers in `xs` starting from `this`.
   //>   .check{(0.0 .sumNumber(List#(1.0, 2.0, 3.0))) .assertEq 6.0}
   //>   .check{(10.0 .sumNumber(List#())) .assertEq 10.0}
   .sumNumber xs ->
     xs.fold( {this}, {acc,e -> acc + e} );
 
-  /// `this.match(m)` dispatches on the special variants of float weirdness:
-  /// `+0.0`, `-0.0`, `+Inf`, `-Inf`, `NaN`, or a regular finite/non-special value.
+  /// ``this.match(m)`` dispatches on the special variants of float weirdness:
+  /// ``+0.0``, ``-0.0``, ``+Inf``, ``-Inf``, ``NaN``, or a regular finite/non-special value.
   //>   .check{(0.0 .match({.posZero -> "pz"; .negZero -> "nz"; .posInf -> "pi"; .negInf -> "ni"; .nan -> "n"; .regular x -> "r"})) .assertEq "pz"}
   //>   .check{(3.5 .match({.posZero -> "pz"; .negZero -> "nz"; .posInf -> "pi"; .negInf -> "ni"; .nan -> "n"; .regular x -> "r"})) .assertEq "r"}
   //>   .check{((Math.nan) .match({.posZero -> "pz"; .negZero -> "nz"; .posInf -> "pi"; .negInf -> "ni"; .nan -> "n"; .regular x -> "r"})) .assertEq "n"}
@@ -448,14 +448,14 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.deg` returns `.some` of `this` interpreted as an angle in degrees if `this` is finite,
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
-  /// Note: there is no `soft` variant, since it's unclear how to map non-finite values to an angle.
+  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .deg .assertEq({::}, Opts#(90.0.getDeg))}
   //>   .check{Math.nan .deg .assertEmpty}
   //>   .check{Math.inf .deg .assertEmpty}
   .deg: Opt[Degree] -> this.isFinite.toOpt{{this}};
 
   /// `this.getDeg` returns `this` as a `Degree`. Throws if `this` is not finite.
-  /// Note: there is no `soft` variant, since it's unclear how to map non-finite values to an angle.
+  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .getDeg# .assertEq(90.0)}
   //>   .checkDetErr({_ -> True}, {(Math.inf) .getDeg})
   .getDeg: Degree -> this.isFinite .if {
@@ -465,12 +465,12 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.rad` returns `.some` of `this` interpreted as an angle in radians if `this` is finite,
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
-  /// Note: there is no `soft` variant, since it's unclear how to map non-finite values to an angle.
+  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{1.5 .rad .assertEq({::}, Opts#(1.5.getRad))}
   //>   .check{Math.nan .rad .assertEmpty}
   .rad: Opt[Radian] -> this.isFinite.toOpt{{this}};
 
-  /// `this.getRad` returns `this` as a `Radian`. Throws if `this` is NaN or `+/-` Infinity.
+  /// `this.getRad` returns `this` as a `Radian`. Throws if `this` is NaN or ``+/-`` Infinity.
   //>   .check{1.5 .getRad# .assertEq 1.5}
   //>   .checkDetErr({_ -> True}, {(Math.nan) .getRad})
   .getRad: Radian -> this.isFinite .if {
@@ -478,9 +478,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .else -> Error.msg("Invalid angle, "+this+" is not finite.");
     };
 
-  /// `this~~end` returns the open range `(this, end)`: from `this.getSucc` to `end.getPred`.
+  /// ``this~~end`` returns the open range ``(this, end)``: from `this.getSucc` to `end.getPred`.
   /// Throws if either endpoint is NaN, `this` is `Math.inf`, `end` is `Math.negInf`,
-  /// or the resulting range would be empty (`this.getSucc > end.getPred`).
+  /// or the resulting range would be empty (``this.getSucc > end.getPred``).
   //>   .check{(1.0~~4.0) .start .assertEq(1.0 .getSucc)}
   //>   .check{(1.0~~4.0) .end .assertEq(4.0 .getPred)}
   //>   .checkDetErr({_ -> True}, {1.0~~(1.0 .getSucc)})
@@ -495,9 +495,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       }
     .return {_FloatRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
-  /// `this~~=endInclusive` returns the range `(this, endInclusive]`: from `this.getSucc` to `endInclusive`.
+  /// ``this~~=endInclusive`` returns the range ``(this, endInclusive]``: from `this.getSucc` to `endInclusive`.
   /// Throws if either endpoint is NaN, `this` is `Math.inf`, or the range would be empty
-  /// (`this >= endInclusive`).
+  /// (``this >= endInclusive``).
   //>   .check{(1.0~~=4.0) .start .assertEq(1.0 .getSucc)}
   //>   .check{(1.0~~=4.0) .end .assertEq 4.0}
   //>   .checkDetErr({_ -> True}, {1.0~~=1.0})
@@ -509,9 +509,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       }
     .return {_FloatRanges#(this.getSucc, endInclusive, "("+this+", "+endInclusive+"]")};
 
-  /// `this=~~end` returns the range `[this, end)`: from `this` to `end.getPred`.
+  /// ``this=~~end`` returns the range ``[this, end)``: from `this` to `end.getPred`.
   /// Throws if either endpoint is NaN, `end` is `Math.negInf`, or the range would be empty
-  /// (`this >= end`).
+  /// (``this >= end``).
   //>   .check{(1.0=~~4.0) .start .assertEq 1.0}
   //>   .check{(1.0=~~4.0) .end .assertEq(4.0 .getPred)}
   //>   .checkDetErr({_ -> True}, {1.0=~~1.0})
@@ -525,8 +525,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       }
     .return {_FloatRanges#(this, end.getPred, "["+this+", "+end+")")};
 
-  /// `this=~~=endInclusive` returns the inclusive range `[this, endInclusive]`.
-  /// Throws if either endpoint is NaN, or the range would be empty (`this > endInclusive`).
+  /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
+  /// Throws if either endpoint is NaN, or the range would be empty (``this > endInclusive``).
   //>   .check{(1.0=~~=4.0) .start .assertEq 1.0}
   //>   .check{(1.0=~~=1.0) .start .assertEq 1.0}
   //>   .checkDetErr({_ -> True}, {4.0=~~=1.0})
@@ -537,26 +537,26 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       }
     .return {_FloatRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
 
-  /// `this.inRange(range)` returns `True` iff `range.start <= this <= range.end`.
-  /// Note: since NaN is greater than everything, `this.inRange(range)` is `False` when `this` is NaN.
+  /// ``this.inRange(range)`` returns `True` iff ``range.start <= this <= range.end``.
+  /// Note: since NaN is greater than everything, ``this.inRange(range)`` is `False` when `this` is NaN.
   //>   .check{(2.0 .inRange(1.0=~~=4.0)) .assertTrue}
   //>   .check{(5.0 .inRange(1.0=~~=4.0)) .assertFalse}
   .inRange(range: Range[Float]): Bool -> range.start <= this && {this <= (range.end)};
 
-  /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
+  /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{2.0 .assertInRange(1.0=~~=4.0)}
   //>   .checkDetErr({_ -> True}, {5.0 .assertInRange(1.0=~~=4.0)})
   .assertInRange(range: Range[Float]): Void -> this.assertInRange(range, {``});
 
-  /// `this.assertInRange(range, msg)` is equivalent to `this.inRange(range).assertTrue`
+  /// ``this.assertInRange(range, msg)`` is equivalent to ``this.inRange(range).assertTrue``
   .assertInRange(range: Range[Float], msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
     { msg#.info + (`Expected in range: `+ (range.str) // technically a DD point...
       | `actual: `+this
       .info)});
 
-  /// `this.clampTo(range)` clamps `this` into `[range.start, range.end]`.
-  /// Note: since NaN is greater than everything, a `Math.nan.clamp(range)` always clamps to `range.end`;
+  /// ``this.clampTo(range)`` clamps `this` into ``[range.start, range.end]``.
+  /// Note: since NaN is greater than everything, a ``Math.nan.clamp(range)`` always clamps to `range.end`;
   //>   .check{0.0 .clampTo(1.0=~~=4.0) .assertEq 1.0}
   //>   .check{5.0 .clampTo(1.0=~~=4.0) .assertEq 4.0}
   //>   .check{Math.nan .clampTo(1.0=~~=4.0) .assertEq 4.0}

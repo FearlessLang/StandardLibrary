@@ -31,7 +31,7 @@ _MagicMath: Sealed {
   /// Throws if either x or y is NaN.
   .atan2(x: Float, y: Float): Radian -> Magic!;
 
-  /// `this.hypot(x, y)` returns `(x** +2.0 + y** +2.0).sqrt`.
+  /// ``this.hypot(x, y)`` returns ``(x** +2.0 + y** +2.0).sqrt``.
   /// Throws if either argument is NaN
   .hypot(x: Float, y: Float): Float -> Magic!;
   }
@@ -102,9 +102,9 @@ Math: Sealed, _MagicMath {
       .lt -> t0; .eq -> t0; .gt -> t1;
     });
 
-  /// `Math.clamp(by, lo, hi, t)` returns `t` clamped between upper and lower.
-  /// Note: `Math.clamp(by, lo, hi, t)` returns `t` in the case where it is equal to lo or hi
-  /// Equivalent to: `Math.max(by, Math.min(by, t, lower), upper)`
+  /// ``Math.clamp(by, lo, hi, t)`` returns `t` clamped between upper and lower.
+  /// Note: ``Math.clamp(by, lo, hi, t)`` returns `t` in the case where it is equal to lo or hi
+  /// Equivalent to: ``Math.max(by, Math.min(by, t, lower), upper)``
   .clamp[T,K](ordering: OrderBy[T,K], lower: T, upper: T, t: T): T -> Block#
     .let[Order[K]] lower'={ordering# lower}
     .let[Order[K]] upper'={ordering# upper}
@@ -117,10 +117,10 @@ Math: Sealed, _MagicMath {
 
 
 
-/// The super type of Radians and Degrees, used to enforce common behaviour
+/// The super type of `Radian` and `Degree`, used to enforce common behaviour
 /// Angles that normalize to the same value are considered equal,
-/// `Degrees#(+360.0)! == Degrees#(+0.0)! .assertTrue`
-/// `Radians#(Math.tau / -4.0)! == Degrees#(+3.0 / +4.0 * Math.tau)! .assertTrue`
+/// ``360.0.degree .assertEq(0.0.degree)``
+/// ``(Math.tau / -4.0).getRad.deg .assertEq((+3.0 / +4.0 * Math.tau).getRad.deg)``
 Angle[Self]: F[Float],Sealed,DataType[Self, Self] {
   +(other: Self): Self;
   -(other: Self): Self;

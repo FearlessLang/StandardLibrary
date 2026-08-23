@@ -2,57 +2,57 @@
 ///This string type is designed for robustness and ease of reasoning.
 ///It can only even contain the following whitelisted characters:
 ///0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\
-///Plus space ` ` and new line.
-///There is no concept of escape as in some other languages, so `\n` is two characters.
+///Plus space `` `` and new line.
+///There is no concept of escape as in some other languages, so ``\n`` is two characters.
 ///The methods ^ and | can be used to obtain a string including new lines or backticks (`).
 
 /// Relations of parsers and printers.
 /// Methods .getInt/.getFloat/.getNum/.getByte below accept exactly the numeric type names
-/// accepted by the Fearless syntax, including the allowed `_` as for the Fearless syntax.
+/// accepted by the Fearless syntax, including the allowed ``_`` as for the Fearless syntax.
 /// They *do not* evaluate expressions.
 /// Str.escape, Float.str and Float.ieeeStr  instead output Fearless code when there is no literal represing the value.
 ///
 /// Str.getInt:
-/// - rejected: `12`.getInt  `+1_`.getInt  `+_1`.getInt
+/// - rejected: ``12``.getInt  ``+1_``.getInt  ``+_1``.getInt
 //  - accepted: `+12`.getInt, `+1_000`.getInt  `+0__10`.getInt  `+01__0`.getInt `+1__0`.getInt `+00`.getInt `-00`.getInt `-001`.getInt `+001`.getInt
-/// - canonicalization: `+00_12`.getInt.str ==`+12`
+/// - canonicalization: ``+00_12``.getInt.str ==``+12``
 ///
 /// Str.getNat:
-/// - rejected: `+12`.getNat  `-1`.getNat  `1_`.getNat  `_1`.getNat    `4_294_967_296`.getNat (range)
-/// - accepted: `0`.getNat  `00`.getNat  `0__10`.getNat  `4_294_967_295`.getNat
-/// - canonicalization: `000_255`.nat.str ==`255`  and `4_294_967_295`.nat.str==`4294967295`
+/// - rejected: ``+12``.getNat  ``-1``.getNat  ``1_``.getNat  ``_1``.getNat    ``4_294_967_296``.getNat (range)
+/// - accepted: ``0``.getNat  ``00``.getNat  ``0__10``.getNat  ``4_294_967_295``.getNat
+/// - canonicalization: ``000_255``.nat.str ==``255``  and ``4_294_967_295``.nat.str==``4294967295``
 ///
 /// Str.getByte:
-/// - rejected: `+12`.getByte  `-1`.getByte  `1_`.getByte  `_1`.getByte  `256`.getByte
-/// - accepted: `0`.getByte  `00`.getByte  `0__10`.getByte  `255`.getByte  `000_255`.getByte
-/// - canonicalization: `000_255`.getByte.str==`255`
+/// - rejected: ``+12``.getByte  ``-1``.getByte  ``1_``.getByte  ``_1``.getByte  ``256``.getByte
+/// - accepted: ``0``.getByte  ``00``.getByte  ``0__10``.getByte  ``255``.getByte  ``000_255``.getByte
+/// - canonicalization: ``000_255``.getByte.str==``255``
 ///
 /// Str.getNum:
-/// - rejected: `12`.getNum  `+12`.getNum  `+1/`.getNum  `+1./2`.getNum  `+1/_2`.getNum  `+1/0`.getNum  `+1.0/0.0`.getNum
-/// - accepted: `+12/1`.getNum  `-00_12/000_3`.getNum  `+12.4/3.2`.getNum  `+0/1`.getNum  `-0/1`.getNum
-/// - canonicalization: `+12.4/3.2`.getNum!.str==`+31/8`  `+12/2`.getNum!.str==`+6/1`
+/// - rejected: ``12``.getNum  ``+12``.getNum  ``+1/``.getNum  ``+1./2``.getNum  ``+1/_2``.getNum  ``+1/0``.getNum  ``+1.0/0.0``.getNum
+/// - accepted: ``+12/1``.getNum  ``-00_12/000_3``.getNum  ``+12.4/3.2``.getNum  ``+0/1``.getNum  ``-0/1``.getNum
+/// - canonicalization: ``+12.4/3.2``.getNum!.str==``+31/8``  ``+12/2``.getNum!.str==``+6/1``
 ///
 /// Str.getFloat (IEEE 754 binary 64):
-/// - rejected (syntax): `1.0`.getFloat  `+1`.getFloat  `+1.`.getFloat  `+.1`.getFloat  `+1e0`.getFloat
-/// - rejected (value): `+NaN`.getFloat  `+Infinity`.getFloat  `-Infinity`.getFloat  `+0.1`.getFloat
+/// - rejected (syntax): ``1.0``.getFloat  ``+1``.getFloat  ``+1.``.getFloat  ``+.1``.getFloat  ``+1e0``.getFloat
+/// - rejected (value): ``+NaN``.getFloat  ``+Infinity``.getFloat  ``-Infinity``.getFloat  ``+0.1``.getFloat
 /// - Float value 0.1 (and many others) do not exist; so it is rejected.
-/// - accepted: `+0.5`.getFloat  `+1.25`.getFloat  `+01__0.00__1`.getFloat  `+1.0e-3`.getFloat
-/// - canonicalization: `-0.0`.getFloat.str==`+0.0`
+/// - accepted: ``+0.5``.getFloat  ``+1.25``.getFloat  ``+01__0.00__1``.getFloat  ``+1.0e-3``.getFloat
+/// - canonicalization: ``-0.0``.getFloat.str==``+0.0``
 ///
 /// Str.ieeeFloat:
-/// - rejected: `duck`.ieeeFloat
-/// - accepted: `NaN`.ieeeFloat  `Infinity`.ieeeFloat  `-Infinity`.ieeeFloat  `-0.0`.ieeeFloat  `+0.0`.ieeeFloat  `1e0`.ieeeFloat
-/// - canonicalization: `1e0`.ieeeFloat!.ieeeStr==`1.0`  and `+0.0`.ieeeFloat!.ieeeStr==`0.0`  (NaN payload not preserved)
+/// - rejected: ``duck``.ieeeFloat
+/// - accepted: ``NaN``.ieeeFloat  ``Infinity``.ieeeFloat  ``-Infinity``.ieeeFloat  ``-0.0``.ieeeFloat  ``+0.0``.ieeeFloat  ``1e0``.ieeeFloat
+/// - canonicalization: ``1e0``.ieeeFloat!.ieeeStr==``1.0``  and ``+0.0``.ieeeFloat!.ieeeStr==``0.0``  (NaN payload not preserved)
 /// - roundtrip (value): f.ieeeStr.ieeeFloat! == f
 ///   The roundtrip also preserves the sign of zero but not the NaN payload
-///   `0.1`.ieeeFloat!.ieeeStr == `0.1` BUT there is no Float representing 0.1 
+///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1`` BUT there is no Float representing 0.1 
 ///   .ieeeFloat + .ieeeStr implement shortest string that round-trips under round-to-nearest ties-to-even
-///   That is, `0.1`.ieeeFloat!.ieeeStr lies to you twice, once when it creates the float, and a secon time when
+///   That is, ``0.1``.ieeeFloat!.ieeeStr lies to you twice, once when it creates the float, and a secon time when
 ///   it choses to print a near value that has a compact representation instead of the actual content of the float
-///   Another example: `0.100000000000000005`.ieeeFloat!.ieeeStr == `0.1`
-///   But, `0.100000000000000005` is closer to the actual representable Float value. That is,
-///   `+0.1`.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
-///   `+0.1`.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
+///   Another example: ``0.100000000000000005``.ieeeFloat!.ieeeStr == ``0.1``
+///   But, ``0.100000000000000005`` is closer to the actual representable Float value. That is,
+///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
+///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
 Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
