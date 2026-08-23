@@ -38,12 +38,22 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .checkDetErr({_ -> True}, {+7 / 0})
   / (d: Nat) : Num;
 
-  /// `this.getDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
+  /// `this.getTruncDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
   /// Note: negative divisors are not allowed, if you need this use `this.aluDiv`.
-  //>   .check{+7 .getDiv 2 .assertEq +3}
-  //>   .check{-7 .getDiv 2 .assertEq -3}
+  //>   .check{+7 .getTruncDiv 2 .assertEq +3}
+  //>   .check{-7 .getTruncDiv 2 .assertEq +3}
+  //>   .checkDetErr({_ -> True}, {+7 .getTruncDiv 0})
+  .getTruncDiv(d: Nat): Int;
+
+  /// `this.getDiv(d)` returns `this` exactly divided by `d`. Throws iff `d == 0` or `this.rem == 1`.
+  //>   .check{(+6) .getDiv 2 .assertEq(+3)}
+  //>   .checkDetErr({_ -> True}, {+7 .getDiv 3})
   //>   .checkDetErr({_ -> True}, {+7 .getDiv 0})
-  .getDiv(d: Nat): Int;
+  .getDiv(d: Nat): Int -> Block#
+    .if {d == 0} .error {"Int.getDiv: Cannot divide by 0"}
+    .let[Int] rem = {this.getRem d}
+    .if {rem != +0} .error {"Int.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
+    .return {this.getTruncDiv d};
 
   /// `this.getRem(d)` returns the remainder `this - (this.getDiv(d)) * d`. Throws iff `d == 0`.
   //>   .check{+7 .getRem 2 .assertEq +1}
@@ -52,27 +62,23 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` iff `d == 0`.
   //>   .check{+7 .rem 2 .assertEq({::}, Opts# +1)}
-  //>   .check{+7 .rem 0 .assertEmpty}
+  //>   .check{+7 .rem 0 .assertEmpty {::}}
   .rem(d: Nat): Opt[Int] -> d != 0 .toOpt {this.getRem(d)};
 
-  /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, rounding towards 0.
-  //>   .check{+6 .div(2) .assertEq({::}, Opts# +3)}
-  //>   .check{+7 .div(2) .assertEq({::}, Opts# +3)}
-  //>   .check{+7 .div(0) .assertEmpty}
-  .div(d: Nat): Opt[Int]
-    -> d != 0 .toOpt{this.getDiv d};
+  /// `this.truncDiv(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, rounding towards 0.
+  //>   .check{+6 .truncDiv(2) .assertEq({::}, Opts# +3)}
+  //>   .check{+7 .truncDiv(2) .assertEq({::}, Opts# +3)}
+  //>   .check{+7 .truncDiv(0) .assertEmpty {::}}
+  .truncDiv(d: Nat): Opt[Int]
+    -> d != 0 .toOpt{this.getTruncDiv d};
 
-  /// `this.exactDiv(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`, that is if:
+  /// `this.div(d)` returns `.some` of `this.getTruncDiv(d)` if `d` evenly divides `this`, that is if:
   ///  `d != 0` and `this.rem(d) == 0` otherwise returns .empty` otherwise.
-  //>   .check{+6 .exactDiv(2) .assertEq({::}, Opts# +3)}
-  //>   .check{+7 .exactDiv(2) .assertEmpty}
-  //>   .check{+7 .exactDiv(0) .assertEmpty}
-  .exactDiv(d: Nat): Opt[Int]
-    -> this.rem(d).match {
-      .empty -> {};
-      .some r -> r == +0 .toOpt {this.getDiv(d)};
-      };
-
+  //>   .check{+6 .div(2) .assertEq({::}, Opts# +3)}
+  //>   .check{+7 .div(2) .assertEmpty {::}}
+  //>   .check{+7 .div(0) .assertEmpty {::}}
+  .div(d: Nat): Opt[Int] ->
+    (d != 0) && {this.getRem d == +0} .toOpt {this.getTruncDiv(d)};
 
   /// `this.sign` returns the sign of `this`: `+0` if `this` is `0`, `+1` if positive, `-1` if negative.
   //>   .check{+5 .sign .assertEq +1}
@@ -106,7 +112,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.wrapIndex(len)` returns `.some` of `this.getWrapIndex(len)` if `len != 0`, `.empty` iff `len == 0`.
   //>   .check{-1 .wrapIndex 7 .assertEq({::}, Opts# 6)}
-  //>   .check{+5 .wrapIndex 0 .assertEmpty}
+  //>   .check{+5 .wrapIndex 0 .assertEmpty {::}}
   .wrapIndex(len: Nat): Opt[Nat] -> len == 0 .toOpt {this.getWrapIndex(len)};
 
   /// `this.num` converts `this` to a `Num`.
@@ -116,17 +122,17 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.nat` returns `.some` of `this` as a `Nat` if `this >= 0`, `.empty` otherwise.
   //>   .check{+5 .nat .assertEq({::}, Opts# 5)}
-  //>   .check{-5 .nat .assertEmpty}
+  //>   .check{-5 .nat .assertEmpty {::}}
   .nat: Opt[Nat];
 
   /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is in `[0, maxByte]`, `.empty` otherwise.
   //>   .check{+5 .byte .assertEq({::}, Opts# (5.getByte))}
-  //>   .check{+300 .byte .assertEmpty}
+  //>   .check{+300 .byte .assertEmpty {::}}
   .byte: Opt[Byte];
 
   /// `this.float` returns `.some` of `this` as a `Float` if `this` is exactly representable, `.empty` otherwise.
   //>   .check{+5 .float .assertEq({::}, Opts# 5.0)}
-  //>   .check{Math.maxInt - +1 .float .assertEmpty}
+  //>   .check{Math.maxInt - +1 .float .assertEmpty {::}}
   .float: Opt[Float];
 
   /// `this.getNat` converts `this` to a `Nat`. Throws if `this < 0`.
@@ -156,7 +162,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.softFloat` converts `this` to the closest representable `Float`
   //>   .check{+5 .softFloat .assertEq 5.0}
-  //>   .check{Math.maxInt - +1 .softFloat.softInt .assertEq(Math.maxInt.getNat)}
+  //>   .check{Math.maxInt - +1 .softFloat.softNat .assertEq(Math.maxInt.getNat)}
   .softFloat: Float;
 
   /// `this.aluAddWrap(x)` returns `this + x` mod `2^64` (i64 wraparound add)
@@ -206,7 +212,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .aluOr(x: Int): Int;
 
   /// `this.aluNat` reinterprets the raw i64 bits of `this` as an unsigned u64 `Nat` (bit-cast, not a value conversion).
-  //>   .check{-1 .aluNat .assertEq (Math.maxInt)}
+  //>   .check{-1 .aluNat .assertEq (Math.maxNat)}
   .aluNat: Nat;
 
   /// `this.aluByte` returns the low 8 bits of `this`, wrapped (not clamped).
@@ -268,7 +274,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
   //>   .check{+2 .assertInRange(+1=~~= +4)}
-  //>   .checkDetErr({_ -> True}, {+5 .assertInRange(+1=~~= +4)})
+  //>   .checkNonDetErr({_ -> True}, {+5 .assertInRange(+1=~~= +4)})
   .assertInRange(range: Range[Int]): Void -> this.assertInRange(range, {``});
 
   /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.

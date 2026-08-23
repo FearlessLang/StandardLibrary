@@ -1,0 +1,208 @@
+package base;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static base.Util.*;
+public interface Lists$1c$0 extends Sealed$2o$0{
+  default Object imm$singletonRead$1(Object p0){ return imm$$hash$1(p0); }
+    
+  default Object imm$$hash$1(Object p0){
+    var l= new ArrayList<>(1);
+    l.add(p0);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$2(Object p0, Object p1){
+    var l= new ArrayList<>(2);
+    l.add(p0); l.add(p1);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$3(Object p0, Object p1, Object p2){
+    var l= new ArrayList<>(3);
+    l.add(p0); l.add(p1); l.add(p2);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$4(Object p0, Object p1, Object p2, Object p3){
+    var l= new ArrayList<>(4);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){
+    var l= new ArrayList<>(5);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$6(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5){
+    var l= new ArrayList<>(6);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){
+    var l= new ArrayList<>(7);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$8(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7){
+    var l= new ArrayList<>(8);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){
+    var l= new ArrayList<>(9);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$10(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){
+    var l= new ArrayList<Object>(10);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){
+    var l= new ArrayList<>(11);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$12(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){
+    var l= new ArrayList<>(12);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){
+    var l= new ArrayList<>(13);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$14(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){
+    var l= new ArrayList<>(14);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12); l.add(p13);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){
+    var l= new ArrayList<>(15);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12); l.add(p13); l.add(p14);
+    return new List$o$1Instance(l);
+  }
+  default Object imm$$hash$16(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){
+    var l= new ArrayList<>(16);
+    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12); l.add(p13); l.add(p14); l.add(p15);
+    return new List$o$1Instance(l);
+  }
+  Lists$1c$0 instance= new Lists$1c$0(){};
+}
+
+record List$o$1Instance(List<Object> val) implements List$o$1{
+  static Object wrap(List<Object> l){ return l.isEmpty() ? List$o$1.instance : new List$o$1Instance(l); }
+
+  static List<Object> asJava(Object xs){
+    if (xs == List$o$1.instance){ return List.of(); }
+    if (xs instanceof List$o$1Instance x){ return x.val; }
+    throw new AssertionError("Unexpected List impl: "+xs.getClass());
+  }
+  private int idx(Object p0){
+    long i= natToLong(p0);
+    check(0 <= i && i < val.size(), "List.get: List index "+Long.toUnsignedString(i)+" out of range for List of length "+val.size());
+    return (int) i;
+  }
+
+  @Override public Object read$size$0(){ return Nat$c$0Instance.instance(val.size()); }
+  @Override public Object read$isEmpty$0(){ return bool(val.isEmpty()); }
+  @Override public Object read$str$1(Object p0){
+    var by= (ToStrBy$5u$1)p0;
+    String res= val.stream().map(e->toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ","[","]"));
+    return Str$c$0Instance.instance(res);
+  }
+  @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
+  @Override public Object read$get$1(Object p0){ return val.get(idx(p0)); }
+  @Override public Object mut$opt$1(Object p0){
+    long i= natToLong(p0);
+    return (0 <= i && i < val.size()) ? optSome(val.get((int) i)) : optEmpty();
+  }
+  @Override public Object read$opt$1(Object p0){ return mut$opt$1(p0); }
+  @Override public Object imm$opt$1(Object p0){ return mut$opt$1(p0); }
+  @Override public Object mut$getFirst$0(){
+    //can not be empty check(!val.isEmpty(), "List was empty");
+    return val.getFirst();
+  }
+  @Override public Object read$getFirst$0(){ return mut$getFirst$0(); }
+  @Override public Object mut$getLast$0(){
+    //can not be empty check(!val.isEmpty(), "List was empty");
+    return val.getLast();
+  }
+  @Override public Object read$getLast$0(){ return mut$getLast$0(); }
+  @Override public Object mut$first$0(){ return optSome(val.getFirst()); }
+  @Override public Object read$first$0(){ return mut$first$0(); }
+  @Override public Object imm$first$0(){ return mut$first$0(); }
+  @Override public Object mut$last$0(){ return optSome(val.getLast()); }
+  @Override public Object read$last$0(){ return mut$last$0(); }
+  @Override public Object imm$last$0(){ return mut$last$0(); }
+  @Override public Object mut$$plus_plus$1(Object p0){
+    var xs= asJava(p0);
+    if (xs.isEmpty()){ return this; }
+    var l= new ArrayList<Object>(val.size()+xs.size());
+    l.addAll(val);
+    l.addAll(xs);
+    return wrap(l);
+  }
+  @Override public Object read$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
+  @Override public Object mut$$lt_plus$1(Object p0){
+    var l= new ArrayList<Object>(val.size()+1);
+    l.add(p0);
+    l.addAll(val);
+    return wrap(l);
+  }
+  @Override public Object read$$lt_plus$1(Object p0){ return mut$$lt_plus$1(p0); }
+  @Override public Object mut$$plus_gt$1(Object p0){
+    var l= new ArrayList<Object>(val.size()+1);
+    l.addAll(val);
+    l.add(p0);
+    return wrap(l);
+  }
+  @Override public Object read$$plus_gt$1(Object p0){ return mut$$plus_gt$1(p0); }
+  @Override public Object mut$subList$2(Object p0, Object p1){
+    long s= Util.natToLong(p0); long e= Util.natToLong(p1);
+    check(0 <= s && s <= e && e <= val.size(), "List subList out of range");
+    return wrap(val.subList((int) s, (int) e));
+  }
+  @Override public Object read$subList$2(Object p0, Object p1){ return mut$subList$2(p0,p1); }
+  @Override public Object mut$subList$1(Object p0){ return mut$subList$2(p0, Nat$c$0Instance.instance(val.size())); }
+  @Override public Object read$subList$1(Object p0){ return mut$subList$1(p0); }
+  @Override public Object mut$with$2(Object p0, Object p1){
+    int i= idx(p0);
+    var l= new ArrayList<Object>(val);
+    l.set(i,p1);
+    return wrap(l);
+  }
+  @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0,p1); }
+  @Override public Object mut$withAlso$2(Object p0, Object p1){
+    long i= natToLong(p0);
+    check(0 <= i && i <= val.size(), "List withAlso out of range");
+    int index = (int) i;
+    var l= new ArrayList<Object>(val.size()+1);
+    l.addAll(val.subList(0,index));
+    l.add(p1);
+    l.addAll(val.subList(index,val.size()));
+    return wrap(l);
+  }
+  @Override public Object read$withAlso$2(Object p0, Object p1){ return mut$withAlso$2(p0,p1); }
+  @Override public Object mut$without$1(Object p0){
+    int i= idx(p0);
+    if (val.size() == 1 && i == 0){ return List$o$1.instance; }
+    if (i == 0){ return wrap(val.subList(1,val.size())); }
+    if (i == val.size()-1){ return wrap(val.subList(0,val.size()-1)); }
+    var l= new ArrayList<Object>(val.size()-1);
+    l.addAll(val.subList(0,i));
+    l.addAll(val.subList(i+1,val.size()));
+    return wrap(l);
+  }
+  @Override public Object read$without$1(Object p0){ return mut$without$1(p0); }
+
+  @Override public Object mut$reverse$0(){ return wrap(val.reversed()); }
+  @Override public Object read$reverse$0(){ return mut$reverse$0(); }
+
+  @Override public Object imm$as$1(Object p0){ return this; }
+  @Override public Object read$imm$1(Object p0){
+    var by= (ToImmBy$5u$2)p0;
+    return new List$o$1Instance(val.stream().map(e->((ToImm$1g$1)by.imm$$hash$1(e)).read$imm$0()).toList());
+  }  
+}

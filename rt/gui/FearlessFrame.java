@@ -125,7 +125,7 @@ final class FearlessFrame extends JFrame{
   // once per model tick that became due since the previous firing; the
   // submissions of one firing are contiguous on the queue (single EDT
   // producer), so catch-up ticks cannot interleave with button or key events.
-  void restartModelTimer(long periodNs, int warmupMillis, java.util.List<MF$1> actions){
+  void restartModelTimer(long periodNs, int warmupMillis, java.util.List<MF$7$1> actions){
     assert SwingUtilities.isEventDispatchThread();
     if (!active()){ return; }
     if (modelTimer != null){ modelTimer.stop(); }

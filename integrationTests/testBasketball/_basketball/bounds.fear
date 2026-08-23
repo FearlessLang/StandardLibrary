@@ -1,0 +1,61 @@
+Bound: {
+  .x: X; .y: Y; .width: Width; .height: Height;
+  .inBounds(x: X, y: Y): Bool ->
+    x.get.inRange(this.x.get|>{::=~~= (:: + (this.width.get))}) 
+    && { y.get.inRange(this.y.get|>{:: =~~= (:: + (this.height.get))}) }
+  }
+
+MenuBounds: { #(width: Width, height: Height): Bound -> Block#
+  .let w = { Width#(width.get * 2.aluDiv 5) }
+  .let h = { Height#(height.get.aluDiv 5) }
+  .let x = {X#(width.get - (w.get) .aluDiv 2)}
+  .let y = {Y#(height.get - (h.get) .aluDiv 2)}
+  .return { {.x -> x; .y -> y; .width -> w; .height -> h;}}
+}
+SquareBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Bound -> Block#
+  .let w = { (width.get).aluDiv 10 }
+  .let h = { width.get.aluDiv 12 }
+  .return { {.x -> X#x; .y -> Y#y; .width -> Width#w; .height -> Height#h; } }
+}
+
+PlayerBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Bound -> Block#
+  .let size = { (width.get).aluDiv 12 }
+  .return { {.x -> X#x; .y -> Y#y; .width -> Width#size; .height -> Height#size;} }
+}
+
+BallBounds: { #(x: Nat, y: Nat, width: Width, height: Height): BallBound -> Block#
+  .let size = { (width.get).aluDiv 16 }
+  .return {{
+    .x -> X#x; .y -> Y#y;
+    .width -> Width#size; .height -> Height#size;
+    .screenWidth -> width;
+    .screenHeight -> height;
+    }}}
+
+BallBound: Bound {
+    .screenWidth: Width;
+    .screenHeight: Height;
+    .overlapsRect(bx: Float, by: Float, bounds: Bound): Bool -> Block#
+      .let[Float] px          = { bounds.x.get.softFloat }//somehow infers read Float
+      .let[Float] py          = { bounds.y.get.softFloat }
+      .let[Float] boundW      = { bounds.width.get.softFloat }
+      .let[Float] boundH      = { bounds.height.get.softFloat }
+      .let[Float] ballW       = { this.width.get.softFloat }
+      .let[Float] ballH       = { this.height.get.softFloat }
+      .let ballRight   = { bx + ballW }
+      .let ballBottom  = { by + ballH }
+      .let boundRight  = { px + boundW }
+      .let boundBottom = { py + boundH }
+      .return {
+        ballRight > px
+        && { bx < boundRight }
+        && { ballBottom > py }
+        && { by < boundBottom }
+        };
+    .bounceOffPlayer(bx: Float, player: read Player): Float -> Block#
+      .let playerBounds          = { PlayerBounds#(player.x, player.y, this.screenWidth, this.screenHeight) }
+      .let px           = { playerBounds.x.get.softFloat }
+      .let playerW      = { playerBounds.width.get.softFloat }
+      .let playerCenter = { px + (playerW / +2.0) }
+      .let ballCenter   = { bx + (this.width.get.softFloat / +2.0) }
+      .return { (ballCenter - playerCenter) / playerW * +16.0 }}

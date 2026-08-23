@@ -19,21 +19,21 @@ final class TextEncoding{
   }
 
   static Object str(byte[] bs,Object recover,Decoder decoder){
-    var out=new StrSink((BadStrUnitRecover$0)recover);
+    var out=new StrSink((BadStrUnitRecover$4ev4$0)recover);
     decoder.decode(bs,out);
     return out.result();
   }
 
   static Object uStr(byte[] bs,Object recover,Decoder decoder){
-    var out=new UStrSink((BadUStrUnitRecover$0)recover);
+    var out=new UStrSink((BadUStrUnitRecover$8z7k$0)recover);
     decoder.decode(bs,out);
     return out.result();
   }
 
   static Object reason(int id){
-    return new BadTextReason$0(){
+    return new BadTextReason$9wg$0(){
       @Override public Object imm$match$1(Object p0){
-        var m=(BadTextReasonMatch$1)p0;
+        var m=(BadTextReasonMatch$8suo$1)p0;
         return switch(id){
           case 0 -> m.mut$malformedEncoding$0();
           case 1 -> m.mut$truncatedEncoding$0();
@@ -45,16 +45,16 @@ final class TextEncoding{
     };
   }
 
-  static Object nat(long n){ return Nat$0Instance.instance(n); }
+  static Object nat(long n){ return Nat$c$0Instance.instance(n); }
 
   static final class StrSink implements Sink{
-    final BadStrUnitRecover$0 recover;
+    final BadStrUnitRecover$4ev4$0 recover;
     final StringBuilder out=new StringBuilder();
 
-    StrSink(BadStrUnitRecover$0 recover){ this.recover=recover; }
+    StrSink(BadStrUnitRecover$4ev4$0 recover){ this.recover=recover; }
 
     @Override public void scalar(int byteOffset,int byteLength,int cp){
-      if (UStr$0Instance.isStrScalar(cp)){
+      if (UStr$s$0Instance.isStrScalar(cp)){
         out.appendCodePoint(cp);
         return;
       }
@@ -62,31 +62,31 @@ final class TextEncoding{
     }
 
     @Override public void bad(Object reason,int byteOffset,int byteLength,long rejectedValue){
-      out.append(((Str$0Instance)recover.mut$$hash$4(
+      out.append(((Str$c$0Instance)recover.mut$$hash$4(
         reason,nat(byteOffset),nat(byteLength),nat(rejectedValue)
         )).val());
     }
 
-    @Override public Object result(){ return Str$0Instance.instance(out.toString()); }
+    @Override public Object result(){ return Str$c$0Instance.instance(out.toString()); }
   }
 
   static final class UStrSink implements Sink{
-    final BadUStrUnitRecover$0 recover;
+    final BadUStrUnitRecover$8z7k$0 recover;
     int[] out=new int[16];
     int size;
 
-    UStrSink(BadUStrUnitRecover$0 recover){ this.recover=recover; }
+    UStrSink(BadUStrUnitRecover$8z7k$0 recover){ this.recover=recover; }
 
     @Override public void scalar(int byteOffset,int byteLength,int cp){ add(cp); }
 
     @Override public void bad(Object reason,int byteOffset,int byteLength,long rejectedValue){
-      addAll(((UStr$0Instance)recover.mut$$hash$4(
+      addAll(((UStr$s$0Instance)recover.mut$$hash$4(
         reason,nat(byteOffset),nat(byteLength),nat(rejectedValue)
         )).val());
     }
 
     void add(int cp){
-      assert UStr$0Instance.isScalar(cp);
+      assert UStr$s$0Instance.isScalar(cp);
       if (size == out.length){ out=Arrays.copyOf(out,Math.multiplyExact(out.length,2)); }
       out[size++]=cp;
     }
@@ -102,7 +102,7 @@ final class TextEncoding{
       size=newSize;
     }
 
-    @Override public Object result(){ return UStr$0Instance.instance(Arrays.copyOf(out,size)); }
+    @Override public Object result(){ return UStr$s$0Instance.instance(Arrays.copyOf(out,size)); }
   }
 
   static void ascii(byte[] bs,Sink out){
@@ -231,7 +231,7 @@ final class TextEncoding{
           continue;
         }
         int cp=((b0&0x0F)<<12)|((b1&0x3F)<<6)|(b2&0x3F);
-        if (!UStr$0Instance.isScalar(cp)){ out.bad(notScalar,i,3,cp); }
+        if (!UStr$s$0Instance.isScalar(cp)){ out.bad(notScalar,i,3,cp); }
         else{ out.scalar(i,3,cp); }
         i+=3;
         continue;
@@ -274,7 +274,7 @@ final class TextEncoding{
           continue;
         }
         int cp=((b0&0x07)<<18)|((b1&0x3F)<<12)|((b2&0x3F)<<6)|(b3&0x3F);
-        if (!UStr$0Instance.isScalar(cp)){ out.bad(notScalar,i,4,cp); }
+        if (!UStr$s$0Instance.isScalar(cp)){ out.bad(notScalar,i,4,cp); }
         else{ out.scalar(i,4,cp); }
         i+=4;
         continue;

@@ -43,6 +43,8 @@ use base.ToInfoBy as ToInfoBy;
 use base.InfoToPrettyString as InfoToPrettyString;
 use base.Infos as Infos;
 
+use base.Norm as Norm;
+use base.Cache as Cache;
 
 MyTests:UnitTests{::
   .test TestByte
@@ -53,6 +55,7 @@ MyTests:UnitTests{::
   .test TestStr
   .test TestList
   .test TestMap
+  .test TestAs
   .test TestRepr
   .test TestLiteralErrors
   .test TestPipe

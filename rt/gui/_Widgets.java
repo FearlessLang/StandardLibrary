@@ -43,9 +43,9 @@ final class SkComponent extends JComponent{
   @Override protected void paintComponent(java.awt.Graphics g){ w.frame.blit(g, this); }
 }
 
-class _Button extends AWidget implements Button$0{
+class _Button extends AWidget implements Button$2o$0{
   String text = "";
-  final List<MF$1> actions = new ArrayList<>();// EDT confined
+  final List<MF$7$1> actions = new ArrayList<>();// EDT confined
   boolean down;// visual pressed state, maintained by SkMouse, read by Sk.button
   boolean over;// visual rollover state, maintained by SkMouse, read by Sk.button
   // Bevel path cache, used and maintained by Sk.button; EDT confined. The
@@ -58,28 +58,28 @@ class _Button extends AWidget implements Button$0{
   _Button(_Frame frame){ super(frame); }
 
   @Override public Object mut$text$1(Object t){
-    var s = ((Str$0Instance) t).val();
+    var s = ((Str$c$0Instance) t).val();
     return reStyle(() -> text = s);
   }
-  @Override public Object read$text$0(){ return new Str$0Instance(text); }
+  @Override public Object read$text$0(){ return new Str$c$0Instance(text); }
   @Override public Object mut$action$1(Object r){
-    frame.onEdtAndWait(() -> actions.add((MF$1) r));
+    frame.onEdtAndWait(() -> actions.add((MF$7$1) r));
     return this;
   }
   @Override Dimension autoSize(){ return Sk.textSizeWithInsets(text, this); }
   @Override void sk(Canvas cv){ Sk.button(cv, this); }
 }
 
-class _Label extends AWidget implements Label$0{
+class _Label extends AWidget implements Label$1c$0{
   String text = "";
 
   _Label(_Frame frame){ super(frame); }
 
   @Override public Object mut$text$1(Object t){
-    var s = ((Str$0Instance) t).val();
+    var s = ((Str$c$0Instance) t).val();
     return reStyle(() -> text = s);
   }
-  @Override public Object read$text$0(){ return new Str$0Instance(text); }
+  @Override public Object read$text$0(){ return new Str$c$0Instance(text); }
   @Override Dimension autoSize(){ return Sk.textSizeWithInsets(text, this); }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
@@ -87,16 +87,16 @@ class _Label extends AWidget implements Label$0{
   }
 }
 
-class _Pane extends AContainer implements Pane$0{
+class _Pane extends AContainer implements Pane$o$0{
   _Pane(_Frame frame){
     super(frame);
     component.setLayout(new CenteredFlowLayout(this));
   }
-  @Override public Pane$0 mut$button$1(Object s){ frame.addTo(component, s, _Button::new); return this; }
-  @Override public Pane$0 mut$label$1(Object s){ frame.addTo(component, s, _Label::new); return this; }
-  @Override public Pane$0 mut$pane$1(Object s){ frame.addTo(component, s, _Pane::new); return this; }
-  @Override public Pane$0 mut$border$1(Object s){ frame.addTo(component, s, _Border::new); return this; }
-  @Override public Pane$0 mut$clear$0(){
+  @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(component, s, _Button::new); return this; }
+  @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(component, s, _Label::new); return this; }
+  @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(component, s, _Pane::new); return this; }
+  @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(component, s, _Border::new); return this; }
+  @Override public Pane$o$0 mut$clear$0(){
     frame.onEdtAndWait(() -> {
       // Removed widgets get no Exited events (DOM semantics: removal is not
       // an exit); SkMouse just forgets its references into the subtrees.
@@ -110,45 +110,45 @@ class _Pane extends AContainer implements Pane$0{
   }
 }
 
-class _Border extends AContainer implements Border$0{
+class _Border extends AContainer implements Border$2o$0{
   _Border(_Frame frame){
     super(frame);
     component.setLayout(new MutableBorderLayout(this));
   }
-  @Override public Border$0 mut$north$1(Object s){ frame.addTo(component, BorderLayout.NORTH, s, _Pane::new); return this; }
-  @Override public Border$0 mut$south$1(Object s){ frame.addTo(component, BorderLayout.SOUTH, s, _Pane::new); return this; }
-  @Override public Border$0 mut$east$1(Object s){ frame.addTo(component, BorderLayout.EAST, s, _Pane::new); return this; }
-  @Override public Border$0 mut$west$1(Object s){ frame.addTo(component, BorderLayout.WEST, s, _Pane::new); return this; }
-  @Override public Border$0 mut$center$1(Object s){ frame.addTo(component, BorderLayout.CENTER, s, _Pane::new); return this; }
-  @Override public Border$0 mut$northB$1(Object s){ frame.addTo(component, BorderLayout.NORTH, s, _Border::new); return this; }
-  @Override public Border$0 mut$southB$1(Object s){ frame.addTo(component, BorderLayout.SOUTH, s, _Border::new); return this; }
-  @Override public Border$0 mut$eastB$1(Object s){ frame.addTo(component, BorderLayout.EAST, s, _Border::new); return this; }
-  @Override public Border$0 mut$westB$1(Object s){ frame.addTo(component, BorderLayout.WEST, s, _Border::new); return this; }
-  @Override public Border$0 mut$centerB$1(Object s){ frame.addTo(component, BorderLayout.CENTER, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$north$1(Object s){ frame.addTo(component, BorderLayout.NORTH, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$south$1(Object s){ frame.addTo(component, BorderLayout.SOUTH, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$east$1(Object s){ frame.addTo(component, BorderLayout.EAST, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$west$1(Object s){ frame.addTo(component, BorderLayout.WEST, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$center$1(Object s){ frame.addTo(component, BorderLayout.CENTER, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$northB$1(Object s){ frame.addTo(component, BorderLayout.NORTH, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$southB$1(Object s){ frame.addTo(component, BorderLayout.SOUTH, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$eastB$1(Object s){ frame.addTo(component, BorderLayout.EAST, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$westB$1(Object s){ frame.addTo(component, BorderLayout.WEST, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$centerB$1(Object s){ frame.addTo(component, BorderLayout.CENTER, s, _Border::new); return this; }
 }
 
-abstract class AWidget implements Widget$1{
-  static final Nat$0 zero = Nat$0Instance.instance(0);
-  static final Nat$0 def = Nat$0Instance.instance(6);
-  static final Nat$0 defText = Nat$0Instance.instance(12);
+abstract class AWidget implements Widget$2o$1{
+  static final Nat$c$0 zero = Nat$c$0Instance.instance(0);
+  static final Nat$c$0 def = Nat$c$0Instance.instance(6);
+  static final Nat$c$0 defText = Nat$c$0Instance.instance(12);
 
-  WidthNat$0 left = (WidthNat$0) WidthNat$0.instance.read$$hash$1(def);
-  HeightNat$0 top = (HeightNat$0) HeightNat$0.instance.read$$hash$1(def);
-  WidthNat$0 right = (WidthNat$0) WidthNat$0.instance.read$$hash$1(def);
-  HeightNat$0 bottom = (HeightNat$0) HeightNat$0.instance.read$$hash$1(def);
-  WidthNat$0 widthGap = (WidthNat$0) WidthNat$0.instance.read$$hash$1(def);
-  HeightNat$0 heightGap = (HeightNat$0) HeightNat$0.instance.read$$hash$1(def);
-  Nat$0 radius = defText;
-  WidthNat$0 preferredWidth;
-  HeightNat$0 preferredHeight;
-  Color$0 foreground = (Color$0) Color$0.instance;
-  Color$0 background = (Color$0) Color$0.instance.imm$transparent$0();
-  HeightNat$0 textSize = (HeightNat$0) HeightNat$0.instance.read$$hash$1(defText);
+  WidthNat$as$0 left = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
+  HeightNat$lg$0 top = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
+  WidthNat$as$0 right = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
+  HeightNat$lg$0 bottom = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
+  WidthNat$as$0 widthGap = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
+  HeightNat$lg$0 heightGap = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
+  Nat$c$0 radius = defText;
+  WidthNat$as$0 preferredWidth;
+  HeightNat$lg$0 preferredHeight;
+  Color$1c$0 foreground = (Color$1c$0) Color$1c$0.instance;
+  Color$1c$0 background = (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
+  HeightNat$lg$0 textSize = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(defText);
 
   final _Frame frame;
   final SkComponent component = new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
-  final EnumMap<MouseKind, List<Consumer$1>> handlers = new EnumMap<>(MouseKind.class);
+  final EnumMap<MouseKind, List<Consumer$ao$1>> handlers = new EnumMap<>(MouseKind.class);
 
   AWidget(_Frame frame){ this.frame = frame; }
 
@@ -172,59 +172,59 @@ abstract class AWidget implements Widget$1{
     return mut$self$0();
   }
 
-  @Override public Object mut$topInset$1(Object v){ return mut$topInset$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0) v)); }
+  @Override public Object mut$topInset$1(Object v){ return mut$topInset$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$topInset$p1$1(Object v){
-    frame.height((HeightNat$0) v, "top inset");
-    return reStyle(() -> top = (HeightNat$0) v);
+    frame.height((HeightNat$lg$0) v, "top inset");
+    return reStyle(() -> top = (HeightNat$lg$0) v);
   }
-  @Override public Object mut$bottomInset$1(Object v){ return mut$bottomInset$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0) v)); }
+  @Override public Object mut$bottomInset$1(Object v){ return mut$bottomInset$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$bottomInset$p1$1(Object v){
-    frame.height((HeightNat$0) v, "bottom inset");
-    return reStyle(() -> bottom = (HeightNat$0) v);
+    frame.height((HeightNat$lg$0) v, "bottom inset");
+    return reStyle(() -> bottom = (HeightNat$lg$0) v);
   }
-  @Override public Object mut$leftInset$1(Object v){ return mut$leftInset$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0) v)); }
+  @Override public Object mut$leftInset$1(Object v){ return mut$leftInset$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$leftInset$p1$1(Object v){
-    frame.width((WidthNat$0) v, "left inset");
-    return reStyle(() -> left = (WidthNat$0) v);
+    frame.width((WidthNat$as$0) v, "left inset");
+    return reStyle(() -> left = (WidthNat$as$0) v);
   }
-  @Override public Object mut$rightInset$1(Object v){ return mut$rightInset$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0) v)); }
+  @Override public Object mut$rightInset$1(Object v){ return mut$rightInset$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$rightInset$p1$1(Object v){
-    frame.width((WidthNat$0) v, "right inset");
-    return reStyle(() -> right = (WidthNat$0) v);
+    frame.width((WidthNat$as$0) v, "right inset");
+    return reStyle(() -> right = (WidthNat$as$0) v);
   }
-  @Override public Object mut$heightGap$1(Object v){ return mut$heightGap$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0) v)); }
+  @Override public Object mut$heightGap$1(Object v){ return mut$heightGap$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$heightGap$p1$1(Object v){
-    frame.height((HeightNat$0) v, "height gap");
-    return reStyle(() -> heightGap = (HeightNat$0) v);
+    frame.height((HeightNat$lg$0) v, "height gap");
+    return reStyle(() -> heightGap = (HeightNat$lg$0) v);
   }
-  @Override public Object mut$widthGap$1(Object v){ return mut$widthGap$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0) v)); }
+  @Override public Object mut$widthGap$1(Object v){ return mut$widthGap$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$widthGap$p1$1(Object v){
-    frame.width((WidthNat$0) v, "width gap");
-    return reStyle(() -> widthGap = (WidthNat$0) v);
+    frame.width((WidthNat$as$0) v, "width gap");
+    return reStyle(() -> widthGap = (WidthNat$as$0) v);
   }
-  @Override public Object mut$width$1(Object w){ return mut$width$p1$1(WidthNat$0.instance.read$$hash$1((Nat$0) w)); }
+  @Override public Object mut$width$1(Object w){ return mut$width$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) w)); }
   @Override public Object mut$width$p1$1(Object w){
-    frame.width((WidthNat$0) w, "widget width");
-    return reStyle(() -> preferredWidth = (WidthNat$0) w);
+    frame.width((WidthNat$as$0) w, "widget width");
+    return reStyle(() -> preferredWidth = (WidthNat$as$0) w);
   }
-  @Override public Object mut$height$1(Object h){ return mut$height$p1$1(HeightNat$0.instance.read$$hash$1((Nat$0) h)); }
+  @Override public Object mut$height$1(Object h){ return mut$height$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) h)); }
   @Override public Object mut$height$p1$1(Object h){
-    frame.height((HeightNat$0) h, "widget height");
-    return reStyle(() -> preferredHeight = (HeightNat$0) h);
+    frame.height((HeightNat$lg$0) h, "widget height");
+    return reStyle(() -> preferredHeight = (HeightNat$lg$0) h);
   }
   @Override public Object mut$radius$1(Object r){
-    frame.size((Nat$0) r, "radius");
-    return reStyle(() -> radius = (Nat$0) r);
+    frame.size((Nat$c$0) r, "radius");
+    return reStyle(() -> radius = (Nat$c$0) r);
   }
   public Object mut$textSize$1(Object t){
-    frame.height((HeightNat$0) t, "text size");
-    return reStyle(() -> textSize = (HeightNat$0) t);
+    frame.height((HeightNat$lg$0) t, "text size");
+    return reStyle(() -> textSize = (HeightNat$lg$0) t);
   }
   //TODO: this can stay in pure fearless. Is there any other code we can remove from Java in this way?
   // Alias: .textHeight(n) is .textSize(Height#n), following the inset pattern
   // of a Nat overload wrapping the dimension-typed one.
   //public Object mut$textHeight$1(Object n){
-  //  return mut$textSize$1(HeightNat$0.instance.read$$hash$1((Nat$0) n));
+  //  return mut$textSize$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) n));
   //}
   public Object read$textSize$0(){ return textSize; }
   @Override public Object mut$autoWidth$0(){ return reStyle(() -> preferredWidth = null); }
@@ -235,8 +235,8 @@ abstract class AWidget implements Widget$1{
       preferredHeight = null;
     });
   }
-  @Override public Object mut$foreground$1(Object c){ return onEdt(() -> foreground = (Color$0) c); }
-  @Override public Object mut$background$1(Object c){ return onEdt(() -> background = (Color$0) c); }
+  @Override public Object mut$foreground$1(Object c){ return onEdt(() -> foreground = (Color$1c$0) c); }
+  @Override public Object mut$background$1(Object c){ return onEdt(() -> background = (Color$1c$0) c); }
   @Override public Object read$topInset$0(){ return top; }
   @Override public Object read$bottomInset$0(){ return bottom; }
   @Override public Object read$leftInset$0(){ return left; }
@@ -249,13 +249,13 @@ abstract class AWidget implements Widget$1{
   @Override public Object read$foreground$0(){ return foreground; }
   @Override public Object read$background$0(){ return background; }
   @Override public Object mut$save$1(Object s){
-    ((Consumer$1) s).mut$accept$1(mut$self$0());
+    ((Consumer$ao$1) s).mut$accept$1(mut$self$0());
     return mut$self$0();
   }
 }
 
 abstract class AContainer extends AWidget{
-  Painter$0 paint = Scopes.idP;
+  Painter$5c$0 paint = Scopes.idP;
 
   AContainer(_Frame frame){ super(frame); }
 
@@ -268,8 +268,8 @@ abstract class AContainer extends AWidget{
         frame.elapsed,
         Scopes.w(component.getWidth()),
         Scopes.h(component.getHeight()),
-        XNat$0.instance,
-        YNat$0.instance,
+        XNat$s$0.instance,
+        YNat$s$0.instance,
         p
       ));
     }
@@ -277,40 +277,40 @@ abstract class AContainer extends AWidget{
 
   public Object mut$mouse$1(Object s){
     frame.onEdtAndWait(handlers::clear);// .mouse replaces earlier handlers
-    ((Scope$1) s).mut$run$1(new CMouseBuilder(this));
+    ((Scope$1c$1) s).mut$run$1(new CMouseBuilder(this));
     return mut$self$0();
   }
 
-  public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$0) p); }
+  public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$5c$0) p); }
 }
 
-class _Frame implements Frame$0{
+class _Frame implements Frame$1c$0{
   final FearlessFrame frame;
   final SkMouse mouse = new SkMouse(this);
   // Written by the repaint tick on the EDT, read by painters on the EDT and
   // by the model (read .elapsed) on the queue thread with no ordering between
   // the two: volatile makes the reference handoff safe. The Time object
   // itself is immutable.
-  volatile Time$0 elapsed = time(0);
+  volatile Time$o$0 elapsed = time(0);
   AWidget top;
   final int screenW;
   final int screenH;
-  final WidthNat$0 screenSizeW;
-  final HeightNat$0 screenSizeH;
+  final WidthNat$as$0 screenSizeW;
+  final HeightNat$lg$0 screenSizeH;
   private long startNanos = System.nanoTime();// re-based in start(): game time zero = warmup end
-  private Nat$0 fps = n(30);
-  private Nat$0 modelFpsVal;
-  private final List<MF$1> modelTickActions = new ArrayList<>();// live, EDT confined
-  private Alpha$0 alpha = (Alpha$0) Alpha$0.instance.imm$opaque$0();
-  private XNat$0 locationX;
-  private YNat$0 locationY;
+  private Nat$c$0 fps = n(30);
+  private Nat$c$0 modelFpsVal;
+  private final List<MF$7$1> modelTickActions = new ArrayList<>();// live, EDT confined
+  private Alpha$1c$0 alpha = (Alpha$1c$0) Alpha$1c$0.instance.imm$opaque$0();
+  private XNat$s$0 locationX;
+  private YNat$s$0 locationY;
   // Explicit window size, or null to size from the content (pack). Set by
   // .resizable(w,h) and .fixedSize(w,h); resizability is orthogonal and kept
   // in `resizable`. Note an undecorated window can be technically resizable,
   // but there is no border to drag, so the user cannot actually resize it.
-  private WidthNat$0 frameW;
-  private HeightNat$0 frameH;
-  private Str$0 title = new Str$0Instance("");
+  private WidthNat$as$0 frameW;
+  private HeightNat$lg$0 frameH;
+  private Str$c$0 title = new Str$c$0Instance("");
   private boolean maximized;
   private boolean resizable;
   private boolean undecorated;
@@ -347,7 +347,7 @@ class _Frame implements Frame$0{
       parent.add(bb.component);
       return bb;
     });
-    ((Scope$1) scope).mut$run$1(b);
+    ((Scope$1c$1) scope).mut$run$1(b);
     markLayoutDirty();
   }
 
@@ -366,7 +366,7 @@ class _Frame implements Frame$0{
       parent.add(bb.component, where);
       return bb;
     });
-    ((Scope$1) scope).mut$run$1(b);
+    ((Scope$1c$1) scope).mut$run$1(b);
     markLayoutDirty();
   }
 
@@ -396,7 +396,7 @@ class _Frame implements Frame$0{
 
   void markLayoutDirty(){ layoutDirty.set(true); }
 
-  void tick(Time$0 elapsed){
+  void tick(Time$o$0 elapsed){
     this.elapsed = elapsed;
     // Never relayout while a mouse button is held or a press/release is
     // already queued behind this tick: moving components mid-gesture would
@@ -472,11 +472,11 @@ class _Frame implements Frame$0{
     g.drawImage(bimg, 0, 0, renderLogicalW, renderLogicalH, null);
   }
 
-  int width(WidthNat$0 v, String what){ return bounded(nat(v.read$get$0()), screenW, what, "screen width"); }
-  int height(HeightNat$0 v, String what){ return bounded(nat(v.read$get$0()), screenH, what, "screen height"); }
-  int xPos(XNat$0 v, String what){ return bounded(nat(v.read$get$0()), screenW - 1, what, "screen x"); }
-  int yPos(YNat$0 v, String what){ return bounded(nat(v.read$get$0()), screenH - 1, what, "screen y"); }
-  int size(Nat$0 v, String what){ return bounded(nat(v), Math.min(screenW, screenH), what, "screen size"); }
+  int width(WidthNat$as$0 v, String what){ return bounded(nat(v.read$get$0()), screenW, what, "screen width"); }
+  int height(HeightNat$lg$0 v, String what){ return bounded(nat(v.read$get$0()), screenH, what, "screen height"); }
+  int xPos(XNat$s$0 v, String what){ return bounded(nat(v.read$get$0()), screenW - 1, what, "screen x"); }
+  int yPos(YNat$s$0 v, String what){ return bounded(nat(v.read$get$0()), screenH - 1, what, "screen y"); }
+  int size(Nat$c$0 v, String what){ return bounded(nat(v), Math.min(screenW, screenH), what, "screen size"); }
 
   private long nat(Object n){ return Util.natToLong(n); }
 
@@ -506,7 +506,7 @@ class _Frame implements Frame$0{
     assert SwingUtilities.isEventDispatchThread();
     assert top != null;
 
-    frame.setTitle(((Str$0Instance) title).val());
+    frame.setTitle(((Str$c$0Instance) title).val());
     forceTopStyle();
 
     frame.setContentPane(top.component);
@@ -566,15 +566,15 @@ class _Frame implements Frame$0{
 
   private void forceTopStyle(){
     top.mut$radius$1(n(0));
-    var col = (Color$0) top.read$background$0();
+    var col = (Color$1c$0) top.read$background$0();
     if (Scopes.alpha(col.read$alpha$0()) == 0){
-      top.mut$background$1(Color$0.instance.imm$boringGray$0());
+      top.mut$background$1(Color$1c$0.instance.imm$boringGray$0());
     } else {
-      top.mut$background$1(Color$0.instance.imm$$hash$4(
+      top.mut$background$1(Color$1c$0.instance.imm$$hash$4(
         col.read$red$0(),
         col.read$green$0(),
         col.read$blue$0(),
-        Alpha$0.instance.imm$opaque$0()
+        Alpha$1c$0.instance.imm$opaque$0()
       ));
     }
   }
@@ -596,13 +596,13 @@ class _Frame implements Frame$0{
   // no border to drag, so the user cannot actually resize it.
   @Override public Object mut$resizable$0(){ return setResizable(true, null, null); }
   @Override public Object mut$resizable$2(Object w, Object h){
-    return setResizable(true, (WidthNat$0) w, (HeightNat$0) h);
+    return setResizable(true, (WidthNat$as$0) w, (HeightNat$lg$0) h);
   }
   @Override public Object mut$fixedSize$0(){ return setResizable(false, null, null); }
   @Override public Object mut$fixedSize$2(Object w, Object h){
-    return setResizable(false, (WidthNat$0) w, (HeightNat$0) h);
+    return setResizable(false, (WidthNat$as$0) w, (HeightNat$lg$0) h);
   }
-  private Object setResizable(boolean r, WidthNat$0 w, HeightNat$0 h){
+  private Object setResizable(boolean r, WidthNat$as$0 w, HeightNat$lg$0 h){
     int ww = w == null ? 0 : width(w, "window width");// validate eagerly, deterministic error
     int hh = h == null ? 0 : height(h, "window height");
     resizable = r;
@@ -620,7 +620,7 @@ class _Frame implements Frame$0{
   }
   @Override public Object mut$undecorated$1(Object a){
     undecorated = true;
-    alpha = (Alpha$0) a;
+    alpha = (Alpha$1c$0) a;
     if (started){
       // Live decoration swap: dispose + re-show inside one EDT block; the
       // synthetic WINDOW_CLOSED is suppressed in FearlessFrame.
@@ -635,10 +635,10 @@ class _Frame implements Frame$0{
     return this;
   }
   @Override public Object mut$location$2(Object x, Object y){
-    int xx = xPos((XNat$0) x, "window x location");
-    int yy = yPos((YNat$0) y, "window y location");
-    locationX = (XNat$0) x;
-    locationY = (YNat$0) y;
+    int xx = xPos((XNat$s$0) x, "window x location");
+    int yy = yPos((YNat$s$0) y, "window y location");
+    locationX = (XNat$s$0) x;
+    locationY = (YNat$s$0) y;
     if (started){
       onEdtAndWait(() -> {
         checkWindowLocationFits(xx, yy);
@@ -649,7 +649,7 @@ class _Frame implements Frame$0{
   }
   @Override public Object mut$onKey$1(Object scope){
     var keys = new CKeyManager(this);
-    ((Scope$1) scope).mut$run$1(keys);
+    ((Scope$1c$1) scope).mut$run$1(keys);
     onEdtAndWait(() -> {
       for (var l : frame.getKeyListeners()){ frame.removeKeyListener(l); }
       frame.addKeyListener(keys);
@@ -657,14 +657,14 @@ class _Frame implements Frame$0{
     return this;
   }
   @Override public Object mut$title$1(Object t){
-    title = (Str$0) t;
-    if (started){ onEdtAndWait(() -> frame.setTitle(((Str$0Instance) title).val())); }
+    title = (Str$c$0) t;
+    if (started){ onEdtAndWait(() -> frame.setTitle(((Str$c$0Instance) title).val())); }
     return this;
   }
   @Override public Object mut$fps$1(Object f){
     long nn = Util.natToLong(f);
     if (nn < 1 || nn > 500){ throw Util.detErr("FPS must be between 1 and 500"); }
-    fps = (Nat$0) f;
+    fps = (Nat$c$0) f;
     if (started){
       int delay = Math.round(1000.0f / nn);
       onEdtAndWait(() -> frame.setTickDelay(delay));
@@ -699,13 +699,13 @@ class _Frame implements Frame$0{
   @Override public Object mut$modelFps$2(Object f, Object scope){
     long nn = Util.natToLong(f);
     if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
-    modelFpsVal = (Nat$0) f;
+    modelFpsVal = (Nat$c$0) f;
     onEdtAndWait(modelTickActions::clear);// replace semantics, like .mouse and .onKey
-    ((Scope$1) scope).mut$run$1(new ModelFps$0(){
+    ((Scope$1c$1) scope).mut$run$1(new ModelFps$as$0(){
       @Override public Object mut$action$1(Object r){
         // Live list: an action added later (through a saved builder) takes
         // part from the next due tick, exactly like Button.actions.
-        onEdtAndWait(() -> modelTickActions.add((MF$1) r));
+        onEdtAndWait(() -> modelTickActions.add((MF$7$1) r));
         return this;
       }
     });
@@ -726,14 +726,14 @@ class _Frame implements Frame$0{
         if (top != null){ uninstall(top); }// a later .content replaces an earlier one
         install(t);
       });
-      ((Scope$1) scope).mut$run$1(t);
+      ((Scope$1c$1) scope).mut$run$1(t);
       markLayoutDirty();
-      return Void$0.instance;
+      return Void$o$0.instance;
     }
     // Post start: configure the new tree while detached (ticks keep painting
     // the old tree), then swap in one EDT block so no tick or mouse event
     // ever sees a half-built tree. The window keeps its current size.
-    ((Scope$1) scope).mut$run$1(t);
+    ((Scope$1c$1) scope).mut$run$1(t);
     onEdtAndWait(() -> {
       uninstall(top);
       install(t);
@@ -749,7 +749,7 @@ class _Frame implements Frame$0{
       render();// fresh pixels before the next paint, never the old tree's image
     });
     markLayoutDirty();
-    return Void$0.instance;
+    return Void$o$0.instance;
   }
 
   // Only the top component listens for mouse events: children have no AWT

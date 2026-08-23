@@ -1,13 +1,13 @@
 /// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
 Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.getSucc` returns `this + 1`. Throws if `this` is `255` (overflow).
-  //>   .check{5.getByte .succ .assertEq(6.getByte)}
-  //>   .checkDetErr({_ -> True}, {(255.getByte) .succ})
+  //>   .check{5.getByte .getSucc .assertEq(6.getByte)}
+  //>   .checkDetErr({_ -> True}, {(255.getByte) .getSucc})
   .getSucc: Byte -> this + (1.getByte);
 
   /// `this.getPred` returns `this - 1`. Throws if `this` is `0` (underflow).
-  //>   .check{5.getByte .pred .assertEq(4.getByte)}
-  //>   .checkDetErr({_ -> True}, {(0.getByte) .pred})
+  //>   .check{5.getByte .getPred .assertEq(4.getByte)}
+  //>   .checkDetErr({_ -> True}, {(0.getByte) .getPred})
   .getPred: Byte -> this - (1.getByte);
 
   /// `this + x` returns the checked sum of `this` and `x`. Throws if the result would exceed `255`.
@@ -39,10 +39,20 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>     }, {7.getByte / 0})
   /(x: Nat): Num;
 
-  /// `this.getDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
-  //>   .check{(7.getByte) .getDiv 2 .assertEq(3.getByte)}
+  /// `this.getTruncDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
+  //>   .check{(7.getByte) .getTruncDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({_ -> True}, {7.getByte .getDiv 0})
-  .getDiv(d: Nat): Byte;
+  .getTruncDiv(d: Nat): Byte;
+
+  /// `this.getDiv(d)` returns `this` exactly divided by `d`. Throws iff `d == 0` or `this.rem == 1`.
+  //>   .check{(6.getByte) .getDiv 2 .assertEq(3.getByte)}
+  //>   .checkDetErr({_ -> True}, {7.getByte .getDiv 3})
+  //>   .checkDetErr({_ -> True}, {7.getByte .getDiv 0})
+  .getDiv(d: Nat): Byte -> Block#
+    .if {d == 0} .error {"Byte.getDiv: Cannot divide by 0"}
+    .let[Byte] rem = {this.getRem d}
+    .if {rem != (0.getByte)} .error {"Byte.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
+    .return {this.getTruncDiv d};
 
   /// `this.getRem(d)` returns the remainder `this - (this.getDiv(d)) * d`. Throws iff `d == 0`.
   //>   .check{7.getByte .getRem 2 .assertEq(1.getByte)}
@@ -51,23 +61,21 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
 
   /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` otherwise.
   //>   .check{7.getByte .rem 2 .assertEq({::}, Opts# (1.getByte))}
-  //>   .check{7.getByte .rem 0 .assertEmpty}
+  //>   .check{7.getByte .rem 0 .assertEmpty {::}}
   .rem(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getRem(d)};
 
-  /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, `.empty` otherwise.
-  //>   .check{7.getByte .div 2 .assertEq({::}, Opts# (3.getByte))}
-  //>   .check{7.getByte .div 0 .assertEmpty}
-  .div(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getDiv(d)};
+  /// `this.truncDiv(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, `.empty` otherwise.
+  //>   .check{7.getByte .truncDiv 2 .assertEq({::}, Opts# (3.getByte))}
+  //>   .check{7.getByte .truncDiv 0 .assertEmpty {::}}
+  .truncDiv(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getTruncDiv(d)};
 
-  /// `this.exactDiv(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`, that is if:
+  /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`, that is if:
   ///  `d != 0` and `this.rem(d) == 0` otherwise returns .empty` otherwise.
   //>   .check{6.getByte .div(2) .assertEq({::}, Opts#(3.getByte))}
-  //>   .check{7.getByte .exactDiv(2) .assertEmpty}
-  //>   .check{7.getByte .exactDiv(0) .assertEmpty}
-  .exactDiv(d: Nat): Opt[Byte] -> this.rem(d).match {
-      .empty -> {};
-      .some r -> r == (0.getByte) .toOpt {this.getDiv(d)}.as{::};
-      };
+  //>   .check{7.getByte .div(2) .assertEmpty {::}}
+  //>   .check{7.getByte .div(0) .assertEmpty {::}}
+  .div(d: Nat): Opt[Byte] ->
+    (d != 0) && {this.getRem d == (0.getByte)} .toOpt {this.getTruncDiv(d)};
 
   /// `this.softSqrt` returns an approximate `Float` square root of `this`.
   /// (unlike `Float.getSqrt`, `this` is always non-negative since `Byte` is unsigned).
@@ -151,7 +159,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
     .let endInclusive={end.getPred}
     .let startInclusive={this.getSucc}
     .if {startInclusive > endInclusive } .error {
-      "Byte ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
+      "Byte ~~: Tried to produce empty range, start ("+this+") .getSucc must be <= end (" + end + ") .getPred"
       }
     .return {_ByteRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
@@ -194,7 +202,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
 
   /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
   //>   .check{2.getByte .assertInRange(1.getByte=~~=(4.getByte))}
-  //>   .checkDetErr({_ -> True}, {5.getByte .assertInRange(1.getByte=~~=(4.getByte))})
+  //>   .checkNonDetErr({_ -> True}, {5.getByte .assertInRange(1.getByte=~~=(4.getByte))})
   .assertInRange(range: Range[Byte]): Void -> this.assertInRange(range, {``});
 
   /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.

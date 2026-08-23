@@ -1,0 +1,66 @@
+Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  height: Nat): mut Gui -> Block#
+  .let lightGrey = { Color#(Red#(83.getByte),Green#(81.getByte),Blue#(81.getByte),Alpha.opaque) }
+  .return { mut Gui: Consumer[mut Frame] {::
+    .title "Basketball"
+    .undecorated(Alpha.opaque)
+    .fps 30
+    .onKey {::
+      .pressed  {:: .matchOnly(Key#`W`) .doOnly { e -> model!.player.jump } }
+      .pressed  {:: .matchOnly(Key#`A`) .doOnly { e -> model!.player.left True } }
+      .released {:: .matchOnly(Key#`A`) .doOnly { e -> model!.player.left False } }
+      .pressed  {:: .matchOnly(Key#`D`) .doOnly { e -> model!.player.right True } }
+      .released {:: .matchOnly(Key#`D`) .doOnly { e -> model!.player.right False } }
+      }
+    .modelFps(30, {:: .action { model!.tick } })
+    .content {::
+      .width width
+      .height height
+      .save canvas 
+      .paint Menu
+      .mouse {:: .clicked { e -> Block# 
+        .if { MenuBounds#(e.panelWidth, e.panelHeight).inBounds(e.mouseX, e.mouseY) }
+          .do { model!.play }
+        .done
+        }}};
+    mut .set(p: Painter): Void -> Block#(canvas!.paint(p), Void);
+    }}}
+
+Menu: Painter { g -> Block#
+  .let lightGrey = { Color#(Red#(83.getByte),Green#(81.getByte),Blue#(81.getByte),Alpha#(150.getByte)) }
+  .let menuBounds = { MenuBounds#(g.panelWidth, g.panelHeight) }
+  .return {g
+  .color lightGrey
+    .position(X#(0), Y#(0))
+    .image(Court#(g.panelHeight.get))
+    .position(menuBounds.x, menuBounds.y)
+    .image(ButtonImg#(menuBounds.width.get))
+    }}
+
+Game: Painter { g -> Block#
+  .let squareBounds = { SquareBounds#(this.state.sx, this.state.sy, g.panelWidth, g.panelHeight) }
+  .let playerBounds = { PlayerBounds#(this.state.px, this.state.py, g.panelWidth, g.panelHeight) }
+  .let ballBounds   = { BallBounds#(this.state.bx, this.state.by, g.panelWidth, g.panelHeight) }
+  .return {g
+    .position(X#(0), Y#(0))
+    .image(Court#(g.panelHeight.get))
+    .position(X#(squareBounds.x.get - (squareBounds.width.get.aluDiv 7)), squareBounds.y) 
+    .image(Hoop#(squareBounds.width.get * 9 .aluDiv 7))
+    .position(squareBounds.x, squareBounds.y)
+    .position(playerBounds.x, playerBounds.y)
+    .image(PlayerImg#(playerBounds.width.get))
+    .position(ballBounds.x, ballBounds.y)
+    .image(BallImg#(ballBounds.width.get))
+    };
+  .state: State;
+  }
+
+Court:{#(h:Nat):Image->Cache.of(h.norm,
+  {ImgCourt.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
+Hoop:{#(h:Nat):Image->Cache.of(h.norm,
+  {ImgHoop.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
+BallImg:{#(h:Nat):Image->Cache.of(h.norm,
+  {ImgBall.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
+PlayerImg:{#(h:Nat):Image->Cache.of(h.norm,
+  {ImgPlayer.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
+ButtonImg:{#(h:Nat):Image->Cache.of(h.norm,
+  {ImgMenu.consumeImage("A", Math.maxNat) .scaleToWidth(Width#(::.get))})}
