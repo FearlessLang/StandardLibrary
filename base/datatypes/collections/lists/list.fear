@@ -80,7 +80,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
 
 _List[E:*]: Sealed,BaseContainer[imm E],DataType[List[E],List[imm E],E,imm E] {
   read .size: Nat;                           /// number of elements
-  read .isEmpty: Bool;                       /// True iff size == 0
+  read .isEmpty: Bool;                       /// `True` iff size == 0
 
   mut  .get(i: Nat): E;                      /// element at i (0-based); throws if i >= size
   read .get(i: Nat): read/imm E;             /// element at i (0-based); throws if i >= size
@@ -138,7 +138,7 @@ _List[E:*]: Sealed,BaseContainer[imm E],DataType[List[E],List[imm E],E,imm E] {
   imm  .flow: mut Flow[imm E];               /// view as flow
   mut  .flow(mode:FlowMode[E]): mut Flow[E]; /// sequential flow
 
-  imm  .as[T2](f: BaseId[imm E,T2]): List[T2];        /// zero cost retyping, returns this
+  imm  .as[T2](f: BaseId[imm E,T2]): List[T2];        /// zero cost retyping, returns `this`
   imm .norm[R](mut MF[E,Norm[R]]):Norm[List[Norm[R]]];/// list normalization
   }
 

@@ -10,7 +10,7 @@ Operation[S:**, R:**]: Pipe[Operation[S, R]] {
   }
 
 /// A interface to allow for piping of operations on a source S.
-/// In general it assumed `.close` returns this, but it is not required.
+/// In general it assumed `.close` returns `this`, but it is not required.
 Pipe[S:*]: {
   mut  .close: mut  S;
   read .close: read S;

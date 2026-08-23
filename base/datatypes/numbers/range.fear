@@ -8,8 +8,8 @@ Container[N:**]: {
 /// A datatype to represent a discrete range of comparable values.
 /// Note: For the discrete numeric types, the core logic of these methods is implemented in those types,
 /// so it is safe when implementing a new Range of those types to call those methods, without it going in loop.
-/// Warning: Because of this, if you define your own discrete type that overrides `.contains` or `.clamp` the symmetry of these methods will be broken,
-///   That is `MyRange.contains(n)` may not be equivalent to `n.inRange(n)`
+/// Warning: Because of `this`, if you define your own discrete type that overrides `.contains` or `.clamp` the symmetry of these methods will be broken,
+///   That is ``MyRange.contains(n)`` may not be equivalent to ``n.inRange(n)``
 Range[N]: Container[N], Pipe[Range[N]], ToStr {
   .close -> this;
   /// `this.start` returns the first value of this range
@@ -21,11 +21,11 @@ Range[N]: Container[N], Pipe[Range[N]], ToStr {
   .size: Nat;
 
   /// `this.isEmpty` returns true if this range represents an empty sequence.
-  /// Equivalent to: `this.size == 0`.
+  /// Equivalent to: ``this.size == 0``.
   .isEmpty: Bool -> this.size == 0;
 
   /// `this.isEmpty` return `False` if this represents an empty sequence.
-  /// Equivalent to: `this.isEmpty.not`
+  /// Equivalent to: ``this.isEmpty.not``
   .notEmpty: Bool -> this.isEmpty.not;
 
   /// `this.flow` creates a flow of all the elements in the range
@@ -33,18 +33,18 @@ Range[N]: Container[N], Pipe[Range[N]], ToStr {
   .flow: mut Flow[N];
 
   /// `this.list` creates a list of all the elements in the range
-  /// Equivalent to: `this.flow.list`
+  /// Equivalent to: ``this.flow.list``
   .list: mut List[N] -> this.flow.list;
 
-  /// `this.flow(n)` creates a flow stepping over the elements in the range
+  /// ``this.flow(n)`` creates a flow stepping over the elements in the range
   //> .check{1=~~=6.flow(2).list .assertEq({::}, Lists#(1,3,5))
   .flow(stepSize: N): mut Flow[N];
 
-  /// `this.list(n)` creates a list stepping over the elements in the range
-  /// Equivalent to: `this.flow(n).list`
+  /// ``this.list(n)`` creates a list stepping over the elements in the range
+  /// Equivalent to: ``this.flow(n).list``
   .list(n: N): mut List[N] -> this.flow(n).list;
 
-  /// `this.clamp n` clamps `n` so that it is inside this range.
+  /// ``this.clamp n`` clamps ``n`` so that it is inside this range.
   .clamp(N): N;
   }
 

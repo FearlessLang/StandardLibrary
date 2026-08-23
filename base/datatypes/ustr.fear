@@ -6,17 +6,17 @@
 ///
 ///Those numbers are conventionally written in hexadecimal (base 16) using digits 0..9 and letters A..F;
 ///total of 16 symbols representing numbers 0-15 with a single symbol each.
-///For example, `0061` is the scalar value for `a`,
-///and `1F600` is the scalar value for the grinning face emoji.
+///For example, ``0061`` is the scalar value for ``a``,
+///and ``1F600`` is the scalar value for the grinning face emoji.
 ///Unicode documentation often writes those same numbers as U+0061 and U+1F600.
 ///
 ///Crucially, there are no UStr literals. Use the method `.u` on Str to obtain Unicode strings.
-/// `` `foo`.u `` converts the `foo` Str into the equivalent `UStr`.
+/// `` `foo`.u `` converts the ``foo`` Str into the equivalent `UStr`.
 ///The method `.u` on UStr reads one or more uppercase hexadecimal numbers
 ///separated by single spaces, and appends the corresponding scalar values.
 ///Only digits 0..9 and uppercase letters A..F are allowed. No extra whitespace is accepted. Malformed input throws.
 ///For example: `` `Hello`.u.u`FB03 0066 0066 0069`+(`World`.u) `` would create a string that may be visualized as "HelloffiffiWorld",
-///but where the first `ffi` is represented as a single scalar value representing a ligature, while the second `ffi` is represented as three distinct scalar values.
+///but where the first ``ffi`` is represented as a single scalar value representing a ligature, while the second ``ffi`` is represented as three distinct scalar values.
 ///And `` myUString.u`FB03 0066 0066 0069`+(`Hello`.u) `` would append "ffiffiHello" to a pre-existing Unicode string.
 ///Since writing `` `Hello`.u.u`...` `` is clearly redundant, Str also supports `.u` with one argument, that first converts to unicode and then append the new sequence.
 ///
@@ -45,7 +45,7 @@ UStr: Sealed,ToUStr,ToImm[UStr],JoinStr[UStr] {
   .flow: mut Flow[Nat];             /// return a flow of scalar values.
   .equalRepr(other: UStr): Bool;    /// checks if the two unicode strings have the same exact scalar value representation.
   .hashRepr: Nat;                   /// hashes all the scalar values together.
-  .u(values: Str): UStr;            /// concatenate those scalar values to the end of this string. Example parameter could be `FB03 0066 0066 0069`; throws on malformed input.
+  .u(values: Str): UStr;            /// concatenate those scalar values to the end of this string. Example parameter could be ``FB03 0066 0066 0069``; throws on malformed input.
   .norm: Norm[UStr];
   }
 
