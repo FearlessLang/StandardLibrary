@@ -1,0 +1,3 @@
+TestTry: Test {::
+  .debug{-12.0 .getByte}
+  }

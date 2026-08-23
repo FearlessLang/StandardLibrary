@@ -101,7 +101,7 @@ record List$1Instance(List<Object> val) implements List$1{
   }
   private int idx(Object p0){
     long i= natToLong(p0);
-    check(0 <= i && i < val.size(), "List index out of range");
+    check(0 <= i && i < val.size(), "List.get: List index "+Long.toUnsignedString(i)+" out of range for List of length "+val.size());
     return (int) i;
   }
 

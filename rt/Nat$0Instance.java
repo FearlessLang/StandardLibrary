@@ -212,7 +212,6 @@ public record Nat$0Instance(long val) implements Nat$0,Norm$1 {
     return Float$0Instance.instance(Math.sqrt(unsignedLongToDouble(val)));
   }
   @Override public Object read$str$0(){ return Str$0Instance.instance(Long.toUnsignedString(val)); }
-  @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object imm$getDiv$1(Object p0){
     long d= n(p0);

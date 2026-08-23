@@ -28,7 +28,13 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .list: List[Info]->{};
   .map: Map[Str,Info]->Maps#[Str,Str,Info] {::};
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
-  .match[R](m: InfoMatch[R]): R->m.empty;
+  .match[R:**](m: InfoMatch[R]): R->m.empty;
+  .matchWithDefault[R:**](m: DefaultInfoMatch[R]): R -> this.match {
+    .empty -> m.empty;
+    .msg(s) -> m.msg(s);
+    .list(l) -> m.list(l);
+    .map(m2) -> m.map(m2);
+    };
   .str -> this.imm.match(_InfoToStr);
   +(other: Info) : Info -> this.match {
     .empty -> other;
@@ -78,12 +84,22 @@ _InfoFreshKey: {
       .else -> k;
   }};}
 
-InfoMatch[R]: {
+InfoMatch[R:**]: {
   .empty: R;
   .msg(Str): R;
   .list(List[Info]): R;
   .map(Map[Str,Info]): R;
   }
+
+
+DefaultInfoMatch[R:**]: InfoMatch[R] {
+  .default: R;
+  .empty -> this.default;
+  .msg _ -> this.default;
+  .list _ -> this.default;
+  .map _ -> this.default;
+  }
+
 
 _InfoToStr: InfoMatch[Str] {
   .empty ->`EmptyInfo`;
@@ -91,3 +107,18 @@ _InfoToStr: InfoMatch[Str] {
   .list(list) -> list.str {::};
   .map(map) -> map.str {::};
   }
+
+InfoToPrettyString: {
+  #(i: Info): Str -> this#(i, 0);
+
+  #(i: Info, depth: Nat): Str -> (i.match InfoMatch[Str] {
+    .empty -> `EmptyInfo`;
+
+    .msg(msg) -> msg.escape;
+
+    .list list -> "[" | (list.flow.map{"  ".repeat(depth+1) + (this#(::, depth + 1))}.join(","|)) | + ("  ".repeat(depth)) + "]";
+
+
+    .map(map) -> "{" | (map.flow.map{"  ".repeat(depth+1) + (::.key + ": " + (this#(::.elem, depth + 1)))}.join(","|)) | + ("  ".repeat(depth)) +"}";
+  });
+}

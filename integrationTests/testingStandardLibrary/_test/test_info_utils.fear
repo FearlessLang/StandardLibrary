@@ -1,0 +1,61 @@
+// Thank you AI for this large Info
+_Infos: {
+  .largeNested: imm Info ->
+    Maps#[Str,Str,ToInfo]({::},
+      "application", Maps#[Str, Str, ToInfo]({::},
+        "name", "Example Application",
+        "version", "2.4.1",
+        "environment", "production",
+
+        "server", Maps#[Str, Str, ToInfo]({::},
+          "host", "api.example.com",
+          "port", 443,
+          "secure", True,
+
+          "timeouts", Maps#({::},
+            "connection", 5000,
+            "read", 30000,
+            "write", 30000
+          ).info{::}
+        ).info ToInfoBy[ToInfo]{::},
+
+        "database", Maps#[Str, Str, ToInfo]({::},
+          "engine", "postgres",
+          "host", "db.example.com",
+          "port", 5432,
+          "pool", Maps#({::},
+            "minimum", 5,
+            "maximum", 20,
+            "timeout", 10000
+          ).info{::}
+        ).info ToInfoBy[ToInfo]{::},
+
+        "features", Maps#[Str, Str, ToInfo]({::},
+          "search", True,
+          "recommendations", True,
+          "experimental", False,
+
+          "betaFeatures", Lists#[Map[Str,ToInfo]](
+            Maps#[Str,Str,ToInfo]({::},
+              "name", "newDashboard",
+              "enabled", True,
+              "rollout", 0.25
+            ),
+            Maps#[Str,Str,ToInfo]({::},
+              "name", "newSearch",
+              "enabled", False,
+              "rollout", 0.0
+            )
+          ).info ToInfoBy[Map[Str,ToInfo]]{::.info{::}}
+        ).info ToInfoBy[ToInfo]{::}
+      ).info ToInfoBy[ToInfo]{::.info}
+    ).info ToInfoBy[ToInfo]{::.info}
+}
+
+InfoTests: Test {::
+  .check{_Infos.largeNested & .isMap# .assertTrue}
+  .check{_Infos.largeNested & > "application" > "name".msgMatch{:: == "Example Application"}# .assertTrue}
+  .debug{Try#{List[Str].get 0}.run{.ok e -> e.str; .info i -> i.str}}
+  .debug{Try#{(Math.maxNat) .getSucc}.run{.ok e -> e.str; .info i -> i & .msgMatch{::.startsWith "Nat.getSucc:"}#.str}}
+  }
+

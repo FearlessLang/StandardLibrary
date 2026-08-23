@@ -190,10 +190,8 @@ public record Float$0Instance(double val) implements Float$0{
     double x= (val == 0.0d) ? 0.0d : val; // merge -0.0
     String s= new java.math.BigDecimal(x).toPlainString(); // exact decimal of this binary64
     if (s.indexOf('.') == -1){ s += ".0"; }                // satisfy SignedFloat shape
-    if (s.charAt(0) != '-'){ s= "+"+s; }                   // SignedFloat requires sign
     return Str$0Instance.instance(s);
   }
-  @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
 
   @Override public Object imm$eqDelta$2(Object p0, Object p1){

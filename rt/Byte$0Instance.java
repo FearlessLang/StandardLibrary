@@ -92,7 +92,6 @@ public record Byte$0Instance(byte val) implements Byte$0,Norm$1{
   @Override public Object imm$float$0(){ return Float$0Instance.instance((double)u8(val)); }
   @Override public Object imm$num$0(){ return Num$0Instance.instance(BigInteger.valueOf(u8(val)),BigInteger.ONE); }
   @Override public Object read$str$0(){ return Str$0Instance.instance(Integer.toString(u8(val))); }
-  @Override public Object read$info$0(){ return Info$0.instance; }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance((byte)(val + b(p0))); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance((byte)(val - b(p0))); }

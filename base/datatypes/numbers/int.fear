@@ -290,6 +290,8 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
       .return {this};
 
   .hash -> this.str.hash;                   /// hash via str
+  /// `this.info` returns a `.msg` info with the string representation of `this` as the message.
+  //>   .check{+5.info .assertEq Infos#("+5")}
   .info -> Infos.msg(this.str);              /// info via str
   .close -> ::; .close -> this;             /// fixpoint type closed
   .sumNumber xs ->                          /// summing all numbers starting from this

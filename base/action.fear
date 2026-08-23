@@ -30,6 +30,15 @@ Action[T:*]: {
     .ok _ -> Assert.msg `Failure expected but nothing was thrown`;
     .info _->{};
     };
+  // mut .assertInfo(
+  mut .try(errorMapper: F[Info, mut Opt[T]]): Action[T] -> this.run {
+    .ok _ -> this;
+    .info i -> errorMapper#(i).match {
+      .some x -> Actions.ok(x);
+      .empty -> this
+      }
+    };
+
   //mut .assertInfo(constraint1: Str): Void -> this.run{
   //  .ok _ -> Assert.msg `Failure expected containing`^constraint1^`but nothing was thrown`;
   //  .info _->{};//checking containmenet is not obvious
