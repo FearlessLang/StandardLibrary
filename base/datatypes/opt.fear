@@ -49,8 +49,8 @@ Opt[E:*]: _Opt[E] {
   .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
 
   .as f       -> _OptAs#this;
-  /// `this.mapSome(f)` returns .empty if this is .empty otherwise .some of `this`'s value mapped by `f`.
-  /// Equivalent to: `this.rem(d).flow.map(f).opt` but avoids extra object creation
+  /// ``this.mapSome(f)`` returns .empty if this is .empty otherwise .some of `this`'s value mapped by `f`.
+  /// Equivalent to: ``this.rem(d).flow.map(f).opt`` but avoids extra object creation
   .mapSome f  -> this.match{.some x->Opts#(f#x); .empty->{}};
   .ifSome  f  -> this.match{.some x -> f#x; .empty -> {}};
   .ifEmpty f  -> this.match{.some _ -> {}; .empty -> f#};

@@ -1,7 +1,7 @@
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
 Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
-  /// `this.getSucc` returns `this + 1`. Throws if `this` is `Math.maxNat` (overflow).
+  /// `this.getSucc` returns ``this + 1``. Throws if `this` is `Math.maxNat` (overflow).
   //>   .check{5 .getSucc .assertEq 6}
   //>   .checkDetErr({:: & .msgMatch{::.startsWith "Nat.getSucc"}#}, {(Math.maxNat) .getSucc})
   .getSucc: Nat -> this == (Math.maxNat) .if {
@@ -9,7 +9,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
     .else -> this + 1;
     };
 
-  /// `this.getPred` returns `this - 1`. Throws if `this` is `0` (underflow).
+  /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
   //>   .check{5 .getPred .assertEq 4}
   //>   .checkDetErr({_ -> True}, {0 .getPred})
   .getPred: Nat -> this == (Math.minNat) .if {
@@ -17,37 +17,37 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
     .else -> this - 1;
     };
 
-  /// `this + x` returns the checked sum of `this` and `x`. Throws on overflow past `Math.maxNat`.
+  /// ``this + x`` returns the checked sum of `this` and ``x``. Throws on overflow past `Math.maxNat`.
   //>   .check{(2 + 3) .assertEq 5}
   //>   .checkDetErr({_ -> True}, {(Math.maxNat - 1) + 2})
   +(x: Nat): Nat;
 
-  /// `this - x` returns the checked difference of `this` and `x`. Throws on underflow below `0`.
+  /// ``this - x`` returns the checked difference of `this` and ``x``. Throws on underflow below ``0``.
   //>   .check{(5 - 3) .assertEq 2}
   //>   .checkDetErr({_ -> True}, {0 - 1})
   -(x: Nat): Nat;
 
-  /// `this * x` returns the checked product of `this` and `x`. Throws on overflow.
+  /// ``this * x`` returns the checked product of `this` and ``x``. Throws on overflow.
   //>   .check{(6 * 7) .assertEq 42}
   //>   .checkDetErr({_ -> True}, {(Math.maxNat) * 2})
   *(x: Nat): Nat;
 
-  /// `this ** x` returns the checked power of `this` raised to `x`. Throws on overflow.
+  /// ``this ** x`` returns the checked power of `this` raised to ``x``. Throws on overflow.
   //>   .check{(2 ** 6) .assertEq 64}
   //>   .checkDetErr({_ -> True}, {(Math.maxNat) ** 2})
   **(x: Nat): Nat;
 
-  /// `this / d` returns the exact rational quotient of `this` and `d` as a `Num`. Throws iff `d == 0`.
+  /// ``this / d`` returns the exact rational quotient of `this` and ``d`` as a `Num`. Throws iff ``d == 0``.
   //>   .check{(7 / 2) .softFloat .assertEq 3.5}
   //>   .checkDetErr({_ -> True}, {7 / 0})
   /(d: Nat) : Num;
 
-  /// `this.getTruncDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
+  /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{7 .getTruncDiv 2 .assertEq 3}
   //>   .checkDetErr({_ -> True}, {7 .getDiv 0})
   .getTruncDiv(d: Nat): Nat;
 
-  /// `this.getDiv(d)` returns `this` exactly divided by `d`. Throws iff `d == 0` or `rem != 0`.
+  /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``rem != 0``.
   //>   .check{6 .getDiv 2 .assertEq 3}
   //>   .checkDetErr({_ -> True}, {7 .getDiv 2})
   //>   .checkDetErr({_ -> True}, {7 .getDiv 0})
@@ -57,25 +57,25 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
     .if {rem != 0} .error {"Nat.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
     .return {this.getTruncDiv d};
 
-  /// `this.getRem(d)` returns the remainder `this - (this.getDiv(d)) * d`. Throws iff `d == 0`.
+  /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7 .getRem 2 .assertEq 1}
   //>   .checkDetErr({_ -> True}, {7 .getRem 0})
   .getRem(d: Nat): Nat;
 
-  /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` iff `d == 0`.
+  /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` iff ``d == 0``.
   //>   .check{7 .rem 2 .assertEq({::}, Opts# 1)}
   //>   .check{7 .rem 0 .assertEmpty {::}}
   .rem(d: Nat): Opt[Nat] ->
       d != 0 .toOpt {this.getRem(d)};
 
-  /// `this.truncDiv(d)` returns `.some` of `this.getTruncDiv(d)` if `d != 0`, `.empty` otherwise.
+  /// ``this.truncDiv(d)`` returns `.some` of ``this.getTruncDiv(d)`` if ``d != 0``, `.empty` otherwise.
   //>   .check{7 .truncDiv 2 .assertEq({::}, Opts# (3))}
   //>   .check{7 .truncDiv 0 .assertEmpty {::}}
   .truncDiv(d: Nat): Opt[Nat]
     -> d != 0 .toOpt {this.getTruncDiv(d)};
 
-  /// `this.div(d)` returns `.some` of `this.getTruncDiv(d)` if `d` evenly divides `this`
-  /// if `d != 0` and `this.rem(d) == 0`, `.empty` otherwise.
+  /// ``this.div(d)`` returns `.some` of ``this.getTruncDiv(d)`` if `d` evenly divides `this`
+  /// if ``d != 0`` and ``this.rem(d) == 0``, `.empty` otherwise.
   //>   .check{6 .div 2 .assertEq({::}, Opts# 3)}
   //>   .check{7 .div 2 .assertEmpty {::}}
   //>   .check{7 .div 0 .assertEmpty {::}}
@@ -87,14 +87,14 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{0 .softSqrt .assertEq 0.0}
   .softSqrt: Float;
 
-  /// `this.getIndexOffset(delta)` returns `this + delta` (index-arithmetic helper).
-  /// Throws if the result would underflow below `0` or overflow past `Math.maxNat`.
+  /// ``this.getIndexOffset(delta)`` returns ``this + delta`` (index-arithmetic helper).
+  /// Throws if the result would underflow below ``0`` or overflow past `Math.maxNat`.
   //>   .check{5 .getIndexOffset(+3) .assertEq 8}
   //>   .check{5 .getIndexOffset(-3) .assertEq 2}
   //>   .checkDetErr({_ -> True}, {5 .getIndexOffset(-10)})
   .getIndexOffset(delta: Int): Nat;
 
-  /// `this.indexOffset(delta)` returns `.some` of `this + delta` if it would neither underflow
+  /// ``this.indexOffset(delta)`` returns `.some` of ``this + delta`` if it would neither underflow
   /// nor overflow, `.empty` otherwise.
   //>   .check{5 .indexOffset(+3) .assertEq({::}, Opts# 8)}
   //>   .check{5 .indexOffset(-10) .assertEmpty {::}}
@@ -106,17 +106,17 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       };
 
   /// `this.num` converts `this` to a `Num`. Always exact; never throws as `Num` can safely
-  /// represent every `Nat` value, so there is no `soft`/`get` variant needed for this conversion.
-  // Equivalent to: `this / 1`
+  /// represent every `Nat` value, so there is no ``soft``/``get`` variant needed for this conversion.
+  /// Equivalent to: ``this / 1``
   //>   .check{5 .num .assertEq(5/1)}
   .num: Num -> this / 1;
 
-  /// `this.int` returns `.some` of `this` as an `Int` if `this <= maxInt`, `.empty` otherwise.
+  /// `this.int` returns `.some` of `this` as an `Int` if ``this <= maxInt``, `.empty` otherwise.
   //>   .check{5 .int .assertEq({::}, Opts# +5)}
   //>   .check{(Math.maxNat) .int .assertEmpty {::}}
   .int: Opt[Int];
 
-  /// `this.byte` returns `.some` of `this` as a `Byte` if `this <= maxByte`, `.empty` otherwise.
+  /// `this.byte` returns `.some` of `this` as a `Byte` if ``this <= maxByte``, `.empty` otherwise.
   //>   .check{5 .byte .assertEq({::}, Opts# (5.getByte))}
   //>   .check{300 .byte .assertEmpty {::}}
   .byte: Opt[Byte];
@@ -126,12 +126,12 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{Math.maxNat.float .assertEmpty {::}}
   .float: Opt[Float];
 
-  /// `this.getInt` converts `this` to an `Int`. Throws if `this > maxInt`.
+  /// `this.getInt` converts `this` to an `Int`. Throws if ``this > maxInt``.
   //>   .check{5 .getInt .assertEq +5}
   //>   .checkDetErr({_ -> True}, {Math.maxNat .getInt})
   .getInt: Int;
 
-  /// `this.getByte` converts `this` to a `Byte`. Throws if `this > maxByte`.
+  /// `this.getByte` converts `this` to a `Byte`. Throws if ``this > maxByte``.
   //>   .check{5 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({_ -> True}, {300 .getByte})
   .getByte: Byte;
@@ -141,12 +141,12 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .checkDetErr({_ -> True}, {Math.maxNat.getFloat})
   .getFloat: Float;
 
-  /// `this.softInt` converts `this` to an `Int` by clamping into `[0, maxInt]`
+  /// `this.softInt` converts `this` to an `Int` by clamping into ``[0, maxInt]``
   //>   .check{5 .softInt .assertEq +5}
   //>   .check{(Math.maxNat) .softInt .assertEq(Math.maxInt)}
   .softInt: Int;
 
-  /// `this.softByte` converts `this` to a `Byte` by clamping into `[0, maxByte]`
+  /// `this.softByte` converts `this` to a `Byte` by clamping into ``[0, maxByte]``
   //>   .check{5 .softByte .assertEq(5.getByte)}
   //>   .check{300 .softByte .assertEq(255.getByte)}
   .softByte: Byte;
@@ -155,47 +155,47 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5 .softFloat .assertEq 5.0}
   .softFloat: Float;
 
-  /// `this.aluAddWrap(x)` returns `this + x` mod `2^64` (u64 wraparound add)
+  /// ``this.aluAddWrap(x)`` returns ``this + x`` mod ``2^64`` (u64 wraparound add)
   //>   .check{(Math.maxNat) .aluAddWrap 1 .assertEq 0}
   .aluAddWrap(x: Nat): Nat;
 
-  /// `this.aluSubWrap(x)` returns `this - x` mod `2^64` (u64 wraparound sub)
+  /// ``this.aluSubWrap(x)`` returns ``this - x`` mod ``2^64`` (u64 wraparound sub)
   //>   .check{0 .aluSubWrap 1 .assertEq(Math.maxNat)}
   .aluSubWrap(x: Nat): Nat;
 
-  /// `this.aluMulWrap(x)` returns `this * x` mod `2^64` (u64 wraparound mul)
+  /// ``this.aluMulWrap(x)`` returns ``this * x`` mod ``2^64`` (u64 wraparound mul)
   //>   .check{(Math.maxNat) .aluMulWrap 2 .assertEq(Math.maxNat - 1)}
   .aluMulWrap(x: Nat): Nat;
 
-  /// `this.aluDiv(x)` returns `this` divided by `x`, truncated toward `0` (u64 semantics). Throws iff `x == 0`.
+  /// ``this.aluDiv(x)`` returns `this` divided by ``x``, truncated toward ``0`` (u64 semantics). Throws iff ``x == 0``.
   //>   .check{7 .aluDiv 2 .assertEq 3}
   //>   .checkDetErr({_ -> True}, {7 .aluDiv 0})
   .aluDiv(x: Nat): Nat;
 
-  /// `this.aluRem(x)` returns the remainder paired with `this.aluDiv(x)`. Throws iff `x == 0`.
+  /// ``this.aluRem(x)`` returns the remainder paired with ``this.aluDiv(x)``. Throws iff ``x == 0``.
   //>   .check{7 .aluRem 2 .assertEq 1}
   //>   .checkDetErr({_ -> True}, {7 .aluRem 0})
   .aluRem(x: Nat): Nat;
 
-  /// `this.aluShiftLeft(bits)` returns `this` shifted left by `bits`, with the effective shift
-  /// taken modulo `64` (`bits & 63`)
+  /// ``this.aluShiftLeft(bits)`` returns `this` shifted left by ``bits``, with the effective shift
+  /// taken modulo ``64`` (``bits & 63``)
   //>   .check{1 .aluShiftLeft 3 .assertEq 8}
   .aluShiftLeft(bits: Nat): Nat;
 
-  /// `this.aluShiftRight(bits)` returns `this` logically shifted right by `bits`, with the
-  /// effective shift taken modulo `64` (`bits & 63`)
+  /// ``this.aluShiftRight(bits)`` returns `this` logically shifted right by ``bits``, with the
+  /// effective shift taken modulo ``64`` (``bits & 63``)
   //>   .check{8 .aluShiftRight 3 .assertEq 1}
   .aluShiftRight(bits: Nat): Nat;
 
-  /// `this.aluXor(x)` returns the bitwise XOR of `this` and `x` (u64)
+  /// ``this.aluXor(x)`` returns the bitwise XOR of `this` and ``x`` (u64)
   //>   .check{5 .aluXor 3 .assertEq 6}
   .aluXor(x: Nat): Nat;
 
-  /// `this.aluAnd(x)` returns the bitwise AND of `this` and `x` (u64)
+  /// ``this.aluAnd(x)`` returns the bitwise AND of `this` and ``x`` (u64)
   //>   .check{5 .aluAnd 3 .assertEq 1}
   .aluAnd(x: Nat): Nat;
 
-  /// `this.aluOr(x)` returns the bitwise OR of `this` and `x` (u64)
+  /// ``this.aluOr(x)`` returns the bitwise OR of `this` and ``x`` (u64)
   //>   .check{5 .aluOr 2 .assertEq 7}
   .aluOr(x: Nat): Nat;
 
@@ -207,7 +207,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{257 .aluByte .assertEq(1.getByte)}
   .aluByte: Byte;
 
-  /// `this~~end` returns the open range `(this, end)`.
+  /// ``this~~end`` returns the open range ``(this, end)``.
   /// Throws if `this` is `Math.maxNat`, `end` is `Math.minNat`, or the resulting range would be empty.
   //>   .check{(1~~4) .start .assertEq 2}
   //>   .checkDetErr({_ -> True}, {1~~2})
@@ -221,8 +221,8 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       }
     .return {_NatRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
-  /// `this~~=endInclusive` returns the range `(this, endInclusive]`.
-  /// Throws if `this` is `Math.maxNat`, or the range would be empty (`this >= endInclusive`).
+  /// ``this~~=endInclusive`` returns the range ``(this, endInclusive]``.
+  /// Throws if `this` is `Math.maxNat`, or the range would be empty (``this >= endInclusive``).
   //>   .check{(1~~=4) .end .assertEq 4}
   //>   .checkDetErr({_ -> True}, {1~~=1})
   ~~=(endInclusive: Nat): Range[Nat] -> Block#
@@ -232,8 +232,8 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       }
     .return {_NatRanges#(this.getSucc, endInclusive, "("+this+", "+endInclusive+"]")};
 
-  /// `this=~~end` returns the range `[this, end)`.
-  /// Throws if `end` is `Math.minNat`, or the range would be empty (`this >= end`).
+  /// ``this=~~end`` returns the range ``[this, end)``.
+  /// Throws if `end` is `Math.minNat`, or the range would be empty (``this >= end``).
   //>   .check{(1=~~4) .start .assertEq 1}
   //>   .checkDetErr({_ -> True}, {1=~~1})
   =~~(end: Nat): Range[Nat] -> Block#
@@ -245,8 +245,8 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       }
     .return {_NatRanges#(this, end.getPred, "["+this+", "+end+")")};
 
-  /// `this=~~=endInclusive` returns the inclusive range `[this, endInclusive]`.
-  /// Throws if the range would be empty (`this > endInclusive`).
+  /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
+  /// Throws if the range would be empty (``this > endInclusive``).
   //>   .check{(1=~~=4) .start .assertEq 1}
   //>   .checkDetErr({_ -> True}, {4=~~=1})
   =~~=(endInclusive: Nat): Range[Nat] -> Block#
@@ -255,19 +255,19 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       }
     .return {_NatRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
 
-  /// `this.inRange(range)` returns `True` iff `range.start <= this <= range.end`.
+  /// ``this.inRange(range)`` returns `True` iff ``range.start <= this <= range.end``.
   //>   .check{2 .inRange(1=~~=4) .assertTrue}
   //>   .check{5 .inRange(1=~~=4) .assertFalse}
   .inRange(range: Range[Nat]): Bool -> range.start <= this && {this <= (range.end)};
 
-  /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
+  /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   /// Note: This method calls `.str` method on the non-sealed range, meaning you should be careful to call this on a
   ///   range you do not control, as doing so may invoke arbitrary code.
   //>   .check{2 .assertInRange(1=~~=4)}
   //>   .checkNonDetErr({_ -> True}, {5 .assertInRange(1=~~=4)})
   .assertInRange(range: Range[Nat]): Void -> this.assertInRange(range, {``});
 
-  /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.
+  /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   /// Note: This method calls `.str` method on the non-sealed range, meaning you should be careful to call this on a
   ///   range you do not control, as doing so may invoke arbitrary code.
   //>   .check{2 .assertInRange(1=~~=4, {`custom context`})}
@@ -279,7 +279,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       | `actual: `+this
       .info)});
 
-  /// `this.clampTo(range)` returns `this` clamped into `[range.start, range.end]`
+  /// ``this.clampTo(range)`` returns `this` clamped into ``[range.start, range.end]``
   //>   .check{0 .clampTo(1=~~=4) .assertEq 1}
   //>   .check{9 .clampTo(1=~~=4) .assertEq 4}
   .clampTo(range: Range[Nat]): Nat -> Block#
@@ -299,7 +299,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5.info .assertEq Infos#("5")}
   .info -> Infos.msg(this.str);            /// info via str
   .close->::; .close->this;               /// fixpoint type closed
-  .sumNumber xs ->                        /// summing all numbers starting from this
+  .sumNumber xs ->                        /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .hashWith(other: Nat): Nat -> this.aluMulWrap(31).aluAddWrap(other);
   .norm: Norm[Nat];

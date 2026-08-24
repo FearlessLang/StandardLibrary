@@ -1,36 +1,36 @@
 /// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
 Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
-  /// `this.getSucc` returns `this + 1`. Throws if `this` is `255` (overflow).
+  /// `this.getSucc` returns ``this + 1``. Throws if `this` is ``255`` (overflow).
   //>   .check{5.getByte .getSucc .assertEq(6.getByte)}
   //>   .checkDetErr({_ -> True}, {(255.getByte) .getSucc})
   .getSucc: Byte -> this + (1.getByte);
 
-  /// `this.getPred` returns `this - 1`. Throws if `this` is `0` (underflow).
+  /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
   //>   .check{5.getByte .getPred .assertEq(4.getByte)}
   //>   .checkDetErr({_ -> True}, {(0.getByte) .getPred})
   .getPred: Byte -> this - (1.getByte);
 
-  /// `this + x` returns the checked sum of `this` and `x`. Throws if the result would exceed `255`.
+  /// ``this + x`` returns the checked sum of `this` and ``x``. Throws if the result would exceed ``255``.
   //>   .check{(2.getByte + (3.getByte)) .assertEq(5.getByte)}
   //>   .checkDetErr({_ -> True}, {(255.getByte) + (1.getByte)})
   +(x: Byte): Byte;
 
-  /// `this - x` returns the checked difference of `this` and `x`. Throws if the result would go below `0`.
+  /// ``this - x`` returns the checked difference of `this` and ``x``. Throws if the result would go below ``0``.
   //>   .check{5.getByte - (3.getByte) .assertEq(2.getByte)}
   //>   .checkDetErr({_ -> True}, {0.getByte - (1.getByte)})
   -(x: Byte): Byte;
 
-  /// `this * x` returns the checked product of `this` and `x`. Throws if the result would exceed `255`.
+  /// ``this * x`` returns the checked product of `this` and ``x``. Throws if the result would exceed ``255``.
   //>   .check{10.getByte * (5.getByte) .assertEq(50.getByte)}
   //>   .checkDetErr({_ -> True}, {100.getByte * (3.getByte)})
   *(x: Byte): Byte;
 
-  /// `this ** x` returns the checked power of `this` raised to `x`. Throws if the result would exceed `255`.
+  /// ``this ** x`` returns the checked power of `this` raised to ``x``. Throws if the result would exceed ``255``.
   //>   .check{2.getByte ** (6.getByte) .assertEq(64.getByte)}
   //>   .checkDetErr({_ -> True}, {2.getByte ** (8.getByte)})
   **(x: Byte): Byte;
 
-  /// `this / x` returns the exact rational quotient of `this` and `x` as a `Num`. Throws iff `x == 0`.
+  /// ``this / x`` returns the exact rational quotient of `this` and ``x`` as a `Num`. Throws iff ``x == 0``.
   /// Note: This returns a num for exact precision, if you want to do byte division you should use `.div` or `.aluDiv`
   //>   .check{7.getByte / 2 .getFloat .assertEq 3.5}
   //>   .checkDetErr({
@@ -39,12 +39,12 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>     }, {7.getByte / 0})
   /(x: Nat): Num;
 
-  /// `this.getTruncDiv(d)` returns `this` divided by `d`, truncated toward `0`. Throws iff `d == 0`.
+  /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{(7.getByte) .getTruncDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({_ -> True}, {7.getByte .getDiv 0})
   .getTruncDiv(d: Nat): Byte;
 
-  /// `this.getDiv(d)` returns `this` exactly divided by `d`. Throws iff `d == 0` or `this.rem == 1`.
+  /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
   //>   .check{(6.getByte) .getDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({_ -> True}, {7.getByte .getDiv 3})
   //>   .checkDetErr({_ -> True}, {7.getByte .getDiv 0})
@@ -54,23 +54,23 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
     .if {rem != (0.getByte)} .error {"Byte.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
     .return {this.getTruncDiv d};
 
-  /// `this.getRem(d)` returns the remainder `this - (this.getDiv(d)) * d`. Throws iff `d == 0`.
+  /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7.getByte .getRem 2 .assertEq(1.getByte)}
   //>   .checkDetErr({_ -> True}, {7.getByte .getRem 0})
   .getRem(d: Nat): Byte;
 
-  /// `this.rem(d)` returns `.some` of `this.getRem(d)` if `d != 0`, `.empty` otherwise.
+  /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` otherwise.
   //>   .check{7.getByte .rem 2 .assertEq({::}, Opts# (1.getByte))}
   //>   .check{7.getByte .rem 0 .assertEmpty {::}}
   .rem(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getRem(d)};
 
-  /// `this.truncDiv(d)` returns `.some` of `this.getDiv(d)` if `d != 0`, `.empty` otherwise.
+  /// ``this.truncDiv(d)`` returns `.some` of ``this.getDiv(d)`` if ``d != 0``, `.empty` otherwise.
   //>   .check{7.getByte .truncDiv 2 .assertEq({::}, Opts# (3.getByte))}
   //>   .check{7.getByte .truncDiv 0 .assertEmpty {::}}
   .truncDiv(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getTruncDiv(d)};
 
-  /// `this.div(d)` returns `.some` of `this.getDiv(d)` if `d` evenly divides `this`, that is if:
-  ///  `d != 0` and `this.rem(d) == 0` otherwise returns .empty` otherwise.
+  /// ``this.div(d)`` returns `.some` of ``this.getDiv(d)`` if `d` evenly divides `this`, that is if:
+  ///  ``d != 0`` and ``this.rem(d) == 0`` otherwise returns .empty` otherwise.
   //>   .check{6.getByte .div(2) .assertEq({::}, Opts#(3.getByte))}
   //>   .check{7.getByte .div(2) .assertEmpty {::}}
   //>   .check{7.getByte .div(0) .assertEmpty {::}}
@@ -103,54 +103,54 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{200.getByte .num .assertEq(200 / 1)}
   .num: Num;
 
-  /// `this.aluAddWrap(x)` returns `this + x` mod `256` (u8 wraparound add).
+  /// ``this.aluAddWrap(x)`` returns ``this + x`` mod ``256`` (u8 wraparound add).
   //>   .check{250.getByte .aluAddWrap(10.getByte) .assertEq(4.getByte)}
   .aluAddWrap(x: Byte): Byte;
 
-  /// `this.aluSubWrap(x)` returns `this - x` mod `256` (u8 wraparound sub).
+  /// ``this.aluSubWrap(x)`` returns ``this - x`` mod ``256`` (u8 wraparound sub).
   //>   .check{1.getByte .aluSubWrap(2.getByte) .assertEq(255.getByte)}
   .aluSubWrap(x: Byte): Byte;
 
-  /// `this.aluMulWrap(x)` returns `this * x` mod `256` (u8 wraparound mul).
+  /// ``this.aluMulWrap(x)`` returns ``this * x`` mod ``256`` (u8 wraparound mul).
   //>   .check{(200.getByte) .aluMulWrap(2.getByte) .assertEq(144.getByte)}
   .aluMulWrap(x: Byte): Byte;
 
-  /// `this.aluDiv(x)` returns `this` divided by `x`, truncated toward `0`. Throws iff `x == 0`.
+  /// ``this.aluDiv(x)`` returns `this` divided by ``x``, truncated toward ``0``. Throws iff ``x == 0``.
   //>   .check{7.getByte .aluDiv(2.getByte) .assertEq(3.getByte)}
   //>   .checkDetErr({_ -> True}, {(7.getByte) .aluDiv(0.getByte)})
   .aluDiv(x: Byte): Byte;
 
-  /// `this.aluRem(x)` returns the remainder paired with `this.aluDiv(x)`. Throws iff `x == 0`.
+  /// ``this.aluRem(x)`` returns the remainder paired with ``this.aluDiv(x)``. Throws iff ``x == 0``.
   //>   .check{7.getByte .aluRem(2.getByte) .assertEq(1.getByte)}
   //>   .checkDetErr({_ -> True}, {7.getByte .aluRem(0.getByte)})
   .aluRem(x: Byte): Byte;
 
-  /// `this.aluShiftLeft(bits)` returns `this` shifted left by `bits`, with the effective shift
-  /// taken modulo `8` (`bits & 7`).
+  /// ``this.aluShiftLeft(bits)`` returns `this` shifted left by ``bits``, with the effective shift
+  /// taken modulo ``8`` (``bits & 7``).
   //>   .check{1.getByte .aluShiftLeft 3 .assertEq(8.getByte)}
   //>   .check{1.getByte .aluShiftLeft 8 .assertEq(1.getByte)}
   .aluShiftLeft(bits: Nat): Byte;
 
-  /// `this.aluShiftRight(bits)` returns `this` logically shifted right by `bits`, with the
-  /// effective shift taken modulo `8` (`bits & 7`).
+  /// ``this.aluShiftRight(bits)`` returns `this` logically shifted right by ``bits``, with the
+  /// effective shift taken modulo ``8`` (``bits & 7``).
   //>   .check{8.getByte .aluShiftRight 3 .assertEq(1.getByte)}
   .aluShiftRight(bits: Nat): Byte;
 
-  /// `this.aluXor(x)` returns the bitwise XOR of `this` and `x`.
+  /// ``this.aluXor(x)`` returns the bitwise XOR of `this` and ``x``.
   //>   .check{5.getByte .aluXor(3.getByte) .assertEq(6.getByte)}
   .aluXor(x: Byte): Byte;
 
-  /// `this.aluAnd(x)` returns the bitwise AND of `this` and `x`.
+  /// ``this.aluAnd(x)`` returns the bitwise AND of `this` and ``x``.
   //>   .check{5.getByte .aluAnd(3.getByte) .assertEq(1.getByte)}
   .aluAnd(x: Byte): Byte;
 
-  /// `this.aluOr(x)` returns the bitwise OR of `this` and `x`.
+  /// ``this.aluOr(x)`` returns the bitwise OR of `this` and ``x``.
   //>   .check{(5.getByte) .aluOr(2.getByte) .assertEq(7.getByte)}
   .aluOr(x: Byte): Byte;
 
 
-  /// `this~~end` returns the open range `(this, end)`.
-  /// Throws if `this == Math.maxByte`, or `end == Math.minByte`, or the resulting range would be empty.
+  /// ``this~~end`` returns the open range ``(this, end)``.
+  /// Throws if ``this == Math.maxByte``, or ``end == Math.minByte``, or the resulting range would be empty.
   //>   .check{1.getByte~~(4.getByte) .list .assertEq({::}, Lists#(2.getByte, 3.getByte))}
   //>   .checkDetErr({_ -> True}, {(1.getByte)~~(2.getByte)})
   ~~(end: Byte): Range[Byte] -> Block#
@@ -163,8 +163,8 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       }
     .return {_ByteRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
-  /// `this~~=endInclusive` returns the range `(this, endInclusive]`.
-  /// Throws if `this` is `Math.maxByte`, or the range would be empty (`this >= endInclusive`).
+  /// ``this~~=endInclusive`` returns the range ``(this, endInclusive]``.
+  /// Throws if `this` is `Math.maxByte`, or the range would be empty (``this >= endInclusive``).
   //>   .check{1.getByte~~=(4.getByte) .list .assertEq({::}, Lists#(2.getByte, 3.getByte, 4.getByte))}
   //>   .checkDetErr({_ -> True}, {1.getByte~~=(1.getByte)})
   ~~=(endInclusive: Byte): Range[Byte] -> Block#
@@ -174,8 +174,8 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       }
     .return {_ByteRanges#(this.getSucc, endInclusive, "("+this+", "+endInclusive+"]")};
 
-  /// `this=~~end` returns the range `[this, end)`.
-  /// Throws if `end` is `Math.minByte`, or the range would be empty (`this >= end`).
+  /// ``this=~~end`` returns the range ``[this, end)``.
+  /// Throws if `end` is `Math.minByte`, or the range would be empty (``this >= end``).
   //>   .check{1.getByte=~~(4.getByte).list .assertEq({::}, Lists#(1.getByte, 2.getByte, 3.getByte))}
   //>   .checkDetErr({_ -> True}, {(1.getByte)=~~(1.getByte)})
   =~~(end: Byte): Range[Byte] -> Block#
@@ -185,8 +185,8 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       }
     .return {_ByteRanges#(this, end.getPred, "["+this+", "+end+")")};
 
-  /// `this=~~=endInclusive` returns the inclusive range `[this, endInclusive]`.
-  /// Throws if the range would be empty (`this > endInclusive`).
+  /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
+  /// Throws if the range would be empty (``this > endInclusive``).
   //>   .check{1.getByte=~~=(4.getByte) .assertEq({::}, Lists#(1.getByte, 2.getByte, 3.getByte, 4.getByte))}
   //>   .checkDetErr({_ -> True}, {(4.getByte)=~~=(1.getByte)})
   =~~=(endInclusive: Byte): Range[Byte] -> Block#
@@ -195,17 +195,17 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       }
     .return {_ByteRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
 
-  /// `this.inRange(range)` returns `True` iff `range.start <= this <= range.end`.
+  /// ``this.inRange(range)`` returns `True` iff ``range.start <= this <= range.end``.
   //>   .check{2.getByte .inRange(1.getByte=~~=(4.getByte)) .assertTrue}
   //>   .check{5.getByte .inRange(1.getByte=~~=(4.getByte)) .assertFalse}
   .inRange(range: Range[Byte]): Bool -> range.start <= this && {this <= (range.end)};
 
-  /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
+  /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{2.getByte .assertInRange(1.getByte=~~=(4.getByte))}
   //>   .checkNonDetErr({_ -> True}, {5.getByte .assertInRange(1.getByte=~~=(4.getByte))})
   .assertInRange(range: Range[Byte]): Void -> this.assertInRange(range, {``});
 
-  /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.
+  /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   .assertInRange(range: Range[Byte], msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
     { msg#.info + (`Expected in range: `+ (range.str) // technically a DD point...
@@ -214,7 +214,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       | `actual: `+this
       .info)});
 
-  /// `this.clampTo(range)` returns `this` clamped into `[range.start, range.end]`.
+  /// ``this.clampTo(range)`` returns `this` clamped into ``[range.start, range.end]``.
   //>   .check{0.getByte .clampTo(1.getByte=~~=(4.getByte)) .assertEq(1.getByte)}
   //>   .check{9.getByte .clampTo(1.getByte=~~=(4.getByte)) .assertEq(4.getByte)}
   .clampTo(range: Range[Byte]): Byte -> Block#
@@ -227,7 +227,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{5.getByte.info .assertEq Infos#("5")}
   .info -> Infos.msg(this.str);                 /// info via str
   .close->::; .close->this;                    /// fixpoint type closed
-  .sumNumber xs ->                             /// summing all numbers starting from this
+  .sumNumber xs ->                             /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Byte];
   }

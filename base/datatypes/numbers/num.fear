@@ -1,41 +1,41 @@
 /// Num: unlimited-precision rational (exact arithmetic).
 Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 
-  /// `this + x` returns the exact sum of `this` and `x`.
+  /// ``this + x`` returns the exact sum of `this` and ``x``.
   //>   .check{2/3 + (3/2) .assertEq(13/6)}
   +(x: Num): Num;
 
-  /// `this - x` returns the exact difference of `this` and `x`.
+  /// ``this - x`` returns the exact difference of `this` and ``x``.
   //>   .check{5/1 - (3/1) .assertEq(2/1)}
   -(x: Num): Num;
 
-  /// `this * x` returns the exact product of `this` and `x`.
+  /// ``this * x`` returns the exact product of `this` and ``x``.
   //>   .check{2/3 * (3/7) .assertEq(6/21)}
   *(x: Num): Num;
 
-  /// `this / x` returns the exact quotient of `this` and `x`. Throws iff `x == 0`.
+  /// ``this / x`` returns the exact quotient of `this` and ``x``. Throws iff ``x == 0``.
   //>   .check{2 / 6 / (4/3) .assertEq((2*3) / (6*4))}
   //>   .checkDetErr({_ -> True}, {1 / 0})
   /(x: Num): Num;
 
-  /// `this ** x` raises `this` to the power `x`. `x` is an `Int` (not `Num`), since fractional
+  /// ``this ** x`` raises `this` to the power ``x``. ``x`` is an `Int` (not `Num`), since fractional
   /// exponents could produce results that aren't expressible as an exact rational.
   //>   .check{(2/4 ** +3) .assertEq(8 / 64)}
   //>   .check{(2/1 ** -1) .assertEq(1 / 2)}
   **(x: Int): Num;
 
-  /// `this.abs` returns the exact absolute value of `this`: `this` if `this >= 0`, `-this` otherwise.
+  /// `this.abs` returns the exact absolute value of `this`: `this` if ``this >= 0``, ``-this`` otherwise.
   //>   .check{3/1 .abs .assertEq(3/1)}
   //>   .check{-3/4 .abs .assertEq(3/4)}
   .abs: Num;
 
-  /// `this.absNeg` returns the exact negative absolute value of `this`: `this` if `this <= 0`, `-this` otherwise.
+  /// `this.absNeg` returns the exact negative absolute value of `this`: `this` if ``this <= 0``, ``-this`` otherwise.
   //>   .check{3/1 .absNeg .assertEq(-3/1)}
   //>   .check{-3/4 .absNeg .assertEq(-3/4)}
   .absNeg: Num;
 
-  /// `this.sign` returns the sign of `this` as an exact rational: `0/1` if `this` is `0`,
-  /// `1/1` if positive, `-1/1` if negative.
+  /// `this.sign` returns the sign of `this` as an exact rational: ``0/1`` if `this` is ``0``,
+  /// ``1/1`` if positive, ``-1/1`` if negative.
   //>   .check{5/1 .sign .assertEq(1/1)}
   //>   .check{(-5/1) .sign .assertEq(-1/1)}
   //>   .check{0/1 .sign .assertEq(0/1)}
@@ -51,12 +51,12 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{((-7) / 2) .ceil .assertEq(-3/1)}
   .ceil: Num;
 
-  /// `this.trunc0` returns `this` rounded towards `0` (exact).
+  /// `this.trunc0` returns `this` rounded towards ``0`` (exact).
   //>   .check{(7 / 2) .trunc0 .assertEq(3/1)}
   //>   .check{((-7) / 2) .trunc0 .assertEq(-3/1)}
   .trunc0: Num;
 
-  /// `this.round` returns `this` rounded to the nearest integer, ties rounded away from `0` (exact).
+  /// `this.round` returns `this` rounded to the nearest integer, ties rounded away from ``0`` (exact).
   //>   .check{(5 / 2) .round .assertEq(3/1)}
   //>   .check{((-5) / 2) .round .assertEq(-3/1)}
   .round: Num;
@@ -67,23 +67,23 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{(7 / 2) .roundTiesEven .assertEq(4/1)}
   .roundTiesEven: Num;
 
-  /// `this.isInteger` returns `True` iff `this` has denominator `1`.
+  /// `this.isInteger` returns `True` iff `this` has denominator ``1``.
   //>   .check{5/1 .isInteger .assertTrue}
   //>   .check{1 / 2 .isInteger .assertFalse}
   .isInteger: Bool;
 
   /// `this.int` returns `.some` of `this` as an `Int` if `this` is an integer in
-  /// `[Math.minInt, Math.maxInt]`, `.empty` otherwise.
+  /// ``[Math.minInt, Math.maxInt]``, `.empty` otherwise.
   //>   .check{5 .int .assertEq({::}, Opts# +5)}
   //>   .check{1 / 2 .int .assertEmpty}
   .int: Opt[Int] -> _NumIs.int this .toOpt {this.softInt};
 
-  /// `this.nat` returns `.some` of `this` as a `Nat` if `this` is an integer in `[0, Math.maxNat]`, `.empty` otherwise.
+  /// `this.nat` returns `.some` of `this` as a `Nat` if `this` is an integer in ``[0, Math.maxNat]``, `.empty` otherwise.
   //>   .check{5/1 .nat .assertEq({::}, Opts# 5)}
   //>   .check{-5/1 .nat .assertEmpty}
   .nat: Opt[Nat] -> _NumIs.nat this .toOpt {this.softNat};
 
-  /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is an integer in `[0, Math.maxByte]`, `.empty` otherwise.
+  /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is an integer in ``[0, Math.maxByte]``, `.empty` otherwise.
   //>   .check{5/1 .byte .assertEq({::}, Opts# (5.getByte))}
   //>   .check{300/1 .byte .assertEmpty}
   .byte: Opt[Byte] -> _NumIs.byte this .toOpt {this.softByte};
@@ -94,17 +94,17 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{(1 / 3) .float .assertEmpty}
   .float: Opt[Float];
 
-  /// `this.getInt` converts `this` to an `Int` if it's an integer in `[Math.minInt, Math.maxInt]`; throws otherwise.
+  /// `this.getInt` converts `this` to an `Int` if it's an integer in ``[Math.minInt, Math.maxInt]``; throws otherwise.
   //>   .check{5/1 .getInt .assertEq +5}
   //>   .checkDetErr({_ -> True}, {(1 / 2) .getInt})
   .getInt: Int;
 
-  /// `this.getNat` converts `this` to a `Nat` if it's an integer in `[0, Math.maxNat]`; throws otherwise.
+  /// `this.getNat` converts `this` to a `Nat` if it's an integer in ``[0, Math.maxNat]``; throws otherwise.
   //>   .check{5/1 .getNat .assertEq 5}
   //>   .checkDetErr({_ -> True}, {(-5) .getNat})
   .getNat: Nat;
 
-  /// `this.getByte` converts `this` to a `Byte` if it's an integer in `[0, Math.maxByte]`; throws otherwise.
+  /// `this.getByte` converts `this` to a `Byte` if it's an integer in ``[0, Math.maxByte]``; throws otherwise.
   //>   .check{5/1 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({_ -> True}, {300 .getByte})
   .getByte: Byte;
@@ -114,19 +114,19 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .checkDetErr({_ -> True}, {(1 / 3) .getFloat})
   .getFloat: Float;
 
-  /// `this.softInt` converts `this` to an `Int` by truncating towards `0`, then clamping into
-  /// `[minInt, maxInt]`.
+  /// `this.softInt` converts `this` to an `Int` by truncating towards ``0``, then clamping into
+  /// ``[minInt, maxInt]``.
   //>   .check{7 / 2 .softInt .assertEq +3}
   .softInt: Int;
 
-  /// `this.softNat` converts `this` to a `Nat` by truncating towards `0`, then clamping into
-  /// `[0, maxNat]`.
+  /// `this.softNat` converts `this` to a `Nat` by truncating towards ``0``, then clamping into
+  /// ``[0, maxNat]``.
   //>   .check{7 / 2 .softNat .assertEq 3}
   //>   .check{-5/1 .softNat .assertEq 0}
   .softNat: Nat;
 
-  /// `this.softByte` converts `this` to a `Byte` by truncating towards `0`, then clamping into
-  /// `[0, maxByte]`.
+  /// `this.softByte` converts `this` to a `Byte` by truncating towards ``0``, then clamping into
+  /// ``[0, maxByte]``.
   //>   .check{7 / 2 .softByte .assertEq(3.getByte)}
   .softByte: Byte;
 
@@ -134,8 +134,8 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{1 / 3 .softFloat .assertEq +0.33333299999999999041477849459624849259853363037109375}
   .softFloat: Float;
 
-  /// `this~~end` returns the open range `(this, end)`.
-  /// Throws if the range would be empty (`this >= end`).
+  /// ``this~~end`` returns the open range ``(this, end)``.
+  /// Throws if the range would be empty (``this >= end``).
   //>   .check{1/1 ~~ (4/3) .contains 2 .assertTrue}
   //>   .check{1/1 ~~ (4/3) .contains 1 .assertFalse}
   //>   .checkDetErr({_ -> True}, {1/1~~(1/1)})
@@ -148,8 +148,8 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       .str -> "("+this+", "+end+")";
       }};
 
-  /// `this~~=endInclusive` returns the range `(this, endInclusive]`.
-  /// Throws if the range would be empty (`this >= endInclusive`).
+  /// ``this~~=endInclusive`` returns the range ``(this, endInclusive]``.
+  /// Throws if the range would be empty (``this >= endInclusive``).
   //>   .check{(1/1~~=(4/3)) .contains(4/3) .assertTrue}
   //>   .check{(1/1~~=(4/3)) .contains(1/1) .assertFalse}
   //>   .checkDetErr({_ -> True}, {1/1~~=(1/1)})
@@ -162,8 +162,8 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       .str -> "("+this+", "+endInclusive+"]";
       }};
 
-  /// `this=~~end` returns the range `[this, end)`.
-  /// Throws if the range would be empty (`this >= end`).
+  /// ``this=~~end`` returns the range ``[this, end)``.
+  /// Throws if the range would be empty (``this >= end``).
   //>   .check{1/1=~~(4/3) .contains(1/1) .assertTrue}
   //>   .check{1/1=~~(4/3) .contains(4/3) .assertFalse}
   //>   .checkDetErr({_ -> True}, {1/1=~~(1/1)})
@@ -176,9 +176,9 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       .str -> "["+this+", "+end+")";
       }};
 
-  /// `this=~~=endInclusive` returns the inclusive range `[this, endInclusive]`. Unlike the other
+  /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``. Unlike the other
   /// range operators, this returns a `ClosedNumRange`, which supports `.clampTo`.
-  /// Throws if the range would be empty (`this > endInclusive`).
+  /// Throws if the range would be empty (``this > endInclusive``).
   //>   .check{(1/1=~~=(4/3)) .contains(4/3) .assertTrue}
   //>   .check{(1/1=~~=(4/3)) .contains(1/1) .assertTrue}
   //>   .checkDetErr({_ -> True}, {4/1=~~=(1/1)})
@@ -191,17 +191,17 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       .str -> "["+this+", "+endInclusive+"]";
       }};
 
-  /// `this.inRange(range)` returns `range.contains(this)`. Uses a sealed `NumRange` so callers
+  /// ``this.inRange(range)`` returns ``range.contains(this)``. Uses a sealed `NumRange` so callers
   /// don't have to specify open/closed endpoints explicitly.
   //>   .check{2 .inRange(1=~~=4) .assertTrue}
   //>   .check{5 .inRange(1=~~=4) .assertFalse}
   .inRange(range: NumRange): Bool -> range.contains(this);
 
-  /// `this.assertInRange(range)` asserts `this.inRange(range)`, using a default empty message.
+  /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{2/1 .assertInRange((1/1)=~~=(4/1))}
   .assertInRange(range: NumRange): Void -> this.assertInRange(range, {``});
 
-  /// `this.assertInRange(range, msg)` asserts `this.inRange(range)` with custom error message.
+  /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   //>   .check{(2/1) .assertInRange((1/1)=~~=(4/1), {`custom context`})}
   .assertInRange(range: NumRange, msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
@@ -211,8 +211,8 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       | `actual: `+ this
       .info)});
 
-  /// `this.clampTo(range)` returns `this` clamped into `range` (delegates to `range.clamp`).
-  /// Only accepts a `ClosedNumRange` (from `=~~=`), since clamping to an open range is ill-defined.
+  /// ``this.clampTo(range)`` returns `this` clamped into `range` (delegates to `range.clamp`).
+  /// Only accepts a `ClosedNumRange` (from ``=~~=``), since clamping to an open range is ill-defined.
   //>   .check{0/1 .clampTo(1/1=~~=(4/1)) .assertEq(1/1)}
   //>   .check{9/1 .clampTo(1/1=~~=(4/1)) .assertEq(4/1)}
   .clampTo(range: ClosedNumRange): Num -> range.clamp(this);
@@ -220,7 +220,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   .hash -> this.str.hash;           /// hash via string
   .info -> Infos.msg(this.str);      /// info via string
   .close->::; .close->this;         /// fixpoint type closed
-  .sumNumber xs ->                  /// summing all numbers starting from this
+  .sumNumber xs ->                  /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Num];
   }

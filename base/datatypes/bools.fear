@@ -18,12 +18,12 @@ Bool: Sealed,DataType[Bool,Bool] {
 
   .match[R:**](m: mut BoolMatch[R]): R -> this?{.then->m.true; .else->m.false};
 
-  /// `this.toOpt(f)` returns `.some f#` if `this == True` otherwise `.empty`.
+  /// ``this.toOpt(f)`` returns ``.some f#`` if ``this == True`` otherwise `.empty`.
   /// Note: this name is unstable, other names could be:
-  ///   - `.ifTrue`, but reads like a thing that takes a void
+  ///   - ``.ifTrue``, but reads like a thing that takes a void
   ///   - `.then`, simpler but less expressive
   ///   - `.toOpt`, simple but doesn't describe how it converts it
-  ///   - `.thenSome`, `trueToSome`, `mapTrue` ...
+  ///   - ``.thenSome``, ``trueToSome``, ``mapTrue`` ...
   .toOpt[R:*](mut MF[R]): mut Opt[R];
 
   .close -> this; .close -> ::;

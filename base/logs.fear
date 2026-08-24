@@ -70,7 +70,7 @@ InMemoryLog[T]:CaptureFree{
   ///Submits s to an in memory log that requires a capability to be read.
   .log(s: T): Void -> Magic!;
   
-  ///Convenience over calling `sys.readLog(this)`
+  ///Convenience over calling ``sys.readLog(this)``
   .reader(sys: mut System): mut LogReader[T]->sys.readLog(this);
   }
 LogReader[T]: ToIso[LogReader[T]], WidenTo[LogReader[T]]{
