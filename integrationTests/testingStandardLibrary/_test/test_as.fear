@@ -9,10 +9,15 @@ AsWiden: {
   .opt(o: Opt[AsCustomer]): Opt[AsPerson] -> o.as{::};
   .optOfList(o: Opt[List[AsCustomer]]): Opt[List[AsPerson]] -> o.as{::.as{::}};
   .norm(n: Norm[AsCustomer]): Norm[AsPerson] -> n.as{::};
+  .normTwice(n: Norm[AsCustomer]): Norm[AsPerson] -> n.as{::}.as{::};
+  .normInList(ns: Norm[List[Norm[AsCustomer]]]): Norm[List[Norm[AsPerson]]] -> ns.as{::.as{::.as{::}}};
   .same(cs: List[AsCustomer]): List[AsCustomer] -> cs.as{::};
   }
 
 AsCustomerNorm: { #(s: Norm[Str]): Norm[AsCustomer] -> Cache.ofMemo(s, {_ -> AsCustomer}) }
+
+/// Keyed on the widened Norm[AsPerson], so it can only be reached through .as.
+AsPersonName: { #(p: Norm[AsPerson]): Str -> Cache#(p, {p2 -> p2.get.name}) }
 
 AsTests: Test {::
   .check{AsWiden.list(Lists#(AsCustomer)) .size .assertEq 1}
@@ -25,6 +30,13 @@ AsTests: Test {::
   .check{AsWiden.opt(Opts#AsCustomer) ! .name .assertEq `c`}
   .check{AsWiden.optOfList(Opts#(Lists#(AsCustomer))) ! .get 0 .name .assertEq `c`}
   .check{AsWiden.norm(AsCustomerNorm#(`k`.norm)) .get .name .assertEq `c`}
+  .check{AsWiden.normTwice(AsCustomerNorm#(`k`.norm)) .get .name .assertEq `c`}
+  .check{AsWiden.normInList(Lists#(AsCustomerNorm#(`k`.norm)).norm{::}) .get .size .assertEq 1}
+  .check{AsWiden.normInList(Lists#(AsCustomerNorm#(`k`.norm)).norm{::}) .get .get 0 .get .name .assertEq `c`}
+  // A Norm widened by .as is the same Norm, so it is usable as a cache key and
+  // lands on the entry of the Norm it came from, however many times it is widened.
+  .check{AsPersonName#(AsWiden.norm(AsCustomerNorm#(`k`.norm))) .assertEq `c`}
+  .check{AsPersonName#(AsWiden.normTwice(AsCustomerNorm#(`k`.norm))) .assertEq `c`}
   }
 
 /// The empty cases go through the fearless level implementations of .as,
