@@ -14,6 +14,7 @@ use base.Repr as Repr;
 use base.Var as Var;
 use base.Vars as Vars;
 use base.CacheF as CacheF;
+use base.CacheMemo as CacheMemo;
 use base.CaptureFree as CaptureFree;
 
 CacheSum:{ #(a:Nat,b:Nat):Nat->Cache#(a.norm,b.norm,{
@@ -96,5 +97,77 @@ MainFlushCache:Main{s->Block#
   .do{ Debug#("cleaned") }
   .do {Cache.flush(Cache27)}
   .let w= {Cache_27Out.methName("foo".norm,Lists#("b").norm{::.norm})}
+  .done
+  }
+///Caching is invisible to the values a program computes: a hit and a
+///recomputation return the very same result. What tells them apart is whether
+///the cached body ran at all, so the Mains below print a line from inside each
+///cached body and the expected Debug trace is what the Java side asserts.
+
+NormAnimal: { .name: Str }
+NormCat: NormAnimal { .name -> `cat` }
+
+///Memoized production of a Norm[NormCat]. Equal keys must hand back the very
+///same Norm, since caches keyed on a Norm key it by identity, not by content.
+CatMemo:{ #(k: Norm[Str]): Norm[NormCat] -> Cache.ofMemo(k,
+  CatMemoF: CacheMemo[Str,NormCat]{_->Block#(Debug#("memoCat"),NormCat)})}
+
+///Keyed on Norm[NormAnimal], but reached with a Norm[NormCat] widened by .as.
+AnimalName:{ #(a: Norm[NormAnimal]): Str -> Cache.of(a,
+  AnimalNameF: CacheF[NormAnimal,Str]{a'->Block#(Debug#("naming"),a'.get.name)})}
+
+///.as widens the type of a Norm without making a new one, so a widened Norm
+///must land on the cache entry of the Norm it was widened from.
+MainAsKeepsCacheKey:Main{s->Block#
+  .let c1= {CatMemo#("c".norm)}
+  .let c2= {CatMemo#("c".norm)}
+  .do{ Debug#(AnimalName#(c1.as{::})) }
+  .do{ Debug#(AnimalName#(c2.as{::})) }
+  .do{ Debug#(AnimalName#(c1.as{::}.as{::})) }
+  .done
+  }
+
+///Flushing a memo does not only force the body to run again: it also hands out
+///a Norm that is a different object, so caches keyed on that Norm miss too.
+MainFlushMemo:Main{s->Block#
+  .let c1= {CatMemo#("f".norm)}
+  .do{ Debug#(AnimalName#(c1.as{::})) }
+  .do{ Cache.flush CatMemoF }
+  .let c2= {CatMemo#("f".norm)}
+  .do{ Debug#(AnimalName#(c2.as{::})) }
+  .do{ Cache.flush AnimalNameF }
+  .do{ Debug#(AnimalName#(c2.as{::})) }
+  .done
+  }
+
+ZeroF:{ #: Nat -> Cache#{Block#(Debug#("zeroF"),42)} }
+ZeroMemo:{ #: Norm[Nat] -> Cache.ofMemo{Block#(Debug#("zeroMemo"),7)} }
+MainZeroArity:Main{s->Block#
+  .do{ Debug#(ZeroF#) }
+  .do{ Debug#(ZeroF#) }
+  .do{ Debug#(ZeroMemo#.get) }
+  .do{ Debug#(ZeroMemo#.get) }
+  .done
+  }
+
+///Strings long enough to be interned by .norm: two equal ones built apart are
+///the same Norm, so they share a cache entry, while a different one does not.
+LongStr:{ #(pre: Str): Str -> pre+"0123456789012345678901234567890123456789012345678901234567890123456789" }
+LongSize:{ #(s: Norm[Str]): Nat -> Cache#(s,{s'->Block#(Debug#("sizing"),s'.get.size)})}
+MainStrNormInterning:Main{s->Block#
+  .do{ Debug#(LongSize#(LongStr#("x").norm)) }
+  .do{ Debug#(LongSize#(LongStr#("x").norm)) }
+  .do{ Debug#(LongSize#(LongStr#("y").norm)) }
+  .done
+  }
+
+///Same for lists: .norm interns a list of Norms, so two equal lists built apart
+///share the cache entry keyed on the resulting Norm.
+SumAllTraced:{#(ns: Norm[List[Norm[Nat]]]):Nat->Cache#(ns,
+  {n->Block#(Debug#("summingList"),n.get.flow.map{::.get}.sum 0)})}
+MainListNormInterning:Main{s->Block#
+  .do{ Debug#(SumAllTraced#(NormL#(Lists#(1,2,3)))) }
+  .do{ Debug#(SumAllTraced#(NormL#(Lists#(1,2,3)))) }
+  .do{ Debug#(SumAllTraced#(NormL#(Lists#(1,2,4)))) }
   .done
   }
