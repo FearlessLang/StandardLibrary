@@ -100,8 +100,8 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
       };
 
   /// `this.num` converts `this` to a `Num`. Always exact; never throws as `Num` can safely
-  /// represent every `Nat` value, so there is no `soft`/`get` variant needed for this conversion.
-  // Equivalent to: `this / 1`
+  /// represent every `Nat` value, so there is no ``soft``/``get`` variant needed for this conversion.
+  /// Equivalent to: ``this / 1``
   //>   .check{5 .num .assertEq(5/1)}
   .num: Num -> this / 1;
 

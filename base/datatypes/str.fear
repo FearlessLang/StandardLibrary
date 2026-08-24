@@ -14,7 +14,7 @@
 ///
 /// Str.getInt:
 /// - rejected: ``12``.getInt  ``+1_``.getInt  ``+_1``.getInt
-//  - accepted: `+12`.getInt, `+1_000`.getInt  `+0__10`.getInt  `+01__0`.getInt `+1__0`.getInt `+00`.getInt `-00`.getInt `-001`.getInt `+001`.getInt
+/// - accepted: ``+12``.getInt, ``+1_000``.getInt  ``+0__10``.getInt  ``+01__0``.getInt ``+1__0``.getInt ``+00``.getInt ``-00``.getInt ``-001``.getInt ``+001``.getInt
 /// - canonicalization: ``+00_12``.getInt.str ==``+12``
 ///
 /// Str.getNat:
