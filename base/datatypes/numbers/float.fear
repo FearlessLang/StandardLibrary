@@ -113,10 +113,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{4.0 .getSqrt .assertEq 2.0}
   //>   .checkDetErr({_ -> True}, {-4.0 .getSqrt})
   //>   .checkDetErr({_ -> True}, {Math.nan .getSqrt})
-  .getSqrt: Float -> this.isNaN || {this < -0.0} .if {
-    .then -> Error.msg("Cannot take the sqrt of "+this);
-    .else -> this.sqrtOrNaN;
-    };
+  .getSqrt: Float -> Block#
+    .if{this.isNaN} .error {"Float.getSqrt: Cannot take the sqrt of NaN."}
+    .if{this < 0.0} .error {"Float.getSqrt: Cannot take the sqrt of a negative number, given: "+this}
+    .return{this.sqrtOrNaN};
 
   /// `this.signOrNaN` returns the sign of `this`: ``+0.0``/``-0.0`` if `this` is ``+0.0``/``-0.0``,
   /// ``1.0`` if `this` is positive, ``-1.0`` if `this` is negative, `Math.nan` if `this` is NaN.

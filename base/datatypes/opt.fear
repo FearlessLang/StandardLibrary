@@ -37,11 +37,6 @@ Opt[E:*]: _Opt[E] {
     .empty -> {}
     };
 
-  .someAs f -> this.match{
-    .some x -> Opts#(f#x);
-    .empty -> {}
-    };
-
   .then f -> this.match{
     .some x -> f#x;
     .empty -> {}
@@ -109,12 +104,9 @@ _Opt[E:*]: BaseContainer[imm E],DataType[Opt[E],Opt[imm E],E,imm E] {
   imm  &&(mut MF[imm Opt[E]]): imm Opt[E];
 
   mut  .andThen[E':*, R:*](mut MF[mut Opt[E']], read F[E, E', R]): mut Opt[R];
-  read .andThen[E':*, R:*](mut MF[read Opt[E']], read F[read/imm E, read/imm E', R]): read Opt[R];
-  imm  .andThen[E':*, R:*](mut MF[imm Opt[E']], read F[imm E, imm E', R]): imm Opt[R];
+  read .andThen[E':*, R:*](mut MF[read Opt[E']], read F[read/imm E, read/imm E', R]): mut Opt[R];
+  imm  .andThen[E':*, R:*](mut MF[imm Opt[E']], read F[imm E, imm E', R]): mut Opt[R];
 
-  mut  .someAs[E':*](read F[E, E']): mut Opt[E'];
-  read .someAs[E':*](read F[read/imm E, E']): read Opt[E'];
-  imm  .someAs[E':*](read F[imm E, E']): imm Opt[E'];
 
   mut  .then[E':*](mut MF[E, mut Opt[E']]): mut Opt[E'];
   read .then[E':*](mut MF[read/imm E, read Opt[E']]): read Opt[E'];
@@ -143,8 +135,8 @@ _Opt[E:*]: BaseContainer[imm E],DataType[Opt[E],Opt[imm E],E,imm E] {
   read .assertSome: Void;
   read .assertSome(read LazyInfo): Void;
   imm  .as[T2](f: BaseId[imm E,T2]): Opt[T2];
-  mut .mapSome[R:*](mut MF[E, R]): mut Opt[R];
-  read .mapSome[R:*](mut MF[read/imm E, R]): mut Opt[R];
+  mut .mapSome[R:*](read F[E, R]): mut Opt[R];
+  read .mapSome[R:*](read F[read/imm E, R]): mut Opt[R];
   }
 
 Opts: {

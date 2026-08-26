@@ -341,6 +341,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     var other= ((Str$c$0Instance)p0).val;
     return bool(val.startsWith(other));  
   }
+  @Override public Object imm$contains$1(Object p0){
+    var other= ((Str$c$0Instance)p0).val;
+    return bool(val.contains(other));
+  }
   @Override public Object imm$lower$0(){ return new Str$c$0Instance(val.toLowerCase()); }
   @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase()); }
   @Override public Object imm$norm$0(){

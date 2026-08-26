@@ -288,7 +288,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       .return {this}; .hash -> this.str.hash;                 /// hash via str
 
 
-  /// `this.indexInfo info` returns `.empty` if `info` is not the `.list` variant,
+  /// ``this.indexInfo info`` returns `.empty` if `info` is not the `.list` variant,
   /// otherwise returns .some the `this`-th element of the list if it exists, `.empty` otherwise.
   .indexInto info -> info.match DefaultInfoMatch[mut Opt[Info]] {
     .list list -> list.opt(this);

@@ -91,7 +91,8 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .getByte: Byte;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
 
 
-  .startsWith(Str): Bool;            /// this string starts with the other string
+  .startsWith(Str): Bool;           /// this string starts with the other string
+  .contains(Str): Bool;             /// ``this.contains s`` returns `True` if ``s`` is a substring of ``this``.
   .lower: Str;                      /// this string but all lowercase
   .upper: Str;                      /// this string but all uppercase
   .u : UStr;                        /// this string, but as a Unicode string

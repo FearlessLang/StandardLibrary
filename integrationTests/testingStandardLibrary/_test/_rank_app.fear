@@ -69,5 +69,7 @@ MyTests:UnitTests{::
   .test Nat0ImmTests
   .test ESet1ImmTests
   .test InfoTests
-  .test TestTry
+  .test InfoMatchTests
+  .test InfoExtractorTests
+  .test TryTests
   }

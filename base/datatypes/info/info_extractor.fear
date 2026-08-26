@@ -4,10 +4,25 @@ _Extractor[T: *]: Sealed {
 
   /// Map the extracted value to some result
   =>[R: *](mapper: read F[T, R]): mut Opt[R] ->
-    this.extractedValue.someAs mapper
+    this.extractedValue.mapSome mapper
   }
 
-InfoExtractor: _Extractor[imm Info] {
+/// `InfoExtractor` is a utility class to help "fuzzy" extract values from an info.
+/// Similar to `InfoMatches` you can descend into an info with the `>` operator.
+/// You can match against some deep part of an info by combining this with `InfoMatches` using the `&` operator.
+//>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+//>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+//>   .check{info ~ => {::}! .assertEq info}
+//>   .check{info ~ > "friends" > 0 > "name" .isMsg => {::.lower}! == "bob"}
+//>   .check{info ~ > "friends"
+//>     & > 0 > "name" .msgMatch{:: == "Bob"}
+//>     & > 1 > "name" .msgMatch{:: == "Alice"}
+//>     ~ .isList => {::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "} .assertEq(Opts# "Bob, Alice")}
+//>   .check{info ~ > "friends"
+//>     & > 0 > "name" .msgMatch{:: == "Bob"}
+//>     & > 1 > "name" .msgMatch{:: == "David"}
+//>     ~ .isList => {::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "}.assertEmpty {::}}
+InfoExtractor: _Extractor[Info] {
   &: InfoMatches -> {.close -> this.extractedValue};
 
   /// Descend one layer deeper into info,

@@ -55,7 +55,12 @@ _Infos: {
 InfoTests: Test {::
   .check{_Infos.largeNested & .isMap# .assertTrue}
   .check{_Infos.largeNested & > "application" > "name".msgMatch{:: == "Example Application"}# .assertTrue}
-  .debug{Try#{List[Str].get 0}.run{.ok e -> e.str; .info i -> i.str}}
-  .debug{Try#{(Math.maxNat) .getSucc}.run{.ok e -> e.str; .info i -> i & .msgMatch{::.startsWith "Nat.getSucc:"}#.str}}
+  .check{Infos.msg "A" & .msgMatch{::.contains "A"}#.assertTrue}
+  .check{Infos.msg "B" & .msgMatch{::.contains "B"}#.assertTrue}
+  .check{Infos.msg "A" & .msgMatch{::.contains "A"} | .msgMatch{::.contains "B"}#.assertTrue}
+  .check{Infos.msg "B" & .msgMatch{::.contains "A"} | .msgMatch{::.contains "B"}#.assertTrue}
+  .check{Infos.msg "B" & > 0 & > 1 ~ => {_ -> True} .assertEmpty{::}}
+  .check{Infos.msg "B" & > 0 & > 1 ~ => {_ -> True} .assertEmpty{::}}
+  .check{Infos.msg "B" ~ > 0 & > 1 => {_ -> True} .assertEmpty{::}}
   }
 

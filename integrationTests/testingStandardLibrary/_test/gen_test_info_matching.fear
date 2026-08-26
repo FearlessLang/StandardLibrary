@@ -1,0 +1,32 @@
+InfoMatchTests: Test {::
+  // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .check{info & # .assertTrue}
+  .check{info & > "friends" > 0 > "name" .msgMatch{:: == "Bob"} # .assertTrue}
+  .check{info
+    & > "friends" > 0 > "name" .msgMatch{:: == "Bob"}
+    & > "friends" > 1 > "name" .msgMatch{:: == "Alice"}# .assertTrue}
+  .check{info
+    & > "friends" > 0 > "name" .msgMatch{:: == "Bob"}
+    | > "friends" > 1 > "name" .msgMatch{:: == "Alice"}
+    & > "friends" > 1 > "name" .msgMatch{:: == "David"}# .assertFalse}
+  .check{info
+    & > "friends" > 0 > "name" .msgMatch{:: == "Bob"}
+    || {:: & > "friends" > 1 > "name" .msgMatch{:: == "Alice"}
+          & > "friends" > 1 > "name" .msgMatch{:: == "David"}}# .assertTrue}
+  }
+
+InfoExtractorTests: Test {::
+  // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .check{info ~ => {::}! .assertEq info}
+  .check{info ~ > "friends" > 0 > "name" .isMsg => {::.lower}! .assertEq "bob"}
+  .check{info ~ > "friends"
+    & > 0 > "name" .msgMatch{:: == "Bob"}
+    & > 1 > "name" .msgMatch{:: == "Alice"}
+    ~ .isList => {::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "} .assertEq({::}, Opts# "Bob, Alice")}
+  .check{info ~ > "friends"
+    & > 0 > "name" .msgMatch{:: == "Bob"}
+    & > 1 > "name" .msgMatch{:: == "David"}
+    ~ .isList => {::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "}.assertEmpty {::}}
+  }
