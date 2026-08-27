@@ -29,12 +29,6 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .map: Map[Str,Info]->Maps#[Str,Str,Info] {::};
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
   .match[R:**](m: InfoMatch[R]): R->m.empty;
-  .matchWithDefault[R:**](m: DefaultInfoMatch[R]): R -> this.match {
-    .empty -> m.empty;
-    .msg(s) -> m.msg(s);
-    .list(l) -> m.list(l);
-    .map(m2) -> m.map(m2);
-    };
   .str -> this.imm.match(_InfoToStr);
   +(other: Info) : Info -> this.match {
     .empty -> other;
