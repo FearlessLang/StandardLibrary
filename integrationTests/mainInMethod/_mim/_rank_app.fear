@@ -1,0 +1,17 @@
+use base.Main as Main;
+use base.CaptureFree as CaptureFree;
+use base.Str as Str;
+
+///A main declared at the top level: it captures nothing, so its name denotes an
+///instance, and it is one of the mains of this package.
+TopMain:Main{s->base.Debug#(`top level main`)}
+
+///A main declared inside a method and promising to capture nothing: it also has an
+///instance, so it is a main of this package too, even though it is written inside
+///"MkFree.mk".
+MkFree:{.mk:Main->FreeMain:Main,CaptureFree{s->base.Debug#(`capture free main in a method`)}}
+
+///A main declared inside a method that captures the parameter of that method: there
+///is no instance of it without an "x", so it is not a main of this package and it is
+///never run. Calling "MkCapturing.mk" is the only way to get one.
+MkCapturing:{.mk(x:Str):Main->CapturingMain:Main{s->base.Debug#(x)}}
