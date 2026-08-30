@@ -5,7 +5,7 @@ Balls: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Ball -> Block
   .var vy          = { 0.0 }
   .var alive       = { True }
   .let ballBounds  = { BallBounds#(0, 0, Width#width, Height#height) }
-  .let gravity = { "0.4".ieeeFloat! }
+  .let gravity = { 0.4soft }
   .let maxVel  = { 12.0 }
   .let ballW   = { ballBounds.width.get.softFloat }
   .return { mut Ball: {
@@ -42,7 +42,7 @@ Players: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Player -> B
   .var right                  = { False }
   .let playerBounds           = { PlayerBounds#(0, 0, Width#width, Height#height) }
   .let speed         = { 8.0 }
-  .let gravity       = { "0.4".ieeeFloat! }
+  .let gravity       = { 0.4soft }
   .let jumpStrength  = { -12.0 }
   .let groundY       = { startY.softFloat }
   .let playerW       = { playerBounds.width.get.softFloat }

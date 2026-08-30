@@ -62,5 +62,6 @@ MyTests:UnitTests{::
   .test Float0ImmTests
   .test Int0ImmTests
   .test Nat0ImmTests
+  .test Num0ImmTests
   .test ESet1ImmTests
   }
