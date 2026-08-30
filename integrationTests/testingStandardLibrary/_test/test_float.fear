@@ -110,6 +110,18 @@ FloatLiteralFormsLargeTests: Test {::
   .check{-1.0e3 .assertEq -1000.0}
   }
 
+FloatSoftLiteralTests: Test {::
+  .check{+0.4soft .assertEq +0.40000000000000002220446049250313080847263336181640625}
+  .check{-0.4soft .assertEq -0.40000000000000002220446049250313080847263336181640625}
+  .check{0.4soft .assertEq +0.4soft}
+  .check{+0.5soft .assertEq +0.5}
+  .check{+1_0.4soft .assertEq +10.4soft}
+  .check{+1.0e-400soft .assertEq +0.0}
+  .check{+0.1soft .assertEq(`0.1`.getSoftFloat)}
+  .check{+0.4soft .ieeeStr .assertEq `0.4`}
+  .check{+0.1soft + (+0.2soft) .assertNotEq +0.3soft}
+  }
+
 FloatSignNumTests: Test {::
   .check{-12.0.getSign .assertEq -1.0}
   .check{+7.0.getSign .assertEq +1.0}
@@ -220,6 +232,7 @@ TestFloat: Test {::
   .test FloatRangeCheckTests
   .test FloatRangeTests
   .test FloatLiteralFormsLargeTests
+  .test FloatSoftLiteralTests
   .test FloatSignNumTests
   .test FloatIEEEPowTests
   }
