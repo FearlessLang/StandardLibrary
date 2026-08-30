@@ -106,8 +106,8 @@ Gui06:Consumer[mut Frame]{::
     .background (Color.ghostWhite)
     .label{:: .text `Move/click inside the window, then close` }
     .pane{::
-      .width (Width#360)
-      .height (Height#180)
+      .width' (Width#360)
+      .height' (Height#180)
       .background (Color.alienMint)
       .mouse{::
         .clicked{ e-> Debug#"mouse clicked" }
@@ -166,8 +166,8 @@ Gui08:Consumer[mut Frame]{
     .background (Color.ghostWhite)
    .label{::
       .text `Hello`
-      .width (Width#500)
-      .height (Height#80)
+      .width' (Width#500)
+      .height' (Height#80)
       .textSize (Height#24)
       .background (Color.rubberDuck)
       .save (this.slot)

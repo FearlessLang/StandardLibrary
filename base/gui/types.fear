@@ -11,35 +11,101 @@ Wrapper[S,T]: DataType[S,S] {
   .info->this.getDataType.close(this.get).info;
   .imm->this#(this.get);
 }
-XNat:Wrapper[XNat,Nat]{.name->"X"; .getDataType -> 0;
+ExtentNat[S]: Wrapper[S,Nat] {
+  +(other: S): S -> this#(this.get + (this.close(other).get));
+  -(other: S): S -> this#(this.get - (this.close(other).get));
+  .gap(other: S): S -> Block#
+    .let a = { this.get }
+    .let b = { this.close(other).get }
+    .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
+  *(k: Nat): S -> this#(this.get * k);
+  .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
+  .zero: S -> this#0;
+  }
+
+CoordNat[S,E]: Wrapper[S,Nat] {
+  read .extent: Wrapper[E,Nat];
+  +(d: E): S -> this#(this.get + (this.extent.close(d).get));
+  -(d: E): S -> this#(this.get - (this.extent.close(d).get));
+  .to(other: S): E -> this.extent#(this.close(other).get - (this.get));
+  .gap(other: S): E -> Block#
+    .let a = { this.get }
+    .let b = { this.close(other).get }
+    .return { (a >= b).if{ .then -> this.extent#(a - b); .else -> this.extent#(b - a) } };
+  .origin: S -> this#0;
+  }
+
+XNat:CoordNat[XNat,WidthNat]{.name->"X"; .getDataType -> 0; .extent -> WidthNat;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
-YNat:Wrapper[YNat,Nat]{.name->"Y"; .getDataType -> 0;
+YNat:CoordNat[YNat,HeightNat]{.name->"Y"; .getDataType -> 0; .extent -> HeightNat;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
-WidthNat:Wrapper[WidthNat,Nat]{.name->"Width"; .getDataType -> 0;
+WidthNat:ExtentNat[WidthNat]{.name->"Width"; .getDataType -> 0;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
-HeightNat:Wrapper[HeightNat,Nat]{.name->"Height"; .getDataType -> 0;
+HeightNat:ExtentNat[HeightNat]{.name->"Height"; .getDataType -> 0;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
 
-Red:Wrapper[Red,Byte]{.name->"Red"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-Green:Wrapper[Green,Byte]{.name->"Green"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-Blue:Wrapper[Blue,Byte]{.name->"Blue"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-Alpha:Wrapper[Alpha,Byte]{.name->"Alpha"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::;
-  .opaque:Alpha->Alpha#(255.getByte);
-  .transparent:Alpha->Alpha#(0.getByte);
+Rect: {
+  .x: XNat; .y: YNat; .width: WidthNat; .height: HeightNat;
+  .right: XNat -> this.x + (this.width);
+  .bottom: YNat -> this.y + (this.height);
+  .contains(x: XNat, y: YNat): Bool ->
+    x >= (this.x) && { x <= (this.right) }
+    && { y >= (this.y) } && { y <= (this.bottom) };
   }
-Hue:Wrapper[Hue,Float]{.name->"Hue"; .getDataType -> 0.0;
+Rects: { #(x: XNat, y: YNat, width: WidthNat, height: HeightNat): Rect ->
+  { .x -> x; .y -> y; .width -> width; .height -> height; } }
+
+LevelByte[S]: Wrapper[S,Byte] {
+  +(other: S): S -> this#(this.get + (this.close(other).get));
+  -(other: S): S -> this#(this.get - (this.close(other).get));
+  .gap(other: S): S -> Block#
+    .let a = { this.get }
+    .let b = { this.close(other).get }
+    .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
+  .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
+  .min: S -> this#(Math.minByte);
+  .max: S -> this#(Math.maxByte);
+  }
+
+LevelFloat[S]: Wrapper[S,Float] {
+  read .lowest: Float;
+  read .highest: Float;
+  +(other: S): S -> this#(this.get + (this.close(other).get));
+  -(other: S): S -> this#(this.get - (this.close(other).get));
+  .gap(other: S): S -> this#((this.get - (this.close(other).get)).getAbs);
+  .min: S -> this#(this.lowest);
+  .max: S -> this#(this.highest);
+  }
+
+Red:LevelByte[Red]{.name->"Red"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+Green:LevelByte[Green]{.name->"Green"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+Blue:LevelByte[Blue]{.name->"Blue"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
+Alpha:LevelByte[Alpha]{.name->"Alpha"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType->t }; .close->this; .close->::;
+  .opaque:Alpha->Alpha.max;
+  .transparent:Alpha->Alpha.min;
+  }
+CyclicFloat[S]: Wrapper[S,Float] {
+  read .period: Float;
+  +(other: S): S -> this#(Math.euclideanMod(this.get + (this.close(other).get), this.period));
+  -(other: S): S -> this#(Math.euclideanMod(this.get - (this.close(other).get), this.period));
+  .normalize: S -> this#(Math.euclideanMod(this.get, this.period));
+  }
+
+Hue:CyclicFloat[Hue]{.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
   # t ->Block#(t.assertInRange(0.0=~~=1.0, {"Hue must be between 0 and 1"}),
   { .getDataType->t });
   .close->this; .close->::; }
-Saturation:Wrapper[Saturation,Float]{.name->"Saturation"; .getDataType -> 0.0;
+Saturation:LevelFloat[Saturation]{.name->"Saturation"; .getDataType -> 0.0;
+  .lowest -> 0.0; .highest -> +1.0;
   # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Saturation must be between 0 and 1"}),
   { .getDataType->t });
   .close->this; .close->::; }
-Brightness:Wrapper[Brightness,Float]{.name->"Brightness"; .getDataType -> 0.0;
+Brightness:LevelFloat[Brightness]{.name->"Brightness"; .getDataType -> 0.0;
+  .lowest -> 0.0; .highest -> +1.0;
   # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Brightness must be between 0 and 1"}),
   { .getDataType->t });
   .close->this; .close->::; }
@@ -47,11 +113,13 @@ Brightness:Wrapper[Brightness,Float]{.name->"Brightness"; .getDataType -> 0.0;
 KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "";
   # t ->{ .getDataType->t }; .close->this; .close->::; }
 
-Time:Wrapper[Time,Nat]{.name->"Time"; .getDataType -> 0;
+Duration:ExtentNat[Duration]{.name->"Duration"; .getDataType -> 0;
   # t ->{ .getDataType->t };
-  .seconds(t:Nat):Time->this#(t*1000000);
-  .milliSeconds(t:Nat):Time->this#(t*1000);
+  .seconds(t:Nat):Duration->this#(t*1000000);
+  .milliSeconds(t:Nat):Duration->this#(t*1000);
   .close->this; .close->::; }
+Instant:CoordNat[Instant,Duration]{.name->"Instant"; .getDataType -> 0; .extent -> Duration;
+  # t ->{ .getDataType->t }; .close->this; .close->::; }
 Color:DataType[Color,Color]{
   .close->this; .close->::;
   read .red:Red->{};
@@ -187,7 +255,7 @@ Frame:{
   read .title: Str;
   mut .fps(fps: Nat): mut Frame;
   read .fps: Nat;
-  read .elapsed: Time;  //Time since game time zero (warmup end), as seen by the last repaint tick.
+  read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
   read .screenSizeW: WidthNat;
   read .screenSizeH: HeightNat;
   read .locationX: XNat;//Note: on some OS the OS may place a window at negative coordinates, reported here as 0.
@@ -218,7 +286,7 @@ Graphics:{
   mut .rect(WidthNat, HeightNat): mut Graphics;
   mut .oval(WidthNat, HeightNat): mut Graphics;
   mut .image(Image): mut Graphics;
-  read .elapsed: Time;
+  read .elapsed: Instant;
   read .screenWidth: WidthNat;
   read .screenHeight: HeightNat;
   read .panelWidth: WidthNat;
@@ -245,7 +313,7 @@ Mouse:{
 MouseEvent:{
   .mouseX:XNat;
   .mouseY:YNat;
-  .elapsed:Time;
+  .elapsed:Instant;
   .screenWidth:WidthNat;
   .screenHeight:HeightNat;
   .panelWidth:WidthNat;
@@ -281,7 +349,7 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
     }};
   }
 KeyEvent:{
-  .elapsed:Time;
+  .elapsed:Instant;
   .screenWidth:WidthNat;
   .screenHeight:HeightNat;
   .windowWidth:WidthNat;

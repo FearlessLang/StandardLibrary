@@ -100,7 +100,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0{
 }
 
 record CKeyEventData(
-  Time$o$0 elapsed,
+  Instant$5c$0 elapsed,
   WidthNat$as$0 screenWidth,
   HeightNat$lg$0 screenHeight,
   WidthNat$as$0 windowWidth,
@@ -111,7 +111,7 @@ record CKeyEventData(
 record CKeyRun(KeyStroke$m8$0 key,List<Consumer$ao$1> actions){}
 
 record CKeyCtx(
-  Time$o$0 elapsed,
+  Instant$5c$0 elapsed,
   WidthNat$as$0 screenWidth,
   HeightNat$lg$0 screenHeight,
   WidthNat$as$0 windowWidth,

@@ -39,6 +39,8 @@ use base.Pane as Pane;
 use base.Border as Border;
 use base.Scope as Scope;
 use base.Painter as Painter;
+use base.Rect as Rect;
+use base.Rects as Rects;
 use base.Cache as Cache;
 
 Presentation2: base.Main { sys -> Block#

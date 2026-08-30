@@ -9,7 +9,7 @@ import io.github.humbleui.types.Rect;
 record CGraphicsCtx(
   Canvas cv,
   _Frame frame,
-  Time$o$0 elapsed,
+  Instant$5c$0 elapsed,
   WidthNat$as$0 panelSizeW,
   HeightNat$lg$0 panelSizeH,
   XNat$s$0 currentX,

@@ -14,7 +14,7 @@ import static base.MouseKind.*;
 enum MouseKind{ Clicked, Pressed, Released, Moved, Dragged, Entered, Exited }
 
 record CMouseCtx(
-  Time$o$0 elapsed,
+  Instant$5c$0 elapsed,
   XNat$s$0 mouseX,
   YNat$s$0 mouseY,
   WidthNat$as$0 screenWidth,

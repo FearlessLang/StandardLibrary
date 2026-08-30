@@ -4,8 +4,8 @@ class Scopes{
   static final Painter$5c$0 idP = new Painter$5c$0(){ @Override public Object imm$run$1(Object p0){ return p0; } };
 
   static Nat$c$0 n(long n){ return new Nat$c$0Instance(n); }
-  static Time$o$0 time(long n){ return (Time$o$0) Time$o$0.instance.read$$hash$1(new Nat$c$0Instance(n)); }
-  static Time$o$0 timeNanos(long n){ return time(n / 1000); }
+  static Instant$5c$0 time(long n){ return (Instant$5c$0) Instant$5c$0.instance.read$$hash$1(new Nat$c$0Instance(n)); }
+  static Instant$5c$0 timeNanos(long n){ return time(n / 1000); }
   static WidthNat$as$0 w(long n){ return (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(new Nat$c$0Instance(n)); }
   static HeightNat$lg$0 h(long n){ return (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(new Nat$c$0Instance(n)); }
   static XNat$s$0 x(long n){ return (XNat$s$0) XNat$s$0.instance.read$$hash$1(new Nat$c$0Instance(n)); }
