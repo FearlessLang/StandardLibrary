@@ -71,6 +71,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
 
   .ieeeFloat: Opt[Float];      /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
   .float: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  .softFloat: Opt[Float];      /// parse a string representing to the closest valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, but *not* values that would round)
 
   .int: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
   .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)

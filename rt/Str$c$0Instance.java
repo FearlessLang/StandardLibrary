@@ -293,6 +293,16 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
   }
 
+  @Override public Object imm$softFloat$0(){
+    if (!optionallySignedFloat.matcher(val).matches()){ return optEmpty(); }
+    try{
+      double d= Double.parseDouble(no_(val));
+      if (!Double.isFinite(d)){ return optEmpty(); }
+      if (d == 0.0d){ d= 0.0d; }
+      return optSome(Float$1c$0Instance.instance(d));
+    }
+    catch(NumberFormatException e){ return optEmpty(); }
+  }
   @Override public Object imm$getSoftFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){
       throw err("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
@@ -302,7 +312,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       String x= no_(val);
       double d= Double.parseDouble(x);
-      if (!Double.isFinite(d)){ throw err("Str.getFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
+      if (!Double.isFinite(d)){ throw err("Str.getSoftFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
       if (d == 0.0d){ d= 0.0d; }
       return Float$1c$0Instance.instance(d);
     }

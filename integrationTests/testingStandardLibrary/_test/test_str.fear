@@ -192,6 +192,29 @@ StrParseFloatTests: Test {::
   .check{`+1.0_e3` .float .assertEq({::}, Opt[Float])}
   }
 
+StrParseSoftFloatTests: Test {::
+  .check{`` .softFloat .assertEq({::}, Opt[Float])}
+  .check{`+0.5` .softFloat .assertEq({::}, Opts#(+0.5))}
+  .check{`+1_000.0` .softFloat .assertEq({::}, Opts#(+1000.0))}
+  .check{`-0.0` .softFloat .assertEq({::}, Opts#(+0.0))}
+  .check{`+0.1` .softFloat .assertEq({::}, Opts#(+0.1soft))}
+  .check{`+0.2` .softFloat .assertEq({::}, Opts#(+0.2soft))}
+  .check{`-0.1` .softFloat .assertEq({::}, Opts#(-0.1soft))}
+  .check{`+0.1` .softFloat! .assertEq(`+0.1`.getSoftFloat)}
+  .check{`+1.0e-400` .softFloat .assertEq({::}, Opts#(+0.0))}
+  .check{`+1.0e309` .softFloat .assertEq({::}, Opt[Float])}
+  .check{`-1.0e309` .softFloat .assertEq({::}, Opt[Float])}
+  .check{`NaN` .softFloat .assertEq({::}, Opt[Float])}
+  .check{`Infinity` .softFloat .assertEq({::}, Opt[Float])}
+  .check{`-Infinity` .softFloat .assertEq({::}, Opt[Float])}
+  .check{`+1.0` .float .assertEq({::}, `+1.0` .softFloat)}
+  .check{`+0.1` .float .assertEq({::}, Opt[Float])}
+  .check{` +1.0` .softFloat .assertEq({::}, Opt[Float])}
+  .check{`+1_.0` .softFloat .assertEq({::}, Opt[Float])}
+  .checkDetErr({i -> i.str.indexOf(`Str.getSoftFloat`).isSome}, {`+1.0e309`.getSoftFloat})
+  .checkDetErr({i -> i.str.indexOf(`Str.getSoftFloat`).isSome}, {`duck`.getSoftFloat})
+  }
+
 StrParseIeeeFloatTests: Test {::
   .check{`` .ieeeFloat .isEmpty .assertEq True}
   .check{`0.0` .ieeeFloat .match{ .some f->f .isPosZero; .empty->False } .assertEq True}
@@ -225,5 +248,6 @@ TestStr: Test {::
   .test StrParseByteTests
   .test StrParseNumTests
   .test StrParseFloatTests
+  .test StrParseSoftFloatTests
   .test StrParseIeeeFloatTests
   }
