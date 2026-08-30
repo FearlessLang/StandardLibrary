@@ -147,6 +147,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     return instance(numerator.multiply(o.denominator), denominator.multiply(o.numerator));
   }
   @Override public Object imm$abs$0(){ return numerator.signum() < 0 ? instance(numerator.negate(), denominator) : this; }
+  @Override public Object imm$absNeg$0(){ return numerator.signum() > 0 ? instance(numerator.negate(), denominator) : this; }
   @Override public Object imm$floor$0(){ return instance(floorZ(numerator, denominator), one); }
   @Override public Object imm$ceil$0(){ return instance(ceilZ(numerator, denominator), one); }
   @Override public Object imm$trunc0$0(){ return instance(trunc0Z(numerator, denominator), one); }

@@ -20,9 +20,7 @@ _FloatTest: {
     actual.assertInRange(expected - delta =~~= (expected + delta));
 
   .closeTo(actual: Float, expected: Float): Void ->
-    this.within(
-      actual, expected, +0.000100000000000000004792173602385929598312941379845142364501953125
-      );
+    this.within(actual, expected, +0.0001soft);
   }
 
 MathConstantsTests: Test {::
@@ -60,10 +58,7 @@ LnTests: Test {::
   .check{Math.ln(+0.0).assertEq(Math.negInf)}
   .check{Math.ln(-0.0).assertEq(Math.negInf)}
   .check{Math.ln(Math.inf).assertEq(Math.inf)}
-  .check{Math.ln(+2.0).assertInRange(
-    +0.693147170000000034661979952943511307239532470703125
-    =~~= +0.69314718055994528622676398299518041312694549560546875
-    )}
+  .check{Math.ln(+2.0).assertInRange(+0.69314717soft =~~= +0.6931471805599453soft)}
   .check{Math.ln(Math.e).assertEq(+1.0)}
   .check{Math.ln(+1.0).assertEq(+0.0)}
   .checkDetErr({i -> True}, {Math.ln(-1.0)})
@@ -77,10 +72,7 @@ LogTests: Test {::
   .check{Math.log(Math.inf).assertEq(Math.inf)}
   .check{Math.log(+10.0).assertEq(+1.0)}
   .check{Math.log(+1.0).assertEq(+0.0)}
-  .check{Math.log(+2.0).assertInRange(
-    +0.301029995599999988797890182468108832836151123046875
-    =~~= +0.301029995800000005345964382286183536052703857421875
-    )}
+  .check{Math.log(+2.0).assertInRange(+0.3010299956soft =~~= +0.3010299958soft)}
   .checkDetErr({i -> True}, {Math.log(-1.0)})
   .checkDetErr({i -> True}, {Math.log(Math.nan)})
   .checkDetErr({i -> True}, {Math.log(Math.negInf)})
@@ -103,10 +95,7 @@ LogbTests: Test {::
 Log2Tests: Test {::
   .check{Math.log2(+8.0).assertEq(+3.0)}
   .check{Math.log2(+1.0).assertEq(+0.0)}
-  .check{Math.log2(+7.0).assertInRange(
-    +2.8073549209999999476394805242307484149932861328125
-    =~~= +2.8073549230000001131202225224114954471588134765625
-    )}
+  .check{Math.log2(+7.0).assertInRange(+2.807354921soft =~~= +2.807354923soft)}
   .check{Math.log2(+0.0).assertEq(Math.negInf)}
   .check{Math.log2(Math.inf).assertEq(Math.inf)}
   .checkDetErr({i -> True}, {Math.log2(-1.0)})

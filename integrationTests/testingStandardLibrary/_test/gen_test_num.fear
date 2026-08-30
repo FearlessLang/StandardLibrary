@@ -120,7 +120,7 @@ Num0Imm0SoftByte0Test: Test {::
   }
 
 Num0Imm0SoftFloat0Test: Test {::
-    .check{1 / 3 .softFloat .assertEq +0.33333299999999999041477849459624849259853363037109375}
+    .check{1 / 3 .softFloat .assertEq +0.333333333333333314829616256247390992939472198486328125}
   }
 
 Num0Imm0InRange1Test: Test {::
