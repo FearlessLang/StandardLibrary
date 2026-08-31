@@ -35,9 +35,23 @@ CoordNat[S,E]: Wrapper[S,Nat] {
   .origin: S -> this#0;
   }
 
-XNat:CoordNat[XNat,WidthNat]{.name->"X"; .getDataType -> 0; .extent -> WidthNat;
+CoordInt[S,E]: Wrapper[S,Int] {
+  read .extent: Wrapper[E,Nat];
+  +(d: E): S -> this#(this.get + (this.extent.close(d).get.getInt));
+  -(d: E): S -> this#(this.get - (this.extent.close(d).get.getInt));
+  .to(other: S): E -> this.extent#(this.close(other).get - (this.get) .getNat);
+  .gap(other: S): E -> Block#
+    .let a = { this.get }
+    .let b = { this.close(other).get }
+    .return { (a >= b).if{
+      .then -> this.extent#(a - b .getNat);
+      .else -> this.extent#(b - a .getNat) } };
+  .origin: S -> this#(+0);
+  }
+
+XInt:CoordInt[XInt,WidthNat]{.name->"X"; .getDataType -> +0; .extent -> WidthNat;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
-YNat:CoordNat[YNat,HeightNat]{.name->"Y"; .getDataType -> 0; .extent -> HeightNat;
+YInt:CoordInt[YInt,HeightNat]{.name->"Y"; .getDataType -> +0; .extent -> HeightNat;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
 WidthNat:ExtentNat[WidthNat]{.name->"Width"; .getDataType -> 0;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
@@ -45,14 +59,14 @@ HeightNat:ExtentNat[HeightNat]{.name->"Height"; .getDataType -> 0;
   # t ->{ .getDataType->t }; .close->this; .close->::; }
 
 Rect: {
-  .x: XNat; .y: YNat; .width: WidthNat; .height: HeightNat;
-  .right: XNat -> this.x + (this.width);
-  .bottom: YNat -> this.y + (this.height);
-  .contains(x: XNat, y: YNat): Bool ->
+  .x: XInt; .y: YInt; .width: WidthNat; .height: HeightNat;
+  .right: XInt -> this.x + (this.width);
+  .bottom: YInt -> this.y + (this.height);
+  .contains(x: XInt, y: YInt): Bool ->
     x >= (this.x) && { x <= (this.right) }
     && { y >= (this.y) } && { y <= (this.bottom) };
   }
-Rects: { #(x: XNat, y: YNat, width: WidthNat, height: HeightNat): Rect ->
+Rects: { #(x: XInt, y: YInt, width: WidthNat, height: HeightNat): Rect ->
   { .x -> x; .y -> y; .width -> width; .height -> height; } }
 
 LevelByte[S]: Wrapper[S,Byte] {
@@ -258,12 +272,12 @@ Frame:{
   read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
   read .screenSizeW: WidthNat;
   read .screenSizeH: HeightNat;
-  read .locationX: XNat;//Note: on some OS the OS may place a window at negative coordinates, reported here as 0.
-  read .locationY: YNat;
+  read .locationX: XInt;
+  read .locationY: YInt;
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
   mut .content(s: mut Scope[Pane]): Void;
   mut .contentB(s: mut Scope[Border]): Void;
-  mut .location(XNat, YNat): mut Frame;
+  mut .location(XInt, YInt): mut Frame;
   mut .onKey(mut Scope[Keys]): mut Frame;
   mut .maximized: mut Frame;
   //The user may resize by dragging the window edges; without arguments the
@@ -281,8 +295,8 @@ Frame:{
   }
 Graphics:{
   mut .color(Color): mut Graphics;
-  mut .position(XNat, YNat): mut Graphics;
-  mut .line(XNat, YNat): mut Graphics;
+  mut .position(XInt, YInt): mut Graphics;
+  mut .line(XInt, YInt): mut Graphics;
   mut .rect(WidthNat, HeightNat): mut Graphics;
   mut .oval(WidthNat, HeightNat): mut Graphics;
   mut .image(Image): mut Graphics;
@@ -311,8 +325,8 @@ Mouse:{
   mut .exited(mut Consumer[MouseEvent]):mut Mouse;
 }
 MouseEvent:{
-  .mouseX:XNat;
-  .mouseY:YNat;
+  .mouseX:XInt;
+  .mouseY:YInt;
   .elapsed:Instant;
   .screenWidth:WidthNat;
   .screenHeight:HeightNat;

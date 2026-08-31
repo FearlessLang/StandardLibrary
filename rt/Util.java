@@ -86,6 +86,9 @@ public class Util{
   public static long natToLong(Object n){
     return ((Nat$c$0Instance)n).val();
   }
+  public static long intToLong(Object n){
+    return ((Int$c$0Instance)n).val();
+  }
   public static int natToInt(Object n){
     long nat = ((Nat$c$0Instance)n).val();
     if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {

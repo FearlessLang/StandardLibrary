@@ -12,8 +12,8 @@ record CGraphicsCtx(
   Instant$5c$0 elapsed,
   WidthNat$as$0 panelSizeW,
   HeightNat$lg$0 panelSizeH,
-  XNat$s$0 currentX,
-  YNat$s$0 currentY,
+  XInt$s$0 currentX,
+  YInt$s$0 currentY,
   Paint paint//shared by all positions of one Painter run; owned by AContainer.sk
   ) implements Graphics$ao$0 {
 
@@ -24,9 +24,9 @@ record CGraphicsCtx(
 //Drawing outside the panel silently clips (canvas is clipped to the panel),
 //otherwise user can cause errors by resizing the gui by hand
   @Override public Object mut$position$2(Object x,Object y){
-    frame.xPos((XNat$s$0)x,"graphics x position");
-    frame.yPos((YNat$s$0)y,"graphics y position");
-    return new CGraphicsCtx(cv,frame,elapsed,panelSizeW,panelSizeH,(XNat$s$0)x,(YNat$s$0)y,paint);
+    frame.xPos((XInt$s$0)x,"graphics x position");
+    frame.yPos((YInt$s$0)y,"graphics y position");
+    return new CGraphicsCtx(cv,frame,elapsed,panelSizeW,panelSizeH,(XInt$s$0)x,(YInt$s$0)y,paint);
   }
 //Correctly does not update the position.
   @Override public Object mut$line$2(Object x,Object y){
@@ -34,8 +34,8 @@ record CGraphicsCtx(
     cv.drawLine(
       frame.xPos(currentX,"graphics current x"),
       frame.yPos(currentY,"graphics current y"),
-      frame.xPos((XNat$s$0)x,"graphics line x"),
-      frame.yPos((YNat$s$0)y,"graphics line y"),
+      frame.xPos((XInt$s$0)x,"graphics line x"),
+      frame.yPos((YInt$s$0)y,"graphics line y"),
       paint);
     return this;
   }

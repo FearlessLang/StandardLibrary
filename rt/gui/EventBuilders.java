@@ -15,8 +15,8 @@ enum MouseKind{ Clicked, Pressed, Released, Moved, Dragged, Entered, Exited }
 
 record CMouseCtx(
   Instant$5c$0 elapsed,
-  XNat$s$0 mouseX,
-  YNat$s$0 mouseY,
+  XInt$s$0 mouseX,
+  YInt$s$0 mouseY,
   WidthNat$as$0 screenWidth,
   HeightNat$lg$0 screenHeight,
   WidthNat$as$0 panelWidth,
@@ -210,16 +210,12 @@ final class SkMouse extends MouseAdapter{
     int ph = t.component.getHeight();
     return new CMouseCtx(
       frame.elapsed,
-      Scopes.x(clamp(q.x, pw)),
-      Scopes.y(clamp(q.y, ph)),
+      Scopes.x(q.x),
+      Scopes.y(q.y),
       frame.screenSizeW,
       frame.screenSizeH,
       Scopes.w(pw),
       Scopes.h(ph));
-  }
-
-  private static int clamp(int v, int size){
-    return size <= 0 ? 0 : Math.max(0, Math.min(v, size - 1));
   }
 
   private SkComponent top(){ return frame.top.component; }
