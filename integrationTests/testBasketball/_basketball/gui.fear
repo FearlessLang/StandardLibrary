@@ -30,7 +30,7 @@ Menu: Painter { g -> Block#
   .let menuBounds = { MenuBounds#(g.panelWidth, g.panelHeight) }
   .return {g
   .color lightGrey
-    .position(X#(0), Y#(0))
+    .position(X.origin, Y.origin)
     .image(Court#(g.panelHeight.get))
     .position(menuBounds.x, menuBounds.y)
     .image(ButtonImg#(menuBounds.width.get))
@@ -41,7 +41,7 @@ Game: Painter { g -> Block#
   .let playerBounds = { PlayerBounds#(this.state.px, this.state.py, g.panelWidth, g.panelHeight) }
   .let ballBounds   = { BallBounds#(this.state.bx, this.state.by, g.panelWidth, g.panelHeight) }
   .return {g
-    .position(X#(0), Y#(0))
+    .position(X.origin, Y.origin)
     .image(Court#(g.panelHeight.get))
     .position(squareBounds.x - (squareBounds.width .getTruncDiv 7), squareBounds.y) 
     .image(Hoop#((squareBounds.width * 9 .getTruncDiv 7).get))

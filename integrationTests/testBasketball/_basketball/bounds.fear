@@ -8,18 +8,18 @@ MenuBounds: { #(width: Width, height: Height): Rect -> Block#
 SquareBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Rect -> Block#
   .let w = { width .getTruncDiv 10 }
   .let h = { Height#((width .getTruncDiv 12).get) }
-  .return { Rects#(X#x, Y#y, w, h) }
+  .return { Rects#(X#(x.getInt), Y#(y.getInt), w, h) }
 }
 
 PlayerBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Rect -> Block#
   .let size = { width .getTruncDiv 12 }
-  .return { Rects#(X#x, Y#y, size, Height#(size.get)) }
+  .return { Rects#(X#(x.getInt), Y#(y.getInt), size, Height#(size.get)) }
 }
 
 BallBounds: { #(x: Nat, y: Nat, width: Width, height: Height): BallBound -> Block#
   .let size = { width .getTruncDiv 16 }
   .return {{
-    .x -> X#x; .y -> Y#y;
+    .x -> X#(x.getInt); .y -> Y#(y.getInt);
     .width -> size; .height -> Height#(size.get);
     .screenWidth -> width;
     .screenHeight -> height;
