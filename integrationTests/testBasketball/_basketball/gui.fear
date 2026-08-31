@@ -18,7 +18,7 @@ Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  h
       .save canvas 
       .paint Menu
       .mouse {:: .clicked { e -> Block# 
-        .if { MenuBounds#(e.panelWidth, e.panelHeight).inBounds(e.mouseX, e.mouseY) }
+        .if { MenuBounds#(e.panelWidth, e.panelHeight).contains(e.mouseX, e.mouseY) }
           .do { model!.play }
         .done
         }}};
@@ -43,8 +43,8 @@ Game: Painter { g -> Block#
   .return {g
     .position(X#(0), Y#(0))
     .image(Court#(g.panelHeight.get))
-    .position(X#(squareBounds.x.get - (squareBounds.width.get.aluDiv 7)), squareBounds.y) 
-    .image(Hoop#(squareBounds.width.get * 9 .aluDiv 7))
+    .position(squareBounds.x - (squareBounds.width .getTruncDiv 7), squareBounds.y) 
+    .image(Hoop#((squareBounds.width * 9 .getTruncDiv 7).get))
     .position(squareBounds.x, squareBounds.y)
     .position(playerBounds.x, playerBounds.y)
     .image(PlayerImg#(playerBounds.width.get))

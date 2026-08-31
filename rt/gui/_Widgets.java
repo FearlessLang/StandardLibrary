@@ -291,7 +291,7 @@ class _Frame implements Frame$1c$0{
   // by the model (read .elapsed) on the queue thread with no ordering between
   // the two: volatile makes the reference handoff safe. The Time object
   // itself is immutable.
-  volatile Time$o$0 elapsed = time(0);
+  volatile Instant$5c$0 elapsed = time(0);
   AWidget top;
   final int screenW;
   final int screenH;
@@ -396,7 +396,7 @@ class _Frame implements Frame$1c$0{
 
   void markLayoutDirty(){ layoutDirty.set(true); }
 
-  void tick(Time$o$0 elapsed){
+  void tick(Instant$5c$0 elapsed){
     this.elapsed = elapsed;
     // Never relayout while a mouse button is held or a press/release is
     // already queued behind this tick: moving components mid-gesture would

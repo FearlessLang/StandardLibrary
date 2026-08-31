@@ -1,41 +1,34 @@
-Bound: {
-  .x: X; .y: Y; .width: Width; .height: Height;
-  .inBounds(x: X, y: Y): Bool ->
-    x.get.inRange(this.x.get|>{::=~~= (:: + (this.width.get))}) 
-    && { y.get.inRange(this.y.get|>{:: =~~= (:: + (this.height.get))}) }
-  }
-
-MenuBounds: { #(width: Width, height: Height): Bound -> Block#
-  .let w = { Width#(width.get * 2.aluDiv 5) }
-  .let h = { Height#(height.get.aluDiv 5) }
-  .let x = {X#(width.get - (w.get) .aluDiv 2)}
-  .let y = {Y#(height.get - (h.get) .aluDiv 2)}
-  .return { {.x -> x; .y -> y; .width -> w; .height -> h;}}
+MenuBounds: { #(width: Width, height: Height): Rect -> Block#
+  .let w = { width * 2 .getTruncDiv 5 }
+  .let h = { height .getTruncDiv 5 }
+  .let x = { X.origin + ((width - w) .getTruncDiv 2) }
+  .let y = { Y.origin + ((height - h) .getTruncDiv 2) }
+  .return { Rects#(x, y, w, h) }
 }
-SquareBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Bound -> Block#
-  .let w = { (width.get).aluDiv 10 }
-  .let h = { width.get.aluDiv 12 }
-  .return { {.x -> X#x; .y -> Y#y; .width -> Width#w; .height -> Height#h; } }
+SquareBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Rect -> Block#
+  .let w = { width .getTruncDiv 10 }
+  .let h = { Height#((width .getTruncDiv 12).get) }
+  .return { Rects#(X#x, Y#y, w, h) }
 }
 
-PlayerBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Bound -> Block#
-  .let size = { (width.get).aluDiv 12 }
-  .return { {.x -> X#x; .y -> Y#y; .width -> Width#size; .height -> Height#size;} }
+PlayerBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Rect -> Block#
+  .let size = { width .getTruncDiv 12 }
+  .return { Rects#(X#x, Y#y, size, Height#(size.get)) }
 }
 
 BallBounds: { #(x: Nat, y: Nat, width: Width, height: Height): BallBound -> Block#
-  .let size = { (width.get).aluDiv 16 }
+  .let size = { width .getTruncDiv 16 }
   .return {{
     .x -> X#x; .y -> Y#y;
-    .width -> Width#size; .height -> Height#size;
+    .width -> size; .height -> Height#(size.get);
     .screenWidth -> width;
     .screenHeight -> height;
     }}}
 
-BallBound: Bound {
+BallBound: Rect {
     .screenWidth: Width;
     .screenHeight: Height;
-    .overlapsRect(bx: Float, by: Float, bounds: Bound): Bool -> Block#
+    .overlapsRect(bx: Float, by: Float, bounds: Rect): Bool -> Block#
       .let[Float] px          = { bounds.x.get.softFloat }//somehow infers read Float
       .let[Float] py          = { bounds.y.get.softFloat }
       .let[Float] boundW      = { bounds.width.get.softFloat }

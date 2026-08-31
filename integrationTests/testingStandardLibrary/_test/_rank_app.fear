@@ -40,6 +40,21 @@ use base.ESet as ESet;
 use base.ESets as ESets;
 use base.Norm as Norm;
 use base.Cache as Cache;
+use base.XNat as X;
+use base.YNat as Y;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
+use base.Red as Red;
+use base.Green as Green;
+use base.Blue as Blue;
+use base.Alpha as Alpha;
+use base.Hue as Hue;
+use base.Saturation as Saturation;
+use base.Brightness as Brightness;
+use base.Duration as Duration;
+use base.Instant as Instant;
+use base.Rect as Rect;
+use base.Rects as Rects;
 
 MyTests:UnitTests{::
   .test TestByte
@@ -48,6 +63,7 @@ MyTests:UnitTests{::
   .test TestNat
   .test TestNum
   .test TestStr
+  .test TestWrappers
   .test TestList
   .test TestMap
   .test TestAs
