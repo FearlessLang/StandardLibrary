@@ -37,8 +37,7 @@ Models: { #: mut Model -> Block#
       .empty -> self.full.if{.then->"Draw!"; .else->(turn.get?{.then->"X"; .else->"O"}) + "'s turn"};
       };
     mut .play(i: Nat): Void -> Block#
-      .let canPlay = { self.cell(i).isEmpty && {self.winner.isEmpty} }
-      .if { canPlay }
+      .if { self.cell(i).isEmpty && {self.winner.isEmpty} }
           .do { Block#(
             board.set(board.get.with(i, Opts#(turn.get))),
             turn.set(turn.get.not),
