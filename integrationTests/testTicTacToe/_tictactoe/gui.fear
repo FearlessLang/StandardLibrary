@@ -1,0 +1,28 @@
+CellButton: { #(model: mut Model, i: Nat): mut Scope[Button] -> {::
+  .width 60
+  .height 60
+  .textHeight 28
+  .text(model.cellText(i))
+  .action{model.play(i)}
+  .save(model.slot(i))
+  }}
+
+Row: { #(model: mut Model, line: Line): mut Scope[Pane] -> {::
+  .button(CellButton#(model, line.a))
+  .button(CellButton#(model, line.b))
+  .button(CellButton#(model, line.c))
+  }}
+
+Gui: Consumer[mut Frame] {
+  mut .model: mut Model;
+  ::
+  .title "Tic-Tac-Toe"
+  .content{::
+    .background (Color.ghostWhite)
+    .label{:: .text(this.model.status) .save(this.model.statusSlot) }
+    .pane(Row#(this.model, Lines#(0,1,2)))
+    .pane(Row#(this.model, Lines#(3,4,5)))
+    .pane(Row#(this.model, Lines#(6,7,8)))
+    .button{:: .text "New Game" .action{this.model.reset} }
+    }
+  }

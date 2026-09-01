@@ -1,0 +1,28 @@
+use base.Main as Main;
+use base.Void as Void;
+use base.Str as Str;
+use base.Nat as Nat;
+use base.Bool as Bool;
+use base.True as True;
+use base.False as False;
+use base.Block as Block;
+use base.Consumer as Consumer;
+use base.Frame as Frame;
+use base.Color as Color;
+use base.Label as Label;
+use base.Button as Button;
+use base.Pane as Pane;
+use base.Scope as Scope;
+use base.Slot as Slot;
+use base.Slots as Slots;
+use base.Opt as Opt;
+use base.Opts as Opts;
+use base.List as List;
+use base.Lists as Lists;
+use base.F as F;
+
+Presentation: base.Main { sys -> Block#
+  .let model = { Models# }
+  .do { sys.gui.run(mut Gui{.model->model}) }
+  .done
+  }
