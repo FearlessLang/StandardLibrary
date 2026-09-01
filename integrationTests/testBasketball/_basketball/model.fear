@@ -6,7 +6,7 @@ Bouncers: { #(start: Float, initialVel: Float): mut Bouncer -> Block#
     read .vel: Float -> v.get;
     mut .setVel(newVel: Float): Void -> v.set newVel;
     mut .tick(accel: Float, maxSpeed: Float, min: Float, max: Float): Void -> Block#
-      .do { v.set((v.get + accel).clampTo(0.0 - maxSpeed =~~= maxSpeed)) }
+      .do { v.set((v.get + accel).clampTo(maxSpeed.getNegAbs =~~= maxSpeed)) }
       .do { p.set(p.get + (v.get)) }
       .if { p.get < min } .do { Block#(p.set min, v.set(v.get.getAbs)) }
       .if { p.get > max } .do { Block#(p.set max, v.set(v.get.getNegAbs)) }
