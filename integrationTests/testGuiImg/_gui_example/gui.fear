@@ -82,7 +82,7 @@ PaintPortal:Painter{::
   .position(X#(+0), Y#(+0))
   .image(base.Cache.of
     {Fishing.consumeImage("A",3_000_000)
-      .scaleToHeight(Height#300)})
+      .scaleToHeight(300)})
   }
 
 PaintWarning:Painter{::

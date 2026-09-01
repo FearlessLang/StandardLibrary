@@ -138,11 +138,14 @@ ImageFile:{
     cap.readImage(this.path,this.diskPath,this.zipSteps,this.zipEntry,maxPixels);
   .consumeImage(requestId: Str, maxPixels: Nat): Image ->
     _ImageRead.consumeImage(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,maxPixels);
+  .consumeImage(requestId: Str): Image -> this.consumeImage(requestId, Math.maxNat);
   }
 Image:{
   read .width: WidthNat;
   read .height: HeightNat;
   .scale(width: WidthNat, height: HeightNat): Image;
-  .scaleToWidth(width: WidthNat): Image;
-  .scaleToHeight(height: HeightNat): Image;
+  .scaleToWidth'(width: WidthNat): Image;
+  .scaleToHeight'(height: HeightNat): Image;
+  .scaleToWidth(width: Nat): Image -> this.scaleToWidth'(WidthNat#width);
+  .scaleToHeight(height: Nat): Image -> this.scaleToHeight'(HeightNat#height);
   }

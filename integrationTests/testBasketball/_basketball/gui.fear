@@ -37,8 +37,8 @@ Menu: Painter { g -> Block#
     }}
 
 Game: Painter { g -> Block#
-  .let squareBounds = { SquareBounds#(this.state.sx, this.state.sy, g.panelWidth, g.panelHeight) }
-  .let playerBounds = { PlayerBounds#(this.state.px, this.state.py, g.panelWidth, g.panelHeight) }
+  .let squareBounds = { SquareBounds#(this.state.sx, this.state.sy, g.panelWidth) }
+  .let playerBounds = { PlayerBounds#(this.state.px, this.state.py, g.panelWidth) }
   .let ballBounds   = { BallBounds#(this.state.bx, this.state.by, g.panelWidth, g.panelHeight) }
   .return {g
     .position(X.origin, Y.origin)
@@ -54,13 +54,13 @@ Game: Painter { g -> Block#
   .state: State;
   }
 
-Court:{#(h:Nat):Image->Cache.of(h.norm,
-  {ImgCourt.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
-Hoop:{#(h:Nat):Image->Cache.of(h.norm,
-  {ImgHoop.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
-BallImg:{#(h:Nat):Image->Cache.of(h.norm,
-  {ImgBall.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
-PlayerImg:{#(h:Nat):Image->Cache.of(h.norm,
-  {ImgPlayer.consumeImage("A", Math.maxNat) .scaleToHeight(Height#(::.get))})}
-ButtonImg:{#(h:Nat):Image->Cache.of(h.norm,
-  {ImgMenu.consumeImage("A", Math.maxNat) .scaleToWidth(Width#(::.get))})}
+Court:F[Nat,Image]{h->Cache.of(h.norm,
+  {ImgCourt.consumeImage("A") .scaleToHeight(::.get)})}
+Hoop:F[Nat,Image]{h->Cache.of(h.norm,
+  {ImgHoop.consumeImage("A") .scaleToHeight(::.get)})}
+BallImg:F[Nat,Image]{h->Cache.of(h.norm,
+  {ImgBall.consumeImage("A") .scaleToHeight(::.get)})}
+PlayerImg:F[Nat,Image]{h->Cache.of(h.norm,
+  {ImgPlayer.consumeImage("A") .scaleToHeight(::.get)})}
+ButtonImg:F[Nat,Image]{h->Cache.of(h.norm,
+  {ImgMenu.consumeImage("A") .scaleToWidth(::.get)})}

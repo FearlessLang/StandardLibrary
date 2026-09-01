@@ -24,6 +24,7 @@ use base.Debug as Debug;
 use base.Color as Color;
 use base.WidenTo as WidenTo;
 use base.CacheF as CacheF;
+use base.F as F;
 use base.Image as Image;
 use base.List as List;
 use base.Lists as Lists;
