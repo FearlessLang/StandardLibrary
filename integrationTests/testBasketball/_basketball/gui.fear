@@ -52,13 +52,13 @@ Game: Painter { g -> Block#
   .state: State;
   }
 
-Court:F[Nat,Image]{h->Cache.of(h.norm,
+Court:F[Nat,Image]{Cache.of(::.norm,
   {ImgCourt.consumeImage("A") .scaleToHeight(::.get)})}
-Hoop:F[Nat,Image]{h->Cache.of(h.norm,
+Hoop:F[Nat,Image]{Cache.of(::.norm,
   {ImgHoop.consumeImage("A") .scaleToHeight(::.get)})}
-BallImg:F[Nat,Image]{h->Cache.of(h.norm,
+BallImg:F[Nat,Image]{Cache.of(::.norm,
   {ImgBall.consumeImage("A") .scaleToHeight(::.get)})}
-PlayerImg:F[Nat,Image]{h->Cache.of(h.norm,
+PlayerImg:F[Nat,Image]{Cache.of(::.norm,
   {ImgPlayer.consumeImage("A") .scaleToHeight(::.get)})}
-ButtonImg:F[Nat,Image]{h->Cache.of(h.norm,
+ButtonImg:F[Nat,Image]{Cache.of(::.norm,
   {ImgMenu.consumeImage("A") .scaleToWidth(::.get)})}

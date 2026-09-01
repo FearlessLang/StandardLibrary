@@ -48,9 +48,7 @@ BallBound: Rect {
         && { by < boundBottom }
         };
     .bounceOffPlayer(bx: Float, player: read Player): Float -> Block#
-      .let playerBounds          = { PlayerBounds#(player.x, player.y, this.screenWidth) }
-      .let px           = { playerBounds.x.get.softFloat }
-      .let playerW      = { playerBounds.width.get.softFloat }
-      .let playerCenter = { px + (playerW / +2.0) }
+      .let playerW      = { PlayerSize#(this.screenWidth).get.softFloat }
+      .let playerCenter = { player.x.softFloat + (playerW / +2.0) }
       .let ballCenter   = { bx + (this.width.get.softFloat / +2.0) }
       .return { (ballCenter - playerCenter) / playerW * +16.0 }}
