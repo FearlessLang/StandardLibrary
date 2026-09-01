@@ -7,9 +7,10 @@ Bouncers: { #(start: Float, initialVel: Float): mut Bouncer -> Block#
     mut .setVel(newVel: Float): Void -> v.set newVel;
     mut .tick(accel: Float, maxSpeed: Float, range: Range[Float]): Void -> Block#
       .do { v.set((v.get + accel).clampTo(maxSpeed.getNegAbs =~~= maxSpeed)) }
-      .do { p.set(p.get + (v.get)) }
-      .if { p.get < (range.start) } .do { Block#(p.set(range.start), v.set(v.get.getAbs)) }
-      .if { p.get > (range.end) } .do { Block#(p.set(range.end), v.set(v.get.getNegAbs)) }
+      .let next = { p.get + (v.get) }
+      .do { p.set(range.clamp(next)) }
+      .if { next < (range.start) } .do { v.set(v.get.getAbs) }
+      .if { next > (range.end) } .do { v.set(v.get.getNegAbs) }
       .done;
     }}}
 
