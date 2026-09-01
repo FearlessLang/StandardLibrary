@@ -5,11 +5,11 @@ Bouncers: { #(start: Float, initialVel: Float): mut Bouncer -> Block#
     read .pos: Float -> p.get;
     read .vel: Float -> v.get;
     mut .setVel(newVel: Float): Void -> v.set newVel;
-    mut .tick(accel: Float, maxSpeed: Float, min: Float, max: Float): Void -> Block#
+    mut .tick(accel: Float, maxSpeed: Float, range: Range[Float]): Void -> Block#
       .do { v.set((v.get + accel).clampTo(maxSpeed.getNegAbs =~~= maxSpeed)) }
       .do { p.set(p.get + (v.get)) }
-      .if { p.get < min } .do { Block#(p.set min, v.set(v.get.getAbs)) }
-      .if { p.get > max } .do { Block#(p.set max, v.set(v.get.getNegAbs)) }
+      .if { p.get < (range.start) } .do { Block#(p.set(range.start), v.set(v.get.getAbs)) }
+      .if { p.get > (range.end) } .do { Block#(p.set(range.end), v.set(v.get.getNegAbs)) }
       .done;
     }}}
 
@@ -26,8 +26,8 @@ Balls: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Ball -> Block
     read .y: Nat -> yAxis.pos.softNat;
     read .alive: Bool -> alive.get;
      mut .tick(player: mut Player, square: mut Square): Void -> Block#
-    .do { xAxis.tick(0.0, Math.inf, 0.0, width.softFloat - ballW) }
-    .do { yAxis.tick(gravity, maxVel, 0.0, height.softFloat - ballW) }
+    .do { xAxis.tick(0.0, Math.inf, 0.0 =~~= (width.softFloat - ballW)) }
+    .do { yAxis.tick(gravity, maxVel, 0.0 =~~= (height.softFloat - ballW)) }
     .if { ballBounds.overlapsRect(xAxis.pos, yAxis.pos, PlayerBounds#(player.x, player.y, Width#width)) }
         .do { Block#(
           xAxis.setVel(ballBounds.bounceOffPlayer(xAxis.pos, player)),
@@ -76,7 +76,7 @@ Squares: { #(startX: Nat, startY: Nat, width: Nat): mut Square -> Block#
   .return { mut Square: {
     read .x: Nat -> xAxis.pos.softNat;
     read .y: Nat -> startY;
-    mut .tick: Void -> xAxis.tick(0.0, speed, minX, maxX);
+    mut .tick: Void -> xAxis.tick(0.0, speed, minX =~~= maxX);
     }}}
 Models: { #(gui: mut Gui, width: Nat, height: Nat): mut Model -> Block#
   .var playing      = { False }

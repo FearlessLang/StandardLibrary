@@ -1,5 +1,6 @@
 use base.Main as Main;
 use base.Float as Float;
+use base.Range as Range;
 use base.Alpha as Alpha;
 use base.Red as Red;
 use base.Green as Green;
