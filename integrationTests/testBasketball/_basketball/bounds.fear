@@ -5,19 +5,23 @@ MenuBounds: { #(width: Width, height: Height): Rect -> Block#
   .let y = { Y.origin + ((height - h) .getTruncDiv 2) }
   .return { Rects#(x, y, w, h) }
 }
-SquareBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Rect -> Block#
-  .let w = { width .getTruncDiv 10 }
-  .let h = { Height#((width .getTruncDiv 12).get) }
-  .return { Rects#(X#(x.getInt), Y#(y.getInt), w, h) }
+
+PlayerSize: { #(width: Width): Width -> width .getTruncDiv 12 }
+BallSize: { #(width: Width): Width -> width .getTruncDiv 16 }
+SquareWidth: { #(width: Width): Width -> width .getTruncDiv 10 }
+SquareHeight: { #(width: Width): Height -> Height#((width .getTruncDiv 12).get) }
+
+SquareBounds: { #(x: Nat, y: Nat, width: Width): Rect -> Block#
+  .return { Rects#(X#(x.getInt), Y#(y.getInt), SquareWidth#width, SquareHeight#width) }
 }
 
-PlayerBounds: { #(x: Nat, y: Nat, width: Width, height: Height): Rect -> Block#
-  .let size = { width .getTruncDiv 12 }
+PlayerBounds: { #(x: Nat, y: Nat, width: Width): Rect -> Block#
+  .let size = { PlayerSize#width }
   .return { Rects#(X#(x.getInt), Y#(y.getInt), size, Height#(size.get)) }
 }
 
 BallBounds: { #(x: Nat, y: Nat, width: Width, height: Height): BallBound -> Block#
-  .let size = { width .getTruncDiv 16 }
+  .let size = { BallSize#width }
   .return {{
     .x -> X#(x.getInt); .y -> Y#(y.getInt);
     .width -> size; .height -> Height#(size.get);
@@ -46,7 +50,7 @@ BallBound: Rect {
         && { by < boundBottom }
         };
     .bounceOffPlayer(bx: Float, player: read Player): Float -> Block#
-      .let playerBounds          = { PlayerBounds#(player.x, player.y, this.screenWidth, this.screenHeight) }
+      .let playerBounds          = { PlayerBounds#(player.x, player.y, this.screenWidth) }
       .let px           = { playerBounds.x.get.softFloat }
       .let playerW      = { playerBounds.width.get.softFloat }
       .let playerCenter = { px + (playerW / +2.0) }

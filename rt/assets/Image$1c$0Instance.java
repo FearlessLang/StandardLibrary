@@ -13,11 +13,11 @@ final class Image$1c$0Instance implements Image$1c$0{
   @Override public Object imm$scale$2(Object w,Object h){
     return new Image$1c$0Instance(Sk.scaled(image,widthVal(w),heightVal(h)));
   }
-  @Override public Object imm$scaleToWidth$1(Object w){
+  @Override public Object imm$scaleToWidth$p1$1(Object w){
     var newW=widthVal(w);
     return new Image$1c$0Instance(Sk.scaled(image,newW,proportional(image.getHeight(),newW,image.getWidth())));
   }
-  @Override public Object imm$scaleToHeight$1(Object h){
+  @Override public Object imm$scaleToHeight$p1$1(Object h){
     var newH=heightVal(h);
     return new Image$1c$0Instance(Sk.scaled(image,proportional(image.getWidth(),newH,image.getHeight()),newH));
   }
