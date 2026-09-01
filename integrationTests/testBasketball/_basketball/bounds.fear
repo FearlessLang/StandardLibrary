@@ -6,13 +6,13 @@ MenuBounds: { #(width: Width, height: Height): Rect -> Block#
   .return { Rects#(x, y, w, h) }
 }
 
-PlayerSize: { #(width: Width): Width -> width .getTruncDiv 12 }
-BallSize: { #(width: Width): Width -> width .getTruncDiv 16 }
-SquareWidth: { #(width: Width): Width -> width .getTruncDiv 10 }
-SquareHeight: { #(width: Width): Height -> Height#((width .getTruncDiv 12).get) }
+PlayerSize:F[Width,Width]{:: .getTruncDiv 12}
+BallSize:F[Width,Width]{:: .getTruncDiv 16}
+SquareWidth:F[Width,Width]{:: .getTruncDiv 10}
+SquareHeight:F[Width,Height]{Height#((::.getTruncDiv 12).get)}
 
-SquareBounds: { #(x: Nat, y: Nat, width: Width): Rect -> Block#
-  .return { Rects#(X#(x.getInt), Y#(y.getInt), SquareWidth#width, SquareHeight#width) }
+SquareBounds: { #(x: Nat, y: Nat, width: Width): Rect ->
+  Rects#(X#(x.getInt), Y#(y.getInt), SquareWidth#width, SquareHeight#width)
 }
 
 PlayerBounds: { #(x: Nat, y: Nat, width: Width): Rect -> Block#
