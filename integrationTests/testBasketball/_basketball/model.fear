@@ -9,7 +9,7 @@ Bouncers: { #(start: Float, initialVel: Float): mut Bouncer -> Block#
       .do { v.set((v.get + accel).clampTo(0.0 - maxSpeed =~~= maxSpeed)) }
       .do { p.set(p.get + (v.get)) }
       .if { p.get < min } .do { Block#(p.set min, v.set(v.get.getAbs)) }
-      .if { p.get > max } .do { Block#(p.set max, v.set(0.0 - (v.get.getAbs))) }
+      .if { p.get > max } .do { Block#(p.set max, v.set(v.get.getNegAbs)) }
       .done;
     }}}
 
@@ -31,7 +31,7 @@ Balls: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Ball -> Block
     .if { ballBounds.overlapsRect(xAxis.pos, yAxis.pos, PlayerBounds#(player.x, player.y, Width#width)) }
         .do { Block#(
           xAxis.setVel(ballBounds.bounceOffPlayer(xAxis.pos, player)),
-          yAxis.setVel(0.0 - (yAxis.vel.getAbs + 1.0))
+          yAxis.setVel((yAxis.vel.getAbs + 1.0).getNegAbs)
         )}
     .if { ballBounds.overlapsRect(xAxis.pos, yAxis.pos, SquareBounds#(square.x, square.y, Width#width)) }
         .do { alive.set False }
