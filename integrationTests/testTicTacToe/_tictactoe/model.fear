@@ -1,0 +1,57 @@
+Line: { .a: Nat; .b: Nat; .c: Nat; }
+Lines: { #(a: Nat, b: Nat, c: Nat): Line -> { .a->a; .b->b; .c->c; } }
+
+AllLines:F[mut List[Line]]{Lists#(
+  Lines#(0,1,2), Lines#(3,4,5), Lines#(6,7,8),
+  Lines#(0,3,6), Lines#(1,4,7), Lines#(2,5,8),
+  Lines#(0,4,8), Lines#(2,4,6)
+  )}
+
+EmptyBoard:F[mut List[mut Opt[Bool]]]{Lists#({},{},{},{},{},{},{},{},{})}
+
+Models: { #: mut Model -> Block#
+  .var board       = { EmptyBoard# }
+  .var turn        = { True }
+  .let[mut List[mut Slot[mut Button]]] slots      = { Lists#(Slots#[mut Button],Slots#[mut Button],Slots#[mut Button],Slots#[mut Button],Slots#[mut Button],Slots#[mut Button],Slots#[mut Button],Slots#[mut Button],Slots#[mut Button]) }
+  .let[mut Slot[mut Label]]            statusSlot = { Slots#[mut Label] }
+  .return { mut Model: {'self
+    mut .slot(i: Nat): mut Slot[mut Button] -> slots.get(i);
+    mut .statusSlot: mut Slot[mut Label] -> statusSlot;
+    mut .cell(i: Nat): mut Opt[Bool] -> board.get.get(i);
+    mut .cellText(i: Nat): Str -> self.cell(i).match{
+      .some m -> m?{.then->"X"; .else->"O"};
+      .empty -> " ";
+      };
+    mut .winner: mut Opt[Bool] -> Block#
+      .let list = { board.get }
+      .return { AllLines#.flow.mapFilter{line -> list.get(line.a).match{
+        .some mark -> Block#
+          .let b = { list.get(line.b) }
+          .let c = { list.get(line.c) }
+          .return { (b.isSome && {b! == mark} && {c.isSome} && {c! == mark}).toOpt{mark} };
+        .empty -> {};
+        }}.first };
+    mut .full: Bool -> board.get.flow.all{c -> c.isSome};
+    mut .status: Str -> self.winner.match{
+      .some m -> (m?{.then->"X"; .else->"O"}) + " wins!";
+      .empty -> self.full.if{.then->"Draw!"; .else->(turn.get?{.then->"X"; .else->"O"}) + "'s turn"};
+      };
+    mut .play(i: Nat): Void -> Block#
+      .let canPlay = { self.cell(i).isEmpty && {self.winner.isEmpty} }
+      .if { canPlay }
+          .do { Block#(
+            board.set(board.get.with(i, Opts#(turn.get))),
+            turn.set(turn.get.not),
+            self.refresh
+          )}
+      .done;
+    mut .reset: Void -> Block#(
+      board.set(EmptyBoard#),
+      turn.set(True),
+      self.refresh
+      );
+    mut .refresh: Void -> Block#(
+      statusSlot!.text(self.status),
+      (0=~~=8).flow.forEach{i -> Block#(slots.get(i)!.text(self.cellText(i)), Void)}
+      );
+    }}}
