@@ -15,10 +15,10 @@ Bouncers: { #(start: Float, initialVel: Float): mut Bouncer -> Block#
 
 Balls: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Ball -> Block#
   .var alive      = { True }
-  .let ballBounds = { BallBounds#(0, 0, Width#width, Height#height) }
+  .let ballBounds = { BallBounds#(0, 0, Width#width) }
   .let gravity    = { 0.4soft }
   .let maxVel     = { 12.0 }
-  .let ballW      = { ballBounds.width.get.softFloat }
+  .let ballW      = { BallSize#(Width#width).get.softFloat }
   .let xAxis      = { Bouncers#(startX.softFloat, 0.0) }
   .let yAxis      = { Bouncers#(startY.softFloat, 0.0) }
   .return { mut Ball: {
@@ -38,17 +38,17 @@ Balls: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Ball -> Block
     .done;
     }}}
 
-Players: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Player -> Block#
-  .var px                = { startX.softFloat }
-  .var py                = { startY.softFloat }
-  .var vy                = { 0.0 }
-  .var left                   = { False }
-  .var right                  = { False }
-  .let speed         = { 8.0 }
-  .let gravity       = { 0.4soft }
-  .let jumpStrength  = { -12.0 }
-  .let groundY       = { startY.softFloat }
-  .let playerW       = { PlayerSize#(Width#width).get.softFloat }
+Players: { #(startX: Nat, startY: Nat, width: Nat): mut Player -> Block#
+  .var px           = { startX.softFloat }
+  .var py           = { startY.softFloat }
+  .var vy           = { 0.0 }
+  .var left         = { False }
+  .var right        = { False }
+  .let speed        = { 8.0 }
+  .let gravity      = { 0.4soft }
+  .let jumpStrength = { -12.0 }
+  .let groundY      = { startY.softFloat }
+  .let playerW      = { PlayerSize#(Width#width).get.softFloat }
   .return { mut Player: {
     read .x: Nat -> px.get.softNat;
     read .y: Nat -> py.get.softNat;
@@ -67,7 +67,7 @@ Players: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Player -> B
           .do { Block#(py.set groundY, vy.set(0.0)) }
       .done;
     }}}
-Squares: { #(startX: Nat, startY: Nat, width: Nat, height: Nat): mut Square -> Block#
+Squares: { #(startX: Nat, startY: Nat, width: Nat): mut Square -> Block#
   .let speed   = { 5.0 }
   .let squareW = { SquareWidth#(Width#width).get.softFloat }
   .let minX    = { width.softFloat / 10.0 }
@@ -84,7 +84,7 @@ Models: { #(gui: mut Gui, width: Nat, height: Nat): mut Model -> Block#
   .let playerH      = { playerW }
   .let playerX      = { (width.aluDiv 2) - (playerW.aluDiv 2) }
   .let playerY      = { height - playerH }
-  .let player       = { Players#(playerX, playerY, width, height) }
+  .let player       = { Players#(playerX, playerY, width) }
   .let ballW        = { BallSize#(Width#width).get }
   .let ballH        = { ballW }
   .let ballX        = { (width.aluDiv 2) - (ballW.aluDiv 2) }
@@ -94,7 +94,7 @@ Models: { #(gui: mut Gui, width: Nat, height: Nat): mut Model -> Block#
   .let squareH      = { SquareHeight#(Width#width).get }
   .let squareX      = { (width.aluDiv 4) - (squareW.aluDiv 2) }
   .let squareY      = { (height.aluDiv 4) - ((squareH * 3) .aluDiv 4) }
-  .let square       = { Squares#(squareX, squareY, width, height) }
+  .let square       = { Squares#(squareX, squareY, width) }
   .return { mut Model: {
     mut .player: mut Player -> player;
     mut .square: mut Square -> square;

@@ -1,6 +1,5 @@
-Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  height: Nat): mut Gui -> Block#
-  .let lightGrey = { Color#(Red#(83.getByte),Green#(81.getByte),Blue#(81.getByte),Alpha.opaque) }
-  .return { mut Gui: Consumer[mut Frame] {::
+Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  height: Nat): mut Gui ->
+  mut Gui: Consumer[mut Frame] {::
     .title "Basketball"
     .undecorated(Alpha.opaque)
     .fps 30
@@ -23,7 +22,7 @@ Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  h
         .done
         }}};
     mut .set(p: Painter): Void -> Block#(canvas!.paint(p), Void);
-    }}}
+    }}
 
 Menu: Painter { g -> Block#
   .let lightGrey = { Color#(Red#(83.getByte),Green#(81.getByte),Blue#(81.getByte),Alpha#(150.getByte)) }
@@ -39,13 +38,12 @@ Menu: Painter { g -> Block#
 Game: Painter { g -> Block#
   .let squareBounds = { SquareBounds#(this.state.sx, this.state.sy, g.panelWidth) }
   .let playerBounds = { PlayerBounds#(this.state.px, this.state.py, g.panelWidth) }
-  .let ballBounds   = { BallBounds#(this.state.bx, this.state.by, g.panelWidth, g.panelHeight) }
+  .let ballBounds   = { BallBounds#(this.state.bx, this.state.by, g.panelWidth) }
   .return {g
     .position(X.origin, Y.origin)
     .image(Court#(g.panelHeight.get))
-    .position(squareBounds.x - (squareBounds.width .getTruncDiv 7), squareBounds.y) 
+    .position(squareBounds.x - (squareBounds.width .getTruncDiv 7), squareBounds.y)
     .image(Hoop#((squareBounds.width * 9 .getTruncDiv 7).get))
-    .position(squareBounds.x, squareBounds.y)
     .position(playerBounds.x, playerBounds.y)
     .image(PlayerImg#(playerBounds.width.get))
     .position(ballBounds.x, ballBounds.y)

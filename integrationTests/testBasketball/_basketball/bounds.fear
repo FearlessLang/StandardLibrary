@@ -20,18 +20,16 @@ PlayerBounds: { #(x: Nat, y: Nat, width: Width): Rect -> Block#
   .return { Rects#(X#(x.getInt), Y#(y.getInt), size, Height#(size.get)) }
 }
 
-BallBounds: { #(x: Nat, y: Nat, width: Width, height: Height): BallBound -> Block#
+BallBounds: { #(x: Nat, y: Nat, width: Width): BallBound -> Block#
   .let size = { BallSize#width }
   .return {{
     .x -> X#(x.getInt); .y -> Y#(y.getInt);
     .width -> size; .height -> Height#(size.get);
     .screenWidth -> width;
-    .screenHeight -> height;
     }}}
 
 BallBound: Rect {
     .screenWidth: Width;
-    .screenHeight: Height;
     .overlapsRect(bx: Float, by: Float, bounds: Rect): Bool -> Block#
       .let[Float] px          = { bounds.x.get.softFloat }//somehow infers read Float
       .let[Float] py          = { bounds.y.get.softFloat }
