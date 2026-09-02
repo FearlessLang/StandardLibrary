@@ -6,6 +6,7 @@ use base.Bool as Bool;
 use base.True as True;
 use base.False as False;
 use base.Sealed as Sealed;
+use base.WidenTo as WidenTo;
 use base.Block as Block;
 use base.Pipe as Pipe;
 use base.Consumer as Consumer;
