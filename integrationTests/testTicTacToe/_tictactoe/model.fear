@@ -7,9 +7,9 @@ Cell: Sealed, WidenTo[Cell] {
   .isO: Bool -> this.match{.o->True; .empty->False; .x->False};
   .text: Str -> this.match{.empty->" "; .x->"X"; .o->"O"};
   }
-CellEmpty: Cell { .match m -> m.empty }
-CellX: Cell { .match m -> m.x }
-CellO: Cell { .match m -> m.o }
+CellEmpty: Cell { ::.empty }
+CellX: Cell { ::.x }
+CellO: Cell { ::.o }
 
 AllLines:F[mut List[mut List[Nat]]]{Lists#(
   Lists#(0,1,2), Lists#(3,4,5), Lists#(6,7,8),
@@ -19,34 +19,33 @@ AllLines:F[mut List[mut List[Nat]]]{Lists#(
 
 EmptyBoard:F[mut List[Cell]]{ (0=~~=8).flow.map{_ -> CellEmpty}.list }
 
+Winner: { #(board: mut List[Cell]): mut Opt[Cell] -> AllLines#.flow.mapFilter{line -> board.get(line.get 0).match{
+  .empty -> {};
+  .x -> (board.get(line.get 1).isX && {board.get(line.get 2).isX}).toOpt{CellX};
+  .o -> (board.get(line.get 1).isO && {board.get(line.get 2).isO}).toOpt{CellO};
+  }}.first }
+
 Models: { #: mut Model -> Block#
   .var board       = { EmptyBoard# }
   .var turn        = { True }
-  .let[mut List[mut Slot[mut Button]]] slots      = { (0=~~=8).flow.map{_ -> Slots#[mut Button]}.list }
-  .let[mut Slot[mut Label]]            statusSlot = { Slots#[mut Label] }
+  .let slots      = { (0=~~=8).flow.map{_ -> Slots#[mut Button]}.list }
+  .let statusSlot = { Slots#[mut Label] }
   .return { mut Model: Pipe[mut Model] {'self
     .close -> self;
     mut .slot(i: Nat): mut Slot[mut Button] -> slots.get(i);
     mut .statusSlot: mut Slot[mut Label] -> statusSlot;
     mut .cell(i: Nat): Cell -> board.get.get(i);
     mut .cellText(i: Nat): Str -> self.cell(i).text;
-    mut .winner: mut Opt[Cell] -> board.get |>{list -> AllLines#.flow.mapFilter{line -> list.get(line.get 0).match{
-      .empty -> {};
-      .x -> (list.get(line.get 1).isX && {list.get(line.get 2).isX}).toOpt{CellX};
-      .o -> (list.get(line.get 1).isO && {list.get(line.get 2).isO}).toOpt{CellO};
-      }}.first };
+    mut .winner: mut Opt[Cell] -> Winner#(board.get);
     mut .full: Bool -> board.get.flow.all{c -> c.isEmpty.not};
     mut .status: Str -> self.winner.match{
       .some m -> m.text + " wins!";
       .empty -> self.full.if{.then->"Draw!"; .else->(turn.get?{.then->"X"; .else->"O"}) + "'s turn"};
       };
-    mut .play(i: Nat): Void -> (self.cell(i).isEmpty && {self.winner.isEmpty}) ?{
-      .then -> Block#(
-        board.set(board.get.with(i, turn.get?{.then->CellX; .else->CellO})),
-        turn.set(turn.get.not),
-        self.refresh);
-      .else -> Void;
-      };
+    mut .play(i: Nat): Void -> (self.cell(i).isEmpty && {self.winner.isEmpty}).thenDo{Block#(
+      board.set(board.get.with(i, turn.get?{.then->CellX; .else->CellO})),
+      turn.set(turn.get.not),
+      self.refresh)};
     mut .reset: Void -> Block#(
       board.set(EmptyBoard#),
       turn.set(True),
@@ -54,6 +53,6 @@ Models: { #: mut Model -> Block#
       );
     mut .refresh: Void -> Block#(
       statusSlot!.text(self.status),
-      (0=~~=8).flow.forEach{i -> Block#(slots.get(i)!.text(self.cellText(i)), Void)}
-      );
+      (0=~~=8).flow.forEach{Block#(slots.get(::)!.text(self.cellText(::)), Void)},
+      Void);
     }}}

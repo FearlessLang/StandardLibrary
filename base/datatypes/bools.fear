@@ -16,6 +16,9 @@ Bool: Sealed,DataType[Bool,Bool] {
   .if[R:**](f: mut ThenElse[R]): R;
   ?[R:**](f: mut ThenElse[R]): R -> this.if(f);
 
+  /// ``this.thenDo(f)`` runs ``f`` for its side effect if ``this == True``, otherwise does nothing.
+  .thenDo(f: mut MF[Void]): Void -> this?{.then->f#; .else->Void};
+
   .match[R:**](m: mut BoolMatch[R]): R -> this?{.then->m.true; .else->m.false};
 
   /// ``this.toOpt(f)`` returns ``.some f#`` if ``this == True`` otherwise `.empty`.
