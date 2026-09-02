@@ -17,9 +17,9 @@ Block[R:*]: Sealed {
   mut .return(a: mut MF[R]): R -> a#;
   mut .do(r: mut MF[Void]): mut Block[R] -> 
     Block#(r#,this);
-  mut .assert(p: mut MF[Bool]): mut Block[R] ->
+  mut .assert(p: read F[Bool]): mut Block[R] ->
     Block#(Assert!(p#),this);
-  mut .assert(p: mut MF[Bool], failMsg: read LazyInfo): mut Block[R] ->
+  mut .assert(p: read F[Bool], failMsg: read LazyInfo): mut Block[R] ->
     Block#(Assert!(p#,failMsg),this);
   mut .let[X:*](x: mut MF[X], cont: mut Continuation[X,R]): R ->
     cont#(x#, this);
