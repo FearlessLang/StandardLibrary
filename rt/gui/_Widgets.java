@@ -108,6 +108,22 @@ class _Pane extends AContainer implements Pane$o$0{
     frame.markLayoutDirty();
     return this;
   }
+  @Override public Pane$o$0 mut$horizontal$0(){
+    frame.onEdtAndWait(() -> { vertical = false; component.invalidate(); });
+    frame.markLayoutDirty();
+    return this;
+  }
+  @Override public Pane$o$0 mut$vertical$0(){
+    frame.onEdtAndWait(() -> { vertical = true; component.invalidate(); });
+    frame.markLayoutDirty();
+    return this;
+  }
+  @Override public Pane$o$0 mut$chunk$1(Object n){
+    int c = nat(n);
+    frame.onEdtAndWait(() -> { chunk = c; component.invalidate(); });
+    frame.markLayoutDirty();
+    return this;
+  }
 }
 
 class _Border extends AContainer implements Border$2o$0{
@@ -144,6 +160,10 @@ abstract class AWidget implements Widget$2o$1{
   Color$1c$0 foreground = (Color$1c$0) Color$1c$0.instance;
   Color$1c$0 background = (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
   HeightNat$lg$0 textSize = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(defText);
+  // Read live by CenteredFlowLayout; only _Pane exposes Fearless methods to
+  // change them, but they live here alongside the other style fields.
+  boolean vertical = false;
+  int chunk = 0;
 
   final _Frame frame;
   final SkComponent component = new SkComponent(this);
