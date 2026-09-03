@@ -1,0 +1,19 @@
+//Demonstrates .chunk: a single flat Pane of 9 buttons, wrapped into exactly
+//3 per line regardless of window size. Resizable; the board keeps its
+//natural pixel size and just gets more (or less) empty margin around it.
+ChunkGui: Consumer[mut Frame] {
+  mut .model: mut Model;
+  ::
+  .title "Tic-Tac-Toe: chunked grid"
+  .contentB{::
+    .background (Color.ghostWhite)
+    .north{:: .label{:: .text(this.model.status) .save(this.model.statusSlot) } }
+    .center{::
+      .chunk 3
+      .button(CellButton#(this.model, 0)) .button(CellButton#(this.model, 1)) .button(CellButton#(this.model, 2))
+      .button(CellButton#(this.model, 3)) .button(CellButton#(this.model, 4)) .button(CellButton#(this.model, 5))
+      .button(CellButton#(this.model, 6)) .button(CellButton#(this.model, 7)) .button(CellButton#(this.model, 8))
+      }
+    .south{:: .button{:: .text "New Game" .action{this.model.reset} } }
+    }
+  }

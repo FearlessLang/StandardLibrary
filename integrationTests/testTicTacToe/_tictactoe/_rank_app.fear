@@ -10,6 +10,7 @@ use base.WidenTo as WidenTo;
 use base.Block as Block;
 use base.Pipe as Pipe;
 use base.Consumer as Consumer;
+use base.Gui as GuiC;
 use base.Frame as Frame;
 use base.Color as Color;
 use base.Label as Label;
@@ -22,5 +23,12 @@ use base.Opt as Opt;
 use base.List as List;
 use base.Lists as Lists;
 use base.F as F;
+use base.Painter as Painter;
+use base.Rect as Rect;
+use base.Rects as Rects;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
+use base.XInt as X;
+use base.YInt as Y;
 
-Presentation:Main{sys->Models# |>{ m->sys.gui.run(mut Gui{.model->m}) } }
+Presentation:Main{sys-> sys.gui.run(mut ChooserGui{.gui->sys.gui}) }

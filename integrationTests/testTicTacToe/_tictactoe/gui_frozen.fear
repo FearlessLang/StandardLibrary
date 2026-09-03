@@ -1,0 +1,23 @@
+//Demonstrates the pre-.chunk technique: the 9 buttons sit in one flat,
+//unwrapped Pane inside a window pinned to an exact pixel width (label and
+//New Game are pinned to their own Border rows so they cannot steal width
+//from the count). Wrap-to-3 falls out of CenteredFlowLayout's existing
+//width-based wrap, only because the window can never be wider than that.
+//Not resizable: give the flow more width and it wraps to a different
+//(wrong) number of columns, so the fix only works frozen.
+FrozenGui: Consumer[mut Frame] {
+  mut .model: mut Model;
+  ::
+  .title "Tic-Tac-Toe: frozen"
+  .fixedSize(Width#262, Height#360)
+  .contentB{::
+    .background (Color.ghostWhite)
+    .north{:: .label{:: .text(this.model.status) .save(this.model.statusSlot) } }
+    .center{::
+      .button(CellButton#(this.model, 0)) .button(CellButton#(this.model, 1)) .button(CellButton#(this.model, 2))
+      .button(CellButton#(this.model, 3)) .button(CellButton#(this.model, 4)) .button(CellButton#(this.model, 5))
+      .button(CellButton#(this.model, 6)) .button(CellButton#(this.model, 7)) .button(CellButton#(this.model, 8))
+      }
+    .south{:: .button{:: .text "New Game" .action{this.model.reset} } }
+    }
+  }

@@ -342,6 +342,17 @@ Pane:Widget[Pane]{
   mut .label(mut Scope[Label]):mut Pane;
   mut .clear:mut Pane;
   mut .paint(Painter):mut Pane;
+  //Flow axis: .horizontal (default) lays children left-to-right, wrapping
+  //into new rows; .vertical lays them top-to-bottom, wrapping into new
+  //columns.
+  mut .horizontal:mut Pane;
+  mut .vertical:mut Pane;
+  //Breaks the flow into fixed-size lines of exactly n children each,
+  //regardless of the container's available size along the flow axis (so,
+  //unlike the default wrap, it neither depends on nor changes with a
+  //resize). 0 (the default) means "no chunking": wrap by available size,
+  //as before.
+  mut .chunk(Nat):mut Pane;
 }
 Scope[T]:{ mut .run(mut T): mut T; }
 Painter:{ .run(mut Graphics): mut Graphics; }
