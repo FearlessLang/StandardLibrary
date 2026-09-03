@@ -66,7 +66,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    * => a > Long.MAX_VALUE / b
    */
   private static long mulChecked(long a, long b){
-    if (a == 0) {return 0;}
+    if (a == 0 || b == 0) {return 0;}
     boolean overflow = Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0;
     if (overflow){ throw err("Nat *: overflow"); }
     return a * b;
