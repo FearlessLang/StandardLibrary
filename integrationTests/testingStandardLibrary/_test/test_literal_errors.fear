@@ -29,6 +29,7 @@ ThrowListTests: Test {::
   .checkDetErr({i -> True}, {Lists#(`a`).with(1,`b`)})
   .checkDetErr({i -> True}, {Lists#(`a`).withAlso(2,`b`)})
   .checkDetErr({i -> True}, {Lists#(`a`,`b`).subList(0,3)})
+  .checkDetErr({i -> True}, {List[Str].subList(0,3)})
   }
 
 ThrowMapTests: Test {::
