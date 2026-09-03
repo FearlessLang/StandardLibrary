@@ -129,6 +129,21 @@ InstantTests: Test {::
   .checkDetErr({_ -> True}, {Instant.origin - (Duration.seconds 1)})
   }
 
+ColorCmpTests: Test {::
+  .check{
+    (Color#(Red#(9.getByte),Green#(0.getByte),Blue#(0.getByte),Alpha#(255.getByte))) <
+    (Color#(Red#(10.getByte),Green#(0.getByte),Blue#(0.getByte),Alpha#(255.getByte)))
+    .assertTrue}
+  .check{
+    (Color#(Red#(1.getByte),Green#(9.getByte),Blue#(0.getByte),Alpha#(255.getByte))) <
+    (Color#(Red#(1.getByte),Green#(10.getByte),Blue#(0.getByte),Alpha#(255.getByte)))
+    .assertTrue}
+  .check{
+    (Color#(Red#(1.getByte),Green#(2.getByte),Blue#(3.getByte),Alpha#(4.getByte))) ==
+    (Color#(Red#(1.getByte),Green#(2.getByte),Blue#(3.getByte),Alpha#(4.getByte)))
+    .assertTrue}
+  }
+
 RectTests: Test {::
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .right .assertEq(X#(+40))}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .bottom .assertEq(Y#(+60))}
@@ -152,6 +167,7 @@ TestWrappers: Test {::
   .test CoordIntRoundTripTests
   .test WrapperNatAgreementTests
   .test LevelByteTests
+  .test ColorCmpTests
   .test LevelFloatTests
   .test CyclicFloatTests
   .test DurationTests

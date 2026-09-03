@@ -151,7 +151,7 @@ Color:DataType[Color,Color]{
     .hashWith (this.green.hash)
     .hashWith (this.blue.hash)
     .hashWith (this.alpha.hash);
-  .cmp(a,b,m) -> a.str<=>(b.str,m);//TODO: improve
+  .cmp(a,b,m) -> a.red<=>(b.red,m &&{a.green<=>(b.green,m &&{a.blue<=>(b.blue,m &&{a.alpha<=>(b.alpha,m)})})});
   .info->this.str.info;
   .imm->Color#(this.red,this.green,this.blue,this.alpha);
   .transparent:Color->Color#({},{},{},Alpha.transparent);

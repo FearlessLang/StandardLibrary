@@ -48,6 +48,7 @@ use base.Red as Red;
 use base.Green as Green;
 use base.Blue as Blue;
 use base.Alpha as Alpha;
+use base.Color as Color;
 use base.Hue as Hue;
 use base.Saturation as Saturation;
 use base.Brightness as Brightness;
