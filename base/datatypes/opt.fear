@@ -24,7 +24,23 @@ Opt[E:*]: _Opt[E] {
   .orValue default -> this.match{.some x -> x; .empty -> default};
 
   .orLazy default -> this.match{.some x -> x; .empty -> default#};
-  
+
+  .and other -> this.match{.some _ -> other; .empty -> this};
+  & other -> this.and(other);
+
+  && other -> this.match{.some _ -> other#; .empty -> this};
+  .andThen other, f -> this.match{
+    .some x -> other# .match {
+      .some y -> Opts#(f#(x, y));
+      .empty -> {}
+      };
+    .empty -> {}
+    };
+
+  .then f -> this.match{
+    .some x -> f#x;
+    .empty -> {}
+    };
   .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
 
   .as f       -> _OptAs#this;
@@ -75,6 +91,27 @@ _Opt[E:*]: BaseContainer[imm E],DataType[Opt[E],Opt[imm E],E,imm E] {
   read .orLazy(mut MF[read/imm E]): read/imm E;
   imm  .orLazy(mut MF[imm E]): imm E;
 
+  mut  .and(mut Opt[E]): mut Opt[E];
+  read .and(read Opt[E]): read Opt[E];
+  imm  .and(Opt[E]): imm Opt[E];
+
+  mut  &(mut Opt[E]): mut Opt[E];
+  read &(read Opt[E]): read Opt[E];
+  imm  &(imm Opt[E]): imm Opt[E];
+
+  mut  &&(mut MF[mut Opt[E]]): mut Opt[E];
+  read &&(mut MF[read Opt[E]]): read Opt[E];
+  imm  &&(mut MF[imm Opt[E]]): imm Opt[E];
+
+  mut  .andThen[E':*, R:*](mut MF[mut Opt[E']], read F[E, E', R]): mut Opt[R];
+  read .andThen[E':*, R:*](mut MF[read Opt[E']], read F[read/imm E, read/imm E', R]): mut Opt[R];
+  imm  .andThen[E':*, R:*](mut MF[imm Opt[E']], read F[imm E, imm E', R]): mut Opt[R];
+
+
+  mut  .then[E':*](mut MF[E, mut Opt[E']]): mut Opt[E'];
+  read .then[E':*](mut MF[read/imm E, read Opt[E']]): read Opt[E'];
+  imm  .then[E':*](mut MF[imm E, imm Opt[E']]): imm Opt[E'];
+
   mut  !: E;
   read !: read/imm E;
 
@@ -98,8 +135,8 @@ _Opt[E:*]: BaseContainer[imm E],DataType[Opt[E],Opt[imm E],E,imm E] {
   read .assertSome: Void;
   read .assertSome(read LazyInfo): Void;
   imm  .as[T2](f: BaseId[imm E,T2]): Opt[T2];
-  mut .mapSome[R:*](mut MF[E, R]): mut Opt[R];
-  read .mapSome[R:*](mut MF[read/imm E, R]): mut Opt[R];
+  mut .mapSome[R:*](read F[E, R]): mut Opt[R];
+  read .mapSome[R:*](read F[read/imm E, R]): mut Opt[R];
   }
 
 Opts: {

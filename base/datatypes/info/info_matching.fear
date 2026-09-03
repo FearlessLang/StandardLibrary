@@ -1,0 +1,172 @@
+/// InfoMatches is a utility class to help "fuzzy" match infos.
+/// you can descend into the option with the `>` operator.
+/// With ``this > str`` matching against a map with a key str and ``this > 0`` matching against the a list with an index 0.
+/// `InfoMatches` can be chained using logical operators `&`, `|`, `.not` by default these will chain,
+/// if you wish for more complex you can chain with the `&&` `||` methods.
+//>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+//>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+//>   .check{info & # .assertTrue}
+//>   .check{info & > "friends" > 0 > "name" .msgMatch{:: == "Bob"} # .assertTrue}
+//>   .check{info
+//>     & > "friends" > 0 > "name" .msgMatch{:: == "Bob"}
+//>     & > "friends" > 1 > "name" .msgMatch{:: == "Alice"}# .assertTrue}
+//>   .check{info
+//>     & > "friends" > 0 > "name" .msgMatch{:: == "Bob"}
+//>     | > "friends" > 1 > "name" .msgMatch{:: == "Alice"}
+//>     & > "friends" > 1 > "name" .msgMatch{:: == "David"}# .assertFalse}
+//>   .check{info
+//>     & > "friends" > 0 > "name" .msgMatch{:: == "Bob"}
+//>     || {:: & > "friends" > 1 > "name" .msgMatch{:: == "Alice"}
+//>           & > "friends" > 1 > "name" .msgMatch{:: == "David"}}# .assertTrue}
+InfoMatches: Sealed {
+  ~: InfoExtractor -> { this# .if {
+    .then -> this.close;
+    .else -> {}
+    }};
+  #: Bool -> this.matchLevel.isSome;
+  /// The info we are matching against - how far we have "descended" into info.
+  .matchLevel: mut Opt[Info] -> this.close;
+  /// The Base level info we are matching on, different from .matchLevel as it is the base we chain on.
+  /// Is an opt as the matchers produced by InfoExtractors may not have an info in them.
+  .close: mut Opt[Info];
+
+  =>[R:*](f: read F[Info, R]): mut Opt[R] -> this# .if {
+    .then -> this.close.mapSome f;
+    .else -> {};
+    };
+
+  >(key: InfoKey): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.match {
+        .some info -> key.indexInto info;
+        .empty -> {};
+      };
+    };
+
+  .msgMatch(fn: F[Str, Bool]): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.then {info -> info.match DefaultInfoMatch[mut Opt[Info]] {
+      .msg m -> fn#(m) .toOpt {info};
+      .default -> {};
+      }}
+    };
+
+  .listMatch(fn: F[List[Info], Bool]): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.then {info -> info.match DefaultInfoMatch[mut Opt[Info]] {
+      .list l -> fn#(l) .toOpt {info};
+      .default -> {}
+      }}
+    };
+
+  .mapMatch(fn: F[Map[Str,Info], Bool]): InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.then {info -> info.match DefaultInfoMatch[mut Opt[Info]] {
+      .map m -> fn#(m) .toOpt {info};
+      .default -> {}
+      }}
+    };
+
+  .isMsg: InfoMatches -> this.msgMatch{_ -> True};
+  .isList: InfoMatches -> this.listMatch{_ -> True};
+  .isMap: InfoMatches -> this.mapMatch{_ -> True};
+  .isEmpty: InfoMatches -> {
+    .close -> this.close;
+    .matchLevel -> this.matchLevel.then {::.match DefaultInfoMatch[mut Opt[Info]] {
+      .empty -> this.matchLevel;
+      .default -> {};
+      }}
+    };
+
+  .not: InfoMatches -> {
+    .close -> this.close;
+    # -> this# .not;
+    };
+
+  &: InfoMatches -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this;
+    .right -> { this.close };
+    .combiner left, right -> left# && {right#};
+    };
+
+  &&(lazyMatch: LazyInfoMatches): InfoMatches -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this;
+    .right -> this.close.match {
+      .some i -> lazyMatch# i;
+      .empty -> { {} }
+      };
+    .combiner left, right -> left# && {right#};
+    };
+
+  |: InfoMatches -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this;
+    .right -> { this.close };
+    .combiner left, right -> left# || {right#};
+    };
+
+  ||(lazyMatch: LazyInfoMatches): InfoMatches -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this;
+    .right -> this.close.match {
+      .some i -> lazyMatch# i;
+      .empty -> { {} }
+      };
+    .combiner left, right -> left# || {right#};
+    };
+  }
+
+ChainedInfoMatches: InfoMatches {
+  #: Bool -> this.combiner(this.left, this.right);
+  .close: mut Opt[Info];
+  .left: InfoMatches;
+  .right: InfoMatches;
+  .combiner(InfoMatches, InfoMatches): Bool;
+
+  > key -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this.left;
+    .right -> this.right > key;
+    .combiner left, right -> this.combiner(left, right);
+    };
+
+  .msgMatch fn -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this.left;
+    .right -> this.right .msgMatch fn;
+    .combiner left, right -> this.combiner(left, right);
+    };
+
+  .listMatch fn -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this.left;
+    .right -> this.right .listMatch fn;
+    .combiner left, right -> this.combiner(left, right);
+    };
+
+  .mapMatch fn -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this.left;
+    .right -> this.right .mapMatch fn;
+    .combiner left, right -> this.combiner(left, right);
+    };
+
+  .isEmpty -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this.left;
+    .right -> this.right .isEmpty;
+    .combiner left, right -> this.combiner(left, right);
+    };
+
+  .not -> ChainedInfoMatches {
+    .close -> this.close;
+    .left -> this.left;
+    .right -> this.right .not;
+    .combiner left, right -> this.combiner(left, right);
+    };
+  }
+
+
+LazyInfoMatches: F[Info, InfoMatches] {}

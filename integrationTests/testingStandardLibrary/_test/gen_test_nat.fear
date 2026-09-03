@@ -1,6 +1,6 @@
 Nat0Imm0GetSucc0Test: Test {::
     .check{5 .getSucc .assertEq 6}
-    .checkDetErr({_ -> True}, {(Math.maxNat) .getSucc})
+    .checkDetErr({:: & .msgMatch{::.startsWith "Nat.getSucc:"}#}, {(Math.maxNat) .getSucc})
   }
 
 Nat0Imm0GetPred0Test: Test {::

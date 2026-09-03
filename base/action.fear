@@ -30,10 +30,46 @@ Action[T:*]: {
     .ok _ -> Assert.msg `Failure expected but nothing was thrown`;
     .info _->{};
     };
-  //mut .assertInfo(constraint1: Str): Void -> this.run{
-  //  .ok _ -> Assert.msg `Failure expected containing`^constraint1^`but nothing was thrown`;
-  //  .info _->{};//checking containmenet is not obvious
-  //  };//TODO: this can be a good exercise to implement this directl in Fearless
+
+  /// ``this.try f`` maps the info variant of this to ``.ok t`` if ``f#info`` returns ``Opts# t``,
+  /// otherwise it returns this unchanged.
+  //> QuadraticFormula: F[Float, Float, Float, Float] {
+  //>   # a, b, c -> Block#
+  //>     .if{a==0} .error {"Expression is not a quadratic equation"}
+  //>     .return {((b**2.0 - 4.0*a*c).getSqrt - b) / (2.0*a)};
+  //>   }
+  //> ToHTTPCode: F[Float, Float, Float, Nat] {
+  //>    # a, b, c -> Try#{QuadraticFormula#(a, b, c)}
+  //>       .map{_ -> 200}
+  //>       .try{:: & .msgMatch{::.startsWith "Float.getSqrt: Cannot take the sqrt of a negative number"} => {_ -> 422}}
+  //>       .try{:: & .msgMatch{::.contains "NaN"}
+  //>               | .msgMatch{:: == "Expression is not a quadratic equation"}
+  //>               => {_ -> 400}}
+  //>       .try{_ -> Opts# 500}!;
+  //>   }
+  //> TryTests: Test {::
+  //>   .check{ToHTTPCode#(1.0, -3.0, 2.0) .assertEq 200}
+  //>   .check{ToHTTPCode#(1.0, 0.0, 1.0) .assertEq 422}
+  //>   .check{ToHTTPCode#(0.0, 2.0, 1.0) .assertEq 400}
+  //>   .check{ToHTTPCode#(Math.nan, 2.0, 1.0) .assertEq 400}
+  //>   }
+  mut .try(errorMapper: F[Info, mut Opt[T]]): mut Action[T] -> this.run {
+    .ok _ -> this;
+    .info i -> errorMapper#(i).match {
+      .some x -> Actions.ok(x);
+      .empty -> this
+      }
+    };
+
+  mut .assertInfo(constraint: LazyInfoMatches): Void -> this.run{
+    .ok _ -> Assert.msg "Failure expected but nothing was thrown";
+    .info info ->
+      Assert!(
+        constraint# info #,
+        {"Failure correctly occurred but error info doesn't match constraint."
+        | "Got: "+info}
+        )
+    };//TODO: Should InfoMatches implement ToStr so it can be used in this error message?
   }
 
 ActionMatch[T:*,R:*]: {

@@ -7,11 +7,11 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .isEmpty->True;
 
   /// Only assert if the method is .assertXXX
-  .get(i)->Error.msg `.get called on empty list`;
+  .get(i)->Error.msg `List.get: called on empty list`;
   .opt(i)->{};
 
-  .getFirst->Error.msg `.first called on empty list`;
-  .getLast->Error.msg `.last called on empty list`;
+  .getFirst->Error.msg `List.get: .first called on empty list`;
+  .getLast->Error.msg `List.get: .last called on empty list`;
   .first->{};
   .last->{};
 

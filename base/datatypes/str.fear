@@ -45,7 +45,7 @@
 /// - canonicalization: ``1e0``.ieeeFloat!.ieeeStr==``1.0``  and ``+0.0``.ieeeFloat!.ieeeStr==``0.0``  (NaN payload not preserved)
 /// - roundtrip (value): f.ieeeStr.ieeeFloat! == f
 ///   The roundtrip also preserves the sign of zero but not the NaN payload
-///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1`` BUT there is no Float representing 0.1 
+///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1`` BUT there is no Float representing 0.1
 ///   .ieeeFloat + .ieeeStr implement shortest string that round-trips under round-to-nearest ties-to-even
 ///   That is, ``0.1``.ieeeFloat!.ieeeStr lies to you twice, once when it creates the float, and a secon time when
 ///   it choses to print a near value that has a compact representation instead of the actual content of the float
@@ -53,7 +53,7 @@
 ///   But, ``0.100000000000000005`` is closer to the actual representable Float value. That is,
 ///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
 ///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
-Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
+Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKey {
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
   |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings
@@ -68,6 +68,10 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
   .sub(from: Nat, to: Nat): Str;    /// substring [from,to); throws on from/to out of the string boundaries or from > to
   .replaceSimultaneous(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement; throws on empty keys, duplicated keys, odd sized lists, keys with prefixes
   .replaceSimultaneousOrdered(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement where the first matching rule wins; throws on empty keys, duplicated keys, odd sized lists
+  .repeat(n: Nat): Str -> n == 0 .if {
+    .then -> "";
+    .else -> this + (this.repeat(n-1));
+    };
 
   .ieeeFloat: Opt[Float];      /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
   .float: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
@@ -88,12 +92,18 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize {
   .getByte: Byte;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
 
 
-  .startsWith(Str): Bool;            /// this string starts with the other string
+  .startsWith(Str): Bool;           /// this string starts with the other string
+  .contains(Str): Bool;             /// ``this.contains s`` returns `True` if ``s`` is a substring of ``this``.
   .lower: Str;                      /// this string but all lowercase
   .upper: Str;                      /// this string but all uppercase
   .u : UStr;                        /// this string, but as a Unicode string
   .u(values: Str) : UStr;           /// equivalent to this.u.u values
   .norm: Norm[Str];
+
+  .indexInto i -> i.match DefaultInfoMatch[mut Opt[Info]] {
+    .map map -> map.opt(this);
+    .default -> {};
+    }
   }
 
 OrderByCaseInsensitive: OrderBy[Str] { s0,s1,m -> s0.imm.lower <=> (s1.imm.lower, m) }

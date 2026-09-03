@@ -65,7 +65,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `.empty` if `this` is NaN.
   //>   .check{4.75 .abs .assertEq({::}, Opts# 4.75)}
   //>   .check{-4.75 .abs .assertEq({::}, Opts# 4.75)}
-  //>   .check{Math.nan .abs .assertEmpty}
+  //>   .check{Math.nan .abs .assertEmpty {::}}
   .abs: Opt[Float] -> this.isNaN.not .toOpt {this.absOrNaN};
 
   /// `this.getAbs` returns `this` if ``this >= 0``, ``-this`` otherwise. Throws if `this` is NaN.
@@ -87,7 +87,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.negAbs` returns `.some` of ``-|this|`` if `this` is not NaN, `.empty` otherwise.
   //>   .check{4.75 .negAbs .assertEq({::}, Opts# -4.75)}
-  //>   .check{Math.nan .negAbs .assertEmpty}
+  //>   .check{Math.nan .negAbs .assertEmpty {::}}
   .negAbs: Opt[Float] -> this.isNaN.not .toOpt {this.absOrNaN * -1.0};
 
   /// `this.getNegAbs` returns ``-|this|``. Throws if `this` is NaN.
@@ -105,18 +105,18 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.sqrt` returns `.some` of the IEEE sqrt of `this` if ``this >= 0.0`` and not NaN, `.empty` otherwise.
   //>   .check{4.0 .sqrt .assertEq({::}, Opts# 2.0)}
-  //>   .check{-4.0 .sqrt .assertEmpty}
-  //>   .check{Math.nan .sqrt .assertEmpty}
+  //>   .check{-4.0 .sqrt .assertEmpty {::}}
+  //>   .check{Math.nan .sqrt .assertEmpty {::}}
   .sqrt: Opt[Float] -> this.isNaN.not && {this >= 0.0} .toOpt {this.sqrtOrNaN};
 
   /// `this.getSqrt` returns the IEEE sqrt of `this`. Throws if `this` is NaN or negative (excluding ``-0.0``).
   //>   .check{4.0 .getSqrt .assertEq 2.0}
   //>   .checkDetErr({_ -> True}, {-4.0 .getSqrt})
   //>   .checkDetErr({_ -> True}, {Math.nan .getSqrt})
-  .getSqrt: Float -> this.isNaN || {this < -0.0} .if {
-    .then -> Error.msg("Cannot take the sqrt of "+this);
-    .else -> this.sqrtOrNaN;
-    };
+  .getSqrt: Float -> Block#
+    .if{this.isNaN} .error {"Float.getSqrt: Cannot take the sqrt of NaN."}
+    .if{this < 0.0} .error {"Float.getSqrt: Cannot take the sqrt of a negative number, given: "+this}
+    .return{this.sqrtOrNaN};
 
   /// `this.signOrNaN` returns the sign of `this`: ``+0.0``/``-0.0`` if `this` is ``+0.0``/``-0.0``,
   /// ``1.0`` if `this` is positive, ``-1.0`` if `this` is negative, `Math.nan` if `this` is NaN.
@@ -129,7 +129,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.sign` returns `.some` of `this.signOrNaN` if `this` is not NaN, `.empty` otherwise.
   //>   .check{4.75 .sign .assertEq({::}, Opts# 1.0)}
-  //>   .check{Math.nan .sign .assertEmpty}
+  //>   .check{Math.nan .sign .assertEmpty {::}}
   .sign: Opt[Float] -> this.isNaN.not .toOpt {this.signOrNaN};
 
   /// `this.getSign` returns `this.signOrNaN`. Throws if `this` is NaN.
@@ -141,8 +141,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     };
 
   /// `this.softFloor` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
-  /// otherwise returns `this` rounded down to the nearest integer.
-  //>   .check{4.75 .softFloor .assertEq 3.0}
+  /// otherwise returns `this` rounded down (towards negative infinity) to the nearest integer.
+  //>   .check{4.75 .softFloor .assertEq 4.0}
   //>   .check{-3.25 .softFloor .assertEq -4.0}
   //>   .check{Math.inf .softFloor .assertEq(Math.inf)}
   //>   .check{Math.nan .softFloor .isNaN .assertTrue}
@@ -151,8 +151,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.floor` returns `.empty` if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise `.some` of `this` rounded down to the nearest integer.
   //>   .check{4.75 .floor .assertEq({::}, Opts# 4.0)}
-  //>   .check{Math.inf .floor .assertEmpty}
-  //>   .check{Math.nan .floor .assertEmpty}
+  //>   .check{Math.inf .floor .assertEmpty {::}}
+  //>   .check{Math.nan .floor .assertEmpty {::}}
   .floor: Opt[Float] -> this.isFinite.toOpt{this.softFloor};
 
   /// `this.getFloor` returns `this` rounded down to the nearest integer.
@@ -168,7 +168,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.softCeil` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise returns `this` rounded up to the nearest integer.
   //>   .check{3.25 .softCeil .assertEq 4.0}
-  //>   .check{-4.75 .softCeil .assertEq -4.0)}
+  //>   .check{-4.75 .softCeil .assertEq -4.0}
   //>   .check{Math.negInf .softCeil .assertEq(Math.negInf)}
   //>   .check{Math.nan .softCeil .isNaN .assertTrue}
   .softCeil: Float;
@@ -176,8 +176,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.ceil` returns `.empty` if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise `.some` of `this` rounded up to the nearest integer.
   //>   .check{3.25 .ceil .assertEq({::}, Opts# 4.0)}
-  //>   .check{Math.negInf .ceil .assertEmpty}
-  //>   .check{Math.nan .ceil .assertEmpty}
+  //>   .check{Math.negInf .ceil .assertEmpty {::}}
+  //>   .check{Math.nan .ceil .assertEmpty {::}}
   .ceil: Opt[Float] -> this.isFinite.toOpt{this.softCeil};
 
   /// `this.getCeil` returns `this` rounded up to the nearest integer.
@@ -202,8 +202,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// otherwise `.some` of `this` rounded towards ``0``.
   //>   .check{2.75 .trunc0 .assertEq({::}, Opts# 2.0)}
   //>   .check{-2.75 .trunc0 .assertEq({::}, Opts# -2.0)}
-  //>   .check{Math.inf .trunc0 .assertEmpty}
-  //>   .check{Math.nan .trunc0 .assertEmpty}
+  //>   .check{Math.inf .trunc0 .assertEmpty {::}}
+  //>   .check{Math.nan .trunc0 .assertEmpty {::}}
   .trunc0: Opt[Float] -> this.isFinite.toOpt{this.softTrunc0};
 
   /// `this.getTrunc0` returns `this` rounded towards ``0``. Throws if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`.
@@ -227,8 +227,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// otherwise `.some` of `this` rounded to the nearest integer, ties rounded away from ``0``.
   //>   .check{2.5 .round .assertEq({::}, Opts# 3.0)}
   //>   .check{-2.5 .round .assertEq({::}, Opts# (-3.0))}
-  //>   .check{Math.inf .round .assertEmpty}
-  //>   .check{Math.nan .round .assertEmpty}
+  //>   .check{Math.inf .round .assertEmpty {::}}
+  //>   .check{Math.nan .round .assertEmpty {::}}
   .round: Opt[Float] -> this.isFinite.toOpt{this.softRound};
 
   /// `this.getRound` returns `this` rounded to the nearest integer, ties rounded away from ``0``.
@@ -253,8 +253,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.roundTiesEven` returns `.empty` if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise `.some` of `this` rounded to the nearest integer, ties rounded to even.
   //>   .check{2.5 .roundTiesEven .assertEq({::}, Opts# 2.0)}
-  //>   .check{Math.inf .roundTiesEven .assertEmpty}
-  //>   .check{Math.nan .roundTiesEven .assertEmpty}
+  //>   .check{Math.inf .roundTiesEven .assertEmpty {::}}
+  //>   .check{Math.nan .roundTiesEven .assertEmpty {::}}
   .roundTiesEven: Opt[Float] -> this.isFinite.toOpt{this.softRoundTiesEven};
 
   /// `this.getRoundTiesEven` returns `this` rounded to the nearest integer, ties rounded to even.
@@ -271,12 +271,6 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{Math.nan .isNaN .assertTrue}
   //>   .check{1.0 .isNaN .assertFalse}
   .isNaN: Bool;
-
-  /// `this.isInfinite` returns `True` iff `this` is `Math.inf` or `Math.negInf`.
-  //>   .check{Math.inf .isInfinite .assertTrue}
-  //>   .check{Math.negInf .isInfinite .assertTrue}
-  //>   .check{1.0 .isInfinite .assertFalse}
-  .isInfinite: Bool;
 
   /// `this.isPosInfinity` returns `True` iff `this` is `Math.inf`.
   //>   .check{Math.inf .isPosInfinity .assertTrue}
@@ -306,11 +300,16 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{Math.inf .isFinite .assertFalse}
   //>   .check{Math.nan .isFinite .assertFalse}
   .isFinite: Bool ->
-      this.match({
+      this.match {
       .posInf -> False; .negInf -> False; .nan -> False;
-      .posZero -> True; .negZero -> True;
-      .regular x -> True;
-      });
+      .regular _ -> True; .posZero -> True; .negZero -> True;
+      };
+
+  /// `this.isInfinite` returns `True` iff `this` is `Math.inf` or `Math.negInf`.
+  //>   .check{Math.inf .isInfinite .assertTrue}
+  //>   .check{Math.negInf .isInfinite .assertTrue}
+  //>   .check{1.0 .isInfinite .assertFalse}
+  .isInfinite: Bool -> this == (Math.inf) || {this == (Math.negInf)};
 
   /// ``this.ieeePow(x)`` returns the IEEE 754-2008 ``pow(this, x)``, following the full IEEE special-value rules
   ///  unlike ``**`` - see its docs for how the two differ. Rules apply top down
@@ -354,25 +353,25 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.int` returns `.some` of `this` as an `Int` if `this` is an integer in ``[minInt, maxInt]``,
   /// `.empty` otherwise (non-integral, out of range, NaN, or infinite).
   //>   .check{3.0 .int .assertEq({::}, Opts# +3)}
-  //>   .check{3.5 .int .assertEmpty}
-  //>   .check{Math.nan .int .assertEmpty}
+  //>   .check{3.5 .int .assertEmpty {::}}
+  //>   .check{Math.nan .int .assertEmpty {::}}
   .int: Opt[Int];
 
   /// `this.nat` returns `.some` of `this` as a `Nat` if `this` is an integer in ``[0, maxNat]``,
   /// `.empty` otherwise.
   //>   .check{3.0 .nat .assertEq({::}, Opts# 3)}
-  //>   .check{-1.0 .nat .assertEmpty}
+  //>   .check{-1.0 .nat .assertEmpty {::}}
   .nat: Opt[Nat];
 
   /// `this.byte` returns `.some` of `this` as a `Byte` if `this` is an integer in ``[0, maxByte]``,
   /// `.empty` otherwise.
   //>   .check{3.0 .byte .assertEq({::}, Opts#(3.getByte))}
-  //>   .check{300.0 .byte .assertEmpty}
+  //>   .check{300.0 .byte .assertEmpty {::}}
   .byte: Opt[Byte];
 
   /// `this.num` returns `.some` of `this` as a `Num` if `this` is finite, `.empty` on NaN/Inf.
   //>   .check{3.5 .num .assertEq({::}, Opts#(7/2))}
-  //>   .check{Math.inf .num .assertEmpty}
+  //>   .check{Math.inf .num .assertEmpty {::}}
   .num: Opt[Num];
 
   /// `this.softInt` clamps and truncates `this` towards ``0`` into an `Int`.
@@ -421,7 +420,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// NaN hashes the same as every other NaN (since ``ieeeStr`` does not distinguish NaN payloads).
   //>   .check{0.0 .hash .assertEq((-0.0) .hash)}
   //>   .check{Math.nan .hash .assertEq((Math.nan.negAbsOrNaN) .hash)}
-  //>   .check{1.0 .hash .assertNe(2.0 .hash)}
+  //>   .check{1.0 .hash .assertNotEq(2.0 .hash)}
   .hash -> this.imm.isNegZero?{.then->`0.0`.hash; .else->this.imm.ieeeStr.hash};/// hash via str
 
   /// fixpoint type closed
@@ -450,8 +449,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
   /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .deg .assertEq({::}, Opts#(90.0.getDeg))}
-  //>   .check{Math.nan .deg .assertEmpty}
-  //>   .check{Math.inf .deg .assertEmpty}
+  //>   .check{Math.nan .deg .assertEmpty {::}}
+  //>   .check{Math.inf .deg .assertEmpty {::}}
   .deg: Opt[Degree] -> this.isFinite.toOpt{{this}};
 
   /// `this.getDeg` returns `this` as a `Degree`. Throws if `this` is not finite.
@@ -467,7 +466,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
   /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{1.5 .rad .assertEq({::}, Opts#(1.5.getRad))}
-  //>   .check{Math.nan .rad .assertEmpty}
+  //>   .check{Math.nan .rad .assertEmpty {::}}
   .rad: Opt[Radian] -> this.isFinite.toOpt{{this}};
 
   /// `this.getRad` returns `this` as a `Radian`. Throws if `this` is NaN or ``+/-`` Infinity.
@@ -545,7 +544,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{2.0 .assertInRange(1.0=~~=4.0)}
-  //>   .checkDetErr({_ -> True}, {5.0 .assertInRange(1.0=~~=4.0)})
+  //>   .checkNonDetErr({_ -> True}, {5.0 .assertInRange(1.0=~~=4.0)})
   .assertInRange(range: Range[Float]): Void -> this.assertInRange(range, {``});
 
   /// ``this.assertInRange(range, msg)`` is equivalent to ``this.inRange(range).assertTrue``
@@ -564,6 +563,15 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       .if {this <= (range.start)} .return {range.start}
       .if {this >= (range.end)} .return {range.end}
       .return {this};
+
+  /// `this.info` returns a `.msg` info with the string representation of `this` as the message.
+  //>   .check{+5.0.info .assertEq(Infos.msg("5.0"))}
+  //>   .check{-5.0.info .assertEq(Infos.msg("-5.0"))}
+  //>   .check{-0.0.info .assertEq(Infos.msg("0.0"))}
+  //>   .check{Math.nan.info .assertEq(Infos.msg("(+0.0 / +0.0)"))}
+  //>   .check{Math.inf.info .assertEq(Infos.msg("(+1.0 / +0.0)"))}
+  //>   .check{Math.negInf.info .assertEq(Infos.msg("(-1.0 / +0.0)"))}
+  .info -> Infos.msg(this.str);
   }
 
 _FloatRanges: Sealed {
@@ -598,3 +606,4 @@ FloatMatch[R:**]: {
   mut .negInf: R;
   mut .nan: R;
   }
+

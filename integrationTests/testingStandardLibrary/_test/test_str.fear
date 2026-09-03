@@ -9,6 +9,7 @@ StrBasicsTests: Test {::
   .check{`a` .str .assertEq `a`}
   .check{`a` .close .assertEq `a`}
   .check{`ab` .close .assertEq `ab`}
+  .check{`ab` .repeat(3) .assertEq `ababab`}
   }
 
 StrConcatTests: Test {::

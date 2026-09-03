@@ -212,7 +212,6 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     return Float$1c$0Instance.instance(Math.sqrt(unsignedLongToDouble(val)));
   }
   @Override public Object read$str$0(){ return Str$c$0Instance.instance(Long.toUnsignedString(val)); }
-  @Override public Object read$info$0(){ return Info$o$0.instance; }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object imm$getTruncDiv$1(Object p0){
     long d= n(p0);

@@ -145,7 +145,6 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
   @Override public Object read$str$0(){ return Str$c$0Instance.instance((val < 0 ? "" : "+")+val); }
 
-  @Override public Object read$info$0(){ return Info$o$0.instance; }
   @Override public Object read$imm$0(){ return this; }
 
   @Override public Object imm$getTruncDiv$1(Object p0){

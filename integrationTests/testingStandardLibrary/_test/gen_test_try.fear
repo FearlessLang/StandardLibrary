@@ -1,0 +1,19 @@
+QuadraticFormula: F[Float, Float, Float, Float] {
+  # a, b, c -> Block#
+    .if{a == 0.0} .error {"Expression is not a quadratic equation"}
+    .return {((b**2.0 - 4.0*a*c).getSqrt - b) / (2.0*a)};
+  }
+ToHTTPCode: F[Float, Float, Float, Nat] {
+   # a, b, c -> Try#{QuadraticFormula#(a, b, c)}
+      .map{_ -> 200}
+      .try{:: & .msgMatch{::.startsWith "Float.getSqrt: Cannot take the sqrt of a negative number"} => {_ -> 422}}
+      .try{:: & .msgMatch{::.contains "NaN"}
+              | .msgMatch{::.contains "Expression"} => {_ -> 400}}
+      .try{i -> Block#(Debug#(i),Opts# 500)}!;
+  }
+TryTests: Test {::
+  .check{ToHTTPCode#(1.0, -3.0, 2.0) .assertEq 200}
+  .check{ToHTTPCode#(1.0, 0.0, 1.0) .assertEq 422}
+  .check{ToHTTPCode#(0.0, 2.0, 1.0) .assertEq 400}
+  .check{ToHTTPCode#(Math.nan, 2.0, 1.0) .assertEq 400}
+  }

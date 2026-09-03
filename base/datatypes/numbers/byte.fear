@@ -33,7 +33,10 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// ``this / x`` returns the exact rational quotient of `this` and ``x`` as a `Num`. Throws iff ``x == 0``.
   /// Note: This returns a num for exact precision, if you want to do byte division you should use `.div` or `.aluDiv`
   //>   .check{7.getByte / 2 .getFloat .assertEq 3.5}
-  //>   .checkDetErr({_ -> True}, {7.getByte / 0})
+  //>   .checkDetErr({
+  //>     :: & .msgMatch{::.startsWith("Byte /: ")}
+  //>        & .msgMatch{::.contains("divide by zero")}
+  //>     }, {7.getByte / 0})
   /(x: Nat): Num;
 
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
@@ -220,6 +223,8 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       .return {this};
 
   .hash -> this.str.hash;                      /// hash via str
+  /// `this.info` returns a `.msg` info with the string representation of `this` as the message.
+  //>   .check{5.getByte.info .assertEq Infos#("5")}
   .info -> Infos.msg(this.str);                 /// info via str
   .close->::; .close->this;                    /// fixpoint type closed
   .sumNumber xs ->                             /// summing all numbers starting from `this`

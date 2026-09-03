@@ -1,0 +1,112 @@
+_Extractor[T: *]: Sealed {
+  /// `this.extractedValue` returns the value extracted so far, if there is one.
+  .extractedValue: mut Opt[T];
+
+  /// Map the extracted value to some result
+  =>[R: *](mapper: read F[T, R]): mut Opt[R] ->
+    this.extractedValue.mapSome mapper
+  }
+
+/// `InfoExtractor` is a utility class to help "fuzzy" extract values from an info.
+/// Similar to `InfoMatches` you can descend into an info with the `>` operator.
+/// You can match against some deep part of an info by combining this with `InfoMatches` using the `&` operator.
+//>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+//>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+//>   .check{info ~ => {::}! .assertEq info}
+//>   .check{info ~ > "friends" > 0 > "name" .isMsg => {::.lower}! == "bob"}
+//>   .check{info ~ > "friends"
+//>     & > 0 > "name" .msgMatch{:: == "Bob"}
+//>     & > 1 > "name" .msgMatch{:: == "Alice"}
+//>     ~ .isList => {::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "} .assertEq(Opts# "Bob, Alice")}
+//>   .check{info ~ > "friends"
+//>     & > 0 > "name" .msgMatch{:: == "Bob"}
+//>     & > 1 > "name" .msgMatch{:: == "David"}
+//>     ~ .isList => {::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "}.assertEmpty {::}}
+InfoExtractor: _Extractor[Info] {
+  &: InfoMatches -> {.close -> this.extractedValue};
+
+  /// Descend one layer deeper into info,
+  /// matching against it being a map with a key `key`
+  /// or a List with index key: Nat.
+  >(key: InfoKey): InfoExtractor -> {
+    .extractedValue -> this.extractedValue.then{key.indexInto ::}
+    };
+
+  .msgMatch(fn: F[Str, Bool]): StrExtractor -> {
+    .extractedValue -> this.extractedValue.then{::.match DefaultInfoMatch[Opt[Str]] {
+      .msg str -> fn# str .toOpt{str};
+      .default -> {};
+      }};
+    };
+
+  .listMatch(fn: F[List[Info], Bool]): ListExtractor -> {
+    .extractedValue -> this.extractedValue.then{::.match DefaultInfoMatch[Opt[List[Info]]] {
+      .list l -> fn#(l).toOpt{l};
+      .default -> {};
+      }}
+    };
+
+  .mapMatch(fn: F[Map[Str,Info], Bool]): MapExtractor -> {
+    .extractedValue -> this.extractedValue.then{::.match DefaultInfoMatch[Opt[Map[Str,Info]]] {
+      .map m -> fn#(m).toOpt{m};
+      .default -> {};
+      }}
+    };
+
+  .isMsg: StrExtractor -> this.msgMatch{_ -> True};
+  .isList: ListExtractor -> this.listMatch{_ -> True};
+  .isMap: MapExtractor -> this.mapMatch{_ -> True};
+
+  .isEmpty: _Extractor[Info] -> {
+    .extractedValue -> this.extractedValue.match {
+      .empty -> {};
+      .some i -> i.match {
+        .msg _ -> {}; .list _ -> {}; .map _ -> {};
+        .empty -> Opts#(i);
+        }
+      }
+    };
+  }
+
+StrExtractor: _Extractor[Str] {
+  .msgMatch(fn: F[Str, Bool]): StrExtractor -> {
+    .extractedValue -> this.extractedValue.match{
+      .empty -> {};
+      .some str -> fn#(str).toOpt {str}
+      }
+    }
+  }
+
+MapExtractor: _Extractor[Map[Str,Info]] {
+  /// Descend deeper into the map
+   > (key: Str): InfoExtractor -> {
+    .extractedValue -> this.extractedValue.match{
+      .empty -> {};
+      .some m -> m.opt key;
+      }
+    };
+
+  // Drop the extraction if the map doesn't match the value
+  .mapMatch(fn: F[Map[Str,Info], Bool]): MapExtractor -> {
+    .extractedValue -> this.extractedValue.match{
+      .empty -> {};
+      .some m -> fn#(m).toOpt{m};
+      }
+    };
+  }
+
+ListExtractor: _Extractor[List[Info]] {
+  > (index: Nat): InfoExtractor -> {
+    .extractedValue -> this.extractedValue.match{
+      .empty -> {};
+      .some l -> l.opt index;
+      }
+    };
+
+  .listMatch(fn: F[List[Info], Bool]): ListExtractor -> {
+    .extractedValue -> this.extractedValue.match{
+      .empty -> {};
+      .some l -> fn#(l).toOpt{l};
+      }
+    };
+  }

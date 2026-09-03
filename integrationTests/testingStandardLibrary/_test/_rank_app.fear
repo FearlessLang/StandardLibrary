@@ -38,6 +38,11 @@ use base.Operation as Operation;
 use base.Todo as Todo;
 use base.ESet as ESet;
 use base.ESets as ESets;
+use base.ToInfo as ToInfo;
+use base.ToInfoBy as ToInfoBy;
+use base.InfoToPrettyString as InfoToPrettyString;
+use base.Infos as Infos;
+
 use base.Norm as Norm;
 use base.Cache as Cache;
 use base.XInt as X;
@@ -81,4 +86,8 @@ MyTests:UnitTests{::
   .test Nat0ImmTests
   .test Num0ImmTests
   .test ESet1ImmTests
+  .test InfoTests
+  .test InfoMatchTests
+  .test InfoExtractorTests
+  .test TryTests
   }

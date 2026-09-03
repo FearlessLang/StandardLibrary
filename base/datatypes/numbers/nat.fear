@@ -1,15 +1,21 @@
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
+Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// `this.getSucc` returns ``this + 1``. Throws if `this` is `Math.maxNat` (overflow).
   //>   .check{5 .getSucc .assertEq 6}
-  //>   .checkDetErr({_ -> True}, {(Math.maxNat) .getSucc})
-  .getSucc: Nat -> this + 1;
+  //>   .checkDetErr({:: & .msgMatch{::.startsWith "Nat.getSucc"}#}, {(Math.maxNat) .getSucc})
+  .getSucc: Nat -> this == (Math.maxNat) .if {
+    .then -> Error.msg("Nat.getSucc: cannot get the successor of Math.maxNat ("+(Math.maxNat)+").");
+    .else -> this + 1;
+    };
 
   /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
   //>   .check{5 .getPred .assertEq 4}
   //>   .checkDetErr({_ -> True}, {0 .getPred})
-  .getPred: Nat -> this - 1;
+  .getPred: Nat -> this == (Math.minNat) .if {
+    .then -> Error.msg("Nat.getPred: cannot get the predecessor of Math.minNat ("+(Math.minNat)+").");
+    .else -> this - 1;
+    };
 
   /// ``this + x`` returns the checked sum of `this` and ``x``. Throws on overflow past `Math.maxNat`.
   //>   .check{(2 + 3) .assertEq 5}
@@ -281,6 +287,16 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat] {
       .if {this >= (range.end)} .return {range.end}
       .return {this}; .hash -> this.str.hash;                 /// hash via str
 
+
+  /// ``this.indexInfo info`` returns `.empty` if `info` is not the `.list` variant,
+  /// otherwise returns .some the `this`-th element of the list if it exists, `.empty` otherwise.
+  .indexInto info -> info.match DefaultInfoMatch[mut Opt[Info]] {
+    .list list -> list.opt(this);
+    .default -> {};
+    };
+
+  /// `this.info` returns a `.msg` info with the string representation of `this` as the message.
+  //>   .check{5.info .assertEq Infos#("5")}
   .info -> Infos.msg(this.str);            /// info via str
   .close->::; .close->this;               /// fixpoint type closed
   .sumNumber xs ->                        /// summing all numbers starting from `this`
