@@ -1,28 +1,15 @@
-CellButton: { #(model: mut Model, i: Nat): mut Scope[Button] -> {::
-  .width 60
-  .height 60
-  .textHeight 28
-  .text(model.cellText(i))
-  .action{model.play(i)}
-  .save(model.slot(i))
-  }}
-
-Row: { #(model: mut Model, line: mut List[Nat]): mut Scope[Pane] -> {::
-  .button(CellButton#(model, line.get 0))
-  .button(CellButton#(model, line.get 1))
-  .button(CellButton#(model, line.get 2))
-  }}
-
-Gui: Consumer[mut Frame] {
-  mut .model: mut Model;
+//Entry screen: pick which of the three layout techniques to open. Each
+//button opens its own frame (independent Model, so games don't interfere),
+//and the chooser stays open so the three can be compared side by side.
+ChooserGui: Consumer[mut Frame] {
+  mut .gui: mut GuiC;
   ::
-  .title "Tic-Tac-Toe"
+  .title "Tic-Tac-Toe: pick a layout"
   .content{::
     .background (Color.ghostWhite)
-    .label{:: .text(this.model.status) .save(this.model.statusSlot) }
-    .pane(Row#(this.model, AllLines#.get 0))
-    .pane(Row#(this.model, AllLines#.get 1))
-    .pane(Row#(this.model, AllLines#.get 2))
-    .button{:: .text "New Game" .action{this.model.reset} }
+    .label{:: .text "Three ways to lay out the 3x3 board:" }
+    .button{:: .text "Frozen (fixed window)" .action{Models# |>{ m -> this.gui.run(mut FrozenGui{.model->m}) }} }
+    .button{:: .text "Chunked grid (.chunk 3)" .action{Models# |>{ m -> this.gui.run(mut ChunkGui{.model->m}) }} }
+    .button{:: .text "Resizable square (canvas)" .action{this.gui.run(ResizableGuis#(Models#, Slots#[mut Pane]))} }
     }
   }

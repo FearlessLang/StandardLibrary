@@ -51,8 +51,12 @@ Models: { #: mut Model -> Block#
       turn.set(True),
       self.refresh
       );
+    //Button-cell slots are only populated by button-based UIs (Frozen,
+    //Chunk); a canvas-based UI (Resizable) never creates or .saves those
+    //Buttons, so the per-cell text push is skipped where a slot was never
+    //filled rather than throwing on Slot!.
     mut .refresh: Void -> Block#(
       statusSlot!.text(self.status),
-      (0=~~=8).flow.forEach{Block#(slots.get(::)!.text(self.cellText(::)), Void)},
+      (0=~~=8).flow.forEach{i -> Block#(slots.get(i).isFull.thenDo{Block#(slots.get(i)!.text(self.cellText(i)), Void)}, Void)},
       Void);
     }}}

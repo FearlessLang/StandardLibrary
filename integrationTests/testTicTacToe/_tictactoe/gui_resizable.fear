@@ -1,0 +1,166 @@
+//Demonstrates the canvas + manual hit-testing technique used by
+//testBasketball, instead of a layout manager: draw the whole board with a
+//Painter computed from the live panel size, and translate clicks back to a
+//cell index by hand. Keeps the board square and as large as possible as
+//the window resizes, which no layout manager here can do on its own (a
+//real Grid would stretch rows/cols independently, not as one square).
+BoardBounds: { #(panelW: Width, panelH: Height): Rect -> Block#
+  .let[Nat] pw = { panelW.get }
+  .let[Nat] ph = { panelH.get }
+  .let[Nat] side = { (pw < ph).if{.then->pw; .else->ph} }
+  .let[Nat] offX = { (pw - side) .getTruncDiv 2 }
+  .let[Nat] offY = { (ph - side) .getTruncDiv 2 }
+  .return { Rects#(X.origin + (Width#offX), Y.origin + (Height#offY), Width#side, Height#side) }
+  }
+
+CellBounds: { #(board: Rect, i: Nat): Rect -> Block#
+  .let[Nat] cell = { board.width.get .getTruncDiv 3 }
+  .let[Nat] col  = { i .getRem 3 }
+  .let[Nat] row  = { i .getTruncDiv 3 }
+  .return { Rects#(board.x + (Width#(cell*col)), board.y + (Height#(cell*row)), Width#cell, Height#cell) }
+  }
+
+IdPainter: Painter { g -> g }
+
+XMark: { #(r: Rect): Painter -> { g -> Block#
+  .let[Nat] w    = { r.width.get }
+  .let[Nat] pad  = { w .getTruncDiv 6 }
+  .let[Nat] far  = { w - pad }
+  .return { g
+    .color (Color.sleepyBlue)
+    .position(r.x + (Width#pad), r.y + (Height#pad)) .line(r.x + (Width#far), r.y + (Height#far))
+    .position(r.x + (Width#far), r.y + (Height#pad)) .line(r.x + (Width#pad), r.y + (Height#far))
+    }
+  }}
+
+OMark: { #(r: Rect): Painter -> { g -> Block#
+  .let[Nat] w   = { r.width.get }
+  .let[Nat] pad = { w .getTruncDiv 6 }
+  .let[Nat] d   = { w - (pad*2) }
+  .return { g
+    .color (Color.dangerTomato)
+    .position(r.x + (Width#pad), r.y + (Height#pad))
+    .oval(Width#d, Height#d)
+    }
+  }}
+
+CellMark: { #(cell: Cell, board: Rect, i: Nat): Painter -> cell.match{
+  .empty -> IdPainter;
+  .x -> XMark#(CellBounds#(board, i));
+  .o -> OMark#(CellBounds#(board, i));
+  }}
+
+GridLines: { #(board: Rect): Painter -> { g -> Block#
+  .let[Nat] cell = { board.width.get .getTruncDiv 3 }
+  .let x1 = { board.x + (Width#cell) }
+  .let x2 = { board.x + (Width#(cell*2)) }
+  .let y1 = { board.y + (Height#cell) }
+  .let y2 = { board.y + (Height#(cell*2)) }
+  .return { g
+    .color (Color.boringGray)
+    .position(x1, board.y) .line(x1, board.bottom)
+    .position(x2, board.y) .line(x2, board.bottom)
+    .position(board.x, y1) .line(board.right, y1)
+    .position(board.x, y2) .line(board.right, y2)
+    }
+  }}
+
+//Snapshots the 9 cells as plain (capability-free) Cell values rather than
+//holding a mut Model reference: this literal gets built from inside nested
+//Scope literals (the click handler, the initial .paint call), and a
+//captured mut reference stored as a field there gets auto-strengthened to
+//imm by the capability checker -- a plain Cell value has no capability to
+//strengthen, so there is nothing to reject.
+BoardPainter: Painter { g -> Block#
+  .let board = { BoardBounds#(g.panelWidth, g.panelHeight) }
+  .let g1 = { GridLines#(board).run(g) }
+  .let g2 = { CellMark#(this.c0, board, 0).run(g1) }
+  .let g3 = { CellMark#(this.c1, board, 1).run(g2) }
+  .let g4 = { CellMark#(this.c2, board, 2).run(g3) }
+  .let g5 = { CellMark#(this.c3, board, 3).run(g4) }
+  .let g6 = { CellMark#(this.c4, board, 4).run(g5) }
+  .let g7 = { CellMark#(this.c5, board, 5).run(g6) }
+  .let g8 = { CellMark#(this.c6, board, 6).run(g7) }
+  .let g9 = { CellMark#(this.c7, board, 7).run(g8) }
+  .let g10 = { CellMark#(this.c8, board, 8).run(g9) }
+  .return { g10 };
+  .c0:Cell; .c1:Cell; .c2:Cell; .c3:Cell; .c4:Cell; .c5:Cell; .c6:Cell; .c7:Cell; .c8:Cell;
+  }
+
+//The cell values are read into plain locals first: the object literal
+//below may not even mention a captured mut-typed variable in its body
+//(not just store one), so `model` itself has to stay outside it.
+BoardPainters: { #(model: mut Model): Painter -> Block#
+  .let c0 = { model.cell(0) }
+  .let c1 = { model.cell(1) }
+  .let c2 = { model.cell(2) }
+  .let c3 = { model.cell(3) }
+  .let c4 = { model.cell(4) }
+  .let c5 = { model.cell(5) }
+  .let c6 = { model.cell(6) }
+  .let c7 = { model.cell(7) }
+  .let c8 = { model.cell(8) }
+  .return { BoardPainter{
+    .c0->c0; .c1->c1; .c2->c2;
+    .c3->c3; .c4->c4; .c5->c5;
+    .c6->c6; .c7->c7; .c8->c8;
+    } }
+  }
+
+//model/canvas are captured directly as parameters of this constructor
+//function, not stored as fields read through `this` -- a BoardPainter
+//literal capturing `this.model` from deep inside the nested Scope
+//literals below would be trying to store a mut-observing reference into
+//an imm object literal, which the capability checker correctly refuses.
+//A plain captured parameter has no such restriction (mirrors testBasketball's
+//Guis#, which captures its model/canvas parameters the same way).
+//
+//The click handler only flips `dirty`; .modelFps is the sole caller of
+//canvas!.paint, matching testBasketball's shape (its mouse handler only
+//flips model state; model!.tick, driven by .modelFps, is what repaints).
+//Kept for that separation of concerns, not because a direct repaint from
+//the click handler was unsafe -- it wasn't; the actual repaint crash this
+//project turned up was a real Nat.* bug (StandardLibrary/rt/Nat$c$0Instance
+//.java's mulChecked divided by the right operand while overflow-checking,
+//without the same before that check guarded the left one for zero, so any
+//`n * 0` with n != 0 threw division-by-zero -- CellBounds#'s `cell*col`
+//hits exactly that for every cell in the leftmost column).
+ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[mut Frame] -> Block#
+  .var dirty = { False }
+  .return { mut ResizableGui: Consumer[mut Frame] {::
+    .title "Tic-Tac-Toe: resizable square"
+    .resizable
+    .modelFps(30, {:: .action{ dirty.get.thenDo{Block#(
+        canvas!.paint(BoardPainters#(model)),
+        dirty.set(False),
+        Void
+        )} } })
+    .contentB{::
+      .background (Color.ghostWhite)
+      .north{:: .label{:: .text(model.status) .save(model.statusSlot) } }
+      .center{::
+        .width 480 .height 480
+        .save canvas
+        .paint(BoardPainters#(model))
+        .mouse{:: .clicked{ e -> Block#
+          .let board = { BoardBounds#(e.panelWidth, e.panelHeight) }
+          .let[Nat] cell = { board.width.get .getTruncDiv 3 }
+          .if { (cell > 0) && {model.winner.isEmpty} && {board.contains(e.mouseX, e.mouseY)} }
+            .do { Block#
+              .let[Nat] col  = { board.x.to(e.mouseX).get .getTruncDiv cell }
+              .let[Nat] row  = { board.y.to(e.mouseY).get .getTruncDiv cell }
+              .do { model.play(row*3 + col) }
+              .do { dirty.set(True) }
+              .done
+              }
+          .done
+          }}
+        }
+      .south{:: .button{:: .text "New Game" .action{Block#(
+          model.reset,
+          dirty.set(True),
+          Void
+          )} } }
+      }
+    }}
+  }
