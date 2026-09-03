@@ -43,6 +43,7 @@ final class AssetBytesRead{
   static long nat(Object o){ return ((Nat$c$0Instance)o).val(); }
 
   static byte[] bytes(String path,String diskPath,String zipSteps,String zipEntry){
+    checkAutoloaded(path,diskPath,zipSteps,zipEntry);
     var full= localAssetPath(diskPath);
     var steps= zipStepList(zipSteps);
     var entry= canonicalZipEntry(zipEntry);
@@ -62,6 +63,49 @@ final class AssetBytesRead{
     }
     catch(IOException ioe){
       throw nonDetErr("Files under project root has been altered.\nFile not found in "+path+" "+ioe);
+    }
+  }
+
+  static final ConcurrentHashMap<String,List<List<String>>> autoloadCache= new ConcurrentHashMap<>();
+
+  /** this.path/diskPath/zipSteps/zipEntry are plain Str fields any Fearless type can override
+   * with an arbitrary literal, so they cannot be trusted on their own: this checks the exact
+   * triple against the compiler's own compiled-in record of which files it auto-imported for
+   * the package path claims to come from (base.<pkg>.Main.autoloadedAssets), rejecting anything
+   * that is not literally one of those files. */
+  static void checkAutoloaded(String path,String diskPath,String zipSteps,String zipEntry){
+    var javaPkg= autoloadJavaPackage(path);
+    var triple= List.of(diskPath,zipSteps,zipEntry);
+    if (autoloadCache.computeIfAbsent(javaPkg,AssetBytesRead::loadAutoloaded).contains(triple)){ return; }
+    throw invalidAssetDescriptor(
+      "This file was not recognized by the compiler as auto-imported.\n"
+      +"package: "+javaPkg+"\ndiskPath: "+diskPath
+      );
+  }
+
+  static String autoloadJavaPackage(String path){
+    var prefix= "fear:/";
+    if (!path.startsWith(prefix)){ throw invalidAssetDescriptor("path does not start with "+prefix+": "+path); }
+    var rest= path.substring(prefix.length());
+    var slash= rest.indexOf('/');
+    var folder= slash < 0 ? rest : rest.substring(0,slash);
+    if (folder.length() < 2 || folder.charAt(0) != '_'){
+      throw invalidAssetDescriptor("path has no valid package folder: "+path);
+    }
+    return folder.substring(1);
+  }
+
+  static List<List<String>> loadAutoloaded(String javaPkg){
+    try{
+      var cls= Class.forName(javaPkg+".Main",true,AssetBytesRead.class.getClassLoader());
+      var field= cls.getField("autoloadedAssets");
+      var rows= (String[][])field.get(null);
+      var res= new ArrayList<List<String>>();
+      for (var row: rows){ res.add(List.of(row)); }
+      return List.copyOf(res);
+    }
+    catch(ReflectiveOperationException|ClassCastException e){
+      throw invalidAssetDescriptor("Cannot resolve auto-imported assets for package \""+javaPkg+"\": "+e);
     }
   }
 
