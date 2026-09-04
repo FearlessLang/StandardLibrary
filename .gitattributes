@@ -1,0 +1,23 @@
+# Normalize all text files to LF line endings on checkin, regardless of
+# platform or the local core.autocrlf setting.
+* text=auto eol=lf
+
+# Known binary types: never touched for line endings. The "binary" macro
+# alone does not clear eol (it only unsets text/diff/merge), so eol=lf
+# from the rule above would otherwise still apply to these; -eol clears it.
+*.jar binary -eol
+*.zip binary -eol
+*.png binary -eol
+*.jpg binary -eol
+*.jpeg binary -eol
+*.gif binary -eol
+*.bmp binary -eol
+*.ico binary -eol
+*.icns binary -eol
+*.xcf binary -eol
+*.pdf binary -eol
+*.woff binary -eol
+*.woff2 binary -eol
+*.ttf binary -eol
+*.otf binary -eol
+*.odp binary -eol
