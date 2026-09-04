@@ -5,6 +5,7 @@ System: ToIso[System], WidenTo[System] {
   mut .out: mut Output;
   mut .inputCursor: mut InputCursor;
   mut .assetRead: mut AssetReadCapability;//TODO: rename as CapAssetRead? and complete real system and the inherited metods returning 'this'
+  mut .download: mut DownloadCapability;
   ///Creates a reader for this in memory log.
   ///Concrete log types must be non generic.
   ///Creating a reader throw with nondeterministic error if the concrete log type is generic.

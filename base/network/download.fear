@@ -1,0 +1,32 @@
+///Downloads the content at ``url`` over HTTP(S).
+///``url`` must be an absolute http/https URI: since any syntactically valid
+///RFC 3986 URI is already representable as a Str (Str's whitelist is a
+///superset of the URI character set), no separate URL character check is
+///needed here beyond the scheme/syntax validation every method performs.
+///``maxBytes`` is a caller-supplied hard cap on the response body size,
+///enforced both against the response's Content-Length header (before the
+///body is read) and while streaming the body (regardless of what
+///Content-Length claimed).
+///Redirects are followed automatically up to a fixed cap of 5 hops, each
+///one re-validated against the same URL/scheme rule.
+///Connect and per-request timeouts are a fixed 30s each, not configurable.
+DownloadCapability: ToIso[DownloadCapability], WidenTo[DownloadCapability] {
+  mut .downloadBytes(url: Str, maxBytes: Nat): List[Byte];
+
+  mut .downloadStrUtf8(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
+  mut .downloadUStrUtf8(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+  mut .downloadStrUtf16Le(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
+  mut .downloadUStrUtf16Le(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+  mut .downloadStrUtf16Be(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
+  mut .downloadUStrUtf16Be(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+  mut .downloadStrUtf32Le(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
+  mut .downloadUStrUtf32Le(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+  mut .downloadStrUtf32Be(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
+  mut .downloadUStrUtf32Be(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+  mut .downloadStrAscii(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
+  mut .downloadUStrAscii(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+  mut .downloadStrLatin1(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
+  mut .downloadUStrLatin1(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+
+  mut .downloadImage(url: Str, maxBytes: Nat, maxPixels: Nat): Image;
+  }
