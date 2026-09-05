@@ -1,0 +1,20 @@
+use base.Main as Main;
+use base.Block as Block;
+use base.Log as Log;
+use base.Lists as Lists;
+use base.List as List;
+use base.Str as Str;
+use base.InMemoryLog as InMemoryLog;
+
+Steps: InMemoryLog[Str]{`steps`}
+
+LoggingExample:Main{s->Block#
+  .do{ Log.log(`starting logging example`) }
+  .do{ Lists#(1,2,3).flow.forEach{n->Block#(
+    Steps.log(`step `+n),
+    Log.log(`processed item `+n))} }
+  .let[List[Str]] recorded= { Steps.reader(s).consume }
+  .do{ Log.log(`finished, `+(recorded.size)+` steps recorded`) }
+  .do{ s.out.println(`done, `+(recorded.size)+` steps recorded`) }
+  .done
+  }
