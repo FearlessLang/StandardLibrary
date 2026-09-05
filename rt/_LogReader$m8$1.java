@@ -9,17 +9,23 @@ public record _LogReader$m8$1(InMemoryLog$2kk$1 o,ArrayList<Object> log) impleme
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   public _LogReader$m8$1{
-    if (!o.getClass().getSimpleName().endsWith("$0")){ throw nonDetErr("Generic logs can not be read"); }
+    //o's class is always the anonymous singleton literal, whose own getSimpleName() is "";
+    //the arity-carrying name is on the one interface it implements.
+    if (!o.getClass().getInterfaces()[0].getSimpleName().endsWith("$0")){ throw nonDetErr("Generic logs can not be read"); }
   }
   public Object mut$read$0(){
-    if (log.isEmpty()){ return List$o$1.instance; }
-    return new List$o$1Instance(List.copyOf(log));
+    synchronized(log){
+      if (log.isEmpty()){ return List$o$1.instance; }
+      return new List$o$1Instance(List.copyOf(log));
+    }
   }
   public Object mut$consume$0(){
-    if (log.isEmpty()){ return List$o$1.instance; }
-    var res= new List$o$1Instance(List.copyOf(log));
-    log.clear(); 
-    return res;
+    synchronized(log){
+      if (log.isEmpty()){ return List$o$1.instance; }
+      var res= new List$o$1Instance(List.copyOf(log));
+      log.clear();
+      return res;
+    }
   }
   public Object mut$logName$0(){
     return o.imm$name$0();
