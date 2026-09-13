@@ -155,24 +155,27 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
       );
   }
 
+  // Whether a gap is owed before the next slot depends on whether a slot was
+  // already placed, never on whether its measured size happens to be 0: a
+  // widget can legitimately have width or height 0 (Nat includes 0), and
+  // that must not be mistaken for "nothing here yet" the way it would be
+  // with a plain `total == 0` check.
   private Dimension size(Container target, Dim dim){
-    var middle = middleSize(dim);
-    var total = new Dimension(middle.width, middle.height);
+    boolean hasMiddle = west != null || center != null || east != null;
+    var total = middleSize(dim);
+    boolean hasContent = hasMiddle;
 
     if (north != null){
       var d = dim.of(north);
       total.width = Math.max(total.width, d.width);
-      total.height = total.height == 0
-        ? d.height
-        : d.height + h(gap.heightGap) + total.height;
+      total.height = hasContent ? total.height + h(gap.heightGap) + d.height : d.height;
+      hasContent = true;
     }
 
     if (south != null){
       var d = dim.of(south);
       total.width = Math.max(total.width, d.width);
-      total.height = total.height == 0
-        ? d.height
-        : total.height + h(gap.heightGap) + d.height;
+      total.height = hasContent ? total.height + h(gap.heightGap) + d.height : d.height;
     }
 
     var in = target.getInsets();
@@ -183,18 +186,19 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
 
   private Dimension middleSize(Dim dim){
     var total = new Dimension();
-    addMiddle(total, dim, west);
-    addMiddle(total, dim, center);
-    addMiddle(total, dim, east);
+    boolean hasContent = addMiddle(total, dim, west, false);
+    hasContent = addMiddle(total, dim, center, hasContent);
+    addMiddle(total, dim, east, hasContent);
     return total;
   }
 
-  private void addMiddle(Dimension total, Dim dim, Component c){
-    if (c == null){ return; }
+  private boolean addMiddle(Dimension total, Dim dim, Component c, boolean hasContent){
+    if (c == null){ return hasContent; }
     var d = dim.of(c);
-    if (total.width != 0){ total.width += w(gap.widthGap); }
+    if (hasContent){ total.width += w(gap.widthGap); }
     total.width += d.width;
     total.height = Math.max(total.height, d.height);
+    return true;
   }
 
   private record Area(int left, int top, int right, int bottom){}
