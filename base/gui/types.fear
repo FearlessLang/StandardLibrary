@@ -397,11 +397,11 @@ KeyActions:{#:mut KeyAction->Block#
     mut .match: mut EList[KeyStroke]->match;
     mut .actions: mut EList[mut Consumer[KeyEvent]]->actions;
     mut .matchOnly( k:KeyStroke): mut KeyAction->
-      Block#(match.clear,match.add(k),self);
+      Block#(match.clear,self.matchAlso(k));
     mut .matchAlso( k:KeyStroke): mut KeyAction->
       Block#(match.add(k),self);
     mut .doOnly( c:mut Consumer[KeyEvent]): mut KeyAction->
-      Block#(actions.clear,actions.add(c),self);
+      Block#(actions.clear,self.doAlso(c));
     mut .doAlso( c:mut Consumer[KeyEvent]): mut KeyAction->
       Block#(actions.add(c),self);
     mut .save(c:mut Consumer[mut KeyAction]):mut KeyAction->
