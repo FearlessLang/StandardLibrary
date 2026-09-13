@@ -17,30 +17,30 @@ AssetTextReadAsciiTests: UnitTests { ::
 
 AssetTextReadAsciiPlainFiles: Test { ::
   .checkWithSys { s->
-    Auto_loadTest_text
+    AutoLoadTestText
       .readStrUtf8(s.assetRead,UnexpectedBadStr)
       .assertEq `Hello! We are automatically reading this file!`
     }
   .checkWithSys { s->
-    GoodAsciiStr#(Asset_textGood_ascii.readStrUtf8(s.assetRead,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.readStrUtf8(s.assetRead,UnexpectedBadStr))
     }
   .checkWithSys { s->
-    GoodAsciiUStr#(Asset_textGood_ascii.readUStrUtf8(s.assetRead,UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.readUStrUtf8(s.assetRead,UnexpectedBadUStr))
     }
   .checkWithSys { s->
-    GoodAsciiStr#(Asset_textGood_ascii.readStrAscii(s.assetRead,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.readStrAscii(s.assetRead,UnexpectedBadStr))
     }
   .checkWithSys { s->
-    GoodAsciiUStr#(Asset_textGood_ascii.readUStrAscii(s.assetRead,UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.readUStrAscii(s.assetRead,UnexpectedBadUStr))
     }
   .checkWithSys { s->
-    GoodAsciiStr#(Asset_textGood_ascii.readStrLatin1(s.assetRead,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.readStrLatin1(s.assetRead,UnexpectedBadStr))
     }
   .checkWithSys { s->
-    GoodAsciiUStr#(Asset_textGood_ascii.readUStrLatin1(s.assetRead,UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.readUStrLatin1(s.assetRead,UnexpectedBadUStr))
     }
   .checkWithSys { s->
-    Auto_zip_loadSubTest_text_in_zip
+    AutoZipLoadSubTestTextInZip
       .readStrUtf8(s.assetRead,UnexpectedBadStr)
       .assertEq `Hello! We are automatically reading this file from a zip!`
     }
@@ -48,36 +48,36 @@ AssetTextReadAsciiPlainFiles: Test { ::
 
 AssetTextReadAsciiRepeatedRead: Test { ::
   .checkWithSys { s-> Block#
-    .do { GoodAsciiStr#(Asset_textGood_ascii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
-    .do { GoodAsciiStr#(Asset_textGood_ascii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
-    .do { GoodAsciiUStr#(Asset_textGood_ascii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
-    .do { GoodAsciiUStr#(Asset_textGood_ascii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
+    .do { GoodAsciiStr#(AssetTextGoodAscii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
+    .do { GoodAsciiStr#(AssetTextGoodAscii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
+    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
+    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
     .done
     }
   }
 
 AssetTextReadAsciiConsumeProtocol: Test { ::
   .check {
-    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-1`,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-1`,UnexpectedBadStr))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)),
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)),
     sys.try#{
-      Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)
+      AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)
       }.assertInfo)}
   .check {
-    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-3a`,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-3a`,UnexpectedBadStr))
     }
   .check {
-    GoodAsciiStr#(Asset_textGood_ascii.consumeStrUtf8(`ascii-consume-3b`,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-3b`,UnexpectedBadStr))
     }
   .check {
-    GoodAsciiUStr#(Asset_textGood_ascii.consumeUStrUtf8(`ascii-consume-4`,UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8(`ascii-consume-4`,UnexpectedBadUStr))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiUStr#(Asset_textGood_ascii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)),
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)),
     sys.try#{
-      Asset_textGood_ascii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)
+      AssetTextGoodAscii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)
       }.assertInfo)}
   }
 

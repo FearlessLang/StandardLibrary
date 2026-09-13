@@ -145,7 +145,6 @@ class _Border extends AContainer implements Border$2o$0{
 }
 
 abstract class AWidget implements Widget$2o$1{
-  static final Nat$c$0 zero = Nat$c$0Instance.instance(0);
   static final Nat$c$0 def = Nat$c$0Instance.instance(6);
   static final Nat$c$0 defText = Nat$c$0Instance.instance(12);
 

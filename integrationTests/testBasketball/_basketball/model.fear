@@ -63,8 +63,9 @@ Players: { #(startX: Nat, startY: Nat, width: Nat): mut Player -> Block#
           .do { px.set((px.get - speed).clampTo(0.0 =~~= ( width.softFloat - playerW))) }
       .if { right.get }
           .do { px.set((px.get + speed).clampTo(0.0 =~~= ( width.softFloat - playerW))) }
-      .do { py.set(py.get + curVy) }
-      .if { (py.get + curVy) > groundY }
+      .let nextPy = { py.get + curVy }
+      .do { py.set nextPy }
+      .if { nextPy > groundY }
           .do { Block#(py.set groundY, vy.set(0.0)) }
       .done;
     }}}

@@ -6,8 +6,6 @@ use base.Consumer as Consumer;
 use base.Frame as Frame;
 use base.Debug as Debug;
 use base.Color as Color;
-use base.WidthNat as Width;
-use base.HeightNat as Height;
 use base.KeyStroke as Key;
 use base.Label as Label;
 use base.Slot as Slot;
@@ -107,8 +105,8 @@ Gui06:Consumer[mut Frame]{::
     .background (Color.ghostWhite)
     .label{:: .text `Move/click inside the window, then close` }
     .pane{::
-      .width' (Width#360)
-      .height' (Height#180)
+      .width 360
+      .height 180
       .background (Color.alienMint)
       .mouse{::
         .clicked{ e-> Debug#"mouse clicked" }
@@ -167,9 +165,9 @@ Gui08:Consumer[mut Frame]{
     .background (Color.ghostWhite)
    .label{::
       .text `Hello`
-      .width' (Width#500)
-      .height' (Height#80)
-      .textSize (Height#24)
+      .width 500
+      .height 80
+      .textHeight 24
       .background (Color.rubberDuck)
       .save (this.slot)
       }
@@ -190,7 +188,7 @@ Gui09:Consumer[mut Frame]{::
     .label{:: .uText (``.u `0645 0631 062D 0628 0627 0020 05E9 05DC 05D5 05DD 0020 0928 092E 0938 094D 0924 0947 0020 0E2A 0E27 0E31 0E2A 0E14 0E35`) }
     .label{:: .uText (``.u `4F60 597D 4E16 754C 0020 3053 3093 306B 3061 306F 0020 D55C AD6D C5B4`) }
     .label{:: .uText (``.u `2200 0078 2208 211D 003A 0020 2211 222B 0020 2192 0020 25A0 25B2 25CF 0020 2660 2665`) }
-    .label{:: .uText (``.u `1F600 0020 2764 FE0F 0020 1F468 200D 1F469 200D 1F467 0020 1F1F3 1F1FF 0020 1F44D 1F3FD`).textSize (Height#32) }
+    .label{:: .uText (``.u `1F600 0020 2764 FE0F 0020 1F468 200D 1F469 200D 1F467 0020 1F1F3 1F1FF 0020 1F44D 1F3FD`).textHeight 32 }
     .button{:: .uText (`Press `.u `1F680`).action{Debug#"rocket pressed"} }
     }
   }
