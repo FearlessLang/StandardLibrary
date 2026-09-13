@@ -39,6 +39,7 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
 
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
   .match[R:**](m: InfoMatch[R]): R->m.empty;
+  /// valid JSon text; ``.empty`` alone has no JSon value so renders as the bare word ``EmptyInfo``
   .str -> this.imm.match(_InfoToStr);
   +(other: Info) : Info -> this.match {
     .empty -> other;
@@ -109,9 +110,19 @@ DefaultInfoMatch[R:**]: InfoMatch[R] {
 
 _InfoToStr: InfoMatch[Str] {
   .empty ->`EmptyInfo`;
-  .msg(msg) -> msg.escape;
-  .list(list) -> list.str {::};
-  .map(map) -> map.str {::};
+  .msg(msg) -> _JsonEscape#msg;
+  .list(list) -> `[` + (list.flow.map{::.str}.join(`,`)) + `]`;
+  .map(map) -> `{` + (map.flow.map{_JsonEscape#(::.key) + `:` + (::.elem.str)}.join(`,`)) + `}`;
+  }
+
+/// Fearless Str never carries backslash escapes, so a raw ``"``, ``\`` or newline
+/// has to be turned into the two-character JSon escape sequence by hand.
+_JsonEscape: {
+  #(s: Str): Str -> `"` + (s.replaceSimultaneous(Lists#(
+    `\`, `\\`,
+    `"`, `\"`,
+    (`` |), `\n`,
+    ))) + `"`;
   }
 
 InfoToPrettyString: {
