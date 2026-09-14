@@ -238,11 +238,11 @@ abstract class AWidget implements Widget$2o$1{
     frame.size((Nat$c$0) r, "radius");
     return reStyle(() -> radius = (Nat$c$0) r);
   }
-  public Object mut$textSize$1(Object t){
+  public Object mut$textHeight$p1$1(Object t){
     frame.height((HeightNat$lg$0) t, "text size");
     return reStyle(() -> textSize = (HeightNat$lg$0) t);
   }
-  public Object read$textSize$0(){ return textSize; }
+  public Object read$textHeight$0(){ return textSize; }
   @Override public Object mut$autoWidth$0(){ return reStyle(() -> preferredWidth = null); }
   @Override public Object mut$autoHeight$0(){ return reStyle(() -> preferredHeight = null); }
   @Override public Object mut$autoSize$0(){
