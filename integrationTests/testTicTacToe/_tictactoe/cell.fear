@@ -1,7 +1,7 @@
 CellButton: { #(model: mut Model, i: Nat): mut Scope[Button] -> {::
   .width 60
   .height 60
-  .textHeight 28
+  .textSize 28
   .text(model.cellText(i))
   .action{model.play(i)}
   .save(model.slot(i))

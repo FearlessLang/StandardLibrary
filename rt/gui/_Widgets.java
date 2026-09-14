@@ -238,7 +238,7 @@ abstract class AWidget implements Widget$2o$1{
     frame.size((Nat$c$0) r, "radius");
     return reStyle(() -> radius = (Nat$c$0) r);
   }
-  public Object mut$textSize$1(Object t){
+  public Object mut$textSize$p1$1(Object t){
     frame.height((HeightNat$lg$0) t, "text size");
     return reStyle(() -> textSize = (HeightNat$lg$0) t);
   }
