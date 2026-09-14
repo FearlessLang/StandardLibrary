@@ -39,7 +39,12 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   }
   private static long n(Object o){ return ((Nat$c$0Instance)o).val; }
   private static long i(Object o){ return ((Int$c$0Instance)o).val(); }
-
+  private static String overflowMsg(String op, long a, long b) {
+    return "Nat " + op + ": overflow " + Long.toUnsignedString(a) + " " + op + " " + Long.toUnsignedString(b) + " is greater than " + Long.toUnsignedString(MAX_UNSIGNED_VALUE);
+  }
+  private static String underflowMsg(String op, long a, long b) {
+    return "Nat " + op + ": underflow " + Long.toUnsignedString(a) + " " + op + " " + Long.toUnsignedString(b) + " is less than 0";
+  }
   /**
    * For a long to overflow a + b has to be greater than Long.MAX_VALUE
    * We don't need to worry about underflow
@@ -49,7 +54,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    */
   private static long addChecked(long a, long b){
     boolean overflow = Long.compareUnsigned(a, MAX_UNSIGNED_VALUE - b) > 0;
-    if (overflow) { throw err("Nat +: overflow"); }
+    if (overflow) { throw nonDetErr(overflowMsg("+", a, b)); }
     return a + b;
   }
   /**
@@ -57,7 +62,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    * since we are working with unsigned numbers
    */
   private static long subChecked(long a, long b){
-    if (Long.compareUnsigned(a, b) < 0){ throw err("Nat -: underflow"); }
+    if (Long.compareUnsigned(a, b) < 0){ throw nonDetErr(underflowMsg("-", a, b)); }
     return a - b;
   }
 
@@ -68,7 +73,8 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   private static long mulChecked(long a, long b){
     if (a == 0 || b == 0) {return 0;}
     boolean overflow = Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0;
-    if (overflow){ throw err("Nat *: overflow"); }
+    if (overflow){ throw nonDetErr(overflowMsg("*", a, b));
+    }
     return a * b;
   }
 
@@ -87,6 +93,18 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     return nat.val;
   }
 
+  @Override public Object imm$succ$0() {
+    if (val != MAX_UNSIGNED_VALUE) {
+      return Nat$c$0Instance.instance(val + 1);
+    }
+    throw nonDetErr("Nat.succ: cannot take the successor of "+Long.toUnsignedString(MAX_UNSIGNED_VALUE));
+  }
+  @Override public Object imm$pred$0() {
+    if (val != 0) {
+      return Nat$c$0Instance.instance(val - 1);
+    }
+    throw nonDetErr("Nat.pred: cannot take the predecessor of "+0);
+  }
   @Override public Object imm$$slash$1(Object p0){
     long d=n(p0);
     if (d == 0L) {
@@ -208,7 +226,10 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
         power -= 1;
       }
     }
-    catch (Error _) { throw err("Nat **: overflow"); }
+    catch (Error _) {
+      // re-wrap the error for a better message
+      throw nonDetErr(overflowMsg("**", this.val, n(p0)));
+    }
     return Nat$c$0Instance.instance(result);
   }
   @Override public Object imm$softSqrt$0(){
@@ -228,9 +249,21 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   }
   @Override public Object imm$getIndexOffset$1(Object p0){
     long offset = i(p0);
+
     if (offset <= 0) {
+      if (Long.compareUnsigned(val, -offset) < 0) {
+        throw detErr(
+          "Nat.getIndexOffset: Underflow occurred when offsetting "
+          + Long.toUnsignedString(val)+" by "+offset+", this must be >= delta");
+      }
       // works for Long.MIN_VALUE as well, as Long.MIN_VALUE when read unsigned is LONG.MAX_VALUE + 1
       return instance(subChecked(val, -offset));
+    }
+    if (Long.compareUnsigned(val, MAX_UNSIGNED_VALUE - offset) > 0) {
+      throw detErr(
+        "Nat.getIndexOffset: Overflow occurred when offsetting "
+          + Long.toUnsignedString(val)+" by "+offset+"this+delta must be <= "
+          + Long.toUnsignedString(MAX_UNSIGNED_VALUE));
     }
     return instance(addChecked(val, offset));
   }

@@ -102,27 +102,29 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
   mut .test(t: Test): mut TestCap -> t.tests this;
   mut .disabledTest(Test): mut TestCap;
   mut .check(Check): mut TestCap;
-  mut .disabledCheck(Check): mut TestCap; 
+  mut .checkTrue(f: F[Bool]): mut TestCap -> this.check{f#.assertTrue};
+  mut .checkFalse(f: F[Bool]): mut TestCap -> this.check{f#.assertFalse};
+  mut .disabledCheck(Check): mut TestCap;
   mut .checkWithSys(CheckSys): mut TestCap;
   mut .disabledCheckWithSys(CheckSys): mut TestCap;  
-  mut .checkDetErr[T:*](errorMatch: LazyInfoValidator, f: F[T]): mut TestCap -> this.check{
+  mut .checkDetErr[T:*](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.check{
     Try#(f).run {
      .ok _ -> Error.msg "Expected error but got success";
-     .info i -> errorMatch#(InfoValidators# i).match {
-       .valid _ -> Void;
-       .invalid _ -> Error.msg("Error did not match expected: " + (i.str));
+     .info i -> i.validate errorMatch .if {
+       .then -> Void;
+       .else -> Error.msg("Error did not match expected: " + (i.str));
        }
      }
     };
-  mut .checkNonDetErr[T](errorMatch: LazyInfoValidator, f: F[T]): mut TestCap -> this.checkWithSys{
+  mut .checkNonDetErr[T](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.checkWithSys{
     sys -> sys.try#({Try#(f).run {
       .ok _ -> "Expected error but got success";
       .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
     }}).run {
        .ok errMsg -> Error.msg errMsg;
-       .info i -> errorMatch#(InfoValidators# i) .match {
-         .valid _ -> Void;
-         .invalid _ -> Error.msg("Error did not match expected: " + (i.str));
+       .info i -> i.validate errorMatch .if {
+         .then -> Void;
+         .else -> Error.msg("Error did not match expected: " + (i.str));
          }
        }
      };
@@ -243,7 +245,7 @@ _FailureActual: {
   #(i: Info): Str ->
     i.extract{:: > `actual` .extractMsg}.match {
       .some a -> `<actual>` + (_XmlEscape#a) + `</actual>` |;
-      .empty -> ``;
+      .empty -> "";
     };
   }
 
@@ -251,7 +253,7 @@ _FailureList: {
   #(i: Info): Str ->
     i.extract{:: > "list" .extractList}
       .mapSome{::.flow.filter{_IsUserFile#(_FrameField#(::, `fileName`))}.map {_FailureTrace#::}.join (`` |)}
-      .orValue ``
+      .orValue ""
   }
 
 _FormatFailure: {

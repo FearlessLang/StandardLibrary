@@ -52,11 +52,11 @@ Action[T:*]: {
 
   /// ``this.assertInfo constraint`` asserts that this action fails and that the failure info satisfies the given constraint.
   //> .checkNonDetErr({::}, {Try#{1 / 0}.assertInfo{::.isMsg{::.contains "divide by zero"}}});
-  mut .assertInfo(constraint: LazyInfoValidator): Void -> this.run{
+  mut .assertInfo(constraint: F[InfoValidator, InfoValidator]): Void -> this.run{
     .ok _ -> Assert.msg "Failure expected but nothing was thrown";
     .info info ->
       Assert!(
-        constraint#(SuccessfulInfoValidator {.close -> info})#,
+        info.validate constraint,
         {"Failure correctly occurred but error info doesn't match constraint."
         | "Got: "+info}
         )

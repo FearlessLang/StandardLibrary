@@ -39,8 +39,10 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
 
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
   .match[R:**](m: InfoMatch[R]): R->m.empty;
+  .matchWithDefault[R:**](m: DefaultInfoMatch[R]): R -> this.match(m);
   /// valid JSon text; ``.empty`` alone has no JSon value so renders as the bare word ``EmptyInfo``
   .str -> this.imm.match(_InfoToStr);
+  .prettyStr: Str -> InfoToPrettyString#(this);
   +(other: Info) : Info -> this.match {
     .empty -> other;
     .msg(s1) -> other.match {
@@ -63,8 +65,8 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
       };
     };
 
-  .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> f#{.close -> this; .extractedValue -> Opts# this }#;
-  .validate(f: read F[InfoValidator, InfoValidator]): Bool -> f#(InfoValidators# this)#;
+  .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> f#{.close -> this; .extract -> Opts# this }.extract;
+  .validate(f: read F[InfoValidator, InfoValidator]): Bool -> f#(InfoValidators# this).isValid;
   }
 
 ExtractionFunction[R:*]: F[InfoExtractor, Extractor[R]] {}
@@ -72,7 +74,7 @@ ExtractionFunction[R:*]: F[InfoExtractor, Extractor[R]] {}
 /// Allow indexing into an info,
 /// Union of Str (index into map) and Nat (index into list)
 InfoKey: Sealed, ToStr {
-  .indexInto(Info): mut Opt[Info];
+  .indexInto(Info): Opt[Info];
   }
 
 _InfoMapPlus: { #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->

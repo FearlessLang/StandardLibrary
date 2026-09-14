@@ -1,40 +1,43 @@
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
 Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
-  /// `this.getSucc` returns ``this + 1``. Throws if `this` is `Math.maxNat` (overflow).
-  //>   .check{5 .getSucc .assertEq 6}
-  //>   .checkDetErr({:: & .isMsg{::.startsWith "Nat.getSucc"}}, {(Math.maxNat) .getSucc})
-  .getSucc: Nat -> this == (Math.maxNat) .if {
-    .then -> Error.msg("Nat.getSucc: cannot get the successor of Math.maxNat ("+(Math.maxNat)+").");
-    .else -> this + 1;
-    };
+  /// `this.succ` returns ``this + 1``.
+  /// Overflow behaviour depends on the chosen backend, overflows if ``this == 18_446_744_073_709_551_615``.
+  //>   .check{5 .succ .assertEq 6}
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.succ"}}, {(Math.maxNat) .succ})
+  .succ: Nat;
 
-  /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
-  //>   .check{5 .getPred .assertEq 4}
-  //>   .checkDetErr({::}, {0 .getPred})
-  .getPred: Nat -> this == (Math.minNat) .if {
-    .then -> Error.msg("Nat.getPred: cannot get the predecessor of Math.minNat ("+(Math.minNat)+").");
-    .else -> this - 1;
-    };
+  /// `this.pred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
+  /// Underflow behaviour depends on the chosen backend, underflows if ``this == 0``.
+  //>   .check{5 .pred .assertEq 4}
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.pred"}}, {0 .pred})
+  .pred: Nat;
 
-  /// ``this + x`` returns the checked sum of `this` and ``x``. Throws on overflow past `Math.maxNat`.
+  /// ``this + x`` returns the checked sum of `this` and ``x``.
+  /// Overflow behaviour depends on the chosen backend, overflows if the result would exceed ``18_446_744_073_709_551_615``.
   //>   .check{(2 + 3) .assertEq 5}
-  //>   .checkDetErr({::}, {(Math.maxNat - 1) + 2})
+  //>   .checkNonDetErr(
+  //>     {:: > "msg" .isMsg{::.startsWith "Nat +" & (::.contains "overflow")}},
+  //>     {(Math.maxNat - 1) + 2}
+  //>     )
   +(x: Nat): Nat;
 
   /// ``this - x`` returns the checked difference of `this` and ``x``. Throws on underflow below ``0``.
+  /// Underflow behaviour depends on the chosen backend, underflows if the result would go below ``0``.
   //>   .check{(5 - 3) .assertEq 2}
-  //>   .checkDetErr({::}, {0 - 1})
+  //>   .checkNonDetErr({::}, {0 - 1})
   -(x: Nat): Nat;
 
-  /// ``this * x`` returns the checked product of `this` and ``x``. Throws on overflow.
+  /// ``this * x`` returns the checked product of `this` and ``x``.
+  /// Overflow behaviour depends on the chosen backend, overflows if the result would exceed ``18_446_744_073_709_551_615``.
   //>   .check{(6 * 7) .assertEq 42}
-  //>   .checkDetErr({::}, {(Math.maxNat) * 2})
+  //>   .checkNonDetErr({::}, {(Math.maxNat) * 2})
   *(x: Nat): Nat;
 
   /// ``this ** x`` returns the checked power of `this` raised to ``x``. Throws on overflow.
+  /// Overflow behaviour depends on the chosen backend, overflows if the result would exceed ``18_446_744_073_709_551_615``.
   //>   .check{(2 ** 6) .assertEq 64}
-  //>   .checkDetErr({::}, {(Math.maxNat) ** 2})
+  //>   .checkNonDetErr({::}, {(Math.maxNat) ** 2})
   **(x: Nat): Nat;
 
   /// ``this / d`` returns the exact rational quotient of `this` and ``d`` as a `Num`. Throws iff ``d == 0``.
@@ -214,10 +217,10 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   ~~(end: Nat): Range[Nat] -> Block#
     .if {this == (Math.maxNat)} .error{"Nat ~~: Start of open range cannot be Math.maxNat"}
     .if {end == (Math.minNat)} .error{"Nat ~~: End of open range cannot be Math.minNat"}
-    .let endInclusive={end.getPred}
-    .let startInclusive={this.getSucc}
+    .let endInclusive={end.pred}
+    .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Nat ~~: Tried to produce empty range, start ("+this+") .getSucc must be <= end (" + end + ") .getPred"
+      "Nat ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
     .return {_NatRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
@@ -230,7 +233,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
     .if {this >= endInclusive } .error {
       "Nat ~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
-    .return {_NatRanges#(this.getSucc, endInclusive, "("+this+", "+endInclusive+"]")};
+    .return {_NatRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
 
   /// ``this=~~end`` returns the range ``[this, end)``.
   /// Throws if `end` is `Math.minNat`, or the range would be empty (``this >= end``).
@@ -243,7 +246,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
     .if {this >= end } .error {
       "Nat =~~: invalid range start ("+this+") must be < end (" + end + ")"
       }
-    .return {_NatRanges#(this, end.getPred, "["+this+", "+end+")")};
+    .return {_NatRanges#(this, end.pred, "["+this+", "+end+")")};
 
   /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
   /// Throws if the range would be empty (``this > endInclusive``).
@@ -290,7 +293,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// ``this.indexInfo info`` returns `.empty` if `info` is not the `.list` variant,
   /// otherwise returns .some the `this`-th element of the list if it exists, `.empty` otherwise.
-  .indexInto info -> info.match DefaultInfoMatch[mut Opt[Info]] {
+  .indexInto info -> info.matchWithDefault {
     .list list -> list.opt(this);
     .default -> {};
     };

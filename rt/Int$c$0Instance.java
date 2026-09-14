@@ -39,7 +39,13 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
   private static long mulChecked(long a, long b) {
     try{ return Math.multiplyExact(a, b); }
-    catch(ArithmeticException e){ throw err("Int.* overflow"); }
+    catch(ArithmeticException e){
+      // either both negative or both positive
+      if (a < 0 == b < 0) {
+        throw nonDetErr(overflowMessage("*", a, b));
+      }
+      throw nonDetErr(underflowMessage("*", a, b));
+    }
   }
   static boolean canSafelyConvertToDouble(long val) {
     // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
@@ -52,7 +58,18 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     return val == (long) ((double) val);
   }
 
-
+  @Override public Object imm$succ$0() {
+    if (val != MAX_VALUE) {
+      return Int$c$0Instance.instance(val + 1);
+    }
+    throw nonDetErr("Int.succ: cannot take the successor of "+MAX_VALUE);
+  }
+  @Override public Object imm$pred$0() {
+    if (val != MIN_VALUE) {
+      return Int$c$0Instance.instance(val - 1);
+    }
+    throw nonDetErr("Int.pred: cannot take the predecessor of "+MIN_VALUE);
+  }
   @Override public Object imm$softNat$0(){ return Nat$c$0Instance.instance(val < 0 ? 0 : val); }
   @Override public Object imm$softByte$0(){ return Byte$o$0Instance.instance(clampByte(val)); }
   @Override public Object imm$softFloat$0(){ return Float$1c$0Instance.instance((double)val); }
@@ -90,13 +107,19 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
         + " is too large to be represented as a Float without loss of precision"
     );
   }
-  @Override public Object imm$$plus$1(Object p0){
-    try{ return instance(Math.addExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw err("Int.+ overflow"); }
+  private static String overflowMessage(String operator, long a, long b) {
+    return "Int "+operator+": overflow "+a+" "+operator+" "+b+" is greater than "+MAX_VALUE;
+  }
+  private static String underflowMessage(String operator, long a, long b) {
+    return "Int "+operator+": underflow "+a+" "+operator+" "+b+" is greater than "+MAX_VALUE;
+  }
+  @Override public Object imm$$plus$1(Object p0) {
+    try {return instance(Math.addExact(val, unwrap(p0)));}
+    catch (ArithmeticException e) {throw nonDetErr(overflowMessage("+", val, unwrap(p0)));}
   }
   @Override public Object imm$$dash$1(Object p0){
     try{ return instance(Math.subtractExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw err("Int.- overflow"); }
+    catch(ArithmeticException e){ throw nonDetErr(underflowMessage("-",  val, unwrap(p0))); }
   }
   @Override public Object imm$$slash$1(Object p0){
     long d=Nat$c$0Instance.unwrap(p0);
@@ -115,12 +138,23 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
 
     long result = 1;
-    while (power > 0) {
-      result = mulChecked(result, this.val);
-      power -= 1;
+    try {
+      while (power > 0) {
+        result = Math.multiplyExact(result, this.val);
+        power -= 1;
+      }
+
+      return Int$c$0Instance.instance(result);
+    } catch(ArithmeticException e){
+      // Unsure what the best approach here is, the whole expression would underflow
+      // As value is negative, and power is odd. But the intermediate expression might
+      // fail with either underflow or overflow
+      if (unsignedLongFromNat(p0) % 2 == 1 && this.val < 0) {
+        throw nonDetErr(underflowMessage("**", val, unwrap(p0)));
+      }
+      throw nonDetErr(overflowMessage("**", val, unwrap(p0)));
     }
 
-    return Int$c$0Instance.instance(result);
   }
 
   @Override public Object imm$abs$0(){
@@ -129,7 +163,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
 
   @Override public Object imm$negAbs$0(){
-    // Long.MIN_VALUE correctly converted to Long.MAX_VALUE + 1
+    // Long.MAX_VALUE correctly untouched
     if (val < 0) {
       return this;
     }

@@ -14,7 +14,7 @@ Opt[E:*]: _Opt[E] {
   .assertSome msg -> Assert.expectedActual(this.isSome, msg, ".some _", ".empty ");
 
   !           -> this.match{.some x -> x; .empty -> Error.msg `Opt was empty`};
-  ! msg       -> this.match{.some x -> x; .empty -> Error!(msg#.info)};
+  ! lazyToInfo       -> this.match{.some x -> x; .empty -> Error!(lazyToInfo#.info)};
 
   .or other -> this.match{.some _ -> this; .empty -> other};
   |   other -> this.or(other);
@@ -25,22 +25,6 @@ Opt[E:*]: _Opt[E] {
 
   .orLazy default -> this.match{.some x -> x; .empty -> default#};
 
-  .and other -> this.match{.some _ -> other; .empty -> this};
-  & other -> this.and(other);
-
-  && other -> this.match{.some _ -> other#; .empty -> this};
-  .andThen other, f -> this.match{
-    .some x -> other# .match {
-      .some y -> Opts#(f#(x, y));
-      .empty -> {}
-      };
-    .empty -> {}
-    };
-
-  .then f -> this.match{
-    .some x -> f#x;
-    .empty -> {}
-    };
   .flow       -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
 
   .as f       -> _OptAs#this;
@@ -90,27 +74,6 @@ _Opt[E:*]: BaseContainer[E],DataType[Opt[E],Opt[imm E],E,imm E] {
   mut  .orLazy(mut MF[E]): E;
   read .orLazy(mut MF[read/imm E]): read/imm E;
   imm  .orLazy(mut MF[imm E]): imm E;
-
-  mut  .and(mut Opt[E]): mut Opt[E];
-  read .and(read Opt[E]): read Opt[E];
-  imm  .and(Opt[E]): imm Opt[E];
-
-  mut  &(mut Opt[E]): mut Opt[E];
-  read &(read Opt[E]): read Opt[E];
-  imm  &(imm Opt[E]): imm Opt[E];
-
-  mut  &&(mut MF[mut Opt[E]]): mut Opt[E];
-  read &&(mut MF[read Opt[E]]): read Opt[E];
-  imm  &&(mut MF[imm Opt[E]]): imm Opt[E];
-
-  mut  .andThen[E':*, R:*](mut MF[mut Opt[E']], read F[E, E', R]): mut Opt[R];
-  read .andThen[E':*, R:*](mut MF[read Opt[E']], read F[read/imm E, read/imm E', R]): mut Opt[R];
-  imm  .andThen[E':*, R:*](mut MF[imm Opt[E']], read F[imm E, imm E', R]): mut Opt[R];
-
-
-  mut  .then[E':*](mut MF[E, mut Opt[E']]): mut Opt[E'];
-  read .then[E':*](mut MF[read/imm E, read Opt[E']]): read Opt[E'];
-  imm  .then[E':*](mut MF[imm E, imm Opt[E']]): imm Opt[E'];
 
   mut  !: E;
   read !: read/imm E;

@@ -1,22 +1,30 @@
 Extractor[T:*]: Sealed {
   .close: Info;
-  /// `this.extractedValue` returns the value extracted so far, if there is one.
-  .extractedValue: mut Opt[T];
-
-  #: mut Opt[T] -> this.extractedValue;
+  /// `this.extract` returns the value extracted so far, if there is one.
+  .extract: Opt[T];
   }
 
 Extractor[T:*, Self]: Extractor[T] {
   .where(f: read F[InfoValidator, InfoValidator]): Self;
   }
 
-/// `InfoExtractor` is a utility class to help "fuzzy" extract values from an info.
+Flatten: {
+  #[T:*]: Flatten[T] -> Flatten[T];
+  }
+Flatten[T:*]: Operation[Opt[Opt[T]], Opt[T]] {
+   ::.match {
+    .some x -> x;
+    .empty -> {};
+    };
+  }
+
+/// `InfoExtractor` is a utility class to help extract values from an info.
 /// Similar to `InfoValidator` you can descend into an info with the `>` operator.
 /// You can match against some deep part of an info by combining this with `InfoValidator` using the `&` operator.
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-//>   .check{info.extract{::} .assertEq info}
-//>   .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.map{::.lower}! == "bob"}
+//>   .check{info.extract{::}! .assertEq info}
+//>   .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}! == "bob"}
 //>   .check{info.extract{:: > "friends" .extractList .where{::
 //>       > 0 > "name" .isMsg{:: == "Bob"}
 //>       & > 1 > "name" .isMsg{:: == "Alice"}
@@ -33,15 +41,17 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
   /// or a List with index key: Nat.
   >(key: InfoKey): InfoExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.then{key.indexInto ::}
+    .extract -> this.extract
+      .mapSome{key.indexInto ::}.as{::}
+      |> Flatten[Info];
     };
 
-  .where f -> this.extractedValue.match{
-    .some info -> f#(SuccessfulInfoValidator {.close -> info})#.match {
+  .where f -> this.extract.match{
+    .some info -> info.validate f .match {
       .true -> this;
       .false -> InfoExtractor {
         .close -> this.close;
-        .extractedValue -> {}
+        .extract -> {}
         }
       };
     .empty -> this;
@@ -49,8 +59,8 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
 
   .extractMsg(fn: F[Str, Bool]): StrExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.match {
-      .some info -> info.match DefaultInfoMatch[mut Opt[Str]] {
+    .extract -> this.extract.match {
+      .some info -> info.matchWithDefault {
         .msg str -> fn# str .toOpt{str};
         .default -> {};
         };
@@ -60,18 +70,21 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
 
   .extractList(fn: F[List[Info], Bool]): ListExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.then{::.match DefaultInfoMatch[mut Opt[List[Info]]] {
-      .list l -> fn#(l).toOpt{l};
-      .default -> {};
-      }}
+    .extract -> this.extract.match{
+      .some -> ::.matchWithDefault {
+        .list l -> fn#(l).toOpt{l};
+        .default -> {};
+        };
+      .empty -> {};
+      }
     };
 
   .extractMap(fn: F[Map[Str,Info], Bool]): MapExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.then{::.match DefaultInfoMatch[mut Opt[Map[Str,Info]]] {
+    .extract -> this.extract.mapSome{::.matchWithDefault {
       .map m -> fn#(m).toOpt{m};
       .default -> {};
-      }}
+      }}.as{::.as{::}} |> Flatten[Map[Str,Info]]
     };
 
   .extractMsg: StrExtractor -> this.extractMsg{_ -> True};
@@ -80,11 +93,11 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
 
   .extractEmpty: InfoExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.match {
+    .extract -> this.extract.match {
       .empty -> {};
-      .some i -> i.match {
-        .msg _ -> {}; .list _ -> {}; .map _ -> {};
+      .some i -> i.matchWithDefault {
         .empty -> Opts#(i);
+        .default -> {};
         }
       }
     };
@@ -93,18 +106,18 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
 StrExtractor: Extractor[Str, StrExtractor] {
   .extractMsg(fn: F[Str, Bool]): StrExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.match{
+    .extract -> this.extract.match{
       .empty -> {};
       .some str -> fn#(str).toOpt {str}
       }
     };
 
-  .where f ->  this.extractedValue.match{
-    .some str -> f#(SuccessfulInfoValidator {.close -> Infos.msg str})#.match {
+  .where f ->  this.extract.match{
+    .some str -> Infos.msg str .validate f .match {
       .true -> this;
       .false -> StrExtractor {
         .close -> this.close;
-        .extractedValue -> {}
+        .extract -> {}
         }
       };
     .empty -> this;
@@ -115,7 +128,7 @@ MapExtractor: Extractor[Map[Str,Info], MapExtractor] {
   /// Descend deeper into the map
    > (key: Str): InfoExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.match{
+    .extract -> this.extract.match{
       .empty -> {};
       .some m -> m.opt key;
       }
@@ -124,22 +137,21 @@ MapExtractor: Extractor[Map[Str,Info], MapExtractor] {
   // Drop the extraction if the map doesn't match the value
   .extractMap(fn: F[Map[Str,Info], Bool]): MapExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.match{
+    .extract -> this.extract.match{
       .empty -> {};
       .some m -> fn#(m).toOpt{m};
       }
     };
 
-  .where f -> this.extractedValue.match{
-    .some map -> f#(SuccessfulInfoValidator {.close -> {'i
-        .match->::.map map;
-        .map -> Opts# map;
-        .imm->i;
-        }})#
-      .match {
-        .true -> this;
-        .false -> MapExtractor {.close -> this.close; .extractedValue -> {}}
-        };
+  .where f -> this.extract.match{
+    .some map -> Info {'i
+      .match->::.map map;
+      .map -> Opts# map;
+      .imm->i;
+      }.validate f .match {
+          .true -> this;
+          .false -> MapExtractor {.close -> this.close; .extract -> {}}
+          };
     .empty -> this;
     };
   }
@@ -147,7 +159,7 @@ MapExtractor: Extractor[Map[Str,Info], MapExtractor] {
 ListExtractor: Extractor[List[Info], ListExtractor] {
   > (index: Nat): InfoExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.match{
+    .extract -> this.extract.match{
       .empty -> {};
       .some l -> l.opt index;
       }
@@ -155,22 +167,21 @@ ListExtractor: Extractor[List[Info], ListExtractor] {
 
   .extractList(fn: F[List[Info], Bool]): ListExtractor -> {
     .close -> this.close;
-    .extractedValue -> this.extractedValue.match{
+    .extract -> this.extract.match{
       .empty -> {};
       .some l -> fn#(l).toOpt{l};
       }
     };
 
-  .where f -> this.extractedValue.match{
-    .some list -> f#(SuccessfulInfoValidator {.close -> {'i
+  .where f -> this.extract.match{
+    .some list -> Info {'i
         .match->::.list list;
         .list -> Opts# list;
         .imm->i;
-        }})#
-      .match {
-        .true -> this;
-        .false -> ListExtractor {.close -> this.close; .extractedValue -> {};}
-        };
+        }.validate f .match {
+          .true -> this;
+          .false -> ListExtractor {.close -> this.close; .extract -> {};}
+          };
     .empty -> this;
     };
   }

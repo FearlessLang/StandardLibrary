@@ -1,33 +1,39 @@
 /// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
 Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
-  /// `this.getSucc` returns ``this + 1``. Throws if `this` is ``255`` (overflow).
-  //>   .check{5.getByte .getSucc .assertEq(6.getByte)}
-  //>   .checkDetErr({::}, {(255.getByte) .getSucc})
-  .getSucc: Byte -> this + (1.getByte);
+  /// `this.succ` returns ``this + 1``.
+  /// Overflow behaviour depends on the chosen backend, overflows if ``this == 255``.
+  //>   .check{5.getByte .succ .assertEq(6.getByte)}
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Byte.succ:"}}, {(255.getByte) .succ})
+  .succ: Byte;
 
-  /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
-  //>   .check{5.getByte .getPred .assertEq(4.getByte)}
-  //>   .checkDetErr({::}, {(0.getByte) .getPred})
-  .getPred: Byte -> this - (1.getByte);
+  /// `this.pred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
+  /// Underflow behaviour depends on the chosen backend, underflows if ``this == 0``.
+  //>   .check{5.getByte .pred .assertEq(4.getByte)}
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Byte.pred:"}}, {(0.getByte) .pred})
+  .pred: Byte;
 
-  /// ``this + x`` returns the checked sum of `this` and ``x``. Throws if the result would exceed ``255``.
+  /// ``this + x`` returns the checked sum of `this` and ``x``.
+  /// Overflow behaviour depends on the chosen backend, overflows if the result would exceed ``255``.
   //>   .check{(2.getByte + (3.getByte)) .assertEq(5.getByte)}
-  //>   .checkDetErr({::}, {(255.getByte) + (1.getByte)})
+  //>   .checkNonDetErr({::}, {(255.getByte) + (1.getByte)})
   +(x: Byte): Byte;
 
-  /// ``this - x`` returns the checked difference of `this` and ``x``. Throws if the result would go below ``0``.
+  /// ``this - x`` returns the checked difference of `this` and ``x``.
+  /// Underflow behaviour depends on the chosen backend, underflows if the result would go below ``0``.
   //>   .check{5.getByte - (3.getByte) .assertEq(2.getByte)}
-  //>   .checkDetErr({::}, {0.getByte - (1.getByte)})
+  //>   .checkNonDetErr({::}, {0.getByte - (1.getByte)})
   -(x: Byte): Byte;
 
-  /// ``this * x`` returns the checked product of `this` and ``x``. Throws if the result would exceed ``255``.
+  /// ``this * x`` returns the checked product of `this` and ``x``.
+  /// Overflow behaviour depends on the chosen backend, overflows if the result would exceed ``255``.
   //>   .check{10.getByte * (5.getByte) .assertEq(50.getByte)}
-  //>   .checkDetErr({::}, {100.getByte * (3.getByte)})
+  //>   .checkNonDetErr({::}, {100.getByte * (3.getByte)})
   *(x: Byte): Byte;
 
   /// ``this ** x`` returns the checked power of `this` raised to ``x``. Throws if the result would exceed ``255``.
+  /// Overflow behaviour depends on the chosen backend, overflows if the result would exceed ``255``.
   //>   .check{2.getByte ** (6.getByte) .assertEq(64.getByte)}
-  //>   .checkDetErr({::}, {2.getByte ** (8.getByte)})
+  //>   .checkNonDetErr({::}, {2.getByte ** (8.getByte)})
   **(x: Byte): Byte;
 
   /// ``this / x`` returns the exact rational quotient of `this` and ``x`` as a `Num`. Throws iff ``x == 0``.
@@ -153,10 +159,10 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   ~~(end: Byte): Range[Byte] -> Block#
     .if {this == (Math.maxByte)} .error{"Byte ~~: Start of open range cannot be Math.maxByte"}
     .if {end == (Math.minByte)} .error{"Byte ~~: End of open range cannot be Math.minByte"}
-    .let endInclusive={end.getPred}
-    .let startInclusive={this.getSucc}
+    .let endInclusive={end.pred}
+    .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Byte ~~: Tried to produce empty range, start ("+this+") .getSucc must be <= end (" + end + ") .getPred"
+      "Byte ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
     .return {_ByteRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
@@ -169,7 +175,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
     .if {this >= endInclusive } .error {
       "Byte ~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
-    .return {_ByteRanges#(this.getSucc, endInclusive, "("+this+", "+endInclusive+"]")};
+    .return {_ByteRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
 
   /// ``this=~~end`` returns the range ``[this, end)``.
   /// Throws if `end` is `Math.minByte`, or the range would be empty (``this >= end``).
@@ -180,7 +186,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
     .if {this >= end } .error {
       "Byte =~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
       }
-    .return {_ByteRanges#(this, end.getPred, "["+this+", "+end+")")};
+    .return {_ByteRanges#(this, end.pred, "["+this+", "+end+")")};
 
   /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
   /// Throws if the range would be empty (``this > endInclusive``).

@@ -100,7 +100,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .u(values: Str) : UStr;           /// equivalent to this.u.u values
   .norm: Norm[Str];
 
-  .indexInto i -> i.match DefaultInfoMatch[mut Opt[Info]] {
+  .indexInto i -> i.matchWithDefault {
     .map map -> map.opt(this);
     .default -> {};
     }

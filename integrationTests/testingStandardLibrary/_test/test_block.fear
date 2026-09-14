@@ -1,0 +1,10 @@
+BlockUnitTests: Test {::
+  .check{Block#
+    .if{True} .return {Void}
+    .error{"BlockUnit test failed, error was run when it should be"}
+    }
+  .check{Block#
+    .if{False} .error{"BlockUnit test failed, error was run when it should be"}
+    .return {Void}
+    }
+  }

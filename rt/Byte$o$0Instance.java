@@ -32,33 +32,53 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   private static byte b(Object o){ return ((Byte$o$0Instance)o).val; }
   private static long natBits(Object o){ return ((Nat$c$0Instance)o).val(); }
 
+  private static String overflowErrorMsg(String operator, byte a, byte b) {
+    return "Byte " + operator + ": overflow " + u8(a) + " " + operator + " " + u8(b) + " is greater than " + Long.toUnsignedString(MAX_VALUE_LONG);
+  }
+  private static String underflowErrorMsg(String operator, byte a, byte b) {
+    return "Byte " + operator + ": underflow " + u8(a) + " " + operator + " " + u8(b) + " is less than 0";
+  }
+
   private static byte addChecked(byte a, byte b){
     int r= u8(a) + u8(b);
-    if (r > 255){ throw err("Byte.+ overflow"); }
+    if (r > 255){ throw nonDetErr(overflowErrorMsg("+", a, b)); }
     return (byte)r;
   }
   private static byte subChecked(byte a, byte b){
     if (Byte.compareUnsigned(a, b) < 0) {
-      throw err("Byte.- underflow");
+      throw nonDetErr(underflowErrorMsg("-", a, b));
     }
     return (byte) (a - b);
   }
-  private static byte mulChecked(byte a, byte b){
+
+  private static byte mulChecked(byte a, byte b, String operator){
     int r= u8(a) * u8(b);
-    if (r > 255){ throw err("Byte.* overflow"); }
-    return (byte)r;
+    if (r > 255){ throw nonDetErr(overflowErrorMsg(operator, a, b)); }
+    return (byte) r;
   }
 
+  @Override public Object imm$succ$0() {
+    if (val != MAX_VALUE) {
+      return Byte$o$0Instance.instance((byte) (val + 1));
+    }
+    throw nonDetErr("Byte.succ: cannot take the successor of "+Long.toUnsignedString(MAX_VALUE));
+  }
+  @Override public Object imm$pred$0() {
+    if (val != 0) {
+      return Byte$o$0Instance.instance((byte) (val - 1));
+    }
+    throw nonDetErr("Byte.pred: cannot take the predecessor of "+0);
+  }
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,b(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
-  @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
+  @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0), "*")); }
   @Override public Object imm$$star_star$1(Object p0) {
     byte power = b(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
     byte result = 1;
     for (int i = 0; i < power; i++) {
-      result = mulChecked(result, this.val);
+      result = mulChecked(result, this.val, "**");
     }
     return Byte$o$0Instance.instance(result);
   }

@@ -64,15 +64,16 @@ MyTests:UnitTests{::
   .test TestNat
   .test TestNum
   .test TestStr
- // .test TestWrappers
- // .test TestList
- // .test TestMap
- // .test TestAs
- // .test TestRepr
- // .test TestLiteralErrors
- // .test TestPipe
- // .test TestComparators
- // .test TestUStr
+  .test TestWrappers
+  .test TestList
+  .test TestMap
+  .test TestAs
+  .test TestRepr
+  .test TestLiteralErrors
+  .test TestPipe
+  .test TestComparators
+  .test TestUStr
   .test MathUnitTests
   .test InfoTests
+  .test BlockUnitTests
   }

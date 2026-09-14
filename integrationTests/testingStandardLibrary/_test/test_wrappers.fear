@@ -5,8 +5,8 @@ ExtentNatTests: Test {::
   .check{(Width#7) .getTruncDiv 2 .assertEq(Width#3)}
   .check{Width.zero .assertEq(Width#0)}
   .check{(Height#3) + (Height#4) .assertEq(Height#7)}
-  .checkDetErr({::}, {(Width#3) - (Width#4)})
-  .checkDetErr({::}, {(Width#2) * (Math.maxNat)})
+  .checkNonDetErr({::}, {(Width#3) - (Width#4)})
+  .checkNonDetErr({::}, {(Width#2) * (Math.maxNat)})
   }
 
 ExtentNatGapTests: Test {::
@@ -78,8 +78,8 @@ LevelByteTests: Test {::
   .check{Alpha.opaque .assertEq(Alpha.max)}
   .check{Red.min .assertEq(Red#(Math.minByte))}
   .check{Blue.max .assertEq(Blue#(Math.maxByte))}
-  .checkDetErr({::}, {Red.max + (Red#(1.getByte))})
-  .checkDetErr({::}, {Red.min - (Red#(1.getByte))})
+  .checkNonDetErr({::}, {Red.max + (Red#(1.getByte))}) // See if this knock of effect is desired
+  .checkNonDetErr({::}, {Red.min - (Red#(1.getByte))})
   }
 
 LevelFloatTests: Test {::
@@ -114,7 +114,7 @@ DurationTests: Test {::
   .check{(Duration.seconds 3) * 2 .assertEq(Duration.seconds 6)}
   .check{(Duration.seconds 6) .getTruncDiv 2 .assertEq(Duration.seconds 3)}
   .check{Duration.zero .assertEq(Duration#0)}
-  .checkDetErr({::}, {(Duration.seconds 1) - (Duration.seconds 2)})
+  .checkNonDetErr({::}, {(Duration.seconds 1) - (Duration.seconds 2)})
   }
 
 InstantTests: Test {::
@@ -125,8 +125,8 @@ InstantTests: Test {::
   .check{(Instant#1000000) .gap(Instant#4000000) .assertEq(Duration.seconds 3)}
   .check{Instant.origin .assertEq(Instant#0)}
   .check{(Instant#7) + ((Instant#7) .to(Instant#20)) .assertEq(Instant#20)}
-  .checkDetErr({::}, {(Instant#4000000) .to(Instant#1000000)})
-  .checkDetErr({::}, {Instant.origin - (Duration.seconds 1)})
+  .checkNonDetErr({::}, {(Instant#4000000) .to(Instant#1000000)})
+  .checkNonDetErr({::}, {Instant.origin - (Duration.seconds 1)})
   }
 
 ColorCmpTests: Test {::
