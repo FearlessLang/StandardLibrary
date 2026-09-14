@@ -1,6 +1,7 @@
 package base;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public interface _Throw$1c$0{
   default Object imm$deterministic$1(Object p0){
@@ -25,23 +26,17 @@ public interface _Throw$1c$0{
     var dtId= new DataTypeBy$17m$3(){ @Override public Object imm$$hash$1(Object p0){ return p0; } };
     return list.read$info$1(dtId);
   }
+  static final Set<String> machinery= Set.of("errors.fear","_Throw$1c$0.java","Try$c$0.java","_CapTry$2s$0.java");
+  static final Set<String> rcs= Set.of("imm","mut","read","iso","readH","mutH");
   static StackFrame$174$0 frameData(StackTraceElement e){
     var cn= e.getClassName();
     int dot= cn.indexOf('.');
-    if (dot < 0 || cn.indexOf('.',dot + 1) != -1){ return null; }
-    var ty= cn.substring(dot + 1);
-    int dol= ty.lastIndexOf('$');
-    if (dol < 0 || dol == ty.length() - 1){ return null; }
-    int tag= ty.lastIndexOf('$', dol - 1);
-    if (tag <= 0 || ty.indexOf('$') != tag){ return null; }
-    var ds= ty.substring(dol + 1);
-    for (int i= 0; i < ds.length(); i++){
-      char c= ds.charAt(i);
-      if (c < '0' || c > '9'){ return null; }
-    }
-    int targs= Integer.parseInt(ds);
-    var type= ty.substring(0,tag) + holes('[',']',targs);
+    if (dot < 0 || cn.indexOf('.',dot + 1) != -1 || machinery.contains(e.getFileName())){ return null; }
+    var ty= cn.substring(dot + 1).split("\\$");
     var meth= fmtMethodName(e.getMethodName());
+    if (ty.length < 3 || meth == null){ return null; }
+    for (int i= 2; i < ty.length; i++){ if (!digits(ty[i])){ return null; } }
+    var type= ty[0] + holes('[',']',Integer.parseInt(ty[2]));
     return (StackFrame$174$0)StackFrames$2e8$0.instance.read$$hash$4(
       new Str$c$0Instance(e.getFileName()),
       new Str$c$0Instance(type),
@@ -59,10 +54,11 @@ public interface _Throw$1c$0{
     var meth= mn.substring(0,sp+1)+tn+mn.substring(sp+1);
     return meth+" error line: "+ln+" in file "+fn;
   }
+  static boolean digits(String s){ return !s.isEmpty() && s.chars().allMatch(c->c >= '0' && c <= '9'); }
   static String fmtMethodName(String m){
     int a= m.indexOf('$');
     int b= m.lastIndexOf('$');
-    assert a > 0 && b > a;
+    if (a <= 0 || b <= a || !rcs.contains(m.substring(0,a)) || !digits(m.substring(b + 1))){ return null; }
     int n= Integer.parseInt(m.substring(b + 1));
     var rc= m.substring(0,a);
     var mid= m.substring(a + 1,b);

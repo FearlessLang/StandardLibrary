@@ -173,14 +173,12 @@ CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->CheckInfo: {
 
 Test: { .tests(t: mut TestCap): mut TestCap; }
 
-//A named type's own .tests call gets its own real stack frame, so st.get(2) used to
-//find it reliably. An anonymous Test{::...} literal's .tests call does not: its frame
-//is simply missing, shifting every fixed index that follows it. Searching past every
-//frame that belongs to this file or blocks.fear (the only frames the test DSL itself
-//ever contributes) finds the real caller either way, named or anonymous.
+//The frames that belong to this file or blocks.fear are the test DSL itself; the
+//others are the user's, and the first of them is the real caller of a check.
+_IsUserFile: F[Str, Bool] { fn -> fn.startsWith(`testing.fear`).not && {fn.startsWith(`blocks.fear`).not} }
+
 _RealFrame: {
-  #(st: List[StackFrame]): StackFrame ->
-    st.flow.filter{f -> f.fileName.startsWith(`testing.fear`).not && {f.fileName.startsWith(`blocks.fear`).not}}.first!
+  #(st: List[StackFrame]): StackFrame -> st.flow.filter{_IsUserFile#(::.fileName)}.first!
   }
 
 _AddToLog: {
@@ -197,7 +195,7 @@ _AddToLog: {
         Debug#(`Test failure `
           + (f.typeName) + ` at line: `
           + (f.lineNumber) + ` in file: `+ (f.fileName)
-          + ` ` + i
+          | (_FailureText#i)
           ),
         `<testcase classname="` + (_XmlEscape#(f.typeName))
         + `" name="` + (_XmlEscape#(f.typeName)) + ` at line: ` + (f.lineNumber)
@@ -210,10 +208,12 @@ _AddToLog: {
     }};
   }
 
+_FailureText: { #(i: Info): Str -> _FailureMsg#i | (_FailureList#i) }
+
 _FailureMsg: {
   #(i: Info): Str ->
     i.extract{::.extractMsg}
-    || {i.extract{:: > "msg"}.mapSome{::.str}} // what if the msg is nested in a map, prev implementation just returns `` silently
+    || {i.extract{:: > "msg" .extractMsg}} // what if the msg is nested in a map, prev implementation just returns `` silently
     .orLazy{i.str}
     //i.msg.isEmpty ? {
     //  .then -> i.softMap.opt(`msg`).match {
@@ -226,11 +226,8 @@ _FailureMsg: {
 
 _FailureExpected: {
   #(i: Info): Str ->
-    i.extract{:: > "expected"}.match {
-      .some e -> Block#(
-        Debug#(`Expected: `+(e.str)),
-        `<expected>` + (_XmlEscape#(e.str)) + `</expected>`
-        );
+    i.extract{:: > "expected" .extractMsg}.match {
+      .some e -> `<expected>` + (_XmlEscape#e) + `</expected>` |;
       .empty -> ``;
     };
     //i.map.opt(`expected`).match {
@@ -244,11 +241,8 @@ _FailureExpected: {
 
 _FailureActual: {
   #(i: Info): Str ->
-    i.extract{:: > `actual`}.match {
-      .some i' -> Block#(
-        Debug#(`Actual: `+(i'.str)), // should these be .msg?
-        `<actual>` + (_XmlEscape#(i'.str)) + `</actual>`
-        );
+    i.extract{:: > `actual` .extractMsg}.match {
+      .some a -> `<actual>` + (_XmlEscape#a) + `</actual>` |;
       .empty -> ``;
     };
   }
@@ -256,7 +250,7 @@ _FailureActual: {
 _FailureList: {
   #(i: Info): Str ->
     i.extract{:: > "list" .extractList}
-      .mapSome{::.flow.map {_FailureTrace#::}.join (`` |)}
+      .mapSome{::.flow.filter{_IsUserFile#(_FrameField#(::, `fileName`))}.map {_FailureTrace#::}.join (`` |)}
       .orValue ``
   }
 
@@ -264,15 +258,13 @@ _FormatFailure: {
   #(i: Info): Str ->
     `<failure>`
     | (_FailureExpected#i)
-    | (_FailureActual#i)
-    | (_XmlEscape#(_FailureMsg#i))
-    + (_XmlEscape#(_FailureList#i))
+    + (_FailureActual#i)
+    + (_XmlEscape#(_FailureText#i))
     | `</failure>`;
   }
 
 _FrameField: { #(i: Info, k: Str): Str ->
-  i.extract{:: > k}
-    .mapSome{::.str}
+  i.extract{:: > k .extractMsg}
     ! {`Malformed stack frame info, missing key: ` + k};
   // if the key isn't a message you get `` throwing out whatever information existed previously
   //i.map.opt(k).orLazy{Error.msg(`Malformed stack frame info, missing key: ` + k)}.msg

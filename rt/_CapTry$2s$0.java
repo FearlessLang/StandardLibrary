@@ -25,19 +25,26 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
     };
   }
    private static Object addStackInfo(Object info, Throwable t){
-    return ((Info$o$0)info).imm$$plus$1(stackTraceOf(t.getStackTrace()).read$info$1(dtId));
+    return ((Info$o$0)info).imm$$plus$1(stackTraceOf(aboveHere(t.getStackTrace())).read$info$1(dtId));
   }
+  private static StackTraceElement[] aboveHere(StackTraceElement[] st){
+    var here= new Throwable().getStackTrace();
+    int n= st.length, m= here.length;
+    while (n > 0 && m > 0 && same(st[n-1], here[m-1])){ n-= 1; m-= 1; }
+    return java.util.Arrays.copyOf(st, n);
+  }
+  private static boolean same(StackTraceElement a, StackTraceElement b){ return a.getClassName().equals(b.getClassName()) && a.getMethodName().equals(b.getMethodName()); }
   private static final DataTypeBy$17m$3 dtId= new DataTypeBy$17m$3(){
     @Override public Object imm$$hash$1(Object p0){ return p0; }
   };
   public final Object mut$currentStackTrace$0(){ return stackTraceOf(new Throwable().getStackTrace()); }
   public final static List$o$1Instance stackTraceOf(StackTraceElement[] st){
     var al= new ArrayList<>();
-    for(int i= 2; i < st.length; i++){
-      var s= base._Throw$1c$0.frameData(st[i]);
+    for(var e : st){
+      var s= base._Throw$1c$0.frameData(e);
       if(s == null){ continue; }
       al.add(s);
-    }    
+    }
     return new List$o$1Instance(al);
   }
 }
