@@ -1,0 +1,32 @@
+/// Support for closed sets of named singleton values (enumerations).
+/// A family with a few named values is declared by implementing Enum and
+/// Enums: the family type binds every value to its list via .enums and
+/// gives .close/.cmp/.hash once; each value then supplies its own .str
+/// and .imm (a fixed singleton value has no other way to prove it is imm).
+
+/// The "list of values" side of an enumeration family.
+/// .strBy witnesses that E implements ToStr: a bare generic parameter
+/// carries no methods of its own, so {::} is how a concrete family
+/// vouches for its own values.
+Enums[E]: FromInfo[E]{
+  .list: List[E];                                 /// every value, in declaration order
+  .strBy: ToStrBy[E];
+  .map: Map[Str,E] -> this.list.flow.mapping({::},{.key e->(this.strBy#e).str; .elem e->e;}).as{::};
+  /// declaration index of every value's str
+  .indexMap: Map[Str,Nat] -> this.list.flow.fold(
+    {Maps#[Str,Str,Nat]{::}.as{::}},
+    {acc,e->acc.with((this.strBy#e).str,acc.size).as{::}}
+    );
+  .fromInfo i -> this.map.get(i.getMsg);
+  }
+
+/// The "single value" side of an enumeration family.
+/// E names the concrete family type, but a bare generic parameter carries
+/// no methods of its own: close/cmp/hash still need to be given once at the
+/// family, since they produce or compare values of that concrete type.
+Enum[E]: DataType[E,E]{
+  read .enums: Enums[E];
+  .info -> Infos.msg(this.str);
+  /// this value's position in enums.list
+  read .index: Nat -> this.enums.indexMap.get(this.str);
+  }
