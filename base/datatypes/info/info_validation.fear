@@ -2,34 +2,46 @@ InfoValidators: Sealed {
   #(info: Info): InfoValidator -> SuccessfulInfoValidator { .close -> info }
   }
 
-// TODO: improvement to docs
-// TODO: talk about `&` bringing back to root, and `|` being a trap and left associative, where
-// Add example with not maybe fix
-/// InfoValidator is a utility class to help "fuzzy" match info s.
-/// you can descend into the option with the `>` operator.
-/// With ``this > str`` matching against a map with a key str and ``this > 0`` matching against the a list with an index 0.
-/// `InfoValidator` can be chained using logical operators `&`, `|`, `.not`...
-/// if you wish for more complex logic you can
+/// `InfoValidator` is a utility class to help match `Info`s. This is useful for dealing with error's in `Action`s,
+/// as you can match against the error info to determine what to do next.
+/// `InfoValidator`s start from a "root" `Info`, which you can descend into with the `>` operator.
+/// For example, `this > "friends" > 0 > "name"` will match against an `Info` that is a map with a key `"friends"` that is a list with at least one element, and that first element is a map with a key `"name"`.
+/// Often you will want to match against multiple parts of an `Info`, if so you can chain `InfoValidator`s together with the ``&``, ``|`` operators. Each one of these operations will bring you back to the root `Info` to start matching from again.
+/// These follow standard fearless operator precedence (left associativity), with no preference between operators.
+/// For example: ``InfoValidators# info > "friends" > 0 .isMsg{:: == "Alice"}  | > "friends" > 1 .isMsg {:: == "Bob"} & > "friends" > 2 .isMsg{:: == "Carol"}``
+/// can be summarised as (first friend is "Alice" OR second friend is "Bob") AND (third friend is "Carol").
+/// If you wish to avoid left associativity you can use the `.where` operator.
+/// For example: ```InfoValidators# info > "friends" > 0 .isMsg{:: == "Alice"} | > "friends" .where {
+///   :: > 1 .isMsg {:: == "Bob"}} & > "friends" > 2 .isMsg{:: == "Carol"}
+///   }``` which will get read as (first friend is "Alice" OR (second friend is "Bob" AND third friend is "Carol")).
+/// Expressions can also be negated with `.not`, `.not` acts upon the current "local" expression and doesn't negate the whole expression.
+/// Note: `::` will match any Info, so you can start an expression with `:: &` as `::` is always true, this means you should not start with `|` as `:: |` will always be true
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-//>   .check{info.validate{::} .assertTrue}
-//>   .check{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}} .assertTrue}
-//>   .check{info.validate{:: // Note you can include the `&` if it reads better
+//>   .checkTrue{info.validate{::}}
+//>   .checkTrue{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}}}
+//>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-//>     } .assertTrue}
-//>   .check{info.validate{::
+//>     }}
+//>   .checkTrue{info.validate{::.isList{::.size == 2}}}
+//>   .checkFalse{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-//>     & > "friends" > 2 > "name" .isMsg{:: == "David"}} .assertFalse}
-//>   .check{info.validate{:: > "friends" .where{::
+//>     & > "friends" > 2 > "name" .isMsg{:: == "David"}}}
+//>   .checkFalse{info.validate{:: > "friends" .where{::
 //>     & > 0 > "name" .isMsg{:: == "Bob"}
 //>     | > 1 > "name" .isMsg{:: == "Alice"}
-//>     & > 2 > "name" .isMsg{:: == "David"}} .assertFalse}
-//>   .check{info.validate{::
+//>     & > 2 > "name" .isMsg{:: == "David"}}}
+//>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-//>     | .where {:: & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-//>            & > "friends" > 2 > "name" .isMsg{:: == "David"}}} .assertTrue}
+//>     | > "friends" .where {::
+//>       & > 1 > "name" .isMsg{:: == "Alice"}
+//>       & > 2 > "name" .isMsg{:: == "David"}}}}
+//>   .checkTrue{info.validate{::
+//>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+//>     & > "friends" > 1 > "name" .isMsg{:: == "David"}.not
+//>   }
 InfoValidator: Sealed {
   .close: Info;
   .isValid: Bool;
@@ -66,67 +78,6 @@ InfoValidator: Sealed {
     .right -> InfoValidators#(this.close);
     .combiner l, r -> l | r;
     };
-  }
-
-ChainedInfoValidator: InfoValidator {
-  .close: Info;
-  .left: InfoValidator;
-  .right: InfoValidator;
-  .combiner(Bool, Bool): Bool;
-  .isValid: Bool -> this.combiner(this.left.isValid, this.right.isValid);
-
-  > key -> ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right > key
-    };
-
-  // can use pipe
-  .where f -> Block#
-    .let right={this.right.where f}
-    .return{ ChainedInfoValidator {
-      .close -> this.close;
-      .combiner a, b -> this.combiner(a,b);
-      .left -> this.left;
-      .right -> right
-      }};
-
-
-  .isMsg f -> ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right.isMsg f
-    };
-
-  .isList f -> ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right.isList f
-    };
-
-  .isMap f -> ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right.isMap f
-    };
-
-  .isEmpty -> ChainedInfoValidator {
-   .close -> this.close;
-   .combiner a, b -> this.combiner(a,b);
-   .left -> this.left;
-   .right -> this.right.isEmpty
-   };
-
-  .not -> ChainedInfoValidator {
-   .close -> this.close;
-   .combiner a, b -> this.combiner(a,b);
-   .left -> this.left;
-   .right -> this.right.not
-   };
   }
 
 SuccessfulInfoValidator: InfoValidator {
@@ -202,4 +153,65 @@ FailedInfoValidator: InfoValidator {
   & -> this;
 
   |: InfoValidator -> SuccessfulInfoValidator {this.close};
+  }
+
+ChainedInfoValidator: InfoValidator {
+  .close: Info;
+  .left: InfoValidator;
+  .right: InfoValidator;
+  .combiner(Bool, Bool): Bool;
+  .isValid: Bool -> this.combiner(this.left.isValid, this.right.isValid);
+
+  > key -> ChainedInfoValidator {
+    .close -> this.close;
+    .combiner a, b -> this.combiner(a,b);
+    .left -> this.left;
+    .right -> this.right > key
+    };
+
+  // can use pipe
+  .where f -> Block#
+    .let right={this.right.where f}
+    .return{ ChainedInfoValidator {
+      .close -> this.close;
+      .combiner a, b -> this.combiner(a,b);
+      .left -> this.left;
+      .right -> right
+      }};
+
+
+  .isMsg f -> ChainedInfoValidator {
+    .close -> this.close;
+    .combiner a, b -> this.combiner(a,b);
+    .left -> this.left;
+    .right -> this.right.isMsg f
+    };
+
+  .isList f -> ChainedInfoValidator {
+    .close -> this.close;
+    .combiner a, b -> this.combiner(a,b);
+    .left -> this.left;
+    .right -> this.right.isList f
+    };
+
+  .isMap f -> ChainedInfoValidator {
+    .close -> this.close;
+    .combiner a, b -> this.combiner(a,b);
+    .left -> this.left;
+    .right -> this.right.isMap f
+    };
+
+  .isEmpty -> ChainedInfoValidator {
+   .close -> this.close;
+   .combiner a, b -> this.combiner(a,b);
+   .left -> this.left;
+   .right -> this.right.isEmpty
+   };
+
+  .not -> ChainedInfoValidator {
+   .close -> this.close;
+   .combiner a, b -> this.combiner(a,b);
+   .left -> this.left;
+   .right -> this.right.not
+   };
   }

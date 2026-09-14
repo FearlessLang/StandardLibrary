@@ -28,13 +28,13 @@ Flatten[T:*]: Operation[Opt[Opt[T]], Opt[T]] {
 //>   .check{info.extract{:: > "friends" .extractList .where{::
 //>       > 0 > "name" .isMsg{:: == "Bob"}
 //>       & > 1 > "name" .isMsg{:: == "Alice"}
-//>       }
-//>     .map{::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "}
-//>     .assertEq(Opts# "Bob, Alice")}}
-//>   .check{info ~ > "friends"
+//>       }}
+//>     .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!
+//>     .assertEq("Bob, Alice")}
+//>   .check{info > "friends" .extractList .where{::
 //>     & > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > 1 > "name" .isMsg{:: == "David"}
-//>     ~ .isList => {::.flow.map{:: ~ > "name" .isMsg => {::}!}.join ", "}.assertEmpty {::}}
+//>     }.assertEmpty {::}}
 InfoExtractor: Extractor[Info, InfoExtractor] {
   /// Descend one layer deeper into info,
   /// matching against it being a map with a key `key`

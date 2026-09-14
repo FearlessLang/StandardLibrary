@@ -1,0 +1,43 @@
+TestInfoValidation: Test {::
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .checkTrue{info.validate{::}}
+  .checkTrue{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}}}
+  .checkTrue{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
+    }}
+  .checkTrue{info.validate{::.isList{::.size == 2}}}
+  .checkFalse{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
+    & > "friends" > 2 > "name" .isMsg{:: == "David"}}}
+  .checkFalse{info.validate{:: > "friends" .where{::
+    & > 0 > "name" .isMsg{:: == "Bob"}
+    | > 1 > "name" .isMsg{:: == "Alice"}
+    & > 2 > "name" .isMsg{:: == "David"}}}
+  .checkTrue{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    | > "friends" .where {::
+      & > 1 > "name" .isMsg{:: == "Alice"}
+      & > 2 > "name" .isMsg{:: == "David"}}}}
+  .checkTrue{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    & > "friends" > 1 > "name" .isMsg{:: == "David"}.not
+    }
+  }
+
+TestInfoExtraction: Test {::
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .check{info.extract{::}! .assertEq info}
+  .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}! == "bob"}
+  .check{info.extract{:: > "friends" .extractList .where{::
+      > 0 > "name" .isMsg{:: == "Bob"}
+      & > 1 > "name" .isMsg{:: == "Alice"}
+      }}
+    .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!
+    .assertEq("Bob, Alice")}
+  .check{info > "friends" .extractList .where{::
+    & > 0 > "name" .isMsg{:: == "Bob"}
+    & > 1 > "name" .isMsg{:: == "David"}
+    }.assertEmpty {::}}
+  }

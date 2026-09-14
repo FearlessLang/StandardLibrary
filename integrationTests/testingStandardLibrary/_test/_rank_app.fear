@@ -76,4 +76,6 @@ MyTests:UnitTests{::
   .test MathUnitTests
   .test InfoTests
   .test BlockUnitTests
+  .test TestInfoValidation
+  .test TestInfoExtraction
   }
