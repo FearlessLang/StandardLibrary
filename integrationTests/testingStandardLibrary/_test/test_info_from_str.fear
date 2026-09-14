@@ -1,0 +1,42 @@
+InfoFromStrFormatTests: Test {::
+  .check{Info.str .assertEq `EmptyInfo`}
+  .check{Infos.msg(`hello`).str .assertEq `"hello"`}
+  .check{Infos.list(Infos.msg `a`, Infos.msg `b`).str .assertEq `["a","b"]`}
+  .check{Infos.map(`k1`, Infos.msg `v1`, `k2`, Infos.msg `v2`).str .assertEq `{"k1":"v1","k2":"v2"}`}
+  .check{Infos.fromStr(`EmptyInfo`) .assertEq Info}
+  .check{Infos.fromStr(`"hello"`) .assertEq(Infos.msg `hello`)}
+  .check{Infos.fromStr(`["a","b"]`) .assertEq(Infos.list(Infos.msg `a`, Infos.msg `b`))}
+  .check{Infos.fromStr(`{"k1":"v1","k2":"v2"}`) .assertEq(Infos.map(`k1`, Infos.msg `v1`, `k2`, Infos.msg `v2`))}
+  }
+
+InfoFromStrRoundTripTests: Test {::
+  .check{Infos.fromStr(Info.str) .assertEq Info}
+  .check{Infos.fromStr(Infos.msg(``).str) .assertEq(Infos.msg ``)}
+  .check{Infos.fromStr(Infos.msg(`hello`).str) .assertEq(Infos.msg `hello`)}
+  .check{Infos.fromStr(Infos.msg(`with "quotes" and \ backslash`).str) .assertEq(Infos.msg(`with "quotes" and \ backslash`))}
+  .check{Infos.fromStr(Infos.msg(`line1` | `line2`).str) .assertEq(Infos.msg(`line1` | `line2`))}
+  .check{Infos.fromStr(Infos.msg(`EmptyInfo`).str) .assertEq(Infos.msg `EmptyInfo`)}
+  .check{Infos.fromStr(Infos.list(Infos.msg `a`, Infos.msg `b`).str) .assertEq(Infos.list(Infos.msg `a`, Infos.msg `b`))}
+  .check{Infos.fromStr(Infos.map(`k1`, Infos.msg `v1`, `k2`, Infos.msg `v2`).str) .assertEq(Infos.map(`k1`, Infos.msg `v1`, `k2`, Infos.msg `v2`))}
+  .check{Infos.fromStr(Infos.list(Infos.map(`a`, 1), Infos.list(2, 3)).str) .assertEq(Infos.list(Infos.map(`a`, 1), Infos.list(2, 3)))}
+  .check{Infos.fromStr(Infos.list(Info, Infos.msg `x`).str) .assertEq(Infos.list(Info, Infos.msg `x`))}
+  .check{Infos.fromStr(Infos.map(`empty`, Info, `full`, Infos.msg `x`).str) .assertEq(Infos.map(`empty`, Info, `full`, Infos.msg `x`))}
+  .check{Infos.fromStr(_Infos.largeNested.str) .assertEq(_Infos.largeNested)}
+  }
+
+InfoFromStrErrorTests: Test {::
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr ``})
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr `nonsense`})
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr `"unterminated`})
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr `["a"`})
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr `{"a":"1"`})
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr `{"a":1}`})
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr `"hi"trailing`})
+  .checkDetErr({::.isMsg{::.contains `Infos.fromStr`}}, {Infos.fromStr `{"a""b"}`})
+  }
+
+TestInfoFromStr: Test {::
+  .test InfoFromStrFormatTests
+  .test InfoFromStrRoundTripTests
+  .test InfoFromStrErrorTests
+  }

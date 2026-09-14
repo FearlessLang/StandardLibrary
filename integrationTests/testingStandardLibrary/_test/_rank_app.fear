@@ -83,4 +83,5 @@ MyTests:UnitTests{::
   .test MathUnitTests
   .test InfoTests
   .test TestBlock
+  .test TestInfoFromStr
   }
