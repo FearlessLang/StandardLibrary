@@ -156,10 +156,9 @@ public class Util{
       .filter(e->is(e.getKey(),"msg")).forEach(e->printInfoMsg("","",(Info$o$0)e.getValue()));
     //map.entrySet().stream()
     //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
-    var st= d.getStackTrace();
-    for(int j= 3; j < st.length; j += 1){
-      var stj= _Throw$1c$0.frameData(st[j]);
-      if (stj != null){ System.err.print(_Throw$1c$0.fmtFrame(stj)+"\n"); }
+    for(var e : d.getStackTrace()){
+      var f= _Throw$1c$0.frameData(e);
+      if (f != null){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
     }
   }
   public static boolean is(MapKey k,String label){
