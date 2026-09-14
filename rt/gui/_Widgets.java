@@ -511,7 +511,7 @@ class _Frame implements Frame$1c$0{
   }
 
   private void checkWindowLocationFits(int x, int y){
-    if (x + frame.getWidth() > screenW || y + frame.getHeight() > screenH){
+    if (x < 0 || y < 0 || x + frame.getWidth() > screenW || y + frame.getHeight() > screenH){
       throw Util.detErr("Window location puts window outside screen: location="
         + x + "," + y
         + ", window=" + frame.getWidth() + "x" + frame.getHeight()
