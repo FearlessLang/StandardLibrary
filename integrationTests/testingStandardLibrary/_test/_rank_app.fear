@@ -56,6 +56,8 @@ use base.Rects as Rects;
 use base.ToInfo as ToInfo;
 use base.ToInfoBy as ToInfoBy;
 use base.Infos as Infos;
+use base.Enum as Enum;
+use base.Enums as Enums;
 
 MyTests:UnitTests{::
   .test TestByte
@@ -64,6 +66,7 @@ MyTests:UnitTests{::
   .test TestNat
   .test TestNum
   .test TestStr
+  .test TestEnum
  // .test TestWrappers
  // .test TestList
  // .test TestMap
