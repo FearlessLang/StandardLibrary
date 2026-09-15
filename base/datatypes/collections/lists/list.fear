@@ -64,17 +64,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
     .return {this.flow.fold({ size },
        { acc, e -> acc.hashWith(by#e.hash)}
        )};
-  .cmp by, a, b, m ->a.opt(0).match {
-    .empty->b.opt(0).match { .empty->m.eq; .some _->m.lt; };
-    .some ea->b.opt(0).match {
-      .empty->m.gt;
-      .some eb->by#ea<=>(by#eb,{
-        .lt->m.lt;
-        .gt->m.gt;
-        .eq->this.cmp(by, a.subList(1), b.subList(1), m);
-        });
-      };
-    };
+  .cmp by, a, b, m -> _ListCmp#(by, a, b, m);
   .norm f ->_ListNorm#(this,f);
   }
 
@@ -162,3 +152,4 @@ Lists: Sealed {//No need of empty, just use {}
 
   .singletonRead[E:*](read E): read List[E]->Magic!;
   }
+_ListCmp: { #[E:*,K,R:**](by: OrderBy[imm E,K], a: read List[E], b: read List[E], m: mut OrderMatch[R]): R -> Magic! }
