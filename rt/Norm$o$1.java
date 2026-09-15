@@ -31,7 +31,7 @@ class Entry{
       broken=true;
       return sequential(s);
     }
-    catch(ExecutionException ex){ return sneakyThrow(ex.getCause()); }
+    catch(ExecutionException ex){ return cancelledOr(ex, () -> sequential(s)); }
     catch(InterruptedException ex){
       Thread.currentThread().interrupt();
       throw new RuntimeException(ex);
@@ -41,21 +41,27 @@ class Entry{
     var res= s.get();
     if (!ready.isDone()){ return res; }
     try{ return ready.get(); }
-    catch(ExecutionException ex){ return sneakyThrow(ex.getCause()); }
+    catch(ExecutionException ex){ return cancelledOr(ex, () -> res); }
     catch(InterruptedException ex){
       Thread.currentThread().interrupt();
       throw new RuntimeException(ex);
     }//return the more normalized if possible
+  }
+  private static Object cancelledOr(ExecutionException ex, Supplier<Object> alt){
+    if (ex.getCause() instanceof Cancelled){ return alt.get(); }
+    return sneakyThrow(ex.getCause());
   }
   @SuppressWarnings("unchecked")
   private static <E extends Throwable,T> T sneakyThrow(Throwable t) throws E{ throw (E)t; }
 }
 interface Cache{
   Entry former(Object k, Entry candidate);
+  void evict(Object k, Entry e);
   default Object get(Object k, Supplier<Object> f, long time){
     var fresh= new Entry();
     var e= former(k,fresh);
-    if (e == null){ return fresh.computeNow(f); }
-    return e.joinWait(time,f);
+    if (e != null){ return e.joinWait(time,f); }
+    try{ return fresh.computeNow(f); }
+    catch(Cancelled c){ evict(k,fresh); throw c; }
   }
 }

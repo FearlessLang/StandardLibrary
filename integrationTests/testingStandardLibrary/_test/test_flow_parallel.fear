@@ -1,0 +1,66 @@
+Nats: { #: mut List[Nat] -> (0 =~~= 199).flow.list }
+
+FlowParallelOrderTests: Test {::
+  .check{Nats#.flow.list .assertEq({::}, Nats#)}
+  .check{Nats#.flow.eList.list .assertEq({::}, Nats#)}
+  .check{Nats#.flow.map{e -> e + 1}.list .assertEq({::}, (1 =~~= 200).flow.list)}
+  .check{Nats#.flow.filter{e -> e > 99}.list .assertEq({::}, (100 =~~= 199).flow.list)}
+  .check{Nats#.flow.flatMap{e -> Flows#(e, e)}.list .assertEq({::}, Nats#.seqFlow.flatMap{e -> Flows#(e, e)}.list)}
+  .check{(Nats#.flow ++ (Nats#.flow)).list .assertEq({::}, Nats# ++ (Nats#))}
+  .check{Nats#.flow.limit 10 .list .assertEq({::}, (0 =~~= 9).flow.list)}
+  .check{Nats#.flow.size .assertEq 200}
+  .check{Nats#.flow.first! .assertEq 0}
+  .check{Nats#.flow.last! .assertEq 199}
+  .check{Nats#.flow.filter{e -> e == 100}.get .assertEq 100}
+  .check{Nats#.flow.filter{e -> e == 100}.getOpt! .assertEq 100}
+  .check{Nats#.flow.min{::}.get .assertEq 0}
+  .check{Nats#.flow.max{::}.get .assertEq 199}
+  .check{Nats#.flow.any{e -> e == 100} .assertTrue}
+  .check{Nats#.flow.all{e -> e < 200} .assertTrue}
+  .check{Nats#.flow.none{e -> e > 199} .assertTrue}
+  .check{Nats#.flow.fold({0}, {acc, e -> acc.hashWith e}) .assertEq(Nats#.seqFlow.fold({0}, {acc, e -> acc.hashWith e}))}
+  .check{Nats#.flow.scan(0, {acc, e -> acc.hashWith e}).list .assertEq({::}, Nats#.seqFlow.scan(0, {acc, e -> acc.hashWith e}).list)}
+  .check{Nats#.flow.map{e -> e.str}.join `,` .assertEq(Nats#.seqFlow.map{e -> e.str}.join `,`)}
+  .check{Nats#.reverse.flow.sort{::}.list .assertEq({::}, Nats#)}
+  .check{Nats#.flow.mapping({::}, {.key k -> k; .elem k -> k}).flow.map{::.key}.list .assertEq({::}, Nats#)}
+  .check{Block#
+    .let acc= {ELists#[Nat]}
+    .do{Nats#.flow.forEach{e -> acc.add e}}
+    .return{acc.list .assertEq({::}, Nats#)}
+    }
+  .check{Block#
+    .let acc= {ELists#[Nat]}
+    .let es= {Nats#.flow.eSet({e -> Block#(acc.add e, e)}, {::})}
+    .do{acc.list .assertEq({::}, Nats#)}
+    .return{es.seqFlow.list .assertEq({::}, Nats#)}
+    }
+  .check{Block#
+    .let acc= {ELists#[Nat]}
+    .let s= {Nats#.flow.set({e -> Block#(acc.add e, e)}, {::})}
+    .do{acc.list .assertEq({::}, Nats#)}
+    .return{s.list .assertEq({::}, Nats#)}
+    }
+  }
+
+ErrIf: { #(b: Bool, msg: Str, e: Nat): Nat -> Block#[Nat].if{b}.error{msg}.return{e} }
+LoopIf: { #(b: Bool, e: Nat): Nat -> Block#[Nat].if{b}.return{Block#[Nat].loop{Continue#}.return{e}}.return{e} }
+
+FlowParallelErrorTests: Test {::
+  .checkDetErr({::.isMsg{::.contains `boom100`}}, {Nats#.flow.map{e -> ErrIf#(e == 100, `boom100`, ErrIf#(e == 150, `boom150`, e))}.list})
+  .checkDetErr({::.isMsg{::.contains `boom100`}}, {Nats#.flow.map{e -> ErrIf#(e == 100, `boom100`, ErrIf#(e == 150, `boom150`, e))}.fold({0}, {acc, e -> acc + e})})
+  .checkDetErr({::.isMsg{::.contains `boom100`}}, {Nats#.flow.filter{e -> ErrIf#(e == 100, `boom100`, e) > 150}.size})
+  .checkDetErr({::.isMsg{::.contains `boom100`}}, {Nats#.flow.flatMap{e -> Flows#(ErrIf#(e == 100, `boom100`, e))}.list})
+  .check{Nats#.flow.map{e -> ErrIf#(e > 100, `late`, e)}.any{e -> e == 100} .assertTrue}
+  .check{Nats#.flow.map{e -> ErrIf#(e > 100, `late`, e)}.all{e -> e < 100} .assertFalse}
+  .check{Nats#.flow.map{e -> ErrIf#(e > 100, `late`, e)}.first! .assertEq 0}
+  .check{Nats#.flow.map{e -> ErrIf#(e > 100, `late`, e)}.limit 50 .list .assertEq({::}, (0 =~~= 49).flow.list)}
+  .check{Nats#.flow.map{e -> ErrIf#(e > 100, `late`, e)}.scan(0, {acc, e -> acc + e}).limit 3 .list .assertEq({::}, Lists#(0, 1, 3))}
+  .check{Nats#.flow.map{e -> LoopIf#(e > 0, e)}.first! .assertEq 0}
+  .check{Nats#.flow.map{e -> LoopIf#(e > 0, e)}.any{e -> e == 0} .assertTrue}
+  .checkDetErr({::.isMsg{::.contains `boom5`}}, {Nats#.flow.map{e -> ErrIf#(e == 5, `boom5`, LoopIf#(e > 5, e))}.list})
+  }
+
+TestFlowParallel: Test {::
+  .test FlowParallelOrderTests
+  .test FlowParallelErrorTests
+  }

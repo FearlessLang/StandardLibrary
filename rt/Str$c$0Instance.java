@@ -4,7 +4,6 @@ import static base.Util.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -343,8 +342,8 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     return Nat$c$0Instance.instance(val.hashCode());
   }
   @Override public Object imm$joinStr$1(Object p0){
-    Stream<Object> stream= ((Flow$o$1Instance)p0).s();
-    String res= stream.map(o->((Str$c$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
+    var parts= List$o$1Instance.asJava(((Flow$o$1Instance)p0).mut$list$0());
+    String res= parts.stream().map(o->((Str$c$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
     return new Str$c$0Instance(res);
   }
   @Override public Object imm$startsWith$1(Object p0){
