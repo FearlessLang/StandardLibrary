@@ -201,20 +201,20 @@ Color:DataType[Color,Color]{
 Widget[S]:{
   mut .self:mut S;
   mut .save(mut Consumer[mut S]):mut S;
-  mut .topInset(Nat):mut S;
+  mut .topInset(n:Nat):mut S->this.topInset'(HeightNat#n);
   mut .topInset'(HeightNat):mut S;
-  mut .bottomInset(Nat):mut S;
+  mut .bottomInset(n:Nat):mut S->this.bottomInset'(HeightNat#n);
   mut .bottomInset'(HeightNat):mut S;
-  mut .leftInset(Nat):mut S;
+  mut .leftInset(n:Nat):mut S->this.leftInset'(WidthNat#n);
   mut .leftInset'(WidthNat):mut S;
-  mut .rightInset(Nat):mut S;
+  mut .rightInset(n:Nat):mut S->this.rightInset'(WidthNat#n);
   mut .rightInset'(WidthNat):mut S;
-  mut .heightGap(Nat):mut S;
+  mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
   mut .heightGap'(HeightNat):mut S;
-  mut .widthGap(Nat):mut S;
+  mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
   mut .widthGap'(WidthNat):mut S;
-  mut .width(Nat):mut S;
-  mut .height(Nat):mut S;
+  mut .width(n:Nat):mut S->this.width'(WidthNat#n);
+  mut .height(n:Nat):mut S->this.height'(HeightNat#n);
   mut .width'(WidthNat):mut S;
   mut .height'(HeightNat):mut S;
   mut .autoWidth:mut S;
