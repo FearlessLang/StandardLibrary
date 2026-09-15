@@ -41,21 +41,20 @@ record CGraphicsCtx(
   }
   @Override public Object mut$rect$2(Object w,Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawRect(Rect.makeXYWH(
-      frame.xPos(currentX,"graphics rect x"),
-      frame.yPos(currentY,"graphics rect y"),
-      frame.width((WidthNat$as$0)w,"graphics rect width"),
-      frame.height((HeightNat$lg$0)h,"graphics rect height")),paint);
+    cv.drawRect(shapeRect("rect",w,h),paint);
     return this;
   }
   @Override public Object mut$oval$2(Object w,Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawOval(Rect.makeXYWH(
-      frame.xPos(currentX,"graphics oval x"),
-      frame.yPos(currentY,"graphics oval y"),
-      frame.width((WidthNat$as$0)w,"graphics oval width"),
-      frame.height((HeightNat$lg$0)h,"graphics oval height")),paint);
+    cv.drawOval(shapeRect("oval",w,h),paint);
     return this;
+  }
+  private Rect shapeRect(String what,Object w,Object h){
+    return Rect.makeXYWH(
+      frame.xPos(currentX,"graphics "+what+" x"),
+      frame.yPos(currentY,"graphics "+what+" y"),
+      frame.width((WidthNat$as$0)w,"graphics "+what+" width"),
+      frame.height((HeightNat$lg$0)h,"graphics "+what+" height"));
   }
   @Override public Object mut$image$1(Object image){
     var img=((Image$1c$0Instance)image).image();
