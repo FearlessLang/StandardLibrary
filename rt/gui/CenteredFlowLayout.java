@@ -156,22 +156,6 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // not depend on any given size).
   private Dimension naturalSize(Container target){
     boolean vert = gap.vertical;
-    if (gap.chunk <= 0){
-      int pg = vert ? h(gap.heightGap) : w(gap.widthGap);
-      int p = 0;
-      int c = 0;
-      boolean first = true;
-      for (var comp : target.getComponents()){
-        if (!comp.isVisible()){ continue; }
-        var d = comp.getPreferredSize();
-        int cp = vert ? d.height : d.width;
-        int cc = vert ? d.width : d.height;
-        p += (first ? 0 : pg) + cp;
-        c = Math.max(c, cc);
-        first = false;
-      }
-      return vert ? new Dimension(c, p) : new Dimension(p, c);
-    }
     var ls = lines(target, Integer.MAX_VALUE);
     int lineGap = vert ? w(gap.widthGap) : h(gap.heightGap);
     int totalCross = 0;
