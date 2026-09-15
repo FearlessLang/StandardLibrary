@@ -32,6 +32,7 @@ EnumTests: Test {::
   .check{Directions.map.get(`North`).assertEq North}
   .check{Directions.map.get(`West`).assertEq West}
   .check{Directions.map.size.assertEq 4}
+  .check{Directions.map.flow.map{::.key}.list .assertEq({::}, Lists#(`North`,`East`,`South`,`West`))}
 
   .check{Directions.fromInfo(Infos.msg `East`).assertEq East}
   .check{Directions.fromInfo(North.info).assertEq North}
