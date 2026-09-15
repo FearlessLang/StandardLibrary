@@ -140,8 +140,8 @@ _JsonUnescape: {
 /// Recursive-descent inverse of `_InfoToStr`.
 /// `.pos` always indexes the next unread character; each parsing method returns
 /// both the `.info` it built and the position right after what it consumed.
-/// Walking sibling characters/elements is done with ``Range[Nat].flow.fold`` (a
-/// native loop), not by a method calling itself again for the next sibling, so a
+/// Walking sibling characters/elements uses `.var`/`.loop` (a native loop, since
+/// `Block.loop` is), not a method calling itself again for the next sibling, so a
 /// long flat string/list/map does not grow the call stack; only genuine nesting
 /// recurses, and that depth is bounded by the document's actual nesting, never by
 /// its size. Building the resulting `.list`/`.map` `Info` reuses ``List[Info].info``/
@@ -149,9 +149,6 @@ _JsonUnescape: {
 /// than assembling the variant by hand, so an empty result collapses to `Info` the
 /// same way it would from any other construction path.
 _InfoParsed: { .info: Info; .pos: Nat }
-_StrScan: { .end: Opt[Nat]; .escape: Bool }
-_ListScan: { .acc: List[Info]; .nextPos: Nat; .closedAt: Opt[Nat] }
-_MapScan: { .acc: Map[Str,Info]; .nextPos: Nat; .closedAt: Opt[Nat] }
 
 _InfoFromStr: {
   #(s: Str): Info -> Block#
@@ -180,57 +177,53 @@ _InfoFromStr: {
       }};
 
   .strEnd(s: Str, pos: Nat): Nat -> Block#
-    .if {pos >= (s.size)} .error {`Infos.fromStr: unterminated string in `+(s.escape)+`.`}
-    .let scan = {(pos =~~= (s.size - 1)).flow.fold(
-      {_StrScan {.end -> {}; .escape -> False}},
-      {acc, i -> this.strEndStep(acc, i, s)}
-      )}
-    .if {(scan.end).isEmpty} .error {`Infos.fromStr: unterminated string in `+(s.escape)+`.`}
-    .return {scan.end!};
-
-  .strEndStep(acc: _StrScan, i: Nat, s: Str): _StrScan -> Block#
-    .if {(acc.end).isSome} .return {acc}
-    .if {acc.escape} .return {_StrScan {.end -> {}; .escape -> False}}
-    .let c = {s.sub(i, i + 1)}
-    .if {c == `"`} .return {_StrScan {.end -> Opts#i; .escape -> False}}
-    .if {c == `\`} .return {_StrScan {.end -> {}; .escape -> True}}
-    .return {_StrScan {.end -> {}; .escape -> False}};
+    .var[Nat] i = {pos}
+    .loop { Block#
+      .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated string in `+(s.escape)+`.`}
+      .let c = {s.sub(i.get, (i.get) + 1)}
+      .if {c == `"`} .return {OuterReturn#(i.get)}
+      .do {i.set((i.get) + (c == `\` ? {.then -> 2; .else -> 1}))}
+      .return {Continue#}
+      }
+    .return {Unreachable!};
 
   .listValue(s: Str, pos: Nat): _InfoParsed -> Block#
-    .if {pos >= (s.size)} .error {`Infos.fromStr: unterminated list in `+(s.escape)+`.`}
-    .let scan = {(pos =~~= (s.size - 1)).flow.fold(
-      {_ListScan {.acc -> {}; .nextPos -> pos; .closedAt -> {}}},
-      {acc, i -> this.listStep(acc, i, s)}
-      )}
-    .if {(scan.closedAt).isEmpty} .error {`Infos.fromStr: unterminated list in `+(s.escape)+`.`}
-    .return {_InfoParsed {.info -> (scan.acc).info {::}; .pos -> scan.closedAt!}};
-
-  .listStep(acc: _ListScan, i: Nat, s: Str): _ListScan -> Block#
-    .if {(acc.closedAt).isSome} .return {acc}
-    .if {i < (acc.nextPos)} .return {acc}
-    .if {(s.sub(i, i + 1)) == `]`} .return {_ListScan {.acc -> acc.acc; .nextPos -> i + 1; .closedAt -> Opts#(i + 1)}}
-    .let start = {(acc.acc).isEmpty ? {.then -> i; .else -> this.expect(s, i, `,`)}}
-    .let elem = {this.value(s, start)}
-    .return {_ListScan {.acc -> (acc.acc) +> (elem.info); .nextPos -> elem.pos; .closedAt -> {}}};
+    .var[Nat] i = {pos}
+    .var[List[Info]] acc = {{}}
+    .loop { Block#
+      .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated list in `+(s.escape)+`.`}
+      .if {(s.sub(i.get, (i.get) + 1)) == `]`} .return {Block#
+        .let result = {(acc.get).info {::}}
+        .let endPos = {(i.get) + 1}
+        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
+        }
+      .let start = {(acc.get).isEmpty ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
+      .let elem = {this.value(s, start)}
+      .do {acc.set((acc.get) +> (elem.info))}
+      .do {i.set(elem.pos)}
+      .return {Continue#}
+      }
+    .return {Unreachable!};
 
   .mapValue(s: Str, pos: Nat): _InfoParsed -> Block#
-    .if {pos >= (s.size)} .error {`Infos.fromStr: unterminated map in `+(s.escape)+`.`}
-    .let scan = {(pos =~~= (s.size - 1)).flow.fold(
-      {_MapScan {.acc -> Maps#[Str,Str,Info]{::}.as{::}; .nextPos -> pos; .closedAt -> {}}},
-      {acc, i -> this.mapStep(acc, i, s)}
-      )}
-    .if {(scan.closedAt).isEmpty} .error {`Infos.fromStr: unterminated map in `+(s.escape)+`.`}
-    .return {_InfoParsed {.info -> (scan.acc).info {::}; .pos -> scan.closedAt!}};
-
-  .mapStep(acc: _MapScan, i: Nat, s: Str): _MapScan -> Block#
-    .if {(acc.closedAt).isSome} .return {acc}
-    .if {i < (acc.nextPos)} .return {acc}
-    .if {(s.sub(i, i + 1)) == `}`} .return {_MapScan {.acc -> acc.acc; .nextPos -> i + 1; .closedAt -> Opts#(i + 1)}}
-    .let start = {(acc.acc).isEmpty ? {.then -> i; .else -> this.expect(s, i, `,`)}}
-    .let key = {this.msgValue(s, start)}
-    .let afterColon = {this.expect(s, key.pos, `:`)}
-    .let elem = {this.value(s, afterColon)}
-    .return {_MapScan {.acc -> (acc.acc).with(key.info.getMsg, elem.info).as{::}; .nextPos -> elem.pos; .closedAt -> {}}};
+    .var[Nat] i = {pos}
+    .var[Map[Str,Info]] acc = {Maps#[Str,Str,Info]{::}.as{::}}
+    .loop { Block#
+      .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated map in `+(s.escape)+`.`}
+      .if {(s.sub(i.get, (i.get) + 1)) == `}`} .return {Block#
+        .let result = {(acc.get).info {::}}
+        .let endPos = {(i.get) + 1}
+        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
+        }
+      .let start = {(acc.get).isEmpty ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
+      .let key = {this.msgValue(s, start)}
+      .let afterColon = {this.expect(s, key.pos, `:`)}
+      .let elem = {this.value(s, afterColon)}
+      .do {acc.set((acc.get).with(key.info.getMsg, elem.info).as{::})}
+      .do {i.set(elem.pos)}
+      .return {Continue#}
+      }
+    .return {Unreachable!};
 
   .expect(s: Str, pos: Nat, ch: Str): Nat -> Block#
     .if {pos >= (s.size)} .error {`Infos.fromStr: unexpected end of input; expected `+(ch.escape)+` in `+(s.escape)+`.`}
