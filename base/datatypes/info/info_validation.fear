@@ -5,7 +5,7 @@ InfoValidators: Sealed {
 /// `InfoValidator` is a utility class to help match `Info`s. This is useful for dealing with error's in `Action`s,
 /// as you can match against the error info to determine what to do next.
 /// `InfoValidator`s start from a "root" `Info`, which you can descend into with the `>` operator.
-/// For example, `this > "friends" > 0 > "name"` will match against an `Info` that is a map with a key `"friends"` that is a list with at least one element, and that first element is a map with a key `"name"`.
+/// For example, ``this > "friends" > 0 > "name"`` will match against an `Info` that is a map with a key ``"friends"`` that is a list with at least one element, and that first element is a map with a key ``"name"``.
 /// Often you will want to match against multiple parts of an `Info`, if so you can chain `InfoValidator`s together with the ``&``, ``|`` operators. Each one of these operations will bring you back to the root `Info` to start matching from again.
 /// These follow standard fearless operator precedence (left associativity), with no preference between operators.
 /// For example: ``InfoValidators# info > "friends" > 0 .isMsg{:: == "Alice"}  | > "friends" > 1 .isMsg {:: == "Bob"} & > "friends" > 2 .isMsg{:: == "Carol"}``
@@ -15,7 +15,7 @@ InfoValidators: Sealed {
 ///   :: > 1 .isMsg {:: == "Bob"}} & > "friends" > 2 .isMsg{:: == "Carol"}
 ///   }``` which will get read as (first friend is "Alice" OR (second friend is "Bob" AND third friend is "Carol")).
 /// Expressions can also be negated with `.not`, `.not` acts upon the current "local" expression and doesn't negate the whole expression.
-/// Note: `::` will match any Info, so you can start an expression with `:: &` as `::` is always true, this means you should not start with `|` as `:: |` will always be true
+/// Note: ``::`` will match any Info, so you can start an expression with ``:: &`` as ``::`` is always true, this means you should not start with ``|`` as ``:: |`` will always be true
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
 //>   .checkTrue{info.validate{::}}
@@ -32,7 +32,7 @@ InfoValidators: Sealed {
 //>   .checkFalse{info.validate{:: > "friends" .where{::
 //>     & > 0 > "name" .isMsg{:: == "Bob"}
 //>     | > 1 > "name" .isMsg{:: == "Alice"}
-//>     & > 2 > "name" .isMsg{:: == "David"}}}
+//>     & > 2 > "name" .isMsg{:: == "David"}}}}
 //>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     | > "friends" .where {::
@@ -41,7 +41,7 @@ InfoValidators: Sealed {
 //>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > "friends" > 1 > "name" .isMsg{:: == "David"}.not
-//>   }
+//>   }}
 InfoValidator: Sealed {
   .close: Info;
   .isValid: Bool;

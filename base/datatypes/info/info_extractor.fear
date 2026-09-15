@@ -24,17 +24,17 @@ Flatten[T:*]: Operation[Opt[Opt[T]], Opt[T]] {
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
 //>   .check{info.extract{::}! .assertEq info}
-//>   .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}! == "bob"}
+//>   .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}! .assertEq "bob"}
 //>   .check{info.extract{:: > "friends" .extractList .where{::
 //>       > 0 > "name" .isMsg{:: == "Bob"}
 //>       & > 1 > "name" .isMsg{:: == "Alice"}
 //>       }}
 //>     .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!
 //>     .assertEq("Bob, Alice")}
-//>   .check{info > "friends" .extractList .where{::
+//>   .check{info.extract{:: > "friends" .extractList .where{::
 //>     & > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > 1 > "name" .isMsg{:: == "David"}
-//>     }.assertEmpty {::}}
+//>     }}.assertEmpty {::}}
 InfoExtractor: Extractor[Info, InfoExtractor] {
   /// Descend one layer deeper into info,
   /// matching against it being a map with a key `key`
