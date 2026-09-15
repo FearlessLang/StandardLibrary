@@ -251,16 +251,18 @@ Border:Widget[Border]{
   mut .centerB(mut Scope[Border]):mut Border;
   mut .paint(Painter):mut Border;
 }
-Button: Widget[Button]{
-  .self-> this;
-  mut .action(mut MF[Void]):mut Button;
-  mut .text(s:Str):mut Button->this.uText(s.u);
-  mut .uText(UStr):mut Button;
-  mut .textSize(HeightNat):mut Button;
-  mut .textHeight(n:Nat): mut Button->this.textSize(HeightNat#n);
+_TextWidget[S]: Widget[S]{
+  mut .text(s:Str):mut S->this.uText(s.u);
+  mut .uText(UStr):mut S;
+  mut .textHeight(n:Nat): mut S->this.textHeight'(HeightNat#n);
+  mut .textHeight'(HeightNat):mut S;
   read .text:Str->this.uText.getStr; ///throws if the text was set with .uText and is not a valid Str
   read .uText:UStr;
-  read .textSize:HeightNat;
+  read .textHeight:HeightNat;
+}
+Button: _TextWidget[Button]{
+  .self-> this;
+  mut .action(mut MF[Void]):mut Button;
 }
 
 ModelFps: {
@@ -314,15 +316,8 @@ Graphics:{
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
 ///the same text looks the same on every OS, and a character outside those fonts is drawn as a box everywhere.
 Gui:{ mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run(Frame f); }
-Label:Widget[Label]{
+Label:_TextWidget[Label]{
   .self->this;
-  mut .text(s:Str):mut Label->this.uText(s.u);
-  mut .uText(UStr):mut Label;
-  mut .textSize(HeightNat):mut Label;
-  mut .textHeight(n:Nat): mut Label->this.textSize(HeightNat#n);
-  read .text:Str->this.uText.getStr; ///throws if the text was set with .uText and is not a valid Str
-  read .uText:UStr;
-  read .textSize:HeightNat
 }
 Mouse:{
   mut .clicked(mut Consumer[MouseEvent]):mut Mouse;

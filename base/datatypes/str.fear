@@ -53,6 +53,11 @@
 ///   But, ``0.100000000000000005`` is closer to the actual representable Float value. That is,
 ///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
 ///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
+///
+/// Str.bool / Str.getBool:
+/// - rejected: any text other than exactly ``True`` or ``False`` (this includes ``true``, `` True`` and ``True ``)
+/// - accepted: ``True``.getBool  ``False``.getBool
+/// - roundtrip: b.str.getBool == b for every Bool b
 Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKey {
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
@@ -80,7 +85,8 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .int: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
   .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
   .nat: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
-  .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid (this includes out of range)
+  .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid
+  .bool: Opt[Bool] -> (this == `True`).toOpt{True} | ((this == `False`).toOpt{False}); /// parses exactly ``True``/``False`` as produced by Bool.str; .empty on invalid (this includes out of range)
 
 
   .getIeeeFloat: Float;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
@@ -90,6 +96,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .getNum: Num;              /// parse a string representing a valid Fearless Num; throws if invalid (this includes denominator == 0)
   .getNat: Nat;              /// parse a string representing a valid Fearless Nat; throws if invalid (this includes out of range)
   .getByte: Byte;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
+  .getBool: Bool -> this.bool.orLazy{Error.msg(`Str.getBool: `+(this.escape)+` is not "True" or "False".`)}; /// parses exactly ``True``/``False`` as produced by Bool.str; throws if invalid
 
 
   .startsWith(Str): Bool;           /// this string starts with the other string

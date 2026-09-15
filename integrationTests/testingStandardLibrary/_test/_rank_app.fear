@@ -23,6 +23,10 @@ use base.True as True;
 use base.False as False;
 use base.Bool as Bool;
 use base.Block as Block;
+use base.Continue as Continue;
+use base.Break as Break;
+use base.OuterReturn as OuterReturn;
+use base.Unreachable as Unreachable;
 use base.Math as Math;
 use base.F as F;
 use base.OrderHash as OrderHash;
@@ -56,6 +60,8 @@ use base.Rects as Rects;
 use base.ToInfo as ToInfo;
 use base.ToInfoBy as ToInfoBy;
 use base.Infos as Infos;
+use base.Enum as Enum;
+use base.Enums as Enums;
 
 MyTests:UnitTests{::
   .test TestByte
@@ -64,6 +70,7 @@ MyTests:UnitTests{::
   .test TestNat
   .test TestNum
   .test TestStr
+  .test TestEnum
   .test TestWrappers
   .test TestList
   .test TestMap
@@ -78,4 +85,6 @@ MyTests:UnitTests{::
   .test BlockUnitTests
   .test TestInfoValidation
   .test TestInfoExtraction
+  .test TestBlock
+  .test TestInfoFromStr
   }

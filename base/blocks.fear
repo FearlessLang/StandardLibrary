@@ -46,11 +46,19 @@ Block[R:*]: Sealed {
       .done     -> Block#[Void];
       };
     };
-  mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> body#.match mut ControlFlowMatch[R:*]: {
-    mut .continue: mut Block[R]     -> this.loop(body);
-    mut .break: mut Block[R]        -> this;
-    mut .return(v: R): mut Block[R] -> _DecidedBlock#v;
-    };
+  /// iterates `body` without growing the call stack per iteration: unlike a Fearless
+  /// method calling itself for each `.continue`, this is backed by a native Java loop.
+  /// Logically equivalent to:
+  ///   body#.match ControlFlowMatch[R]: {
+  ///     .continue -> this.loop(body);
+  ///     .break    -> this;
+  ///     .return v -> _DecidedBlock#v;
+  ///     };
+  mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _NativeLoop#(this, body);
+  }
+
+_NativeLoop: Sealed {
+  #[R:*](self: mut Block[R], body: mut MF[mut ControlFlow[R]]): mut Block[R] -> Magic!;
   }
 
 BlockIf[R:*]: {
@@ -83,6 +91,11 @@ _DecidedBlock: {
   }
 
 ControlFlow[R:*]: Sealed { mut .match(m: mut ControlFlowMatch[R]): mut Block[R]; }
+ControlFlowMatch[R:*]: {
+  mut .continue: mut Block[R];
+  mut .break: mut Block[R];
+  mut .return(v: R): mut Block[R];
+  }
 Continue: {#[R:*]: mut ControlFlow[R]->{::.continue}}
 Break: {#[R:*]: mut ControlFlow[R]->{::.break}}
 OuterReturn: {#[R:*](r: R): mut ControlFlow[R]->{::.return r} }
