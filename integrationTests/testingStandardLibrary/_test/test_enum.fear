@@ -9,8 +9,6 @@ Direction: Enum[Direction]{
   .enums->Directions;
   read .match[R:**](m: mut DirectionMatch[R]): R;
   .close->this; .close->::;
-  .cmp t0,t1,m -> t0.index<=>(t1.index,m);
-  .hash -> this.index;
   }
 
 North: Direction{::.north; .imm->North; `North`}

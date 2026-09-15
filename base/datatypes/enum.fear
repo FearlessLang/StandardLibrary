@@ -1,8 +1,9 @@
 /// Support for closed sets of named singleton values (enumerations).
 /// A family with a few named values is declared by implementing `Enum` and
 /// `Enums`: the family type binds every value to its list via `.enums` and
-/// gives `.close`/`.cmp`/`.hash` once; each value then supplies its own `.str`
-/// and `.imm` (a fixed singleton value has no other way to prove it is imm).
+/// gives `.close` once (`.cmp`/`.hash`/`.index` come for free from that);
+/// each value then supplies its own `.str` and `.imm` (a fixed singleton
+/// value has no other way to prove it is imm).
 ///
 /// Minimal usage, without a dedicated Match type:
 /// ```
@@ -13,8 +14,6 @@
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
 ///   .close->this; .close->::;
-///   .cmp t0,t1,m -> t0.index<=>(t1.index,m);
-///   .hash -> this.index;
 ///   }
 /// North: Direction{.imm->North; `North`}
 /// East:  Direction{.imm->East;  `East` }
@@ -35,8 +34,6 @@
 ///   .enums->Directions;
 ///   read .match[R:**](m: mut DirectionMatch[R]): R;
 ///   .close->this; .close->::;
-///   .cmp t0,t1,m -> t0.index<=>(t1.index,m);
-///   .hash -> this.index;
 ///   }
 /// North: Direction{::.north; .imm->North; `North`}
 /// East:  Direction{::.east;  .imm->East;  `East` }
@@ -72,8 +69,9 @@ Enums[E]: FromInfo[E]{
 
 /// The "single value" side of an enumeration family.
 /// E names the concrete family type, but a bare generic parameter carries
-/// no methods of its own: `.close`/`.cmp`/`.hash` still need to be given once at the
-/// family, since they produce or compare values of that concrete type.
+/// no methods of its own, so `.close` still needs to be given once at the
+/// family: it is what lets `.cmp` below turn an arbitrary value of type E
+/// back into an ``Enum[E]`` with an `.index` to compare.
 Enum[E]: DataType[E,E]{
   /// the family this value belongs to; families may also add a `.match`
   /// method of their own, as shown in the second example above.
@@ -82,7 +80,12 @@ Enum[E]: DataType[E,E]{
   /// derived from `.str`, and round-trips through `Enums.fromInfo`.
   /// ``North.info`` is `` Infos.msg`North` ``.
   .info -> Infos.msg(this.str);
-  /// this value's position in ``.enums.list``.
+  /// this value's position in `.enums`'s list.
   /// ``North.index`` is ``0``, ``West.index`` is ``3``, and ``North < East`` is `True`.
   read .index: Nat -> this.enums.indexMap.get(this.str);
+  /// narrows ``DataType[E,E].close`` to ``Enum[E]`` (still given by the family,
+  /// not here) so that `.cmp` below can call `.index` on its arguments.
+  read .close(t: read E): read Enum[E];
+  .cmp t0,t1,m -> this.close(t0).index<=>(this.close(t1).index,m);
+  .hash -> this.index;
   }
