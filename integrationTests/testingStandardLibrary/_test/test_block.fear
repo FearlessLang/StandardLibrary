@@ -1,0 +1,38 @@
+BlockLoopTests: Test {::
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop { Block#
+      .if {(i.get) >= 10} .return {OuterReturn#(i.get)}
+      .do {i.set((i.get) + 1)}
+      .return {Continue#}
+      }
+    .return {Unreachable!}
+    ) .assertEq 10}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .var[Nat] sum = {0}
+    .loop { Block#
+      .if {(i.get) >= 5} .return {Break#}
+      .do {sum.set((sum.get) + (i.get))}
+      .do {i.set((i.get) + 1)}
+      .return {Continue#}
+      }
+    .return {sum.get}
+    ) .assertEq 10}
+
+  // many iterations: proves .loop does not grow the call stack per iteration
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop { Block#
+      .if {(i.get) >= 500000} .return {OuterReturn#(i.get)}
+      .do {i.set((i.get) + 1)}
+      .return {Continue#}
+      }
+    .return {Unreachable!}
+    ) .assertEq 500000}
+  }
+
+TestBlock: Test {::
+  .test BlockLoopTests
+  }
