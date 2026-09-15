@@ -13,6 +13,8 @@ Infos: Sealed {
   .map(k1: Str, e1: read ToInfo,k2: Str, e2: read ToInfo,k3: Str, e3: read ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info,k3,e3.info).info {::};
   .map(k1: Str, e1: read ToInfo,k2: Str, e2: read ToInfo,k3: Str, e3: read ToInfo,k4: Str, e4: read ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info,k3,e3.info,k4,e4.info).info {::};
   .map(k1: Str, e1: read ToInfo,k2: Str, e2: read ToInfo,k3: Str, e3: read ToInfo,k4: Str, e4: read ToInfo,k5: Str, e5: read ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info,k3,e3.info,k4,e4.info,k5,e5.info).info {::};
+  /// parses text produced by ``Info.str`` back into the same `Info`; throws on malformed input
+  .fromStr(s: Str): Info -> _InfoFromStr#(s);
   }
 
 //To make an info from arbitrary map/list, just do myList.info {::} or myMap.info {::}
@@ -39,7 +41,7 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
 
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
   .match[R:**](m: InfoMatch[R]): R->m.empty;
-  /// valid JSon text; ``.empty`` alone has no JSon value so renders as the bare word ``EmptyInfo``
+  /// valid JSon text; ``.empty`` renders as the JSon ``null``
   .str -> this.imm.match(_InfoToStr);
   +(other: Info) : Info -> this.match {
     .empty -> other;
@@ -109,7 +111,7 @@ DefaultInfoMatch[R:**]: InfoMatch[R] {
 
 
 _InfoToStr: InfoMatch[Str] {
-  .empty ->`EmptyInfo`;
+  .empty ->`null`;
   .msg(msg) -> _JsonEscape#msg;
   .list(list) -> `[` + (list.flow.map{::.str}.join(`,`)) + `]`;
   .map(map) -> `{` + (map.flow.map{_JsonEscape#(::.key) + `:` + (::.elem.str)}.join(`,`)) + `}`;
@@ -125,11 +127,115 @@ _JsonEscape: {
     ))) + `"`;
   }
 
+/// Inverse of `_JsonEscape`'s content: turns each two-character escape sequence back
+/// into the raw character it stands for.
+_JsonUnescape: {
+  #(s: Str): Str -> s.replaceSimultaneous(Lists#(
+    `\\`, `\`,
+    `\"`, `"`,
+    `\n`, (`` |),
+    ));
+  }
+
+/// Recursive-descent inverse of `_InfoToStr`.
+/// `.pos` always indexes the next unread character; each parsing method returns
+/// both the `.info` it built and the position right after what it consumed.
+/// Walking sibling characters/elements uses `.var`/`.loop` (a native loop, since
+/// `Block.loop` is), not a method calling itself again for the next sibling, so a
+/// long flat string/list/map does not grow the call stack; only genuine nesting
+/// recurses, and that depth is bounded by the document's actual nesting, never by
+/// its size. Building the resulting `.list`/`.map` `Info` reuses ``List[Info].info``/
+/// ``Map[Str,Info].info`` (the same conversion `.list`/`.map` on `Infos` use), rather
+/// than assembling the variant by hand, so an empty result collapses to `Info` the
+/// same way it would from any other construction path.
+_InfoParsed: { .info: Info; .pos: Nat }
+
+_InfoFromStr: {
+  #(s: Str): Info -> Block#
+    .let result = {this.value(s, 0)}
+    .if {(result.pos) != (s.size)} .error {`Infos.fromStr: unexpected trailing characters at position `+(result.pos)+` in `+(s.escape)+`.`}
+    .return {result.info};
+
+  .value(s: Str, pos: Nat): _InfoParsed -> Block#
+    .if {pos >= (s.size)} .error {`Infos.fromStr: unexpected end of input while expecting a value in `+(s.escape)+`.`}
+    .let c = {s.sub(pos, pos + 1)}
+    .if {c == `"`} .return {this.msgValue(s, pos)}
+    .if {c == `[`} .return {this.listValue(s, pos + 1)}
+    .if {c == `{`} .return {this.mapValue(s, pos + 1)}
+    .return {this.emptyValue(s, pos)};
+
+  .emptyValue(s: Str, pos: Nat): _InfoParsed -> Block#
+    .if {pos + 4 > (s.size)} .error {`Infos.fromStr: unexpected end of input while expecting a value in `+(s.escape)+`.`}
+    .if {(s.sub(pos, pos + 4)) != `null`} .error {`Infos.fromStr: unexpected character at position `+pos+` in `+(s.escape)+`; expected a value.`}
+    .return {_InfoParsed {.info -> Info; .pos -> pos + 4}};
+
+  .msgValue(s: Str, pos: Nat): _InfoParsed -> Block#
+    .let endIdx = {this.strEnd(s, pos + 1)}
+    .return {_InfoParsed {
+      .info -> Infos.msg(_JsonUnescape#(s.sub(pos + 1, endIdx)));
+      .pos -> endIdx + 1;
+      }};
+
+  .strEnd(s: Str, pos: Nat): Nat -> Block#
+    .var[Nat] i = {pos}
+    .loop { Block#
+      .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated string in `+(s.escape)+`.`}
+      .let c = {s.sub(i.get, (i.get) + 1)}
+      .if {c == `"`} .return {OuterReturn#(i.get)}
+      .do {i.set((i.get) + (c == `\` ? {.then -> 2; .else -> 1}))}
+      .return {Continue#}
+      }
+    .return {Unreachable!};
+
+  .listValue(s: Str, pos: Nat): _InfoParsed -> Block#
+    .var[Nat] i = {pos}
+    .let acc = {ELists#[Info]}
+    .loop { Block#
+      .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated list in `+(s.escape)+`.`}
+      .if {(s.sub(i.get, (i.get) + 1)) == `]`} .return {Block#
+        .let result = {(acc.list).info {::}}
+        .let endPos = {(i.get) + 1}
+        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
+        }
+      .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
+      .let elem = {this.value(s, start)}
+      .do {acc.add(elem.info)}
+      .do {i.set(elem.pos)}
+      .return {Continue#}
+      }
+    .return {Unreachable!};
+
+  .mapValue(s: Str, pos: Nat): _InfoParsed -> Block#
+    .var[Nat] i = {pos}
+    .let acc = {ELists#[KeyElem[Str,Info]]}
+    .loop { Block#
+      .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated map in `+(s.escape)+`.`}
+      .if {(s.sub(i.get, (i.get) + 1)) == `}`} .return {Block#
+        .let result = {(acc.list).seqFlow.mapping({::}, {.key e -> e.key; .elem e -> e.elem}).info {::}}
+        .let endPos = {(i.get) + 1}
+        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
+        }
+      .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
+      .let key = {this.msgValue(s, start)}
+      .let afterColon = {this.expect(s, key.pos, `:`)}
+      .let elem = {this.value(s, afterColon)}
+      .do {acc.add({.key -> key.info.getMsg; .elem -> elem.info})}
+      .do {i.set(elem.pos)}
+      .return {Continue#}
+      }
+    .return {Unreachable!};
+
+  .expect(s: Str, pos: Nat, ch: Str): Nat -> Block#
+    .if {pos >= (s.size)} .error {`Infos.fromStr: unexpected end of input; expected `+(ch.escape)+` in `+(s.escape)+`.`}
+    .if {(s.sub(pos, pos + 1)) != ch} .error {`Infos.fromStr: expected `+(ch.escape)+` at position `+pos+` in `+(s.escape)+`.`}
+    .return {pos + 1};
+  }
+
 InfoToPrettyString: {
   #(i: Info): Str -> this#(i, 0);
 
   #(i: Info, depth: Nat): Str -> (i.match InfoMatch[Str] {
-    .empty -> `EmptyInfo`;
+    .empty -> `null`;
     .msg(msg) -> msg.escape;
     .list list -> "[" | (list.flow.map{"  ".repeat(depth+1) + (this#(::, depth + 1))}.join(","|)) | + ("  ".repeat(depth)) + "]";
     .map(map) -> "{" | (map.flow.map{"  ".repeat(depth+1) + (::.key + ": " + (this#(::.elem, depth + 1)))}.join(","|)) | + ("  ".repeat(depth)) +"}";

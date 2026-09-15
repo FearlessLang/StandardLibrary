@@ -238,6 +238,22 @@ StrParseIeeeFloatTests: Test {::
   .check{`+0.1`.ieeeFloat!.num!.inRange(`+0.1/1`.num! =~~= (`+0.100000000000000005/1`.num!)).assertEq False}
   }
 
+StrParseBoolTests: Test {::
+  .check{`` .bool .assertEq({::}, Opt[Bool])}
+  .check{`True` .bool .assertEq({::}, Opts# True)}
+  .check{`False` .bool .assertEq({::}, Opts# False)}
+  .check{`true` .bool .assertEq({::}, Opt[Bool])}
+  .check{`false` .bool .assertEq({::}, Opt[Bool])}
+  .check{` True` .bool .assertEq({::}, Opt[Bool])}
+  .check{`True ` .bool .assertEq({::}, Opt[Bool])}
+  .check{`TrueFalse` .bool .assertEq({::}, Opt[Bool])}
+  .check{`True` .getBool .assertEq True}
+  .check{`False` .getBool .assertEq False}
+  .check{True .str .getBool .assertEq True}
+  .check{False .str .getBool .assertEq False}
+  .checkDetErr({::.isMsg{::.contains `Str.getBool`}}, {`duck`.getBool})
+  }
+
 TestStr: Test {::
   .test StrBasicsTests
   .test StrConcatTests
@@ -251,4 +267,5 @@ TestStr: Test {::
   .test StrParseFloatTests
   .test StrParseSoftFloatTests
   .test StrParseIeeeFloatTests
+  .test StrParseBoolTests
   }
