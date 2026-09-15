@@ -24,7 +24,7 @@ InfoValidators: Sealed {
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
 //>     }}
-//>   .checkTrue{info.validate{::.isList{::.size == 2}}}
+//>   .checkTrue{info.validate{:: > "friends" .isList{::.size == 2}}}
 //>   .checkFalse{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
