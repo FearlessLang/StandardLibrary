@@ -7,6 +7,7 @@ public interface _NativeLoop$16w$0 {
     var mf= (MF$7$1) body;
     var matcher= new _NativeLoopMatcher(self);
     while (true){
+      Speculate.poll();
       matcher.result= null;
       ((ControlFlow$2dk$1) mf.mut$$hash$0()).mut$match$1(matcher);
       if (matcher.result == _NativeLoopMatcher.CONTINUE){ continue; }

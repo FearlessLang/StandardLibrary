@@ -4,7 +4,6 @@ package base;
 import base.Util.MapKey;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static base.Util.*;
@@ -15,19 +14,6 @@ final class ESet$s$1Instance implements ESet$s$1 {
     private LinkedHashMap<MapKey, Object> set;
     private final OrderHashBy$2ea$2 ordering;
 
-    static Object wrap(LinkedHashSet<MapKey> s, OrderHashBy$2ea$2 ordering){ return new ESet$s$1Instance(new LinkedHashSet<>(s), ordering); }
-
-    ESet$s$1Instance(LinkedHashSet<MapKey> s, OrderHashBy$2ea$2 ordering){
-        set= new LinkedHashMap<>(s.stream().collect(Collectors.toMap(
-                k -> k,
-                Set$c$1Instance::extractKey
-        )));
-        this.ordering= ordering;
-    }
-    ESet$s$1Instance(LinkedHashMap<MapKey, Object> s, OrderHashBy$2ea$2 ordering){
-        set = s;
-        this.ordering= ordering;
-    }
     ESet$s$1Instance(OrderHashBy$2ea$2 ordering) {
         this.ordering=ordering;
         set= new LinkedHashMap<>();
@@ -98,7 +84,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
          );
     }
     @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey)); }
-    @Override public Object mut$flow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey).parallel()); }
+    @Override public Object mut$flow$0(){ return Flow$o$1Instance.par(drain().keySet().stream().map(Set$c$1Instance::extractKey).toList()); }
     @Override public Object mut$set$0(){ return Set$c$1Instance.of(ordering, drain()); }
     @Override public Object mut$distinctBy$1(Object p0){
         reOrderHash((OrderHashBy$2ea$2) p0);
