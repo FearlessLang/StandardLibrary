@@ -49,7 +49,11 @@ _Infos: {
           ).info ToInfoBy[Map[Str,ToInfo]]{::.info{::}}
         ).info ToInfoBy[ToInfo]{::}
       ).info ToInfoBy[ToInfo]{::.info}
-    ).info ToInfoBy[ToInfo]{::.info}
+    ).info ToInfoBy[ToInfo]{::.info};
+
+  /// many siblings, no nesting: stresses sibling-by-sibling scanning
+  /// (as opposed to .largeNested, which stresses recursion into nested values)
+  .wideFlat: imm Info -> (0=~~5000).flow.map{n->Infos.msg(n.str)}.list.info{::};
   }
 
 InfoTests: Test {::

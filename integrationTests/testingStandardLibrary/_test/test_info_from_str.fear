@@ -7,6 +7,8 @@ InfoFromStrFormatTests: Test {::
   .check{Infos.fromStr(`"hello"`) .assertEq(Infos.msg `hello`)}
   .check{Infos.fromStr(`["a","b"]`) .assertEq(Infos.list(Infos.msg `a`, Infos.msg `b`))}
   .check{Infos.fromStr(`{"k1":"v1","k2":"v2"}`) .assertEq(Infos.map(`k1`, Infos.msg `v1`, `k2`, Infos.msg `v2`))}
+  .check{Infos.fromStr(`[]`) .assertEq Info}
+  .check{Infos.fromStr(`{}`) .assertEq Info}
   }
 
 InfoFromStrRoundTripTests: Test {::
@@ -22,6 +24,7 @@ InfoFromStrRoundTripTests: Test {::
   .check{Infos.fromStr(Infos.list(Info, Infos.msg `x`).str) .assertEq(Infos.list(Info, Infos.msg `x`))}
   .check{Infos.fromStr(Infos.map(`empty`, Info, `full`, Infos.msg `x`).str) .assertEq(Infos.map(`empty`, Info, `full`, Infos.msg `x`))}
   .check{Infos.fromStr(_Infos.largeNested.str) .assertEq(_Infos.largeNested)}
+  .check{Infos.fromStr(_Infos.wideFlat.str) .assertEq(_Infos.wideFlat)}
   }
 
 InfoFromStrErrorTests: Test {::
