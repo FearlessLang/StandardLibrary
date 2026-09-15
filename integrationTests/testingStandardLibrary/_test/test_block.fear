@@ -31,6 +31,7 @@ BlockLoopTests: Test {::
       }
     .return {Unreachable!}
     ) .assertEq 500000}
+  }
 
 BlockUnitTests: Test {::
   .check{Block#
