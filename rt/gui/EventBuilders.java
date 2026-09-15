@@ -124,10 +124,14 @@ final class SkMouse extends MouseAdapter{
       | InputEvent.BUTTON2_DOWN_MASK
       | InputEvent.BUTTON3_DOWN_MASK)) != 0;
     var p = point(e);
-    // AWT delivers the release to the pressed component even if the cursor
-    // left it, so the release is interpreted against the press chain.
-    dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Released, p);
-    if (!SwingUtilities.isLeftMouseButton(e)){ return; }
+    boolean left = SwingUtilities.isLeftMouseButton(e);
+    // mousePressed only ever captures a left press into pressTarget, so only
+    // a left release is interpreted against that press chain (AWT delivers
+    // it to the pressed component even if the cursor left it); any other
+    // button was dispatched at its own current location on press and is
+    // released the same way, not against an unrelated left gesture's target.
+    dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p);
+    if (!left){ return; }
     if (pressedButton != null){ pressedButton.down = false; }
     click(p);
     pressTarget = null;
