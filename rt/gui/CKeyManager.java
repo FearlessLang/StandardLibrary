@@ -83,17 +83,13 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0{
   }
   private static String keyText(KeyEvent e){ return KeyNames.of(e.getKeyCode()); }
 
-  @Override public Object mut$pressed$1(Object scope){
-    var keyAction=(KeyAction$m8$0)KeyActions$18g$0.instance.imm$$hash$0();
-    ((Scope$1c$1)scope).mut$run$1(keyAction);
-    pressed.add(keyAction);
-    return this;
-  }
+  @Override public Object mut$pressed$1(Object scope){ return addKeyAction(scope,pressed); }
+  @Override public Object mut$released$1(Object scope){ return addKeyAction(scope,released); }
 
-  @Override public Object mut$released$1(Object scope){
+  private Object addKeyAction(Object scope,List<KeyAction$m8$0> list){
     var keyAction=(KeyAction$m8$0)KeyActions$18g$0.instance.imm$$hash$0();
     ((Scope$1c$1)scope).mut$run$1(keyAction);
-    released.add(keyAction);
+    list.add(keyAction);
     return this;
   }
 }
