@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -46,7 +45,7 @@ final class SkComponent extends JComponent{
 
 class _Button extends AWidget implements Button$2o$0{
   String text = "";
-  final List<MF$7$1> actions = new ArrayList<>();// EDT confined
+  final ArrayList<MF$7$1> actions = new ArrayList<>();// EDT confined
   boolean down;// visual pressed state, maintained by SkMouse, read by Sk.button
   boolean over;// visual rollover state, maintained by SkMouse, read by Sk.button
   // Bevel path cache, used and maintained by Sk.button; EDT confined. The
@@ -170,7 +169,7 @@ abstract class AWidget implements Widget$2o$1{
   final _Frame frame;
   final SkComponent component = new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
-  final EnumMap<MouseKind, List<Consumer$ao$1>> handlers = new EnumMap<>(MouseKind.class);
+  final EnumMap<MouseKind, ArrayList<Consumer$ao$1>> handlers = new EnumMap<>(MouseKind.class);
 
   AWidget(_Frame frame){ this.frame = frame; }
 
@@ -316,7 +315,7 @@ class _Frame implements Frame$1c$0{
   private long startNanos = System.nanoTime();// re-based in start(): game time zero = warmup end
   private Nat$c$0 fps = n(30);
   private Nat$c$0 modelFpsVal;
-  private final List<MF$7$1> modelTickActions = new ArrayList<>();// live, EDT confined
+  private final ArrayList<MF$7$1> modelTickActions = new ArrayList<>();// live, EDT confined
   private Alpha$1c$0 alpha = (Alpha$1c$0) Alpha$1c$0.instance.imm$opaque$0();
   private XInt$s$0 locationX;
   private YInt$s$0 locationY;
