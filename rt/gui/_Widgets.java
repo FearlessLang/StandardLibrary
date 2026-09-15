@@ -630,7 +630,10 @@ class _Frame implements Frame$1c$0{
     if (started){
       onEdtAndWait(() -> {
         frame.setResizable(r);
-        if (w != null){ frame.setSize(new Dimension(ww, hh)); }
+        if (w != null){
+          frame.setSize(new Dimension(ww, hh));
+          checkWindowLocationFits(frame.getX(), frame.getY());
+        }
       });
     }
     return this;
