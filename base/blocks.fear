@@ -48,6 +48,12 @@ Block[R:*]: Sealed {
     };
   /// iterates `body` without growing the call stack per iteration: unlike a Fearless
   /// method calling itself for each `.continue`, this is backed by a native Java loop.
+  /// Logically equivalent to:
+  ///   body#.match ControlFlowMatch[R]: {
+  ///     .continue -> this.loop(body);
+  ///     .break    -> this;
+  ///     .return v -> _DecidedBlock#v;
+  ///     };
   mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _NativeLoop#(this, body);
   }
 
