@@ -41,7 +41,7 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
 
   .isEmpty: Bool ->this.msg.isEmpty .and (this.list.isEmpty) .and (this.map.isEmpty);
   .match[R:**](m: InfoMatch[R]): R->m.empty;
-  /// valid JSon text; ``.empty`` alone has no JSon value so renders as the bare word ``EmptyInfo``
+  /// valid JSon text; ``.empty`` renders as the JSon ``null``
   .str -> this.imm.match(_InfoToStr);
   +(other: Info) : Info -> this.match {
     .empty -> other;
@@ -111,7 +111,7 @@ DefaultInfoMatch[R:**]: InfoMatch[R] {
 
 
 _InfoToStr: InfoMatch[Str] {
-  .empty ->`EmptyInfo`;
+  .empty ->`null`;
   .msg(msg) -> _JsonEscape#msg;
   .list(list) -> `[` + (list.flow.map{::.str}.join(`,`)) + `]`;
   .map(map) -> `{` + (map.flow.map{_JsonEscape#(::.key) + `:` + (::.elem.str)}.join(`,`)) + `}`;
@@ -157,9 +157,9 @@ _InfoFromStr: {
     .return {this.emptyValue(s, pos)};
 
   .emptyValue(s: Str, pos: Nat): _InfoParsed -> Block#
-    .if {pos + 9 > (s.size)} .error {`Infos.fromStr: unexpected end of input while expecting a value in `+(s.escape)+`.`}
-    .if {(s.sub(pos, pos + 9)) != `EmptyInfo`} .error {`Infos.fromStr: unexpected character at position `+pos+` in `+(s.escape)+`; expected a value.`}
-    .return {_InfoParsed {.info -> Info; .pos -> pos + 9}};
+    .if {pos + 4 > (s.size)} .error {`Infos.fromStr: unexpected end of input while expecting a value in `+(s.escape)+`.`}
+    .if {(s.sub(pos, pos + 4)) != `null`} .error {`Infos.fromStr: unexpected character at position `+pos+` in `+(s.escape)+`; expected a value.`}
+    .return {_InfoParsed {.info -> Info; .pos -> pos + 4}};
 
   .msgValue(s: Str, pos: Nat): _InfoParsed -> Block#
     .let endIdx = {this.strEnd(s, pos + 1)}
