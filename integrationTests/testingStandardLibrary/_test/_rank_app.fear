@@ -23,6 +23,10 @@ use base.True as True;
 use base.False as False;
 use base.Bool as Bool;
 use base.Block as Block;
+use base.Continue as Continue;
+use base.Break as Break;
+use base.OuterReturn as OuterReturn;
+use base.Unreachable as Unreachable;
 use base.Math as Math;
 use base.F as F;
 use base.OrderHash as OrderHash;
@@ -75,4 +79,5 @@ MyTests:UnitTests{::
  // .test TestUStr
   .test MathUnitTests
   .test InfoTests
+  .test TestBlock
   }
