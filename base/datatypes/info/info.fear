@@ -213,7 +213,7 @@ InfoToPrettyString: {
   #(i: Info): Str -> this#(i, 0);
 
   #(i: Info, depth: Nat): Str -> (i.match InfoMatch[Str] {
-    .empty -> `EmptyInfo`;
+    .empty -> `null`;
     .msg(msg) -> msg.escape;
     .list list -> "[" | (list.flow.map{"  ".repeat(depth+1) + (this#(::, depth + 1))}.join(","|)) | + ("  ".repeat(depth)) + "]";
     .map(map) -> "{" | (map.flow.map{"  ".repeat(depth+1) + (::.key + ": " + (this#(::.elem, depth + 1)))}.join(","|)) | + ("  ".repeat(depth)) +"}";
