@@ -189,17 +189,17 @@ _InfoFromStr: {
 
   .listValue(s: Str, pos: Nat): _InfoParsed -> Block#
     .var[Nat] i = {pos}
-    .var[List[Info]] acc = {{}}
+    .let acc = {ELists#[Info]}
     .loop { Block#
       .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated list in `+(s.escape)+`.`}
       .if {(s.sub(i.get, (i.get) + 1)) == `]`} .return {Block#
-        .let result = {(acc.get).info {::}}
+        .let result = {(acc.list).info {::}}
         .let endPos = {(i.get) + 1}
         .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
         }
-      .let start = {(acc.get).isEmpty ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
+      .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
       .let elem = {this.value(s, start)}
-      .do {acc.set((acc.get) +> (elem.info))}
+      .do {acc.add(elem.info)}
       .do {i.set(elem.pos)}
       .return {Continue#}
       }
@@ -207,19 +207,19 @@ _InfoFromStr: {
 
   .mapValue(s: Str, pos: Nat): _InfoParsed -> Block#
     .var[Nat] i = {pos}
-    .var[Map[Str,Info]] acc = {Maps#[Str,Str,Info]{::}.as{::}}
+    .let acc = {ELists#[KeyElem[Str,Info]]}
     .loop { Block#
       .if {(i.get) >= (s.size)} .error {`Infos.fromStr: unterminated map in `+(s.escape)+`.`}
       .if {(s.sub(i.get, (i.get) + 1)) == `}`} .return {Block#
-        .let result = {(acc.get).info {::}}
+        .let result = {(acc.list).seqFlow.mapping({::}, {.key e -> e.key; .elem e -> e.elem}).info {::}}
         .let endPos = {(i.get) + 1}
         .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
         }
-      .let start = {(acc.get).isEmpty ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
+      .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, `,`)}}
       .let key = {this.msgValue(s, start)}
       .let afterColon = {this.expect(s, key.pos, `:`)}
       .let elem = {this.value(s, afterColon)}
-      .do {acc.set((acc.get).with(key.info.getMsg, elem.info).as{::})}
+      .do {acc.add({.key -> key.info.getMsg; .elem -> elem.info})}
       .do {i.set(elem.pos)}
       .return {Continue#}
       }
