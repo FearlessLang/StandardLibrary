@@ -35,7 +35,7 @@ the actual Fearless GUI library with set/get methods like .setImage
 //.modelFps(100)//behaves like a button.
 
 This forces the Frame to have all the needed setters and getters like the components
-Frame needs the .style and .save as all the other thingys
+Frame needs the .style and .save as all the other thingys DONE
 
 ---------------------- do later ----------------------
 
