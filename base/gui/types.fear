@@ -214,8 +214,8 @@ Widget[S]:{
   mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
   mut .widthGap'(WidthNat):mut S;
   mut .width(n:Nat):mut S->this.width'(WidthNat#n);
-  mut .height(n:Nat):mut S->this.height'(HeightNat#n);
   mut .width'(WidthNat):mut S;
+  mut .height(n:Nat):mut S->this.height'(HeightNat#n);
   mut .height'(HeightNat):mut S;
   mut .autoWidth:mut S;
   mut .autoHeight:mut S;
