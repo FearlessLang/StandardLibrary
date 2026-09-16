@@ -11,6 +11,7 @@ Extractor[T:*, Self]: Extractor[T] {
 Flatten: {
   #[T:*]: Flatten[T] -> Flatten[T];
   }
+
 Flatten[T:*]: Operation[Opt[Opt[T]], Opt[T]] {
    ::.match {
     .some x -> x;
@@ -20,7 +21,7 @@ Flatten[T:*]: Operation[Opt[Opt[T]], Opt[T]] {
 
 /// `InfoExtractor` is a utility class to help extract values from an info.
 /// Similar to `InfoValidator` you can descend into an info with the `>` operator.
-/// You can match against some deep part of an info by combining this with `InfoValidator` using the `&` operator.
+/// You can match against some deep part of an info by combining this with `InfoValidator` using the ``.where`` method.
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
 //>   .check{info.extract{::}! .assertEq info}
