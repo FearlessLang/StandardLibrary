@@ -27,13 +27,19 @@ Flows: {
   .fromMutList[R:*](xs: mut List[R],mode: FlowMode[R]): mut Flow[R]->Magic!;//parallel
   }
 
+/// `Yield#` is a cancellation point for speculative work: a parallel flow that already has
+/// its result abandons the lambdas still running for it at their next `Yield#`.
+/// It returns `Void` and does nothing anywhere else, so it can go in any loop or
+/// recursion inside a flow lambda that may run for long.
+Yield: Sealed { #: Void -> Magic!; }
+
 Flow[E:*]: {
   mut .forEach[R:*](f: mut MF[E,Void]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
   mut .flatMap[R:*](f: read F[E, Flow[R]]): mut Flow[R];
   mut .filter(f: read F[E, Bool]): mut Flow[E];
   mut .size: Nat;
-  mut .isEmpty: Bool -> this.size == 0;
+  mut .isEmpty: Bool -> this.first.isEmpty;
   mut ++ (mut Flow[E]): mut Flow[E];
   mut .list: mut List[E];
   mut .eList: mut EList[E];
