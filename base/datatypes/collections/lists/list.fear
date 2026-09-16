@@ -133,23 +133,23 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
   }
 
 Lists: Sealed {//No need of empty, just use {}
-  #[E:*](E): mut List[E]->Magic!;
-  #[E:*](E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
-  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->Magic!;
+  #[E:*](E): mut List[E]->_Magic!;
+  #[E:*](E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
+  #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut List[E]->_Magic!;
 
-  .singletonRead[E:*](read E): read List[E]->Magic!;
+  .singletonRead[E:*](read E): read List[E]->_Magic!;
   }
-_ListCmp: { #[E:*,K,R:**](by: OrderBy[imm E,K], a: read List[E], b: read List[E], m: mut OrderMatch[R]): R -> Magic! }
+_ListCmp: { #[E:*,K,R:**](by: OrderBy[imm E,K], a: read List[E], b: read List[E], m: mut OrderMatch[R]): R -> _Magic! }

@@ -3,28 +3,28 @@
 //Parallel flows preserve coherent underspecification.
 //This means that for max/min/sort the tournament details have to be fixed across modes.
 Flows: {
-  #[R:*]: mut Flow[R]->Magic!;
-  #[R:*](r1: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R): mut Flow[R]->Magic!;
-  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R, r16: R): mut Flow[R]->Magic!;
+  #[R:*]: mut Flow[R]->_Magic!;
+  #[R:*](r1: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R): mut Flow[R]->_Magic!;
+  #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R, r16: R): mut Flow[R]->_Magic!;
 
-  .fromMutList[R:*](xs: mut List[R]): mut Flow[R]->Magic!;//sequential
-  .fromReadList[R:*](xs: read List[R]): mut Flow[read/imm R]->Magic!;
-  .fromImmList[R:*](xs: List[R]): mut Flow[imm R]->Magic!;
-  .fromMutList[R:*](xs: mut List[R],mode: FlowMode[R]): mut Flow[R]->Magic!;//parallel
+  .fromMutList[R:*](xs: mut List[R]): mut Flow[R]->_Magic!;//sequential
+  .fromReadList[R:*](xs: read List[R]): mut Flow[read/imm R]->_Magic!;
+  .fromImmList[R:*](xs: List[R]): mut Flow[imm R]->_Magic!;
+  .fromMutList[R:*](xs: mut List[R],mode: FlowMode[R]): mut Flow[R]->_Magic!;//parallel
   }
 
 Flow[E:*]: {
@@ -45,8 +45,8 @@ Flow[E:*]: {
   mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
   mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R ->
     this.fold(acc,{a,e->a.acc e}).result;
-  mut .max[K](by: OrderBy[imm E,K]):          mut Flow[E] -> Magic!;
-  mut .min[K](by: OrderBy[imm E,K]):          mut Flow[E] -> Magic!;
+  mut .max[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
+  mut .min[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
   mut .sort[K](by: OrderBy[imm E,K]):         mut Flow[E]-> this.eList.sortAnd by .seqFlow; //can be parallel?
   mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[E]-> this.eList.distinctAnd by .seqFlow; //can be parallel?
   mut .sortDistinct[K](by: OrderBy[imm E,K]): mut Flow[E]-> this.eList.sortDistinctAnd by .seqFlow; //can be parallel?

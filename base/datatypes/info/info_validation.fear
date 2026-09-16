@@ -1,12 +1,13 @@
 InfoValidators: Sealed {
-  #(info: Info): InfoValidator -> SuccessfulInfoValidator { .close -> info }
+  #(info: Info): InfoValidator -> _SuccessfulInfoValidator { .close -> info }
   }
 
 /// `InfoValidator` is a utility class to help match `Info`s. This is useful for dealing with error's in `Action`s,
 /// as you can match against the error info to determine what to do next.
 /// `InfoValidator`s start from a "root" `Info`, which you can descend into with the `>` operator.
 /// For example, ``this > "friends" > 0 > "name"`` will match against an `Info` that is a map with a key ``"friends"`` that is a list with at least one element, and that first element is a map with a key ``"name"``.
-/// Often you will want to match against multiple parts of an `Info`, if so you can chain `InfoValidator`s together with the ``&``, ``|`` operators. Each one of these operations will bring you back to the root `Info` to start matching from again.
+/// Often you will want to match against multiple parts of an `Info`, if so you can chain `InfoValidator`s together with the ``&``, ``|`` operators.
+/// Each one of these operations will bring you back to the root `Info` to start matching from again.
 /// These follow standard fearless operator precedence (left associativity), with no preference between operators.
 /// For example: ``InfoValidators# info > "friends" > 0 .isMsg{:: == "Alice"}  | > "friends" > 1 .isMsg {:: == "Bob"} & > "friends" > 2 .isMsg{:: == "Carol"}``
 /// can be summarised as (first friend is "Alice" OR second friend is "Bob") AND (third friend is "Carol").
@@ -65,14 +66,14 @@ InfoValidator: Sealed {
 
   .not: InfoValidator;
 
-  &: InfoValidator -> ChainedInfoValidator {
+  &: InfoValidator -> _ChainedInfoValidator {
     .close -> this.close;
     .left -> this;
     .right -> InfoValidators#(this.close);
     .combiner l, r -> l & r;
     };
 
-  |: InfoValidator -> ChainedInfoValidator {
+  |: InfoValidator -> _ChainedInfoValidator {
     .close -> this.close;
     .left -> this;
     .right -> InfoValidators#(this.close);
@@ -80,7 +81,7 @@ InfoValidator: Sealed {
     };
   }
 
-SuccessfulInfoValidator: InfoValidator {
+_SuccessfulInfoValidator: InfoValidator {
   /// The Base level info we are matching on, different from .matchLevel as it is the base we chain on.
   /// Is an opt as the matchers produced by InfoExtractors may not have an info in them.
   .close: Info;
@@ -90,52 +91,52 @@ SuccessfulInfoValidator: InfoValidator {
   .matchLevel: Info -> this.close;
 
   > key -> key.indexInto(this.matchLevel).match {
-    .some info -> SuccessfulInfoValidator { .close -> this.close; .matchLevel -> info; };
-    .empty -> FailedInfoValidator {this.close};
+    .some info -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> info; };
+    .empty -> _FailedInfoValidator {this.close};
     };
 
   .where f -> this.matchLevel.validate f .match {
     .true -> this;
-    .false -> FailedInfoValidator {this.close}
+    .false -> _FailedInfoValidator {this.close}
     };
 
   // look for something better for the .match
   .isMsg fn -> this.matchLevel.matchWithDefault {
     .msg m -> fn# m .match {
       .true -> this;
-      .false -> FailedInfoValidator {this.close};
+      .false -> _FailedInfoValidator {this.close};
       };
-    .default -> FailedInfoValidator {this.close};
+    .default -> _FailedInfoValidator {this.close};
     };
 
   .isList fn -> this.matchLevel.matchWithDefault {
     .list l -> fn#(l) .match {
       .true -> this;
-      .false -> FailedInfoValidator {this.close};
+      .false -> _FailedInfoValidator {this.close};
       };
-    .default -> FailedInfoValidator {this.close}
+    .default -> _FailedInfoValidator {this.close}
     };
 
   .isMap fn -> this.matchLevel.matchWithDefault {
     .map m -> fn#(m) .match {
       .true -> this;
-      .false -> FailedInfoValidator {this.close};
+      .false -> _FailedInfoValidator {this.close};
       };
-    .default -> FailedInfoValidator {this.close}
+    .default -> _FailedInfoValidator {this.close}
     };
 
   .isEmpty -> this.matchLevel.matchWithDefault {
     .empty -> this;
-    .default -> FailedInfoValidator {this.close};
+    .default -> _FailedInfoValidator {this.close};
     };
 
-  .not -> FailedInfoValidator {this.close};
+  .not -> _FailedInfoValidator {this.close};
 
-  &  -> SuccessfulInfoValidator {this.close};
+  &  -> _SuccessfulInfoValidator {this.close};
   // note this uses the above or's as otherwise you just always ignore this
   }
 
-FailedInfoValidator: InfoValidator {
+_FailedInfoValidator: InfoValidator {
   .close: Info;
 
   .isValid -> False;
@@ -148,21 +149,21 @@ FailedInfoValidator: InfoValidator {
   .isMap _ -> this;
   .isEmpty -> this;
 
-  .not -> SuccessfulInfoValidator {this.close};
+  .not -> _SuccessfulInfoValidator {this.close};
 
   & -> this;
 
-  |: InfoValidator -> SuccessfulInfoValidator {this.close};
+  |: InfoValidator -> _SuccessfulInfoValidator {this.close};
   }
 
-ChainedInfoValidator: InfoValidator {
+_ChainedInfoValidator: InfoValidator {
   .close: Info;
   .left: InfoValidator;
   .right: InfoValidator;
   .combiner(Bool, Bool): Bool;
   .isValid: Bool -> this.combiner(this.left.isValid, this.right.isValid);
 
-  > key -> ChainedInfoValidator {
+  > key -> _ChainedInfoValidator {
     .close -> this.close;
     .combiner a, b -> this.combiner(a,b);
     .left -> this.left;
@@ -172,7 +173,7 @@ ChainedInfoValidator: InfoValidator {
   // can use pipe
   .where f -> Block#
     .let right={this.right.where f}
-    .return{ ChainedInfoValidator {
+    .return{ _ChainedInfoValidator {
       .close -> this.close;
       .combiner a, b -> this.combiner(a,b);
       .left -> this.left;
@@ -180,35 +181,35 @@ ChainedInfoValidator: InfoValidator {
       }};
 
 
-  .isMsg f -> ChainedInfoValidator {
+  .isMsg f -> _ChainedInfoValidator {
     .close -> this.close;
     .combiner a, b -> this.combiner(a,b);
     .left -> this.left;
     .right -> this.right.isMsg f
     };
 
-  .isList f -> ChainedInfoValidator {
+  .isList f -> _ChainedInfoValidator {
     .close -> this.close;
     .combiner a, b -> this.combiner(a,b);
     .left -> this.left;
     .right -> this.right.isList f
     };
 
-  .isMap f -> ChainedInfoValidator {
+  .isMap f -> _ChainedInfoValidator {
     .close -> this.close;
     .combiner a, b -> this.combiner(a,b);
     .left -> this.left;
     .right -> this.right.isMap f
     };
 
-  .isEmpty -> ChainedInfoValidator {
+  .isEmpty -> _ChainedInfoValidator {
    .close -> this.close;
    .combiner a, b -> this.combiner(a,b);
    .left -> this.left;
    .right -> this.right.isEmpty
    };
 
-  .not -> ChainedInfoValidator {
+  .not -> _ChainedInfoValidator {
    .close -> this.close;
    .combiner a, b -> this.combiner(a,b);
    .left -> this.left;

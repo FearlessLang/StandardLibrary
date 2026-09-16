@@ -1,10 +1,10 @@
 Models:{#(gui:mut Gui):mut Model->Block#
   .var size={100}
   .return {mut Model:{
-    mut .imgPortal:Void -> gui .setImage PaintPortal;
-    mut .imgWarning:Void -> gui .setImage PaintWarning;
-    mut .imgBox:Void -> gui .setImage PaintBox;
-    mut .imgTarget:Void -> Block#
+    mut .imgPortal: Void -> gui .setImage PaintPortal;
+    mut .imgWarning: Void -> gui .setImage PaintWarning;
+    mut .imgBox: Void -> gui .setImage PaintBox;
+    mut .imgTarget: Void -> Block#
       .let s={size.get}
       .do { size.set(size.get + 5) }
       .return {gui .setImage PaintTarget{s}};

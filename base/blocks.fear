@@ -58,7 +58,7 @@ Block[R:*]: Sealed {
   }
 
 _NativeLoop: Sealed {
-  #[R:*](self: mut Block[R], body: mut MF[mut ControlFlow[R]]): mut Block[R] -> Magic!;
+  #[R:*](self: mut Block[R], body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _Magic!;
   }
 
 BlockIf[R:*]: {

@@ -1,7 +1,7 @@
 _Throw:{
-  .deterministic[R:**](info:Info):R ->Magic!;
-  .nonDeterministic[R:**](info:Info):R ->Magic!;
-  .stackTrace:Info->Magic!
+  .deterministic[R:**](info:Info):R -> _Magic!;
+  .nonDeterministic[R:**](info:Info):R -> _Magic!;
+  .stackTrace:Info-> _Magic!
   }
 
 /// Exception classes (observability):
@@ -35,6 +35,6 @@ Unreachable: {
 /// The operation has either completed successfully or thrown an exception,
 /// leaving the program state exactly as it was before the operation started.
 Try: {
-  #[R:*](try: read F[R]): mut Action[R] -> Magic!;
-  #[T:iso,imm,mut,read,R:*](data: iso T, try: read F[iso T, R]): mut Action[R] -> Magic!;
+  #[R:*](try: read F[R]): mut Action[R] -> _Magic!;
+  #[T:iso,imm,mut,read,R:*](data: iso T, try: read F[iso T, R]): mut Action[R] -> _Magic!;
   }

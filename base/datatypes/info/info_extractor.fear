@@ -58,7 +58,7 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
     .empty -> this;
     };
 
-  .extractMsg(fn: F[Str, Bool]): StrExtractor -> {
+  .extractMsg(fn: F[Str, Bool]): _StrExtractor -> {
     .close -> this.close;
     .extract -> this.extract.match {
       .some info -> info.matchWithDefault {
@@ -69,7 +69,7 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
       }
     };
 
-  .extractList(fn: F[List[Info], Bool]): ListExtractor -> {
+  .extractList(fn: F[List[Info], Bool]): _ListExtractor -> {
     .close -> this.close;
     .extract -> this.extract.match{
       .some -> ::.matchWithDefault {
@@ -80,7 +80,7 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
       }
     };
 
-  .extractMap(fn: F[Map[Str,Info], Bool]): MapExtractor -> {
+  .extractMap(fn: F[Map[Str,Info], Bool]): _MapExtractor -> {
     .close -> this.close;
     .extract -> this.extract.mapSome{::.matchWithDefault {
       .map m -> fn#(m).toOpt{m};
@@ -88,9 +88,9 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
       }}.as{::.as{::}} |> Flatten[Map[Str,Info]]
     };
 
-  .extractMsg: StrExtractor -> this.extractMsg{_ -> True};
-  .extractList: ListExtractor -> this.extractList{_ -> True};
-  .extractMap: MapExtractor -> this.extractMap{_ -> True};
+  .extractMsg: _StrExtractor -> this.extractMsg{_ -> True};
+  .extractList: _ListExtractor -> this.extractList{_ -> True};
+  .extractMap: _MapExtractor -> this.extractMap{_ -> True};
 
   .extractEmpty: InfoExtractor -> {
     .close -> this.close;
@@ -104,8 +104,8 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
     };
   }
 
-StrExtractor: Extractor[Str, StrExtractor] {
-  .extractMsg(fn: F[Str, Bool]): StrExtractor -> {
+_StrExtractor: Extractor[Str, _StrExtractor] {
+  .extractMsg(fn: F[Str, Bool]): _StrExtractor -> {
     .close -> this.close;
     .extract -> this.extract.match{
       .empty -> {};
@@ -116,7 +116,7 @@ StrExtractor: Extractor[Str, StrExtractor] {
   .where f ->  this.extract.match{
     .some str -> Infos.msg str .validate f .match {
       .true -> this;
-      .false -> StrExtractor {
+      .false -> _StrExtractor {
         .close -> this.close;
         .extract -> {}
         }
@@ -125,7 +125,7 @@ StrExtractor: Extractor[Str, StrExtractor] {
     };
   }
 
-MapExtractor: Extractor[Map[Str,Info], MapExtractor] {
+_MapExtractor: Extractor[Map[Str,Info], _MapExtractor] {
   /// Descend deeper into the map
    > (key: Str): InfoExtractor -> {
     .close -> this.close;
@@ -136,7 +136,7 @@ MapExtractor: Extractor[Map[Str,Info], MapExtractor] {
     };
 
   // Drop the extraction if the map doesn't match the value
-  .extractMap(fn: F[Map[Str,Info], Bool]): MapExtractor -> {
+  .extractMap(fn: F[Map[Str,Info], Bool]): _MapExtractor -> {
     .close -> this.close;
     .extract -> this.extract.match{
       .empty -> {};
@@ -151,13 +151,13 @@ MapExtractor: Extractor[Map[Str,Info], MapExtractor] {
       .imm->i;
       }.validate f .match {
           .true -> this;
-          .false -> MapExtractor {.close -> this.close; .extract -> {}}
+          .false -> _MapExtractor {.close -> this.close; .extract -> {}}
           };
     .empty -> this;
     };
   }
 
-ListExtractor: Extractor[List[Info], ListExtractor] {
+_ListExtractor: Extractor[List[Info], _ListExtractor] {
   > (index: Nat): InfoExtractor -> {
     .close -> this.close;
     .extract -> this.extract.match{
@@ -166,7 +166,7 @@ ListExtractor: Extractor[List[Info], ListExtractor] {
       }
     };
 
-  .extractList(fn: F[List[Info], Bool]): ListExtractor -> {
+  .extractList(fn: F[List[Info], Bool]): _ListExtractor -> {
     .close -> this.close;
     .extract -> this.extract.match{
       .empty -> {};
@@ -181,7 +181,7 @@ ListExtractor: Extractor[List[Info], ListExtractor] {
         .imm->i;
         }.validate f .match {
           .true -> this;
-          .false -> ListExtractor {.close -> this.close; .extract -> {};}
+          .false -> _ListExtractor {.close -> this.close; .extract -> {};}
           };
     .empty -> this;
     };

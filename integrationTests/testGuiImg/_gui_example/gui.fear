@@ -12,7 +12,7 @@ Gui:Consumer[mut Frame]{::
 
   mut .canvas: mut Slot[mut Pane];
   mut .model: mut Model;
-  mut .setImage(p:Painter):Void-> Block#(this.canvas!.paint(p),Void);
+  mut .setImage(p:Painter): Void-> Block#(this.canvas!.paint(p),Void);
   }
 ShapeCanvas:Scope[Pane]{::
     .background (Color.deepNapBlue)

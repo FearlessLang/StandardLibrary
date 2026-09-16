@@ -1,20 +1,20 @@
 Maps: Sealed {
-  #[K,K',E](OrderHashBy[K,K']):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K']):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
   
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
 
-  .singletonRead[K,K',E:*](OrderHashBy[K,K'], K, read E): read Map[K,E]->Magic!;
+  .singletonRead[K,K',E:*](OrderHashBy[K,K'], K, read E): read Map[K,E]->_Magic!;
   }
 
 /// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,...].

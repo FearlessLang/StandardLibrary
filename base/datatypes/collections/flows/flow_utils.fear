@@ -1,7 +1,7 @@
 AsImm[E:*, R]: { mut #(E): R; }
 
 FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
-ELists: { #[E:*]: mut EList[E]-> Magic! }
+ELists: { #[E:*]: mut EList[E]-> _Magic! }
 
 JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
 SumNumber[E:*]: { .sumNumber(mut Flow[E]): E }
