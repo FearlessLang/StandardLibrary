@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -44,39 +45,42 @@ public interface Flows$1c$0 extends Sealed$2o$0{
 final class Flow$o$1Instance implements Flow$o$1{
   private Stream<Object> s;
   private final List<Object> src;
-  private final UnaryOperator<Stream<Object>> stages;
+  private final UnaryOperator<Consumer<Object>> stages;
   private boolean used;
-  private Flow$o$1Instance(Stream<Object> s, List<Object> src, UnaryOperator<Stream<Object>> stages){ this.s= s; this.src= src; this.stages= stages; }
+  private Flow$o$1Instance(Stream<Object> s, List<Object> src, UnaryOperator<Consumer<Object>> stages){ this.s= s; this.src= src; this.stages= stages; }
   private static Error consumed(){ return err("Flow consumed"); }
   static Flow$o$1Instance of(Object... args){ return Flow$o$1Instance.of(Stream.of(args)); }
   static Flow$o$1Instance of(Stream<Object> stream){ return new Flow$o$1Instance(stream, null, null); }
-  static Flow$o$1Instance par(List<Object> src){ return src.size() < 2 ? of(src.stream()) : new Flow$o$1Instance(null, src, st -> st); }
+  static Flow$o$1Instance par(List<Object> src){ return src.size() < 2 ? of(src.stream()) : new Flow$o$1Instance(null, src, down -> down); }
   Stream<Object> s(){
     if (used){ throw consumed(); }
     used= true;
     if (s == null){ s= Speculate.stream(src, stages); }
     return s;
   }
-  private Flow$o$1Instance stage(UnaryOperator<Stream<Object>> seq, UnaryOperator<Stream<Object>> par){
+  private Flow$o$1Instance stage(UnaryOperator<Stream<Object>> seq, UnaryOperator<Consumer<Object>> par){
     if (src == null){ return of(seq.apply(s())); }
     if (used){ throw consumed(); }
     used= true;
-    return new Flow$o$1Instance(null, src, st -> par.apply(stages.apply(st)));
+    return new Flow$o$1Instance(null, src, down -> stages.apply(par.apply(down)));
   }
   private <R> R run(Function<Stream<Object>,R> body){
     var st= s();
     try{ return body.apply(st); }
     finally{ st.close(); }
   }
-  private Flow$o$1Instance map(Object f){ return stage(st -> st.map(e -> callF$2(f, e)), st -> st.map(e -> Speculate.map(f, e))); }
+  private Flow$o$1Instance map(Object f){ return stage(st -> st.map(e -> callF$2(f, e)), down -> e -> down.accept(callF$2(f, e))); }
   @Override public Object mut$map$1(Object p0){ return map(p0); }
   @Override public Object mut$filter$1(Object p0){
-    return stage(st -> st.filter(e -> isTrue(callF$2(p0, e))), st -> st.map(e -> Speculate.filter(p0, e)).filter(e -> e != Speculate.skip));
+    return stage(st -> st.filter(e -> isTrue(callF$2(p0, e))), down -> e -> { if (isTrue(callF$2(p0, e))){ down.accept(e); } });
   }
   @Override public Object mut$flatMap$1(Object p0){
-    return stage(st -> st.flatMap(e -> ((Flow$o$1Instance)callF$2(p0, e)).s()), st -> st.flatMap(e -> Speculate.flatMap(p0, e)));
+    return stage(st -> st.flatMap(e -> ((Flow$o$1Instance)callF$2(p0, e)).s()), down -> e -> flatMap(p0, e, down));
   }
-  @Override public Object mut$size$0(){ return run(st -> new Nat$c$0Instance((int)st.count())); }
+  private static void flatMap(Object f, Object e, Consumer<Object> down){
+    try (var inner= ((Flow$o$1Instance)callF$2(f, e)).s()){ inner.forEach(down); }
+  }
+  @Override public Object mut$size$0(){ return run(st -> new Nat$c$0Instance(st.mapToLong(e -> 1).sum())); }
   @Override public Object mut$$plus_plus$1(Object o){ return of(Stream.concat(s(), ((Flow$o$1Instance)o).s())); }
   @Override public Object mut$forEach$1(Object p0){ return run(st -> forEach(st, p0)); }
   private static Object forEach(Stream<Object> st, Object f){ st.forEach(e -> callMF$2(f, e)); return Void$o$0.instance; }
