@@ -44,7 +44,6 @@ final class SkComponent extends JComponent{
 }
 
 class _Button extends AWidget implements Button$2o$0{
-  String text = "";
   final ArrayList<MF$7$1> actions = new ArrayList<>();// EDT confined
   boolean down;// visual pressed state, maintained by SkMouse, read by Sk.button
   boolean over;// visual rollover state, maintained by SkMouse, read by Sk.button
@@ -57,11 +56,6 @@ class _Button extends AWidget implements Button$2o$0{
 
   _Button(_Frame frame){ super(frame); }
 
-  @Override public Object mut$uText$1(Object t){
-    var s = ustr(t);
-    return reStyle(() -> text = s);
-  }
-  @Override public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   @Override public Object mut$action$1(Object r){
     frame.onEdtAndWait(() -> actions.add((MF$7$1) r));
     return this;
@@ -71,15 +65,8 @@ class _Button extends AWidget implements Button$2o$0{
 }
 
 class _Label extends AWidget implements Label$1c$0{
-  String text = "";
-
   _Label(_Frame frame){ super(frame); }
 
-  @Override public Object mut$uText$1(Object t){
-    var s = ustr(t);
-    return reStyle(() -> text = s);
-  }
-  @Override public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   @Override Dimension autoSize(){ return Sk.textSizeWithInsets(text, this); }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
@@ -161,6 +148,10 @@ abstract class AWidget implements Widget$2o$1{
   HeightNat$lg$0 textSize = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(defText);
   TextLine line;
   String lineKey;
+  // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
+  // expose Fearless methods to change it, but it lives here alongside the
+  // other style fields.
+  String text = "";
   // Read live by CenteredFlowLayout; only _Pane exposes Fearless methods to
   // change them, but they live here alongside the other style fields.
   boolean vertical = false;
@@ -193,42 +184,34 @@ abstract class AWidget implements Widget$2o$1{
     return mut$self$0();
   }
 
-  @Override public Object mut$topInset$1(Object v){ return mut$topInset$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$topInset$p1$1(Object v){
     frame.height((HeightNat$lg$0) v, "top inset");
     return reStyle(() -> top = (HeightNat$lg$0) v);
   }
-  @Override public Object mut$bottomInset$1(Object v){ return mut$bottomInset$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$bottomInset$p1$1(Object v){
     frame.height((HeightNat$lg$0) v, "bottom inset");
     return reStyle(() -> bottom = (HeightNat$lg$0) v);
   }
-  @Override public Object mut$leftInset$1(Object v){ return mut$leftInset$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$leftInset$p1$1(Object v){
     frame.width((WidthNat$as$0) v, "left inset");
     return reStyle(() -> left = (WidthNat$as$0) v);
   }
-  @Override public Object mut$rightInset$1(Object v){ return mut$rightInset$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$rightInset$p1$1(Object v){
     frame.width((WidthNat$as$0) v, "right inset");
     return reStyle(() -> right = (WidthNat$as$0) v);
   }
-  @Override public Object mut$heightGap$1(Object v){ return mut$heightGap$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$heightGap$p1$1(Object v){
     frame.height((HeightNat$lg$0) v, "height gap");
     return reStyle(() -> heightGap = (HeightNat$lg$0) v);
   }
-  @Override public Object mut$widthGap$1(Object v){ return mut$widthGap$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) v)); }
   @Override public Object mut$widthGap$p1$1(Object v){
     frame.width((WidthNat$as$0) v, "width gap");
     return reStyle(() -> widthGap = (WidthNat$as$0) v);
   }
-  @Override public Object mut$width$1(Object w){ return mut$width$p1$1(WidthNat$as$0.instance.read$$hash$1((Nat$c$0) w)); }
   @Override public Object mut$width$p1$1(Object w){
     frame.width((WidthNat$as$0) w, "widget width");
     return reStyle(() -> preferredWidth = (WidthNat$as$0) w);
   }
-  @Override public Object mut$height$1(Object h){ return mut$height$p1$1(HeightNat$lg$0.instance.read$$hash$1((Nat$c$0) h)); }
   @Override public Object mut$height$p1$1(Object h){
     frame.height((HeightNat$lg$0) h, "widget height");
     return reStyle(() -> preferredHeight = (HeightNat$lg$0) h);
@@ -242,6 +225,11 @@ abstract class AWidget implements Widget$2o$1{
     return reStyle(() -> textSize = (HeightNat$lg$0) t);
   }
   public Object read$textHeight$0(){ return textSize; }
+  public Object mut$uText$1(Object t){
+    var s = ustr(t);
+    return reStyle(() -> text = s);
+  }
+  public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   @Override public Object mut$autoWidth$0(){ return reStyle(() -> preferredWidth = null); }
   @Override public Object mut$autoHeight$0(){ return reStyle(() -> preferredHeight = null); }
   @Override public Object mut$autoSize$0(){
