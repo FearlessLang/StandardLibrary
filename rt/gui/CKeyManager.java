@@ -10,8 +10,8 @@ import java.util.List;
 
 final class CKeyManager extends KeyAdapter implements Keys$o$0{
   final _Frame frame;
-  final List<KeyAction$m8$0> pressed=new ArrayList<>();
-  final List<KeyAction$m8$0> released=new ArrayList<>();
+  final ArrayList<KeyAction$m8$0> pressed=new ArrayList<>();
+  final ArrayList<KeyAction$m8$0> released=new ArrayList<>();
 
   CKeyManager(_Frame frame){ this.frame=frame; }
 
