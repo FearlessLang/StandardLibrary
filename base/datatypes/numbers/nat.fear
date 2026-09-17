@@ -1,6 +1,6 @@
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
-Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],_InfoKey {
+Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// `this.succ` returns ``this + 1``.
   /// Overflow behaviour depends on the chosen backend, overflows if ``this == 18_446_744_073_709_551_615``.
   //>   .check{5 .succ .assertEq 6}

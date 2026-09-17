@@ -58,7 +58,7 @@
 /// - rejected: any text other than exactly ``True`` or ``False`` (this includes ``true``, `` True`` and ``True ``)
 /// - accepted: ``True``.getBool  ``False``.getBool
 /// - roundtrip: b.str.getBool == b for every Bool b
-Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,_InfoKey {
+Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKey {
   .close->::; .close->this;         /// fixpoint type closed
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
   |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings

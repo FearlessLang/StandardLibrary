@@ -41,10 +41,12 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
 
   .reverse->{};
 
-  mut  .seqFlow-> Flows.fromMutList(this);
-  read  .flow-> Flows.fromReadList(this);
-  imm  .flow-> Flows.fromImmList(this);
-  mut  .flow mode-> Flows.fromMutList(this,mode);
+  mut  .seqFlow -> Flows.seqFromMutList(this);
+  read .seqFlow -> Flows.seqFromReadList(this);
+  imm  .seqFlow -> Flows.seqFromImmList(this);
+  read .flow -> Flows.fromReadList(this);
+  imm  .flow -> Flows.fromImmList(this);
+  mut  .flow mode -> Flows.fromMutList(this,mode);
   
   .as f ->{};
 
@@ -120,10 +122,10 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
   mut  .reverse: mut List[E];                /// reverse order
   read .reverse: read List[E];               /// reverse order
 
-//  mut  .flow: mut Flow[E];                   /// view as flow
-//  read .flow: mut Flow[read/imm E];          /// view as flow
-//  imm  .flow: mut Flow[imm E];               /// view as flow
   mut  .seqFlow: mut Flow[E];                /// sequential flow
+  read .seqFlow: mut Flow[read/imm E];          /// view as flow
+  imm  .seqFlow: mut Flow[imm E];               /// view as flow
+
   read .flow: mut Flow[read/imm E];          /// view as flow
   imm  .flow: mut Flow[imm E];               /// view as flow
   mut  .flow(mode: FlowMode[E]): mut Flow[E]; /// sequential flow
