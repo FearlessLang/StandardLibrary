@@ -10,19 +10,19 @@ InferErr[A,B,C,D]: Sealed {}
 ToIso[R]: {mut .iso: iso ToIso[R]; mut .close: mut R;}
 
 Abort: Sealed {![R:**]: R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);}
-Magic: Sealed {
+_Magic: Sealed {
   ![R:**]: R -> this!; // magic'd out to tell us what we forgot to implement
   //![R:**](_: mut _System): R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);
   }
 
 _MagicDebug: Sealed {
-  #(x: read ToStr): Void -> Magic!;
+  #(x: read ToStr): Void -> _Magic!;
   }
 
 Debug: Sealed {
   #[T](x: T, f: ToStrBy[T]): T -> Block#(this#(f#x.str),x);
   #(x: read ToStr): Void -> _MagicDebug# x;
-  //.identify[T](x: read T): Str -> Magic!;//TODO: can this break observability?
+  //.identify[T](x: read T): Str -> _Magic!;//TODO: can this break observability?
   }
 
 As[X:**]: Sealed { #(x: X): X -> x }

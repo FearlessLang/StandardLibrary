@@ -93,23 +93,23 @@ AssetReadCapability: ToIso[AssetReadCapability], WidenTo[AssetReadCapability]{
   mut .readImage(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,maxPixels: Nat): Image;
   }
 _TxtRead:{
-  .consumeStrUtf8(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
-  .consumeUStrUtf8(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
-  .consumeStrUtf16Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
-  .consumeUStrUtf16Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
-  .consumeStrUtf32Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
-  .consumeUStrUtf32Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
-  .consumeStrUtf16Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
-  .consumeUStrUtf16Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
-  .consumeStrUtf32Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
-  .consumeUStrUtf32Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
-  .consumeStrAscii(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
-  .consumeUStrAscii(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
-  .consumeStrLatin1(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> Magic!;
-  .consumeUStrLatin1(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> Magic!;  
+  .consumeStrUtf8(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> _Magic!;
+  .consumeUStrUtf8(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> _Magic!;  
+  .consumeStrUtf16Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> _Magic!;
+  .consumeUStrUtf16Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> _Magic!;  
+  .consumeStrUtf32Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> _Magic!;
+  .consumeUStrUtf32Le(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> _Magic!;  
+  .consumeStrUtf16Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> _Magic!;
+  .consumeUStrUtf16Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> _Magic!;  
+  .consumeStrUtf32Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> _Magic!;
+  .consumeUStrUtf32Be(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> _Magic!;  
+  .consumeStrAscii(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> _Magic!;
+  .consumeUStrAscii(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> _Magic!;  
+  .consumeStrLatin1(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadStrUnitRecover): Str -> _Magic!;
+  .consumeUStrLatin1(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,recover: mut BadUStrUnitRecover): UStr -> _Magic!;  
   }
 _ImageRead:{
-  .consumeImage(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,maxPixels: Nat): Image -> Magic!;
+  .consumeImage(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,maxPixels: Nat): Image -> _Magic!;
   }
 
 BadStrUnitRecover:{

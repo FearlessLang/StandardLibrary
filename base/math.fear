@@ -3,37 +3,37 @@ _MagicMath: Sealed {
   /// throws if x NaN or < 0,
   /// returns negative infinity if x = 0,
   /// returns positive infinity if x is positive infinity
-  .ln(x: Float): Float -> Magic!;
+  .ln(x: Float): Float -> _Magic!;
 
   /// The log base 10 of the given float, returns:
   /// throws if x NaN or < 0,
   /// -ve infinity if x = 0,
   /// +ve infinity if x is positive infinity,
   /// log base 10 of x otherwise;
-  .log(x: Float): Float -> Magic!;
+  .log(x: Float): Float -> _Magic!;
 
   /// Returns the arc sine of a value; the returned angle is in [-pi/2, pi/2].
   /// Throws if the argument is NaN or its absolute value is greater than 1, NaN.
   /// If the argument is zero, then the result is a zero with the same sign as the argument.
-  .asin(x: Float): Radian -> Magic!;
+  .asin(x: Float): Radian -> _Magic!;
 
   /// Returns the arc sine of a value; the returned angle is in [0, pi].
   /// throws if the argument is NaN or its absolute value is greater than 1.
-  .acos(x: Float): Radian -> Magic!;
+  .acos(x: Float): Radian -> _Magic!;
 
   /// Returns the arc tangent of a value; the returned angle is in [-pi/2, pi/2].
   /// throws if the argument is NaN.
   /// If the argument is zero, then the result is a zero with the same sign as the argument.
-  .atan(x: Float): Radian -> Magic!;
+  .atan(x: Float): Radian -> _Magic!;
 
   /// Returns the angle theta from the conversion of rectangular coordinates (x, y) to polar coordinates (r, theta).
   /// This method computes the phase theta by computing an arc tangent of y / x in [-pi to pi]
   /// Throws if either x or y is NaN.
-  .atan2(x: Float, y: Float): Radian -> Magic!;
+  .atan2(x: Float, y: Float): Radian -> _Magic!;
 
   /// ``this.hypot(x, y)`` returns ``(x** +2.0 + y** +2.0).sqrt``.
   /// Throws if either argument is NaN
-  .hypot(x: Float, y: Float): Float -> Magic!;
+  .hypot(x: Float, y: Float): Float -> _Magic!;
   }
 
 /// Question: How many methods should be added here?
@@ -161,9 +161,9 @@ Degree: Angle[Degree] {
 
 
 _RadianTrig: Sealed {
-  .sin(x: Radian): Float -> Magic!;
-  .cos(x: Radian): Float -> Magic!;
-  .tan(x: Radian): Float -> Magic!;
+  .sin(x: Radian): Float -> _Magic!;
+  .cos(x: Radian): Float -> _Magic!;
+  .tan(x: Radian): Float -> _Magic!;
   }
 
 /// An angle measured in radians

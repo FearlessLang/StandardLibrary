@@ -1,22 +1,22 @@
 /// A Factory class for making sets of elements.
 Sets: Sealed {
-  #[E,K](OrderHashBy[E,K]): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
-  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->Magic!;
+  #[E,K](OrderHashBy[E,K]): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
+  #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
   }
 
 /// The implementation of a Set[E] the set keys must be imm to prevent breaking set invariants through mutating it's contents.
