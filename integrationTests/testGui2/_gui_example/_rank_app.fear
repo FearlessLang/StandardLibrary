@@ -23,7 +23,8 @@ use base.Painter as Painter;
 Foo:base.Main{s->Block#
   .let model={Slots#[mut Model]}
   .let canvas={Slots#[mut Pane]}
-  .let[mut Gui] gui= {mut Gui{.canvas->canvas; .model->model!;}}
+  .let frame={Slots#[mut Frame]}
+  .let[mut Gui] gui= {mut Gui{.canvas->canvas; .frame->frame; .model->model!;}}
 
   .do {model.fill (Models#gui) }
 
