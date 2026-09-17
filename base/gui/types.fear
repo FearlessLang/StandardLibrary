@@ -247,6 +247,8 @@ Button: _TextWidget[Button]{
 
 ModelFps: {
   mut .action(mut MF[Void]): mut ModelFps;
+  mut .save(c: mut Consumer[mut ModelFps]): mut ModelFps -> Block#(c.accept(this), this);
+  mut .style(s: mut Scope[ModelFps]): mut ModelFps -> Block#(s.run(this), this);
 }
 Frame:{
   mut .title(s: Str): mut Frame -> this.uTitle(s.u);
@@ -281,18 +283,20 @@ Frame:{
   mut .save(c: mut Consumer[mut Frame]): mut Frame -> Block#(c.accept(this), this);
   mut .style(s: mut Scope[Frame]): mut Frame -> Block#(s.run(this), this);
   }
-Graphics:{
+ScreenContext:{
+  read .elapsed: Instant;
+  read .screenWidth: WidthNat;
+  read .screenHeight: HeightNat;
+  read .panelWidth: WidthNat;
+  read .panelHeight: HeightNat;
+  }
+Graphics:ScreenContext{
   mut .color(Color): mut Graphics;
   mut .position(XInt, YInt): mut Graphics;
   mut .line(XInt, YInt): mut Graphics;
   mut .rect(WidthNat, HeightNat): mut Graphics;
   mut .oval(WidthNat, HeightNat): mut Graphics;
   mut .image(Image): mut Graphics;
-  read .elapsed: Instant;
-  read .screenWidth: WidthNat;
-  read .screenHeight: HeightNat;
-  read .panelWidth: WidthNat;
-  read .panelHeight: HeightNat;
   }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
@@ -310,14 +314,9 @@ Mouse:{
   mut .entered(mut Consumer[MouseEvent]):mut Mouse;
   mut .exited(mut Consumer[MouseEvent]):mut Mouse;
 }
-MouseEvent:{
+MouseEvent:ScreenContext{
   .mouseX:XInt;
   .mouseY:YInt;
-  .elapsed:Instant;
-  .screenWidth:WidthNat;
-  .screenHeight:HeightNat;
-  .panelWidth:WidthNat;
-  .panelHeight:HeightNat;
 }
 Pane:Widget[Pane]{
   .self->this;
