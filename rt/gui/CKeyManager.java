@@ -8,24 +8,45 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-final class CKeyManager extends KeyAdapter implements Keys$o$0{
+final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.WindowFocusListener{
   final _Frame frame;
   final ArrayList<KeyAction$m8$0> pressed=new ArrayList<>();
   final ArrayList<KeyAction$m8$0> released=new ArrayList<>();
+  // Keys currently down, tracked so a lost window focus (alt-tab, OS focus
+  // switch) can synthesize the releases AWT will otherwise never deliver:
+  // without this, a key held during a focus switch leaves any state the
+  // model set on .pressed (e.g. "moving left") stuck forever, since the
+  // matching .released handler never runs.
+  private final java.util.Set<String> held=new java.util.HashSet<>();
 
   CKeyManager(_Frame frame){ this.frame=frame; }
 
-  @Override public void keyPressed(KeyEvent e){ dispatch(e,pressed); }
-  @Override public void keyReleased(KeyEvent e){ dispatch(e,released); }
+  @Override public void keyPressed(KeyEvent e){
+    var k=keyText(e);
+    held.add(k);
+    dispatch(k,pressed);
+  }
+  @Override public void keyReleased(KeyEvent e){
+    var k=keyText(e);
+    held.remove(k);
+    dispatch(k,released);
+  }
+  @Override public void windowLostFocus(java.awt.event.WindowEvent e){
+    if (held.isEmpty()){ return; }
+    var keys=new ArrayList<>(held);
+    held.clear();
+    for (var k:keys){ dispatch(k,released); }
+  }
+  @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
 
-  private void dispatch(KeyEvent e,List<KeyAction$m8$0> keyActions){
+  private void dispatch(String eventKey,List<KeyAction$m8$0> keyActions){
     var event=new CKeyEventData(
       frame.elapsed,
       frame.screenSizeW,
       frame.screenSizeH,
       w(frame.frame.getWidth()),
       h(frame.frame.getHeight()),
-      keyText(e)
+      eventKey
       );
 
     frame.frame.queue.submit(new MF$7$1(){

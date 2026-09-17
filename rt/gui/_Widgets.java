@@ -660,6 +660,8 @@ class _Frame implements Frame$1c$0{
     onEdtAndWait(() -> {
       for (var l : frame.getKeyListeners()){ frame.removeKeyListener(l); }
       frame.addKeyListener(keys);
+      for (var l : frame.getWindowFocusListeners()){ frame.removeWindowFocusListener(l); }
+      frame.addWindowFocusListener(keys);
     });
     return this;
   }
