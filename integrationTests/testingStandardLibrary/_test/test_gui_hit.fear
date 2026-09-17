@@ -1,0 +1,18 @@
+//Regression coverage for the resizable board hit test in
+//integrationTests/testTicTacToe/_tictactoe/gui_resizable.fear: translating a
+//click into a 0..2 grid column truncates (boardWidth/3), while Rect.contains
+//is inclusive at the right/bottom edge (RectTests), so the pixel column at
+//the board's own right/bottom edge is "inside" the board yet truncates to
+//column/row 3 -- one past the last valid index of a 3-wide grid. The fix
+//there clamps the truncated index back into range; this checks the same
+//arithmetic in isolation.
+GridHitTestTests: Test {::
+  .check{Block#
+    .let board = {Rects#(X#(+10), Y#(+0), Width#480, Height#480)}
+    .let cell = {board.width.get .getTruncDiv 3}
+    .do{board.contains(board.right, board.y) .assertTrue}
+    .do{(board.x.to(board.right).get .getTruncDiv cell) .assertEq 3}
+    .do{((board.x.to(board.right).get .getTruncDiv cell) .clampTo(0=~~=2)) .assertEq 2}
+    .done
+    }
+  }
