@@ -582,7 +582,7 @@ _FloatRanges: Sealed {
   }
 
 _FloatsBetween: Sealed {
-  #(startInclusive: Float, endInclusive: Float): Nat -> Magic!;
+  #(startInclusive: Float, endInclusive: Float): Nat -> _Magic!;
   }
 
 /// A matcher for floats, has all the special cases of float:

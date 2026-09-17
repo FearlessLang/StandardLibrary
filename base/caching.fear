@@ -3,37 +3,37 @@ CacheHandler:CaptureFree{}
 Norm[T]:Sealed,BaseContainer[T]{ .get: T; read .as[T2](f: BaseId[read/imm T,T2]): Norm[T2]; }//this means only base can make norms, so we control production of Norms
 CacheF[R]: CacheHandler{//Any instantiated type implementing CacheF will be a singleton (becase of NonCaputure)
   #: R;
-  ._get: R -> Magic!//this.myCache.get()
+  ._get: R -> _Magic!//this.myCache.get()
   //via magic it defines
   //Cache0<Object> myCache= new Cache0<>(new AtomicReference<Entry<Object>>(),1,this);
   }
 CacheF[A,R]: CacheHandler{//Any instantiated type implementing CacheF will be a singleton (becase of NonCaputure)
   #(Norm[A]): R;
-  ._get(a: Norm[A]): R -> Magic!//this.myCache.get(a)
+  ._get(a: Norm[A]): R -> _Magic!//this.myCache.get(a)
   //via magic it defines
   //Cache1<Object,Object> myCache= new Cache1<>(new ConcurrentHashMap<Norm<Object>,Entry<Object>>(),1,this);
   }
 CacheF[A,B,R]: CacheHandler{//Any instantiated type implementing CacheF will be a singleton (becase of NonCaputure)
   #(Norm[A], Norm[B]): R;
-  ._get(a: Norm[A], b: Norm[B]): R -> Magic!//this.myCache.get(a,b)
+  ._get(a: Norm[A], b: Norm[B]): R -> _Magic!//this.myCache.get(a,b)
   //via magic it defines
   //Cache2<Object,Object,Object> myCache= new Cache2<>(new ConcurrentHashMap<Cache2.Key<Object,Object>,Entry<Object>>(),1,this);
   }
 CacheMemo[R]: CacheHandler{//Any instantiated type implementing CacheF will be a singleton (becase of NonCaputure)
   #: R;
-  ._get: Norm[R] -> Magic!//this.myCache.get(a)
+  ._get: Norm[R] -> _Magic!//this.myCache.get(a)
   //via magic it defines
   //Cache0<Object> myCache= new Cache0<>(new AtomicReference<Entry<Object>>(),1,()->new Norm<R>(this.imm$$hash$0()));
   }
 CacheMemo[A,R]: CacheHandler{//Any instantiated type implementing CacheF will be a singleton (becase of NonCaputure)
   #(Norm[A]): R;
-  ._get(a: Norm[A]): Norm[R] -> Magic!//this.myCache.get(a)
+  ._get(a: Norm[A]): Norm[R] -> _Magic!//this.myCache.get(a)
   //via magic it defines
   //Cache1<Object,Object> myCache= new Cache1<>(new ConcurrentHashMap<Norm<Object>,Entry<Object>>(),1,(p1)->new Norm<R>(this.imm$$hash$0(p1));
   }
 CacheMemo[A,B,R]: CacheHandler{//Any instantiated type implementing CacheF will be a singleton (becase of NonCaputure)
   #(Norm[A], Norm[B]): R;
-  ._get(a: Norm[A], b: Norm[B]): Norm[R] -> Magic!//this.myCache.get(a,b)
+  ._get(a: Norm[A], b: Norm[B]): Norm[R] -> _Magic!//this.myCache.get(a,b)
   //via magic it defines
   //Cache2<Object,Object,Object> myCache= new Cache2<>(new ConcurrentHashMap<Cache2.Key<Object,Object>,Entry<Object>>(),1,(p1,p2)->new Norm<R>(this.imm$$hash$0(p1,p2));  
   }
@@ -51,18 +51,18 @@ Cache: {
   }
 CacheReprF[A,R]: CacheHandler{
   #(read A): R;
-  ._get(read Repr[A]): R -> Magic!//CacheReprF$2.myCache.computeIfAbsent(p0,v->new Cache1(1,v)).get(this);
+  ._get(read Repr[A]): R -> _Magic!//CacheReprF$2.myCache.computeIfAbsent(p0,v->new Cache1(1,v)).get(this);
   //via magic it defines in CacheReprF$2
   //static java.util.concurrent.ConcurrentHashMap<Repr$1, Cache1> myCache= new java.util.concurrent.ConcurrentHashMap<>();
   }
 CacheReprF[A,B,R]: CacheHandler{
   #(read A, Norm[B]): R;
-  ._get(read Repr[A], Norm[B]): R -> Magic!//CacheReprF$3.myCache.computeIfAbsent(p0,v->new Cache2(1,v)).get(this,p2);
+  ._get(read Repr[A], Norm[B]): R -> _Magic!//CacheReprF$3.myCache.computeIfAbsent(p0,v->new Cache2(1,v)).get(this,p2);
   //via magic it defines in CacheReprF$2
   //static java.util.concurrent.ConcurrentHashMap<Repr$1, Cache2> myCache= new java.util.concurrent.ConcurrentHashMap<>();
   }
 
-_ListNorm:{#[T:*,R](List[T],mut MF[T,Norm[R]]): Norm[List[Norm[R]]]->Magic!}
+_ListNorm:{#[T:*,R](List[T],mut MF[T,Norm[R]]): Norm[List[Norm[R]]]->_Magic!}
 
-_ReprCacheFlush:{ #[T](mut Repr[T]):Void->Magic! }
-_CacheFlush:{ .flush(h:CacheHandler):Void->Magic!; }
+_ReprCacheFlush:{ #[T](mut Repr[T]):Void->_Magic! }
+_CacheFlush:{ .flush(h:CacheHandler):Void->_Magic!; }

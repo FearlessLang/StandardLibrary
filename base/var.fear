@@ -5,7 +5,7 @@ Var[E:imm,mut,read]: {
   mut .set(v: E): Void -> Block#(this.swap(v), Void);
   }
 
-Vars:Sealed{#[E:*](var: E): mut Var[E] -> Magic!}
+Vars:Sealed{#[E:*](var: E): mut Var[E] -> _Magic!}
 
 Count[N]: Var[N] {
   mut ++: Void;
@@ -62,7 +62,7 @@ IsoPods: {
   //>     .do{Block#(pod.open, Void)}
   //>     .return{Void}
   //>     })
-  #[T](val: iso T): mut IsoPod[T] -> Magic!;
+  #[T](val: iso T): mut IsoPod[T] -> _Magic!;
   }
 
 IsoPod[T]: {
@@ -120,6 +120,6 @@ FilterAny: {
   /// ``FilterAny#(r, pred, fallback)`` returns ``r`` if ``pred#(r)`` is ``True``, otherwise calls and returns ``fallback#``.
   //>   .check{FilterAny#(+5, {n -> n == +5}, {-1}) .assertEq +5}
   //>   .check{FilterAny#(+3, {n -> n == +5}, {-1}) .assertEq -1}
-  #[R:**](R,F[R,Bool],F[R]):R->Magic!
+  #[R:**](R,F[R,Bool],F[R]):R->_Magic!
   }//Needed in some cases. Should it be part of the magic?
 //TODO: add .repr to block with .invariant?

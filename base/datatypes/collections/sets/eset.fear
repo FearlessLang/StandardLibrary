@@ -1,5 +1,5 @@
 /// The initialisation point for an ESet[E] creates and empty ESet
-ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E] -> Magic! }
+ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E] -> _Magic! }
 
 /// A mutable set, allows for in place updates.
 /// In general this collection is built up with `.add` and similar methods and then consumed into a list.

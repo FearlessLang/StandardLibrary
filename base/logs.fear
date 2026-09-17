@@ -18,7 +18,7 @@
 ///
 ///Logging failures are reported to the runtime error log when possible.
 ///Only a bounded number of error logs is kept. (currently 100, this may change with future versions)
-Log: { .log(s: read ToStr): Void -> Magic! }
+Log: { .log(s: read ToStr): Void -> _Magic! }
 
 ///Log used internally by the UnitTest library.
 ///
@@ -36,7 +36,7 @@ Log: { .log(s: read ToStr): Void -> Magic! }
 ///old non-empty logs are moved to stamped archive files, empty logs are
 ///deleted, and only a bounded number of archived logs is kept.
 /// See also: base.Log
-UnitTestLog: { .log(s: read ToStr): Void -> Magic! }
+UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 
 
 ///Logs values in memory.
@@ -68,10 +68,10 @@ InMemoryLog[T]:CaptureFree{
   .name: Str;
   
   ///Submits s to an in memory log that requires a capability to be read.
-  .log(s: T): Void -> Magic!;
+  .log(s: T): Void -> _Magic!;
   
   ///Convenience over calling ``sys.readLog(this)``
-  .reader(sys: mut System): mut LogReader[T]->Magic!;
+  .reader(sys: mut System): mut LogReader[T]->_Magic!;
   }
 ///Logs strings to your own text file, instead of the single shared file
 ///base.Log writes to.
@@ -103,7 +103,7 @@ InMemoryLog[T]:CaptureFree{
 ///base.InMemoryLog (in memory instead of a file, for unit testing).
 FileLog:CaptureFree{
   .name: Str;
-  .log(s: read ToStr): Void -> Magic!;
+  .log(s: read ToStr): Void -> _Magic!;
   }
 LogReader[T]: ToIso[LogReader[T]], WidenTo[LogReader[T]]{
   mut .read: List[T];    ///Returns the values currently stored in the log without removing them

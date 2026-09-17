@@ -143,7 +143,7 @@ Opts: {
   #[E:*](x: E): mut Opt[E] -> { .match m -> m.some(x) };
   }
 
-_OptAs: { #[T1:*,T2](x: read Opt[T1]): Opt[T2] -> Magic! }
+_OptAs: { #[T1:*,T2](x: read Opt[T1]): Opt[T2] -> _Magic! }
 
 OptMatch[E:*,R:**]: {
   mut .some(E): R;
