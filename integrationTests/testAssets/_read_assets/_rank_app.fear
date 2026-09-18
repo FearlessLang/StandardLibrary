@@ -13,6 +13,7 @@ AssetTextReadAsciiTests: UnitTests { ::
   .test AssetTextReadAsciiPlainFiles
   .test AssetTextReadAsciiRepeatedRead
   .test AssetTextReadAsciiConsumeProtocol
+  .test AssetOriginalFileName
   }
 
 AssetTextReadAsciiPlainFiles: Test { ::
@@ -79,6 +80,12 @@ AssetTextReadAsciiConsumeProtocol: Test { ::
     sys.try#{
       AssetTextGoodAscii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)
       }.assertInfo)}
+  }
+
+AssetOriginalFileName: Test { ::
+  .check { AutoLoadTestText.originalFileName.assertEq `test_text.txt` }
+  .check { AssetTextGoodAscii.originalFileName.assertEq `good_ascii.txt` }
+  .check { AutoZipLoadSubTestTextInZip.originalFileName.assertEq `test_text_in_zip.txt` }
   }
 
 GoodAsciiStr: F[Str,Void] { ::.assertEq `Hello safe Str!` }
