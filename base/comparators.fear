@@ -63,7 +63,8 @@ Order[T,E:*]: {                      /// environment-dependent ordering of T (E 
 
   read .cmp[K,R:**](by: OrderBy[imm E,K], t0: read T, t1: read T, m: mut OrderMatch[R]): R; /// compare using by
 
-  read .order[K](by: OrderBy[imm E,K]): read Order[T] -> {  /// freeze by into a plain Order[T]
+  read .order[K](by: OrderBy[imm E,K]): read Order[T] ->  /// freeze by into a plain Order[T]
+    {
     .close -> this.close;
     .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
     };
@@ -107,7 +108,8 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
   read .hash[K](by: OrderHashBy[imm E,K]): Nat; /// hash using by
   read .close(t: read T): read OrderHash[T,E];
   
-  read .orderHash[K](by: OrderHashBy[imm E,K]): read OrderHash[T] -> { /// freeze by into plain OrderHash[T]
+  read .orderHash[K](by: OrderHashBy[imm E,K]): read OrderHash[T] ->  /// freeze by into plain OrderHash[T]
+    {
     .close -> this.close;
     .close t -> this.close(t).orderHash(by);
     .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
@@ -136,7 +138,8 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
 OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-value printing of T
   #(t: read T): read OrderHash[K];          /// build closed OrderHash[K] for t's key
 
-  .thenHash[K0](next: OrderHashBy[T,K0]): OrderHashBy[T] -> {  /// lexicographic order; hash mixes both keys
+  .thenHash[K0](next: OrderHashBy[T,K0]): OrderHashBy[T] ->  /// lexicographic order; hash mixes both keys
+    {
     .cmp t0,t1,m -> this#t0<=>(this#t1,{
       .lt ->m.lt;
       .eq ->next#t0<=>(next#t1,m);
@@ -145,7 +148,8 @@ OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-va
     .str t->this#t.str;
     };
 
-  .viewHash[A](f: F[read A,read T]): OrderHashBy[A] -> {         /// contramap for both cmp and hash
+  .viewHash[A](f: F[read A,read T]): OrderHashBy[A] ->           /// contramap for both cmp and hash
+    {
     .cmp a0,a1,m -> this#(f#a0)<=>(this#(f#a1),m);
     .hash a -> this#(f#a).hash;
     .str t->this#(f#t).str;
@@ -161,8 +165,9 @@ OrderHashBy[T]: OrderHashBy[T,T] {         /// direct order+hash for T
   .cmp[R:**](t0: read T,t1: read T,m: mut OrderMatch[R]): R;
   .hash(t: read T): Nat;
   .str(t: read T): Str; 
-  # t -> {                                /// close->t; compare/hash delegate to this.cmp/this.hash
-    .close -> t; .close t0 -> this#t0; 
+  # t ->                                  /// close->t; compare/hash delegate to this.cmp/this.hash
+    {
+    .close -> t; .close t0 -> this#t0;
     .cmp t0,t1,m -> this.cmp(t0,t1,m);
     .hash -> this.hash t;
     .str -> this.str t; 
