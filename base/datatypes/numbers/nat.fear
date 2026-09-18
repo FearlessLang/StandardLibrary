@@ -285,7 +285,8 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   .clampTo(range: Range[Nat]): Nat -> Block#
       .if {this <= (range.start)} .return {range.start}
       .if {this >= (range.end)} .return {range.end}
-      .return {this}; .hash -> this.str.hash;                 /// hash via str
+      .return {this};
+  .hash -> this.str.hash;                 /// hash via str
 
 
   /// ``this.indexInfo info`` returns `.empty` if `info` is not the `.list` variant,
@@ -295,7 +296,9 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
     .default -> {};
     };
 
-  .close->::; .close->this;               /// fixpoint type closed
+  /// fixpoint type closed
+  .close->::;
+  .close->this;
   .sumNumber xs ->                        /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .hashWith(other: Nat): Nat -> this.aluMulWrap(31).aluAddWrap(other);

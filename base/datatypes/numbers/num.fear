@@ -218,7 +218,9 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   .clampTo(range: ClosedNumRange): Num -> range.clamp(this);
 
   .hash -> this.str.hash;           /// hash via string
-  .close->::; .close->this;         /// fixpoint type closed
+  /// fixpoint type closed
+  .close->::;
+  .close->this;
   .sumNumber xs ->                  /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Num];

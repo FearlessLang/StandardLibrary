@@ -422,7 +422,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{0.0 .hash .assertEq((-0.0) .hash)}
   //>   .check{Math.nan .hash .assertEq((Math.nan.negAbsOrNaN) .hash)}
   //>   .check{1.0 .hash .assertNotEq(2.0 .hash)}
-  .hash -> this.imm.isNegZero?{.then->`0.0`.hash; .else->this.imm.ieeeStr.hash};/// hash via str
+  /// hash via str
+  .hash -> this.imm.isNegZero?{.then->`0.0`.hash; .else->this.imm.ieeeStr.hash};
 
   /// fixpoint type closed
   .close->::; .close->this;

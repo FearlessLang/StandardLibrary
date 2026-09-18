@@ -87,7 +87,8 @@ AnonTests:{
 
   ///The returned anonymous A has a documented method and should appear.
   .anonMethodDoc:A->
-    A{'x .m->///Doc for the anonymous A.m method
+    A{'x
+      .m->///Doc for the anonymous A.m method
       x.m;};
 
   ///The returned anonymous A has a doc on the literal itself and should appear.
@@ -96,7 +97,8 @@ AnonTests:{
       'x .m->x.m;};
 
   ///This intentionally documents the anonymous object, not the method.
-  .inlineBraceDoc:A->A{///Doc after { attaches to the anonymous literal
+  .inlineBraceDoc:A->
+    A{///Doc after { attaches to the anonymous literal
     'x .m->x.m;};
 
   ///This is the preferred way to document the method when returning an object literal.
@@ -116,12 +118,14 @@ LineBeforeDocs:{
   .sameLine:Voider->Voider;///Doc for sameLine
 }
 
-///This tests same-line body docs, like base.Main methods.
-MainLike:base.Main{sys->base.Block#(///Doc for MainLike.main
+///This tests body docs on a SAM method, like base.Main methods.
+MainLike:base.Main{
+  sys->base.Block#(///Doc for MainLike.main
   base.Debug#("Hello world"),
   base.Debug#("/// this string must not become documentation"));
   .aa:A->///Doc for MainLike.aa
-    A{'x .m->///Doc for anon .m inside MainLike.aa
+    A{'x
+      .m->///Doc for anon .m inside MainLike.aa
       x.m;};
   }
 
