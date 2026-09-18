@@ -12,9 +12,11 @@ InfoValidators: Sealed {
 /// For example: ``InfoValidators# info > "friends" > 0 .isMsg{:: == "Alice"}  | > "friends" > 1 .isMsg {:: == "Bob"} & > "friends" > 2 .isMsg{:: == "Carol"}``
 /// can be summarised as (first friend is "Alice" OR second friend is "Bob") AND (third friend is "Carol").
 /// If you wish to avoid left associativity you can use the `.where` operator.
-/// For example: ```InfoValidators# info > "friends" > 0 .isMsg{:: == "Alice"} | > "friends" .where {
+/// For example: ```fearless
+/// InfoValidators# info > "friends" > 0 .isMsg{:: == "Alice"} | > "friends" .where {
 ///   :: > 1 .isMsg {:: == "Bob"}} & > "friends" > 2 .isMsg{:: == "Carol"}
-///   }``` which will get read as (first friend is "Alice" OR (second friend is "Bob" AND third friend is "Carol")).
+///   }
+/// ``` which will get read as (first friend is "Alice" OR (second friend is "Bob" AND third friend is "Carol")).
 /// Expressions can also be negated with `.not`, `.not` acts upon the current "local" expression and doesn't negate the whole expression.
 /// Note: ``::`` will match any Info, so you can start an expression with ``:: &`` as ``::`` is always true, this means you should not start with ``|`` as ``:: |`` will always be true
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}

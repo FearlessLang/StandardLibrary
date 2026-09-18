@@ -104,6 +104,8 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
   mut .check(Check): mut TestCap;
   mut .checkTrue(f: F[Bool]): mut TestCap -> this.check{f#.assertTrue};
   mut .checkFalse(f: F[Bool]): mut TestCap -> this.check{f#.assertFalse};
+  mut .checkEq[T](expected: OrderHash[T], actual: F[T]): mut TestCap  -> this.check{expected.assertEq(actual#)};
+  mut .checkEq[T, E:*, K](by: OrderHashBy[imm E,K], expected: OrderHash[T, E], actual: F[T]): mut TestCap -> this.check{expected.assertEq(by, actual#)};
   mut .disabledCheck(Check): mut TestCap;
   mut .checkWithSys(CheckSys): mut TestCap;
   mut .disabledCheckWithSys(CheckSys): mut TestCap;  

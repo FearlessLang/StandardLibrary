@@ -10,12 +10,13 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// `this.pred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
   /// Underflow behaviour depends on the chosen backend, underflows if ``this == 0``.
   //>   .check{5 .pred .assertEq 4}
+  //>   .checkEq(4, {5.pred})
   //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.pred"}}, {0 .pred})
   .pred: Nat;
 
   /// ``this + x`` returns the checked sum of `this` and ``x``.
   /// Overflow behaviour depends on the chosen backend, overflows if the result would exceed ``18_446_744_073_709_551_615``.
-  //>   .check{(2 + 3) .assertEq 5}
+  //>   .checkEq(5, {2 + 3})
   //>   .checkNonDetErr(
   //>     {:: > "msg" .isMsg{::.startsWith "Nat +" & (::.contains "overflow")}},
   //>     {(Math.maxNat - 1) + 2}
