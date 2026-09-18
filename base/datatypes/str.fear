@@ -59,9 +59,7 @@
 /// - accepted: ``True``.getBool  ``False``.getBool
 /// - roundtrip: b.str.getBool == b for every Bool b
 Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKey {
-  /// fixpoint type closed
-  .close->::;
-  .close->this;
+  .close->::; .close->this;
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
   |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings
   ^(x: read ToStr): Str;           /// like + but inserts a double quote between the two strings
@@ -88,8 +86,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
   .nat: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
   .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid
-  /// parses exactly ``True``/``False`` as produced by Bool.str; .empty on invalid (this includes out of range)
-  .bool: Opt[Bool] -> (this == `True`).toOpt{True} | ((this == `False`).toOpt{False});
+  .bool: Opt[Bool] -> (this == `True`).toOpt{True} | ((this == `False`).toOpt{False}); /// parses exactly ``True``/``False`` as produced by Bool.str; .empty on invalid (this includes out of range)
 
 
   .getIeeeFloat: Float;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
@@ -99,8 +96,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .getNum: Num;              /// parse a string representing a valid Fearless Num; throws if invalid (this includes denominator == 0)
   .getNat: Nat;              /// parse a string representing a valid Fearless Nat; throws if invalid (this includes out of range)
   .getByte: Byte;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
-  /// parses exactly ``True``/``False`` as produced by Bool.str; throws if invalid
-  .getBool: Bool -> this.bool.orLazy{Error.msg(`Str.getBool: `+(this.escape)+` is not "True" or "False".`)};
+  .getBool: Bool -> this.bool.orLazy{Error.msg(`Str.getBool: `+(this.escape)+` is not "True" or "False".`)}; /// parses exactly ``True``/``False`` as produced by Bool.str; throws if invalid
 
 
   .startsWith(Str): Bool;           /// this string starts with the other string

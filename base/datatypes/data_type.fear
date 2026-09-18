@@ -10,29 +10,15 @@
 /// - DataType adds the opposite direction .close(t: T): DataType[...] allowing to this T as DataType[T]
 /// Basically, by implementing those two methods we close the type fixpoint making T and the DataType the same logical type.
 
-ToImm[T0]: {                                                /// deep immutable representation (may change type)
-  read .imm: T0
-  }
-ToImmBy[E,E0]: {                                            /// per-value ToImm conversion
-  #(t: read E): read ToImm[E0]
-  }
-ToImm[E:*,E0,T0]: {                                         /// env-dependent deep imm
-  read .imm(by: ToImmBy[imm E,E0]): T0
-  }
+ToImm[T0]: { read .imm: T0 }                               /// deep immutable representation (may change type)
+ToImmBy[E,E0]: {#(t: read E): read ToImm[E0]}               /// per-value ToImm conversion
+ToImm[E:*,E0,T0]: { read .imm(by: ToImmBy[imm E,E0]): T0 } /// env-dependent deep imm
 
-ToInfo: {                                        /// structured diagnostics info
-  read .info: Info
-  }
-ToInfoBy[E]: {                                      /// per-value Info conversion
-  #(t: read E): read ToInfo
-  }
-ToInfo[E:*]: {                                             /// env-dependent Info
-  read .info(by: ToInfoBy[imm E]): Info
-  }
+ToInfo: { read .info: Info }                     /// structured diagnostics info
+ToInfoBy[E]: {#(t: read E): read ToInfo}            /// per-value Info conversion
+ToInfo[E:*]: { read .info(by: ToInfoBy[imm E]): Info }     /// env-dependent Info
 
-FromInfo[T]: {                                    /// parse/decode from Info
-  .fromInfo(i: Info): T
-  }
+FromInfo[T]: { .fromInfo(i: Info): T }            /// parse/decode from Info
 
 DataType[T,T0]: ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Pipe[T] {
   read .close(t: read T): read DataType[T,T0];                    /// close on t (often implemented as .close->:: when T: DataType)

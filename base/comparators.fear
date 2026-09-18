@@ -5,9 +5,7 @@
 /// - OrderBy[T,K] is a projection: given t: T, build a closed Order[K] for its key.
 /// - OrderHash adds hashing and ToStr. This is all the Maps/Set may need.
 
-ToStr: {                             /// string representation
-  read .str: Str
-  }
+ToStr: { read .str: Str }            /// string representation
 
 ToStrBy[T]: {                        /// per-value printer: given x: T, produce a ToStr for x
   #(read T): read ToStr
@@ -57,8 +55,7 @@ OrderBy[T,K]: {                       /// order values of T by a component/key K
 
 OrderBy[T]: OrderBy[T,T] {           /// produces an ordering via .cmp
   .cmp[R:**](t0: read T,t1: read T,m: mut OrderMatch[R]): R;
-  # t ->                              /// close->t; compare uses this.cmp
-    { .close -> t; .cmp t0,t1,m -> this.cmp(t0,t1,m) };
+  # t -> { .close -> t; .cmp t0,t1,m -> this.cmp(t0,t1,m) }; /// close->t; compare uses this.cmp
   }
 
 Order[T,E:*]: {                      /// environment-dependent ordering of T (E supplies per-value orders)
