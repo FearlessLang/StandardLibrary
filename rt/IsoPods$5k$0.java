@@ -13,5 +13,5 @@ class IsoPod$2s$1Instance implements IsoPod$2s$1{
     if (!closed){ throw err("The IsoPod was open"); }
     var old=v; v= null; closed= false; return old;
     }
-  public Object mut$mutate$1(Object p0){ var f=(IsoMutator$18g$2)p0; return closed ? f.mut$some$1(v) : f.mut$empty$0(); }
+  public Object mut$mutate$1(Object p0){ var f=(IsoMutator$18g$2)p0; return closed ? Speculate.shielded(()->f.mut$some$1(v)) : f.mut$empty$0(); }
   }

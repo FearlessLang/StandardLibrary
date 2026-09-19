@@ -35,9 +35,9 @@ public interface Flows$1c$0 extends Sealed$2o$0{
   default Object imm$$hash$16(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return Flow$o$1Instance.of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15); }
 
   default Object imm$fromMutList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream()); }//sequential
-  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0)); }//parallel!
-  default Object imm$fromReadList$1(Object p0){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0)); }//parallel!
-  default Object imm$fromImmList$1(Object p0){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0)); }//parallel!
+  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0), true); }//parallel!
+  default Object imm$fromReadList$1(Object p0){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0), false); }//parallel!
+  default Object imm$fromImmList$1(Object p0){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0), false); }//parallel!
 
   Flows$1c$0 instance= new Flows$1c$0(){};
 }
@@ -46,23 +46,24 @@ final class Flow$o$1Instance implements Flow$o$1{
   private Stream<Object> s;
   private final List<Object> src;
   private final UnaryOperator<Consumer<Object>> stages;
+  private final boolean join;
   private boolean used;
-  private Flow$o$1Instance(Stream<Object> s, List<Object> src, UnaryOperator<Consumer<Object>> stages){ this.s= s; this.src= src; this.stages= stages; }
+  private Flow$o$1Instance(Stream<Object> s, List<Object> src, UnaryOperator<Consumer<Object>> stages, boolean join){ this.s= s; this.src= src; this.stages= stages; this.join= join; }
   private static Error consumed(){ return err("Flow consumed"); }
   static Flow$o$1Instance of(Object... args){ return Flow$o$1Instance.of(Stream.of(args)); }
-  static Flow$o$1Instance of(Stream<Object> stream){ return new Flow$o$1Instance(stream, null, null); }
-  static Flow$o$1Instance par(List<Object> src){ return src.size() < 2 ? of(src.stream()) : new Flow$o$1Instance(null, src, down -> down); }
+  static Flow$o$1Instance of(Stream<Object> stream){ return new Flow$o$1Instance(stream, null, null, false); }
+  static Flow$o$1Instance par(List<Object> src, boolean join){ return src.size() < 2 ? of(src.stream()) : new Flow$o$1Instance(null, src, down -> down, join); }
   Stream<Object> s(){
     if (used){ throw consumed(); }
     used= true;
-    if (s == null){ s= Speculate.stream(src, stages); }
+    if (s == null){ s= Speculate.stream(src, stages, join); }
     return s;
   }
   private Flow$o$1Instance stage(UnaryOperator<Stream<Object>> seq, UnaryOperator<Consumer<Object>> par){
     if (src == null){ return of(seq.apply(s())); }
     if (used){ throw consumed(); }
     used= true;
-    return new Flow$o$1Instance(null, src, down -> stages.apply(par.apply(down)));
+    return new Flow$o$1Instance(null, src, down -> stages.apply(par.apply(down)), join);
   }
   private <R> R run(Function<Stream<Object>,R> body){
     var st= s();
@@ -139,6 +140,55 @@ final class Flow$o$1Instance implements Flow$o$1{
       throw err("Flow.limit: Cannot limit to more than "+Long.MAX_VALUE+" values, got "+Long.toUnsignedString(limit));
     }
     return of(s().limit(limit));
+  }
+  @Override public Object mut$map$2(Object p0, Object p1){
+    var ctx= (ToIso$1g$1)p0;
+    return of(s().map(e -> callF$3(p1, ((ToIso$1g$1)ctx.mut$iso$0()).mut$close$0(), e)));
+  }
+  @Override public Object mut$actor$2(Object p0, Object p1){
+    var f= (ActorImpl$lk$3)p1;
+    return of(s().gather(ActorStage.of(p0, (sink, st, e) -> f.read$$hash$4(sink, st, e, ActorStage.match))));
+  }
+  @Override public Object mut$actorMut$2(Object p0, Object p1){
+    var f= (ActorImplMut$4sk$3)p1;
+    return of(s().gather(ActorStage.of(p0, (sink, st, e) -> f.read$$hash$4(sink, st, e, ActorStage.match))));
+  }
+  @Override public Object mut$findMap$1(Object p0){
+    return map(p0).run(st -> st.filter(o -> isTrue(((Opt$c$1)o).read$isSome$0())).findFirst().orElseGet(Util::optEmpty));
+  }
+  @Override public Object mut$findFirst$1(Object p0){ return ((Flow$o$1Instance)mut$filter$1(p0)).mut$first$0(); }
+  @Override public Object mut$let$2(Object p0, Object p1){
+    var dup= new MF$7$1(){
+      List<Object> collected;
+      @Override public Object mut$$hash$0(){
+        if (collected == null){ collected= List$o$1Instance.asJava(mut$list$0()); }
+        return src == null ? of(collected.stream()) : par(collected, join);
+      }
+    };
+    var dr= callF$2(p0, dup);
+    var self= dup.collected == null ? this : (Flow$o$1Instance)dup.mut$$hash$0();
+    return ((FlowContinuation$25fk$3)p1).mut$$hash$2(dr, self);
+  }
+}
+
+final class ActorStage implements _Sink$o$1{
+  interface Call{ Object apply(Object sink, Object state, Object e); }
+  static final Object CONTINUE= new Object();
+  static final Object STOP= new Object();
+  static final ActorMatch$174$1 match= new ActorMatch$174$1(){
+    @Override public Object mut$continue$0(){ return CONTINUE; }
+    @Override public Object mut$stop$0(){ return STOP; }
+  };
+  Gatherer.Downstream<? super Object> down;
+  final Object actorSink= _ActorSinks$174$0.instance.imm$$hash$1(this);
+  @Override public Object mut$$hash$1(Object p0){ down.push(p0); return Void$o$0.instance; }
+  @Override public Object mut$pushError$1(Object p0){ throw Util.deterministic((Info$o$0)p0); }
+  @Override public Object mut$stopDown$0(){ return Void$o$0.instance; }
+  static Gatherer<Object, ActorStage, Object> of(Object state, Call call){
+    return Gatherer.ofSequential(ActorStage::new, (st, e, down) -> {
+      st.down= down;
+      return call.apply(st.actorSink, state, e) != STOP;
+    });
   }
 }
 

@@ -5,12 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -20,23 +22,34 @@ final class Cancelled extends RuntimeException{ Cancelled(){ super(null, null, f
 
 final class Speculate{
   private static final ThreadLocal<Speculate> current= new ThreadLocal<>();
-  private final Speculate parent= current.get();
+  private static final ThreadLocal<int[]> shield= ThreadLocal.withInitial(()->new int[1]);
+  private final Speculate parent= shield.get()[0] > 0 ? null : current.get();
   private final Thread consumer= Thread.currentThread();
   private final ArrayDeque<Chunk> pending= new ArrayDeque<>();
+  private final ConcurrentLinkedQueue<Chunk> running= new ConcurrentLinkedQueue<>();
+  private final boolean join;
   private volatile boolean cancelled;
   private volatile boolean parked;
+  private Speculate(boolean join){ this.join= join; }
   static void poll(){
     var sp= current.get();
-    if (sp != null && sp.cancelled()){ throw new Cancelled(); }
+    if (sp != null && shield.get()[0] == 0 && sp.cancelled()){ throw new Cancelled(); }
+  }
+  static Object shielded(Supplier<Object> s){
+    var depth= shield.get();
+    depth[0]+= 1;
+    try{ return s.get(); }
+    finally{ depth[0]-= 1; }
   }
   private boolean cancelled(){ return cancelled || (parent != null && parent.cancelled()); }
   private void cancel(){
     cancelled= true;
     pending.forEach(c -> c.task.cancel(false));
+    if (join){ running.forEach(Chunk::finish); }
   }
   private void wake(){ if (parked){ LockSupport.unpark(consumer); } }
-  static Stream<Object> stream(List<Object> src, UnaryOperator<Consumer<Object>> stages){
-    var sp= new Speculate();
+  static Stream<Object> stream(List<Object> src, UnaryOperator<Consumer<Object>> stages, boolean join){
+    var sp= new Speculate(join);
     return StreamSupport.stream(sp.ordered(src, stages), false).onClose(sp::cancel);
   }
   private final class Chunk implements ForkJoinPool.ManagedBlocker{
@@ -66,8 +79,10 @@ final class Speculate{
       try{ if (cancelled()){ throw new Cancelled(); } sink.accept(sub.get(next++)); return true; }
       catch(Throwable t){ err= t; return false; }
     }
+    void finish(){ while (!done.get()){ LockSupport.parkNanos(this, 100_000L); } }
     void run(){
       if (!started.compareAndSet(false, true)){ return; }
+      running.add(this);
       var prev= current.get();
       current.set(Speculate.this);
       try{ while (step()){} }
