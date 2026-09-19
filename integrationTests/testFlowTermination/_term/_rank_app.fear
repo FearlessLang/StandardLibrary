@@ -1,0 +1,16 @@
+use base.Main as Main;
+use base.Nat as Nat;
+use base.Bool as Bool;
+use base.Block as Block;
+use base.Continue as Continue;
+use base.Void as Void;
+
+/// Never returns when b holds.
+Diverge: { #(b: Bool, e: Nat): Nat -> b.if {
+  .then -> Block#[Nat].loop{Continue#}.return{e};
+  .else -> e;
+  }}
+
+/// The sequential flow returns 0 without evaluating any other element; the parallel flow
+/// must return too, whatever the elements past the decision do.
+FirstDoesNotWaitForTheRest: Main{_ -> base.Debug#((0 =~~= 1999).flow.list.flow.map{e -> Diverge#(e > 0, e)}.first!)}
