@@ -3,6 +3,7 @@ TxtFile:{
   .diskPath: Str;
   .zipSteps: Str;
   .zipEntry: Str;
+  .originalFileName: Str;
 
   .readStrUtf8(cap: mut AssetReadCapability, recover: mut BadStrUnitRecover): Str ->
     cap.readStrUtf8(this.path,this.diskPath,this.zipSteps,this.zipEntry,recover);
@@ -134,6 +135,7 @@ ImageFile:{
   .diskPath: Str;
   .zipSteps: Str;
   .zipEntry: Str;
+  .originalFileName: Str;
   .readImage(cap: mut AssetReadCapability, maxPixels: Nat): Image ->
     cap.readImage(this.path,this.diskPath,this.zipSteps,this.zipEntry,maxPixels);
   .consumeImage(requestId: Str, maxPixels: Nat): Image ->

@@ -310,7 +310,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   .hash -> this.str.hash;                   /// hash via str
   .info: Info;              /// info via str
-  .close -> ::; .close -> this;             /// fixpoint type closed
+  .close -> ::; .close -> this;
   .sumNumber xs ->                          /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Int];

@@ -9,6 +9,7 @@ import java.awt.LayoutManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToIntFunction;
 
 // Flow layout with lines centered on the cross axis and the block of lines
 // centered on the flow axis. Insets and gaps are read live from the owning
@@ -60,14 +61,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   int heightFor(Container target, int width){
     synchronized (target.getTreeLock()){
       if (gap.vertical || gap.chunk > 0){ return preferredLayoutSize(target).height; }
-      int hg = h(gap.heightGap);
-      int total = 0;
-      boolean first = true;
-      for (var ln : lines(target, width - insetsW(target))){
-        total += (first ? 0 : hg) + ln.cross();
-        first = false;
-      }
-      return total + insetsH(target);
+      return gapSum(lines(target, width - insetsW(target)), h(gap.heightGap), Line::cross) + insetsH(target);
     }
   }
 
@@ -84,9 +78,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
       int lineGap = vert ? wg : hg;
       var ls = lines(target, vert ? availH : availW);
 
-      int totalCross = 0;
-      boolean first = true;
-      for (var ln : ls){ totalCross += (first ? 0 : lineGap) + ln.cross(); first = false; }
+      int totalCross = gapSum(ls, lineGap, Line::cross);
 
       int crossStart = vert
         ? x0 + Math.max(0, (availW - totalCross) / 2)
@@ -156,33 +148,20 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // not depend on any given size).
   private Dimension naturalSize(Container target){
     boolean vert = gap.vertical;
-    if (gap.chunk <= 0){
-      int pg = vert ? h(gap.heightGap) : w(gap.widthGap);
-      int p = 0;
-      int c = 0;
-      boolean first = true;
-      for (var comp : target.getComponents()){
-        if (!comp.isVisible()){ continue; }
-        var d = comp.getPreferredSize();
-        int cp = vert ? d.height : d.width;
-        int cc = vert ? d.width : d.height;
-        p += (first ? 0 : pg) + cp;
-        c = Math.max(c, cc);
-        first = false;
-      }
-      return vert ? new Dimension(c, p) : new Dimension(p, c);
-    }
     var ls = lines(target, Integer.MAX_VALUE);
     int lineGap = vert ? w(gap.widthGap) : h(gap.heightGap);
-    int totalCross = 0;
-    int maxPrimary = 0;
-    boolean first = true;
-    for (var ln : ls){
-      totalCross += (first ? 0 : lineGap) + ln.cross();
-      maxPrimary = Math.max(maxPrimary, ln.primary());
-      first = false;
-    }
+    int totalCross = gapSum(ls, lineGap, Line::cross);
+    int maxPrimary = ls.stream().mapToInt(Line::primary).max().orElse(0);
     return vert ? new Dimension(totalCross, maxPrimary) : new Dimension(maxPrimary, totalCross);
+  }
+
+  // Sums f(line) across ls, with gap inserted between consecutive lines (none
+  // before the first or after the last).
+  private static int gapSum(List<Line> ls, int lineGap, ToIntFunction<Line> f){
+    int total = 0;
+    boolean first = true;
+    for (var ln : ls){ total += (first ? 0 : lineGap) + f.applyAsInt(ln); first = false; }
+    return total;
   }
 
   private int insetsW(Container t){

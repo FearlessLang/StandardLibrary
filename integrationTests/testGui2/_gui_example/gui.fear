@@ -1,7 +1,8 @@
 
 Gui:Consumer[mut Frame]{::
   .title `Gui buttons replace canvas painter`
-  .fps 30
+  .style{:: .fps 30 }
+  .save(this.frame)
   .modelFps (1, {::
     .action{Debug#"tick done"}
     })
@@ -12,6 +13,7 @@ Gui:Consumer[mut Frame]{::
     .south(mut ShapeButtons{this.model})
     };
 
+  mut .frame: mut Slot[mut Frame];
   mut .canvas: mut Slot[mut Pane];
   mut .model: mut Model;
   mut .setImage(p:Painter): Void-> Block#(this.canvas!.paint(p),Void);

@@ -226,7 +226,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       .return {this};
 
   .hash -> this.str.hash;                      /// hash via str
-  .close->::; .close->this;                    /// fixpoint type closed
+  .close->::; .close->this;
   .sumNumber xs ->                             /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Byte];

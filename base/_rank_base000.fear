@@ -11,7 +11,7 @@ ToIso[R]: {mut .iso: iso ToIso[R]; mut .close: mut R;}
 
 Abort: Sealed {![R:**]: R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);}
 _Magic: Sealed {
-  ![R:**]: R -> this!; // _Magic'd out to tell us what we forgot to implement
+  ![R:**]: R -> this!; // magic'd out to tell us what we forgot to implement
   //![R:**](_: mut _System): R -> _Throw.nonDeterministic(Infos.msg `Abort reached`);
   }
 

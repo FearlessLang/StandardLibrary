@@ -67,7 +67,6 @@ Rect: {
     x >= (this.x) && { x <= (this.right) }
     && { y >= (this.y) } && { y <= (this.bottom) };
   }
-
 Rects: { #(x: XInt, y: YInt, width: WidthNat, height: HeightNat): Rect ->
   { .x -> x; .y -> y; .width -> width; .height -> height; } }
 
@@ -104,7 +103,6 @@ Alpha: LevelByte[Alpha] {.name->"Alpha"; .getDataType -> 0.getByte;
   .opaque: Alpha->Alpha.max;
   .transparent: Alpha->Alpha.min;
   }
-
 CyclicFloat[S]: Wrapper[S,Float] {
   read .period: Float;
   +(other: S): S -> this#(Math.euclideanMod(this.get + (this.close(other).get), this.period));
@@ -116,13 +114,11 @@ Hue: CyclicFloat[Hue] {.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
   # t ->Block#(t.assertInRange(0.0=~~=1.0, {"Hue must be between 0 and 1"}),
   { .getDataType-> t });
   .close-> this; .close->::; }
-
 Saturation: LevelFloat[Saturation] {.name->"Saturation"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
   # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Saturation must be between 0 and 1"}),
   { .getDataType-> t });
   .close-> this; .close->::; }
-
 Brightness: LevelFloat[Brightness] {.name->"Brightness"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
   # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Brightness must be between 0 and 1"}),
@@ -148,90 +144,69 @@ Color: DataType[Color,Color] {
   read .blue: Blue->{};
   read .alpha: Alpha->Alpha.opaque;
   #(red: Red, green: Green, blue: Blue, alpha: Alpha): Color ->{
-    .red->red;
-    .green ->green;
-    .blue->blue;
-    .alpha->alpha;
+    .red -> red;
+    .green -> green;
+    .blue -> blue;
+    .alpha -> alpha;
     };
   .str -> "Color["+(this.red)+", "+(this.green)+", "+(this.blue)+", "+(this.alpha)+"]";
   .hash ->     this.red.hash
     .hashWith (this.green.hash)
     .hashWith (this.blue.hash)
     .hashWith (this.alpha.hash);
-  .cmp(a, b,m) -> a.red<=>(b.red,m &&{a.green<=>(b.green,m &&{a.blue<=>(b.blue,m &&{a.alpha<=>(b.alpha,m)})})});
-  .info-> this.str.info;
+  .cmp(a,b,m) -> a.red<=>(b.red,m &&{a.green<=>(b.green,m &&{a.blue<=>(b.blue,m &&{a.alpha<=>(b.alpha,m)})})});
+  .info->this.str.info;
   .imm->Color#(this.red,this.green,this.blue,this.alpha);
-  .transparent: Color ->Color#({},{},{},Alpha.transparent);
-  .boringGray: Color ->
-    Color#(Red#(160.getByte),Green#(160.getByte),Blue#(160.getByte),Alpha.opaque);
-  .voidBlack: Color ->
-    Color#(Red#(0.getByte),Green#(0.getByte),Blue#(0.getByte),Alpha.opaque);
-  .ghostWhite: Color ->
-    Color#(Red#(245.getByte),Green#(245.getByte),Blue#(245.getByte),Alpha.opaque);
-  .rubberDuck: Color ->
-    Color#(Red#(255.getByte),Green#(220.getByte),Blue#(40.getByte),Alpha.opaque);
-  .bananaBruise: Color ->
-    Color#(Red#(126.getByte),Green#(96.getByte),Blue#(32.getByte),Alpha.opaque);
-  .dangerTomato: Color ->
-    Color#(Red#(230.getByte),Green#(64.getByte),Blue#(48.getByte),Alpha.opaque);
-  .lavaOrange: Color ->
-    Color#(Red#(255.getByte),Green#(96.getByte),Blue#(16.getByte),Alpha.opaque);
-  .wizardPurple: Color ->
-    Color#(Red#(116.getByte),Green#(64.getByte),Blue#(196.getByte),Alpha.opaque);
-  .sleepyBlue: Color ->
-    Color#(Red#(72.getByte),Green#(120.getByte),Blue#(210.getByte),Alpha.opaque);
-  .deepNapBlue: Color ->
-    Color#(Red#(24.getByte),Green#(48.getByte),Blue#(112.getByte),Alpha.opaque);
-  .goblinGreen: Color ->
-    Color#(Red#(40.getByte),Green#(170.getByte),Blue#(64.getByte),Alpha.opaque);
-  .toxicSlime: Color ->
-    Color#(Red#(120.getByte),Green#(255.getByte),Blue#(32.getByte),Alpha.opaque);
-  .alienMint: Color ->
-    Color#(Red#(128.getByte),Green#(255.getByte),Blue#(190.getByte),Alpha.opaque);
-  .swampTea: Color ->
-    Color#(Red#(82.getByte),Green#(112.getByte),Blue#(54.getByte),Alpha.opaque);
-  .rustyRobot: Color ->
-    Color#(Red#(174.getByte),Green#(86.getByte),Blue#(44.getByte),Alpha.opaque);
-  .dustyRose: Color ->
-    Color#(Red#(196.getByte),Green#(120.getByte),Blue#(132.getByte),Alpha.opaque);
-  .blueberrySoup: Color ->
-    Color#(Red#(64.getByte),Green#(72.getByte),Blue#(176.getByte),Alpha.opaque);
-  .terminalGreen: Color ->
-    Color#(Red#(32.getByte),Green#(220.getByte),Blue#(80.getByte),Alpha.opaque);
-  .panicPink: Color ->
-    Color#(Red#(255.getByte),Green#(72.getByte),Blue#(168.getByte),Alpha.opaque);
-  .cardboard: Color ->
-    Color#(Red#(178.getByte),Green#(136.getByte),Blue#(86.getByte),Alpha.opaque);
-  .moonCheese: Color ->
-    Color#(Red#(236.getByte),Green#(226.getByte),Blue#(148.getByte),Alpha.opaque);
+  .transparent:Color->Color#({},{},{},Alpha.transparent);
+  .rgb(r:Nat,g:Nat,b:Nat):Color->Color#(Red#(r.getByte),Green#(g.getByte),Blue#(b.getByte),Alpha.opaque);
+  .boringGray:Color->this.rgb(160,160,160);
+  .voidBlack:Color->this.rgb(0,0,0);
+  .ghostWhite:Color->this.rgb(245,245,245);
+  .rubberDuck:Color->this.rgb(255,220,40);
+  .bananaBruise:Color->this.rgb(126,96,32);
+  .dangerTomato:Color->this.rgb(230,64,48);
+  .lavaOrange:Color->this.rgb(255,96,16);
+  .wizardPurple:Color->this.rgb(116,64,196);
+  .sleepyBlue:Color->this.rgb(72,120,210);
+  .deepNapBlue:Color->this.rgb(24,48,112);
+  .goblinGreen:Color->this.rgb(40,170,64);
+  .toxicSlime:Color->this.rgb(120,255,32);
+  .alienMint:Color->this.rgb(128,255,190);
+  .swampTea:Color->this.rgb(82,112,54);
+  .rustyRobot:Color->this.rgb(174,86,44);
+  .dustyRose:Color->this.rgb(196,120,132);
+  .blueberrySoup:Color->this.rgb(64,72,176);
+  .terminalGreen:Color->this.rgb(32,220,80);
+  .panicPink:Color->this.rgb(255,72,168);
+  .cardboard:Color->this.rgb(178,136,86);
+  .moonCheese:Color->this.rgb(236,226,148);
   }
-
-Widget[S]: {
-  mut .self: mut S;
-  mut .save(mut Consumer[mut S]): mut S;
-  mut .topInset(Nat): mut S;
-  mut .topInset'(HeightNat): mut S;
-  mut .bottomInset(Nat): mut S;
-  mut .bottomInset'(HeightNat): mut S;
-  mut .leftInset(Nat): mut S;
-  mut .leftInset'(WidthNat): mut S;
-  mut .rightInset(Nat): mut S;
-  mut .rightInset'(WidthNat): mut S;
-  mut .heightGap(Nat): mut S;
-  mut .heightGap'(HeightNat): mut S;
-  mut .widthGap(Nat): mut S;
-  mut .widthGap'(WidthNat): mut S;
-  mut .width(Nat): mut S;
-  mut .height(Nat): mut S;
-  mut .width'(WidthNat): mut S;
-  mut .height'(HeightNat): mut S;
-  mut .autoWidth: mut S;
-  mut .autoHeight: mut S;
-  mut .radius(Nat): mut S;
-  mut .foreground(Color): mut S;
-  mut .background(Color): mut S;
-  mut .autoSize: mut S;
-  mut .style(s: mut Scope[S]): mut S ->Block#(s.run(this.self),this.self);
+Widget[S]:{
+  mut .self:mut S;
+  mut .save(mut Consumer[mut S]):mut S;
+  mut .topInset(n:Nat):mut S->this.topInset'(HeightNat#n);
+  mut .topInset'(HeightNat):mut S;
+  mut .bottomInset(n:Nat):mut S->this.bottomInset'(HeightNat#n);
+  mut .bottomInset'(HeightNat):mut S;
+  mut .leftInset(n:Nat):mut S->this.leftInset'(WidthNat#n);
+  mut .leftInset'(WidthNat):mut S;
+  mut .rightInset(n:Nat):mut S->this.rightInset'(WidthNat#n);
+  mut .rightInset'(WidthNat):mut S;
+  mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
+  mut .heightGap'(HeightNat):mut S;
+  mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
+  mut .widthGap'(WidthNat):mut S;
+  mut .width(n:Nat):mut S->this.width'(WidthNat#n);
+  mut .width'(WidthNat):mut S;
+  mut .height(n:Nat):mut S->this.height'(HeightNat#n);
+  mut .height'(HeightNat):mut S;
+  mut .autoWidth:mut S;
+  mut .autoHeight:mut S;
+  mut .radius(Nat):mut S;
+  mut .foreground(Color):mut S;
+  mut .background(Color):mut S;
+  mut .autoSize:mut S;
+  mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
   read .topInset: HeightNat;
   read .bottomInset: HeightNat;
   read .leftInset: WidthNat;
@@ -278,8 +253,9 @@ Button: _TextWidget[Button] {
 
 ModelFps: {
   mut .action(mut MF[Void]): mut ModelFps;
+  mut .save(c: mut Consumer[mut ModelFps]): mut ModelFps -> Block#(c.accept(this), this);
+  mut .style(s: mut Scope[ModelFps]): mut ModelFps -> Block#(s.run(this), this);
   }
-
 Frame: {
   mut .title(s: Str): mut Frame -> this.uTitle(s.u);
   mut .uTitle(UStr): mut Frame;
@@ -310,59 +286,53 @@ Frame: {
   mut .fixedSize(w: WidthNat, h: HeightNat): mut Frame;
   mut .undecorated(a: Alpha): mut Frame;
   mut .decorated: mut Frame;
+  mut .save(c: mut Consumer[mut Frame]): mut Frame -> Block#(c.accept(this), this);
+  mut .style(s: mut Scope[Frame]): mut Frame -> Block#(s.run(this), this);
   }
-
-Graphics: {
-  mut .color(Color): mut Graphics;
-  mut .position(XInt, YInt): mut Graphics;
-  mut .line(XInt, YInt): mut Graphics;
-  mut .rect(WidthNat, HeightNat): mut Graphics;
-  mut .oval(WidthNat, HeightNat): mut Graphics;
-  mut .image(Image): mut Graphics;
+ScreenContext: {
   read .elapsed: Instant;
   read .screenWidth: WidthNat;
   read .screenHeight: HeightNat;
   read .panelWidth: WidthNat;
   read .panelHeight: HeightNat;
   }
+Graphics: ScreenContext {
+  mut .color(Color): mut Graphics;
+  mut .position(XInt, YInt): mut Graphics;
+  mut .line(XInt, YInt): mut Graphics;
+  mut .rect(WidthNat, HeightNat): mut Graphics;
+  mut .oval(WidthNat, HeightNat): mut Graphics;
+  mut .image(Image): mut Graphics;
+  }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
 ///the same text looks the same on every OS, and a character outside those fonts is drawn as a box everywhere.
-Gui: { mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run(Frame f); }
-
-Label: _TextWidget[Label] {
-  .self -> this;
-  }
-
-Mouse: {
-  mut .clicked(mut Consumer[MouseEvent]): mut Mouse;
-  mut .pressed(mut Consumer[MouseEvent]): mut Mouse;
-  mut .released(mut Consumer[MouseEvent]): mut Mouse;
-  mut .moved(mut Consumer[MouseEvent]): mut Mouse;
-  mut .dragged(mut Consumer[MouseEvent]): mut Mouse;
-  mut .entered(mut Consumer[MouseEvent]): mut Mouse;
-  mut .exited(mut Consumer[MouseEvent]): mut Mouse;
-  }
-
-MouseEvent: {
-  .mouseX: XInt;
-  .mouseY: YInt;
-  .elapsed: Instant;
-  .screenWidth: WidthNat;
-  .screenHeight: HeightNat;
-  .panelWidth: WidthNat;
-  .panelHeight: HeightNat;
-  }
-
-Pane: Widget[Pane] {
-  .self -> this;
-  mut .mouse(mut Scope[Mouse]): mut Pane;
-  mut .pane(mut Scope[Pane]): mut Pane;
-  mut .border(mut Scope[Border]): mut Pane;
-  mut .button(mut Scope[Button]): mut Pane;
-  mut .label(mut Scope[Label]): mut Pane;
-  mut .clear: mut Pane;
-  mut .paint(Painter): mut Pane;
+Gui:{ mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run(Frame f); }
+Label:_TextWidget[Label]{
+  .self->this;
+}
+Mouse:{
+  mut .clicked(mut Consumer[MouseEvent]):mut Mouse;
+  mut .pressed(mut Consumer[MouseEvent]):mut Mouse;
+  mut .released(mut Consumer[MouseEvent]):mut Mouse;
+  mut .moved(mut Consumer[MouseEvent]):mut Mouse;
+  mut .dragged(mut Consumer[MouseEvent]):mut Mouse;
+  mut .entered(mut Consumer[MouseEvent]):mut Mouse;
+  mut .exited(mut Consumer[MouseEvent]):mut Mouse;
+}
+MouseEvent:ScreenContext{
+  .mouseX:XInt;
+  .mouseY:YInt;
+}
+Pane:Widget[Pane]{
+  .self->this;
+  mut .mouse(mut Scope[Mouse]):mut Pane;
+  mut .pane(mut Scope[Pane]):mut Pane;
+  mut .border(mut Scope[Border]):mut Pane;
+  mut .button(mut Scope[Button]):mut Pane;
+  mut .label(mut Scope[Label]):mut Pane;
+  mut .clear:mut Pane;
+  mut .paint(Painter):mut Pane;
   //Flow axis: .horizontal (default) lays children left-to-right, wrapping
   //into new rows; .vertical lays them top-to-bottom, wrapping into new
   //columns.
@@ -375,7 +345,6 @@ Pane: Widget[Pane] {
   //as before.
   mut .chunk(Nat): mut Pane;
   }
-
 Scope[T]: { mut .run(mut T): mut T; }
 Painter: { .run(mut Graphics): mut Graphics; }
 
