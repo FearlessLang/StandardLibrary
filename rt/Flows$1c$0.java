@@ -77,10 +77,10 @@ final class Flow$o$1Instance implements Flow$o$1{
   }
   private Flow$o$1Instance filter(java.util.function.Predicate<Object> p){ return same(new FlowOps.Filter(deco(), take(), p), -1); }
   private boolean any(Object p){ return isTrue(((Opt$c$1)filter(e->isTrue(callF$2(p, e))).mut$first$0()).read$isSome$0()); }
-  @Override public Object mut$map$1(Object p0){ return same(new FlowOps.Map(deco(), take(), p0), size); }
+  @Override public Object mut$map$1(Object p0){ return same(new FlowOps.Map(deco(), take(), p0), -1); }
   @Override public Object mut$map$2(Object p0, Object p1){
     if (kind == Kind.dp){ return stateful().mut$map$2(p0, p1); }
-    return same(new FlowOps.MapCtx(deco(), take(), (ToIso$1g$1)p0, p1), size);
+    return same(new FlowOps.MapCtx(deco(), take(), (ToIso$1g$1)p0, p1), -1);
   }
   @Override public Object mut$filter$1(Object p0){ return filter(e->isTrue(callF$2(p0, e))); }
   @Override public Object mut$flatMap$1(Object p0){ return same(new FlowOps.FlatMap(deco(), take(), p0), -1); }
@@ -96,7 +96,7 @@ final class Flow$o$1Instance implements Flow$o$1{
   }
   @Override public Object mut$scan$2(Object p0, Object p1){
     if (kind == Kind.dp){ return stateful().mut$scan$2(p0, p1); }
-    return same(new FlowOps.Scan(deco(), take(), p0, p1), size);
+    return same(new FlowOps.Scan(deco(), take(), p0, p1), -1);
   }
   @Override public Object mut$limit$1(Object p0){
     long limit= Nat$c$0Instance.unwrap(p0);
