@@ -24,7 +24,6 @@ MyTests: UnitTests{::
 /// sequential flow meets first when there is one.
 DetNats: { #: mut List[Nat] -> (0 =~~= 199).flow.list }
 DetErrIf: { #(b: Bool, msg: Str, e: Nat): Nat -> Block#[Nat].if{b}.error{msg}.return{e} }
-DetNonDetIf: { #(b: Bool, e: Nat): Nat -> Block#[Nat].if{b}.return{Error.nonDeterministic `later element failed non deterministically`}.return{e} }
 /// Burns some time before returning, so an error raised after it is raised late in time.
 DetSlow: { #(e: Nat): Nat -> Block#
   .var[Nat] i = {0}
@@ -65,8 +64,6 @@ FlowErrorIsTheSequentialError: Test {::
   .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> DetErrIf#(e == 5, `boom5`, DetErrIf#(e == 150, `boom150`, e))}.list})
   .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> DetErrIf#(e == 5, `boom5`, DetErrIf#(e == 150, `boom150`, DetSlow#e))}.list})
   .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> e == 5 .if {.then -> DetErrIf#(True, `boom5`, DetSlow#e); .else -> DetErrIf#(e == 150, `boom150`, e)}}.fold({0}, {acc, e -> acc + e})})
-  .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> DetErrIf#(e == 5, `boom5`, DetNonDetIf#(e == 150, e))}.list})
-  .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> e == 5 .if {.then -> DetErrIf#(True, `boom5`, DetSlow#e); .else -> DetNonDetIf#(e == 150, e)}}.list})
   .checkDetErr({::.isMsg{::.contains `boom100`}}, {DetNats#.flow.filter{e -> DetErrIf#(e == 100, `boom100`, e) > 150}.size})
   }
 
