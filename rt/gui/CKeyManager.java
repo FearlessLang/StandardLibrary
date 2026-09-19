@@ -40,28 +40,18 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
 
   private void dispatch(String eventKey,List<KeyAction$m8$0> keyActions){
-    var event=new CKeyEventData(
-      frame.elapsed,
-      frame.screenSizeW,
-      frame.screenSizeH,
-      w(frame.frame.getWidth()),
-      h(frame.frame.getHeight()),
-      eventKey
-      );
+    var elapsed=frame.elapsed;
+    var screenWidth=frame.screenSizeW;
+    var screenHeight=frame.screenSizeH;
+    var windowWidth=w(frame.frame.getWidth());
+    var windowHeight=h(frame.frame.getHeight());
 
     frame.frame.queue.submit(new MF$7$1(){
       @Override public Object mut$$hash$0(){
-        var run=snapshot(keyActions,event.keyText());
+        var run=snapshot(keyActions,eventKey);
         if (run.actions().isEmpty()){ return Void$o$0.instance; }
 
-        var ctx=new CKeyCtx(
-          event.elapsed(),
-          event.screenWidth(),
-          event.screenHeight(),
-          event.windowWidth(),
-          event.windowHeight(),
-          run.key()
-          );
+        var ctx=new CKeyCtx(elapsed,screenWidth,screenHeight,windowWidth,windowHeight,run.key());
 
         for (var a:run.actions()){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
@@ -114,15 +104,6 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
     return this;
   }
 }
-
-record CKeyEventData(
-  Instant$5c$0 elapsed,
-  WidthNat$as$0 screenWidth,
-  HeightNat$lg$0 screenHeight,
-  WidthNat$as$0 windowWidth,
-  HeightNat$lg$0 windowHeight,
-  String keyText
-  ){}
 
 record CKeyRun(KeyStroke$m8$0 key,List<Consumer$ao$1> actions){}
 
