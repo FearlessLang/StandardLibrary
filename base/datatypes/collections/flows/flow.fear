@@ -70,14 +70,13 @@ Flow[E:*]: {
     this.map(ctx, {c, e -> Block#(f#(c, e), e)});
   mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S];
   mut .limit(n: Nat): mut Flow[E];
-  // --Still to implement
   mut .let[DR:*,R:*](
     x: read F[mut MF[mut Flow[E]],DR],
-    cont: mut FlowContinuation[DR,R]
-  ): R->Error.msg`TODO`;
-  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
-  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
-  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg`TODO`;
-  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg`TODO`;
-  mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg`TODO`;
+    cont: mut FlowContinuation[DR,E,R]
+  ): R->_Magic!;
+  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->_Magic!;
+  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->_Magic!;
+  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->_Magic!;
+  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->_Magic!;
+  mut .findFirst(f: read F[E, Bool]): Opt[E]->_Magic!;
   }
