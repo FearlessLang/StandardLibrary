@@ -10,60 +10,60 @@ record CGraphicsCtx(
   Canvas cv,
   _Frame frame,
   Instant$5c$0 elapsed,
-  WidthNat$as$0 panelSizeW,
-  HeightNat$lg$0 panelSizeH,
+  WidthNat$as$0 panelWidth,
+  HeightNat$lg$0 panelHeight,
   XInt$s$0 currentX,
   YInt$s$0 currentY,
-  Paint paint//shared by all positions of one Painter run; owned by AContainer.sk
-  ) implements Graphics$ao$0 {
+  Paint paint// shared by all positions of one Painter run; owned by AContainer.sk
+  ) implements Graphics$ao$0{
 
   @Override public Object mut$color$1(Object color){
-    paint.setColor(Sk.color((Color$1c$0)color));
+    paint.setColor(Sk.color((Color$1c$0) color));
     return this;
   }
-//Drawing outside the panel silently clips (canvas is clipped to the panel),
-//otherwise user can cause errors by resizing the gui by hand
-  @Override public Object mut$position$2(Object x,Object y){
-    frame.xPos((XInt$s$0)x,"graphics x position");
-    frame.yPos((YInt$s$0)y,"graphics y position");
-    return new CGraphicsCtx(cv,frame,elapsed,panelSizeW,panelSizeH,(XInt$s$0)x,(YInt$s$0)y,paint);
+  // Drawing outside the panel silently clips (canvas is clipped to the panel),
+  // otherwise user can cause errors by resizing the gui by hand
+  @Override public Object mut$position$2(Object x, Object y){
+    frame.xPos((XInt$s$0) x, "graphics x position");
+    frame.yPos((YInt$s$0) y, "graphics y position");
+    return new CGraphicsCtx(cv, frame, elapsed, panelWidth, panelHeight, (XInt$s$0) x, (YInt$s$0) y, paint);
   }
-//Correctly does not update the position.
-  @Override public Object mut$line$2(Object x,Object y){
+  // Correctly does not update the position.
+  @Override public Object mut$line$2(Object x, Object y){
     paint.setMode(PaintMode.STROKE).setStrokeWidth(1);
     cv.drawLine(
-      frame.xPos(currentX,"graphics current x"),
-      frame.yPos(currentY,"graphics current y"),
-      frame.xPos((XInt$s$0)x,"graphics line x"),
-      frame.yPos((YInt$s$0)y,"graphics line y"),
+      frame.xPos(currentX, "graphics current x"),
+      frame.yPos(currentY, "graphics current y"),
+      frame.xPos((XInt$s$0) x, "graphics line x"),
+      frame.yPos((YInt$s$0) y, "graphics line y"),
       paint);
     return this;
   }
-  @Override public Object mut$rect$2(Object w,Object h){
+  @Override public Object mut$rect$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawRect(shapeRect("rect",w,h),paint);
+    cv.drawRect(shapeRect("rect", w, h), paint);
     return this;
   }
-  @Override public Object mut$oval$2(Object w,Object h){
+  @Override public Object mut$oval$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawOval(shapeRect("oval",w,h),paint);
+    cv.drawOval(shapeRect("oval", w, h), paint);
     return this;
   }
-  private Rect shapeRect(String what,Object w,Object h){
+  private Rect shapeRect(String what, Object w, Object h){
     return Rect.makeXYWH(
-      frame.xPos(currentX,"graphics "+what+" x"),
-      frame.yPos(currentY,"graphics "+what+" y"),
-      frame.width((WidthNat$as$0)w,"graphics "+what+" width"),
-      frame.height((HeightNat$lg$0)h,"graphics "+what+" height"));
+      frame.xPos(currentX, "graphics " + what + " x"),
+      frame.yPos(currentY, "graphics " + what + " y"),
+      frame.width((WidthNat$as$0) w, "graphics " + what + " width"),
+      frame.height((HeightNat$lg$0) h, "graphics " + what + " height"));
   }
   @Override public Object mut$image$1(Object image){
-    var img=((Image$1c$0Instance)image).image();
-    var x=frame.xPos(currentX,"graphics image x");
-    var y=frame.yPos(currentY,"graphics image y");
+    var img = ((Image$1c$0Instance) image).image();
+    var x = frame.xPos(currentX, "graphics image x");
+    var y = frame.yPos(currentY, "graphics image y");
     cv.drawImageRect(
       img,
-      Rect.makeWH(img.getWidth(),img.getHeight()),
-      Rect.makeXYWH(x,y,img.getWidth(),img.getHeight()),
+      Rect.makeWH(img.getWidth(), img.getHeight()),
+      Rect.makeXYWH(x, y, img.getWidth(), img.getHeight()),
       SamplingMode.LINEAR,
       null,
       true);
@@ -72,6 +72,6 @@ record CGraphicsCtx(
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object read$screenWidth$0(){ return frame.screenSizeW; }
   @Override public Object read$screenHeight$0(){ return frame.screenSizeH; }
-  @Override public Object read$panelWidth$0(){ return panelSizeW; }
-  @Override public Object read$panelHeight$0(){ return panelSizeH; }
+  @Override public Object read$panelWidth$0(){ return panelWidth; }
+  @Override public Object read$panelHeight$0(){ return panelHeight; }
 }
