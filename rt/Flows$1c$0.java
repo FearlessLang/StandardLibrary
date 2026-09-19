@@ -2,8 +2,12 @@ package base;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Gatherer;
 import java.util.stream.Gatherers;
@@ -31,171 +35,110 @@ public interface Flows$1c$0 extends Sealed$2o$0{
   default Object imm$$hash$16(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return Flow$o$1Instance.of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15); }
 
   default Object imm$fromMutList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream()); }//sequential
-  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream().parallel()); }//parallel!
-  default Object imm$fromReadList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream().parallel()); }//parallel!
-  default Object imm$fromImmList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream().parallel()); }//parallel!
+  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0)); }//parallel!
+  default Object imm$fromReadList$1(Object p0){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0)); }//parallel!
+  default Object imm$fromImmList$1(Object p0){ return Flow$o$1Instance.par(List$o$1Instance.asJava(p0)); }//parallel!
 
   Flows$1c$0 instance= new Flows$1c$0(){};
 }
 
-record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
+final class Flow$o$1Instance implements Flow$o$1{
+  private Stream<Object> s;
+  private final List<Object> src;
+  private final UnaryOperator<Consumer<Object>> stages;
+  private boolean used;
+  private Flow$o$1Instance(Stream<Object> s, List<Object> src, UnaryOperator<Consumer<Object>> stages){ this.s= s; this.src= src; this.stages= stages; }
   private static Error consumed(){ return err("Flow consumed"); }
   static Flow$o$1Instance of(Object... args){ return Flow$o$1Instance.of(Stream.of(args)); }
-  static Flow$o$1Instance of(Stream<Object> stream) {return new Flow$o$1Instance(stream);}
-
-  @Override public Object mut$map$1(Object p0){
-    try{ return new Flow$o$1Instance(s.map(e->callF$2(p0,e))); }
-    catch(IllegalStateException e){ throw consumed(); }
+  static Flow$o$1Instance of(Stream<Object> stream){ return new Flow$o$1Instance(stream, null, null); }
+  static Flow$o$1Instance par(List<Object> src){ return src.size() < 2 ? of(src.stream()) : new Flow$o$1Instance(null, src, down -> down); }
+  Stream<Object> s(){
+    if (used){ throw consumed(); }
+    used= true;
+    if (s == null){ s= Speculate.stream(src, stages); }
+    return s;
   }
+  private Flow$o$1Instance stage(UnaryOperator<Stream<Object>> seq, UnaryOperator<Consumer<Object>> par){
+    if (src == null){ return of(seq.apply(s())); }
+    if (used){ throw consumed(); }
+    used= true;
+    return new Flow$o$1Instance(null, src, down -> stages.apply(par.apply(down)));
+  }
+  private <R> R run(Function<Stream<Object>,R> body){
+    var st= s();
+    try{ return body.apply(st); }
+    finally{ st.close(); }
+  }
+  private Flow$o$1Instance map(Object f){ return stage(st -> st.map(e -> callF$2(f, e)), down -> e -> down.accept(callF$2(f, e))); }
+  @Override public Object mut$map$1(Object p0){ return map(p0); }
   @Override public Object mut$filter$1(Object p0){
-    try{ return new Flow$o$1Instance(s.filter(e->isTrue(callF$2(p0,e)))); }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$size$0(){
-    try{ return new Nat$c$0Instance((int)s.count()); }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$$plus_plus$1(Object o){
-    //Note: all those try catches are relying on the JVM enforcing the stream consumptions,
-    //but in the standard it is not guaranteed that it is checked. We need to add tests to all of the flow methods
-    //to check that the current JVM does enforce it.
-    var other= ((Flow$o$1Instance)o).s;
-    try{ return new Flow$o$1Instance(Stream.concat(s, other)); }
-    catch(IllegalStateException e){ throw consumed(); }    
-  }
-  @Override public Object mut$forEach$1(Object p0){
-    try{ s.forEach(e->callMF$2(p0,e)); return Void$o$0.instance; }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$list$0(){
-    try{ return List$o$1Instance.wrap(s.toList()); }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$eList$0(){
-    try{ return EList$1k$1Instance.unsafeWrap(s.collect(Collectors.toCollection(ArrayList::new))); }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$set$2(Object p0, Object p1){
-    OrderHashBy$2ea$2 ordering = Set$c$1Instance.ordering(p1);
-    AsImm$1g$2 toImm = (AsImm$1g$2) p0;
-    try{
-      return Set$c$1Instance.fromSortedList(
-        ordering,
-        s.map(toImm::mut$$hash$1).sorted(Util.toComparator(ordering)).toList()
-      );
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$eSet$2(Object p0, Object p1){
-    OrderHashBy$2ea$2 ordering = Set$c$1Instance.ordering(p1);
-    AsImm$1g$2 toImm = (AsImm$1g$2) p0;
-    LinkedHashMap<Util.MapKey, Object> map = new LinkedHashMap<>();
-    try{
-      s.map(toImm::mut$$hash$1).forEach(e -> map.put(mapKey(ordering, e), e));
-      return new ESet$s$1Instance(map, ordering);
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$fold$2(Object p0,Object p1){
-    try{
-      var it= s.iterator();
-      Object r= callMF$1(p0);
-      while(it.hasNext()){ r = callF$3(p1,r,it.next()); }
-      return r;
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$mapping$2(Object p0,Object p1){
-    try{
-      var kem= (KeyElemMapper$9wg$3)p1;
-      var m= new LinkedHashMap<Util.MapKey,Object>();
-      var k= Maps$o$0.toKey(p0);
-      s.forEach(e->m.put(mapKey(k,kem.imm$key$1(e)), kem.imm$elem$1(e)));
-      return new Map$c$2Instance(k,m);
-    }
-    catch(IllegalStateException e){ throw consumed(); }
+    return stage(st -> st.filter(e -> isTrue(callF$2(p0, e))), down -> e -> { if (isTrue(callF$2(p0, e))){ down.accept(e); } });
   }
   @Override public Object mut$flatMap$1(Object p0){
-    try{ return new Flow$o$1Instance(s.flatMap(e->((Flow$o$1Instance)callF$2(p0,e)).s)); }
-    catch(IllegalStateException e){ throw consumed(); }
+    return stage(st -> st.flatMap(e -> ((Flow$o$1Instance)callF$2(p0, e)).s()), down -> e -> flatMap(p0, e, down));
+  }
+  private static void flatMap(Object f, Object e, Consumer<Object> down){
+    try (var inner= ((Flow$o$1Instance)callF$2(f, e)).s()){ inner.forEach(down); }
+  }
+  @Override public Object mut$size$0(){ return run(st -> new Nat$c$0Instance(st.mapToLong(e -> 1).sum())); }
+  @Override public Object mut$$plus_plus$1(Object o){ return of(Stream.concat(s(), ((Flow$o$1Instance)o).s())); }
+  @Override public Object mut$forEach$1(Object p0){ return run(st -> forEach(st, p0)); }
+  private static Object forEach(Stream<Object> st, Object f){ st.forEach(e -> callMF$2(f, e)); return Void$o$0.instance; }
+  @Override public Object mut$list$0(){ return run(st -> List$o$1Instance.wrap(st.toList())); }
+  @Override public Object mut$eList$0(){ return run(st -> EList$1k$1Instance.unsafeWrap(st.collect(Collectors.toCollection(ArrayList::new)))); }
+  @Override public Object mut$set$2(Object p0, Object p1){
+    AsImm$1g$2 toImm= (AsImm$1g$2)p0;
+    return run(st -> Set$c$1Instance.fromUnsortedList(Set$c$1Instance.ordering(p1), st.map(toImm::mut$$hash$1).collect(Collectors.toCollection(ArrayList::new))));
+  }
+  @Override public Object mut$eSet$2(Object p0, Object p1){ return run(st -> eSet(st, (AsImm$1g$2)p0, new ESet$s$1Instance(Set$c$1Instance.ordering(p1)))); }
+  private static Object eSet(Stream<Object> st, AsImm$1g$2 toImm, ESet$s$1Instance res){ st.forEach(e -> res.mut$add$1(toImm.mut$$hash$1(e))); return res; }
+  @Override public Object mut$fold$2(Object p0,Object p1){ return run(st -> fold(st, p0, p1)); }
+  private static Object fold(Stream<Object> st, Object acc, Object f){
+    var it= st.iterator();
+    Object r= callMF$1(acc);
+    while(it.hasNext()){ r = callF$3(f,r,it.next()); }
+    return r;
+  }
+  @Override public Object mut$mapping$2(Object p0,Object p1){ return run(st -> mapping(st, p0, (KeyElemMapper$9wg$3)p1)); }
+  private static Object mapping(Stream<Object> st, Object keyOh, KeyElemMapper$9wg$3 kem){
+    var m= new LinkedHashMap<Util.MapKey,Object>();
+    var k= Maps$o$0.toKey(keyOh);
+    st.forEach(e->m.put(mapKey(k,kem.imm$key$1(e)), kem.imm$elem$1(e)));
+    return new Map$c$2Instance(k,m);
   }
   //---
-  @Override public Object mut$any$1(Object p0){
-    try{ return bool(s.anyMatch(e->isTrue(callF$2(p0,e)))); }
-    catch(IllegalStateException e){ throw consumed(); }
+  @Override public Object mut$any$1(Object p0){ return map(p0).run(st -> bool(st.anyMatch(Util::isTrue))); }
+  @Override public Object mut$all$1(Object p0){ return map(p0).run(st -> bool(st.allMatch(Util::isTrue))); }
+  @Override public Object mut$none$1(Object p0){ return map(p0).run(st -> bool(st.noneMatch(Util::isTrue))); }
+  @Override public Object mut$get$0(){ return run(Flow$o$1Instance::get); }
+  private static Object get(Stream<Object> st){
+    var it= st.iterator();
+    check(it.hasNext(), "Flow.get expected size==1, got 0");
+    var e0= it.next();
+    check(!it.hasNext(), "Flow.get expected size==1, got 2+");
+    return e0;
   }
-  @Override public Object mut$all$1(Object p0){
-    try{ return bool(s.allMatch(e->isTrue(callF$2(p0,e)))); }
-    catch(IllegalStateException e){ throw consumed(); }
+  @Override public Object mut$min$1(Object p0){ return of(s().gather(new MinGatherer((OrderBy$5e$2) p0))); }
+  @Override public Object mut$max$1(Object p0){ return of(s().gather(new MaxGatherer((OrderBy$5e$2) p0))); }
+  @Override public Object mut$getOpt$0(){ return run(Flow$o$1Instance::getOpt); }
+  private static Object getOpt(Stream<Object> st){
+    var it= st.iterator();
+    if(!it.hasNext()){ return optEmpty(); }
+    var e0= it.next();
+    check(!it.hasNext(), "Flow.opt expected size in {0,1}, got 2+");
+    return optSome(e0);
   }
-  @Override public Object mut$none$1(Object p0){
-    try{ return bool(s.noneMatch(e->isTrue(callF$2(p0,e)))); }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$get$0(){
-    try{
-      var it= s.iterator();
-      check(it.hasNext(), "Flow.get expected size==1, got 0");
-      var e0= it.next();
-      check(!it.hasNext(), "Flow.get expected size==1, got 2+");
-      return e0;
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$min$1(Object p0){
-    try {
-      return Flow$o$1Instance.of(s.gather(new MinGatherer((OrderBy$5e$2) p0)));
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$max$1(Object p0){
-    try {
-      return Flow$o$1Instance.of(s.gather(new MaxGatherer((OrderBy$5e$2) p0)));
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$getOpt$0(){
-    try{
-      var it= s.iterator();
-      if(!it.hasNext()){ return optEmpty(); }
-      var e0= it.next();
-      check(!it.hasNext(), "Flow.opt expected size in {0,1}, got 2+");
-      return optSome(e0);
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$first$0(){
-    try{
-      var it= s.iterator();
-      return it.hasNext() ? optSome(it.next()) : optEmpty();
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$last$0(){
-    try{ return Util.toOpt(s.reduce((_, b) -> b)); }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$scan$2(Object p0, Object p1){
-    try{
-      return Flow$o$1Instance.of(
-        s.gather(Gatherers.scan(() -> p0, (a,b) -> callF$3(p1,a,b)))
-      );
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
+  @Override public Object mut$first$0(){ return run(st -> Util.toOpt(st.findFirst())); }
+  @Override public Object mut$last$0(){ return run(st -> Util.toOpt(st.reduce((_, b) -> b))); }
+  @Override public Object mut$scan$2(Object p0, Object p1){ return of(s().gather(Gatherers.scan(() -> p0, (a,b) -> callF$3(p1,a,b)))); }
   @Override public Object mut$limit$1(Object p0){
-    try{
-      long limit = Nat$c$0Instance.unwrap(p0);
-      if (limit < 0) { // check if overflows long
-        // Potentially better to clamp here and hide it - the caller will likely die before they hit Long.MAX_VALUE.
-        // It's dishonest but if each operation takes 1ns:  9223372036854775807 × (1 nanosecond) ≈ 106752 d ≈ 292 years
-        throw err("Flow.limit: Cannot limit to more than "+Long.MAX_VALUE+" values, got "+Long.toUnsignedString(limit));
-      }
-      return Flow$o$1Instance.of(
-        s.limit(limit)
-      );
+    long limit = Nat$c$0Instance.unwrap(p0);
+    if (limit < 0) { // check if overflows long
+      // Potentially better to clamp here and hide it - the caller will likely die before they hit Long.MAX_VALUE.
+      // It's dishonest but if each operation takes 1ns:  9223372036854775807 × (1 nanosecond) ≈ 106752 d ≈ 292 years
+      throw err("Flow.limit: Cannot limit to more than "+Long.MAX_VALUE+" values, got "+Long.toUnsignedString(limit));
     }
-    catch(IllegalStateException e){ throw consumed(); }
+    return of(s().limit(limit));
   }
 }
 
