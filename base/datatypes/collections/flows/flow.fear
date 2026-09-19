@@ -31,7 +31,7 @@ Flows: {
 /// its result abandons the lambdas still running for it at their next `Yield#`.
 /// It returns `Void` and does nothing anywhere else, so it can go in any loop or
 /// recursion inside a flow lambda that may run for long.
-Yield: Sealed { #: Void -> Magic!; }
+Yield: Sealed { #: Void -> _Magic!; }
 
 Flow[E:*]: {
   mut .forEach[R:*](f: mut MF[E,Void]): Void;
