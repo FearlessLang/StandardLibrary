@@ -1,0 +1,85 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Void as Void;
+use base.List as List;
+use base.Lists as Lists;
+use base.Flows as Flows;
+use base.Flow as Flow;
+use base.Str as Str;
+use base.Nat as Nat;
+use base.ELists as ELists;
+use base.True as True;
+use base.False as False;
+use base.Bool as Bool;
+use base.Block as Block;
+use base.Continue as Continue;
+use base.Break as Break;
+use base.Error as Error;
+
+MyTests: UnitTests{::
+  .test TestFlowDeterminism
+  }
+/// A parallel flow (read/imm List.flow, ESet.flow, EList.flow(mode), List.flow(mode)) is observationally
+/// the sequential flow of the same source: the same values in the same order, and the error the
+/// sequential flow meets first when there is one.
+DetNats: { #: mut List[Nat] -> (0 =~~= 199).flow.list }
+DetErrIf: { #(b: Bool, msg: Str, e: Nat): Nat -> Block#[Nat].if{b}.error{msg}.return{e} }
+DetNonDetIf: { #(b: Bool, e: Nat): Nat -> Block#[Nat].if{b}.return{Error.nonDeterministic `later element failed non deterministically`}.return{e} }
+/// Burns some time before returning, so an error raised after it is raised late in time.
+DetSlow: { #(e: Nat): Nat -> Block#
+  .var[Nat] i = {0}
+  .var[Nat] x = {e}
+  .loop {Block#
+    .if {i.get == 3000000} .return {Break#}
+    .do {x.set(x.get.hashWith(i.get))}
+    .do {i.set(i.get + 1)}
+    .return {Continue#}
+    }
+  .return {x.get.aluRem 1 + e};
+  }
+
+FlowOrderIsEncounterOrder: Test {::
+  .check{DetNats#.flow.map{e -> e + 1}.list .assertEq({::}, (1 =~~= 200).flow.list)}
+  .check{DetNats#.flow.flatMap{e -> Flows#(e, e)}.list .assertEq({::}, DetNats#.seqFlow.flatMap{e -> Flows#(e, e)}.list)}
+  .check{DetNats#.flow.mapping({::}, {.key k -> k; .elem k -> k}).flow.map{::.key}.list .assertEq({::}, DetNats#)}
+  .check{Block#
+    .let acc= {ELists#[Nat]}
+    .do{DetNats#.flow.forEach{e -> acc.add e}}
+    .return{acc.list .assertEq({::}, DetNats#)}
+    }
+  .check{Block#
+    .let acc= {ELists#[Nat]}
+    .let es= {DetNats#.flow.eSet({e -> Block#(acc.add e, e)}, {::})}
+    .do{acc.list .assertEq({::}, DetNats#)}
+    .return{es.seqFlow.list .assertEq({::}, DetNats#)}
+    }
+  .check{Block#
+    .let acc= {ELists#[Nat]}
+    .let s= {DetNats#.flow.set({e -> Block#(acc.add e, e)}, {::})}
+    .do{acc.list .assertEq({::}, DetNats#)}
+    .return{s.list .assertEq({::}, DetNats#)}
+    }
+  }
+
+FlowErrorIsTheSequentialError: Test {::
+  .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> DetErrIf#(e == 5, `boom5`, DetErrIf#(e == 150, `boom150`, e))}.list})
+  .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> DetErrIf#(e == 5, `boom5`, DetErrIf#(e == 150, `boom150`, DetSlow#e))}.list})
+  .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> e == 5 .if {.then -> DetErrIf#(True, `boom5`, DetSlow#e); .else -> DetErrIf#(e == 150, `boom150`, e)}}.fold({0}, {acc, e -> acc + e})})
+  .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> DetErrIf#(e == 5, `boom5`, DetNonDetIf#(e == 150, e))}.list})
+  .checkDetErr({::.isMsg{::.contains `boom5`}}, {DetNats#.flow.map{e -> e == 5 .if {.then -> DetErrIf#(True, `boom5`, DetSlow#e); .else -> DetNonDetIf#(e == 150, e)}}.list})
+  .checkDetErr({::.isMsg{::.contains `boom100`}}, {DetNats#.flow.filter{e -> DetErrIf#(e == 100, `boom100`, e) > 150}.size})
+  }
+
+FlowStopsAtTheDecision: Test {::
+  .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.any{e -> e == 100} .assertTrue}
+  .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.all{e -> e < 100} .assertFalse}
+  .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.first! .assertEq 0}
+  .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.limit 50 .list .assertEq({::}, (0 =~~= 49).flow.list)}
+  .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.scan(0, {acc, e -> acc + e}).limit 3 .list .assertEq({::}, Lists#(0, 1, 3))}
+  }
+
+TestFlowDeterminism: Test {::
+  .test FlowOrderIsEncounterOrder
+  .test FlowErrorIsTheSequentialError
+  .test FlowStopsAtTheDecision
+  }
