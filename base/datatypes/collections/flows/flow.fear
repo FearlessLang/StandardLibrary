@@ -27,6 +27,11 @@ Flows: {
   .fromMutList[R:*](xs: mut List[R],mode: FlowMode[R]): mut Flow[R]->_Magic!;//parallel
   }
 
+/// `Yield#` is a cancellation point for the tasks of a parallel flow: a task whose flow already has
+/// its result stops at its next `Yield#`. It returns `Void` and does nothing anywhere else, so it
+/// can go in any loop or recursion inside a flow lambda that may run for long.
+Yield: Sealed { #: Void -> _Magic!; }
+
 Flow[E:*]: {
   mut .forEach[R:*](f: mut MF[E,Void]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];

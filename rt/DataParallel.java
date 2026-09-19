@@ -6,6 +6,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import base.FlowOps.Err;
 import base.FlowOps.FlowOp;
@@ -14,11 +15,23 @@ import base.FlowOps.Sink;
 final class DataParallel{
   private DataParallel(){}
   static final ScopedValue<Boolean> sequentialised= ScopedValue.newInstance();
+  static final ThreadLocal<Source> current= new ThreadLocal<>();
   static final int cpus= Runtime.getRuntime().availableProcessors();
   static final int parallelismPotential= 4 * cpus;
   static final Semaphore available= new Semaphore(parallelismPotential);
   static final Object stopToken= new Object();
   record Failure(Throwable t){}
+  static final ThreadLocal<int[]> shield= ThreadLocal.withInitial(()->new int[1]);
+  static void poll(){
+    var s= current.get();
+    if (s != null && shield.get()[0] == 0 && s.cancelled()){ throw new Cancelled(); }
+  }
+  static Object shielded(Supplier<Object> s){
+    var depth= shield.get();
+    depth[0]+= 1;
+    try{ return s.get(); }
+    finally{ depth[0]-= 1; }
+  }
   static Object take(LinkedBlockingQueue<Object> q){
     try{ return q.take(); }
     catch(InterruptedException e){ Thread.currentThread().interrupt(); throw new RuntimeException(e); }
@@ -34,8 +47,10 @@ final class DataParallel{
   static final class Source implements FlowOp{
     final FlowOp source;
     final long size;
+    final Source parent= shield.get()[0] > 0 ? null : current.get();
     volatile boolean running= true;
     Source(FlowOp source, long size){ this.source= source; this.size= size; }
+    boolean cancelled(){ return !running || (parent != null && parent.cancelled()); }
     @Override public void step(Sink sink){ source.step(sink); }
     @Override public void stopUp(){ running= false; source.stopUp(); }
     @Override public boolean isRunning(){ return source.isRunning(); }
@@ -61,7 +76,7 @@ final class DataParallel{
       var spawned= new Thread[n];
       int knownFinished= 0;
       for (int i= 0; i < n; i++){
-        var worker= new Worker(split.get(i), new Buffer(down, flusher), sync, this);
+        var worker= new Worker(split.get(i), new Buffer(down, flusher, this), sync, this);
         if (i == n - 1){ worker.run(); break; }
         if (available.tryAcquire()){
           worker.releaseOnDone= true;
@@ -91,9 +106,13 @@ final class DataParallel{
     boolean releaseOnDone;
     Worker(FlowOp source, Buffer down, CountDownLatch sync, Source dp){ this.source= source; this.down= down; this.sync= sync; this.dp= dp; }
     @Override public void run(){
-      try{ if (dp.running){ source.forAll(down); } }
+      var prev= current.get();
+      current.set(dp);
+      try{ if (!dp.cancelled()){ source.forAll(down); } }
       catch(Deterministic d){ down.pushError(d.i); }
+      catch(Cancelled c){}
       finally{
+        current.set(prev);
         down.flush();
         sync.countDown();
         if (releaseOnDone){ available.release(); }
@@ -102,9 +121,13 @@ final class DataParallel{
   }
   static final class Buffer implements Sink{
     final Sink original;
+    final Source dp;
     final LinkedBlockingQueue<Object> buffer= new LinkedBlockingQueue<>();
-    Buffer(Sink original, Flusher flusher){ this.original= original; flusher.toFlush.add(this); }
-    @Override public void accept(Object e){ put(buffer, e); }
+    Buffer(Sink original, Flusher flusher, Source dp){ this.original= original; this.dp= dp; flusher.toFlush.add(this); }
+    @Override public void accept(Object e){
+      if (dp.cancelled()){ throw new Cancelled(); }
+      put(buffer, e);
+    }
     @Override public void pushError(Object info){ put(buffer, new Err(info)); }
     @Override public void stopDown(){}
     void flush(){ put(buffer, stopToken); }
@@ -114,7 +137,7 @@ final class DataParallel{
     Thread thread;
     static Flusher start(Thread.UncaughtExceptionHandler handler){
       var f= new Flusher();
-      f.thread= Thread.ofVirtual().uncaughtExceptionHandler(handler).start(f);
+      f.thread= Thread.ofPlatform().daemon(true).uncaughtExceptionHandler(handler).start(f);
       return f;
     }
     void stop(Sink original){

@@ -50,8 +50,14 @@ FlowParallelOrderTests: Test {::
   }
 
 ErrIf: { #(b: Bool, msg: Str, e: Nat): Nat -> Block#[Nat].if{b}.error{msg}.return{e} }
+LoopIf: { #(b: Bool, e: Nat): Nat -> Block#[Nat].if{b}.return{Block#[Nat].loop{Block#(Yield#, Continue#)}.return{e}}.return{e} }
 
 FlowParallelErrorTests: Test {::
+  .check{Nats#.flow.map{e -> LoopIf#(e > 0, e)}.first! .assertEq 0}
+  .check{Nats#.flow.map{e -> LoopIf#(e > 0, e)}.any{e -> e == 0} .assertTrue}
+  .checkDetErr({::.isMsg{::.contains `boom5`}}, {Nats#.flow.map{e -> ErrIf#(e == 5, `boom5`, LoopIf#(e > 5, e))}.list})
+  .check{(0 =~~= 1999).flow.list.flow.map{e -> LoopIf#(e == 6, e)}.filter{e -> e == 5}.first! .assertEq 5}
+  .check{Nats#.flow.map{e -> LoopIf#(e > 3, e)}.limit 3 .list .assertEq({::}, Lists#(0, 1, 2))}
   .checkDetErr({::.isMsg{::.contains `boom100`}}, {Nats#.flow.map{e -> ErrIf#(e == 100, `boom100`, ErrIf#(e == 150, `boom150`, e))}.list})
   .checkDetErr({::.isMsg{::.contains `boom100`}}, {Nats#.flow.map{e -> ErrIf#(e == 100, `boom100`, ErrIf#(e == 150, `boom150`, e))}.fold({0}, {acc, e -> acc + e})})
   .checkDetErr({::.isMsg{::.contains `boom100`}}, {Nats#.flow.filter{e -> ErrIf#(e == 100, `boom100`, e) > 150}.size})
@@ -134,8 +140,30 @@ FlowStatefulTests: Test {::
     })
   }
 
+Spin: { #(n: Nat): Void -> Block#[Void]
+  .var[Nat] i = {0}
+  .loop {Block#
+    .if {i.get == n} .return {Break#}
+    .do {Yield#}
+    .do {i.set(i.get + 1)}
+    .return {Continue#}
+    }
+  .return {Void}
+  }
+EvenReprs: { #(n: Nat): mut List[mut Repr[Count[Nat]]] -> (1 =~~= n).flow.map{_ -> Reprs#(Count.nat 0, {c -> c.get.aluRem 2 == 0})}.list }
+/// A cancelled task stops at its next Yield#, which must never leave a mutation half done, and every
+/// task is done when the terminal returns, so the caller never sees a mutation in progress.
+FlowCancellationTests: Test {::
+  .check{Block#
+    .let rs= {EvenReprs#2000}
+    .do{Block#(rs.flow(ParRepr[Count[Nat]]).map{r -> Block#(r.mutate{c -> Block#(c++, Spin#20000, c++, Void)}, 1)}.first, Void)}
+    .return{rs.seqFlow.all{r -> r.look{c -> c.get.aluRem 2 == 0}} .assertTrue}
+    }
+  }
+
 TestFlowParallel: Test {::
   .test FlowParallelOrderTests
   .test FlowParallelErrorTests
   .test FlowStatefulTests
+  .test FlowCancellationTests
   }

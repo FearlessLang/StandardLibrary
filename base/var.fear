@@ -104,12 +104,15 @@ Reprs: {
     .openIso _x = x
     .if {inv#(_x).not} .error {Infos.msg`Invariant does not initially hold`} 
     .return{mut Repr[T]: {'self
-      mut .mutate[R:iso,imm,mut,read](f: mut MF[mutH T,R]): R -> _IdOrErr#(f#(_x),inv#(_x),_ReprCacheFlush#(self));
+      mut .mutate[R:iso,imm,mut,read](f: mut MF[mutH T,R]): R -> _IdOrErr#(_NoYield#{f#(_x)},inv#(_x),_ReprCacheFlush#(self));
       read .look[R](f: read F[read T,R]): R -> f#(_x);
       read .cachableLook[R](f: CacheReprF[T,R]): R -> f._get(self);
       read .cachableLook[A,R](a: Norm[A], f: CacheReprF[T,A,R]): R -> f._get(self,a);
       }}
   }
+
+/// Runs the block with `Yield` disabled, so a mutation is never cut halfway.
+_NoYield: Sealed { #[R:iso,imm,mut,read](f: mut MF[R]): R -> _Magic!; }
 
 _IdOrErr: {#[R:iso,imm,mut,read](r:R,b:Bool,_:Void):R->Block#(//Needed for the iso case of R
   b?{.then->Void; .else->Error.msg`Invariant does not hold after mutation`},

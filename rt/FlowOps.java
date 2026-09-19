@@ -11,6 +11,8 @@ import static base.Util.*;
 
 @SuppressWarnings("serial")
 final class FlowError extends Deterministic{ FlowError(Info$o$0 i){ super(i); } }
+@SuppressWarnings("serial")
+final class Cancelled extends RuntimeException{ Cancelled(){ super(null, null, false, false); } }
 
 final class FlowOps{
   private FlowOps(){}
@@ -251,7 +253,11 @@ final class FlowOps{
     final FlowOp op;
     boolean stopped;
     Terminal(FlowOp op){ this.op= op; }
-    @Override public void pushError(Object info){ if (!stopped){ throw new FlowError((Info$o$0)info); } }
+    @Override public void pushError(Object info){
+      if (stopped){ return; }
+      stopDown();
+      throw new FlowError((Info$o$0)info);
+    }
     @Override public void stopDown(){ stopped= true; op.stopUp(); }
     void drain(UnaryOperator<Sink> deco){ op.forAll(deco.apply(this)); op.stopUp(); }
   }
