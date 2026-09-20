@@ -1,4 +1,4 @@
-AsImm[E:*, R]: { mut #(E): R; }
+AsImm[E:*, R]: { read #(E): R; }
 
 FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
 ELists: { #[E:*]: mut EList[E]-> _Magic! }

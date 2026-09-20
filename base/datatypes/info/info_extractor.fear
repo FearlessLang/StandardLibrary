@@ -8,11 +8,11 @@ Extractor[T:*, Self]: Extractor[T] {
   .where(f: read F[InfoValidator, InfoValidator]): Self;
   }
 
-Flatten: {
-  #[T:*]: Flatten[T] -> Flatten[T];
+_FlattenOpt: {
+  #[T:*]: _FlattenOpt[T] -> _FlattenOpt[T];
   }
 
-Flatten[T:*]: Operation[Opt[Opt[T]], Opt[T]] {
+_FlattenOpt[T:*]: Operation[Opt[Opt[T]], Opt[T]] {
    ::.match {
     .some x -> x;
     .empty -> {};
@@ -44,7 +44,7 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
     .close -> this.close;
     .extract -> this.extract
       .mapSome{key.indexInto ::}.as{::}
-      |> Flatten[Info];
+      |> _FlattenOpt[Info];
     };
 
   .where f -> this.extract.match{
@@ -85,7 +85,7 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
     .extract -> this.extract.mapSome{::.matchWithDefault {
       .map m -> fn#(m).toOpt{m};
       .default -> {};
-      }}.as{::.as{::}} |> Flatten[Map[Str,Info]]
+      }}.as{::.as{::}} |> _FlattenOpt[Map[Str,Info]]
     };
 
   .extractMsg: _StrExtractor -> this.extractMsg{_ -> True};

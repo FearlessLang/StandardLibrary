@@ -42,8 +42,8 @@ Flow[E:*]: {
   mut ++ (mut Flow[E]): mut Flow[E];
   mut .list: mut List[E];
   mut .eList: mut EList[E];
-  mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
-  mut .eSet[E', K](mut AsImm[E, E'], OrderHashBy[imm E, K]): mut ESet[E'];
+  mut .set[E', K](read AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
+  mut .eSet[E', K](read AsImm[E, E'], OrderHashBy[imm E, K]): mut ESet[E'];
   mut .mapping[K,K0,E0:*](OrderHashBy[K,K0], read KeyElemMapper[E,K,E0]): mut Map[K,E0];
   mut .join(js: JoinStr[E]): E -> js.joinStr this;
   mut .sum(sn: SumNumber[E]): E -> sn.sumNumber this;
@@ -58,8 +58,8 @@ Flow[E:*]: {
   mut .any(f: read F[E, Bool]):  Bool;
   mut .all(f: read F[E, Bool]):  Bool;
   mut .none(f: read F[E, Bool]): Bool;
-  mut .get:   E;//get the first element if size==1, throws otherwise
-  mut .getOpt:   mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
+  mut .get: E;//get the first element if size==1, throws otherwise
+  mut .getOpt: mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
   mut .first: mut Opt[E]; //opt of the first element
   /// `this.last` returns the last element in the flow, consuming `this`.
   /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(e))``
