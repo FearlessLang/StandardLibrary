@@ -28,6 +28,9 @@ Flows: {
   }
 
 Flow[E:*]: {
+  /// ``this.forEach(f)`` applies ``f`` to every element of `this`, in flow order.
+  /// Since ``f`` is a ``mut MF`` it can write what it captured, so the chain runs
+  /// sequentially whatever mode the source enabled.
   mut .forEach[R:*](f: mut MF[E,Void]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
   mut .flatMap[R:*](f: read F[E, Flow[R]]): mut Flow[R];

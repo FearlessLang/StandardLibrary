@@ -74,6 +74,7 @@ MyTests:UnitTests{::
  // .test TestWrappers
   .test GridHitTestTests
   .test TestList
+  .test TestFlow
  // .test TestMap
  // .test TestAs
  // .test TestRepr

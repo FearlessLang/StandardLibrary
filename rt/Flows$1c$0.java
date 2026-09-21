@@ -64,7 +64,7 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     catch(IllegalStateException e){ throw consumed(); }    
   }
   @Override public Object mut$forEach$1(Object p0){
-    try{ s.forEach(e->callMF$2(p0,e)); return Void$o$0.instance; }
+    try{ s.sequential().forEachOrdered(e->callMF$2(p0,e)); return Void$o$0.instance; }
     catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$list$0(){
