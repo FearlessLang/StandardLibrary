@@ -1,6 +1,7 @@
 package base;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -162,6 +163,25 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$sort$1(Object p0){
+    try {
+      return Flow$o$1Instance.of(s.sorted(toComparator((OrderBy$5e$2) p0)));
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$distinct$1(Object p0){
+    try {
+      return Flow$o$1Instance.of(s.gather(new DistinctGatherer((OrderHashBy$2ea$2) p0)));
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
+  @Override public Object mut$sortDistinct$1(Object p0){
+    var by= (OrderBy$5e$2) p0;
+    try {
+      return Flow$o$1Instance.of(s.sorted(toComparator(by)).gather(new SortedDistinctGatherer(by)));
+    }
+    catch(IllegalStateException e){ throw consumed(); }
+  }
   @Override public Object mut$getOpt$0(){
     try{
       var it= s.iterator();
@@ -259,4 +279,34 @@ final class MaxGatherer extends BestGatherer {
 
   @Override
   boolean better(int cmpResult) { return cmpResult > 0; }
+}
+
+final class DistinctGatherer implements Gatherer<Object, HashSet<Util.MapKey>, Object> {
+  private final OrderHashBy$2ea$2 ordering;
+
+  DistinctGatherer(OrderHashBy$2ea$2 ordering) { this.ordering = ordering; }
+
+  @Override
+  public Supplier<HashSet<Util.MapKey>> initializer() { return HashSet::new; }
+  @Override
+  public Integrator<HashSet<Util.MapKey>, Object, Object> integrator() { return this::integrate; }
+  private boolean integrate(HashSet<Util.MapKey> seen, Object element, Downstream<? super Object> downstream) {
+    return !seen.add(mapKey(ordering, element)) || downstream.push(element);
+  }
+}
+
+final class SortedDistinctGatherer implements Gatherer<Object, Object[], Object> {
+  private final OrderBy$5e$2 ordering;
+
+  SortedDistinctGatherer(OrderBy$5e$2 ordering) { this.ordering = ordering; }
+
+  @Override
+  public Supplier<Object[]> initializer() { return () -> new Object[1]; }
+  @Override
+  public Integrator<Object[], Object, Object> integrator() { return this::integrate; }
+  private boolean integrate(Object[] kept, Object element, Downstream<? super Object> downstream) {
+    if (kept[0] != null && cmp(ordering, kept[0], element) == 0) { return true; }
+    kept[0] = element;
+    return downstream.push(element);
+  }
 }
