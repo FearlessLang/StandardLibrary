@@ -55,9 +55,9 @@ Flow[E:*]: {
     this.fold(acc,{a,e->a.acc e}).result;
   mut .max[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
   mut .min[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
-  mut .sort[K](by: OrderBy[imm E,K]):         mut Flow[E]-> this.eList.sortAnd by .seqFlow; //can be parallel?
-  mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[E]-> this.eList.distinctAnd by .seqFlow; //can be parallel?
-  mut .sortDistinct[K](by: OrderBy[imm E,K]): mut Flow[E]-> this.eList.sortDistinctAnd by .seqFlow; //can be parallel?
+  mut .sort[K](by: OrderBy[imm E,K]):         mut Flow[E] -> _Magic!;
+  mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[E] -> _Magic!;
+  mut .sortDistinct[K](by: OrderBy[imm E,K]): mut Flow[E] -> _Magic!;
   mut .any(f: read F[E, Bool]):  Bool;
   mut .all(f: read F[E, Bool]):  Bool;
   mut .none(f: read F[E, Bool]): Bool;

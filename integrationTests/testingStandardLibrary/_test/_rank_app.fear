@@ -2,6 +2,7 @@ use base.UnitTests as UnitTests;
 use base.Test as Test;
 use base.Void as Void;
 use base.Try as Try;
+use base.Error as Error;
 use base.List as List;
 use base.Lists as Lists;
 use base.Flows as Flows;
