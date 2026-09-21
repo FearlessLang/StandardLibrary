@@ -81,7 +81,7 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     try{
       return Set$c$1Instance.fromSortedList(
         ordering,
-        s.map(toImm::mut$$hash$1).sorted(Util.toComparator(ordering)).toList()
+        s.map(toImm::read$$hash$1).sorted(Util.toComparator(ordering)).toList()
       );
     }
     catch(IllegalStateException e){ throw consumed(); }
@@ -91,7 +91,7 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     AsImm$1g$2 toImm = (AsImm$1g$2) p0;
     LinkedHashMap<Util.MapKey, Object> map = new LinkedHashMap<>();
     try{
-      s.map(toImm::mut$$hash$1).forEach(e -> map.put(mapKey(ordering, e), e));
+      s.map(toImm::read$$hash$1).forEach(e -> map.put(mapKey(ordering, e), e));
       return new ESet$s$1Instance(map, ordering);
     }
     catch(IllegalStateException e){ throw consumed(); }
