@@ -64,7 +64,7 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     catch(IllegalStateException e){ throw consumed(); }    
   }
   @Override public Object mut$forEach$1(Object p0){
-    try{ s.forEach(e->callMF$2(p0,e)); return Void$o$0.instance; }
+    try{ s.toList().forEach(e->callMF$2(p0,e)); return Void$o$0.instance; }
     catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$list$0(){
@@ -91,7 +91,7 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     AsImm$1g$2 toImm = (AsImm$1g$2) p0;
     LinkedHashMap<Util.MapKey, Object> map = new LinkedHashMap<>();
     try{
-      s.map(toImm::read$$hash$1).forEach(e -> map.put(mapKey(ordering, e), e));
+      s.map(toImm::read$$hash$1).toList().forEach(e -> map.put(mapKey(ordering, e), e));
       return new ESet$s$1Instance(map, ordering);
     }
     catch(IllegalStateException e){ throw consumed(); }
@@ -110,7 +110,7 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
       var kem= (KeyElemMapper$9wg$3)p1;
       var m= new LinkedHashMap<Util.MapKey,Object>();
       var k= Maps$o$0.toKey(p0);
-      s.forEach(e->putOnce(m,k,kem,e));
+      s.toList().forEach(e->putOnce(m,k,kem,e));
       return new Map$c$2Instance(k,m);
     }
     catch(IllegalStateException e){ throw consumed(); }
