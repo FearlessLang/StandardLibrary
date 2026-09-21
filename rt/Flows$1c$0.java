@@ -110,10 +110,18 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
       var kem= (KeyElemMapper$9wg$3)p1;
       var m= new LinkedHashMap<Util.MapKey,Object>();
       var k= Maps$o$0.toKey(p0);
-      s.forEach(e->m.put(mapKey(k,kem.imm$key$1(e)), kem.imm$elem$1(e)));
+      s.forEach(e->putOnce(m,k,kem,e));
       return new Map$c$2Instance(k,m);
     }
     catch(IllegalStateException e){ throw consumed(); }
+  }
+  private static void putOnce(LinkedHashMap<Util.MapKey,Object> m,OrderHashBy$2ea$2 by,KeyElemMapper$9wg$3 kem,Object e){
+    var key= kem.imm$key$1(e);
+    var mk= mapKey(by,key);
+    check(!m.containsKey(mk),
+      "Flow.mapping: the key "+toStringBy(by,key)+" is produced by more than one element;"
+      +" a Map holds one element per key.");
+    m.put(mk, kem.imm$elem$1(e));
   }
   @Override public Object mut$flatMap$1(Object p0){
     try{ return new Flow$o$1Instance(s.flatMap(e->((Flow$o$1Instance)callF$2(p0,e)).s)); }

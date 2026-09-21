@@ -39,6 +39,11 @@ Flow[E:*]: {
   mut .eList: mut EList[E];
   mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
   mut .eSet[E', K](mut AsImm[E, E'], OrderHashBy[imm E, K]): mut ESet[E'];
+  /// ``this.mapping(by, kem)`` returns a map holding one entry per element of `this`,
+  /// keyed by ``kem.key`` under ``by`` and holding ``kem.elem``, in flow order.
+  /// Throws a deterministic error when two elements produce the same key.
+  //>   .check{Flows#(1, 2).mapping({::},{.key e->e; .elem e->e}).size .assertEq 2}
+  //>   .checkDetErr({::}, {Flows#(1, 1).mapping({::},{.key e->e; .elem e->e})})
   mut .mapping[K,K0,E0:*](OrderHashBy[K,K0], read KeyElemMapper[E,K,E0]): mut Map[K,E0];
   mut .join(js: JoinStr[E]): E -> js.joinStr this;
   mut .sum(sn: SumNumber[E]): E -> sn.sumNumber this;
