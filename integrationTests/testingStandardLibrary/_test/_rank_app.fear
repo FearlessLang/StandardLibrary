@@ -15,6 +15,7 @@ use base.Int as Int;
 use base.Float as Float;
 use base.Byte as Byte;
 use base.ELists as ELists;
+use base.Vars as Vars;
 use base.Info as Info;
 use base.Map as Map;
 use base.Maps as Maps;
