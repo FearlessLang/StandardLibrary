@@ -15,10 +15,10 @@ ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
 ParPod[T]:FlowMode[mut IsoPod[T]]{this}
 
 ActorImpl[S:*,E:*,R]: {
-  read #(downstream: mut ActorSink[R], state: S, e: E, m: ActorMatch[R]): R
+  read #(downstream: mut ActorSink[R], state: S, e: E, m: mut ActorMatch[R]): R
   }
 ActorImplMut[S:*,E:*,R:*]: {
-  read #(downstream: mutH ActorSink[R], state: mutH S, e: E, m: ActorMatch[R]): R
+  read #(downstream: mutH ActorSink[R], state: mutH S, e: E, m: mut ActorMatch[R]): R
   }
 ActorMatch[R:*]: { mut .continue: R; mut .stop: R; }//Should we instead just have a 'stopper'?
 
