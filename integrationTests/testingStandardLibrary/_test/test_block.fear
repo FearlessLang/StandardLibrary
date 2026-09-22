@@ -60,6 +60,15 @@ BlockArgLoopTests: Test {::
       (c.get) >= 500000 ? { .then -> Break#; .else -> Continue# })})
     .return {i.get}
     ) .assertEq 500000}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .if {True} .return {5}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      OuterReturn#(c.get))})
+    .return {Unreachable!}
+    ) .assertEq 5}
   }
 
 TestBlock: Test {::

@@ -22,7 +22,7 @@ public interface _NativeLoop$16w$0 {
   }
 }
 
-final class _NativeLoopMatcher implements ControlFlowMatch$2428$2{
+final class _NativeLoopMatcher implements ControlFlowMatch$2428$1{
   static final Object CONTINUE= new Object();
   final Object self;
   Object result;

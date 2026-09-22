@@ -15,10 +15,10 @@ ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
 ParPod[T]:FlowMode[mut IsoPod[T]]{this}
 
 ActorImpl[S:*,E:*,R]: {
-  read #(down: mut ActorSink[R], state: S, e: E): mut ControlFlow[R]
+  read #(down: mut ActorSink[R], state: S, e: E): mut ContinueBreak[Void]
   }
 ActorImplMut[S:*,E:*,R:*]: {
-  read #(down: mutH ActorSink[R], state: mutH S, e: E): mut ControlFlow[R]
+  read #(down: mutH ActorSink[R], state: mutH S, e: E): mut ContinueBreak[Void]
   }
 
 /// Where an actor lambda pushes the elements it emits.
@@ -28,7 +28,7 @@ ActorImplMut[S:*,E:*,R:*]: {
 /// `ActorImplMut` it would accept only an ``iso`` element.
 /// ``down.pushOpt#(down, o)`` pushes what ``o`` holds and does nothing when it holds
 /// nothing.
-ActorSink[E:*]: {
+ActorSink[E:*]: Sealed {
   read .push: ActorSinkHelper -> ActorSinkHelper;
   read .pushOpt: ActorSinkOptHelper -> ActorSinkOptHelper;
   mut #(E): Void;
@@ -37,9 +37,10 @@ ActorSink[E:*]: {
 
 /// ``ActorSinkHelper#(down, e)`` is ``down#e``, reached bypassing the type system
 /// since ``#`` can not be declared ``mutH``.
-/// It is sound because a ``mutH`` sink and a ``mutH`` actor state can keep no alias
-/// of the pushed element: storing it would call a ``mut`` method on them, and on a
-/// hygienic receiver such a call takes only ``iso`` arguments.
+/// It is sound because `ActorSink` is sealed, so ``down#e`` is always the runtime
+/// handing ``e`` downstream, and a ``mutH`` actor state can keep no alias of ``e``:
+/// storing it would call a ``mut`` method on the state, and on a hygienic receiver
+/// such a call takes only ``iso`` arguments.
 /// This is the only place where the actor family leaves the type system.
 ActorSinkHelper: Sealed {
   imm #[E:*](down: mutH ActorSink[E], e: E): Void -> _Magic!;

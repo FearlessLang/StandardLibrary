@@ -49,7 +49,7 @@ Block[R:*]: Sealed {
   /// iterates `body` without growing the call stack per iteration: unlike a Fearless
   /// method calling itself for each `.continue`, this is backed by a native Java loop.
   /// Logically equivalent to:
-  ///   body#.match ControlFlowMatch[R, mut Block[R]]: {
+  ///   body#.match ControlFlowMatch[R]: {
   ///     .continue -> this.loop(body);
   ///     .break    -> this;
   ///     .return v -> _DecidedBlock#v;
@@ -89,6 +89,7 @@ _DecidedBlock: {
     .assert  _    -> self;
     .assert  _, _ -> self;
     .loop    _    -> self;
+    .loop    _, _ -> self;
     .if      _    -> {
       .return _ -> self;
       .do     _ -> self;
@@ -98,14 +99,14 @@ _DecidedBlock: {
     }
   }
 
-/// The answer of one iteration of `Block.loop` and of one call of an actor lambda:
-/// `Continue`, `Break`, or `OuterReturn` carrying a value.
-ControlFlow[R:*]: Sealed { mut .match[X:*](m: mut ControlFlowMatch[R,X]): X; }
-ControlFlowMatch[R:*,X:*]: {
-  mut .continue: X;
-  mut .break: X;
-  mut .return(v: R): X;
+ControlFlow[R:*]: Sealed { mut .match(m: mut ControlFlowMatch[R]): mut Block[R]; }
+ControlFlowMatch[R:*]: {
+  mut .continue: mut Block[R];
+  mut .break: mut Block[R];
+  mut .return(v: R): mut Block[R];
   }
-Continue: {#[R:*]: mut ControlFlow[R]->{::.continue}}
-Break: {#[R:*]: mut ControlFlow[R]->{::.break}}
+/// `Continue` or `Break`, never `OuterReturn`: the `ControlFlow` an actor lambda answers.
+ContinueBreak[R:*]: ControlFlow[R] {}
+Continue: {#[R:*]: mut ContinueBreak[R]->{::.continue}}
+Break: {#[R:*]: mut ContinueBreak[R]->{::.break}}
 OuterReturn: {#[R:*](r: R): mut ControlFlow[R]->{::.return r} }
