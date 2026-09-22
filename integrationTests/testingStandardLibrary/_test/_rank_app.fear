@@ -90,4 +90,5 @@ MyTests:UnitTests{::
   .test InfoTests
   .test TestBlock
   .test TestInfoFromStr
+  .test TestDungeon
   }

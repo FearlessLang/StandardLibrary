@@ -39,22 +39,11 @@ WindowsViaActor: {
       });
   }
 
-Treasure: { read .value: Nat }
-Hero: {
-  mut .take(t: iso Treasure): Void;
-  read .purse: Nat;
-  }
-Room: {
-  mut .takeTreasure: iso Treasure;
-  read .killsHeroesPoorerThan: Nat;
-  }
-Survivor: { #(dies: Bool, h: mut Hero): mut Opt[mut Hero] ->
-  dies.if[mut Opt[mut Hero]]{ .then -> {}; .else -> Opts#h } }
 DungeonRoomViaActorMut: {
   #(heroes: mut Flow[mut Hero], room: iso Room): mut Flow[mut Hero] ->
     heroes.actorMut[Room, mut Hero](room, {down, s, h -> Block#(
-      h.take(s.takeTreasure),
-      down.pushOpt#(down, Survivor#(s.killsHeroesPoorerThan > (h.purse), h)),
+      Visit#(s, h),
+      down.pushOpt#(down, Survivor#(s, h)),
       Continue#)});
   }
 
