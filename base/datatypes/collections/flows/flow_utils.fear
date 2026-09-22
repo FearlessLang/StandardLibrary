@@ -22,11 +22,10 @@ ActorImplMut[S:*,E:*,R:*]: {
   }
 
 /// Where an actor lambda pushes the elements it emits.
-/// ``down#e`` is the direct push, available when the sink is ``mut``, as in `ActorImpl`.
-/// ``down.push#(down, e)`` is the push available whatever the sink is, and the only
-/// one `ActorImplMut` can use: ``#`` is a ``mut`` method, so on the ``mutH`` sink of
-/// `ActorImplMut` it would accept only an ``iso`` element.
-/// ``down.pushOpt#(down, o)`` pushes what ``o`` holds and does nothing when it holds
+/// ``down#e`` pushes ``e`` on a ``mut`` sink, as in `ActorImpl`.
+/// ``down.push#(down, e)`` pushes ``e`` on any sink, the ``mutH`` one of
+/// `ActorImplMut` included.
+/// ``down.pushOpt#(down, o)`` pushes what ``o`` holds, and nothing when it holds
 /// nothing.
 ActorSink[E:*]: Sealed {
   read .push: ActorSinkHelper -> ActorSinkHelper;
@@ -35,13 +34,7 @@ ActorSink[E:*]: Sealed {
   mut .pushError(Info): Void;
   }
 
-/// ``ActorSinkHelper#(down, e)`` is ``down#e``, reached bypassing the type system
-/// since ``#`` can not be declared ``mutH``.
-/// It is sound because `ActorSink` is sealed, so ``down#e`` is always the runtime
-/// handing ``e`` downstream, and a ``mutH`` actor state can keep no alias of ``e``:
-/// storing it would call a ``mut`` method on the state, and on a hygienic receiver
-/// such a call takes only ``iso`` arguments.
-/// This is the only place where the actor family leaves the type system.
+/// ``ActorSinkHelper#(down, e)`` is ``down#e``, on a ``mutH`` sink too.
 ActorSinkHelper: Sealed {
   imm #[E:*](down: mutH ActorSink[E], e: E): Void -> _Magic!;
   }

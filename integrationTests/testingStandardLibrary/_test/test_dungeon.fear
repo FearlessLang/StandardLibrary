@@ -2,8 +2,7 @@
 /// ``EList`` of ``EList``s, monsters and graves in ``ESet``s. Every method of `Room`
 /// takes only imm arguments and answers imm values, so all of them can be called on
 /// a mutH room, like the state of an actorMut stage; inside, they are ordinary code
-/// on a mut receiver. `Visit` and `Survivor` run here on a mut room, which is also a
-/// mutH one, and as an actorMut stage in `DungeonRoomViaActorMut`.
+/// on a mut receiver.
 
 Item: { read .name: Str; read .value: Nat; }
 Items: { #(name: Str, value: Nat): Item -> { .name -> name; .value -> value; } }

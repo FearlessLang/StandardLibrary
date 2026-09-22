@@ -1,7 +1,4 @@
 /// The shapes the actor family of flow stages is meant to be written in.
-/// Nothing here runs: ``Flow.actor`` and ``Flow.actorMut`` have no body yet, so
-/// this file is a compile time check that the declared signatures can express
-/// the operations they are supposed to express.
 
 ScanViaActor: {
   #[E:*,S:imm](es: mut Flow[E], acc: S, f: read F[S,E,S]): mut Flow[S] ->
