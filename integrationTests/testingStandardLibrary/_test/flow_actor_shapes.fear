@@ -72,12 +72,32 @@ DungeonRoomViaActorMut: {
       Step#(s.killsHeroesPoorerThan > (h.purse))#(down, h))});
   }
 
-/// Draining an inner flow into the sink is a lambda capturing the sink, so this
-/// shape exists for `ActorImpl` and has no `ActorImplMut` counterpart.
+/// Draining an inner flow one element at a time is ``inner.forEach{x -> ..}``,
+/// a lambda capturing the sink, so it is a shape for `ActorImpl` only.
 FlatMapViaActor: {
   #[E:*,R](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
     es.actor[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
       f#e .forEach{x -> down#x},
+      down.continue)});
+  }
+
+/// What `ActorImplMut` can do instead: materialise the inner flow and walk it,
+/// handing the sink over as an argument at every step, so nothing captures it.
+/// The cost is in the materialisation, which fences the inner flow.
+DrainStep[E:*]: { read #(down: mutH base.ActorSink[E], xs: mut List[E], i: Nat): Void }
+DrainOne[E:*]: DrainStep[E] { down, xs, i -> Block#(
+  down.push#(down, xs.get i),
+  DrainFrom#[E](i + 1 == (xs.size))#(down, xs, i + 1)) }
+DrainEnd[E:*]: DrainStep[E] { down, xs, i -> Void }
+DrainFrom: { #[E:*](done: Bool): DrainStep[E] ->
+  done.if[DrainStep[E]]{ .then -> DrainEnd[E]; .else -> DrainOne[E] } }
+Drain: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E]): Void ->
+  DrainFrom#[E](xs.isEmpty)#(down, xs, 0) }
+
+FlatMapViaActorMut: {
+  #[E:*,R:*](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
+    es.actorMut[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
+      Drain#[R](down, f#e .list),
       down.continue)});
   }
 

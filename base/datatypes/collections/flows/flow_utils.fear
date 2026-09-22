@@ -23,9 +23,8 @@ ActorImplMut[S:*,E:*,R:*]: {
 
 /// What an actor lambda answers after handling one element: whether the stage
 /// wants the element after this one.
-/// A branch answers with `ActorContinue` or `ActorStop` written out: the two
-/// accessors on `ActorSink` read the sink, and a hygienic sink can not be
-/// captured by the lambda that every branching method of `Bool` takes.
+/// A branch answers with `ActorContinue` or `ActorStop` written out: ``down.continue``
+/// reads the sink, a branch is a lambda, and a lambda can not capture a hygienic sink.
 ActorRes: Sealed {}
 ActorContinue: Sealed, ActorRes {}
 ActorStop: Sealed, ActorRes {}
