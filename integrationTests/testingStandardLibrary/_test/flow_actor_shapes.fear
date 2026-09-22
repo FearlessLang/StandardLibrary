@@ -1,0 +1,90 @@
+/// The shapes the actor family of flow stages is meant to be written in.
+/// Nothing here runs: ``Flow.actor`` and ``Flow.actorMut`` have no body yet, so
+/// this file is a compile time check that the declared signatures can express
+/// the operations they are supposed to express.
+
+ScanViaActor: {
+  #[E:*,S:imm](es: mut Flow[E], acc: S, f: read F[S,E,S]): mut Flow[S] ->
+    es.actor[mut base.Var[S], S](Vars#[S](acc), {down, s, e -> Block#(
+      s.set(f#(s.get, e)),
+      down.push#(down, s.get),
+      down.continue)});
+  }
+
+/// The sink of `ActorImpl` is ``mut``, so it also takes the direct push.
+ScanViaActorDirectPush: {
+  #[E:*,S:imm](es: mut Flow[E], acc: S, f: read F[S,E,S]): mut Flow[S] ->
+    es.actor[mut base.Var[S], S](Vars#[S](acc), {down, s, e -> Block#(
+      s.set(f#(s.get, e)),
+      down#(s.get),
+      down.continue)});
+  }
+
+LimitViaActorMut: {
+  #[E:*](es: mut Flow[E], n: Nat): mut Flow[E] -> n == 0 ? {
+    .then -> Error.msg`.limit 0 asks a whole chain of stages for no elements`;
+    .else -> es.actorMut[mut base.Count[Nat], E](base.Count.nat n, {down, s, e -> Block#(
+      down.push#(down, e),
+      s--,
+      s.get == 0 ?[base.ActorRes] { .then -> base.ActorStop; .else -> base.ActorContinue })});
+    };
+  }
+
+/// The sink and the state of `ActorImpl` are ordinary ``mut`` values, so the
+/// lambdas of ``Block#`` may capture them.
+WindowsViaActor: {
+  #(es: mut Flow[Nat], width: Nat): mut Flow[List[Nat]] ->
+    es.actor[mut base.Var[List[Nat]], List[Nat]](Vars#[List[Nat]]({}), {down, s, e -> Block#
+      .do{s.set(this.trim(s.get +> e, width))}
+      .do{s.get.size == width ? { .then -> down.push#(down, s.get); .else -> Void }}
+      .return{down.continue}
+      });
+  .trim(w: List[Nat], width: Nat): List[Nat] ->
+    w.size > width ? { .then -> w.subList(1); .else -> w };
+  }
+
+Treasure: { read .value: Nat }
+Hero: {
+  mut .take(t: iso Treasure): Void;
+  read .purse: Nat;
+  }
+/// A room hands out an ``iso`` treasure rather than being handed the hero:
+/// the room is the ``mutH`` actor state, and a ``mut`` method of a ``mutH``
+/// receiver accepts only ``iso`` arguments, so ``s.visit(h)`` is not a shape
+/// that exists. The hero and the room meet in the lambda instead.
+Room: {
+  mut .takeTreasure: iso Treasure;
+  read .killsHeroesPoorerThan: Nat;
+  }
+/// A hygienic parameter can not be captured by a lambda, and every branching
+/// method of `Bool` takes one, so a branch that has to push can not be written
+/// as ``b ? {.then -> down.push#(down, h); ...}``.
+/// The branch picks an ``imm`` step instead, and that step is then handed the
+/// sink as an argument, the way `ActorSinkHelper` is handed it.
+HeroStep: { read #(down: mutH base.ActorSink[mut Hero], h: mut Hero): base.ActorRes }
+PushHero: HeroStep { down, h -> Block#(down.push#(down, h), base.ActorContinue) }
+DropHero: HeroStep { down, h -> base.ActorContinue }
+
+DungeonRoomViaActorMut: {
+  #(heroes: mut Flow[mut Hero], room: iso Room): mut Flow[mut Hero] ->
+    heroes.actorMut[Room, mut Hero](room, {down, s, h -> Block#(
+      h.take(s.takeTreasure),
+      this.step(s.killsHeroesPoorerThan > (h.purse))#(down, h))});
+  .step(dies: Bool): HeroStep -> dies.if[HeroStep]{ .then -> DropHero; .else -> PushHero };
+  }
+
+/// Draining an inner flow into the sink is a lambda capturing the sink, so this
+/// shape exists for `ActorImpl` and has no `ActorImplMut` counterpart.
+FlatMapViaActor: {
+  #[E:*,R](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
+    es.actor[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
+      f#e .forEach{x -> down#x},
+      down.continue)});
+  }
+
+MapWithContextViaActorMut: {
+  #[C,E:*,R:*](es: mut Flow[E], ctx: iso base.ToIso[C], g: read F[iso C,E,R]): mut Flow[R] ->
+    es.actorMut[base.ToIso[C], R](ctx, {down, s, e -> Block#(
+      down.push#(down, g#(s.iso.close, e)),
+      down.continue)});
+  }

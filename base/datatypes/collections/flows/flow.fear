@@ -91,7 +91,14 @@ Flow[E:*]: {
   ): R-> this.list|>{xs->cont#(x#xs, xs)};
   // --Still to implement
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
+  /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
+  /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.
+  /// ``f`` answers `ActorContinue` or `ActorStop`, and `ActorStop` means the element
+  /// after the current one is never pulled.
   mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
+  /// ``this.actorMut(state, f)`` is `Flow.actor` with the sink and the state handed
+  /// over hygienically, which is what lets the emitted elements be ``mut``.
+  /// See `ActorSink` for how such a sink is pushed to.
   mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg`TODO`;
   mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg`TODO`;
   mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg`TODO`;

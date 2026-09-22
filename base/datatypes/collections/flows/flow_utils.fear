@@ -15,14 +15,45 @@ ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
 ParPod[T]:FlowMode[mut IsoPod[T]]{this}
 
 ActorImpl[S:*,E:*,R]: {
-  read #(downstream: mut ActorSink[R], state: S, e: E, m: mut ActorMatch[R]): R
+  read #(down: mut ActorSink[R], state: S, e: E): ActorRes
   }
 ActorImplMut[S:*,E:*,R:*]: {
-  read #(downstream: mutH ActorSink[R], state: mutH S, e: E, m: mut ActorMatch[R]): R
+  read #(down: mutH ActorSink[R], state: mutH S, e: E): ActorRes
   }
-ActorMatch[R:*]: { mut .continue: R; mut .stop: R; }//Should we instead just have a 'stopper'?
 
-_ActorSinks: {#[T:*](sink: mut _Sink[T]): mut ActorSink[T] -> mut ActorSink[T:*]: {
+/// What an actor lambda answers after handling one element: whether the stage
+/// wants the element after this one.
+/// A branch answers with `ActorContinue` or `ActorStop` written out: the two
+/// accessors on `ActorSink` read the sink, and a hygienic sink can not be
+/// captured by the lambda that every branching method of `Bool` takes.
+ActorRes: Sealed {}
+ActorContinue: Sealed, ActorRes {}
+ActorStop: Sealed, ActorRes {}
+
+/// Where an actor lambda pushes the elements it emits.
+/// ``down#e`` is the direct push, available when the sink is ``mut``, as in `ActorImpl`.
+/// ``down.push#(down, e)`` is the push available whatever the sink is, and the only
+/// one `ActorImplMut` can use: ``#`` is a ``mut`` method, so on the ``mutH`` sink of
+/// `ActorImplMut` it would accept only an ``iso`` element, while the whole point of
+/// ``.actorMut`` is to pass a ``mut`` element on.
+ActorSink[E:*]: {
+  read .push: ActorSinkHelper -> ActorSinkHelper;
+  read .continue: ActorContinue -> ActorContinue;
+  read .stop: ActorStop -> ActorStop;
+  mut #(E): Void;
+  mut .pushError(Info): Void;
+  }
+
+/// ``ActorSinkHelper#(down, e)`` is ``down#e``, reached bypassing the type system
+/// since ``#`` can not be declared ``mutH``.
+/// It is sound because a ``mutH`` sink and a ``mutH`` actor state can keep no alias
+/// of the pushed element: storing it would call a ``mut`` method on them, and on a
+/// hygienic receiver such a call takes only ``iso`` arguments.
+ActorSinkHelper: Sealed {
+  imm #[E:*](down: mutH ActorSink[E], e: E): Void -> _Magic!;
+  }
+
+_ActorSinks: {#[T:*](sink: mut _Sink[T]): mut ActorSink[T] -> {
   mut #(x: T): Void -> sink#x;
   mut .pushError(info: Info): Void -> sink.pushError(info);
   }}
