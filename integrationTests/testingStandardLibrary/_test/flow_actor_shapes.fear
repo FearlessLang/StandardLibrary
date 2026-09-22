@@ -32,15 +32,14 @@ LimitViaActorMut: {
 
 /// The sink and the state of `ActorImpl` are ordinary ``mut`` values, so the
 /// lambdas of ``Block#`` may capture them.
+Trim: { #(w: List[Nat], width: Nat): List[Nat] -> w.size > width ? { .then -> w.subList(1); .else -> w } }
 WindowsViaActor: {
   #(es: mut Flow[Nat], width: Nat): mut Flow[List[Nat]] ->
     es.actor[mut base.Var[List[Nat]], List[Nat]](Vars#[List[Nat]]({}), {down, s, e -> Block#
-      .do{s.set(this.trim(s.get +> e, width))}
+      .do{s.set(Trim#(s.get +> e, width))}
       .do{s.get.size == width ? { .then -> down.push#(down, s.get); .else -> Void }}
       .return{down.continue}
       });
-  .trim(w: List[Nat], width: Nat): List[Nat] ->
-    w.size > width ? { .then -> w.subList(1); .else -> w };
   }
 
 Treasure: { read .value: Nat }
@@ -65,12 +64,12 @@ HeroStep: { read #(down: mutH base.ActorSink[mut Hero], h: mut Hero): base.Actor
 PushHero: HeroStep { down, h -> Block#(down.push#(down, h), base.ActorContinue) }
 DropHero: HeroStep { down, h -> base.ActorContinue }
 
+Step: { #(dies: Bool): HeroStep -> dies.if[HeroStep]{ .then -> DropHero; .else -> PushHero } }
 DungeonRoomViaActorMut: {
   #(heroes: mut Flow[mut Hero], room: iso Room): mut Flow[mut Hero] ->
     heroes.actorMut[Room, mut Hero](room, {down, s, h -> Block#(
       h.take(s.takeTreasure),
-      this.step(s.killsHeroesPoorerThan > (h.purse))#(down, h))});
-  .step(dies: Bool): HeroStep -> dies.if[HeroStep]{ .then -> DropHero; .else -> PushHero };
+      Step#(s.killsHeroesPoorerThan > (h.purse))#(down, h))});
   }
 
 /// Draining an inner flow into the sink is a lambda capturing the sink, so this
