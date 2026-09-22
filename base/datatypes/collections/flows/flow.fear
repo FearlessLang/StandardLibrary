@@ -80,8 +80,8 @@ Flow[E:*]: {
   mut .limit(n: Nat): mut Flow[E];
   // --Still to implement
   mut .let[DR:*,R:*](
-    x: read F[mut MF[mut Flow[E]],DR],
-    cont: mut FlowContinuation[DR,R]
+    x: read F[mut Flow[E],DR],
+    cont: mut FlowContinuation[E,DR,R]
   ): R->Error.msg`TODO`;
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
   mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
