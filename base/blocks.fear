@@ -56,8 +56,7 @@ Block[R:*]: Sealed {
   ///     };
   mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _NativeLoop#(this, body);
   /// ``this.loop(a, body)`` is `Block.loop` handing ``a`` to every iteration as an
-  /// argument. A hygienic ``a`` can not be captured, so this is the only way it
-  /// reaches the body.
+  /// argument, which is how a hygienic ``a`` reaches the body.
   mut .loop[A](a: mutH A, body: mut LoopBody[A,R]): mut Block[R] ->
     _NativeLoop#(this, a, body);
   }
@@ -67,9 +66,8 @@ _NativeLoop: Sealed {
   #[A,R:*](self: mut Block[R], a: mutH A, body: mut LoopBody[A,R]): mut Block[R] -> _Magic!;
   }
 
-/// The body of ``Block.loop(a, body)``. ``a`` is a parameter and not a capture, so
-/// this is a named type: a hygienic type can not be a type argument, and
-/// ``MF[mutH A, ..]`` is therefore not a type that exists.
+/// The body of ``Block.loop(a, body)``. It is a named type because a hygienic type
+/// can not be a type argument, so ``MF[mutH A, ..]`` is not a type that exists.
 LoopBody[A,R:*]: { mut #(a: mutH A): mut ControlFlow[R] }
 
 BlockIf[R:*]: {
@@ -102,7 +100,6 @@ _DecidedBlock: {
 
 /// The answer of one iteration of `Block.loop` and of one call of an actor lambda:
 /// `Continue`, `Break`, or `OuterReturn` carrying a value.
-/// ``X`` is what matching it produces, ``mut Block[R]`` for `Block.loop`.
 ControlFlow[R:*]: Sealed { mut .match[X:*](m: mut ControlFlowMatch[R,X]): X; }
 ControlFlowMatch[R:*,X:*]: {
   mut .continue: X;

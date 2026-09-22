@@ -36,8 +36,6 @@ BlockLoopTests: Test {::
 TenTimesAt: { #(n: Nat, limit: Nat): mut ControlFlow[Nat] ->
   n >= limit ? { .then -> OuterReturn#(n * 10); .else -> Continue# } }
 
-// the loop handing its argument to every iteration: what a hygienic value needs,
-// exercised here with an ordinary mut one, since mut is a subtype of mutH
 BlockArgLoopTests: Test {::
   .check{(Block#
     .var[Nat] i = {0}
@@ -47,8 +45,6 @@ BlockArgLoopTests: Test {::
     .return {i.get}
     ) .assertEq 5}
 
-  // the branch can not read `c`, it is a lambda and `c` is hygienic, so what the
-  // branch needs is read where `c` is in scope and arrives as an argument
   .check{(Block#
     .var[Nat] i = {0}
     .loop(i, {c -> Block#(

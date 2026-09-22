@@ -11,7 +11,6 @@ ScanViaActor: {
       Continue#)});
   }
 
-/// The sink of `ActorImpl` is ``mut``, so it also takes the direct push.
 ScanViaActorDirectPush: {
   #[E:*,S:imm](es: mut Flow[E], acc: S, f: read F[S,E,S]): mut Flow[S] ->
     es.actor[mut base.Var[S], S](Vars#[S](acc), {down, s, e -> Block#(
@@ -30,8 +29,6 @@ LimitViaActorMut: {
     };
   }
 
-/// The sink and the state of `ActorImpl` are ordinary ``mut`` values, so the
-/// lambdas of ``Block#`` may capture them.
 Trim: { #(w: List[Nat], width: Nat): List[Nat] -> w.size > width ? { .then -> w.subList(1); .else -> w } }
 WindowsViaActor: {
   #(es: mut Flow[Nat], width: Nat): mut Flow[List[Nat]] ->
@@ -47,17 +44,10 @@ Hero: {
   mut .take(t: iso Treasure): Void;
   read .purse: Nat;
   }
-/// A room hands out an ``iso`` treasure rather than being handed the hero:
-/// the room is the ``mutH`` actor state, and a ``mut`` method of a ``mutH``
-/// receiver accepts only ``iso`` arguments, so ``s.visit(h)`` is not a shape
-/// that exists. The hero and the room meet in the lambda instead.
 Room: {
   mut .takeTreasure: iso Treasure;
   read .killsHeroesPoorerThan: Nat;
   }
-/// The branch that decides whether the hero goes on can not push, since it is a
-/// lambda and the sink is hygienic. It answers an `Opt` instead, and ``.pushOpt``
-/// commits it where the sink is in scope.
 Survivor: { #(dies: Bool, h: mut Hero): mut Opt[mut Hero] ->
   dies.if[mut Opt[mut Hero]]{ .then -> {}; .else -> Opts#h } }
 DungeonRoomViaActorMut: {
@@ -68,8 +58,6 @@ DungeonRoomViaActorMut: {
       Continue#)});
   }
 
-/// Draining an inner flow one element at a time is ``inner.forEach{x -> ..}``,
-/// a lambda capturing the sink, so it is a shape for `ActorImpl` only.
 FlatMapViaActor: {
   #[E:*,R](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
     es.actor[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
@@ -77,12 +65,6 @@ FlatMapViaActor: {
       Continue#)});
   }
 
-/// What `ActorImplMut` can do instead: materialise the inner flow and walk it with
-/// the loop that hands the sink to every iteration. The cost is in the
-/// materialisation, which fences the inner flow.
-/// ``Block#.var`` is not available here: its continuation is a lambda and it would
-/// capture the sink, so the loop counter arrives as a parameter instead. A method
-/// call is what binds a name next to a hygienic one.
 Drain: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E]): Void ->
   DrainFrom#[E](down, xs, Vars#[Nat](0)) }
 DrainFrom: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E], i: mut base.Var[Nat]): Void ->
@@ -106,12 +88,6 @@ MapWithContextViaActorMut: {
       Continue#)});
   }
 
-/// The state holds two lists of the same size. For every incoming string, the
-/// actor walks the indexes and emits that string joined with the two items at the
-/// index, wherever those two items have the same size.
-/// Everything the loop needs from the hygienic state is read at the call site, where
-/// the state is in scope, and arrives as an ordinary parameter, so the loop body
-/// captures only ordinary values and receives the sink as its argument.
 Pairs: { read .a: List[Str]; read .b: List[Str]; }
 SameSize: { #(pre: Str, x: Str, y: Str): mut Opt[Str] ->
   x.size == (y.size) ?[mut Opt[Str]]{ .then -> Opts#(pre + x + y); .else -> {} } }
