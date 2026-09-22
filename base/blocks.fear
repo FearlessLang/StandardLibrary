@@ -1,5 +1,5 @@
 Continuation[T:*,R:*]: {mut #(x: T, self: mut Block[R]): R}
-FlowContinuation[T:*,R:*]: {mut #(x: T, self: mut Flow[R]): R}
+FlowContinuation[E:*,T:*,R:*]: {mut #(x: T, self: mut List[E]): R}
 OpenIsoContinuation[T,R:*]: {mut #(x: mut T, self: mut Block[R]): R}//Only needed for limitations of inference
 //otherwise the same as Continuation[mut X,R]
 ReprWithInvariant[T]: { mut .elem: iso T; mut .invariant: F[read T,Bool];}
