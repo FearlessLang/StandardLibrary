@@ -14,20 +14,15 @@ ParRepr[T]:FlowMode[mut Repr[T]]{this}
 ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
 ParPod[T]:FlowMode[mut IsoPod[T]]{this}
 
+/// An actor lambda answers `Continue`, `Break`, or ``OuterReturn#e``, which emits
+/// ``e`` and stops. They are the values `Block.loop` answers with, and being values
+/// they can be returned from a branch, which a push can not.
 ActorImpl[S:*,E:*,R]: {
-  read #(down: mut ActorSink[R], state: S, e: E): ActorRes
+  read #(down: mut ActorSink[R], state: S, e: E): mut ControlFlow[R]
   }
 ActorImplMut[S:*,E:*,R:*]: {
-  read #(down: mutH ActorSink[R], state: mutH S, e: E): ActorRes
+  read #(down: mutH ActorSink[R], state: mutH S, e: E): mut ControlFlow[R]
   }
-
-/// What an actor lambda answers after handling one element: whether the stage
-/// wants the element after this one.
-/// A branch answers with `ActorContinue` or `ActorStop` written out: ``down.continue``
-/// reads the sink, a branch is a lambda, and a lambda can not capture a hygienic sink.
-ActorRes: Sealed {}
-ActorContinue: Sealed, ActorRes {}
-ActorStop: Sealed, ActorRes {}
 
 /// Where an actor lambda pushes the elements it emits.
 /// ``down#e`` is the direct push, available when the sink is ``mut``, as in `ActorImpl`.
@@ -35,10 +30,12 @@ ActorStop: Sealed, ActorRes {}
 /// one `ActorImplMut` can use: ``#`` is a ``mut`` method, so on the ``mutH`` sink of
 /// `ActorImplMut` it would accept only an ``iso`` element, while the whole point of
 /// ``.actorMut`` is to pass a ``mut`` element on.
+/// ``down.pushOpt#(down, o)`` pushes what ``o`` holds and does nothing when it holds
+/// nothing, which is how a hygienic sink is pushed to conditionally: the condition
+/// is decided where the sink is not in scope, and what comes back is a value.
 ActorSink[E:*]: {
   read .push: ActorSinkHelper -> ActorSinkHelper;
-  read .continue: ActorContinue -> ActorContinue;
-  read .stop: ActorStop -> ActorStop;
+  read .pushOpt: ActorSinkOptHelper -> ActorSinkOptHelper;
   mut #(E): Void;
   mut .pushError(Info): Void;
   }
@@ -48,9 +45,19 @@ ActorSink[E:*]: {
 /// It is sound because a ``mutH`` sink and a ``mutH`` actor state can keep no alias
 /// of the pushed element: storing it would call a ``mut`` method on them, and on a
 /// hygienic receiver such a call takes only ``iso`` arguments.
+/// This is the only place where the actor family leaves the type system.
 ActorSinkHelper: Sealed {
   imm #[E:*](down: mutH ActorSink[E], e: E): Void -> _Magic!;
   }
+
+ActorSinkOptHelper: Sealed {
+  imm #[E:*](down: mutH ActorSink[E], e: mut Opt[E]): Void -> _PushOpt#[E](e.isSome)#(down, e);
+  }
+_PushOptStep[E:*]: { read #(down: mutH ActorSink[E], e: mut Opt[E]): Void }
+_PushOpt: { #[E:*](some: Bool): _PushOptStep[E] ->
+  some.if[_PushOptStep[E]]{ .then -> _PushSome[E]; .else -> _PushNone[E] } }
+_PushSome[E:*]: _PushOptStep[E] { down, e -> down.push#(down, e!) }
+_PushNone[E:*]: _PushOptStep[E] { down, e -> Void }
 
 _ActorSinks: {#[T:*](sink: mut _Sink[T]): mut ActorSink[T] -> {
   mut #(x: T): Void -> sink#x;

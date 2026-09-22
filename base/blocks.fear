@@ -49,17 +49,28 @@ Block[R:*]: Sealed {
   /// iterates `body` without growing the call stack per iteration: unlike a Fearless
   /// method calling itself for each `.continue`, this is backed by a native Java loop.
   /// Logically equivalent to:
-  ///   body#.match ControlFlowMatch[R]: {
+  ///   body#.match ControlFlowMatch[R, mut Block[R]]: {
   ///     .continue -> this.loop(body);
   ///     .break    -> this;
   ///     .return v -> _DecidedBlock#v;
   ///     };
   mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _NativeLoop#(this, body);
+  /// ``this.loop(a, body)`` is `Block.loop` handing ``a`` to every iteration as an
+  /// argument. A hygienic ``a`` can not be captured, so this is the only way it
+  /// reaches the body.
+  mut .loop[A](a: mutH A, body: mut LoopBody[A,R]): mut Block[R] ->
+    _NativeLoop#(this, a, body);
   }
 
 _NativeLoop: Sealed {
   #[R:*](self: mut Block[R], body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _Magic!;
+  #[A,R:*](self: mut Block[R], a: mutH A, body: mut LoopBody[A,R]): mut Block[R] -> _Magic!;
   }
+
+/// The body of ``Block.loop(a, body)``. ``a`` is a parameter and not a capture, so
+/// this is a named type: a hygienic type can not be a type argument, and
+/// ``MF[mutH A, ..]`` is therefore not a type that exists.
+LoopBody[A,R:*]: { mut #(a: mutH A): mut ControlFlow[R] }
 
 BlockIf[R:*]: {
   mut .return(a: mut MF[R]): mut Block[R];
@@ -89,11 +100,14 @@ _DecidedBlock: {
     }
   }
 
-ControlFlow[R:*]: Sealed { mut .match(m: mut ControlFlowMatch[R]): mut Block[R]; }
-ControlFlowMatch[R:*]: {
-  mut .continue: mut Block[R];
-  mut .break: mut Block[R];
-  mut .return(v: R): mut Block[R];
+/// The answer of one iteration of `Block.loop` and of one call of an actor lambda:
+/// `Continue`, `Break`, or `OuterReturn` carrying a value.
+/// ``X`` is what matching it produces, ``mut Block[R]`` for `Block.loop`.
+ControlFlow[R:*]: Sealed { mut .match[X:*](m: mut ControlFlowMatch[R,X]): X; }
+ControlFlowMatch[R:*,X:*]: {
+  mut .continue: X;
+  mut .break: X;
+  mut .return(v: R): X;
   }
 Continue: {#[R:*]: mut ControlFlow[R]->{::.continue}}
 Break: {#[R:*]: mut ControlFlow[R]->{::.break}}

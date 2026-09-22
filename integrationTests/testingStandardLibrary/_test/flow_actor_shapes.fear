@@ -8,7 +8,7 @@ ScanViaActor: {
     es.actor[mut base.Var[S], S](Vars#[S](acc), {down, s, e -> Block#(
       s.set(f#(s.get, e)),
       down.push#(down, s.get),
-      down.continue)});
+      Continue#)});
   }
 
 /// The sink of `ActorImpl` is ``mut``, so it also takes the direct push.
@@ -17,7 +17,7 @@ ScanViaActorDirectPush: {
     es.actor[mut base.Var[S], S](Vars#[S](acc), {down, s, e -> Block#(
       s.set(f#(s.get, e)),
       down#(s.get),
-      down.continue)});
+      Continue#)});
   }
 
 LimitViaActorMut: {
@@ -26,7 +26,7 @@ LimitViaActorMut: {
     .else -> es.actorMut[mut base.Count[Nat], E](base.Count.nat n, {down, s, e -> Block#(
       down.push#(down, e),
       s--,
-      s.get == 0 ?[base.ActorRes] { .then -> base.ActorStop; .else -> base.ActorContinue })});
+      s.get == 0 ? { .then -> Break#; .else -> Continue# })});
     };
   }
 
@@ -38,7 +38,7 @@ WindowsViaActor: {
     es.actor[mut base.Var[List[Nat]], List[Nat]](Vars#[List[Nat]]({}), {down, s, e -> Block#
       .do{s.set(Trim#(s.get +> e, width))}
       .do{s.get.size == width ? { .then -> down.push#(down, s.get); .else -> Void }}
-      .return{down.continue}
+      .return{Continue#}
       });
   }
 
@@ -55,21 +55,17 @@ Room: {
   mut .takeTreasure: iso Treasure;
   read .killsHeroesPoorerThan: Nat;
   }
-/// A hygienic parameter can not be captured by a lambda, and every branching
-/// method of `Bool` takes one, so a branch that has to push can not be written
-/// as ``b ? {.then -> down.push#(down, h); ...}``.
-/// The branch picks an ``imm`` step instead, and that step is then handed the
-/// sink as an argument, the way `ActorSinkHelper` is handed it.
-HeroStep: { read #(down: mutH base.ActorSink[mut Hero], h: mut Hero): base.ActorRes }
-PushHero: HeroStep { down, h -> Block#(down.push#(down, h), base.ActorContinue) }
-DropHero: HeroStep { down, h -> base.ActorContinue }
-
-Step: { #(dies: Bool): HeroStep -> dies.if[HeroStep]{ .then -> DropHero; .else -> PushHero } }
+/// The branch that decides whether the hero goes on can not push, since it is a
+/// lambda and the sink is hygienic. It answers an `Opt` instead, and ``.pushOpt``
+/// commits it where the sink is in scope.
+Survivor: { #(dies: Bool, h: mut Hero): mut Opt[mut Hero] ->
+  dies.if[mut Opt[mut Hero]]{ .then -> {}; .else -> Opts#h } }
 DungeonRoomViaActorMut: {
   #(heroes: mut Flow[mut Hero], room: iso Room): mut Flow[mut Hero] ->
     heroes.actorMut[Room, mut Hero](room, {down, s, h -> Block#(
       h.take(s.takeTreasure),
-      Step#(s.killsHeroesPoorerThan > (h.purse))#(down, h))});
+      down.pushOpt#(down, Survivor#(s.killsHeroesPoorerThan > (h.purse), h)),
+      Continue#)});
   }
 
 /// Draining an inner flow one element at a time is ``inner.forEach{x -> ..}``,
@@ -78,32 +74,58 @@ FlatMapViaActor: {
   #[E:*,R](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
     es.actor[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
       f#e .forEach{x -> down#x},
-      down.continue)});
+      Continue#)});
   }
 
-/// What `ActorImplMut` can do instead: materialise the inner flow and walk it,
-/// handing the sink over as an argument at every step, so nothing captures it.
-/// The cost is in the materialisation, which fences the inner flow.
-DrainStep[E:*]: { read #(down: mutH base.ActorSink[E], xs: mut List[E], i: Nat): Void }
-DrainOne[E:*]: DrainStep[E] { down, xs, i -> Block#(
-  down.push#(down, xs.get i),
-  DrainFrom#[E](i + 1 == (xs.size))#(down, xs, i + 1)) }
-DrainEnd[E:*]: DrainStep[E] { down, xs, i -> Void }
-DrainFrom: { #[E:*](done: Bool): DrainStep[E] ->
-  done.if[DrainStep[E]]{ .then -> DrainEnd[E]; .else -> DrainOne[E] } }
+/// What `ActorImplMut` can do instead: materialise the inner flow and walk it with
+/// the loop that hands the sink to every iteration. The cost is in the
+/// materialisation, which fences the inner flow.
+/// ``Block#.var`` is not available here: its continuation is a lambda and it would
+/// capture the sink, so the loop counter arrives as a parameter instead. A method
+/// call is what binds a name next to a hygienic one.
 Drain: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E]): Void ->
-  DrainFrom#[E](xs.isEmpty)#(down, xs, 0) }
+  DrainFrom#[E](down, xs, Vars#[Nat](0)) }
+DrainFrom: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E], i: mut base.Var[Nat]): Void ->
+  Block#[Void].loop(down, {d -> Block#(
+    d.pushOpt#(d, xs.opt(i.get)),
+    i.set(i.get + 1),
+    i.get >= (xs.size) ? { .then -> Break#; .else -> Continue# })})
+    .done }
 
 FlatMapViaActorMut: {
   #[E:*,R:*](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
     es.actorMut[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
       Drain#[R](down, f#e .list),
-      down.continue)});
+      Continue#)});
   }
 
 MapWithContextViaActorMut: {
   #[C,E:*,R:*](es: mut Flow[E], ctx: iso base.ToIso[C], g: read F[iso C,E,R]): mut Flow[R] ->
     es.actorMut[base.ToIso[C], R](ctx, {down, s, e -> Block#(
       down.push#(down, g#(s.iso.close, e)),
-      down.continue)});
+      Continue#)});
+  }
+
+/// The state holds two lists of the same size. For every incoming string, the
+/// actor walks the indexes and emits that string joined with the two items at the
+/// index, wherever those two items have the same size.
+/// Everything the loop needs from the hygienic state is read at the call site, where
+/// the state is in scope, and arrives as an ordinary parameter, so the loop body
+/// captures only ordinary values and receives the sink as its argument.
+Pairs: { read .a: List[Str]; read .b: List[Str]; }
+SameSize: { #(pre: Str, x: Str, y: Str): mut Opt[Str] ->
+  x.size == (y.size) ?[mut Opt[Str]]{ .then -> Opts#(pre + x + y); .else -> {} } }
+JoinAt: { #(pre: Str, a: List[Str], b: List[Str], i: Nat): mut Opt[Str] ->
+  i >= (a.size) ?[mut Opt[Str]]{ .then -> {}; .else -> SameSize#(pre, a.get i, b.get i) } }
+JoinFrom: { #(down: mutH base.ActorSink[Str], pre: Str, a: List[Str], b: List[Str], i: mut base.Var[Nat]): Void ->
+  Block#[Void].loop(down, {d -> Block#(
+    d.pushOpt#(d, JoinAt#(pre, a, b, i.get)),
+    i.set(i.get + 1),
+    i.get >= (a.size) ? { .then -> Break#; .else -> Continue# })})
+    .done }
+JoinEqualSizesViaActorMut: {
+  #(es: mut Flow[Str], lists: iso Pairs): mut Flow[Str] ->
+    es.actorMut[Pairs, Str](lists, {down, s, e -> Block#(
+      JoinFrom#(down, e, s.a, s.b, Vars#[Nat](0)),
+      Continue#)});
   }

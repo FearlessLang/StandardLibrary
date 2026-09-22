@@ -93,8 +93,8 @@ Flow[E:*]: {
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
   /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
   /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.
-  /// ``f`` answers `ActorContinue` or `ActorStop`, and `ActorStop` means the element
-  /// after the current one is never pulled.
+  /// ``f`` answers `Continue`, `Break`, or ``OuterReturn#e`` to emit ``e`` and stop;
+  /// stopping means the element after the current one is never pulled.
   mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
   /// ``this.actorMut(state, f)`` is `Flow.actor` with the sink and the state handed
   /// over hygienically, which is what lets the emitted elements be ``mut``.
