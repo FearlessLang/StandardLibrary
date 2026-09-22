@@ -64,6 +64,7 @@ use base.ToInfo as ToInfo;
 use base.ToInfoBy as ToInfoBy;
 use base.Infos as Infos;
 use base.Enum as Enum;
+use base.ControlFlow as ControlFlow;
 use base.Enums as Enums;
 
 MyTests:UnitTests{::
@@ -89,4 +90,5 @@ MyTests:UnitTests{::
   .test InfoTests
   .test TestBlock
   .test TestInfoFromStr
+  .test TestDungeon
   }

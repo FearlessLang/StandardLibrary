@@ -55,11 +55,20 @@ Block[R:*]: Sealed {
   ///     .return v -> _DecidedBlock#v;
   ///     };
   mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _NativeLoop#(this, body);
+  /// ``this.loop(a, body)`` is `Block.loop` handing ``a`` to every iteration as an
+  /// argument, which is how a hygienic ``a`` reaches the body.
+  mut .loop[A](a: mutH A, body: mut LoopBody[A,R]): mut Block[R] ->
+    _NativeLoop#(this, a, body);
   }
 
 _NativeLoop: Sealed {
   #[R:*](self: mut Block[R], body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _Magic!;
+  #[A,R:*](self: mut Block[R], a: mutH A, body: mut LoopBody[A,R]): mut Block[R] -> _Magic!;
   }
+
+/// The body of ``Block.loop(a, body)``. It is a named type because a hygienic type
+/// can not be a type argument, so ``MF[mutH A, ..]`` is not a type that exists.
+LoopBody[A,R:*]: { mut #(a: mutH A): mut ControlFlow[R] }
 
 BlockIf[R:*]: {
   mut .return(a: mut MF[R]): mut Block[R];
@@ -80,6 +89,7 @@ _DecidedBlock: {
     .assert  _    -> self;
     .assert  _, _ -> self;
     .loop    _    -> self;
+    .loop    _, _ -> self;
     .if      _    -> {
       .return _ -> self;
       .do     _ -> self;
@@ -95,6 +105,8 @@ ControlFlowMatch[R:*]: {
   mut .break: mut Block[R];
   mut .return(v: R): mut Block[R];
   }
-Continue: {#[R:*]: mut ControlFlow[R]->{::.continue}}
-Break: {#[R:*]: mut ControlFlow[R]->{::.break}}
+/// `Continue` or `Break`, never `OuterReturn`: the `ControlFlow` an actor lambda answers.
+ContinueBreak[R:*]: ControlFlow[R] {}
+Continue: {#[R:*]: mut ContinueBreak[R]->{::.continue}}
+Break: {#[R:*]: mut ContinueBreak[R]->{::.break}}
 OuterReturn: {#[R:*](r: R): mut ControlFlow[R]->{::.return r} }

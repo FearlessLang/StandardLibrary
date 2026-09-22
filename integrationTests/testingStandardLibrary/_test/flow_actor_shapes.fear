@@ -1,0 +1,96 @@
+/// The shapes the actor family of flow stages is meant to be written in.
+/// Nothing here runs: ``Flow.actor`` and ``Flow.actorMut`` have no body yet, so
+/// this file is a compile time check that the declared signatures can express
+/// the operations they are supposed to express.
+
+ScanViaActor: {
+  #[E:*,S:imm](es: mut Flow[E], acc: S, f: read F[S,E,S]): mut Flow[S] ->
+    es.actor[mut base.Var[S], S](Vars#[S](acc), {down, s, e -> Block#(
+      s.set(f#(s.get, e)),
+      down.push#(down, s.get),
+      Continue#)});
+  }
+
+ScanViaActorDirectPush: {
+  #[E:*,S:imm](es: mut Flow[E], acc: S, f: read F[S,E,S]): mut Flow[S] ->
+    es.actor[mut base.Var[S], S](Vars#[S](acc), {down, s, e -> Block#(
+      s.set(f#(s.get, e)),
+      down#(s.get),
+      Continue#)});
+  }
+
+LimitViaActorMut: {
+  #[E:*](es: mut Flow[E], n: Nat): mut Flow[E] -> n == 0 ? {
+    .then -> Error.msg`.limit 0 asks a whole chain of stages for no elements`;
+    .else -> es.actorMut[mut base.Count[Nat], E](base.Count.nat n, {down, s, e -> Block#(
+      down.push#(down, e),
+      s--,
+      s.get == 0 ? { .then -> Break#; .else -> Continue# })});
+    };
+  }
+
+Trim: { #(w: List[Nat], width: Nat): List[Nat] -> w.size > width ? { .then -> w.subList(1); .else -> w } }
+WindowsViaActor: {
+  #(es: mut Flow[Nat], width: Nat): mut Flow[List[Nat]] ->
+    es.actor[mut base.Var[List[Nat]], List[Nat]](Vars#[List[Nat]]({}), {down, s, e -> Block#
+      .do{s.set(Trim#(s.get +> e, width))}
+      .do{s.get.size == width ? { .then -> down.push#(down, s.get); .else -> Void }}
+      .return{Continue#}
+      });
+  }
+
+DungeonRoomViaActorMut: {
+  #(heroes: mut Flow[mut Hero], room: iso Room): mut Flow[mut Hero] ->
+    heroes.actorMut[Room, mut Hero](room, {down, s, h -> Block#(
+      Visit#(s, h),
+      down.pushOpt#(down, Survivor#(s, h)),
+      Continue#)});
+  }
+
+FlatMapViaActor: {
+  #[E:*,R](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
+    es.actor[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
+      f#e .forEach{x -> down#x},
+      Continue#)});
+  }
+
+Drain: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E]): Void ->
+  DrainFrom#[E](down, xs, Vars#[Nat](0)) }
+DrainFrom: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E], i: mut base.Var[Nat]): Void ->
+  Block#[Void].loop(down, {d -> Block#(
+    d.pushOpt#(d, xs.opt(i.get)),
+    i.set(i.get + 1),
+    i.get >= (xs.size) ? { .then -> Break#; .else -> Continue# })})
+    .done }
+
+FlatMapViaActorMut: {
+  #[E:*,R:*](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
+    es.actorMut[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
+      Drain#[R](down, f#e .list),
+      Continue#)});
+  }
+
+MapWithContextViaActorMut: {
+  #[C,E:*,R:*](es: mut Flow[E], ctx: iso base.ToIso[C], g: read F[iso C,E,R]): mut Flow[R] ->
+    es.actorMut[base.ToIso[C], R](ctx, {down, s, e -> Block#(
+      down.push#(down, g#(s.iso.close, e)),
+      Continue#)});
+  }
+
+Pairs: { read .a: List[Str]; read .b: List[Str]; }
+SameSize: { #(pre: Str, x: Str, y: Str): mut Opt[Str] ->
+  x.size == (y.size) ?[mut Opt[Str]]{ .then -> Opts#(pre + x + y); .else -> {} } }
+JoinAt: { #(pre: Str, a: List[Str], b: List[Str], i: Nat): mut Opt[Str] ->
+  i >= (a.size) ?[mut Opt[Str]]{ .then -> {}; .else -> SameSize#(pre, a.get i, b.get i) } }
+JoinFrom: { #(down: mutH base.ActorSink[Str], pre: Str, a: List[Str], b: List[Str], i: mut base.Var[Nat]): Void ->
+  Block#[Void].loop(down, {d -> Block#(
+    d.pushOpt#(d, JoinAt#(pre, a, b, i.get)),
+    i.set(i.get + 1),
+    i.get >= (a.size) ? { .then -> Break#; .else -> Continue# })})
+    .done }
+JoinEqualSizesViaActorMut: {
+  #(es: mut Flow[Str], lists: iso Pairs): mut Flow[Str] ->
+    es.actorMut[Pairs, Str](lists, {down, s, e -> Block#(
+      JoinFrom#(down, e, s.a, s.b, Vars#[Nat](0)),
+      Continue#)});
+  }

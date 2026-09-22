@@ -33,6 +33,45 @@ BlockLoopTests: Test {::
     ) .assertEq 500000}
   }
 
+TenTimesAt: { #(n: Nat, limit: Nat): mut ControlFlow[Nat] ->
+  n >= limit ? { .then -> OuterReturn#(n * 10); .else -> Continue# } }
+
+BlockArgLoopTests: Test {::
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      (c.get) >= 5 ? { .then -> Break#; .else -> Continue# })})
+    .return {i.get}
+    ) .assertEq 5}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      TenTimesAt#(c.get, 3))})
+    .return {Unreachable!}
+    ) .assertEq 30}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      (c.get) >= 500000 ? { .then -> Break#; .else -> Continue# })})
+    .return {i.get}
+    ) .assertEq 500000}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .if {True} .return {5}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      OuterReturn#(c.get))})
+    .return {Unreachable!}
+    ) .assertEq 5}
+  }
+
 TestBlock: Test {::
   .test BlockLoopTests
+  .test BlockArgLoopTests
   }

@@ -1,0 +1,76 @@
+/// A dungeon room: a large mutable graph with imm leaves, chests of items in an
+/// ``EList`` of ``EList``s, monsters and graves in ``ESet``s. Every method of `Room`
+/// takes only imm arguments and answers imm values, so all of them can be called on
+/// a mutH room, like the state of an actorMut stage; inside, they are ordinary code
+/// on a mut receiver. `Visit` and `Survivor` run here on a mut room, which is also a
+/// mutH one, and as an actorMut stage in `DungeonRoomViaActorMut`.
+
+Item: { read .name: Str; read .value: Nat; }
+Items: { #(name: Str, value: Nat): Item -> { .name -> name; .value -> value; } }
+Monster: { read .name: Str; read .strength: Nat; }
+Monsters: { #(name: Str, strength: Nat): Monster -> { .name -> name; .strength -> strength; } }
+Grave: { read .name: Str; read .items: List[Item]; }
+Graves: { #(name: Str, items: List[Item]): Grave -> { .name -> name; .items -> items; } }
+
+Room: {
+  mut .fight(strength: Nat): Nat;
+  mut .loot: List[Item];
+  mut .bury(grave: Opt[Grave]): Void;
+  read .buried(name: Str): Bool;
+  }
+Rooms: { #(chests: mut base.EList[mut base.EList[Item]], monsters: mut ESet[Monster]): mut Room -> Block#
+  .let[mut ESet[Str]] graves = {base.ESets#[Str,Str]{::}}
+  .return {{
+    .fight strength -> monsters.removeIf{m -> m.strength < strength}.size;
+    .loot -> chests.seqFlow.flatMap{c -> c.seqFlow}.fold({{}}, {acc, i -> acc +> i});
+    .bury grave -> grave.ifSome{g -> Block#(graves.add(g.name), chests.add(g.items.flow.eList), Void)};
+    .buried name -> graves.contains(name);
+    }}
+  }
+
+Hero: {
+  read .name: Str;
+  read .strength: Nat;
+  read .isAlive: Bool;
+  read .worth: Nat;
+  mut .wound(blows: Nat): Void;
+  mut .carry(items: List[Item]): Void;
+  mut .grave: Opt[Grave];
+  }
+Heroes: { #(name: Str, strength: Nat, hp: Nat): mut Hero -> Block#
+  .var[Nat] blows = {0}
+  .var[List[Item]] pack = {{}}
+  .return {{'self
+    .name -> name;
+    .strength -> strength;
+    .isAlive -> blows.get < hp;
+    .worth -> pack.get.flow.fold({0}, {acc, i -> acc + (i.value)});
+    .wound n -> blows.set(blows.get + n);
+    .carry items -> pack.set(pack.get ++ items);
+    .grave -> self.isAlive ?[Opt[Grave]]{ .then -> {}; .else -> Opts#(Graves#(name, pack.get)) };
+    }}
+  }
+
+Visit: { #(room: mutH Room, h: mut Hero): Void -> Block#(
+  h.wound(room.fight(h.strength)),
+  h.carry(room.loot),
+  room.bury(h.grave),
+  Void) }
+
+Survivor: { #(room: readH Room, h: mut Hero): mut Opt[mut Hero] ->
+  room.buried(h.name) ?[mut Opt[mut Hero]]{ .then -> {}; .else -> Opts#h } }
+
+TestDungeon: Test {::
+  .check{Block#
+    .let[mut Room] room = {Rooms#(
+      ELists#[mut base.EList[Item]].addAnd(Lists#(Items#(`sword`, 10), Items#(`coin`, 1)).seqFlow.eList),
+      base.ESets#[Monster,Str]{::.name}.add(Monsters#(`rat`, 1)).add(Monsters#(`troll`, 8)))}
+    .let[mut Hero] bo = {Heroes#(`Bo`, 2, 1)}
+    .let[mut Hero] ann = {Heroes#(`Ann`, 9, 5)}
+    .do {Visit#(room, bo)}
+    .do {Visit#(room, ann)}
+    .do {Survivor#(room, bo).isEmpty.assertTrue}
+    .do {Survivor#(room, ann).isSome.assertTrue}
+    .do {ann.worth.assertEq 11}
+    .done}
+  }
