@@ -97,7 +97,6 @@ final class ESet$s$1Instance implements ESet$s$1 {
              + " Consider using `ESet.opt` to properly handle the failure case."
          );
     }
-    @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey)); }
     @Override public Object mut$flow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey).parallel()); }
     @Override public Object mut$set$0(){ return Set$c$1Instance.of(ordering, drain()); }
     @Override public Object mut$distinctBy$1(Object p0){
