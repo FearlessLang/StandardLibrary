@@ -88,6 +88,8 @@ NatRangeTests: Test {::
   .check{(1=~~=4).size .assertEq 4}
   .check{(1=~~=1).size .assertEq 1}
   .check{(1=~~=4).isEmpty .assertFalse}
+  .check{(Math.maxNat - 1)=~~=(Math.maxNat).flow 2 .limit 3 .list .assertEq({::}, Lists#(Math.maxNat - 1))}
+  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {1=~~=5.flow 0})
   }
 
 
