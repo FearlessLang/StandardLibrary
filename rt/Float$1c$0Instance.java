@@ -1,6 +1,5 @@
 package base;
 
-import static base.Nat$c$0Instance.MAX_UNSIGNED_VALUE_FLOAT;
 import static base.Util.*;
 import java.math.BigInteger;
 
@@ -40,37 +39,37 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$getSucc$0() {
     if (Double.isNaN(val)) {
-      throw err("Float.succ: NaN does not have a successor");
+      throw err("Float.getSucc: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY) {
-      throw err("Float.succ: Math.posInf does not have a successor");
+      throw err("Float.getSucc: Math.posInf does not have a successor");
     }
     return Float$1c$0Instance.instance(Math.nextUp(val));
   }
   @Override public Object imm$tryGetSucc$0() {
     if (Double.isNaN(val)) {
-      return fail("Float.succ: NaN does not have a successor");
+      return fail("Float.getSucc: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY) {
-      return fail("Float.succ: Math.posInf does not have a successor");
+      return fail("Float.getSucc: Math.posInf does not have a successor");
     }
     return ok(Float$1c$0Instance.instance(Math.nextUp(val)));
   }
   @Override public Object imm$getPred$0() {
     if (Double.isNaN(val)) {
-      throw err("Float.pred: NaN does not have a predecessor");
+      throw err("Float.getPred: NaN does not have a predecessor");
     }
     if (val == Double.NEGATIVE_INFINITY) {
-      throw err("Float.pred: Math.negInf does not have a predecessor");
+      throw err("Float.getPred: Math.negInf does not have a predecessor");
     }
     return Float$1c$0Instance.instance(Math.nextDown(val));
   }
   @Override public Object imm$tryGetPred$0() {
     if (Double.isNaN(val)) {
-      return fail("Float.pred: NaN does not have a predecessor");
+      return fail("Float.getPred: NaN does not have a predecessor");
     }
     if (val == Double.NEGATIVE_INFINITY) {
-      return fail("Float.pred: Math.negInf does not have a predecessor");
+      return fail("Float.getPred: Math.negInf does not have a predecessor");
     }
     return ok(Float$1c$0Instance.instance(Math.nextDown(val)));
   }
@@ -109,10 +108,10 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     if (Double.isNaN(val) || val <= 0.0d) {
       return Nat$c$0Instance.instance(0);
     }
-    if (val > MAX_UNSIGNED_VALUE_FLOAT) {
+    if (val >= 0x1p64) {
       return Nat$c$0Instance.instance(Nat$c$0Instance.MAX_UNSIGNED_VALUE);
     }
-    return Nat$c$0Instance.instance((long) val);
+    return Nat$c$0Instance.instance(natBits(val));
   }
   @Override public Object imm$softByte$0(){ return Byte$o$0Instance.instance(clampTrunc0ToByteBits(val)); }
   static Num$c$0 numExactFinite(double x){

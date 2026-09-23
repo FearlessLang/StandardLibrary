@@ -1,44 +1,36 @@
 /// Int: signed 64-bit.
 /// Note: / is not provided; use div/rem (divisor is Nat).
 Int: Sealed,DataType[Int,Int],SumNumber[Int] {
-  /// `this.getSucc` returns ``this + +1``. Throws if `this` is `Math.maxInt` (overflow).
-  //>   .check{+5 .getSucc .assertEq +6}
-  //>   .checkDetErr({::}, {(Math.maxInt) .getSucc})
-  .getSucc: Int -> this + +1;
-  .tryGetSucc: mut Action[Int] -> this == (Math.maxInt) .if {
-    .then -> Actions.msg("Int.getSucc: cannot get the successor of Math.maxInt ("+(Math.maxInt)+").");
-    .else -> Actions.ok(this + +1);
-    };
+  /// `this.succ` returns ``this + +1``. Throws if `this` is `Math.maxInt` (overflow).
+  //>   .check{+5 .succ .assertEq +6}
+  //>   .checkNonDetErr({::}, {(Math.maxInt) .succ})
+  .succ: Int -> this + +1;
 
-  /// `this.getPred` returns ``this - +1``. Throws if `this` is `Math.minInt` (underflow).
-  //>   .check{+5 .getPred .assertEq +4}
-  //>   .checkDetErr({::}, {(Math.minInt) .getPred})
-  .getPred: Int -> this + -1;
-  .tryGetPred: mut Action[Int] -> this == (Math.minInt) .if {
-    .then -> Actions.msg("Int.getPred: cannot get the predecessor of Math.minInt ("+(Math.minInt)+").");
-    .else -> Actions.ok(this + -1);
-    };
+  /// `this.pred` returns ``this - +1``. Throws if `this` is `Math.minInt` (underflow).
+  //>   .check{+5 .pred .assertEq +4}
+  //>   .checkNonDetErr({::}, {(Math.minInt) .pred})
+  .pred: Int -> this + -1;
 
   /// ``this + x`` returns the checked sum of `this` and ``x``. Throws on overflow/underflow.
   //>   .check{(+2 + +3) .assertEq +5}
-  //>   .checkDetErr({::}, {(Math.maxInt) + +1})
+  //>   .checkNonDetErr({::}, {(Math.maxInt) + +1})
   +(x: Int): Int;
 
   /// ``this - x`` returns the checked difference of `this` and ``x``. Throws on overflow/underflow.
   //>   .check{(+5 - +3) .assertEq +2}
-  //>   .checkDetErr({::}, {(Math.minInt) - +1})
+  //>   .checkNonDetErr({::}, {(Math.minInt) - +1})
   -(x: Int): Int;
 
   /// ``this * x`` returns the checked product of `this` and ``x``. Throws on overflow/underflow.
   //>   .check{(+6 * +7) .assertEq +42}
-  //>   .checkDetErr({::}, {(Math.maxInt) * +2})
+  //>   .checkNonDetErr({::}, {(Math.maxInt) * +2})
   *(x: Int): Int;
 
   /// ``this ** x`` returns the checked power of `this` raised to ``x``.
   /// Note: ``x`` is `Nat` (not `Int`), as negative exponents would produce fractional results.
   /// Throws on overflow/underflow.
   //>   .check{(+2 ** 6) .assertEq +64}
-  //>   .checkDetErr({::}, {(Math.maxInt) ** 2})
+  //>   .checkNonDetErr({::}, {(Math.maxInt) ** 2})
   **(x: Nat): Int;
 
   /// ``this / d`` returns the exact rational quotient of `this` and ``d`` as a `Num`. Throws iff ``d == 0``.
@@ -177,7 +169,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.softFloat` converts `this` to the closest representable `Float`
   //>   .check{+5 .softFloat .assertEq 5.0}
-  //>   .check{Math.maxInt - +1 .softFloat.softNat .assertEq(Math.maxInt.getNat)}
+  //>   .check{Math.maxInt - +1 .softFloat.softNat .assertEq(Math.maxInt.getNat + 1)}
   .softFloat: Float;
 
   /// ``this.aluAddWrap(x)`` returns ``this + x`` mod ``2^64`` (i64 wraparound add)
@@ -241,10 +233,10 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   ~~(end: Int): Range[Int] -> Block#
     .if {this == (Math.maxInt)} .error{"Int ~~: Start of open range cannot be Math.maxInt"}
     .if {end == (Math.minInt)} .error{"Int ~~: End of open range cannot be Math.minInt"}
-    .let endInclusive={end.getPred}
-    .let startInclusive={this.getSucc}
+    .let endInclusive={end.pred}
+    .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Int ~~: Tried to produce empty range, start ("+this+") .getSucc must be <= end (" + end + ") .getPred"
+      "Int ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
     .return {_IntRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
@@ -257,7 +249,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
     .if {this >= endInclusive } .error {
       "Int ~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
-    .return {_IntRanges#(this.getSucc, endInclusive, "("+this+", "+endInclusive+"]")};
+    .return {_IntRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
 
   /// ``this=~~end`` returns the range ``[this, end)``.
   /// Throws if `end` is `Math.minInt`, or the range would be empty (``this >= end``).
@@ -270,7 +262,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
     .if {this >= end } .error {
       "Int =~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
       }
-    .return {_IntRanges#(this, end.getPred, "["+this+", "+end+")")};
+    .return {_IntRanges#(this, end.pred, "["+this+", "+end+")")};
 
   /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
   /// Throws if the range would be empty (``this > endInclusive``).

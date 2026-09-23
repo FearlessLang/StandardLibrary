@@ -39,7 +39,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
   private static long mulChecked(long a, long b) {
     try{ return Math.multiplyExact(a, b); }
-    catch(ArithmeticException e){ throw err("Int.* overflow"); }
+    catch(ArithmeticException e){ throw nonDetErr("Int.* overflow"); }
   }
   static boolean canSafelyConvertToDouble(long val) {
     // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
@@ -117,11 +117,11 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$$plus$1(Object p0){
     try{ return instance(Math.addExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw err("Int.+ overflow"); }
+    catch(ArithmeticException e){ throw nonDetErr("Int.+ overflow"); }
   }
   @Override public Object imm$$dash$1(Object p0){
     try{ return instance(Math.subtractExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw err("Int.- overflow"); }
+    catch(ArithmeticException e){ throw nonDetErr("Int.- overflow"); }
   }
   @Override public Object imm$$slash$1(Object p0){
     long d=Nat$c$0Instance.unwrap(p0);

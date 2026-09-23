@@ -49,7 +49,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    */
   private static long addChecked(long a, long b){
     boolean overflow = Long.compareUnsigned(a, MAX_UNSIGNED_VALUE - b) > 0;
-    if (overflow) { throw err("Nat +: overflow"); }
+    if (overflow) { throw nonDetErr("Nat +: overflow"); }
     return a + b;
   }
   /**
@@ -57,7 +57,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    * since we are working with unsigned numbers
    */
   private static long subChecked(long a, long b){
-    if (Long.compareUnsigned(a, b) < 0){ throw err("Nat -: underflow"); }
+    if (Long.compareUnsigned(a, b) < 0){ throw nonDetErr("Nat -: underflow"); }
     return a - b;
   }
 
@@ -68,7 +68,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   private static long mulChecked(long a, long b){
     if (a == 0 || b == 0) {return 0;}
     boolean overflow = Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0;
-    if (overflow){ throw err("Nat *: overflow"); }
+    if (overflow){ throw nonDetErr("Nat *: overflow"); }
     return a * b;
   }
 
@@ -226,7 +226,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
         power -= 1;
       }
     }
-    catch (Error _) { throw err("Nat **: overflow"); }
+    catch (Error _) { throw nonDetErr("Nat **: overflow"); }
     return Nat$c$0Instance.instance(result);
   }
   @Override public Object imm$softSqrt$0(){
@@ -258,9 +258,11 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     long offset = i(p0);
     if (offset <= 0) {
       // works for Long.MIN_VALUE as well, as Long.MIN_VALUE when read unsigned is LONG.MAX_VALUE + 1
-      return instance(subChecked(val, -offset));
+      if (Long.compareUnsigned(val, -offset) < 0){ throw err("Nat -: underflow"); }
+      return instance(val + offset);
     }
-    return instance(addChecked(val, offset));
+    if (Long.compareUnsigned(val, MAX_UNSIGNED_VALUE - offset) > 0){ throw err("Nat +: overflow"); }
+    return instance(val + offset);
   }
   @Override public Object imm$tryGetIndexOffset$1(Object p0){
     long offset = i(p0);

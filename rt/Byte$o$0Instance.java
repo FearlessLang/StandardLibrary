@@ -34,18 +34,18 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
 
   private static byte addChecked(byte a, byte b){
     int r= u8(a) + u8(b);
-    if (r > 255){ throw err("Byte.+ overflow"); }
+    if (r > 255){ throw nonDetErr("Byte.+ overflow"); }
     return (byte)r;
   }
   private static byte subChecked(byte a, byte b){
     if (Byte.compareUnsigned(a, b) < 0) {
-      throw err("Byte.- underflow");
+      throw nonDetErr("Byte.- underflow");
     }
     return (byte) (a - b);
   }
   private static byte mulChecked(byte a, byte b){
     int r= u8(a) * u8(b);
-    if (r > 255){ throw err("Byte.* overflow"); }
+    if (r > 255){ throw nonDetErr("Byte.* overflow"); }
     return (byte)r;
   }
 
