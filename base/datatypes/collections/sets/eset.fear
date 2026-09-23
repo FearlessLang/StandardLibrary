@@ -118,7 +118,7 @@ ESet[E]: Pipe[ESet[E]] {
   /// throws if no such element exists.
   //>   .check{Sets#({::.imm.abs}, +1, -2).get(-1) .assertEq +1}
   //>   .checkDetErr({::}, {Sets#({::}, 1, 2).get(3)})
-  mut .get(elem: E): E -> this.tryGet(elem)!;
+  mut .get(elem: E): E;
   mut .tryGet(elem: E): mut Action[E];
 
   /// ``this.getOrInsert(e)`` returns the element in `this` equal to ``e`` under `this`'s orderHash,

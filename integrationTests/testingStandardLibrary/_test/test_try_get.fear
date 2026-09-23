@@ -59,7 +59,27 @@ TryGetCollectionTests: Test {::
   .checkDetErr({::.isMsg{::.startsWith `List.get`}}, {Lists#(1,2,3).get 5})
   }
 
+FloatNumConversionTests: Test {::
+  .check{4294967296.0 .getInt .assertEq +4294967296}
+  .check{-9223372036854775808.0 .getInt .assertEq(Math.minInt)}
+  .check{(4294967296.0 .tryGetInt).ok.assertEq({::}, Opts#(+4294967296))}
+  .check{4294967296.0 .int .assertEq({::}, Opts#(+4294967296))}
+  .checkDetErr({::.isMsg{::.startsWith `Float.getInt`}}, {9223372036854775808.0 .getInt})
+  .check{9223372036854775808.0 .tryGetInt .assertInfo{::.isMsg{::.startsWith `Float.getInt`}}}
+  .check{4294967296.0 .getNat .assertEq 4294967296}
+  .check{9223372036854775808.0 .getNat .assertEq 9223372036854775808}
+  .check{(9223372036854775808.0 .tryGetNat).ok.assertEq({::}, Opts#(9223372036854775808))}
+  .check{9223372036854775808.0 .nat .assertEq({::}, Opts#(9223372036854775808))}
+  .checkDetErr({::.isMsg{::.startsWith `Float.getNat`}}, {18446744073709551616.0 .getNat})
+  .check{18446744073709551616.0 .nat .assertEmpty {::}}
+  .checkDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(1/2).getByte})
+  .checkDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(300/1).getByte})
+  .check{(1/2).tryGetByte.assertInfo{::.isMsg{::.startsWith `Num.getByte`}}}
+  .check{(300/1).tryGetByte.assertInfo{::.isMsg{::.startsWith `Num.getByte`}}}
+  }
+
 TestTryGet: Test {::
+  .test FloatNumConversionTests
   .test TryGetNumberTests
   .test TryGetStrInfoTests
   .test TryGetCollectionTests

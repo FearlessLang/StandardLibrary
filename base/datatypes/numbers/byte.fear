@@ -3,7 +3,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.getSucc` returns ``this + 1``. Throws if `this` is ``255`` (overflow).
   //>   .check{5.getByte .getSucc .assertEq(6.getByte)}
   //>   .checkDetErr({::}, {(255.getByte) .getSucc})
-  .getSucc: Byte -> this.tryGetSucc!;
+  .getSucc: Byte -> this + (1.getByte);
   .tryGetSucc: mut Action[Byte] -> this == (Math.maxByte) .if {
     .then -> Actions.msg("Byte.getSucc: cannot get the successor of Math.maxByte ("+(Math.maxByte)+").");
     .else -> Actions.ok(this + (1.getByte));
@@ -12,7 +12,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
   //>   .check{5.getByte .getPred .assertEq(4.getByte)}
   //>   .checkDetErr({::}, {(0.getByte) .getPred})
-  .getPred: Byte -> this.tryGetPred!;
+  .getPred: Byte -> this - (1.getByte);
   .tryGetPred: mut Action[Byte] -> this == (Math.minByte) .if {
     .then -> Actions.msg("Byte.getPred: cannot get the predecessor of Math.minByte ("+(Math.minByte)+").");
     .else -> Actions.ok(this - (1.getByte));
@@ -47,7 +47,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{(7.getByte) .getTruncDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getDiv 0})
-  .getTruncDiv(d: Nat): Byte -> this.tryGetTruncDiv(d)!;
+  .getTruncDiv(d: Nat): Byte;
   .tryGetTruncDiv(d: Nat): mut Action[Byte];
 
   /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
@@ -64,7 +64,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7.getByte .getRem 2 .assertEq(1.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getRem 0})
-  .getRem(d: Nat): Byte -> this.tryGetRem(d)!;
+  .getRem(d: Nat): Byte;
   .tryGetRem(d: Nat): mut Action[Byte];
 
   /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` otherwise.

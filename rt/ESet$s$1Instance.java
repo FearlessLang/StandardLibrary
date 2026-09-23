@@ -89,6 +89,14 @@ final class ESet$s$1Instance implements ESet$s$1 {
         return this;
     }
     @Override public Object mut$opt$1(Object p0) { return optNullable(this.set.get(mapKey(this.ordering, p0))); }
+    @Override public Object mut$get$1(Object p0) {
+        Object key = this.set.get(mapKey(this.ordering, p0));
+        if (key != null) { return key; }
+         throw err(
+           "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
+             + " Consider using `ESet.opt` to properly handle the failure case."
+         );
+    }
     @Override public Object mut$tryGet$1(Object p0) {
         Object key = this.set.get(mapKey(this.ordering, p0));
         if (key != null) { return ok(key); }

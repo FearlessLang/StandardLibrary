@@ -15,7 +15,7 @@ EList[E:*]: Pipe[EList[E]]{
   mut .seqFlow: mut Flow[E]; //consumes the EList
   mut .flow(mode:FlowMode[E]): mut Flow[E]; //consumes the EList
   imm .flow: mut Flow[imm E]; //safe since imm receiver
-  mut .get(i: Nat): E -> this.tryGet(i)!; //simpler model with most methods `mut`
+  mut .get(Nat): E; //simpler model with most methods `mut`
   mut .tryGet(Nat): mut Action[E];
   read .size: Nat;
   mut .list: mut List[E]; //consumes the EList and moves the data in the result

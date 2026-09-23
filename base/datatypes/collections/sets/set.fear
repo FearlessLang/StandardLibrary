@@ -62,7 +62,7 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   /// throws if no such element exists.
   //>   .check{Sets#({::.imm.abs}, +1, -2).get(-1) .assertEq +1}
   //>   .checkDetErr({::}, {Sets#({::}, 1, 2).get(3)})
-  .get(elem: E): E -> this.tryGet(elem)!;
+  .get(elem: E): E;
   .tryGet(elem: E): mut Action[E];
 
   /// ``this + e`` returns a new Set[E] containing all elements of this plus ``e``.

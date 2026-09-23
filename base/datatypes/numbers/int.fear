@@ -4,7 +4,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.getSucc` returns ``this + +1``. Throws if `this` is `Math.maxInt` (overflow).
   //>   .check{+5 .getSucc .assertEq +6}
   //>   .checkDetErr({::}, {(Math.maxInt) .getSucc})
-  .getSucc: Int -> this.tryGetSucc!;
+  .getSucc: Int -> this + +1;
   .tryGetSucc: mut Action[Int] -> this == (Math.maxInt) .if {
     .then -> Actions.msg("Int.getSucc: cannot get the successor of Math.maxInt ("+(Math.maxInt)+").");
     .else -> Actions.ok(this + +1);
@@ -13,7 +13,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.getPred` returns ``this - +1``. Throws if `this` is `Math.minInt` (underflow).
   //>   .check{+5 .getPred .assertEq +4}
   //>   .checkDetErr({::}, {(Math.minInt) .getPred})
-  .getPred: Int -> this.tryGetPred!;
+  .getPred: Int -> this + -1;
   .tryGetPred: mut Action[Int] -> this == (Math.minInt) .if {
     .then -> Actions.msg("Int.getPred: cannot get the predecessor of Math.minInt ("+(Math.minInt)+").");
     .else -> Actions.ok(this + -1);
@@ -51,7 +51,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+7 .getTruncDiv 2 .assertEq +3}
   //>   .check{-7 .getTruncDiv 2 .assertEq -3}
   //>   .checkDetErr({::}, {+7 .getTruncDiv 0})
-  .getTruncDiv(d: Nat): Int -> this.tryGetTruncDiv(d)!;
+  .getTruncDiv(d: Nat): Int;
   .tryGetTruncDiv(d: Nat): mut Action[Int];
 
   /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
@@ -68,7 +68,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{+7 .getRem 2 .assertEq +1}
   //>   .checkDetErr({::}, {+7 .getRem 0})
-  .getRem(d: Nat): Int -> this.tryGetRem(d)!;
+  .getRem(d: Nat): Int;
   .tryGetRem(d: Nat): mut Action[Int];
 
   /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` iff ``d == 0``.
@@ -119,7 +119,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{-1 .getWrapIndex 7 .assertEq 6}
   //>   .check{+8 .getWrapIndex 7 .assertEq 1}
   //>   .checkDetErr({::}, {+5 .getWrapIndex 0})
-  .getWrapIndex(len: Nat): Nat -> this.tryGetWrapIndex(len)!;
+  .getWrapIndex(len: Nat): Nat;
   .tryGetWrapIndex(len: Nat): mut Action[Nat];
 
   /// ``this.wrapIndex(len)`` returns `.some` of ``this.getWrapIndex(len)`` if ``len != 0``, `.empty` iff ``len == 0``.
@@ -150,19 +150,19 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.getNat` converts `this` to a `Nat`. Throws if ``this < 0``.
   //>   .check{+5 .getNat .assertEq 5}
   //>   .checkDetErr({::}, {-5 .getNat})
-  .getNat: Nat -> this.tryGetNat!;
+  .getNat: Nat;
   .tryGetNat: mut Action[Nat];
 
   /// `this.getByte` converts `this` to a `Byte`. Throws if `this` is not in ``[0, maxByte]``.
   //>   .check{+5 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({::}, {+300 .getByte})
-  .getByte: Byte -> this.tryGetByte!;
+  .getByte: Byte;
   .tryGetByte: mut Action[Byte];
 
   /// `this.getFloat` converts `this` to a `Float`. Throws if `this` is not exactly representable.
   //>   .check{+5 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {Math.minInt + +1 .getFloat})
-  .getFloat: Float -> this.tryGetFloat!;
+  .getFloat: Float;
   .tryGetFloat: mut Action[Float];
 
   /// `this.softNat` converts `this` to a `Nat` by flooring negative values to ``0``

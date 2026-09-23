@@ -26,8 +26,8 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
 
   read .keyOh: OrderHashBy[K];     /// key comparator+hash used by this map;
 
-  mut  .get(k: K): E -> this.tryGet(k)!;              /// value for k; throws iff k absent
-  read .get(k: K): read/imm E -> this.tryGet(k)!;     /// value for k; throws iff k absent
+  mut  .get(k: K): E;              /// value for k; throws iff k absent
+  read .get(k: K): read/imm E;     /// value for k; throws iff k absent
   mut  .tryGet(k: K): mut Action[E];
   read .tryGet(k: K): mut Action[read/imm E];
 

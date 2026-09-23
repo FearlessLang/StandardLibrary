@@ -19,7 +19,7 @@ ExtentNat[S]: Wrapper[S,Nat] {
     .let b = { this.close(other).get }
     .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
   *(k: Nat): S -> this#(this.get * k);
-  .getTruncDiv(k: Nat): S -> this.tryGetTruncDiv(k)!;
+  .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
   .tryGetTruncDiv(k: Nat): mut Action[S] -> this.get.tryGetTruncDiv(k).map{x -> this#x};
   .zero: S -> this#0;
   }
@@ -77,7 +77,7 @@ LevelByte[S]: Wrapper[S,Byte] {
     .let a = { this.get }
     .let b = { this.close(other).get }
     .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
-  .getTruncDiv(k: Nat): S -> this.tryGetTruncDiv(k)!;
+  .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
   .tryGetTruncDiv(k: Nat): mut Action[S] -> this.get.tryGetTruncDiv(k).map{x -> this#x};
   .min: S -> this#(Math.minByte);
   .max: S -> this#(Math.maxByte);
