@@ -35,7 +35,7 @@ Flow[E:*]: {
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
   mut .flatMap[R:*](f: read F[E, mut Flow[R]]): mut Flow[R];
   mut .filter(f: read F[E, Bool]): mut Flow[E];
-  mut .size: Nat;
+  mut .size: Nat -> this.list.size;
   mut .isEmpty: Bool -> this.size == 0;
   mut ++ (mut Flow[E]): mut Flow[E];
   mut .list: mut List[E];
@@ -61,8 +61,12 @@ Flow[E:*]: {
   mut .any(f: read F[E, Bool]):  Bool;
   mut .all(f: read F[E, Bool]):  Bool;
   mut .none(f: read F[E, Bool]): Bool;
-  mut .get:   E;//get the first element if size==1, throws otherwise
-  mut .getOpt:   mut Opt[E];//opt of the first element if size in {0,1} throws otherwise
+  mut .get:   E -> this.list |> {xs -> xs.size == 1 ? {
+    .then -> xs.getFirst;
+    .else -> Error.msg(`Flow.get: the flow has `+(xs.size)+` elements, but .get needs exactly one`)}};//get the first element if size==1, throws otherwise
+  mut .getOpt:   mut Opt[E] -> this.list |> {xs -> xs.size <= 1 ? {
+    .then -> xs.first;
+    .else -> Error.msg(`Flow.getOpt: the flow has `+(xs.size)+` elements, but .getOpt needs at most one`)}};//opt of the first element if size in {0,1} throws otherwise
   mut .first: mut Opt[E]; //opt of the first element
   /// `this.last` returns the last element in the flow, consuming `this`.
   /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(a))``

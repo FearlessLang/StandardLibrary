@@ -63,6 +63,19 @@ FlowLimitTests: Test {::
   .checkDetErr({::.isMsg{::.contains `.limit 0`}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg`stage ran`}.limit 0})
   }
 
+FlowOverListTests: Test {::
+  .check{Flows#(1,2,3).map{e -> e * 2}.size .assertEq 3}
+  .checkDetErr({::.isMsg{:: == `stage ran`}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg`stage ran`}.size})
+  .check{Flows#(5).get .assertEq 5}
+  .check{Flows#(5).getOpt! .assertEq 5}
+  .check{Flows#[Nat].getOpt.isEmpty .assertTrue}
+  .checkDetErr({::.isMsg{:: == `element 3`}}, {Flows#(1,2,3).map[Nat]{e -> e == 3 ? {.then -> Error.msg`element 3`; .else -> e}}.get})
+  .checkDetErr({::.isMsg{:: == `element 3`}}, {Flows#(1,2,3).map[Nat]{e -> e == 3 ? {.then -> Error.msg`element 3`; .else -> e}}.getOpt})
+  .checkDetErr({::.isMsg{:: == `Flow.get: the flow has 0 elements, but .get needs exactly one`}}, {Flows#[Nat].get})
+  .checkDetErr({::.isMsg{:: == `Flow.get: the flow has 2 elements, but .get needs exactly one`}}, {Flows#(1,2).get})
+  .checkDetErr({::.isMsg{:: == `Flow.getOpt: the flow has 2 elements, but .getOpt needs at most one`}}, {Flows#(1,2).getOpt})
+  }
+
 TestFlow: Test {::
   .test FlowForEachTests
   .test FlowBuildOrderTests
@@ -70,4 +83,5 @@ TestFlow: Test {::
   .test FlowScanTests
   .test FlowLetTests
   .test FlowLimitTests
+  .test FlowOverListTests
   }
