@@ -73,10 +73,11 @@ ESet[E]: Pipe[ESet[E]] {
   //>     .do{eset.getTake(-1) .assertEq +1}
   //>     .do{eset.size .assertEq 1}
   //>     .done}
-  mut .getTake(elem: E): E -> Block#
-    .let e={this.get(elem)}
-    .do {this.remove e .void}
-    .return {e};
+  mut .getTake(elem: E): E -> this.tryGetTake(elem)!;
+  mut .tryGetTake(elem: E): mut Action[E] -> this.take(elem).match{
+    .some e -> Actions.ok e;
+    .empty -> this.tryGet(elem);
+    };
 
   /// `this.clear` removes all the elements from this and returns this to allow method chaining.
   /// Note this operation mutates `this`.
@@ -117,7 +118,8 @@ ESet[E]: Pipe[ESet[E]] {
   /// throws if no such element exists.
   //>   .check{Sets#({::.imm.abs}, +1, -2).get(-1) .assertEq +1}
   //>   .checkDetErr({::}, {Sets#({::}, 1, 2).get(3)})
-  mut .get(elem: E): E;
+  mut .get(elem: E): E -> this.tryGet(elem)!;
+  mut .tryGet(elem: E): mut Action[E];
 
   /// ``this.getOrInsert(e)`` returns the element in `this` equal to ``e`` under `this`'s orderHash,
   /// inserting it first if it doesn't exist;

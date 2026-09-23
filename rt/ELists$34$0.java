@@ -23,17 +23,16 @@ final class EList$1k$1Instance implements EList$1k$1{
     xs= new ArrayList<>();
     return r;
   }
-  private int idx(Object p0){
-    long i= natToInt(p0);
-    // Lists cannot get larger than an int
-    check(0 <= i && i < xs.size(), "EList index out of range");
-    return (int) i;
-  }
+
   @Override public Object mut$add$1(Object p0){ xs.add(p0); return Void$o$0.instance; }
   @Override public Object mut$addAnd$1(Object p0){ xs.add(p0); return this; }
   @Override public Object mut$clear$0(){ xs.clear(); return Void$o$0.instance; }
   @Override public Object mut$clearAnd$0(){ xs.clear(); return this; }
-  @Override public Object mut$get$1(Object p0){ return xs.get(idx(p0)); }
+  @Override public Object mut$tryGet$1(Object p0){
+    long i= natToLong(p0);
+    if (0 <= i && i < xs.size()){ return ok(xs.get((int) i)); }
+    return fail("EList index out of range");
+  }
   @Override public Object read$size$0(){ return Nat$c$0Instance.instance(xs.size()); }
   @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().stream()); }
   @Override public Object mut$flow$1(Object p0){ return Flow$o$1Instance.of(drain().stream().parallel()); }

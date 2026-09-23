@@ -3,12 +3,20 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.getSucc` returns ``this + 1``. Throws if `this` is ``255`` (overflow).
   //>   .check{5.getByte .getSucc .assertEq(6.getByte)}
   //>   .checkDetErr({::}, {(255.getByte) .getSucc})
-  .getSucc: Byte -> this + (1.getByte);
+  .getSucc: Byte -> this.tryGetSucc!;
+  .tryGetSucc: mut Action[Byte] -> this == (Math.maxByte) .if {
+    .then -> Actions.msg("Byte.getSucc: cannot get the successor of Math.maxByte ("+(Math.maxByte)+").");
+    .else -> Actions.ok(this + (1.getByte));
+    };
 
   /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
   //>   .check{5.getByte .getPred .assertEq(4.getByte)}
   //>   .checkDetErr({::}, {(0.getByte) .getPred})
-  .getPred: Byte -> this - (1.getByte);
+  .getPred: Byte -> this.tryGetPred!;
+  .tryGetPred: mut Action[Byte] -> this == (Math.minByte) .if {
+    .then -> Actions.msg("Byte.getPred: cannot get the predecessor of Math.minByte ("+(Math.minByte)+").");
+    .else -> Actions.ok(this - (1.getByte));
+    };
 
   /// ``this + x`` returns the checked sum of `this` and ``x``. Throws if the result would exceed ``255``.
   //>   .check{(2.getByte + (3.getByte)) .assertEq(5.getByte)}
@@ -39,22 +47,25 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{(7.getByte) .getTruncDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getDiv 0})
-  .getTruncDiv(d: Nat): Byte;
+  .getTruncDiv(d: Nat): Byte -> this.tryGetTruncDiv(d)!;
+  .tryGetTruncDiv(d: Nat): mut Action[Byte];
 
   /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
   //>   .check{(6.getByte) .getDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getDiv 3})
   //>   .checkDetErr({::}, {7.getByte .getDiv 0})
-  .getDiv(d: Nat): Byte -> Block#
-    .if {d == 0} .error {"Byte.getDiv: Cannot divide by 0"}
+  .getDiv(d: Nat): Byte -> this.tryGetDiv(d)!;
+  .tryGetDiv(d: Nat): mut Action[Byte] -> Block#
+    .if {d == 0} .return {Actions.msg "Byte.getDiv: Cannot divide by 0"}
     .let[Byte] rem = {this.getRem d}
-    .if {rem != (0.getByte)} .error {"Byte.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
-    .return {this.getTruncDiv d};
+    .if {rem != (0.getByte)} .return {Actions.msg("Byte.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
+    .return {this.tryGetTruncDiv d};
 
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7.getByte .getRem 2 .assertEq(1.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getRem 0})
-  .getRem(d: Nat): Byte;
+  .getRem(d: Nat): Byte -> this.tryGetRem(d)!;
+  .tryGetRem(d: Nat): mut Action[Byte];
 
   /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` otherwise.
   //>   .check{7.getByte .rem 2 .assertEq({::}, Opts# (1.getByte))}

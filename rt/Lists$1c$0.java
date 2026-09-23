@@ -112,24 +112,28 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
     String res= val.stream().map(e->toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ","[","]"));
     return Str$c$0Instance.instance(res);
   }
-  @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
-  @Override public Object read$get$1(Object p0){ return val.get(idx(p0)); }
+  @Override public Object mut$tryGet$1(Object p0){
+    long i= natToLong(p0);
+    if (0 <= i && i < val.size()){ return ok(val.get((int) i)); }
+    return fail("List.get: List index "+Long.toUnsignedString(i)+" out of range for List of length "+val.size());
+  }
+  @Override public Object read$tryGet$1(Object p0){ return mut$tryGet$1(p0); }
   @Override public Object mut$opt$1(Object p0){
     long i= natToLong(p0);
     return (0 <= i && i < val.size()) ? optSome(val.get((int) i)) : optEmpty();
   }
   @Override public Object read$opt$1(Object p0){ return mut$opt$1(p0); }
   @Override public Object imm$opt$1(Object p0){ return mut$opt$1(p0); }
-  @Override public Object mut$getFirst$0(){
+  @Override public Object mut$tryGetFirst$0(){
     //can not be empty check(!val.isEmpty(), "List was empty");
-    return val.getFirst();
+    return ok(val.getFirst());
   }
-  @Override public Object read$getFirst$0(){ return mut$getFirst$0(); }
-  @Override public Object mut$getLast$0(){
+  @Override public Object read$tryGetFirst$0(){ return mut$tryGetFirst$0(); }
+  @Override public Object mut$tryGetLast$0(){
     //can not be empty check(!val.isEmpty(), "List was empty");
-    return val.getLast();
+    return ok(val.getLast());
   }
-  @Override public Object read$getLast$0(){ return mut$getLast$0(); }
+  @Override public Object read$tryGetLast$0(){ return mut$tryGetLast$0(); }
   @Override public Object mut$first$0(){ return optSome(val.getFirst()); }
   @Override public Object read$first$0(){ return mut$first$0(); }
   @Override public Object imm$first$0(){ return mut$first$0(); }

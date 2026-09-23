@@ -4,17 +4,19 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// `this.getSucc` returns ``this + 1``. Throws if `this` is `Math.maxNat` (overflow).
   //>   .check{5 .getSucc .assertEq 6}
   //>   .checkDetErr({:: & .isMsg{::.startsWith "Nat.getSucc"}}, {(Math.maxNat) .getSucc})
-  .getSucc: Nat -> this == (Math.maxNat) .if {
-    .then -> Error.msg("Nat.getSucc: cannot get the successor of Math.maxNat ("+(Math.maxNat)+").");
-    .else -> this + 1;
+  .getSucc: Nat -> this.tryGetSucc!;
+  .tryGetSucc: mut Action[Nat] -> this == (Math.maxNat) .if {
+    .then -> Actions.msg("Nat.getSucc: cannot get the successor of Math.maxNat ("+(Math.maxNat)+").");
+    .else -> Actions.ok(this + 1);
     };
 
   /// `this.getPred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
   //>   .check{5 .getPred .assertEq 4}
   //>   .checkDetErr({::}, {0 .getPred})
-  .getPred: Nat -> this == (Math.minNat) .if {
-    .then -> Error.msg("Nat.getPred: cannot get the predecessor of Math.minNat ("+(Math.minNat)+").");
-    .else -> this - 1;
+  .getPred: Nat -> this.tryGetPred!;
+  .tryGetPred: mut Action[Nat] -> this == (Math.minNat) .if {
+    .then -> Actions.msg("Nat.getPred: cannot get the predecessor of Math.minNat ("+(Math.minNat)+").");
+    .else -> Actions.ok(this - 1);
     };
 
   /// ``this + x`` returns the checked sum of `this` and ``x``. Throws on overflow past `Math.maxNat`.
@@ -45,22 +47,25 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{7 .getTruncDiv 2 .assertEq 3}
   //>   .checkDetErr({::}, {7 .getDiv 0})
-  .getTruncDiv(d: Nat): Nat;
+  .getTruncDiv(d: Nat): Nat -> this.tryGetTruncDiv(d)!;
+  .tryGetTruncDiv(d: Nat): mut Action[Nat];
 
   /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``rem != 0``.
   //>   .check{6 .getDiv 2 .assertEq 3}
   //>   .checkDetErr({::}, {7 .getDiv 2})
   //>   .checkDetErr({::}, {7 .getDiv 0})
-  .getDiv(d: Nat): Nat -> Block#
-    .if {d == 0} .error {"Nat.getDiv: Cannot divide by 0"}
+  .getDiv(d: Nat): Nat -> this.tryGetDiv(d)!;
+  .tryGetDiv(d: Nat): mut Action[Nat] -> Block#
+    .if {d == 0} .return {Actions.msg "Nat.getDiv: Cannot divide by 0"}
     .let[Nat] rem = {this.getRem d}
-    .if {rem != 0} .error {"Nat.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
-    .return {this.getTruncDiv d};
+    .if {rem != 0} .return {Actions.msg("Nat.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
+    .return {this.tryGetTruncDiv d};
 
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7 .getRem 2 .assertEq 1}
   //>   .checkDetErr({::}, {7 .getRem 0})
-  .getRem(d: Nat): Nat;
+  .getRem(d: Nat): Nat -> this.tryGetRem(d)!;
+  .tryGetRem(d: Nat): mut Action[Nat];
 
   /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` iff ``d == 0``.
   //>   .check{7 .rem 2 .assertEq({::}, Opts# 1)}
@@ -92,7 +97,8 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5 .getIndexOffset(+3) .assertEq 8}
   //>   .check{5 .getIndexOffset(-3) .assertEq 2}
   //>   .checkDetErr({::}, {5 .getIndexOffset(-10)})
-  .getIndexOffset(delta: Int): Nat;
+  .getIndexOffset(delta: Int): Nat -> this.tryGetIndexOffset(delta)!;
+  .tryGetIndexOffset(delta: Int): mut Action[Nat];
 
   /// ``this.indexOffset(delta)`` returns `.some` of ``this + delta`` if it would neither underflow
   /// nor overflow, `.empty` otherwise.
@@ -129,17 +135,20 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// `this.getInt` converts `this` to an `Int`. Throws if ``this > maxInt``.
   //>   .check{5 .getInt .assertEq +5}
   //>   .checkDetErr({::}, {Math.maxNat .getInt})
-  .getInt: Int;
+  .getInt: Int -> this.tryGetInt!;
+  .tryGetInt: mut Action[Int];
 
   /// `this.getByte` converts `this` to a `Byte`. Throws if ``this > maxByte``.
   //>   .check{5 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({::}, {300 .getByte})
-  .getByte: Byte;
+  .getByte: Byte -> this.tryGetByte!;
+  .tryGetByte: mut Action[Byte];
 
   /// `this.getFloat` converts `this` to a `Float`. Throws if `this` is not exactly representable.
   //>   .check{5 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {Math.maxNat.getFloat})
-  .getFloat: Float;
+  .getFloat: Float -> this.tryGetFloat!;
+  .tryGetFloat: mut Action[Float];
 
   /// `this.softInt` converts `this` to an `Int` by clamping into ``[0, maxInt]``
   //>   .check{5 .softInt .assertEq +5}

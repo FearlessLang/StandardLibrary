@@ -97,22 +97,26 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   /// `this.getInt` converts `this` to an `Int` if it's an integer in ``[Math.minInt, Math.maxInt]``; throws otherwise.
   //>   .check{5/1 .getInt .assertEq +5}
   //>   .checkDetErr({::}, {(1 / 2) .getInt})
-  .getInt: Int;
+  .getInt: Int -> this.tryGetInt!;
+  .tryGetInt: mut Action[Int];
 
   /// `this.getNat` converts `this` to a `Nat` if it's an integer in ``[0, Math.maxNat]``; throws otherwise.
   //>   .check{5/1 .getNat .assertEq 5}
   //>   .checkDetErr({::}, {(-5) .getNat})
-  .getNat: Nat;
+  .getNat: Nat -> this.tryGetNat!;
+  .tryGetNat: mut Action[Nat];
 
   /// `this.getByte` converts `this` to a `Byte` if it's an integer in ``[0, Math.maxByte]``; throws otherwise.
   //>   .check{5/1 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({::}, {300 .getByte})
-  .getByte: Byte;
+  .getByte: Byte -> this.tryGetByte!;
+  .tryGetByte: mut Action[Byte];
 
   /// `this.getFloat` converts `this` to a `Float`. Throws if not exactly representable.
   //>   .check{5/1 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {(1 / 3) .getFloat})
-  .getFloat: Float;
+  .getFloat: Float -> this.tryGetFloat!;
+  .tryGetFloat: mut Action[Float];
 
   /// `this.softInt` converts `this` to an `Int` by truncating towards ``0``, then clamping into
   /// ``[minInt, maxInt]``.

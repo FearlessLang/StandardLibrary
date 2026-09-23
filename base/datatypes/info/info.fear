@@ -31,9 +31,12 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .list: Opt[List[Info]] -> {};
   .map: Opt[Map[Str,Info]] -> {};
 
-  .getMsg: Str-> this.msg! {"Info.getMsg: Tried an Info that is not a .msg variant to a Str."};
-  .getList: List[Info]->this.list! {"Info.getList: Tried an Info that is not a .list variant to a List[Info]."};
-  .getMap: Map[Str,Info]->this.map! {"Info.getMsg: Tried an Info that is not a .map variant to a Map[Str, Info]."};
+  .getMsg: Str-> this.tryGetMsg!;
+  .getList: List[Info]->this.tryGetList!;
+  .getMap: Map[Str,Info]->this.tryGetMap!;
+  .tryGetMsg: mut Action[Str]-> this.msg.match{.some x -> Actions.ok x; .empty -> Actions.msg "Info.getMsg: Tried an Info that is not a .msg variant to a Str."};
+  .tryGetList: mut Action[List[Info]]->this.list.match{.some x -> Actions.ok x; .empty -> Actions.msg "Info.getList: Tried an Info that is not a .list variant to a List[Info]."};
+  .tryGetMap: mut Action[Map[Str,Info]]->this.map.match{.some x -> Actions.ok x; .empty -> Actions.msg "Info.getMsg: Tried an Info that is not a .map variant to a Map[Str, Info]."};
 
   .softMsg: Str-> this.msg.orValue ``;
   .softList: List[Info]->this.list.orValue {};

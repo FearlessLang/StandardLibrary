@@ -69,12 +69,14 @@ Flow[E:*]: {
   mut .any(f: read F[E, Bool]):  Bool;
   mut .all(f: read F[E, Bool]):  Bool;
   mut .none(f: read F[E, Bool]): Bool;
-  mut .get:   E -> this.list |> {xs -> xs.size == 1 ? {
-    .then -> xs.getFirst;
-    .else -> Error.msg(`Flow.get: the flow has `+(xs.size)+` elements, but .get needs exactly one`)}};//get the first element if size==1, throws otherwise
-  mut .getOpt:   mut Opt[E] -> this.list |> {xs -> xs.size <= 1 ? {
-    .then -> xs.first;
-    .else -> Error.msg(`Flow.getOpt: the flow has `+(xs.size)+` elements, but .getOpt needs at most one`)}};//opt of the first element if size in {0,1} throws otherwise
+  mut .get:   E -> this.tryGet!;//get the first element if size==1, throws otherwise
+  mut .tryGet: mut Action[E] -> this.list |> {xs -> xs.size == 1 ? {
+    .then -> Actions.ok(xs.getFirst);
+    .else -> Actions.msg(`Flow.get: the flow has `+(xs.size)+` elements, but .get needs exactly one`)}};
+  mut .getOpt:   mut Opt[E] -> this.tryGetOpt!;//opt of the first element if size in {0,1} throws otherwise
+  mut .tryGetOpt: mut Action[mut Opt[E]] -> this.list |> {xs -> xs.size <= 1 ? {
+    .then -> Actions.ok(xs.first);
+    .else -> Actions.msg(`Flow.getOpt: the flow has `+(xs.size)+` elements, but .getOpt needs at most one`)}};
   mut .first: mut Opt[E]; //opt of the first element
   /// `this.last` returns the last element in the flow, consuming `this`.
   /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(a))``

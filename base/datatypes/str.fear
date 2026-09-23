@@ -89,14 +89,22 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .bool: Opt[Bool] -> (this == `True`).toOpt{True} | ((this == `False`).toOpt{False}); /// parses exactly ``True``/``False`` as produced by Bool.str; .empty on invalid (this includes out of range)
 
 
-  .getIeeeFloat: Float;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
-  .getFloat: Float;          /// parse a string representing a valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
-  .getSoftFloat: Float;      /// parse a string representing to the closest valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, but *not* values that would round)
-  .getInt: Int;              /// parse a string representing a valid Fearless Int, throws if invalid (this includes out of range)
-  .getNum: Num;              /// parse a string representing a valid Fearless Num; throws if invalid (this includes denominator == 0)
-  .getNat: Nat;              /// parse a string representing a valid Fearless Nat; throws if invalid (this includes out of range)
-  .getByte: Byte;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
-  .getBool: Bool -> this.bool.orLazy{Error.msg(`Str.getBool: `+(this.escape)+` is not "True" or "False".`)}; /// parses exactly ``True``/``False`` as produced by Bool.str; throws if invalid
+  .getIeeeFloat: Float -> this.tryGetIeeeFloat!;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .tryGetIeeeFloat: mut Action[Float];
+  .getFloat: Float -> this.tryGetFloat!;          /// parse a string representing a valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  .tryGetFloat: mut Action[Float];
+  .getSoftFloat: Float -> this.tryGetSoftFloat!;      /// parse a string representing to the closest valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, but *not* values that would round)
+  .tryGetSoftFloat: mut Action[Float];
+  .getInt: Int -> this.tryGetInt!;              /// parse a string representing a valid Fearless Int, throws if invalid (this includes out of range)
+  .tryGetInt: mut Action[Int];
+  .getNum: Num -> this.tryGetNum!;              /// parse a string representing a valid Fearless Num; throws if invalid (this includes denominator == 0)
+  .tryGetNum: mut Action[Num];
+  .getNat: Nat -> this.tryGetNat!;              /// parse a string representing a valid Fearless Nat; throws if invalid (this includes out of range)
+  .tryGetNat: mut Action[Nat];
+  .getByte: Byte -> this.tryGetByte!;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
+  .tryGetByte: mut Action[Byte];
+  .getBool: Bool -> this.tryGetBool!; /// parses exactly ``True``/``False`` as produced by Bool.str; throws if invalid
+  .tryGetBool: mut Action[Bool] -> this.bool.match{.some b -> Actions.ok b; .empty -> Actions.msg(`Str.getBool: `+(this.escape)+` is not "True" or "False".`)};
 
 
   .startsWith(Str): Bool;           /// this string starts with the other string

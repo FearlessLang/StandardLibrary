@@ -37,23 +37,23 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
      return ((Float$1c$0Instance) p0).val;
   }
 
-  @Override public Object imm$getSucc$0() {
+  @Override public Object imm$tryGetSucc$0() {
     if (Double.isNaN(val)) {
-      throw err("Float.succ: NaN does not have a successor");
+      return fail("Float.succ: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY) {
-      throw err("Float.succ: Math.posInf does not have a successor");
+      return fail("Float.succ: Math.posInf does not have a successor");
     }
-    return Float$1c$0Instance.instance(Math.nextUp(val));
+    return ok(Float$1c$0Instance.instance(Math.nextUp(val)));
   }
-  @Override public Object imm$getPred$0() {
+  @Override public Object imm$tryGetPred$0() {
     if (Double.isNaN(val)) {
-      throw err("Float.pred: NaN does not have a predecessor");
+      return fail("Float.pred: NaN does not have a predecessor");
     }
     if (val == Double.NEGATIVE_INFINITY) {
-      throw err("Float.pred: Math.negInf does not have a predecessor");
+      return fail("Float.pred: Math.negInf does not have a predecessor");
     }
-    return Float$1c$0Instance.instance(Math.nextDown(val));
+    return ok(Float$1c$0Instance.instance(Math.nextDown(val)));
   }
 
   @Override public Object imm$signOrNaN$0() {
@@ -134,47 +134,47 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     return optSome(Byte$o$0Instance.instance((byte)((int)val)));
   }
 
-  @Override public Object imm$getNum$0(){
+  @Override public Object imm$tryGetNum$0(){
     if (Double.isNaN(val) || Double.isInfinite(val)){
-      throw err("Float.getNum: cannot convert non-finite Float " + val + " to Num");
+      return fail("Float.getNum: cannot convert non-finite Float " + val + " to Num");
     }
-    return numExactFinite(val);
+    return ok(numExactFinite(val));
   }
 
-  @Override public Object imm$getInt$0(){
+  @Override public Object imm$tryGetInt$0(){
     if (!isIntegral(val)){
-      throw err("Float.getInt: cannot convert non-integral Float " + val + " to Int");
+      return fail("Float.getInt: cannot convert non-integral Float " + val + " to Int");
     }
     if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){
-      throw err("Float.getInt: cannot convert Float " + val + " to Int: out of Int range");
+      return fail("Float.getInt: cannot convert Float " + val + " to Int: out of Int range");
     }
-    return Int$c$0Instance.instance((int)val);
+    return ok(Int$c$0Instance.instance((int)val));
   }
 
-  @Override public Object imm$getNat$0(){
+  @Override public Object imm$tryGetNat$0(){
     if (!isIntegral(val)){
-      throw err("Float.getNat: cannot convert non-integral Float " + val + " to Nat");
+      return fail("Float.getNat: cannot convert non-integral Float " + val + " to Nat");
     }
     if (val < 0.0d){
-      throw err("Float.getNat: cannot convert negative Float " + val + " to Nat");
+      return fail("Float.getNat: cannot convert negative Float " + val + " to Nat");
     }
     if (val > MAX_UNSIGNED_VALUE_FLOAT){
-      throw err("Float.getNat: cannot convert Float " + val + " to Nat: out of Nat range");
+      return fail("Float.getNat: cannot convert Float " + val + " to Nat: out of Nat range");
     }
-    return Nat$c$0Instance.instance((int)((long)val));
+    return ok(Nat$c$0Instance.instance((int)((long)val)));
   }
 
-  @Override public Object imm$getByte$0(){
+  @Override public Object imm$tryGetByte$0(){
     if (!isIntegral(val)){
-      throw err("Float.getByte: cannot convert non-integral Float " + val + " to Byte");
+      return fail("Float.getByte: cannot convert non-integral Float " + val + " to Byte");
     }
     if (val < 0.0d){
-      throw err("Float.getByte: cannot convert to Byte " + val + " is less than 0");
+      return fail("Float.getByte: cannot convert to Byte " + val + " is less than 0");
     }
     if (val > 255.0d){
-      throw err("Float.getByte: cannot convert to Byte " + val + " is greater than 255");
+      return fail("Float.getByte: cannot convert to Byte " + val + " is greater than 255");
     }
-    return Byte$o$0Instance.instance((byte)((int)val));
+    return ok(Byte$o$0Instance.instance((byte)((int)val)));
   }
 
   @Override public Object imm$$plus$1(Object p0){ return instance(val + f(p0)); }

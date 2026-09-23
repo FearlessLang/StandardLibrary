@@ -1,0 +1,66 @@
+TryGetNumberTests: Test {::
+  .check{(7 .tryGetRem 3).ok.assertEq({::}, Opts#(1))}
+  .check{7 .tryGetRem 0 .assertInfo{::.isMsg{::.startsWith `Nat.getRem`}}}
+  .check{(7 .tryGetDiv 2).assertInfo{::.isMsg{::.startsWith `Nat.getDiv`}}}
+  .check{(6 .tryGetDiv 2).ok.assertEq({::}, Opts#(3))}
+  .check{(Math.maxNat).tryGetSucc.assertInfo{::.isMsg{::.startsWith `Nat.getSucc`}}}
+  .check{5 .tryGetIndexOffset(-10) .assertInfo{::.isMsg{::.startsWith `Nat -`}}}
+  .check{(Math.maxNat).tryGetIndexOffset(+1) .assertInfo{::.isMsg{::.startsWith `Nat +`}}}
+  .check{(5 .tryGetIndexOffset(-2)).ok.assertEq({::}, Opts#(3))}
+  .check{(Math.maxInt).tryGetSucc.assertInfo{::.isMsg{::.startsWith `Int.getSucc`}}}
+  .check{(Math.minInt).tryGetPred.assertInfo{::.isMsg{::.startsWith `Int.getPred`}}}
+  .check{(+5 .tryGetSucc).ok.assertEq({::}, Opts#(+6))}
+  .check{(Math.maxByte).tryGetSucc.assertInfo{::.isMsg{::.startsWith `Byte.getSucc`}}}
+  .check{(Math.minByte).tryGetPred.assertInfo{::.isMsg{::.startsWith `Byte.getPred`}}}
+  .check{(+5 .tryGetNat).ok.assertEq({::}, Opts#(5))}
+  .check{-5 .tryGetNat .assertInfo{::.isMsg{::.startsWith `Int.getNat`}}}
+  .check{+5 .tryGetWrapIndex 0 .assertInfo{::.isMsg{::.startsWith `Int.wrapIndex`}}}
+  .check{(Math.maxNat).tryGetInt.assertInfo{::.isMsg{::.startsWith `Nat.getInt`}}}
+  .check{(7/2).tryGetInt.assertInfo{::.isMsg{::.startsWith `Num.getInt`}}}
+  .check{(3.5 .tryGetNum).ok.assertEq({::}, Opts#(7/2))}
+  .check{Math.nan.tryGetSqrt.assertInfo{::.isMsg{::.startsWith `Float.getSqrt`}}}
+  .check{(4.0 .tryGetNegAbs).ok.assertEq({::}, Opts#(-4.0))}
+  .check{Math.nan.tryGetNegAbs.assertInfo{::.isMsg{::.startsWith `Cannot take the absolute value`}}}
+  .check{Math.inf.tryGetFloor.assertInfo{::.isMsg{::.startsWith `Floor expected`}}}
+  .check{3.5 .tryGetInt .assertInfo{::.isMsg{::.startsWith `Float.getInt`}}}
+  .check{Math.inf.tryGetDeg.assertInfo{::.isMsg{::.startsWith `Invalid angle`}}}
+  .checkDetErr({::.isMsg{::.startsWith `Nat.getRem`}}, {7 .getRem 0})
+  }
+
+TryGetStrInfoTests: Test {::
+  .check{(`42`.tryGetNat).ok.assertEq({::}, Opts#(42))}
+  .check{`nope`.tryGetInt.assertInfo{::.isMsg{::.startsWith `Str.getInt`}}}
+  .check{`1.1`.tryGetFloat.assertInfo{::.isMsg{::.startsWith `Str.getFloat`}}}
+  .check{`maybe`.tryGetBool.assertInfo{::.isMsg{::.startsWith `Str.getBool`}}}
+  .check{(`True`.tryGetBool).ok.assertEq({::}, Opts#(True))}
+  .check{(Infos.msg `hi`).tryGetList.assertInfo{::.isMsg{::.startsWith `Info.getList`}}}
+  .check{((Infos.msg `hi`).tryGetMsg).ok.assertEq({::}, Opts#(`hi`))}
+  .checkDetErr({::.isMsg{::.startsWith `Str.getInt`}}, {`nope`.getInt})
+  }
+
+TryGetCollectionTests: Test {::
+  .check{(Lists#(1,2,3).tryGet 1).ok.assertEq({::}, Opts#(2))}
+  .check{Lists#(1,2,3).tryGet 5 .assertInfo{::.isMsg{::.startsWith `List.get`}}}
+  .check{(Lists#(1,2,3).tryGetLast).ok.assertEq({::}, Opts#(3))}
+  .check{List[Nat].tryGetFirst.assertInfo{::.isMsg{::.startsWith `List.get`}}}
+  .check{List[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith `List.get`}}}
+  .check{(Maps#({::}, `a`, 1).tryGet `a`).ok.assertEq({::}, Opts#(1))}
+  .check{Maps#({::}, `a`, 1).tryGet `b` .assertInfo{::.isMsg{::.startsWith `Map key absent`}}}
+  .check{(Sets#({::}, 1, 2).tryGet 2).ok.assertEq({::}, Opts#(2))}
+  .check{Sets#({::}, 1, 2).tryGet 3 .assertInfo{::.isMsg{::.startsWith `Set.get`}}}
+  .check{ESets#[Nat,Nat]{::}.add(1).tryGet 3 .assertInfo{::.isMsg{::.startsWith `ESet.get`}}}
+  .check{ESets#[Nat,Nat]{::}.add(1).tryGetTake 3 .assertInfo{::.isMsg{::.startsWith `ESet.get`}}}
+  .check{(ESets#[Nat,Nat]{::}.add(1).tryGetTake 1).ok.assertEq({::}, Opts#(1))}
+  .check{(ELists#[Nat].addAnd(4).tryGet 0).ok.assertEq({::}, Opts#(4))}
+  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith `EList index`}}}
+  .check{(Flows#(1,2).tryGet).assertInfo{::.isMsg{::.startsWith `Flow.get`}}}
+  .check{(Flows#(1).tryGet).ok.assertEq({::}, Opts#(1))}
+  .check{(Flows#(1,2).tryGetOpt).assertInfo{::.isMsg{::.startsWith `Flow.getOpt`}}}
+  .checkDetErr({::.isMsg{::.startsWith `List.get`}}, {Lists#(1,2,3).get 5})
+  }
+
+TestTryGet: Test {::
+  .test TryGetNumberTests
+  .test TryGetStrInfoTests
+  .test TryGetCollectionTests
+  }

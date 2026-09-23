@@ -65,26 +65,26 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     }
     return optEmpty();
   }
-  @Override public Object imm$getNat$0(){
+  @Override public Object imm$tryGetNat$0(){
     if (val < 0) {
-      throw err("Int.getNat: cannot convert negative Int "+val+" to Nat");
+      return fail("Int.getNat: cannot convert negative Int "+val+" to Nat");
     }
-    return Nat$c$0Instance.instance(val);
+    return ok(Nat$c$0Instance.instance(val));
   }
-  @Override public Object imm$getByte$0(){
+  @Override public Object imm$tryGetByte$0(){
     if (val < 0) {
-      throw err("Int.byteExact: cannot convert to Byte "+val+" is less than 0");
+      return fail("Int.byteExact: cannot convert to Byte "+val+" is less than 0");
     }
     if (val > 255) {
-      throw err("Int.byteExact: cannot convert to Byte "+val+" is greater than 255");
+      return fail("Int.byteExact: cannot convert to Byte "+val+" is greater than 255");
     }
-    return Byte$o$0Instance.instance((byte)val);
+    return ok(Byte$o$0Instance.instance((byte)val));
   }
-  @Override public Object imm$getFloat$0(){
+  @Override public Object imm$tryGetFloat$0(){
     if (canSafelyConvertToDouble(val)) {
-      return Float$1c$0Instance.instance((float) val);
+      return ok(Float$1c$0Instance.instance((float) val));
     }
-    throw err(
+    return fail(
   "Int.floatExact: cannot convert to Float "
         + val
         + " is too large to be represented as a Float without loss of precision"
@@ -150,20 +150,20 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
   @Override public Object read$imm$0(){ return this; }
 
-  @Override public Object imm$getTruncDiv$1(Object p0){
+  @Override public Object imm$tryGetTruncDiv$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw err("Int.getTruncDiv: d==0"); }
+    if (d == 0L){ return fail("Int.getTruncDiv: d==0"); }
 
     // if a > b then a / b == 0.
     // We can't directly compare val and d since val is signed,
     // so Long.compareUnsigned would assume it to be a large negative number.
     // Since this is a signed num if d > Long.MAX_VALUE then it is > val and thus the result is 0.
     if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0) {
-      return instance(0L);
+      return ok(instance(0L));
     }
 
     // In the range of unsigned longs, so we can just do the division.
-    return instance(val / d);
+    return ok(instance(val / d));
   }
   public static long remainderWithUnsignedLong(long signed, long unsignedRemainder) {
     // if a % b = a if b> a,
@@ -172,10 +172,10 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     }
     return signed % unsignedRemainder;
   }
-  @Override public Object imm$getRem$1(Object p0){
+  @Override public Object imm$tryGetRem$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw err("Int.getRem: d==0"); }
-    return instance(remainderWithUnsignedLong(val, d));
+    if (d == 0L){ return fail("Int.getRem: d==0"); }
+    return ok(instance(remainderWithUnsignedLong(val, d)));
   }
 
   /**
@@ -194,24 +194,24 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
    * 4. val < 0, |val| == len, only happens when val == Long.MIN_VALUE and len == Long.MAX_VALUE + 1
    *  - val % len == 0, since val is congruent to 0.
    */
-  @Override public Object imm$getWrapIndex$1(Object p0){
+  @Override public Object imm$tryGetWrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
-    if (len == 0L){ throw err("Int.wrapIndex: len==0"); }
+    if (len == 0L){ return fail("Int.wrapIndex: len==0"); }
     // handle case where len cannot be represented as a signed long.
     if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {
       // safe to treat len as signed long
-      return Nat$c$0Instance.instance(Math.floorMod(val, len));
+      return ok(Nat$c$0Instance.instance(Math.floorMod(val, len)));
     }
 
     // 0 <= val < len, so val % len == val
     if (val >= 0) {
-      return Nat$c$0Instance.instance(val);
+      return ok(Nat$c$0Instance.instance(val));
     }
 
     // Long.MIN_VALUE + (Long.MAX_VALUE + 1) == 0, so this handles 4.
     // Otherwise, val is negative, so we can
     // add len to it to get the correct result.
-    return Nat$c$0Instance.instance(len + val);
+    return ok(Nat$c$0Instance.instance(len + val));
   }
   @Override public Object imm$wrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
