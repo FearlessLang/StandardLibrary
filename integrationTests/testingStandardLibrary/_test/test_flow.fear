@@ -58,10 +58,16 @@ FlowLetTests: Test {::
     self.seqFlow.map[Nat]{_ -> Error.msg`the continuation flow ran before its terminal`}}), Void)}
   }
 
+FlowLimitTests: Test {::
+  .check{Flows#(1,2,3).limit 2 .list .assertEq({::}, Lists#(1,2))}
+  .checkDetErr({::.isMsg{::.contains `.limit 0`}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg`stage ran`}.limit 0})
+  }
+
 TestFlow: Test {::
   .test FlowForEachTests
   .test FlowBuildOrderTests
   .test FlowFenceLazyTests
   .test FlowScanTests
   .test FlowLetTests
+  .test FlowLimitTests
   }

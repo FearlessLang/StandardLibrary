@@ -163,6 +163,9 @@ FloatRangeTests: Test {::
   .checkDetErr({::}, {(Math.nan)~~ +1.0})
   .checkDetErr({::}, {+1.0=~~(Math.negInf)})
   .check{Math.negInf ~~ +1.0 .void}
+  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow +0.0})
+  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow -0.25})
+  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow(Math.nan)})
   }
 
 FloatIEEEPowTests: Test {::

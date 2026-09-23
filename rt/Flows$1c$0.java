@@ -214,6 +214,7 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
   @Override public Object mut$limit$1(Object p0){
     try{
       long limit = Nat$c$0Instance.unwrap(p0);
+      check(limit != 0, "Flow.limit: .limit 0 asks a whole chain of stages for no elements. When the count can be 0, test it with .if before building the flow.");
       if (limit < 0) { // check if overflows long
         // Potentially better to clamp here and hide it - the caller will likely die before they hit Long.MAX_VALUE.
         // It's dishonest but if each operation takes 1ns:  9223372036854775807 × (1 nanosecond) ≈ 106752 d ≈ 292 years

@@ -1,5 +1,7 @@
 package base;
 
+import static base.Util.*;
+
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -8,23 +10,21 @@ public interface _NumFlow$5k$0 extends base.Sealed$2o$0 {
 _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
 
   default Object imm$bytes$2(Object p0, Object p1){
-    byte start = Byte$o$0Instance.unwrap(p0);
-    byte end = Byte$o$0Instance.unwrap(p1);
+    int start = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p0));
+    int end = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p1));
     assert start <= end;
     return Flow$o$1Instance.of(IntStream.rangeClosed(start, end)
       .mapToObj(i -> Byte$o$0Instance.instance((byte) i)));
   }
 
   default Object imm$bytes$3(Object p0, Object p1, Object p2){
-    byte start = Byte$o$0Instance.unwrap(p0);
-    byte end = Byte$o$0Instance.unwrap(p1);
-    byte step = Byte$o$0Instance.unwrap(p2);
+    int start = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p0));
+    int end = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p1));
+    int step = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p2));
     assert start <= end;
-    assert step > 0;
-    return Flow$o$1Instance.of(
-      Stream.iterate(start, d -> Byte.compareUnsigned(d, end) <= 0, d -> (byte) (d + step))
-        .map(Byte$o$0Instance::instance)
-      );
+    if (step == 0){ throw badStep(p2); }
+    return Flow$o$1Instance.of(IntStream.iterate(start, i -> i <= end, i -> i + step)
+      .mapToObj(i -> Byte$o$0Instance.instance((byte) i)));
   }
 
   default Object imm$ints$2(Object p0, Object p1){
@@ -40,9 +40,9 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     long end = Int$c$0Instance.unwrap(p1);
     long step = Int$c$0Instance.unwrap(p2);
     assert start <= end;
-    assert step > 0;
+    if (step <= 0){ throw badStep(p2); }
     return Flow$o$1Instance.of(
-      Stream.iterate(start, d -> d <= end, d -> d + step)
+      Stream.iterate(start, d -> d != null, d -> Long.compareUnsigned(end - d, step) < 0 ? null : d + step)
         .map(Int$c$0Instance::instance)
     );
   }
@@ -70,9 +70,9 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     long end = Nat$c$0Instance.unwrap(p1);
     long step = Nat$c$0Instance.unwrap(p2);
     assert Long.compareUnsigned(start, end) <= 0;
-    assert Long.compareUnsigned(step, 0) > 0;
+    if (step == 0){ throw badStep(p2); }
     return Flow$o$1Instance.of(
-      Stream.iterate(start, d -> Long.compareUnsigned(d, end) <= 0, d -> d + step)
+      Stream.iterate(start, d -> d != null, d -> Long.compareUnsigned(end - d, step) < 0 ? null : d + step)
         .map(Nat$c$0Instance::instance)
     );
   }
@@ -92,7 +92,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     double end = Float$1c$0Instance.unwrap(p1);
     double step = Float$1c$0Instance.unwrap(p2);
     assert start <= end;
-    assert step > 0;
+    if (!(step > 0)){ throw badStep(p2); }
     return Flow$o$1Instance.of(
       Stream.iterate(start, d -> d <= end, d -> d+step)
         .map(Float$1c$0Instance::instance)
@@ -120,15 +120,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     return LongStream.rangeClosed(startBits, endBits);
   }
 
-  default Object imm$float$3(Object p0, Object p1, Object p2) {
-    double start = Float$1c$0Instance.unwrap(p0);
-    double end = Float$1c$0Instance.unwrap(p1);
-    double step = Float$1c$0Instance.unwrap(p2);
-    assert start <= end;
-    assert step > 0;
-    return Flow$o$1Instance.of(
-      Stream.iterate(start, d -> d <= end, d -> d+step)
-        .map(Float$1c$0Instance::instance)
-    );
+  private static Error badStep(Object step){
+    return err("Range.flow(step): the step is "+toS(step)+", but a step must be positive: the flow goes from the start of the range up to its end.");
   }
 }
