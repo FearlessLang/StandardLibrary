@@ -45,9 +45,9 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
 
   @Override public Object imm$isStr$0(){ return bool(isStr(val)); }
 
-  @Override public Object imm$getStr$0(){
-    if (isStr(val)) { return Str$c$0Instance.instance(new String(val,0,val.length)); }
-    throw err("Cannot convert this "+ Arrays.toString(this.val)
+  @Override public Object imm$tryGetStr$0(){
+    if (isStr(val)) { return ok(Str$c$0Instance.instance(new String(val,0,val.length))); }
+    return fail("Cannot convert this "+ Arrays.toString(this.val)
             + " into a valid fearless Str as it contains invalid unicode characters: "
             + Arrays.stream(this.val).filter(c -> !isStr(c)).boxed().toList());
   }

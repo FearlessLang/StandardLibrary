@@ -8,10 +8,13 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
 
   /// Only assert if the method is .assertXXX
   .get(i)->Error.msg `List.get: called on empty list`;
+  .tryGet(i)->Actions.msg `List.get: called on empty list`;
   .opt(i)->{};
 
   .getFirst->Error.msg `List.get: .first called on empty list`;
   .getLast->Error.msg `List.get: .last called on empty list`;
+  .tryGetFirst->Actions.msg `List.get: .first called on empty list`;
+  .tryGetLast->Actions.msg `List.get: .last called on empty list`;
   .first->{};
   .last->{};
 
@@ -74,6 +77,8 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
 
   mut  .get(i: Nat): E;                      /// element at i (0-based); throws if i >= size
   read .get(i: Nat): read/imm E;             /// element at i (0-based); throws if i >= size
+  mut  .tryGet(i: Nat): mut Action[E];
+  read .tryGet(i: Nat): mut Action[read/imm E];
 
   mut  .opt(i: Nat): mut Opt[E];             /// .some(get(i)) if i < size; .empty otherwise
   read .opt(i: Nat): mut Opt[read/imm E];    /// .some(get(i)) if i < size; .empty otherwise
@@ -81,9 +86,13 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
 
   mut  .getFirst: E;                            /// get(0); throws iff empty
   read .getFirst: read/imm E;                   /// get(0); throws iff empty
+  mut  .tryGetFirst: mut Action[E];
+  read .tryGetFirst: mut Action[read/imm E];
 
   mut  .getLast: E;                             /// get(size-1); throws iff empty
   read .getLast: read/imm E;                    /// get(size-1); throws iff empty
+  mut  .tryGetLast: mut Action[E];
+  read .tryGetLast: mut Action[read/imm E];
 
   mut  .first: mut Opt[E];                /// .some(first) if non-empty; .empty otherwise
   read .first: mut Opt[read/imm E];       /// .some(first) if non-empty; .empty otherwise

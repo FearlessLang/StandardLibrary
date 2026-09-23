@@ -11,6 +11,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {Math.nan .getSucc})
   //>   .checkDetErr({::}, {Math.inf .getSucc})
   .getSucc: Float;
+  .tryGetSucc: mut Action[Float];
 
   /// `this.getPred` returns the closest Floating point number smaller than `this`.
   /// Throws if `this` is `Math.nan` or `Math.negInf` (there is no smaller value).
@@ -20,6 +21,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {Math.nan .getPred})
   //>   .checkDetErr({::}, {Math.negInf .getPred})
   .getPred: Float;
+  .tryGetPred: mut Action[Float];
 
   /// ``this + x`` returns the IEEE 754 sum of `this` and ``x``. Never throws; NaN propagates.
   //>   .check{2.0 + 3.0 .assertEq 5.0}
@@ -77,6 +79,11 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       .then -> Error.msg "Cannot take the absolute value of NaN";
       .else -> this.absOrNaN;
       };
+  .tryGetAbs: mut Action[Float] ->
+    this.isNaN .if {
+      .then -> Actions.msg "Cannot take the absolute value of NaN";
+      .else -> Actions.ok(this.absOrNaN);
+      };
 
   /// `this.negAbsOrNaN` returns the negative of the absolute value of `this`
   /// (i.e. ``-|this|``), or `Math.nan` if `this` is NaN.
@@ -94,6 +101,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{4.75 .getNegAbs .assertEq(-4.75)}
   //>   .checkDetErr({::}, {(Math.nan) .getNegAbs})
   .getNegAbs: Float -> this.getAbs * -1.0;
+  .tryGetNegAbs: mut Action[Float] -> this.tryGetAbs.map{x -> x * -1.0};
 
   /// `this.sqrtOrNaN` returns the IEEE square root of `this`.
   /// Returns `Math.nan` iff `this` is negative (excluding ``-0.0``, whose sqrt is ``-0.0``) or NaN.
@@ -113,10 +121,11 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{4.0 .getSqrt .assertEq 2.0}
   //>   .checkDetErr({::}, {-4.0 .getSqrt})
   //>   .checkDetErr({::}, {Math.nan .getSqrt})
-  .getSqrt: Float -> Block#
-    .if{this.isNaN} .error {"Float.getSqrt: Cannot take the sqrt of NaN."}
-    .if{this < 0.0} .error {"Float.getSqrt: Cannot take the sqrt of a negative number, given: "+this}
-    .return{this.sqrtOrNaN};
+  .getSqrt: Float -> this.tryGetSqrt!;
+  .tryGetSqrt: mut Action[Float] -> Block#
+    .if{this.isNaN} .return {Actions.msg "Float.getSqrt: Cannot take the sqrt of NaN."}
+    .if{this < 0.0} .return {Actions.msg("Float.getSqrt: Cannot take the sqrt of a negative number, given: "+this)}
+    .return{Actions.ok(this.sqrtOrNaN)};
 
   /// `this.signOrNaN` returns the sign of `this`: ``+0.0``/``-0.0`` if `this` is ``+0.0``/``-0.0``,
   /// ``1.0`` if `this` is positive, ``-1.0`` if `this` is negative, `Math.nan` if `this` is NaN.
@@ -138,6 +147,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .getSign: Float -> this.isNaN .if {
     .then -> Error.msg "Cannot get the sign of NaN";
     .else -> this.signOrNaN;
+    };
+  .tryGetSign: mut Action[Float] -> this.isNaN .if {
+    .then -> Actions.msg "Cannot get the sign of NaN";
+    .else -> Actions.ok(this.signOrNaN);
     };
 
   /// `this.softFloor` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
@@ -164,6 +177,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .then -> this.softFloor;
     .else -> Error.msg("Floor expected finite number, got "+this);
     };
+  .tryGetFloor: mut Action[Float] -> this.isFinite .if {
+    .then -> Actions.ok(this.softFloor);
+    .else -> Actions.msg("Floor expected finite number, got "+this);
+    };
 
   /// `this.softCeil` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise returns `this` rounded up to the nearest integer.
@@ -189,6 +206,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .then -> this.softCeil;
     .else -> Error.msg("Ceil expected finite number, got "+this);
     };
+  .tryGetCeil: mut Action[Float] -> this.isFinite .if {
+    .then -> Actions.ok(this.softCeil);
+    .else -> Actions.msg("Ceil expected finite number, got "+this);
+    };
 
   /// `this.softTrunc0` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise returns `this` rounded towards ``0``.
@@ -213,6 +234,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .getTrunc0: Float -> this.isFinite .if {
     .then -> this.softTrunc0;
     .else -> Error.msg("Float.getTrunc0: Expected finite number, got "+this);
+    };
+  .tryGetTrunc0: mut Action[Float] -> this.isFinite .if {
+    .then -> Actions.ok(this.softTrunc0);
+    .else -> Actions.msg("Float.getTrunc0: Expected finite number, got "+this);
     };
 
   /// `this.softRound` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
@@ -240,6 +265,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .then -> this.softRound;
     .else -> Error.msg("Float.getRound: expected finite number, got "+this);
     };
+  .tryGetRound: mut Action[Float] -> this.isFinite .if {
+    .then -> Actions.ok(this.softRound);
+    .else -> Actions.msg("Float.getRound: expected finite number, got "+this);
+    };
 
   /// `this.softRoundTiesEven` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
   /// otherwise returns `this` rounded to the nearest integer, with ties rounded to the nearest even integer.
@@ -265,6 +294,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .getRoundTiesEven: Float -> this.isFinite .if {
     .then -> this.softRoundTiesEven;
     .else -> Error.msg("Float.getRoundTiesEven: expected finite number got "+this);
+    };
+  .tryGetRoundTiesEven: mut Action[Float] -> this.isFinite .if {
+    .then -> Actions.ok(this.softRoundTiesEven);
+    .else -> Actions.msg("Float.getRoundTiesEven: expected finite number got "+this);
     };
 
   /// `this.isNaN` returns `True` iff `this` is NaN, regardless of payload.
@@ -400,22 +433,26 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {3.5 .getInt})
   //>   .checkDetErr({::}, {(Math.nan) .getInt})
   .getInt: Int;
+  .tryGetInt: mut Action[Int];
 
   /// `this.getNat` converts `this` to a `Nat` if it is an integer in ``[0, maxNat]``; throws otherwise.
   //>   .check{3.0 .getNat .assertEq 3}
   //>   .checkDetErr({::}, {(-1.0) .getNat})
   .getNat: Nat;
+  .tryGetNat: mut Action[Nat];
 
   /// `this.getByte` converts `this` to a `Byte` if it is an integer in ``[0, maxByte]``; throws otherwise.
   //>   .check{3.0 .getByte.nat .assertEq 3}
   //>   .checkDetErr({::}, {300.0 .getByte})
   .getByte: Byte;
+  .tryGetByte: mut Action[Byte];
 
   /// `this.getNum` converts `this` to a `Num` if finite; throws on NaN/Inf.
   //>   .check{3.5 .getNum .assertEq(7/2)}
   //>   .checkDetErr({::}, {(Math.inf) .getNum})
   //>   .checkDetErr({::}, {(Math.nan) .getNum})
-  .getNum: Num;
+  .getNum: Num -> this.tryGetNum!;
+  .tryGetNum: mut Action[Num];
 
   /// `this.hash` returns a hash consistent with ``==``: ``-0.0`` hashes the same as ``+0.0``, and every
   /// NaN hashes the same as every other NaN (since ``ieeeStr`` does not distinguish NaN payloads).
@@ -462,6 +499,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .then -> {this};
     .else -> Error.msg("Invalid angle, "+this+" is not finite.");
     };
+  .tryGetDeg: mut Action[Degree] -> this.isFinite .if {
+    .then -> Actions.ok[Degree]{this};
+    .else -> Actions.msg("Invalid angle, "+this+" is not finite.");
+    };
 
   /// `this.rad` returns `.some` of `this` interpreted as an angle in radians if `this` is finite,
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
@@ -476,6 +517,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .getRad: Radian -> this.isFinite .if {
     .then -> {this};
     .else -> Error.msg("Invalid angle, "+this+" is not finite.");
+    };
+  .tryGetRad: mut Action[Radian] -> this.isFinite .if {
+    .then -> Actions.ok[Radian]{this};
+    .else -> Actions.msg("Invalid angle, "+this+" is not finite.");
     };
 
   /// ``this~~end`` returns the open range ``(this, end)``: from `this.getSucc` to `end.getPred`.

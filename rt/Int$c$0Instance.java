@@ -39,7 +39,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
   private static long mulChecked(long a, long b) {
     try{ return Math.multiplyExact(a, b); }
-    catch(ArithmeticException e){ throw err("Int.* overflow"); }
+    catch(ArithmeticException e){ throw nonDetErr("Int.* overflow"); }
   }
   static boolean canSafelyConvertToDouble(long val) {
     // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
@@ -71,6 +71,12 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     }
     return Nat$c$0Instance.instance(val);
   }
+  @Override public Object imm$tryGetNat$0(){
+    if (val < 0) {
+      return fail("Int.getNat: cannot convert negative Int "+val+" to Nat");
+    }
+    return ok(Nat$c$0Instance.instance(val));
+  }
   @Override public Object imm$getByte$0(){
     if (val < 0) {
       throw err("Int.byteExact: cannot convert to Byte "+val+" is less than 0");
@@ -79,6 +85,15 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
       throw err("Int.byteExact: cannot convert to Byte "+val+" is greater than 255");
     }
     return Byte$o$0Instance.instance((byte)val);
+  }
+  @Override public Object imm$tryGetByte$0(){
+    if (val < 0) {
+      return fail("Int.byteExact: cannot convert to Byte "+val+" is less than 0");
+    }
+    if (val > 255) {
+      return fail("Int.byteExact: cannot convert to Byte "+val+" is greater than 255");
+    }
+    return ok(Byte$o$0Instance.instance((byte)val));
   }
   @Override public Object imm$getFloat$0(){
     if (canSafelyConvertToDouble(val)) {
@@ -90,13 +105,23 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
         + " is too large to be represented as a Float without loss of precision"
     );
   }
+  @Override public Object imm$tryGetFloat$0(){
+    if (canSafelyConvertToDouble(val)) {
+      return ok(Float$1c$0Instance.instance((float) val));
+    }
+    return fail(
+  "Int.floatExact: cannot convert to Float "
+        + val
+        + " is too large to be represented as a Float without loss of precision"
+    );
+  }
   @Override public Object imm$$plus$1(Object p0){
     try{ return instance(Math.addExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw err("Int.+ overflow"); }
+    catch(ArithmeticException e){ throw nonDetErr("Int.+ overflow"); }
   }
   @Override public Object imm$$dash$1(Object p0){
     try{ return instance(Math.subtractExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw err("Int.- overflow"); }
+    catch(ArithmeticException e){ throw nonDetErr("Int.- overflow"); }
   }
   @Override public Object imm$$slash$1(Object p0){
     long d=Nat$c$0Instance.unwrap(p0);
@@ -165,6 +190,14 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     // In the range of unsigned longs, so we can just do the division.
     return instance(val / d);
   }
+  @Override public Object imm$tryGetTruncDiv$1(Object p0){
+    long d= unsignedLongFromNat(p0);
+    if (d == 0L){ return fail("Int.getTruncDiv: d==0"); }
+    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0) {
+      return ok(instance(0L));
+    }
+    return ok(instance(val / d));
+  }
   public static long remainderWithUnsignedLong(long signed, long unsignedRemainder) {
     // if a % b = a if b> a,
     if (Long.compareUnsigned(unsignedRemainder, Long.MAX_VALUE) > 0) {
@@ -176,6 +209,11 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     long d= unsignedLongFromNat(p0);
     if (d == 0L){ throw err("Int.getRem: d==0"); }
     return instance(remainderWithUnsignedLong(val, d));
+  }
+  @Override public Object imm$tryGetRem$1(Object p0){
+    long d= unsignedLongFromNat(p0);
+    if (d == 0L){ return fail("Int.getRem: d==0"); }
+    return ok(instance(remainderWithUnsignedLong(val, d)));
   }
 
   /**
@@ -212,6 +250,17 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     // Otherwise, val is negative, so we can
     // add len to it to get the correct result.
     return Nat$c$0Instance.instance(len + val);
+  }
+  @Override public Object imm$tryGetWrapIndex$1(Object p0){
+    long len= unsignedLongFromNat(p0);
+    if (len == 0L){ return fail("Int.wrapIndex: len==0"); }
+    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {
+      return ok(Nat$c$0Instance.instance(Math.floorMod(val, len)));
+    }
+    if (val >= 0) {
+      return ok(Nat$c$0Instance.instance(val));
+    }
+    return ok(Nat$c$0Instance.instance(len + val));
   }
   @Override public Object imm$wrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);

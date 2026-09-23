@@ -21,6 +21,8 @@ use base.Vars as Vars;
 use base.Info as Info;
 use base.Map as Map;
 use base.Maps as Maps;
+use base.Sets as Sets;
+use base.ESets as ESets;
 use base.Opts as Opts;
 use base.True as True;
 use base.False as False;
@@ -91,4 +93,5 @@ MyTests:UnitTests{::
   .test TestBlock
   .test TestInfoFromStr
   .test TestDungeon
+  .test TestTryGet
   }

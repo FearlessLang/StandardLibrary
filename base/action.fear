@@ -3,6 +3,7 @@ Actions: {
   //.lazy[T:*](f: mut MF[T]): mut Action[T] -> {::.ok(f#)};
   .ok[T:*](x: T): mut Action[T] -> {::.ok(x)};
   .info[T:*](info: Info): mut Action[T] -> {::.info(info)};
+  .msg[T:*](msg: Str): mut Action[T] -> {::.info(Infos.msg msg)};
   }
 
 Action[T:*]: {

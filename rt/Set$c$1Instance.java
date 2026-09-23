@@ -69,6 +69,14 @@ public final class Set$c$1Instance implements Set$c$1 {
     );}
     return key;
   }
+  public Object imm$tryGet$1(Object p0) {
+    Object key = set.get(mapKey(ordering, p0));
+    if (key == null) { return fail(
+      "Set.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
+      + " Consider using `Set.opt` to properly handle the failure case"
+    );}
+    return ok(key);
+  }
   @Override
   public Object imm$opt$1(Object p0) { return optNullable(set.get(mapKey(ordering, p0))); }
   @Override

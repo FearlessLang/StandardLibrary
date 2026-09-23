@@ -1,6 +1,5 @@
 package base;
 
-import static base.Nat$c$0Instance.MAX_UNSIGNED_VALUE_FLOAT;
 import static base.Util.*;
 import java.math.BigInteger;
 
@@ -23,6 +22,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     if (Double.compare(lo,hi) > 0){ throw err(where+": lo>hi"); }
   }
   private static long clampTrunc0ToInt(double x){ return (long)x; }
+  private static long natBits(double x){ return x < 0x1p63 ? (long)x : (long)(x - 0x1p63) ^ Long.MIN_VALUE; }
   private static byte clampTrunc0ToByteBits(double x){
     if (Double.isNaN(x) || x <= 0.0d){ return 0; }
     if (x >= 255.0d){ return (byte)255; }
@@ -39,21 +39,39 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$getSucc$0() {
     if (Double.isNaN(val)) {
-      throw err("Float.succ: NaN does not have a successor");
+      throw err("Float.getSucc: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY) {
-      throw err("Float.succ: Math.posInf does not have a successor");
+      throw err("Float.getSucc: Math.posInf does not have a successor");
     }
     return Float$1c$0Instance.instance(Math.nextUp(val));
   }
+  @Override public Object imm$tryGetSucc$0() {
+    if (Double.isNaN(val)) {
+      return fail("Float.getSucc: NaN does not have a successor");
+    }
+    if (val == Double.POSITIVE_INFINITY) {
+      return fail("Float.getSucc: Math.posInf does not have a successor");
+    }
+    return ok(Float$1c$0Instance.instance(Math.nextUp(val)));
+  }
   @Override public Object imm$getPred$0() {
     if (Double.isNaN(val)) {
-      throw err("Float.pred: NaN does not have a predecessor");
+      throw err("Float.getPred: NaN does not have a predecessor");
     }
     if (val == Double.NEGATIVE_INFINITY) {
-      throw err("Float.pred: Math.negInf does not have a predecessor");
+      throw err("Float.getPred: Math.negInf does not have a predecessor");
     }
     return Float$1c$0Instance.instance(Math.nextDown(val));
+  }
+  @Override public Object imm$tryGetPred$0() {
+    if (Double.isNaN(val)) {
+      return fail("Float.getPred: NaN does not have a predecessor");
+    }
+    if (val == Double.NEGATIVE_INFINITY) {
+      return fail("Float.getPred: Math.negInf does not have a predecessor");
+    }
+    return ok(Float$1c$0Instance.instance(Math.nextDown(val)));
   }
 
   @Override public Object imm$signOrNaN$0() {
@@ -90,10 +108,10 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     if (Double.isNaN(val) || val <= 0.0d) {
       return Nat$c$0Instance.instance(0);
     }
-    if (val > MAX_UNSIGNED_VALUE_FLOAT) {
+    if (val >= 0x1p64) {
       return Nat$c$0Instance.instance(Nat$c$0Instance.MAX_UNSIGNED_VALUE);
     }
-    return Nat$c$0Instance.instance((long) val);
+    return Nat$c$0Instance.instance(natBits(val));
   }
   @Override public Object imm$softByte$0(){ return Byte$o$0Instance.instance(clampTrunc0ToByteBits(val)); }
   static Num$c$0 numExactFinite(double x){
@@ -120,13 +138,13 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$int$0(){
     if (!isIntegral(val)){ return optEmpty(); }
-    if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){ return optEmpty(); }
-    return optSome(Int$c$0Instance.instance((int)val));
+    if (val < -0x1p63 || val >= 0x1p63){ return optEmpty(); }
+    return optSome(Int$c$0Instance.instance((long)val));
   }
   @Override public Object imm$nat$0(){
     if (!isIntegral(val)){ return optEmpty(); }
-    if (val < 0.0d || val > MAX_UNSIGNED_VALUE_FLOAT){ return optEmpty(); }
-    return optSome(Nat$c$0Instance.instance((int)((long)val)));
+    if (val < 0.0d || val >= 0x1p64){ return optEmpty(); }
+    return optSome(Nat$c$0Instance.instance(natBits(val)));
   }
   @Override public Object imm$byte$0(){
     if (!isIntegral(val)){ return optEmpty(); }
@@ -134,21 +152,30 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     return optSome(Byte$o$0Instance.instance((byte)((int)val)));
   }
 
-  @Override public Object imm$getNum$0(){
+  @Override public Object imm$tryGetNum$0(){
     if (Double.isNaN(val) || Double.isInfinite(val)){
-      throw err("Float.getNum: cannot convert non-finite Float " + val + " to Num");
+      return fail("Float.getNum: cannot convert non-finite Float " + val + " to Num");
     }
-    return numExactFinite(val);
+    return ok(numExactFinite(val));
   }
 
   @Override public Object imm$getInt$0(){
     if (!isIntegral(val)){
       throw err("Float.getInt: cannot convert non-integral Float " + val + " to Int");
     }
-    if (val < (double)Integer.MIN_VALUE || val > (double)Integer.MAX_VALUE){
+    if (val < -0x1p63 || val >= 0x1p63){
       throw err("Float.getInt: cannot convert Float " + val + " to Int: out of Int range");
     }
-    return Int$c$0Instance.instance((int)val);
+    return Int$c$0Instance.instance((long)val);
+  }
+  @Override public Object imm$tryGetInt$0(){
+    if (!isIntegral(val)){
+      return fail("Float.getInt: cannot convert non-integral Float " + val + " to Int");
+    }
+    if (val < -0x1p63 || val >= 0x1p63){
+      return fail("Float.getInt: cannot convert Float " + val + " to Int: out of Int range");
+    }
+    return ok(Int$c$0Instance.instance((long)val));
   }
 
   @Override public Object imm$getNat$0(){
@@ -158,10 +185,22 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     if (val < 0.0d){
       throw err("Float.getNat: cannot convert negative Float " + val + " to Nat");
     }
-    if (val > MAX_UNSIGNED_VALUE_FLOAT){
+    if (val >= 0x1p64){
       throw err("Float.getNat: cannot convert Float " + val + " to Nat: out of Nat range");
     }
-    return Nat$c$0Instance.instance((int)((long)val));
+    return Nat$c$0Instance.instance(natBits(val));
+  }
+  @Override public Object imm$tryGetNat$0(){
+    if (!isIntegral(val)){
+      return fail("Float.getNat: cannot convert non-integral Float " + val + " to Nat");
+    }
+    if (val < 0.0d){
+      return fail("Float.getNat: cannot convert negative Float " + val + " to Nat");
+    }
+    if (val >= 0x1p64){
+      return fail("Float.getNat: cannot convert Float " + val + " to Nat: out of Nat range");
+    }
+    return ok(Nat$c$0Instance.instance(natBits(val)));
   }
 
   @Override public Object imm$getByte$0(){
@@ -175,6 +214,18 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
       throw err("Float.getByte: cannot convert to Byte " + val + " is greater than 255");
     }
     return Byte$o$0Instance.instance((byte)((int)val));
+  }
+  @Override public Object imm$tryGetByte$0(){
+    if (!isIntegral(val)){
+      return fail("Float.getByte: cannot convert non-integral Float " + val + " to Byte");
+    }
+    if (val < 0.0d){
+      return fail("Float.getByte: cannot convert to Byte " + val + " is less than 0");
+    }
+    if (val > 255.0d){
+      return fail("Float.getByte: cannot convert to Byte " + val + " is greater than 255");
+    }
+    return ok(Byte$o$0Instance.instance((byte)((int)val)));
   }
 
   @Override public Object imm$$plus$1(Object p0){ return instance(val + f(p0)); }

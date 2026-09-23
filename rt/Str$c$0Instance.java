@@ -91,16 +91,16 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{ return optSome(Int$c$0Instance.instance(Long.parseLong(no_(val)))); }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getInt$0(){
+  @Override public Object imm$tryGetInt$0(){
     if (!signedInt.matcher(val).matches()){
-      throw err("Str.getInt: cannot convert String \""+val+"\" to Int. \n"
+      return fail("Str.getInt: cannot convert String \""+val+"\" to Int. \n"
               + "A Valid Int is any number of digits,, separated by optional \"_\", and preceded by either a + or a - sign."
               + "That is in the range ["+Int$c$0Instance.MIN_VALUE+", "+Int$c$0Instance.MAX_VALUE+"]."
               + "\n For example -4, +0, -3021\"");
     }
-    try{ return Int$c$0Instance.instance(Long.parseLong(no_(val))); }
+    try{ return ok(Int$c$0Instance.instance(Long.parseLong(no_(val)))); }
     catch(NumberFormatException e){
-      throw err("Str.getInt: Str \""+val+"\" has a magnitude too great to be stored in an int, "
+      return fail("Str.getInt: Str \""+val+"\" has a magnitude too great to be stored in an int, "
               + " must be in ["+Int$c$0Instance.MIN_VALUE+", "+Int$c$0Instance.MAX_VALUE+"]");
     }
   }
@@ -143,17 +143,17 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{ return optSome(Float$1c$0Instance.instance(Double.parseDouble(val))); }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getIeeeFloat$0(){
+  @Override public Object imm$tryGetIeeeFloat$0(){
     if (!ieeeFloatText.matcher(val).matches()){
-      throw err("Str.getIeeeFloat: cannot convert String \""+val+"\" to Float. \n"
+      return fail("Str.getIeeeFloat: cannot convert String \""+val+"\" to Float. \n"
         + "A Valid IEEE-754 Float is \"NaN\", \"Infinity\", \"-Infinity\", or a decimal number "
         + "optionally preceded by a \"+\" or \"-\" sign, with an optional \".\" followed by digits, "
         + "and an optional exponent (\"e\"/\"E\" followed by an optionally-signed integer)."
         + "\n For example: NaN, Infinity, -Infinity, -0.0, +0.0, 1e0, 3000.2");
     }
-    try{ return Float$1c$0Instance.instance(Double.parseDouble(val)); }
+    try{ return ok(Float$1c$0Instance.instance(Double.parseDouble(val))); }
     catch(NumberFormatException e){
-      throw err("Str.getIeeeFloat: cannot convert String \""+val+"\" to Float. \n"
+      return fail("Str.getIeeeFloat: cannot convert String \""+val+"\" to Float. \n"
           + "A Valid IEEE-754 Float is \"NaN\", \"Infinity\", \"-Infinity\", or a decimal number "
           + "optionally preceded by a \"+\" or \"-\" sign, with an optional \".\" followed by digits, "
           + "and an optional exponent (\"e\"/\"E\" followed by an optionally-signed integer)."
@@ -167,15 +167,15 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getNat$0(){
+  @Override public Object imm$tryGetNat$0(){
     if (!unsignedInt.matcher(val).matches()){
-      throw err("Str.getNat: cannot convert String \""+val+"\" to Nat. \n"
+      return fail("Str.getNat: cannot convert String \""+val+"\" to Nat. \n"
               + "A Valid Nat is any number of digits, separated by optional \"_\", that is in the range ["+0+", "+Long.toUnsignedString(Nat$c$0Instance.MAX_UNSIGNED_VALUE)+"]."
               + "\n For example 0, 3_021\"");
     }
-    try{ return Nat$c$0Instance.instance(Long.parseUnsignedLong(no_(val))); }
+    try{ return ok(Nat$c$0Instance.instance(Long.parseUnsignedLong(no_(val)))); }
     catch(NumberFormatException e){
-      throw err("Str.getNat: Str \""+val+"\" has a magnitude too great to be stored in an Nat, "
+      return fail("Str.getNat: Str \""+val+"\" has a magnitude too great to be stored in an Nat, "
               + " must be in ["+0+", "+Long.toUnsignedString(Nat$c$0Instance.MAX_UNSIGNED_VALUE)+"].");
     }
   }
@@ -188,19 +188,19 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getByte$0(){
+  @Override public Object imm$tryGetByte$0(){
     if (!unsignedInt.matcher(val).matches()){
-      throw err("Str.getByte: cannot convert String \""+val+"\" to Byte. \n"
+      return fail("Str.getByte: cannot convert String \""+val+"\" to Byte. \n"
               + "A Valid Byte is any number of digits, separated by optional \"_\"s, that is in the range ["+0+", "+255+"]."
               + "\n For example 0, 255, 42");
     }
     try{
       int x= Integer.parseInt(no_(val));
       if (x > 255){ throw new NumberFormatException(); }
-      return Byte$o$0Instance.instance((byte)x);
+      return ok(Byte$o$0Instance.instance((byte)x));
     }
     catch(NumberFormatException e){
-      throw err("Str.getByte: Str \""+val+"\" has a magnitude too great to be stored in an Nat, must be in ["+0+", "+255+"].");
+      return fail("Str.getByte: Str \""+val+"\" has a magnitude too great to be stored in an Nat, must be in ["+0+", "+255+"].");
     }
   }
   @Override public Object imm$num$0(){
@@ -220,9 +220,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getNum$0(){
+  @Override public Object imm$tryGetNum$0(){
     if (!optionallySignedRational.matcher(val).matches()){
-      throw err("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
+      return fail("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
               + "A valid Num is in the form [-]a / b:\n"
               + "Where the numerator is any number of digits, optionally separated by \"_\"s and proceeded by a \"-\".\n"
               + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or proceeded by a \"-\".\n"
@@ -235,14 +235,14 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       int slash= t.indexOf('/');
       Dec a= Dec.parse(t.substring(0,slash));
       Dec b= Dec.parse(t.substring(slash+1));
-      if (b.u.signum() == 0){ throw err("Str.getNum: Cannot convert String "+val+" to Num, as the denominator is 0"); }
+      if (b.u.signum() == 0){ return fail("Str.getNum: Cannot convert String "+val+" to Num, as the denominator is 0"); }
       BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
       BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
       if (neg){ num= num.negate(); }
-      return Num$c$0Instance.instance(num,den);
+      return ok(Num$c$0Instance.instance(num,den));
     }
     catch(NumberFormatException e){
-      throw err("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
+      return fail("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
               + "A valid Num is in the form [-]a / b:\n"
               + "Where the numerator is any number of digits, optionally separated by \"_\"s and proceeded by a \"-\".\n"
               + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or proceeded by a \"-\".\n"
@@ -268,9 +268,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getFloat$0(){
+  @Override public Object imm$tryGetFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){
-      throw err("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
+      return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
               "A valid Float is at least one digits and must be exactly representable as an IEEE-754 64bit number, " +
               "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
@@ -278,15 +278,15 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       String x= no_(val);
       double d= Double.parseDouble(x);
-      if (!Double.isFinite(d)){ throw err("Str.getFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
-      if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ throw err("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
+      if (!Double.isFinite(d)){ return fail("Str.getFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
+      if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return fail("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
               + "If rounded, the nearest representable value is "+floatExactFearlessLit(d)+"."
               + "If this rounding is desired use Str.getSoftFloat");}
       if (d == 0.0d){ d= 0.0d; }
-      return Float$1c$0Instance.instance(d);
+      return ok(Float$1c$0Instance.instance(d));
     }
     catch(NumberFormatException e){
-      throw err("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
+      return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
               "A valid Float is at least one digits and must be exactly representable as an IEEE-746 64bit number, " +
               "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
@@ -303,21 +303,21 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     catch(NumberFormatException e){ return optEmpty(); }
   }
-  @Override public Object imm$getSoftFloat$0(){
+  @Override public Object imm$tryGetSoftFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){
-      throw err("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
+      return fail("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
               "A valid Float is at least one digit then a \".\" and then at least one more digits optionally proceeded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
     }
     try{
       String x= no_(val);
       double d= Double.parseDouble(x);
-      if (!Double.isFinite(d)){ throw err("Str.getSoftFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
+      if (!Double.isFinite(d)){ return fail("Str.getSoftFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
       if (d == 0.0d){ d= 0.0d; }
-      return Float$1c$0Instance.instance(d);
+      return ok(Float$1c$0Instance.instance(d));
     }
     catch(NumberFormatException e){
-      throw err("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
+      return fail("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
                "A valid Float is at least one digit separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
                "\n For example: -2.4, 3000.2, +24.0");
     }

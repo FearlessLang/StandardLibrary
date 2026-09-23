@@ -65,6 +65,8 @@ public class Util{
   public static Opt$c$1 toOpt(Optional<?> opt) {
     return optNullable(opt.orElse(null));
   }
+  public static Object ok(Object x){ return Actions$5c$0.instance.imm$ok$1(x); }
+  public static Object fail(String msg){ return Actions$5c$0.instance.imm$msg$1(new Str$c$0Instance(msg)); }
   public static Error nonDetErr(String msg){
     return (Error)Error$1c$0.instance.imm$nonDeterministic$1(new Str$c$0Instance(msg));
     }
