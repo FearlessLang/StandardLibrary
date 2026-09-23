@@ -52,10 +52,6 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     try{ return new Flow$o$1Instance(s.filter(e->isTrue(callF$2(p0,e)))); }
     catch(IllegalStateException e){ throw consumed(); }
   }
-  @Override public Object mut$size$0(){
-    try{ return new Nat$c$0Instance((int)s.count()); }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
   @Override public Object mut$$plus_plus$1(Object o){
     //Note: all those try catches are relying on the JVM enforcing the stream consumptions,
     //but in the standard it is not guaranteed that it is checked. We need to add tests to all of the flow methods
@@ -141,16 +137,6 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     try{ return bool(s.noneMatch(e->isTrue(callF$2(p0,e)))); }
     catch(IllegalStateException e){ throw consumed(); }
   }
-  @Override public Object mut$get$0(){
-    try{
-      var it= s.iterator();
-      check(it.hasNext(), "Flow.get expected size==1, got 0");
-      var e0= it.next();
-      check(!it.hasNext(), "Flow.get expected size==1, got 2+");
-      return e0;
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
   @Override public Object mut$min$1(Object p0){
     try {
       return Flow$o$1Instance.of(s.gather(new MinGatherer((OrderBy$5e$2) p0)));
@@ -179,16 +165,6 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     var by= (OrderBy$5e$2) p0;
     try {
       return Flow$o$1Instance.of(s.sorted(toComparator(by)).gather(new SortedDistinctGatherer(by)));
-    }
-    catch(IllegalStateException e){ throw consumed(); }
-  }
-  @Override public Object mut$getOpt$0(){
-    try{
-      var it= s.iterator();
-      if(!it.hasNext()){ return optEmpty(); }
-      var e0= it.next();
-      check(!it.hasNext(), "Flow.opt expected size in {0,1}, got 2+");
-      return optSome(e0);
     }
     catch(IllegalStateException e){ throw consumed(); }
   }
