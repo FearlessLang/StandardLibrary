@@ -1,6 +1,7 @@
 AsImm[E:*, R]: { read #(E): R; }
 
 FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
+ForEachBody[A,E:*]: { mut #(a: mutH A, e: E): Void }
 ELists: { #[E:*]: mut EList[E]-> _Magic! }
 
 JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
