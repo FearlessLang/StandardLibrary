@@ -28,8 +28,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   }
   @Override public void keyReleased(KeyEvent e){
     var k=keyText(e);
-    held.remove(k);
-    dispatch(k,released);
+    if (held.remove(k)){ dispatch(k,released); }
   }
   @Override public void windowLostFocus(java.awt.event.WindowEvent e){
     if (held.isEmpty()){ return; }
