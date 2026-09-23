@@ -28,13 +28,6 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   }
   @Override public void keyReleased(KeyEvent e){
     var k=keyText(e);
-    // A key already synthetically released by windowLostFocus (held when
-    // this window lost focus, still held when it regained it, then
-    // genuinely released) is no longer in `held`: AWT's real release still
-    // arrives here, since a key release always targets whichever window is
-    // currently focused, not the one that saw the matching press. Ignoring
-    // it here avoids double-firing a `.released` action the model already
-    // ran once at focus loss.
     if (held.remove(k)){ dispatch(k,released); }
   }
   @Override public void windowLostFocus(java.awt.event.WindowEvent e){
