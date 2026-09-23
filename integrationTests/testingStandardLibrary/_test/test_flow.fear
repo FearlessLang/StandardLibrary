@@ -26,7 +26,7 @@ FlowBuildOrderTests: Test {::
     .mapping({::},{.key e->e; .elem e->e}) .elems.list
     .assertEq({::}, Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15))}
   .check{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow
-    .eSet({::},{::}) .seqFlow.list
+    .eSet({::},{::}) .flow.list
     .assertEq({::}, Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15))}
   }
 

@@ -206,10 +206,6 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   //>   .check{Sets#({::}, 1, 2, 3).flow.list .assertEq({::}, Lists#(1, 2, 3))}
   .flow: mut Flow[E] -> this.list.flow;
 
-  /// `this.seqFlow` returns a sequential flow over the elements of `this`.
-  //>   .check{Sets#({::}, 1, 2, 3).seqFlow.list .assertEq({::}, Lists#(1, 2, 3))}
-  .seqFlow: mut Flow[E] -> this.list.flow;
-
   /// ``this.str(by)`` returns a string representation of this set,
   /// using `by` as the ToStr for each element.
   //>   .check{Sets#({::}, -3, -1, +2).str{::.imm.abs} .assertEq "{3, 1, 2}"}

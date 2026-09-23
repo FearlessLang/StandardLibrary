@@ -147,15 +147,6 @@ ESet[E]: Pipe[ESet[E]] {
   //>     .distinctBy({::.imm.sign}).set.str{::} .assertEq "{-2, +1}"}
   mut .distinctBy[K](by: OrderHashBy[imm E, K]): mut ESet[E];
 
-  /// `this.seqFlow` returns a sequential flow over the elements of `this`.
-  /// Note this operation drains `this`, so any future accesses to this will point to an empty ESet.
-  //>   .check{Block#
-  //>     .let eset={ESets#[Int, Int]{::}.add(+1).add(-2).add(+3)}
-  //>     .do{eset.seqFlow.list.str{::} .assertEq "[+1, -2, +3]"}
-  //>     .do{eset.isEmpty .assertTrue}
-  //>     .done}
-  mut .seqFlow: mut Flow[E];
-
   /// `this.flow` returns a potentially parallel flow over the elements of `this`.
   /// Note this operation drains `this`, so any future accesses to this will point to an empty ESet.
   //>   .check{Block#
