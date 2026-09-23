@@ -148,7 +148,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // not depend on any given size).
   private Dimension naturalSize(Container target){
     boolean vert = gap.vertical;
-    var ls = lines(target, Integer.MAX_VALUE);
+    var ls = lines(target, explicitPrimary(target));
     int lineGap = vert ? w(gap.widthGap) : h(gap.heightGap);
     int totalCross = gapSum(ls, lineGap, Line::cross);
     int maxPrimary = ls.stream().mapToInt(Line::primary).max().orElse(0);
@@ -162,6 +162,11 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     boolean first = true;
     for (var ln : ls){ total += (first ? 0 : lineGap) + f.applyAsInt(ln); first = false; }
     return total;
+  }
+
+  private int explicitPrimary(Container target){
+    if (gap.vertical){ return gap.preferredHeight == null ? Integer.MAX_VALUE : h(gap.preferredHeight) - insetsH(target); }
+    return gap.preferredWidth == null ? Integer.MAX_VALUE : w(gap.preferredWidth) - insetsW(target);
   }
 
   private int insetsW(Container t){
