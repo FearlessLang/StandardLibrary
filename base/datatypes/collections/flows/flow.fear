@@ -32,6 +32,14 @@ Flow[E:*]: {
   /// Since ``f`` is a ``mut MF`` it can write what it captured, so ``forEach`` is a fence:
   /// every stage before it finishes with every element before ``f`` sees the first one.
   mut .forEach[R:*](f: mut MF[E,Void]): Void;
+  /// ``this.forEach(a, f)`` is `Flow.forEach` handing ``a`` to every call of ``f``,
+  /// as `Block.loop` hands it to every iteration.
+  //>   .check{Block#
+  //>     .let acc={ELists#[Nat]}
+  //>     .do{Flows#(1, 2, 3).forEach(acc, {a, e -> a.add(e * 2)})}
+  //>     .do{acc.list .assertEq({::}, Lists#(2, 4, 6))}
+  //>     .done}
+  mut .forEach[A](a: mutH A, f: mut ForEachBody[A,E]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
   mut .flatMap[R:*](f: read F[E, mut Flow[R]]): mut Flow[R];
   mut .filter(f: read F[E, Bool]): mut Flow[E];

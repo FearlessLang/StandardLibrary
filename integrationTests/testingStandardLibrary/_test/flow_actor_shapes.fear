@@ -44,27 +44,15 @@ DungeonRoomViaActorMut: {
       Continue#)});
   }
 
-FlatMapViaActor: {
-  #[E:*,R](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
-    es.actor[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
-      f#e .forEach{x -> down#x},
-      Continue#)});
+FlatMapMutViaActorMut: {
+  #[E:*,R:*](es: mut Flow[E], f: read F[E, mut List[R]]): mut Flow[R] ->
+    es.actorMut[Void, R](Void, {down, _, e ->
+      Block#(f#e .seqFlow.forEach(down, {d, x -> d.push#(d, x)}), Continue#)});
   }
 
-Drain: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E]): Void ->
-  DrainFrom#[E](down, xs, Vars#[Nat](0)) }
-DrainFrom: { #[E:*](down: mutH base.ActorSink[E], xs: mut List[E], i: mut base.Var[Nat]): Void ->
-  Block#[Void].loop(down, {d -> Block#(
-    d.pushOpt#(d, xs.opt(i.get)),
-    i.set(i.get + 1),
-    i.get >= (xs.size) ? { .then -> Break#; .else -> Continue# })})
-    .done }
-
-FlatMapViaActorMut: {
-  #[E:*,R:*](es: mut Flow[E], f: read F[E, mut Flow[R]]): mut Flow[R] ->
-    es.actorMut[mut base.Var[Nat], R](Vars#[Nat](0), {down, s, e -> Block#(
-      Drain#[R](down, f#e .list),
-      Continue#)});
+FlatMapViaFlatMapMut: {
+  #[E:*,R:*](es: mut Flow[E], f: read F[E, read List[R]]): mut Flow[read/imm R] ->
+    FlatMapMutViaActorMut#(es, {e -> f#e .flow.list});
   }
 
 MapWithContextViaActorMut: {

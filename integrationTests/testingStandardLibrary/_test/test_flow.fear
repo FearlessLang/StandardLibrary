@@ -19,6 +19,20 @@ FlowForEachTests: Test {::
     .do{v.get .assertEq 8}
     .done
     }
+  .check{Block#
+    .let acc={ELists#[Nat]}
+    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.map{e->e+1}.forEach(acc, {a, e->a.add e})}
+    .do{acc.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16))}
+    .done
+    }
+  .check{Block#
+    .let v={Vars#[Nat](0)}
+    .let acc={ELists#[Nat]}
+    .do{Lists#(0,1,2,3,4,5,6,7).flow.map{_->v.get}.forEach(v, {c, x->Block#(acc.add x, c.set(c.get + 1))})}
+    .do{acc.list .assertEq({::}, Lists#(0,0,0,0,0,0,0,0))}
+    .do{v.get .assertEq 8}
+    .done
+    }
   }
 
 FlowBuildOrderTests: Test {::
