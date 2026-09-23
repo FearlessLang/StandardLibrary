@@ -60,17 +60,17 @@ class _Button extends AWidget implements Button$2o$0{
     frame.onEdtAndWait(() -> actions.add((MF$7$1) r));
     return this;
   }
-  @Override Dimension autoSize(){ return Sk.textSizeWithInsets(text, this); }
+  @Override Dimension autoSize(){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){ Sk.button(cv, this); }
 }
 
 class _Label extends AWidget implements Label$1c$0{
   _Label(_Frame frame){ super(frame); }
 
-  @Override Dimension autoSize(){ return Sk.textSizeWithInsets(text, this); }
+  @Override Dimension autoSize(){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
-    Sk.text(cv, text, this, 0, 0);
+    Sk.text(cv, this, 0, 0);
   }
 }
 
@@ -83,8 +83,8 @@ class _Pane extends AContainer implements Pane$o$0{
   @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(component, s, _Label::new); return this; }
   @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(component, s, _Pane::new); return this; }
   @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(component, s, _Border::new); return this; }
-  @Override public Pane$o$0 mut$clear$0(){
-    frame.onEdtAndWait(() -> {
+  @Override public Object mut$clear$0(){
+    return reStyle(() -> {
       // Removed widgets get no Exited events (DOM semantics: removal is not
       // an exit); SkMouse just forgets its references into the subtrees.
       // Handler tasks already queued for removed widgets still run; they
@@ -92,24 +92,12 @@ class _Pane extends AContainer implements Pane$o$0{
       for (var c : component.getComponents()){ frame.mouse.detached((SkComponent) c); }
       component.removeAll();
     });
-    frame.markLayoutDirty();
-    return this;
   }
-  @Override public Pane$o$0 mut$horizontal$0(){
-    frame.onEdtAndWait(() -> { vertical = false; component.invalidate(); });
-    frame.markLayoutDirty();
-    return this;
-  }
-  @Override public Pane$o$0 mut$vertical$0(){
-    frame.onEdtAndWait(() -> { vertical = true; component.invalidate(); });
-    frame.markLayoutDirty();
-    return this;
-  }
-  @Override public Pane$o$0 mut$chunk$1(Object n){
+  @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
+  @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
+  @Override public Object mut$chunk$1(Object n){
     int c = nat(n);
-    frame.onEdtAndWait(() -> { chunk = c; component.invalidate(); });
-    frame.markLayoutDirty();
-    return this;
+    return reStyle(() -> chunk = c);
   }
 }
 
@@ -232,12 +220,6 @@ abstract class AWidget implements Widget$2o$1{
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   @Override public Object mut$autoWidth$0(){ return reStyle(() -> preferredWidth = null); }
   @Override public Object mut$autoHeight$0(){ return reStyle(() -> preferredHeight = null); }
-  @Override public Object mut$autoSize$0(){
-    return reStyle(() -> {
-      preferredWidth = null;
-      preferredHeight = null;
-    });
-  }
   @Override public Object mut$foreground$1(Object c){ return onEdt(() -> foreground = (Color$1c$0) c); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> background = (Color$1c$0) c); }
   @Override public Object read$topInset$0(){ return top; }
@@ -251,10 +233,6 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object read$radius$0(){ return radius; }
   @Override public Object read$foreground$0(){ return foreground; }
   @Override public Object read$background$0(){ return background; }
-  @Override public Object mut$save$1(Object s){
-    ((Consumer$ao$1) s).mut$accept$1(mut$self$0());
-    return mut$self$0();
-  }
 }
 
 abstract class AContainer extends AWidget{

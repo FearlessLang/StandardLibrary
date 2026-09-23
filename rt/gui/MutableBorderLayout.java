@@ -67,14 +67,12 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
 
   @Override public Dimension preferredLayoutSize(Container target){
     synchronized (target.getTreeLock()){
-      return size(target, Component::getPreferredSize);
+      return size();
     }
   }
 
   @Override public Dimension minimumLayoutSize(Container target){
-    synchronized (target.getTreeLock()){
-      return size(target, Component::getMinimumSize);
-    }
+    return preferredLayoutSize(target);
   }
 
   @Override public Dimension maximumLayoutSize(Container target){
@@ -87,11 +85,10 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
 
   @Override public void layoutContainer(Container target){
     synchronized (target.getTreeLock()){
-      var a = area(target);
-      int left = a.left();
-      int right = a.right();
-      int top = a.top();
-      int bottom = a.bottom();
+      int left = w(gap.left);
+      int right = target.getWidth() - w(gap.right);
+      int top = h(gap.top);
+      int bottom = target.getHeight() - h(gap.bottom);
       boolean middle = west != null || center != null || east != null;
 
       if (north != null){
@@ -145,65 +142,30 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
 
   private int span(int n){ return Math.max(0, n); }
 
-  private Area area(Container target){
-    var in = target.getInsets();
-    return new Area(
-      in.left + w(gap.left),
-      in.top + h(gap.top),
-      target.getWidth() - in.right - w(gap.right),
-      target.getHeight() - in.bottom - h(gap.bottom)
-      );
-  }
-
   // Whether a gap is owed before the next slot depends on whether a slot was
   // already placed, never on whether its measured size happens to be 0: a
   // widget can legitimately have width or height 0 (Nat includes 0), and
   // that must not be mistaken for "nothing here yet" the way it would be
   // with a plain `total == 0` check.
-  private Dimension size(Container target, Dim dim){
-    boolean hasMiddle = west != null || center != null || east != null;
-    var total = middleSize(dim);
-    boolean hasContent = hasMiddle;
-
-    if (north != null){
-      var d = dim.of(north);
-      total.width = Math.max(total.width, d.width);
-      total.height = hasContent ? total.height + h(gap.heightGap) + d.height : d.height;
+  private Dimension size(){
+    var total = new Dimension();
+    boolean hasContent = false;
+    for (var c : new Component[]{ west, center, east }){
+      if (c == null){ continue; }
+      var d = c.getPreferredSize();
+      total.width += (hasContent ? w(gap.widthGap) : 0) + d.width;
+      total.height = Math.max(total.height, d.height);
       hasContent = true;
     }
-
-    if (south != null){
-      var d = dim.of(south);
+    for (var c : new Component[]{ north, south }){
+      if (c == null){ continue; }
+      var d = c.getPreferredSize();
       total.width = Math.max(total.width, d.width);
-      total.height = hasContent ? total.height + h(gap.heightGap) + d.height : d.height;
+      total.height = (hasContent ? total.height + h(gap.heightGap) : 0) + d.height;
+      hasContent = true;
     }
-
-    var in = target.getInsets();
-    total.width += in.left + in.right + w(gap.left) + w(gap.right);
-    total.height += in.top + in.bottom + h(gap.top) + h(gap.bottom);
+    total.width += w(gap.left) + w(gap.right);
+    total.height += h(gap.top) + h(gap.bottom);
     return total;
-  }
-
-  private Dimension middleSize(Dim dim){
-    var total = new Dimension();
-    boolean hasContent = addMiddle(total, dim, west, false);
-    hasContent = addMiddle(total, dim, center, hasContent);
-    addMiddle(total, dim, east, hasContent);
-    return total;
-  }
-
-  private boolean addMiddle(Dimension total, Dim dim, Component c, boolean hasContent){
-    if (c == null){ return hasContent; }
-    var d = dim.of(c);
-    if (hasContent){ total.width += w(gap.widthGap); }
-    total.width += d.width;
-    total.height = Math.max(total.height, d.height);
-    return true;
-  }
-
-  private record Area(int left, int top, int right, int bottom){}
-
-  private interface Dim{
-    Dimension of(Component c);
   }
 }
