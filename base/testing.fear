@@ -4,16 +4,16 @@ StackFrame: DataType[StackFrame,StackFrame] {
   .cmp a, b, m -> a.str<=>(b.str,m);
   .hash -> this.str.hash;
   .str -> 
-    `StackFrame[` + (this.imm.fileName)
-    + `, ` + (this.imm.typeName)
-    + `, ` + (this.imm.methodName)
-    + `, ` + (this.imm.lineNumber)
-    +`]`;
+    "StackFrame[" + (this.imm.fileName)
+    + ", " + (this.imm.typeName)
+    + ", " + (this.imm.methodName)
+    + ", " + (this.imm.lineNumber)
+    +"]";
   .info -> Infos.map(
-    `fileName`, this.imm.fileName,
-    `typeName`, this.imm.typeName,
-    `methodName`, this.imm.methodName,
-    `lineNumber`, this.imm.lineNumber,
+    "fileName", this.imm.fileName,
+    "typeName", this.imm.typeName,
+    "methodName", this.imm.methodName,
+    "lineNumber", this.imm.lineNumber,
     );
   }
 
@@ -134,7 +134,7 @@ _TestCaps: {
   #(sys: mut System, ts: mut EList[CheckInfo]): mut RTestCap -> mut RTestCap: TestCap {'self
     .check c -> Block#
       .let[List[StackFrame]] st = {c._fetchTrace {sys.try.currentStackTrace}}
-      .do {UnitTestLog.log(_PlanLine#(`RUN`,st))}
+      .do {UnitTestLog.log(_PlanLine#("RUN",st))}
       .do {ts.add(CheckInfos#(
         { _ -> c#; ._fetchTrace f -> c._fetchTrace f },
         st))}
@@ -142,20 +142,20 @@ _TestCaps: {
 
     .checkWithSys c -> Block#
       .let[List[StackFrame]] st = {c._fetchTrace {sys.try.currentStackTrace}}
-      .do {UnitTestLog.log(_PlanLine#(`RUN`,st))}
+      .do {UnitTestLog.log(_PlanLine#("RUN",st))}
       .do {ts.add(CheckInfos#(c,st))}
       .return {self};
 
     .disabledCheck c -> Block#(
-      UnitTestLog.log(_PlanLine#(`DISABLED`,c._fetchTrace {sys.try.currentStackTrace})),
+      UnitTestLog.log(_PlanLine#("DISABLED",c._fetchTrace {sys.try.currentStackTrace})),
       self);
 
     .disabledCheckWithSys c -> Block#(
-      UnitTestLog.log(_PlanLine#(`DISABLED`,c._fetchTrace {sys.try.currentStackTrace})),
+      UnitTestLog.log(_PlanLine#("DISABLED",c._fetchTrace {sys.try.currentStackTrace})),
       self);
 
     .disabledTest _ -> Block#(
-      UnitTestLog.log(_PlanLine#(`DISABLED`,sys.try.currentStackTrace)),
+      UnitTestLog.log(_PlanLine#("DISABLED",sys.try.currentStackTrace)),
       self);
 
     mut .run: Void ->
@@ -175,7 +175,7 @@ Test: { .tests(t: mut TestCap): mut TestCap; }
 
 //The frames that belong to this file or blocks.fear are the test DSL itself; the
 //others are the user's, and the first of them is the real caller of a check.
-_IsUserFile: F[Str, Bool] { fn -> fn.startsWith(`testing.fear`).not && {fn.startsWith(`blocks.fear`).not} }
+_IsUserFile: F[Str, Bool] { fn -> fn.startsWith("testing.fear").not && {fn.startsWith("blocks.fear").not} }
 
 _RealFrame: {
   #(st: List[StackFrame]): StackFrame -> st.flow.filter{_IsUserFile#(::.fileName)}.first!
@@ -187,23 +187,23 @@ _AddToLog: {
     .return {a.run {
       .ok _ ->
         `<testcase classname="` + (_XmlEscape#(f.typeName))
-        + `" name="` + (_XmlEscape#(f.typeName)) + ` at line: ` + (f.lineNumber)
+        + `" name="` + (_XmlEscape#(f.typeName)) + " at line: " + (f.lineNumber)
         + `" file="` + (_XmlEscape#(f.fileName))
         + `" line="` + (f.lineNumber)
         + `"></testcase>` |;
       .info i -> Block#(
-        Debug#(`Test failure `
-          + (f.typeName) + ` at line: `
-          + (f.lineNumber) + ` in file: `+ (f.fileName)
+        Debug#("Test failure "
+          + (f.typeName) + " at line: "
+          + (f.lineNumber) + " in file: "+ (f.fileName)
           | (_FailureText#i)
           ),
         `<testcase classname="` + (_XmlEscape#(f.typeName))
-        + `" name="` + (_XmlEscape#(f.typeName)) + ` at line: ` + (f.lineNumber)
+        + `" name="` + (_XmlEscape#(f.typeName)) + " at line: " + (f.lineNumber)
         + `" file="` + (_XmlEscape#(f.fileName))
         + `" line="` + (f.lineNumber)
         + `">`
         | (_FormatFailure#i)
-        | `</testcase>` |
+        | "</testcase>" |
         );
     }};
   }
@@ -227,8 +227,8 @@ _FailureMsg: {
 _FailureExpected: {
   #(i: Info): Str ->
     i.extract{:: > "expected" .extractMsg}.match {
-      .some e -> `<expected>` + (_XmlEscape#e) + `</expected>` |;
-      .empty -> ``;
+      .some e -> "<expected>" + (_XmlEscape#e) + "</expected>" |;
+      .empty -> "";
     };
     //i.map.opt(`expected`).match {
     //  .some e -> Block#(
@@ -241,47 +241,47 @@ _FailureExpected: {
 
 _FailureActual: {
   #(i: Info): Str ->
-    i.extract{:: > `actual` .extractMsg}.match {
-      .some a -> `<actual>` + (_XmlEscape#a) + `</actual>` |;
-      .empty -> ``;
+    i.extract{:: > "actual" .extractMsg}.match {
+      .some a -> "<actual>" + (_XmlEscape#a) + "</actual>" |;
+      .empty -> "";
     };
   }
 
 _FailureList: {
   #(i: Info): Str ->
     i.extract{:: > "list" .extractList}
-      .mapSome{::.flow.filter{_IsUserFile#(_FrameField#(::, `fileName`))}.map {_FailureTrace#::}.join (`` |)}
-      .orValue ``
+      .mapSome{::.flow.filter{_IsUserFile#(_FrameField#(::, "fileName"))}.map {_FailureTrace#::}.join ("" |)}
+      .orValue ""
   }
 
 _FormatFailure: {
   #(i: Info): Str ->
-    `<failure>`
+    "<failure>"
     | (_FailureExpected#i)
     + (_FailureActual#i)
     + (_XmlEscape#(_FailureText#i))
-    | `</failure>`;
+    | "</failure>";
   }
 
 _FrameField: { #(i: Info, k: Str): Str ->
   i.extract{:: > k .extractMsg}
-    ! {`Malformed stack frame info, missing key: ` + k};
+    ! {"Malformed stack frame info, missing key: " + k};
   // if the key isn't a message you get `` throwing out whatever information existed previously
   //i.map.opt(k).orLazy{Error.msg(`Malformed stack frame info, missing key: ` + k)}.msg
   }
 
 _FailureTrace: { #(i: Info): Str -> Block#
-  .let[Str] fn = {_FrameField#(i, `fileName`)}
-  .let[Str] tn = {_FrameField#(i, `typeName`)}
-  .let[Str] mn = {_FrameField#(i, `methodName`)}
-  .let[Str] ln = {_FrameField#(i, `lineNumber`)}
-  .let[Nat] sp = {mn.indexOf(` `).orLazy{Error.msg(`Malformed stack frame methodName: ` + mn)}}
+  .let[Str] fn = {_FrameField#(i, "fileName")}
+  .let[Str] tn = {_FrameField#(i, "typeName")}
+  .let[Str] mn = {_FrameField#(i, "methodName")}
+  .let[Str] ln = {_FrameField#(i, "lineNumber")}
+  .let[Nat] sp = {mn.indexOf(" ").orLazy{Error.msg("Malformed stack frame methodName: " + mn)}}
   .return {
     mn.sub(0,sp + 1)
     + tn
     + (mn.sub(sp + 1,mn.size))
-    + ` error line: ` + ln
-    + ` in file ` + fn
+    + " error line: " + ln
+    + " in file " + fn
     }
   }
 
@@ -289,15 +289,15 @@ _PlanLine: {
   #(kind: Str, st: List[StackFrame]): Str -> Block#
     .let[StackFrame] f = {_RealFrame#st}
     .return {
-      `PLAN|`
+      "PLAN|"
       + kind
-      + `|`
+      + "|"
       + (f.fileName)
-      + `|`
+      + "|"
       + (f.typeName)
-      + `|`
-      + (f.typeName) + ` at line: ` + (f.lineNumber)
-      + `|`
+      + "|"
+      + (f.typeName) + " at line: " + (f.lineNumber)
+      + "|"
       + (f.lineNumber)|//| to end in new line
       };
   }
@@ -305,7 +305,7 @@ _PlanLine: {
 _XmlEscape: {
   #(s: Str): Str ->
     s.replaceSimultaneous(Lists#(
-      `&`, `&amp;`,
-      `<`, `&lt;`,
-      `"`, `&quot;`,
+      "&", "&amp;",
+      "<", "&lt;",
+      `"`, "&quot;",
       ));}

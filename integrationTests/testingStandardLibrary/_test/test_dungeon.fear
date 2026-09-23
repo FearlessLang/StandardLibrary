@@ -62,10 +62,10 @@ Survivor: { #(room: readH Room, h: mut Hero): mut Opt[mut Hero] ->
 TestDungeon: Test {::
   .check{Block#
     .let[mut Room] room = {Rooms#(
-      ELists#[mut base.EList[Item]].addAnd(Lists#(Items#(`sword`, 10), Items#(`coin`, 1)).seqFlow.eList),
-      base.ESets#[Monster,Str]{::.name}.add(Monsters#(`rat`, 1)).add(Monsters#(`troll`, 8)))}
-    .let[mut Hero] bo = {Heroes#(`Bo`, 2, 1)}
-    .let[mut Hero] ann = {Heroes#(`Ann`, 9, 5)}
+      ELists#[mut base.EList[Item]].addAnd(Lists#(Items#("sword", 10), Items#("coin", 1)).seqFlow.eList),
+      base.ESets#[Monster,Str]{::.name}.add(Monsters#("rat", 1)).add(Monsters#("troll", 8)))}
+    .let[mut Hero] bo = {Heroes#("Bo", 2, 1)}
+    .let[mut Hero] ann = {Heroes#("Ann", 9, 5)}
     .do {Visit#(room, bo)}
     .do {Visit#(room, ann)}
     .do {Survivor#(room, bo).isEmpty.assertTrue}

@@ -282,16 +282,16 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{+2 .assertInRange(+1=~~= +4)}
   //>   .checkNonDetErr({::}, {+5 .assertInRange(+1=~~= +4)})
-  .assertInRange(range: Range[Int]): Void -> this.assertInRange(range, {``});
+  .assertInRange(range: Range[Int]): Void -> this.assertInRange(range, {""});
 
   /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   //>   .check{+2 .assertInRange(+1=~~= +4, {`custom context`})}
   .assertInRange(range: Range[Int], msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
-    { msg#.info + (`Expected in range: `+ (range.str) // technically a DD point...
-      | `lo: `+(range.start)
-      | `hi: `+(range.end)
-      | `actual: `+this
+    { msg#.info + ("Expected in range: "+ (range.str) // technically a DD point...
+      | "lo: "+(range.start)
+      | "hi: "+(range.end)
+      | "actual: "+this
       .info)});
 
   /// ``this.clampTo(range)`` returns `this` clamped into ``[range.start, range.end]``

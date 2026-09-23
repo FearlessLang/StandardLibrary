@@ -4,251 +4,251 @@ TestUStr:Test{::
   // .u parsing and canonical hex printing
   // ------------------------------------------------------------
 
-  .check{``.u.scalarHex.assertEq ``}
-  .check{``.u ``.scalarHex.assertEq ``}
-  .check{``.u.u ``.scalarHex.assertEq ``}
+  .check{"".u.scalarHex.assertEq ""}
+  .check{"".u "".scalarHex.assertEq ""}
+  .check{"".u.u "".scalarHex.assertEq ""}
 
-  .check{``.u `0`.scalarHex.assertEq `0000`}
-  .check{``.u `A`.scalarHex.assertEq `000A`}
-  .check{``.u `F`.scalarHex.assertEq `000F`}
-  .check{``.u `66`.scalarHex.assertEq `0066`}
-  .check{``.u `0066`.scalarHex.assertEq `0066`}
-  .check{``.u `000066`.scalarHex.assertEq `0066`}
-  .check{``.u `00FF`.scalarHex.assertEq `00FF`}
-  .check{``.u `FFFF`.scalarHex.assertEq `FFFF`}
-  .check{``.u `10FFFF`.scalarHex.assertEq `10FFFF`}
+  .check{"".u "0".scalarHex.assertEq "0000"}
+  .check{"".u "A".scalarHex.assertEq "000A"}
+  .check{"".u "F".scalarHex.assertEq "000F"}
+  .check{"".u "66".scalarHex.assertEq "0066"}
+  .check{"".u "0066".scalarHex.assertEq "0066"}
+  .check{"".u "000066".scalarHex.assertEq "0066"}
+  .check{"".u "00FF".scalarHex.assertEq "00FF"}
+  .check{"".u "FFFF".scalarHex.assertEq "FFFF"}
+  .check{"".u "10FFFF".scalarHex.assertEq "10FFFF"}
 
-  .check{``.u `0066 0066 0065 0067`.scalarHex.assertEq `0066 0066 0065 0067`}
-  .check{``.u `FB03 0066 0066 0069`.scalarHex.assertEq `FB03 0066 0066 0069`}
-  .check{``.u `0000 000A 0020 0060 0022 005C`.scalarHex.assertEq `0000 000A 0020 0060 0022 005C`}
+  .check{"".u "0066 0066 0065 0067".scalarHex.assertEq "0066 0066 0065 0067"}
+  .check{"".u "FB03 0066 0066 0069".scalarHex.assertEq "FB03 0066 0066 0069"}
+  .check{"".u "0000 000A 0020 0060 0022 005C".scalarHex.assertEq "0000 000A 0020 0060 0022 005C"}
 
-  .check{``.u `0061`.u ``.scalarHex.assertEq `0061`}
-  .check{``.u ``.u `0061`.scalarHex.assertEq `0061`}
-  .check{``.u `0061`.u `0062`.scalarHex.assertEq `0061 0062`}
-  .check{``.u `0061 F066`.u ``.scalarHex.assertEq `0061 F066`}
+  .check{"".u "0061".u "".scalarHex.assertEq "0061"}
+  .check{"".u "".u "0061".scalarHex.assertEq "0061"}
+  .check{"".u "0061".u "0062".scalarHex.assertEq "0061 0062"}
+  .check{"".u "0061 F066".u "".scalarHex.assertEq "0061 F066"}
 
   // ------------------------------------------------------------
   // malformed .u input
   // ------------------------------------------------------------
 
-  .check{Try#{``.u ` `}.assertInfo}
-  .check{Try#{``.u `0066 `}.assertInfo}
-  .check{Try#{``.u ` 0066`}.assertInfo}
-  .check{Try#{``.u `0066  0067`}.assertInfo}
-  .check{Try#{``.u `0066    0067`}.assertInfo}
-  .check{Try#{``.u (`0066` | `0067`)}.assertInfo}
+  .check{Try#{"".u " "}.assertInfo}
+  .check{Try#{"".u "0066 "}.assertInfo}
+  .check{Try#{"".u " 0066"}.assertInfo}
+  .check{Try#{"".u "0066  0067"}.assertInfo}
+  .check{Try#{"".u "0066    0067"}.assertInfo}
+  .check{Try#{"".u ("0066" | "0067")}.assertInfo}
 
-  .check{Try#{``.u `006g`}.assertInfo}
-  .check{Try#{``.u `006G`}.assertInfo}
-  .check{Try#{``.u `0x66`}.assertInfo}
-  .check{Try#{``.u `U+0066`}.assertInfo}
-  .check{Try#{``.u `+0066`}.assertInfo}
-  .check{Try#{``.u `-0066`}.assertInfo}
-  .check{Try#{``.u `0000066`}.assertInfo}
+  .check{Try#{"".u "006g"}.assertInfo}
+  .check{Try#{"".u "006G"}.assertInfo}
+  .check{Try#{"".u "0x66"}.assertInfo}
+  .check{Try#{"".u "U+0066"}.assertInfo}
+  .check{Try#{"".u "+0066"}.assertInfo}
+  .check{Try#{"".u "-0066"}.assertInfo}
+  .check{Try#{"".u "0000066"}.assertInfo}
 
-  .check{Try#{``.u `110000`}.assertInfo}
-  .check{Try#{``.u `D800`}.assertInfo}
-  .check{Try#{``.u `D801`}.assertInfo}
-  .check{Try#{``.u `DFFF`}.assertInfo}
+  .check{Try#{"".u "110000"}.assertInfo}
+  .check{Try#{"".u "D800"}.assertInfo}
+  .check{Try#{"".u "D801"}.assertInfo}
+  .check{Try#{"".u "DFFF"}.assertInfo}
 
   // ------------------------------------------------------------
   // Str -> UStr
   // ------------------------------------------------------------
 
-  .check{`f`.u.scalarHex.assertEq `0066`}
-  .check{`ffeg`.u.scalarHex.assertEq `0066 0066 0065 0067`}
-  .check{`hello`.u.scalarHex.assertEq `0068 0065 006C 006C 006F`}
-  .check{``.u.scalarHex.assertEq ``}
+  .check{"f".u.scalarHex.assertEq "0066"}
+  .check{"ffeg".u.scalarHex.assertEq "0066 0066 0065 0067"}
+  .check{"hello".u.scalarHex.assertEq "0068 0065 006C 006C 006F"}
+  .check{"".u.scalarHex.assertEq ""}
 
-  .check{`hello`.u.u `F066`.scalarHex.assertEq `0068 0065 006C 006C 006F F066`}
-  .check{`hello`.u.u `F066 0061`.scalarHex.assertEq `0068 0065 006C 006C 006F F066 0061`}
+  .check{"hello".u.u "F066".scalarHex.assertEq "0068 0065 006C 006C 006F F066"}
+  .check{"hello".u.u "F066 0061".scalarHex.assertEq "0068 0065 006C 006C 006F F066 0061"}
 
   // ------------------------------------------------------------
   // concatenation
   // ------------------------------------------------------------
 
-  .check{(`a`.u+(`b`.u)).scalarHex.assertEq `0061 0062`}
-  .check{(`a`.u+(``.u)).scalarHex.assertEq `0061`}
-  .check{(``.u+(`a`.u)).scalarHex.assertEq `0061`}
-  .check{(``.u+(``.u)).scalarHex.assertEq ``}
+  .check{("a".u+("b".u)).scalarHex.assertEq "0061 0062"}
+  .check{("a".u+("".u)).scalarHex.assertEq "0061"}
+  .check{("".u+("a".u)).scalarHex.assertEq "0061"}
+  .check{("".u+("".u)).scalarHex.assertEq ""}
 
-  .check{(`a`.u+(``.u `F066`)).scalarHex.assertEq `0061 F066`}
-  .check{(``.u `F066`+(`a`.u)).scalarHex.assertEq `F066 0061`}
-  .check{(``.u `F066`+(``.u `F067`)).scalarHex.assertEq `F066 F067`}
+  .check{("a".u+("".u "F066")).scalarHex.assertEq "0061 F066"}
+  .check{("".u "F066"+("a".u)).scalarHex.assertEq "F066 0061"}
+  .check{("".u "F066"+("".u "F067")).scalarHex.assertEq "F066 F067"}
 
   // ------------------------------------------------------------
   // separator operators
   // ------------------------------------------------------------
 
-  .check{(`a`.u|(`b`.u)).scalarHex.assertEq `0061 000A 0062`}
-  .check{(`a`.u^(`b`.u)).scalarHex.assertEq `0061 0022 0062`}
+  .check{("a".u|("b".u)).scalarHex.assertEq "0061 000A 0062"}
+  .check{("a".u^("b".u)).scalarHex.assertEq "0061 0022 0062"}
 
-  .check{(`a`.u |).scalarHex.assertEq `0061 000A`}
-  .check{(`a`.u ^).scalarHex.assertEq `0061 0022`}
+  .check{("a".u |).scalarHex.assertEq "0061 000A"}
+  .check{("a".u ^).scalarHex.assertEq "0061 0022"}
 
-  .check{(``.u|(`b`.u)).scalarHex.assertEq `000A 0062`}
-  .check{(``.u^(`b`.u)).scalarHex.assertEq `0022 0062`}
+  .check{("".u|("b".u)).scalarHex.assertEq "000A 0062"}
+  .check{("".u^("b".u)).scalarHex.assertEq "0022 0062"}
 
-  .check{(`a`.u|(``.u)).scalarHex.assertEq `0061 000A`}
-  .check{(`a`.u^(``.u)).scalarHex.assertEq `0061 0022`}
+  .check{("a".u|("".u)).scalarHex.assertEq "0061 000A"}
+  .check{("a".u^("".u)).scalarHex.assertEq "0061 0022"}
 
   // ------------------------------------------------------------
   // isEmpty / size
   // ------------------------------------------------------------
 
-  .check{``.u.isEmpty.assertTrue}
-  .check{``.u ``.isEmpty.assertTrue}
-  .check{`a`.u.isEmpty.assertFalse}
-  .check{``.u `F066`.isEmpty.assertFalse}
+  .check{"".u.isEmpty.assertTrue}
+  .check{"".u "".isEmpty.assertTrue}
+  .check{"a".u.isEmpty.assertFalse}
+  .check{"".u "F066".isEmpty.assertFalse}
 
-  .check{``.u.size.assertEq 0}
-  .check{``.u ``.size.assertEq 0}
-  .check{`a`.u.size.assertEq 1}
-  .check{`ab`.u.size.assertEq 2}
-  .check{``.u `0061 F066 0062`.size.assertEq 3}
-  .check{``.u `10FFFF`.size.assertEq 1}
+  .check{"".u.size.assertEq 0}
+  .check{"".u "".size.assertEq 0}
+  .check{"a".u.size.assertEq 1}
+  .check{"ab".u.size.assertEq 2}
+  .check{"".u "0061 F066 0062".size.assertEq 3}
+  .check{"".u "10FFFF".size.assertEq 1}
 
   // ------------------------------------------------------------
   // isStr
   // ------------------------------------------------------------
 
-  .check{``.u.isStr.assertTrue}
-  .check{``.u ``.isStr.assertTrue}
-  .check{`abcXYZ012`.u.isStr.assertTrue}
-  .check{``.u `0060 0022 005C 000A 0020`.isStr.assertTrue}
+  .check{"".u.isStr.assertTrue}
+  .check{"".u "".isStr.assertTrue}
+  .check{"abcXYZ012".u.isStr.assertTrue}
+  .check{"".u "0060 0022 005C 000A 0020".isStr.assertTrue}
 
-  .check{``.u `00E9`.isStr.assertFalse}
-  .check{``.u `F066`.isStr.assertFalse}
-  .check{``.u `10FFFF`.isStr.assertFalse}
-  .check{``.u `0061 F066`.isStr.assertFalse}
-  .check{``.u `F066 0061`.isStr.assertFalse}
+  .check{"".u "00E9".isStr.assertFalse}
+  .check{"".u "F066".isStr.assertFalse}
+  .check{"".u "10FFFF".isStr.assertFalse}
+  .check{"".u "0061 F066".isStr.assertFalse}
+  .check{"".u "F066 0061".isStr.assertFalse}
 
   // ------------------------------------------------------------
   //.str
   // ------------------------------------------------------------
 
-  .check{``.u.str.isSome.assertTrue}
-  .check{``.u ``.str.isSome.assertTrue}
-  .check{`abc`.u.str.isSome.assertTrue}
-  .check{``.u `0060 0022 005C 000A 0020`.str.isSome.assertTrue}
+  .check{"".u.str.isSome.assertTrue}
+  .check{"".u "".str.isSome.assertTrue}
+  .check{"abc".u.str.isSome.assertTrue}
+  .check{"".u "0060 0022 005C 000A 0020".str.isSome.assertTrue}
 
-  .check{``.u `00E9`.str.isEmpty.assertTrue}
-  .check{``.u `F066`.str.isEmpty.assertTrue}
-  .check{``.u `0061 F066`.str.isEmpty.assertTrue}
+  .check{"".u "00E9".str.isEmpty.assertTrue}
+  .check{"".u "F066".str.isEmpty.assertTrue}
+  .check{"".u "0061 F066".str.isEmpty.assertTrue}
 
   // ------------------------------------------------------------
   // exact representation equality
   // ------------------------------------------------------------
 
-  .check{``.u.equalRepr(``.u).assertTrue}
-  .check{`a`.u.equalRepr(`a`.u).assertTrue}
-  .check{`a`.u.equalRepr(`b`.u).assertFalse}
+  .check{"".u.equalRepr("".u).assertTrue}
+  .check{"a".u.equalRepr("a".u).assertTrue}
+  .check{"a".u.equalRepr("b".u).assertFalse}
 
-  .check{``.u `0066 0066 0069`.equalRepr(`ffi`.u).assertTrue}
-  .check{``.u `FB03`.equalRepr(`ffi`.u).assertFalse}
-  .check{``.u `0066 0066 0069`.equalRepr(``.u `FB03`).assertFalse}
+  .check{"".u "0066 0066 0069".equalRepr("ffi".u).assertTrue}
+  .check{"".u "FB03".equalRepr("ffi".u).assertFalse}
+  .check{"".u "0066 0066 0069".equalRepr("".u "FB03").assertFalse}
 
-  .check{``.u `0066`.equalRepr(`f`.u).assertTrue}
-  .check{``.u `000066`.equalRepr(`f`.u).assertTrue}
-  .check{``.u `0066 0000`.equalRepr(`f`.u).assertFalse}
+  .check{"".u "0066".equalRepr("f".u).assertTrue}
+  .check{"".u "000066".equalRepr("f".u).assertTrue}
+  .check{"".u "0066 0000".equalRepr("f".u).assertFalse}
 
   // ------------------------------------------------------------
   // hashRepr, weak sanity checks only
   // ------------------------------------------------------------
 
-  .check{`a`.u.hashRepr.assertEq (`a`.u.hashRepr)}
-  .check{``.u `0066 0066 0069`.hashRepr.assertEq (`ffi`.u.hashRepr)}
+  .check{"a".u.hashRepr.assertEq ("a".u.hashRepr)}
+  .check{"".u "0066 0066 0069".hashRepr.assertEq ("ffi".u.hashRepr)}
 
   // ------------------------------------------------------------
   // flow
   // ------------------------------------------------------------
 
-  .check{``.u.flow.list.assertEq ({::}, {})}
-  .check{`a`.u.flow.list.assertEq ({::}, Lists#(97))}
-  .check{`ab`.u.flow.list.assertEq ({::}, Lists#(97,98))}
-  .check{``.u `0061 F066 0062`.flow.list.assertEq ({::}, Lists#(97,61542,98))}
+  .check{"".u.flow.list.assertEq ({::}, {})}
+  .check{"a".u.flow.list.assertEq ({::}, Lists#(97))}
+  .check{"ab".u.flow.list.assertEq ({::}, Lists#(97,98))}
+  .check{"".u "0061 F066 0062".flow.list.assertEq ({::}, Lists#(97,61542,98))}
 
   // ------------------------------------------------------------
   // joinStr
   // ------------------------------------------------------------
 
-  .check{``.u.joinStr(Flows#).scalarHex.assertEq ``}
-  .check{``.u.joinStr(Flows#(`a`.u)).scalarHex.assertEq `0061`}
-  .check{``.u.joinStr(Flows#(`a`.u,`b`.u)).scalarHex.assertEq `0061 0062`}
-  .check{`,`.u.joinStr(Flows#(`a`.u,`b`.u,`c`.u)).scalarHex.assertEq `0061 002C 0062 002C 0063`}
-  .check{``.u `F066`.joinStr(Flows#(`a`.u,`b`.u)).scalarHex.assertEq `0061 F066 0062`}
-  .check{`-`.u.joinStr(Flows#).scalarHex.assertEq ``}
+  .check{"".u.joinStr(Flows#).scalarHex.assertEq ""}
+  .check{"".u.joinStr(Flows#("a".u)).scalarHex.assertEq "0061"}
+  .check{"".u.joinStr(Flows#("a".u,"b".u)).scalarHex.assertEq "0061 0062"}
+  .check{",".u.joinStr(Flows#("a".u,"b".u,"c".u)).scalarHex.assertEq "0061 002C 0062 002C 0063"}
+  .check{"".u "F066".joinStr(Flows#("a".u,"b".u)).scalarHex.assertEq "0061 F066 0062"}
+  .check{"-".u.joinStr(Flows#).scalarHex.assertEq ""}
 
   // ------------------------------------------------------------
   // escape, simple
   // ------------------------------------------------------------
 
-  .check{``.u.escape.assertEq (``^ ^ `.u`)}
-  .check{``.u ``.escape.assertEq (``^ ^ `.u`)}
-  .check{`f`.u.escape.assertEq (``^`f`^`.u`)}
-  .check{`ffeg`.u.escape.assertEq (``^`ffeg`^`.u`)}
+  .check{"".u.escape.assertEq (""^ ^ ".u")}
+  .check{"".u "".escape.assertEq (""^ ^ ".u")}
+  .check{"f".u.escape.assertEq (""^"f"^".u")}
+  .check{"ffeg".u.escape.assertEq (""^"ffeg"^".u")}
 
-  .check{``.u `F066`.escape.assertEq (`"".u("F066")`)}
-  .check{``.u `F066 F067`.escape.assertEq (`"".u("F066 F067")`)}
-  .check{``.u `10FFFF`.escape.assertEq (`"".u("10FFFF")`)}
+  .check{"".u "F066".escape.assertEq (`"".u("F066")`)}
+  .check{"".u "F066 F067".escape.assertEq (`"".u("F066 F067")`)}
+  .check{"".u "10FFFF".escape.assertEq (`"".u("10FFFF")`)}
 
   // ------------------------------------------------------------
   // escape, safe special Str chars
   // ------------------------------------------------------------
 
-  .check{``.u `000A`.escape.assertEq (`(""|).u`)}
-  .check{``.u `0060`.escape.assertEq (`"`+"`"+`".u`)}
-  .check{``.u `0022`.escape.assertEq ("`"^"`.u")}
-  .check{``.u `005C`.escape.assertEq (``^`\`^`.u`)}
+  .check{"".u "000A".escape.assertEq (`(""|).u`)}
+  .check{"".u "0060".escape.assertEq (`"`+"`"+`".u`)}
+  .check{"".u "0022".escape.assertEq ("`"^"`.u")}
+  .check{"".u "005C".escape.assertEq (""^"\"^".u")}
 
-  .check{(`a`.u |).escape.assertEq (`("a"|).u`)}
-  .disabledCheck{(`a`.u ^).escape.assertEq (`("a"|).u`)}
+  .check{("a".u |).escape.assertEq (`("a"|).u`)}
+  .disabledCheck{("a".u ^).escape.assertEq (`("a"|).u`)}
 
   // ------------------------------------------------------------
   // escape, mixed safe/unsafe
   // ------------------------------------------------------------
 
-  .disabledCheck{``.u `0066 F066`.escape.assertEq (
-    ``^`f`^`.u`^`F066`^)
+  .disabledCheck{"".u "0066 F066".escape.assertEq (
+    ""^"f"^".u"^"F066"^)
     }
 
-  .disabledCheck{``.u `0066 F066 0066 0065 0067`.escape.assertEq (
-    ``^`f`^`.u`^`F066`^`+(`^`feg`^`.u)`)
+  .disabledCheck{"".u "0066 F066 0066 0065 0067".escape.assertEq (
+    ""^"f"^".u"^"F066"^"+("^"feg"^".u)")
     }
 
-  .disabledCheck{``.u `0066 F066 F067`.escape.assertEq (
-    ``^`f`^`.u`^`F066 F067`^)
+  .disabledCheck{"".u "0066 F066 F067".escape.assertEq (
+    ""^"f"^".u"^"F066 F067"^)
     }
 
-  .disabledCheck{``.u `F066 0066`.escape.assertEq (
-    ``^ ^ `.u`^`F066`^`+(`^`f`^`.u)`)
+  .disabledCheck{"".u "F066 0066".escape.assertEq (
+    ""^ ^ ".u"^"F066"^"+("^"f"^".u)")
     }
 
-  .disabledCheck{``.u `F066 0066 F067`.escape.assertEq (
-    ``^ ^ `.u`^`F066`^`+(`^`f`^`.u`^`F067`^`)`)
+  .disabledCheck{"".u "F066 0066 F067".escape.assertEq (
+    ""^ ^ ".u"^"F066"^"+("^"f"^".u"^"F067"^")")
     }
 
-  .disabledCheck{``.u `F066 F067 0066`.escape.assertEq (
-    ``^ ^ `.u`^`F066 F067`^`+(`^`f`^`.u)`)
+  .disabledCheck{"".u "F066 F067 0066".escape.assertEq (
+    ""^ ^ ".u"^"F066 F067"^"+("^"f"^".u)")
     }
 
-  .disabledCheck{``.u `0061 F066 0062 F067 0063`.escape.assertEq (
-    ``^`a`^`.u`^`F066`^`+(`^`b`^`.u`^`F067`^`)+(`^`c`^`.u)`)
+  .disabledCheck{"".u "0061 F066 0062 F067 0063".escape.assertEq (
+    ""^"a"^".u"^"F066"^"+("^"b"^".u"^"F067"^")+("^"c"^".u)")
     }
 
-  .disabledCheck{``.u `F066 0061 F067 0062`.escape.assertEq (
-    ``^ ^ `.u`^`F066`^`+(`^`a`^`.u`^`F067`^`)+(`^`b`^`.u)`)
+  .disabledCheck{"".u "F066 0061 F067 0062".escape.assertEq (
+    ""^ ^ ".u"^"F066"^"+("^"a"^".u"^"F067"^")+("^"b"^".u)")
     }
 
   // ------------------------------------------------------------
   // escape output shape, representative duplicated cases
   // ------------------------------------------------------------
 
-  .disabledCheck{``.u `0066 F066 0066 0065 0067`.escape.assertEq (
-    ``^`f`^`.u`^`F066`^`+(`^`feg`^`.u)`)
+  .disabledCheck{"".u "0066 F066 0066 0065 0067".escape.assertEq (
+    ""^"f"^".u"^"F066"^"+("^"feg"^".u)")
     }
 
-  .disabledCheck{`hello`.u.u `F066 0061`.escape.assertEq (
-    ``^`hello`^`.u`^`F066`^`+(`^`a`^`.u)`)
+  .disabledCheck{"hello".u.u "F066 0061".escape.assertEq (
+    ""^"hello"^".u"^"F066"^"+("^"a"^".u)")
     }
 }

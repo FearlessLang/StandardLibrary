@@ -266,7 +266,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   ///   range you do not control, as doing so may invoke arbitrary code.
   //>   .check{2 .assertInRange(1=~~=4)}
   //>   .checkNonDetErr({::}, {5 .assertInRange(1=~~=4)})
-  .assertInRange(range: Range[Nat]): Void -> this.assertInRange(range, {``});
+  .assertInRange(range: Range[Nat]): Void -> this.assertInRange(range, {""});
 
   /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   /// Note: This method calls `.str` method on the non-sealed range, meaning you should be careful to call this on a
@@ -274,10 +274,10 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{2 .assertInRange(1=~~=4, {`custom context`})}
   .assertInRange(range: Range[Nat], msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
-    { msg#.info + (`Expected in range: `+ (range.str) // technically a DD point...
-      | `lo: `+(range.start)
-      | `hi: `+(range.end)
-      | `actual: `+this
+    { msg#.info + ("Expected in range: "+ (range.str) // technically a DD point...
+      | "lo: "+(range.start)
+      | "hi: "+(range.end)
+      | "actual: "+this
       .info)});
 
   /// ``this.clampTo(range)`` returns `this` clamped into ``[range.start, range.end]``

@@ -16,7 +16,7 @@ A1: OrderHash[A1] {
   .close -> this;  .close->::;
   .cmp t0, t1, m -> m.eq;
   .hash -> 0;
-  .str ->``;
+  .str ->"";
   .proofConcrete: A1->A1;
 }
 
@@ -36,7 +36,7 @@ Persons: {
 
       .hash: Nat -> age.hash.hashWith(name.hash);
 
-      .str: Str -> `Person[age=`+age+`, name=`+name+`, cats=`+(cats.size)+`]`;
+      .str: Str -> "Person[age="+age+", name="+name+", cats="+(cats.size)+"]";
 
       .close -> self;
       .close -> ::;
@@ -44,9 +44,9 @@ Persons: {
   }
 
 Names: { #(ps: List[Person]): List[Str] -> ps.flow.map{::.name}.list }
-Doctors: { #(ps: List[Person]): List[Person] -> ps.flow.filter{::.name.startsWith `Dr.`}.list }
+Doctors: { #(ps: List[Person]): List[Person] -> ps.flow.filter{::.name.startsWith "Dr."}.list }
 AllCats: { #(ps: List[Person]): List[Cat] -> ps.flow.flatMap{::.cats.flow}.list }
-AllNames: { #(ps: List[Person]): Str -> ps.flow.map{::.name}.join `, ` }
+AllNames: { #(ps: List[Person]): Str -> ps.flow.map{::.name}.join ", " }
 SumSizes: { #(ps: List[Person]): Nat -> ps.flow.map{::.name.size}.sum 0 }
 
 SadAny: { #(ps: List[Person]): Bool -> ps.flow.any{::.cats.isEmpty} }
@@ -61,24 +61,24 @@ Nicer: {
   }
 
 Data: {
-  .cA: Cat -> Cats#(`Mimi`,3);
-  .cB: Cat -> Cats#(`Nori`,5);
-  .cC: Cat -> Cats#(`Puff`,2);
+  .cA: Cat -> Cats#("Mimi",3);
+  .cB: Cat -> Cats#("Nori",5);
+  .cC: Cat -> Cats#("Puff",2);
 
-  .p1: Person -> Persons#(30,`Dr. Alice`, Lists#(this.cA,this.cB));
-  .p2: Person -> Persons#(25,`Bob`, List[Cat]);
-  .p3: Person -> Persons#(40,`Dr. Carol`, Lists#(this.cC));
+  .p1: Person -> Persons#(30,"Dr. Alice", Lists#(this.cA,this.cB));
+  .p2: Person -> Persons#(25,"Bob", List[Cat]);
+  .p3: Person -> Persons#(40,"Dr. Carol", Lists#(this.cC));
 
   .ps: List[Person] -> Lists#(this.p1,this.p2,this.p3);
 
   .psAllCats: List[Person] -> Lists#(
-    Persons#(20,`Eve`, Lists#(Cats#(`X`,1))),
-    Persons#(21,`Frank`, Lists#(Cats#(`Y`,1),Cats#(`Z`,1)))
+    Persons#(20,"Eve", Lists#(Cats#("X",1))),
+    Persons#(21,"Frank", Lists#(Cats#("Y",1),Cats#("Z",1)))
     );
 
   .psNoCats: List[Person] -> Lists#(
-    Persons#(20,`Eve`, List[Cat]),
-    Persons#(21,`Frank`, List[Cat])
+    Persons#(20,"Eve", List[Cat]),
+    Persons#(21,"Frank", List[Cat])
     );
 
   .natsDup: List[Nat] -> Lists#(1,2,3,3,2,1,1,0);
@@ -117,18 +117,18 @@ StrSizeOrder: OrderHashBy[Str] {
 
 TestFlowsBasicsTests: Test {::
   .check{Names#(Data.ps).size.assertEq 3}
-  .check{Names#(Data.ps).get(0).assertEq `Dr. Alice`}
-  .check{Names#(Data.ps).get(1).assertEq `Bob`}
-  .check{Names#(Data.ps).get(2).assertEq `Dr. Carol`}
+  .check{Names#(Data.ps).get(0).assertEq "Dr. Alice"}
+  .check{Names#(Data.ps).get(1).assertEq "Bob"}
+  .check{Names#(Data.ps).get(2).assertEq "Dr. Carol"}
   .check{Doctors#(Data.ps).size.assertEq 2}
-  .check{Doctors#(Data.ps).get(0).name.assertEq `Dr. Alice`}
-  .check{Doctors#(Data.ps).get(1).name.assertEq `Dr. Carol`}
+  .check{Doctors#(Data.ps).get(0).name.assertEq "Dr. Alice"}
+  .check{Doctors#(Data.ps).get(1).name.assertEq "Dr. Carol"}
   .check{AllCats#(Data.ps).size.assertEq 3}
-  .check{AllCats#(Data.ps).get(0).name.assertEq `Mimi`}
-  .check{AllCats#(Data.ps).get(1).name.assertEq `Nori`}
-  .check{AllCats#(Data.ps).get(2).name.assertEq `Puff`}
+  .check{AllCats#(Data.ps).get(0).name.assertEq "Mimi"}
+  .check{AllCats#(Data.ps).get(1).name.assertEq "Nori"}
+  .check{AllCats#(Data.ps).get(2).name.assertEq "Puff"}
   .check{AllCats#(Data.psNoCats).isEmpty.assertEq True}
-  .check{AllNames#(Data.ps).assertEq `Dr. Alice, Bob, Dr. Carol`}
+  .check{AllNames#(Data.ps).assertEq "Dr. Alice, Bob, Dr. Carol"}
   .check{SumSizes#(Data.ps).assertEq 21}
   .check{SadAny#(Data.ps).assertEq True}
   .check{SadAll#(Data.ps).assertEq False}
@@ -136,21 +136,21 @@ TestFlowsBasicsTests: Test {::
   .check{SadAny#(Data.psAllCats).assertEq False}
   .check{SadAll#(Data.psAllCats).assertEq False}
   .check{SadNone#(Data.psAllCats).assertEq True}
-  .check{Nicer#(Data.p1, Data.ps).name.assertEq `Dr. Alice`}
+  .check{Nicer#(Data.p1, Data.ps).name.assertEq "Dr. Alice"}
   }
 
 TestListsBasicsTests: Test {::
   .check{List[Str].size.assertEq 0}
   .check{List[Int].isEmpty.assertEq True}
-  .check{Lists#(`a`,`b`,`c`,`d`,`e`).size.assertEq 5}
-  .check{Lists#(`a`,`b`,`c`,`d`,`e`).get(0).assertEq `a`}
-  .check{Lists#(`a`,`b`,`c`,`d`,`e`).get(4).assertEq `e`}
+  .check{Lists#("a","b","c","d","e").size.assertEq 5}
+  .check{Lists#("a","b","c","d","e").get(0).assertEq "a"}
+  .check{Lists#("a","b","c","d","e").get(4).assertEq "e"}
   .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).get(3,1).assertEq 8}
   .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).y(13).assertEq 2}
   .check{Grids#(Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14)).x(13).assertEq 3}
   .check{
     Lists#(1,2,3).flow.map{::+ 2 .str}.list.orderHash{::} ==
-      (Lists#(`3`,`4`,`5`))
+      (Lists#("3","4","5"))
     .assertTrue
     }
   .check{Lists#(1,2,3).orderHash{::} == (Lists#(1,2,3)).assertTrue}
@@ -206,21 +206,21 @@ TestOrderByAndFlowsTests: Test {::
   .check{Data.natsDup.flow.sortDistinct{::}.list.assertEq({::}, Lists#(0,1,2,3))}
   .check{
     Lists#(
-      Persons#(25,`Bob`,List[Cat]),
-      Persons#(25,`Alice`,List[Cat]),
-      Persons#(24,`Zed`,List[Cat])
-      ).flow.sort(({::.age}.then{::.name})).list.get(0).name.assertEq `Zed`
+      Persons#(25,"Bob",List[Cat]),
+      Persons#(25,"Alice",List[Cat]),
+      Persons#(24,"Zed",List[Cat])
+      ).flow.sort(({::.age}.then{::.name})).list.get(0).name.assertEq "Zed"
     }
   .check{
     Lists#(
-      Persons#(25,`Bob`,List[Cat]),
-      Persons#(25,`Alice`,List[Cat])
-      ).flow.sort(({::.age}.then{::.name})).list.get(0).name.assertEq `Alice`
+      Persons#(25,"Bob",List[Cat]),
+      Persons#(25,"Alice",List[Cat])
+      ).flow.sort(({::.age}.then{::.name})).list.get(0).name.assertEq "Alice"
     }
   .check{
     Lists#(
-      Cars#(2, Persons#(40,`Old`,List[Cat])),
-      Cars#(1, Persons#(20,`Young`,List[Cat]))
+      Cars#(2, Persons#(40,"Old",List[Cat])),
+      Cars#(1, Persons#(20,"Young",List[Cat]))
       ).flow.sort(({::.age}.view (base.F[read Car,read Person]{::.imm.driver}))).list.get(0).id.assertEq 1
     }
   }
@@ -228,27 +228,27 @@ TestOrderByAndFlowsTests: Test {::
 TestMapsAndSetsTests: Test {::
   .check{
     Maps#({::},
-      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
-      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
+      Persons#(25,"Bob",List[Cat]), "Toronto 34b Warden St.",
+      Persons#(34,"Alice",List[Cat]), "Wellington 134 Kelburn Parade"
       ).size.assertEq 2
     }
   .check{
     Maps#({::},
-      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
-      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
+      Persons#(25,"Bob",List[Cat]), "Toronto 34b Warden St.",
+      Persons#(34,"Alice",List[Cat]), "Wellington 134 Kelburn Parade"
       ).isEmpty.assertEq False
     }
   .check{
     Maps#({::},
-      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
-      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
-      ).get(Persons#(34,`Alice`,List[Cat])).assertEq `Wellington 134 Kelburn Parade`
+      Persons#(25,"Bob",List[Cat]), "Toronto 34b Warden St.",
+      Persons#(34,"Alice",List[Cat]), "Wellington 134 Kelburn Parade"
+      ).get(Persons#(34,"Alice",List[Cat])).assertEq "Wellington 134 Kelburn Parade"
     }
   .check{
     Maps#({::},
-      Persons#(25,`Bob`,List[Cat]), `Toronto 34b Warden St.`,
-      Persons#(34,`Alice`,List[Cat]), `Wellington 134 Kelburn Parade`
-      ).opt(Persons#(38,`Neil Armstrong`,List[Cat])).orValue(`Moon`).assertEq `Moon`
+      Persons#(25,"Bob",List[Cat]), "Toronto 34b Warden St.",
+      Persons#(34,"Alice",List[Cat]), "Wellington 134 Kelburn Parade"
+      ).opt(Persons#(38,"Neil Armstrong",List[Cat])).orValue("Moon").assertEq "Moon"
     }
 // Coming with multiflows
 //  .check{
@@ -267,7 +267,7 @@ TestMapsAndSetsTests: Test {::
     Data.ps.flow.mapping({::},{
       .key  p -> p.name;
       .elem p -> p.age;
-      }).get(`Dr. Carol`).assertEq 40
+      }).get("Dr. Carol").assertEq 40
     }
   }
 

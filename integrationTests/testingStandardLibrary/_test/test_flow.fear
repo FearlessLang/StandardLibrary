@@ -45,12 +45,12 @@ FlowBuildOrderTests: Test {::
   }
 
 FlowFenceLazyTests: Test {::
-  .check{Block#(Lists#(2,1,0).flow.map[Nat]{_->Error.msg`stage ran`}.sort{::}, Void)}
-  .check{Block#(Lists#(2,1,0).flow.map[Nat]{_->Error.msg`stage ran`}.distinct{::}, Void)}
-  .check{Block#(Lists#(2,1,0).flow.map[Nat]{_->Error.msg`stage ran`}.sortDistinct{::}, Void)}
-  .checkDetErr({::}, {Lists#(2,1,0).flow.map[Nat]{_->Error.msg`stage ran`}.sort{::}.list})
-  .checkDetErr({::}, {Lists#(2,1,0).flow.map[Nat]{_->Error.msg`stage ran`}.distinct{::}.list})
-  .checkDetErr({::}, {Lists#(2,1,0).flow.map[Nat]{_->Error.msg`stage ran`}.sortDistinct{::}.list})
+  .check{Block#(Lists#(2,1,0).flow.map[Nat]{_->Error.msg"stage ran"}.sort{::}, Void)}
+  .check{Block#(Lists#(2,1,0).flow.map[Nat]{_->Error.msg"stage ran"}.distinct{::}, Void)}
+  .check{Block#(Lists#(2,1,0).flow.map[Nat]{_->Error.msg"stage ran"}.sortDistinct{::}, Void)}
+  .checkDetErr({::}, {Lists#(2,1,0).flow.map[Nat]{_->Error.msg"stage ran"}.sort{::}.list})
+  .checkDetErr({::}, {Lists#(2,1,0).flow.map[Nat]{_->Error.msg"stage ran"}.distinct{::}.list})
+  .checkDetErr({::}, {Lists#(2,1,0).flow.map[Nat]{_->Error.msg"stage ran"}.sortDistinct{::}.list})
   .check{Lists#(3,1,3,2,1).flow.sort{::}.list .assertEq({::}, Lists#(1,1,2,3,3))}
   .check{Lists#(3,1,3,2,1).flow.distinct{::}.list .assertEq({::}, Lists#(3,1,2))}
   .check{Lists#(3,1,3,2,1).flow.sortDistinct{::}.list .assertEq({::}, Lists#(1,2,3))}
@@ -69,25 +69,25 @@ FlowLetTests: Test {::
   .check{Flows#(1,2,3).let[Nat, mut List[Nat]]({xs -> xs.size}, {n, self ->
     self.flow(Par#[Nat]).map{e -> e + n}.list}) .assertEq({::}, Lists#(4,5,6))}
   .check{Block#(Flows#(1,2,3).let[Nat, mut Flow[Nat]]({xs -> xs.size}, {_, self ->
-    self.seqFlow.map[Nat]{_ -> Error.msg`the continuation flow ran before its terminal`}}), Void)}
+    self.seqFlow.map[Nat]{_ -> Error.msg"the continuation flow ran before its terminal"}}), Void)}
   }
 
 FlowLimitTests: Test {::
   .check{Flows#(1,2,3).limit 2 .list .assertEq({::}, Lists#(1,2))}
-  .checkDetErr({::.isMsg{::.contains `.limit 0`}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg`stage ran`}.limit 0})
+  .checkDetErr({::.isMsg{::.contains ".limit 0"}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg"stage ran"}.limit 0})
   }
 
 FlowOverListTests: Test {::
   .check{Flows#(1,2,3).map{e -> e * 2}.size .assertEq 3}
-  .checkDetErr({::.isMsg{:: == `stage ran`}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg`stage ran`}.size})
+  .checkDetErr({::.isMsg{:: == "stage ran"}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg"stage ran"}.size})
   .check{Flows#(5).get .assertEq 5}
   .check{Flows#(5).getOpt! .assertEq 5}
   .check{Flows#[Nat].getOpt.isEmpty .assertTrue}
-  .checkDetErr({::.isMsg{:: == `element 3`}}, {Flows#(1,2,3).map[Nat]{e -> e == 3 ? {.then -> Error.msg`element 3`; .else -> e}}.get})
-  .checkDetErr({::.isMsg{:: == `element 3`}}, {Flows#(1,2,3).map[Nat]{e -> e == 3 ? {.then -> Error.msg`element 3`; .else -> e}}.getOpt})
-  .checkDetErr({::.isMsg{:: == `Flow.get: the flow has 0 elements, but .get needs exactly one`}}, {Flows#[Nat].get})
-  .checkDetErr({::.isMsg{:: == `Flow.get: the flow has 2 elements, but .get needs exactly one`}}, {Flows#(1,2).get})
-  .checkDetErr({::.isMsg{:: == `Flow.getOpt: the flow has 2 elements, but .getOpt needs at most one`}}, {Flows#(1,2).getOpt})
+  .checkDetErr({::.isMsg{:: == "element 3"}}, {Flows#(1,2,3).map[Nat]{e -> e == 3 ? {.then -> Error.msg"element 3"; .else -> e}}.get})
+  .checkDetErr({::.isMsg{:: == "element 3"}}, {Flows#(1,2,3).map[Nat]{e -> e == 3 ? {.then -> Error.msg"element 3"; .else -> e}}.getOpt})
+  .checkDetErr({::.isMsg{:: == "Flow.get: the flow has 0 elements, but .get needs exactly one"}}, {Flows#[Nat].get})
+  .checkDetErr({::.isMsg{:: == "Flow.get: the flow has 2 elements, but .get needs exactly one"}}, {Flows#(1,2).get})
+  .checkDetErr({::.isMsg{:: == "Flow.getOpt: the flow has 2 elements, but .getOpt needs at most one"}}, {Flows#(1,2).getOpt})
   }
 
 TestFlow: Test {::

@@ -82,7 +82,7 @@ ByteRangeTests: Test {::
   .check{0.getByte~~=(5.getByte).list .assertEq({::},  Flows#(1,2,3,4,5).map{::.getByte}.list)}
   .check{0.getByte=~~=(200.getByte).list.size .assertEq 201}
   .check{0.getByte=~~=(255.getByte).flow(100.getByte).limit 4 .list .assertEq({::}, Lists#(0.getByte, 100.getByte, 200.getByte))}
-  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {0.getByte=~~=(5.getByte).flow(0.getByte)})
+  .checkDetErr({::.isMsg{::.contains "Range.flow(step)"}}, {0.getByte=~~=(5.getByte).flow(0.getByte)})
   }
 
 TestByte: Test {::

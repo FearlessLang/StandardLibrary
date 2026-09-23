@@ -61,11 +61,11 @@ FloatIeeeTests: Test {::
   .check{+7.0.ieeeRemainder+2.0 .assertEq -1.0}
   .check{+6.0.ieeeRemainder(+4.0) .assertEq -2.0}
   .check{+10.0.ieeeRemainder(+4.0) .assertEq +2.0}
-  .check{+0.0.ieeeStr .assertEq `0.0`}
-  .check{(-0.0).ieeeStr .assertEq `-0.0`}
-  .check{Math.nan .ieeeStr .assertEq `NaN`}
-  .check{Math.inf .ieeeStr .assertEq `Infinity`}
-  .check{Math.negInf .ieeeStr .assertEq `-Infinity`}
+  .check{+0.0.ieeeStr .assertEq "0.0"}
+  .check{(-0.0).ieeeStr .assertEq "-0.0"}
+  .check{Math.nan .ieeeStr .assertEq "NaN"}
+  .check{Math.inf .ieeeStr .assertEq "Infinity"}
+  .check{Math.negInf .ieeeStr .assertEq "-Infinity"}
   }
 
 FloatConvTests: Test {::
@@ -117,8 +117,8 @@ FloatSoftLiteralTests: Test {::
   .check{+0.5soft .assertEq +0.5}
   .check{+1_0.4soft .assertEq +10.4soft}
   .check{+1.0e-400soft .assertEq +0.0}
-  .check{+0.1soft .assertEq(`0.1`.getSoftFloat)}
-  .check{+0.4soft .ieeeStr .assertEq `0.4`}
+  .check{+0.1soft .assertEq("0.1".getSoftFloat)}
+  .check{+0.4soft .ieeeStr .assertEq "0.4"}
   .check{+0.1soft + (+0.2soft) .assertNotEq +0.3soft}
   }
 
@@ -163,12 +163,12 @@ FloatRangeTests: Test {::
   .checkDetErr({::}, {(Math.nan)~~ +1.0})
   .checkDetErr({::}, {+1.0=~~(Math.negInf)})
   .check{Math.negInf ~~ +1.0 .void}
-  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow +0.0})
-  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow -0.25})
-  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow(Math.nan)})
+  .checkDetErr({::.isMsg{::.contains "Range.flow(step)"}}, {+0.0=~~= +1.0.flow +0.0})
+  .checkDetErr({::.isMsg{::.contains "Range.flow(step)"}}, {+0.0=~~= +1.0.flow -0.25})
+  .checkDetErr({::.isMsg{::.contains "Range.flow(step)"}}, {+0.0=~~= +1.0.flow(Math.nan)})
   .check{+9007199254740990.0=~~= +9007199254740994.0.flow +1.0 .limit 3 .list
     .assertEq({::}, Lists#(+9007199254740990.0, +9007199254740991.0, +9007199254740992.0))}
-  .checkDetErr({::.isMsg{:: == `Range.flow(step): the step +1.0 is too small to move past +9007199254740992.0: adding it gives the same Float back.`}},
+  .checkDetErr({::.isMsg{:: == "Range.flow(step): the step +1.0 is too small to move past +9007199254740992.0: adding it gives the same Float back."}},
     {+9007199254740990.0=~~= +9007199254740994.0.flow +1.0 .limit 10 .list})
   }
 

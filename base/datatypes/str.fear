@@ -86,7 +86,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
   .nat: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
   .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid
-  .bool: Opt[Bool] -> (this == `True`).toOpt{True} | ((this == `False`).toOpt{False}); /// parses exactly ``True``/``False`` as produced by Bool.str; .empty on invalid (this includes out of range)
+  .bool: Opt[Bool] -> (this == "True").toOpt{True} | ((this == "False").toOpt{False}); /// parses exactly ``True``/``False`` as produced by Bool.str; .empty on invalid (this includes out of range)
 
 
   .getIeeeFloat: Float -> this.tryGetIeeeFloat!;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
@@ -104,7 +104,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .getByte: Byte -> this.tryGetByte!;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
   .tryGetByte: mut Action[Byte];
   .getBool: Bool -> this.tryGetBool!; /// parses exactly ``True``/``False`` as produced by Bool.str; throws if invalid
-  .tryGetBool: mut Action[Bool] -> this.bool.match{.some b -> Actions.ok b; .empty -> Actions.msg(`Str.getBool: `+(this.escape)+` is not "True" or "False".`)};
+  .tryGetBool: mut Action[Bool] -> this.bool.match{.some b -> Actions.ok b; .empty -> Actions.msg("Str.getBool: "+(this.escape)+` is not "True" or "False".`)};
 
 
   .startsWith(Str): Bool;           /// this string starts with the other string

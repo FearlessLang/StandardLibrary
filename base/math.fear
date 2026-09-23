@@ -68,7 +68,7 @@ Math: Sealed, _MagicMath {
   /// +ve infinity if x is positive infinity,
   /// log base 10 of x otherwise;
   .logb(base: Float, x: Float): Float -> base == +0.0 .if {
-    .then -> Error.msg `base of log cannot be 0`;
+    .then -> Error.msg "base of log cannot be 0";
     .else -> this.ln(x) / (this.ln(base))
     };
 
@@ -152,7 +152,7 @@ Degree: Angle[Degree] {
 
   .close -> this;
   .imm -> this#.getDeg;
-  .str -> `Degree[`+(this#.str)+`]`;
+  .str -> "Degree["+(this#.str)+"]";
   /// Compare two angles after normalizing them
   .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
   .hash -> this.normalize#.hash;
@@ -180,7 +180,7 @@ Radian: Angle[Radian] {
 
   .close -> this;
   .imm -> this#.rad!;
-  .str -> `Radian[`+(this#.str)+`]`;
+  .str -> "Radian["+(this#.str)+"]";
   /// Compare two angles after normalizing them
   .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
   .hash -> this.normalize#.hash;

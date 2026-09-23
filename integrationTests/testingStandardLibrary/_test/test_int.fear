@@ -126,8 +126,8 @@ IntRangeTests: Test {::
   .check{+0~~(+2).list .assertEq({::},  Lists#(+1))}
   .check{+0~~=(+5).list .assertEq({::},  Lists#(+1,+2,+3,+4,+5))}
   .check{(Math.minInt)=~~=(Math.maxInt).flow(Math.maxInt).limit 4 .list .assertEq({::}, Lists#(Math.minInt, -1, Math.maxInt - +1))}
-  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+1=~~= +5.flow +0})
-  .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+1=~~= +5.flow -1})
+  .checkDetErr({::.isMsg{::.contains "Range.flow(step)"}}, {+1=~~= +5.flow +0})
+  .checkDetErr({::.isMsg{::.contains "Range.flow(step)"}}, {+1=~~= +5.flow -1})
   }
 
 TestInt: Test {::

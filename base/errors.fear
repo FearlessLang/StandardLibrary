@@ -22,13 +22,13 @@ Error: {
   }
 
 Todo: {
-  ![R:**]: R -> Error.msg `TODO: Implement this code.`;
-  ![R:**](msg: Str): R -> Error.msg[R](`TODO: ` + msg);
+  ![R:**]: R -> Error.msg "TODO: Implement this code.";
+  ![R:**](msg: Str): R -> Error.msg[R]("TODO: " + msg);
   }
 
 Unreachable: {
-  ![R:**]: R -> Error.msg `This code was flagged as unreachable, but it has been reached.`;
-  ![R:**](msg: Str): R -> Error.msg(`This code was flagged as unreachable as `+msg+`, but it has been reached.`);
+  ![R:**]: R -> Error.msg "This code was flagged as unreachable, but it has been reached.";
+  ![R:**](msg: Str): R -> Error.msg("This code was flagged as unreachable as "+msg+", but it has been reached.");
   }
 
 /// Strong exception safety is upheld:

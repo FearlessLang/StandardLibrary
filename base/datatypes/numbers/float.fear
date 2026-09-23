@@ -459,7 +459,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{0.0 .hash .assertEq((-0.0) .hash)}
   //>   .check{Math.nan .hash .assertEq((Math.nan.negAbsOrNaN) .hash)}
   //>   .check{1.0 .hash .assertNotEq(2.0 .hash)}
-  .hash -> this.imm.isNegZero?{.then->`0.0`.hash; .else->this.imm.ieeeStr.hash};/// hash via str
+  .hash -> this.imm.isNegZero?{.then->"0.0".hash; .else->this.imm.ieeeStr.hash};/// hash via str
 
   /// fixpoint type closed
   .close->::; .close->this;
@@ -591,13 +591,13 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{2.0 .assertInRange(1.0=~~=4.0)}
   //>   .checkNonDetErr({::}, {5.0 .assertInRange(1.0=~~=4.0)})
-  .assertInRange(range: Range[Float]): Void -> this.assertInRange(range, {``});
+  .assertInRange(range: Range[Float]): Void -> this.assertInRange(range, {""});
 
   /// ``this.assertInRange(range, msg)`` is equivalent to ``this.inRange(range).assertTrue``
   .assertInRange(range: Range[Float], msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
-    { msg#.info + (`Expected in range: `+ (range.str) // technically a DD point...
-      | `actual: `+this
+    { msg#.info + ("Expected in range: "+ (range.str) // technically a DD point...
+      | "actual: "+this
       .info)});
 
   /// ``this.clampTo(range)`` clamps `this` into ``[range.start, range.end]``.
