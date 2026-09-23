@@ -94,9 +94,14 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     assert start <= end;
     if (!(step > 0)){ throw badStep(p2); }
     return Flow$o$1Instance.of(
-      Stream.iterate(start, d -> d <= end, d -> d+step)
+      Stream.iterate(start, d -> d != null, d -> d == end || d + step > end ? null : grown(d, step))
         .map(Float$1c$0Instance::instance)
     );
+  }
+
+  private static double grown(double d, double step){
+    if (d + step == d){ throw err("Range.flow(step): the step "+toS(Float$1c$0Instance.instance(step))+" is too small to move past "+toS(Float$1c$0Instance.instance(d))+": adding it gives the same Float back."); }
+    return d + step;
   }
 
   long smallestNegBits = Double.doubleToRawLongBits(Math.nextDown(-0.0));

@@ -166,6 +166,10 @@ FloatRangeTests: Test {::
   .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow +0.0})
   .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow -0.25})
   .checkDetErr({::.isMsg{::.contains `Range.flow(step)`}}, {+0.0=~~= +1.0.flow(Math.nan)})
+  .check{+9007199254740990.0=~~= +9007199254740994.0.flow +1.0 .limit 3 .list
+    .assertEq({::}, Lists#(+9007199254740990.0, +9007199254740991.0, +9007199254740992.0))}
+  .checkDetErr({::.isMsg{:: == `Range.flow(step): the step +1.0 is too small to move past +9007199254740992.0: adding it gives the same Float back.`}},
+    {+9007199254740990.0=~~= +9007199254740994.0.flow +1.0 .limit 10 .list})
   }
 
 FloatIEEEPowTests: Test {::
