@@ -1,6 +1,7 @@
 package base;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,7 +45,7 @@ final class AssetBytesRead{
 
   static byte[] bytes(String path,String diskPath,String zipSteps,String zipEntry){
     checkAutoloaded(path,diskPath,zipSteps,zipEntry);
-    var full= localAssetPath(diskPath);
+    var full= localAssetPath(assetRoot(path),diskPath);
     var steps= zipStepList(zipSteps);
     var entry= canonicalZipEntry(zipEntry);
     if (entry.isEmpty() && !steps.isEmpty()){ throw invalidAssetDescriptor("zipSteps without zipEntry: "+zipSteps); }
@@ -109,8 +110,14 @@ final class AssetBytesRead{
     }
   }
 
-  static Path localAssetPath(String diskPath){
-    var root= Path.of(System.getProperty("fearlessUser.dir")).toAbsolutePath().normalize();
+  static Path assetRoot(String path){
+    if (!autoloadJavaPackage(path).equals("base")){ return Path.of(System.getProperty("fearlessUser.dir")); }
+    try{ return Path.of(AssetBytesRead.class.getProtectionDomain().getCodeSource().getLocation().toURI()).resolveSibling("assets"); }
+    catch(URISyntaxException e){ throw new AssertionError(e); }
+  }
+
+  static Path localAssetPath(Path assetRoot,String diskPath){
+    var root= assetRoot.toAbsolutePath().normalize();
     var segments= portableSegments("diskPath",diskPath);
     var full= root;
     for (var s: segments){ full = full.resolve(s); }
