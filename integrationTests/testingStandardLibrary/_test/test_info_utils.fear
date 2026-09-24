@@ -96,6 +96,10 @@ InfoValidatorTests: Test {::
     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
     & > "friends" > 1 > "name" .isMsg{:: == "David"} .not} .assertTrue}
   .check{info.validate{:: > "friends" > 1 > "name" .isMsg{:: == "Alice"} .not} .assertFalse}
+  .check{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "Alice"}}}.isSome .assertTrue}
+  .check{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "David"}}}.isEmpty .assertTrue}
+  .check{info.extract{:: .extractMap .where{:: > "friends" .isList}}.isSome .assertTrue}
+  .check{info.extract{:: .extractMap .where{:: > "enemies" .isList}}.isEmpty .assertTrue}
   .checkDetErr({::.isMsg{::.startsWith "Info.getList:"}}, {Infos.msg "hi" .getList})
   .check{Infos.msg "hi" .tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
   }

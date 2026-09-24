@@ -131,15 +131,10 @@ MapExtractor: Extractor[Map[Str,Info], MapExtractor] {
     };
 
   .where f -> this.extractedValue.match{
-    .some map -> Info {'i
-        .match->::.map map;
-        .map -> Opts# map;
-        .imm->i;
-        }.validate f
-      .match {
-        .true -> this;
-        .false -> MapExtractor {.close -> this.close; .extractedValue -> {}}
-        };
+    .some map -> map.info {::} .validate f .match {
+      .true -> this;
+      .false -> MapExtractor {.close -> this.close; .extractedValue -> {}}
+      };
     .empty -> this;
     };
   }
@@ -162,15 +157,10 @@ ListExtractor: Extractor[List[Info], ListExtractor] {
     };
 
   .where f -> this.extractedValue.match{
-    .some list -> Info {'i
-        .match->::.list list;
-        .list -> Opts# list;
-        .imm->i;
-        }.validate f
-      .match {
-        .true -> this;
-        .false -> ListExtractor {.close -> this.close; .extractedValue -> {};}
-        };
+    .some list -> list.info {::} .validate f .match {
+      .true -> this;
+      .false -> ListExtractor {.close -> this.close; .extractedValue -> {};}
+      };
     .empty -> this;
     };
   }
