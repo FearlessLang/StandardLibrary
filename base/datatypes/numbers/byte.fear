@@ -33,7 +33,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// ``this / x`` returns the exact rational quotient of `this` and ``x`` as a `Num`. Throws iff ``x == 0``.
   /// Note: This returns a num for exact precision, if you want to do byte division you should use `.div` or `.aluDiv`
   //>   .check{7.getByte / 2 .getFloat .assertEq 3.5}
-  //>   .checkDetErr({:: .isMsg{::.startsWith("Byte /: ")}}, {7.getByte / 0})
+  //>   .checkDetErr({:: .isMsg{::.startsWith("Byte/: ")}}, {7.getByte / 0})
   /(x: Nat): Num;
 
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
@@ -154,12 +154,12 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{1.getByte~~(4.getByte) .list .assertEq({::}, Lists#(2.getByte, 3.getByte))}
   //>   .checkDetErr({::}, {(1.getByte)~~(2.getByte)})
   ~~(end: Byte): Range[Byte] -> Block#
-    .if {this == (Math.maxByte)} .error{"Byte ~~: Start of open range cannot be Math.maxByte"}
-    .if {end == (Math.minByte)} .error{"Byte ~~: End of open range cannot be Math.minByte"}
+    .if {this == (Math.maxByte)} .error{"Byte~~: Start of open range cannot be Math.maxByte"}
+    .if {end == (Math.minByte)} .error{"Byte~~: End of open range cannot be Math.minByte"}
     .let endInclusive={end.pred}
     .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Byte ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
+      "Byte~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
     .return {_ByteRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
@@ -168,9 +168,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{1.getByte~~=(4.getByte) .list .assertEq({::}, Lists#(2.getByte, 3.getByte, 4.getByte))}
   //>   .checkDetErr({::}, {1.getByte~~=(1.getByte)})
   ~~=(endInclusive: Byte): Range[Byte] -> Block#
-    .if {this == (Math.maxByte)} .error{"Byte ~~=: Start of open range cannot be Math.maxByte"}
+    .if {this == (Math.maxByte)} .error{"Byte~~=: Start of open range cannot be Math.maxByte"}
     .if {this >= endInclusive } .error {
-      "Byte ~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
+      "Byte~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
     .return {_ByteRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
 
@@ -179,9 +179,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{1.getByte=~~(4.getByte).list .assertEq({::}, Lists#(1.getByte, 2.getByte, 3.getByte))}
   //>   .checkDetErr({::}, {(1.getByte)=~~(1.getByte)})
   =~~(end: Byte): Range[Byte] -> Block#
-    .if {end == (Math.minByte)} .error{"Byte =~~: End of open range cannot be Math.minByte"}
+    .if {end == (Math.minByte)} .error{"Byte=~~: End of open range cannot be Math.minByte"}
     .if {this >= end } .error {
-      "Byte =~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
+      "Byte=~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
       }
     .return {_ByteRanges#(this, end.pred, "["+this+", "+end+")")};
 
@@ -191,7 +191,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .checkDetErr({::}, {(4.getByte)=~~=(1.getByte)})
   =~~=(endInclusive: Byte): Range[Byte] -> Block#
     .if {this > endInclusive } .error {
-      "Byte =~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
+      "Byte=~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
       }
     .return {_ByteRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
 

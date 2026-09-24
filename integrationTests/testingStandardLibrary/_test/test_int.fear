@@ -13,12 +13,12 @@ IntArithTests: Test {::
   .check{+0 ** (Math.maxNat) .assertEq +0}
   .check{+1 ** (Math.maxNat) .assertEq +1}
   .check{-3 ** 5 .assertEq -243}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.** overflow`}}, {-2 ** 64})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.** overflow`}}, {+2 ** (Math.maxNat)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {-2 ** 64})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {+2 ** (Math.maxNat)})
   .check{-2 ** 63 .assertEq(Math.minInt)}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.** overflow`}}, {+2 ** 63})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.** overflow`}}, {(Math.maxInt) ** 2})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.* overflow`}}, {(Math.maxInt) * +2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {+2 ** 63})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {(Math.maxInt) ** 2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int*: overflow`}}, {(Math.maxInt) * +2})
   .check{(-7).abs .assertEq 7}
   .check{+16777217 .getFloat .assertEq +16777217.0}
   .check{+9007199254740992 .getFloat .assertEq +9007199254740992.0}

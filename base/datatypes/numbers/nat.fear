@@ -213,12 +213,12 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{(1~~4) .start .assertEq 2}
   //>   .checkDetErr({::}, {1~~2})
   ~~(end: Nat): Range[Nat] -> Block#
-    .if {this == (Math.maxNat)} .error{"Nat ~~: Start of open range cannot be Math.maxNat"}
-    .if {end == (Math.minNat)} .error{"Nat ~~: End of open range cannot be Math.minNat"}
+    .if {this == (Math.maxNat)} .error{"Nat~~: Start of open range cannot be Math.maxNat"}
+    .if {end == (Math.minNat)} .error{"Nat~~: End of open range cannot be Math.minNat"}
     .let endInclusive={end.pred}
     .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Nat ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
+      "Nat~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
     .return {_NatRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
@@ -227,9 +227,9 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{(1~~=4) .end .assertEq 4}
   //>   .checkDetErr({::}, {1~~=1})
   ~~=(endInclusive: Nat): Range[Nat] -> Block#
-    .if {this == (Math.maxNat)} .error{"Nat ~~=: Start of open range cannot be Math.maxNat"}
+    .if {this == (Math.maxNat)} .error{"Nat~~=: Start of open range cannot be Math.maxNat"}
     .if {this >= endInclusive } .error {
-      "Nat ~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
+      "Nat~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
     .return {_NatRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
 
@@ -239,10 +239,10 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .checkDetErr({::}, {1=~~1})
   =~~(end: Nat): Range[Nat] -> Block#
     .if {end == (Math.minNat)} .error{
-      "Nat =~~: End of open range cannot be Math.minNat"
+      "Nat=~~: End of open range cannot be Math.minNat"
       }
     .if {this >= end } .error {
-      "Nat =~~: invalid range start ("+this+") must be < end (" + end + ")"
+      "Nat=~~: invalid range start ("+this+") must be < end (" + end + ")"
       }
     .return {_NatRanges#(this, end.pred, "["+this+", "+end+")")};
 
@@ -252,7 +252,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .checkDetErr({::}, {4=~~=1})
   =~~=(endInclusive: Nat): Range[Nat] -> Block#
     .if {this > endInclusive } .error {
-      "Nat =~~=: invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
+      "Nat=~~=: invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
       }
     .return {_NatRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
 

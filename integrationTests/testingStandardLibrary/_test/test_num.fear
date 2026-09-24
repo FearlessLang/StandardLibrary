@@ -14,7 +14,7 @@ NumArithTests: Test {::
   .check{-1/1 ** (Math.minInt) .assertEq(+1.num)}
   .check{+1/1 ** (Math.minInt) .assertEq(+1.num)}
   .check{+0/1 ** (Math.maxInt) .assertEq(+0.num)}
-  .checkDetErr({::.isMsg{::.startsWith "Num.**: cannot raise +0/1 to the negative power -3"}}, {+0/1 ** -3})
+  .checkDetErr({::.isMsg{::.startsWith "Num**: cannot raise +0/1 to the negative power -3"}}, {+0/1 ** -3})
   }
 
 NumRoundTests: Test {::

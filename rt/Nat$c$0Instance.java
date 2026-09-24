@@ -49,7 +49,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    */
   private static long addChecked(long a, long b){
     boolean overflow = Long.compareUnsigned(a, MAX_UNSIGNED_VALUE - b) > 0;
-    if (overflow) { throw nonDetErr("Nat.+ overflow"); }
+    if (overflow) { throw nonDetErr("Nat+: overflow"); }
     return a + b;
   }
   /**
@@ -57,7 +57,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    * since we are working with unsigned numbers
    */
   private static long subChecked(long a, long b){
-    if (Long.compareUnsigned(a, b) < 0){ throw nonDetErr("Nat.- underflow"); }
+    if (Long.compareUnsigned(a, b) < 0){ throw nonDetErr("Nat-: underflow"); }
     return a - b;
   }
 
@@ -68,7 +68,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   private static long mulChecked(long a, long b){
     if (a == 0 || b == 0) {return 0;}
     boolean overflow = Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0;
-    if (overflow){ throw nonDetErr("Nat.* overflow"); }
+    if (overflow){ throw nonDetErr("Nat*: overflow"); }
     return a * b;
   }
 
@@ -90,7 +90,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   @Override public Object imm$$slash$1(Object p0){
     long d=n(p0);
     if (d == 0L) {
-      throw err("Nat /: Cannot create a Num with denominator 0.");
+      throw err("Nat/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
       unsignedLongToBigInteger(val),
@@ -228,7 +228,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     }
   }
   private static long powMul(long a, long b){
-    if (Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0){ throw nonDetErr("Nat.** overflow"); }
+    if (Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0){ throw nonDetErr("Nat**: overflow"); }
     return a * b;
   }
   @Override public Object imm$softSqrt$0(){

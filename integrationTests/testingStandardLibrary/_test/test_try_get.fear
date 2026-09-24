@@ -78,19 +78,19 @@ FloatNumConversionTests: Test {::
 SuccPredTests: Test {::
   .check{5 .succ .assertEq 6}
   .check{+5 .pred .assertEq +4}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.+ overflow"}}, {(Math.maxNat).succ})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.- underflow"}}, {0 .pred})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.+`}}, {(Math.maxInt).succ})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.+`}}, {(Math.minInt).pred})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte.+`}}, {(Math.maxByte).succ})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte.-`}}, {(Math.minByte).pred})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat+: overflow"}}, {(Math.maxNat).succ})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat-: underflow"}}, {0 .pred})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int+`}}, {(Math.maxInt).succ})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int+`}}, {(Math.minInt).pred})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte+`}}, {(Math.maxByte).succ})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte-`}}, {(Math.minByte).pred})
   .checkDetErr({::.isMsg{::.startsWith `Float.getSucc`}}, {Math.nan.getSucc})
   .check{Math.inf.tryGetSucc.assertInfo{::.isMsg{::.startsWith `Float.getSucc`}}}
   .check{(1.0 .tryGetSucc).ok.assertEq({::}, Opts#(1.0 .getSucc))}
   .checkDetErr({::.isMsg{::.startsWith `Float.getPred`}}, {Math.negInf.getPred})
   .check{Math.nan.tryGetPred.assertInfo{::.isMsg{::.startsWith `Float.getPred`}}}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.*`}}, {(Math.maxInt) * +2})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.* overflow"}}, {(Math.maxNat) * 2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int*`}}, {(Math.maxInt) * +2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat*: overflow"}}, {(Math.maxNat) * 2})
   .checkDetErr({::.isMsg{::.startsWith `Nat.getInt`}}, {(Math.maxNat).getInt})
   }
 

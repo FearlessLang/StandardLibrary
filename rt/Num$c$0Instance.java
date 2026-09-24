@@ -129,7 +129,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
               pow(numerator, exponent), pow(denominator, exponent)
       );
     }
-    if (numerator.signum() == 0){ throw err("Num.**: cannot raise +0/1 to the negative power "+exponent); }
+    if (numerator.signum() == 0){ throw err("Num**: cannot raise +0/1 to the negative power "+exponent); }
     // Since negative flip fraction
     if (exponent == Long.MIN_VALUE) {
       // Since |Long.MIN_VALUE| is too large to fit in long
@@ -146,7 +146,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
 
   @Override public Object imm$$slash$1(Object p0){
     var o= num(p0);
-    if (o.numerator.signum() == 0){ throw err("Num./: x==0"); }
+    if (o.numerator.signum() == 0){ throw err("Num/: x==0"); }
     return instance(numerator.multiply(o.denominator), denominator.multiply(o.numerator));
   }
   @Override public Object imm$abs$0(){ return numerator.signum() < 0 ? instance(numerator.negate(), denominator) : this; }

@@ -34,18 +34,18 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
 
   private static byte addChecked(byte a, byte b){
     int r= u8(a) + u8(b);
-    if (r > 255){ throw nonDetErr("Byte.+ overflow"); }
+    if (r > 255){ throw nonDetErr("Byte+: overflow"); }
     return (byte)r;
   }
   private static byte subChecked(byte a, byte b){
     if (Byte.compareUnsigned(a, b) < 0) {
-      throw nonDetErr("Byte.- underflow");
+      throw nonDetErr("Byte-: underflow");
     }
     return (byte) (a - b);
   }
   private static byte mulChecked(byte a, byte b){
     int r= u8(a) * u8(b);
-    if (r > 255){ throw nonDetErr("Byte.* overflow"); }
+    if (r > 255){ throw nonDetErr("Byte*: overflow"); }
     return (byte)r;
   }
 
@@ -65,13 +65,13 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     }
   }
   private static int powMul(int a, int b){
-    if (a * b > 255){ throw nonDetErr("Byte.** overflow"); }
+    if (a * b > 255){ throw nonDetErr("Byte**: overflow"); }
     return a * b;
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L) {
-      throw err("Byte /: Cannot create a Num with denominator 0.");
+      throw err("Byte/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(val),
