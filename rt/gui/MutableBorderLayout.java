@@ -92,28 +92,28 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
       boolean middle = west != null || center != null || east != null;
 
       if (north != null){
-        int hh = wrapHeight(north, span(right - left));
+        int hh = wrapped(north, span(right - left), Integer.MAX_VALUE).height;
         north.setBounds(left, top, span(right - left), hh);
         top += hh;
         if (middle || south != null){ top += h(gap.heightGap); }
       }
 
       if (south != null){
-        int hh = wrapHeight(south, span(right - left));
+        int hh = wrapped(south, span(right - left), Integer.MAX_VALUE).height;
         bottom -= hh;
         south.setBounds(left, bottom, span(right - left), hh);
         if (middle){ bottom -= h(gap.heightGap); }
       }
 
       if (west != null){
-        var d = west.getPreferredSize();
+        var d = wrapped(west, Integer.MAX_VALUE, span(bottom - top));
         west.setBounds(left, top, d.width, span(bottom - top));
         left += d.width;
         if (center != null || east != null){ left += w(gap.widthGap); }
       }
 
       if (east != null){
-        var d = east.getPreferredSize();
+        var d = wrapped(east, Integer.MAX_VALUE, span(bottom - top));
         right -= d.width;
         east.setBounds(right, top, d.width, span(bottom - top));
         if (center != null){ right -= w(gap.widthGap); }
@@ -131,13 +131,11 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
   // getPreferredSize().height would return the one-row height and the
   // wrapped rows would be clipped. An explicit user .height wins over the
   // wrap-based height.
-  private int wrapHeight(Component c, int width){
-    if (c instanceof SkComponent s
-      && s.w.preferredHeight == null
-      && s.getLayout() instanceof CenteredFlowLayout f){
-      return f.heightFor(s, width);
+  private Dimension wrapped(Component c, int width, int height){
+    if (c instanceof SkComponent s && s.getLayout() instanceof CenteredFlowLayout f){
+      return Sk.preferred(f.sizeFor(s, width, height), s.w);
     }
-    return c.getPreferredSize().height;
+    return c.getPreferredSize();
   }
 
   private int span(int n){ return Math.max(0, n); }

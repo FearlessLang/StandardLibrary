@@ -38,11 +38,14 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   @Override public void addLayoutComponent(String name, Component comp){}
   @Override public void removeLayoutComponent(Component comp){}
 
+  // The size pack() uses for the natural window size: one unwrapped line
+  // when chunk is unset (so a later resize below this can wrap it), or the
+  // full chunked grouping when chunk is set (already final, since it does
+  // not depend on any given size).
   @Override public Dimension preferredLayoutSize(Container target){
-    synchronized (target.getTreeLock()){
-      var d = naturalSize(target);
-      return new Dimension(d.width + insetsW(), d.height + insetsH());
-    }
+    return sizeFor(target,
+      gap.preferredWidth == null ? Integer.MAX_VALUE : w(gap.preferredWidth),
+      gap.preferredHeight == null ? Integer.MAX_VALUE : h(gap.preferredHeight));
   }
 
   // Below-preferred minimums are deliberately not supported: content wraps
@@ -51,16 +54,15 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     return preferredLayoutSize(target);
   }
 
-  // The height this container needs when given the total width `width`:
-  // wrap into lines and sum them. Deterministic within one layout pass. Only
-  // meaningful for a horizontal, unchunked flow (see MutableBorderLayout's
-  // only caller, wrapHeight): a vertical or chunked flow's natural height
-  // does not depend on the width it is offered, so those fall back to the
-  // same value preferredLayoutSize already reports.
-  int heightFor(Container target, int width){
+  Dimension sizeFor(Container target, int width, int height){
     synchronized (target.getTreeLock()){
-      if (gap.vertical || gap.chunk > 0){ return preferredLayoutSize(target).height; }
-      return crossSum(lines(target, width - insetsW()), h(gap.heightGap)) + insetsH();
+      boolean vert = gap.vertical;
+      var ls = lines(target, vert ? height - insetsH() : width - insetsW());
+      int cross = crossSum(ls, vert ? w(gap.widthGap) : h(gap.heightGap));
+      int primary = ls.stream().mapToInt(Line::primary).max().orElse(0);
+      return vert
+        ? new Dimension(cross + insetsW(), primary + insetsH())
+        : new Dimension(primary + insetsW(), cross + insetsH());
     }
   }
 
@@ -140,26 +142,8 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     return res;
   }
 
-  // The size pack() uses for the natural window size: one unwrapped line
-  // when chunk is unset (so a later resize below this can wrap it), or the
-  // full chunked grouping when chunk is set (already final, since it does
-  // not depend on any given size).
-  private Dimension naturalSize(Container target){
-    boolean vert = gap.vertical;
-    var ls = lines(target, explicitPrimary());
-    int lineGap = vert ? w(gap.widthGap) : h(gap.heightGap);
-    int totalCross = crossSum(ls, lineGap);
-    int maxPrimary = ls.stream().mapToInt(Line::primary).max().orElse(0);
-    return vert ? new Dimension(totalCross, maxPrimary) : new Dimension(maxPrimary, totalCross);
-  }
-
   private static int crossSum(List<Line> ls, int lineGap){
     return ls.stream().mapToInt(Line::cross).sum() + lineGap * Math.max(0, ls.size() - 1);
-  }
-
-  private int explicitPrimary(){
-    if (gap.vertical){ return gap.preferredHeight == null ? Integer.MAX_VALUE : h(gap.preferredHeight) - insetsH(); }
-    return gap.preferredWidth == null ? Integer.MAX_VALUE : w(gap.preferredWidth) - insetsW();
   }
 
   private int insetsW(){ return w(gap.left) + w(gap.right); }

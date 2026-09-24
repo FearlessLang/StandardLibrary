@@ -24,4 +24,16 @@ GuiLayoutTests: Test {::
       .ok _ -> Error.msg `The painter always stops the Gui before its window is shown`;
       .info i -> i.validate{:: > `msg` .isMsg{:: == `Width[138]`}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).contentB{::
+    .west{::
+      .vertical
+      .button{:: .width 60 .height 30 }
+      .button{:: .width 60 .height 30 }
+      .button{:: .width 60 .height 30 }
+      .paint{g -> Error.msg(g.panelWidth.str)}
+      }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[204]"}}.assertTrue{i};
+      }}
   }
