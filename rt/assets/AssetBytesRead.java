@@ -44,7 +44,7 @@ final class AssetBytesRead{
 
   static byte[] bytes(String path,String diskPath,String zipSteps,String zipEntry){
     checkAutoloaded(path,diskPath,zipSteps,zipEntry);
-    var full= localAssetPath(diskPath);
+    var full= localAssetPath(path,diskPath);
     var steps= zipStepList(zipSteps);
     var entry= canonicalZipEntry(zipEntry);
     if (entry.isEmpty() && !steps.isEmpty()){ throw invalidAssetDescriptor("zipSteps without zipEntry: "+zipSteps); }
@@ -109,8 +109,9 @@ final class AssetBytesRead{
     }
   }
 
-  static Path localAssetPath(String diskPath){
-    var root= Path.of(System.getProperty("fearlessUser.dir")).toAbsolutePath().normalize();
+  static Path localAssetPath(String path,String diskPath){
+    var dirKey= autoloadJavaPackage(path).equals("base") ? "fearlessBase.dir" : "fearlessUser.dir";
+    var root= Path.of(System.getProperty(dirKey)).toAbsolutePath().normalize();
     var segments= portableSegments("diskPath",diskPath);
     var full= root;
     for (var s: segments){ full = full.resolve(s); }
