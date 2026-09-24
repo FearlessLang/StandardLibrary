@@ -28,6 +28,9 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
 
   mut  .get(k: K): E;              /// value for k; throws iff k absent
   read .get(k: K): read/imm E;     /// value for k; throws iff k absent
+  /// ``this.tryGet(k)`` returns `.ok` of ``this.get(k)``, or the error info of ``this.get(k)`` iff ``k`` is absent.
+  //>   .check{(Maps#({::}, "a", 1).tryGet "a").ok.assertEq({::}, Opts# 1)}
+  //>   .check{Maps#({::}, "a", 1).tryGet "b" .assertInfo{::.isMsg{::.startsWith "Map.get:"}}}
   mut  .tryGet(k: K): mut Action[E];
   read .tryGet(k: K): mut Action[read/imm E];
 

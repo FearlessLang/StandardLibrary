@@ -40,6 +40,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{(7.getByte) .getTruncDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getDiv 0})
   .getTruncDiv(d: Nat): Byte;
+  /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
+  //>   .check{(7.getByte .tryGetTruncDiv 2).ok.assertEq({::}, Opts#(3.getByte))}
+  //>   .check{7.getByte .tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Byte.getTruncDiv:"}}}
   .tryGetTruncDiv(d: Nat): mut Action[Byte];
 
   /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
@@ -47,6 +50,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .checkDetErr({::}, {7.getByte .getDiv 3})
   //>   .checkDetErr({::}, {7.getByte .getDiv 0})
   .getDiv(d: Nat): Byte -> this.tryGetDiv(d)!;
+  /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``this.rem == 1``.
+  //>   .check{(6.getByte .tryGetDiv 2).ok.assertEq({::}, Opts#(3.getByte))}
+  //>   .check{7.getByte .tryGetDiv 3 .assertInfo{::.isMsg{::.startsWith "Byte.getDiv:"}}}
   .tryGetDiv(d: Nat): mut Action[Byte] -> Block#
     .if {d == 0} .return {Actions.msg "Byte.getDiv: Cannot divide by 0"}
     .let[Byte] rem = {this.getRem d}
@@ -57,6 +63,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{7.getByte .getRem 2 .assertEq(1.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getRem 0})
   .getRem(d: Nat): Byte;
+  /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
+  //>   .check{(7.getByte .tryGetRem 2).ok.assertEq({::}, Opts#(1.getByte))}
+  //>   .check{7.getByte .tryGetRem 0 .assertInfo{::.isMsg{::.startsWith "Byte.getRem:"}}}
   .tryGetRem(d: Nat): mut Action[Byte];
 
   /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` otherwise.

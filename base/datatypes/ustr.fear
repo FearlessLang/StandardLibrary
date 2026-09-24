@@ -42,6 +42,9 @@ UStr: Sealed,ToUStr,ToImm[UStr],JoinStr[UStr] {
   .isStr: Bool;                     /// true if this UStr only uses scalar values allowed inside instances of type Str.
   .str: Opt[Str];                   /// .some containg this string if .isStr; .empty otherwise
   .getStr: Str -> this.tryGetStr!;
+  /// `this.tryGetStr` returns `.ok` of `this.getStr`, or the error info of `this.getStr` if not `this.isStr`.
+  //>   .check{("hi".u.tryGetStr).ok.assertEq({::}, Opts# "hi")}
+  //>   .check{"a".u("00E9").tryGetStr .assertInfo{::.isMsg{::.startsWith "UStr.getStr:"}}}
   .tryGetStr: mut Action[Str];
   .flow: mut Flow[Nat];             /// return a flow of scalar values.
   .equalRepr(other: UStr): Bool;    /// checks if the two unicode strings have the same exact scalar value representation.

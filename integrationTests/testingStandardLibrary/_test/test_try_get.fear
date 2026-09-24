@@ -14,10 +14,10 @@ TryGetNumberTests: Test {::
   .check{(3.5 .tryGetNum).ok.assertEq({::}, Opts#(7/2))}
   .check{Math.nan.tryGetSqrt.assertInfo{::.isMsg{::.startsWith `Float.getSqrt`}}}
   .check{(4.0 .tryGetNegAbs).ok.assertEq({::}, Opts#(-4.0))}
-  .check{Math.nan.tryGetNegAbs.assertInfo{::.isMsg{::.startsWith `Cannot take the absolute value`}}}
-  .check{Math.inf.tryGetFloor.assertInfo{::.isMsg{::.startsWith `Floor expected`}}}
+  .check{Math.nan.tryGetNegAbs.assertInfo{::.isMsg{::.startsWith "Float.getAbs: Cannot take the absolute value of NaN"}}}
+  .check{Math.inf.tryGetFloor.assertInfo{::.isMsg{::.startsWith "Float.getFloor: Expected finite number, got "}}}
   .check{3.5 .tryGetInt .assertInfo{::.isMsg{::.startsWith `Float.getInt`}}}
-  .check{Math.inf.tryGetDeg.assertInfo{::.isMsg{::.startsWith `Invalid angle`}}}
+  .check{Math.inf.tryGetDeg.assertInfo{::.isMsg{::.startsWith "Float.getDeg: Invalid angle, "}}}
   .checkDetErr({::.isMsg{::.startsWith `Nat.getRem`}}, {7 .getRem 0})
   }
 
@@ -39,14 +39,14 @@ TryGetCollectionTests: Test {::
   .check{List[Nat].tryGetFirst.assertInfo{::.isMsg{::.startsWith `List.get`}}}
   .check{List[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith `List.get`}}}
   .check{(Maps#({::}, `a`, 1).tryGet `a`).ok.assertEq({::}, Opts#(1))}
-  .check{Maps#({::}, `a`, 1).tryGet `b` .assertInfo{::.isMsg{::.startsWith `Map key absent`}}}
+  .check{Maps#({::}, `a`, 1).tryGet `b` .assertInfo{::.isMsg{::.startsWith "Map.get: Tried to get key "}}}
   .check{(Sets#({::}, 1, 2).tryGet 2).ok.assertEq({::}, Opts#(2))}
   .check{Sets#({::}, 1, 2).tryGet 3 .assertInfo{::.isMsg{::.startsWith `Set.get`}}}
   .check{ESets#[Nat,Nat]{::}.add(1).tryGet 3 .assertInfo{::.isMsg{::.startsWith `ESet.get`}}}
   .check{ESets#[Nat,Nat]{::}.add(1).tryGetTake 3 .assertInfo{::.isMsg{::.startsWith `ESet.get`}}}
   .check{(ESets#[Nat,Nat]{::}.add(1).tryGetTake 1).ok.assertEq({::}, Opts#(1))}
   .check{(ELists#[Nat].addAnd(4).tryGet 0).ok.assertEq({::}, Opts#(4))}
-  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith `EList index`}}}
+  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 0 out of range for EList of length 0"}}}
   .check{(Flows#(1,2).tryGet).assertInfo{::.isMsg{::.startsWith `Flow.get`}}}
   .check{(Flows#(1).tryGet).ok.assertEq({::}, Opts#(1))}
   .check{(Flows#(1,2).tryGetOpt).assertInfo{::.isMsg{::.startsWith `Flow.getOpt`}}}
@@ -94,7 +94,34 @@ SuccPredTests: Test {::
   .checkDetErr({::.isMsg{::.startsWith `Nat.getInt`}}, {(Math.maxNat).getInt})
   }
 
+TryGetNamesGetTests: Test {::
+  .checkDetErr({::.isMsg{::.startsWith "Float.getAbs: Cannot take the absolute value of NaN"}}, {Math.nan.getAbs})
+  .checkDetErr({::.isMsg{::.startsWith "Float.getSign: Cannot get the sign of NaN"}}, {Math.nan.getSign})
+  .check{Math.nan.tryGetSign.assertInfo{::.isMsg{::.startsWith "Float.getSign: Cannot get the sign of NaN"}}}
+  .checkDetErr({::.isMsg{::.startsWith "Float.getFloor: Expected finite number, got "}}, {Math.inf.getFloor})
+  .checkDetErr({::.isMsg{::.startsWith "Float.getCeil: Expected finite number, got "}}, {Math.inf.getCeil})
+  .check{Math.inf.tryGetCeil.assertInfo{::.isMsg{::.startsWith "Float.getCeil: Expected finite number, got "}}}
+  .checkDetErr({::.isMsg{::.startsWith "Float.getDeg: Invalid angle, "}}, {Math.inf.getDeg})
+  .checkDetErr({::.isMsg{::.startsWith "Float.getRad: Invalid angle, "}}, {Math.nan.getRad})
+  .check{Math.nan.tryGetRad.assertInfo{::.isMsg{::.startsWith "Float.getRad: Invalid angle, "}}}
+  .checkDetErr({::.isMsg{::.startsWith "Num.getFloat: cannot convert Num +1/3 to Float"}}, {(1/3).getFloat})
+  .check{(1/3).tryGetFloat.assertInfo{::.isMsg{::.startsWith "Num.getFloat: cannot convert Num +1/3 to Float"}}}
+  .checkDetErr({::.isMsg{::.startsWith "UStr.getStr: cannot convert "}}, {"a".u("00E9").getStr})
+  .check{"a".u("00E9").tryGetStr.assertInfo{::.isMsg{::.startsWith "UStr.getStr: cannot convert "}}}
+  .checkDetErr({::.isMsg{::.startsWith "Info.getMap: Tried an Info that is not a .map variant"}}, {(Infos.msg "hi").getMap})
+  .check{(Infos.msg "hi").tryGetMap.assertInfo{::.isMsg{::.startsWith "Info.getMap: Tried an Info that is not a .map variant"}}}
+  .checkDetErr({::.isMsg{::.startsWith "List.getFirst: called on empty list"}}, {List[Nat].getFirst})
+  .check{List[Nat].tryGetFirst.assertInfo{::.isMsg{::.startsWith "List.getFirst: called on empty list"}}}
+  .checkDetErr({::.isMsg{::.startsWith "List.getLast: called on empty list"}}, {List[Nat].getLast})
+  .check{List[Nat].tryGetLast.assertInfo{::.isMsg{::.startsWith "List.getLast: called on empty list"}}}
+  .checkDetErr({::.isMsg{::.startsWith "Map.get: Tried to get key "}}, {Maps#({::}, "a", 1).get "b"})
+  .check{Maps#({::}, "a", 1).tryGet "b" .assertInfo{::.isMsg{::.startsWith "Map.get: Tried to get key "}}}
+  .checkDetErr({::.isMsg{::.startsWith "EList.get: EList index 3 out of range for EList of length 1"}}, {ELists#[Nat].addAnd(4).get 3})
+  .check{ELists#[Nat].addAnd(4).tryGet 3 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 3 out of range for EList of length 1"}}}
+  }
+
 TestTryGet: Test {::
+  .test TryGetNamesGetTests
   .test SuccPredTests
   .test FloatNumConversionTests
   .test TryGetNumberTests

@@ -16,6 +16,9 @@ EList[E:*]: Pipe[EList[E]]{
   mut .flow(mode:FlowMode[E]): mut Flow[E]; //consumes the EList
   imm .flow: mut Flow[imm E]; //safe since imm receiver
   mut .get(Nat): E; //simpler model with most methods `mut`
+  /// ``this.tryGet(i)`` returns `.ok` of ``this.get(i)``, or the error info of ``this.get(i)`` iff ``i >= size``.
+  //>   .check{(ELists#[Nat].addAnd(4).tryGet 0).ok.assertEq({::}, Opts# 4)}
+  //>   .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get:"}}}
   mut .tryGet(Nat): mut Action[E];
   read .size: Nat;
   mut .list: mut List[E]; //consumes the EList and moves the data in the result
