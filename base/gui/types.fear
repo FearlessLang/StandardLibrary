@@ -321,6 +321,8 @@ Mouse:{
   mut .dragged(mut Consumer[MouseEvent]):mut Mouse;
   mut .entered(mut Consumer[MouseEvent]):mut Mouse;
   mut .exited(mut Consumer[MouseEvent]):mut Mouse;
+  mut .save(c: mut Consumer[mut Mouse]): mut Mouse -> Block#(c.accept(this), this);
+  mut .style(s: mut Scope[Mouse]): mut Mouse -> Block#(s.run(this), this);
 }
 MouseEvent:ScreenContext{
   .mouseX:XInt;
@@ -385,11 +387,13 @@ KeyActions:{#:mut KeyAction->Block#
       Block#(actions.add(c),self);
     mut .save(c:mut Consumer[mut KeyAction]):mut KeyAction->
       Block#(c.accept(self),self);
-    mut .style(c:mut Scope[KeyAction]):mut KeyAction->
-      Block#(c.run(self),self);
+    mut .style(s:mut Scope[KeyAction]):mut KeyAction->
+      Block#(s.run(self),self);
   }}
 }
 Keys:{
   mut .pressed(mut Scope[KeyAction]):mut Keys;
   mut .released(mut Scope[KeyAction]):mut Keys;
+  mut .save(c: mut Consumer[mut Keys]): mut Keys -> Block#(c.accept(this), this);
+  mut .style(s: mut Scope[Keys]): mut Keys -> Block#(s.run(this), this);
   }
