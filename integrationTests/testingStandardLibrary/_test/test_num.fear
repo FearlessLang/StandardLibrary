@@ -10,6 +10,11 @@ NumArithTests: Test {::
   .check{+1.num.assertEqDelta(+1.num,+0.num)}
   .check{+1/2 ** -2.assertEq(+4.num)}
   .check{-4/3 ** +3.assertEq(-64/27)}
+  .check{-1/1 ** (Math.maxInt) .assertEq(-1.num)}
+  .check{-1/1 ** (Math.minInt) .assertEq(+1.num)}
+  .check{+1/1 ** (Math.minInt) .assertEq(+1.num)}
+  .check{+0/1 ** (Math.maxInt) .assertEq(+0.num)}
+  .checkDetErr({::.isMsg{::.startsWith "Num.**: cannot raise +0/1 to the negative power -3"}}, {+0/1 ** -3})
   }
 
 NumRoundTests: Test {::
@@ -49,6 +54,12 @@ NumConvTests: Test {::
   .check{+5.num.getFloat .assertEq +5.0}
   .check{+1.num / (+2.num).softInt .assertEq +0}
   .check{(-1.num) / (+2.num).softNat .assertEq 0}
+  .check{+5000000000.num.softInt .assertEq +5000000000}
+  .check{(-5000000000.num).softInt .assertEq -5000000000}
+  .check{+5000000000.num.softNat .assertEq 5000000000}
+  .check{(Math.maxNat).num.softNat .assertEq(Math.maxNat)}
+  .check{((Math.maxNat).num + (1.num)).softNat .assertEq(Math.maxNat)}
+  .check{((Math.maxInt).num + (1.num)).softInt .assertEq(Math.maxInt)}
   .check{+300.num.softByte .assertEq (+255.getByte)}
   .check{(-1.num).softByte .assertEq (+0.getByte)}
   .check{+2.num.int .assertEq ({::},Opts#(+2))}

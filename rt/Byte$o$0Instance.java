@@ -56,13 +56,17 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     int power = u8(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    byte result = 1, base = val;
+    int result = 1, base = u8(val);
     while (true) {
-      if ((power & 1) != 0){ result = mulChecked(result, base); }
+      if ((power & 1) != 0){ result = powMul(result, base); }
       power >>>= 1;
-      if (power == 0){ return Byte$o$0Instance.instance(result); }
-      base = mulChecked(base, base);
+      if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
+      base = powMul(base, base);
     }
+  }
+  private static int powMul(int a, int b){
+    if (a * b > 255){ throw nonDetErr("Byte.** overflow"); }
+    return a * b;
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);

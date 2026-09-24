@@ -7,12 +7,15 @@ NatArithTests: Test {::
   .check{1 ** (Math.maxNat) .assertEq 1}
   .check{0 ** (Math.maxNat) .assertEq 0}
   .check{2 ** 10 .assertEq 1024}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {2 ** (Math.maxNat)})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {4294967296 ** 2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.** overflow"}}, {2 ** (Math.maxNat)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.** overflow"}}, {4294967296 ** 2})
   .check{2 ** 63 .assertEq 9223372036854775808}
   .check{3 ** 40 .assertEq 12157665459056928801}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {2 ** 64})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {(Math.maxNat) ** 2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.** overflow"}}, {2 ** 64})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.** overflow"}}, {(Math.maxNat) ** 2})
+  .check{9007199254740992 .float .assertEq({::}, Opts# +9007199254740992.0)}
+  .check{9007199254740993 .float .assertEmpty {::}}
+  .check{(Math.maxNat).tryGetInt .assertInfo{::.isMsg{::.startsWith "Nat.getInt: cannot convert to Int, 18446744073709551615 is greater than Math.maxInt (9223372036854775807)"}}}
   .check{5 .assertLt 7}
   .check{7 .assertGt 5}
   .check{(-1).aluNat .assertGt 0}

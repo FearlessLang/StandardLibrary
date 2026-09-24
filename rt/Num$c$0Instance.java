@@ -73,15 +73,15 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     if (qr[1].signum() == 0){ return q; }
     return n.signum() > 0 ? q.add(one) : q;
   }
-  private static int clampIntZ(BigInteger z){
-    if (z.compareTo(minInt) < 0){ return Integer.MIN_VALUE; }
-    if (z.compareTo(maxInt) > 0){ return Integer.MAX_VALUE; }
-    return z.intValue();
+  private static long clampIntZ(BigInteger z){
+    if (z.compareTo(minInt) < 0){ return Long.MIN_VALUE; }
+    if (z.compareTo(maxInt) > 0){ return Long.MAX_VALUE; }
+    return z.longValue();
   }
-  private static int clampNatBitsZ(BigInteger z){
+  private static long clampNatBitsZ(BigInteger z){
     if (z.signum() <= 0){ return 0; }
     if (z.compareTo(maxNat) >= 0){ return -1; } // 0xFFFF_FFFF
-    return (int)z.longValue();
+    return z.longValue();
   }
   private static byte clampByteBitsZ(BigInteger z){
     if (z.signum() <= 0){ return 0; }
@@ -102,6 +102,8 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   }
   public static BigInteger pow(BigInteger n, long exponent) {
     assert exponent >= 0;
+    if (n.signum() == 0 || n.equals(one)){ return exponent == 0 ? one : n; }
+    if (n.equals(one.negate())){ return (exponent & 1) == 0 ? one : n; }
     if (exponent <= Integer.MAX_VALUE) {
       // is small enough to safely cast
       return n.pow((int) exponent);
@@ -127,6 +129,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
               pow(numerator, exponent), pow(denominator, exponent)
       );
     }
+    if (numerator.signum() == 0){ throw err("Num.**: cannot raise +0/1 to the negative power "+exponent); }
     // Since negative flip fraction
     if (exponent == Long.MIN_VALUE) {
       // Since |Long.MIN_VALUE| is too large to fit in long

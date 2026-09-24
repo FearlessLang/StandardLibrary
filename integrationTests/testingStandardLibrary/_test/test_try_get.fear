@@ -3,12 +3,12 @@ TryGetNumberTests: Test {::
   .check{7 .tryGetRem 0 .assertInfo{::.isMsg{::.startsWith `Nat.getRem`}}}
   .check{(7 .tryGetDiv 2).assertInfo{::.isMsg{::.startsWith `Nat.getDiv`}}}
   .check{(6 .tryGetDiv 2).ok.assertEq({::}, Opts#(3))}
-  .check{5 .tryGetIndexOffset(-10) .assertInfo{::.isMsg{::.startsWith `Nat -`}}}
-  .check{(Math.maxNat).tryGetIndexOffset(+1) .assertInfo{::.isMsg{::.startsWith `Nat +`}}}
+  .check{5 .tryGetIndexOffset(-10) .assertInfo{::.isMsg{::.startsWith "Nat.getIndexOffset: 5 .getIndexOffset(-10) would be less than 0"}}}
+  .check{(Math.maxNat).tryGetIndexOffset(+1) .assertInfo{::.isMsg{::.startsWith "Nat.getIndexOffset: 18446744073709551615 .getIndexOffset(+1) would be greater than Math.maxNat"}}}
   .check{(5 .tryGetIndexOffset(-2)).ok.assertEq({::}, Opts#(3))}
   .check{(+5 .tryGetNat).ok.assertEq({::}, Opts#(5))}
   .check{-5 .tryGetNat .assertInfo{::.isMsg{::.startsWith `Int.getNat`}}}
-  .check{+5 .tryGetWrapIndex 0 .assertInfo{::.isMsg{::.startsWith `Int.wrapIndex`}}}
+  .check{+5 .tryGetWrapIndex 0 .assertInfo{::.isMsg{::.startsWith "Int.getWrapIndex: len==0"}}}
   .check{(Math.maxNat).tryGetInt.assertInfo{::.isMsg{::.startsWith `Nat.getInt`}}}
   .check{(7/2).tryGetInt.assertInfo{::.isMsg{::.startsWith `Num.getInt`}}}
   .check{(3.5 .tryGetNum).ok.assertEq({::}, Opts#(7/2))}
@@ -78,8 +78,8 @@ FloatNumConversionTests: Test {::
 SuccPredTests: Test {::
   .check{5 .succ .assertEq 6}
   .check{+5 .pred .assertEq +4}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat +`}}, {(Math.maxNat).succ})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat -`}}, {0 .pred})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.+ overflow"}}, {(Math.maxNat).succ})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.- underflow"}}, {0 .pred})
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.+`}}, {(Math.maxInt).succ})
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.+`}}, {(Math.minInt).pred})
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte.+`}}, {(Math.maxByte).succ})
@@ -90,7 +90,7 @@ SuccPredTests: Test {::
   .checkDetErr({::.isMsg{::.startsWith `Float.getPred`}}, {Math.negInf.getPred})
   .check{Math.nan.tryGetPred.assertInfo{::.isMsg{::.startsWith `Float.getPred`}}}
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.*`}}, {(Math.maxInt) * +2})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat *`}}, {(Math.maxNat) * 2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat.* overflow"}}, {(Math.maxNat) * 2})
   .checkDetErr({::.isMsg{::.startsWith `Nat.getInt`}}, {(Math.maxNat).getInt})
   }
 

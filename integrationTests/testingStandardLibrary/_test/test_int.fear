@@ -20,6 +20,13 @@ IntArithTests: Test {::
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.** overflow`}}, {(Math.maxInt) ** 2})
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int.* overflow`}}, {(Math.maxInt) * +2})
   .check{(-7).abs .assertEq 7}
+  .check{+16777217 .getFloat .assertEq +16777217.0}
+  .check{+9007199254740992 .getFloat .assertEq +9007199254740992.0}
+  .check{+9007199254740993 .float .assertEmpty {::}}
+  .check{Math.minInt .getFloat .assertEq -9223372036854775808.0}
+  .check{Math.maxInt .float .assertEmpty {::}}
+  .check{+9007199254740993 .tryGetFloat .assertInfo{::.isMsg{::.startsWith "Int.getFloat: cannot convert to Float 9007199254740993"}}}
+  .check{+300 .tryGetByte .assertInfo{::.isMsg{::.startsWith "Int.getByte: cannot convert to Byte 300 is greater than 255"}}}
   .check{+9.getFloat.getSqrt .assertEq +3.0}
   .check{(-1).getFloat.sqrtOrNaN.isNaN .assertEq True}
   .check{+1.assertLt(+2)}

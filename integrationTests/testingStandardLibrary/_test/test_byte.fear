@@ -9,9 +9,11 @@ ByteArithTests: Test {::
   .check{2.getByte ** (7.getByte) .assertEq (128.getByte)}
   .check{1.getByte ** (255.getByte) .assertEq (1.getByte)}
   .check{15.getByte ** (2.getByte) .assertEq (225.getByte)}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte.* overflow`}}, {2.getByte ** (255.getByte)})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte.* overflow`}}, {16.getByte ** (2.getByte)})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte.* overflow`}}, {2.getByte ** (200.getByte)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Byte.** overflow"}}, {2.getByte ** (255.getByte)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Byte.** overflow"}}, {16.getByte ** (2.getByte)})
+  .check{15.getByte ** (2.getByte) .assertEq(225.getByte)}
+  .check{3.getByte ** (5.getByte) .assertEq(243.getByte)}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Byte.** overflow"}}, {2.getByte ** (200.getByte)})
   .checkNonDetErr({::}, {2.getByte ** (128.getByte)})
   .check{+255.getByte .assertGt (+0.getByte)}
   .check{+0.getByte .assertLt (+255.getByte)}
