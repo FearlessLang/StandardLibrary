@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -22,7 +22,7 @@ import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.TextLine;
 
-import static base.Scopes.*;
+import static _base.Scopes.*;
 
 // The single Swing component class behind every widget. It never paints its
 // own pixels (only the top component blits the frame image) and never has

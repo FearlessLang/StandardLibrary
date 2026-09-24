@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 import java.util.ArrayList;
 
@@ -41,7 +41,7 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
   public final static List$o$1Instance stackTraceOf(StackTraceElement[] st){
     var al= new ArrayList<>();
     for(var e : st){
-      var s= base._Throw$1c$0.frameData(e);
+      var s= _base._Throw$1c$0.frameData(e);
       if(s == null){ continue; }
       al.add(s);
     }

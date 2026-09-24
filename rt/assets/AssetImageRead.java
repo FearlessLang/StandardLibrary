@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Codec;
@@ -8,7 +8,7 @@ import io.github.humbleui.skija.Data;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 final class AssetImageRead{
   private AssetImageRead(){ throw new AssertionError(); }
@@ -38,7 +38,7 @@ final class AssetImageRead{
       return Image.makeRasterFromBitmap(bm.setImmutable());//shares pixels, no copy
     }
     catch(RuntimeException re){
-      if (re.getClass().getName().startsWith("base.")){ throw re; }
+      if (re.getClass().getName().startsWith("_base.")){ throw re; }
       throw badImage(path,"image could not be decoded: "+re);
     }
   }

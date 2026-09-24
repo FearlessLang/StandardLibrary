@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 public interface _NativeLoop$16w$0 {
   _NativeLoop$16w$0 instance = new _NativeLoop$16w$0(){};

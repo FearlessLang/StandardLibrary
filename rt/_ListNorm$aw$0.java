@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 import java.util.List;
 public interface _ListNorm$aw$0{

@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.Locale;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 final class DownloadFetch{
   private DownloadFetch(){ throw new AssertionError(); }

@@ -1,12 +1,12 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public interface _NumFlow$5k$0 extends base.Sealed$2o$0 {
+public interface _NumFlow$5k$0 extends _base.Sealed$2o$0 {
 _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
 
   default Object imm$bytes$2(Object p0, Object p1){

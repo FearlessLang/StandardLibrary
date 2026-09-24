@@ -1,14 +1,14 @@
-package base;
+package _base;
 
 
-import base.Util.MapKey;
+import _base.Util.MapKey;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static base.Util.*;
-import static base.Set$c$1Instance.extractKey;
+import static _base.Util.*;
+import static _base.Set$c$1Instance.extractKey;
 
 final class ESet$s$1Instance implements ESet$s$1 {
     /// A map to allow for O(1) get

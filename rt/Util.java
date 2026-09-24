@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import java.math.BigInteger;
 import java.util.Comparator;
@@ -74,7 +74,7 @@ public class Util{
     return detErr(msg);
     }
   public static Error detErr(String msg) {
-    var info = base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
+    var info = _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
     return (Error) Error$1c$0.instance.imm$$bang$1(info);
   }
   public static BigInteger unsignedLongToBigInteger(long x){

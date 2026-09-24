@@ -1,4 +1,4 @@
-package base;
+package _base;
 public interface _Magic$1c$0 extends Sealed$2o$0{
   default Object imm$$bang$0(){
     throw new Error("Magic! invocation");

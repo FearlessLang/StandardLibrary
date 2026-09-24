@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import java.awt.Component;
 import java.awt.Point;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
 
-import static base.MouseKind.*;
+import static _base.MouseKind.*;
 
 enum MouseKind{ Clicked, Pressed, Released, Moved, Dragged, Entered, Exited }
 

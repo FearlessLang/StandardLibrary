@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 public interface _ImageRead$lk$0{
   default Object imm$consumeImage$6(Object requestId,Object path,Object diskPath,Object zipSteps,Object zipEntry,Object maxPixels){

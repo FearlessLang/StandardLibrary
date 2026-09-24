@@ -1,9 +1,9 @@
-package base;
+package _base;
 
 import java.math.BigInteger;
 import java.util.stream.IntStream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 class ByteCache {
   final static int max = 255;

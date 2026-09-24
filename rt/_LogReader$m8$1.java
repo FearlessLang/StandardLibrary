@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public record _LogReader$m8$1(InMemoryLog$2kk$1 o) implements LogReader$m8$1{
   @Override public Object mut$iso$0(){ return this; }

@@ -1,9 +1,9 @@
-package base;
+package _base;
 
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 class IntCache {
   private static final long min = -128;

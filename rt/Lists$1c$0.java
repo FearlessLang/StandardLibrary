@@ -1,10 +1,10 @@
-package base;
+package _base;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static base.Util.*;
+import static _base.Util.*;
 public interface Lists$1c$0 extends Sealed$2o$0{
   default Object imm$singletonRead$1(Object p0){ return imm$$hash$1(p0); }
     

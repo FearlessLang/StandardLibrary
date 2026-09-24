@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 public final class _DownloadCapability$8fsw$0 implements DownloadCapability$8fsw$0{
   @Override public Object mut$iso$0(){ return this; }

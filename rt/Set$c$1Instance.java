@@ -1,12 +1,12 @@
-package base;
+package _base;
 
-import base.Util.*;
+import _base.Util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public final class Set$c$1Instance implements Set$c$1 {
   private final OrderHashBy$2ea$2 ordering;

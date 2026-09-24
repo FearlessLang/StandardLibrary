@@ -1,4 +1,4 @@
-package base;
+package _base;
 public interface Try$c$0{
   default Object imm$$hash$1(Object p0){ return actionLazy(()->Util.callF$1(p0)); }
   default Object imm$$hash$2(Object p0, Object p1){ return actionLazy(()->Util.callF$2(p1,p0)); }
