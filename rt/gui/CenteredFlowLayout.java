@@ -9,7 +9,6 @@ import java.awt.LayoutManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.ToIntFunction;
 
 // Flow layout with lines centered on the cross axis and the block of lines
 // centered on the flow axis. Insets and gaps are read live from the owning
@@ -42,7 +41,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   @Override public Dimension preferredLayoutSize(Container target){
     synchronized (target.getTreeLock()){
       var d = naturalSize(target);
-      return new Dimension(d.width + insetsW(target), d.height + insetsH(target));
+      return new Dimension(d.width + insetsW(), d.height + insetsH());
     }
   }
 
@@ -61,24 +60,23 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   int heightFor(Container target, int width){
     synchronized (target.getTreeLock()){
       if (gap.vertical || gap.chunk > 0){ return preferredLayoutSize(target).height; }
-      return gapSum(lines(target, width - insetsW(target)), h(gap.heightGap), Line::cross) + insetsH(target);
+      return crossSum(lines(target, width - insetsW()), h(gap.heightGap)) + insetsH();
     }
   }
 
   @Override public void layoutContainer(Container target){
     synchronized (target.getTreeLock()){
       boolean vert = gap.vertical;
-      var in = target.getInsets();
-      int x0 = in.left + w(gap.left);
-      int y0 = in.top + h(gap.top);
-      int availW = target.getWidth() - insetsW(target);
-      int availH = target.getHeight() - insetsH(target);
+      int x0 = w(gap.left);
+      int y0 = h(gap.top);
+      int availW = target.getWidth() - insetsW();
+      int availH = target.getHeight() - insetsH();
       int wg = w(gap.widthGap);
       int hg = h(gap.heightGap);
       int lineGap = vert ? wg : hg;
       var ls = lines(target, vert ? availH : availW);
 
-      int totalCross = gapSum(ls, lineGap, Line::cross);
+      int totalCross = crossSum(ls, lineGap);
 
       int crossStart = vert
         ? x0 + Math.max(0, (availW - totalCross) / 2)
@@ -148,34 +146,23 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // not depend on any given size).
   private Dimension naturalSize(Container target){
     boolean vert = gap.vertical;
-    var ls = lines(target, explicitPrimary(target));
+    var ls = lines(target, explicitPrimary());
     int lineGap = vert ? w(gap.widthGap) : h(gap.heightGap);
-    int totalCross = gapSum(ls, lineGap, Line::cross);
+    int totalCross = crossSum(ls, lineGap);
     int maxPrimary = ls.stream().mapToInt(Line::primary).max().orElse(0);
     return vert ? new Dimension(totalCross, maxPrimary) : new Dimension(maxPrimary, totalCross);
   }
 
-  // Sums f(line) across ls, with gap inserted between consecutive lines (none
-  // before the first or after the last).
-  private static int gapSum(List<Line> ls, int lineGap, ToIntFunction<Line> f){
-    int total = 0;
-    boolean first = true;
-    for (var ln : ls){ total += (first ? 0 : lineGap) + f.applyAsInt(ln); first = false; }
-    return total;
+  private static int crossSum(List<Line> ls, int lineGap){
+    return ls.stream().mapToInt(Line::cross).sum() + lineGap * Math.max(0, ls.size() - 1);
   }
 
-  private int explicitPrimary(Container target){
-    if (gap.vertical){ return gap.preferredHeight == null ? Integer.MAX_VALUE : h(gap.preferredHeight) - insetsH(target); }
-    return gap.preferredWidth == null ? Integer.MAX_VALUE : w(gap.preferredWidth) - insetsW(target);
+  private int explicitPrimary(){
+    if (gap.vertical){ return gap.preferredHeight == null ? Integer.MAX_VALUE : h(gap.preferredHeight) - insetsH(); }
+    return gap.preferredWidth == null ? Integer.MAX_VALUE : w(gap.preferredWidth) - insetsW();
   }
 
-  private int insetsW(Container t){
-    var in = t.getInsets();
-    return in.left + in.right + w(gap.left) + w(gap.right);
-  }
+  private int insetsW(){ return w(gap.left) + w(gap.right); }
 
-  private int insetsH(Container t){
-    var in = t.getInsets();
-    return in.top + in.bottom + h(gap.top) + h(gap.bottom);
-  }
+  private int insetsH(){ return h(gap.top) + h(gap.bottom); }
 }

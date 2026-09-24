@@ -5,6 +5,7 @@ ChunkGui: Consumer[mut Frame] {
   mut .model: mut Model;
   ::
   .title "Tic-Tac-Toe: chunked grid"
+  .resizable
   .contentB{::
     .background (Color.ghostWhite)
     .north{:: .label{:: .text(this.model.status) .save(this.model.statusSlot) } }
