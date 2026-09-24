@@ -4,6 +4,11 @@ NatArithTests: Test {::
   .check{3 * 4 .assertEq 12}
   .check{3 ** 3 .assertEq 27}
   .check{5 ** 0 .assertEq 1}
+  .check{1 ** (Math.maxNat) .assertEq 1}
+  .check{0 ** (Math.maxNat) .assertEq 0}
+  .check{2 ** 10 .assertEq 1024}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {2 ** (Math.maxNat)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {4294967296 ** 2})
   .check{2 ** 63 .assertEq 9223372036854775808}
   .check{3 ** 40 .assertEq 12157665459056928801}
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {2 ** 64})

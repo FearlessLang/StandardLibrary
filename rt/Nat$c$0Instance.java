@@ -219,13 +219,17 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     long power = n(p0);
     if (power == 0) { return Nat$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    long result = 1;
-    while (power > 0) {
-      if (Long.compareUnsigned(result, Long.divideUnsigned(MAX_UNSIGNED_VALUE, val)) > 0){ throw nonDetErr("Nat **: overflow"); }
-      result *= val;
-      power -= 1;
+    long result = 1, base = val;
+    while (true) {
+      if ((power & 1) != 0){ result = powMul(result, base); }
+      power >>>= 1;
+      if (power == 0){ return Nat$c$0Instance.instance(result); }
+      base = powMul(base, base);
     }
-    return Nat$c$0Instance.instance(result);
+  }
+  private static long powMul(long a, long b){
+    if (Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0){ throw nonDetErr("Nat **: overflow"); }
+    return a * b;
   }
   @Override public Object imm$softSqrt$0(){
     return Float$1c$0Instance.instance(Math.sqrt(unsignedLongToDouble(val)));

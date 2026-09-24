@@ -56,11 +56,13 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     int power = u8(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    byte result = 1;
-    for (int i = 0; i < power; i++) {
-      result = mulChecked(result, this.val);
+    byte result = 1, base = val;
+    while (true) {
+      if ((power & 1) != 0){ result = mulChecked(result, base); }
+      power >>>= 1;
+      if (power == 0){ return Byte$o$0Instance.instance(result); }
+      base = mulChecked(base, base);
     }
-    return Byte$o$0Instance.instance(result);
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);

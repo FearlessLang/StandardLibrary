@@ -138,15 +138,16 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     long power = unsignedLongFromNat(p0);
     if (power == 0) { return Int$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-
-    long result = 1;
-    while (power > 0) {
-      try{ result = Math.multiplyExact(result, this.val); }
-      catch(ArithmeticException e){ throw nonDetErr("Int.** overflow"); }
-      power -= 1;
+    long result = 1, base = val;
+    try{
+      while (true) {
+        if ((power & 1) != 0){ result = Math.multiplyExact(result, base); }
+        power >>>= 1;
+        if (power == 0){ return Int$c$0Instance.instance(result); }
+        base = Math.multiplyExact(base, base);
+      }
     }
-
-    return Int$c$0Instance.instance(result);
+    catch(ArithmeticException e){ throw nonDetErr("Int.** overflow"); }
   }
 
   @Override public Object imm$abs$0(){
