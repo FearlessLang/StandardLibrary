@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 public interface _TxtRead$5k$0{
   default Object imm$consumeStrUtf8$6(Object requestId,Object path,Object diskPath,Object zipSteps,Object zipEntry,Object recover){

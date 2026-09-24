@@ -1,10 +1,10 @@
-package base;
+package _base;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public interface ELists$34$0 extends Sealed$2o$0{
   default Object imm$$hash$0(){ return new EList$1k$1Instance(); }

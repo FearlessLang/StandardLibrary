@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 import java.math.BigInteger;
 
 public record Float$1c$0Instance(double val) implements Float$1c$0{

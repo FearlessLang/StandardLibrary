@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 final class AssetTextRead{
   private AssetTextRead(){ throw new AssertionError(); }

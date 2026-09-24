@@ -1,10 +1,10 @@
-package base;
+package _base;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 class NatCache {
   private static final long max = 255L;

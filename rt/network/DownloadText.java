@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 final class DownloadText{
   private DownloadText(){ throw new AssertionError(); }

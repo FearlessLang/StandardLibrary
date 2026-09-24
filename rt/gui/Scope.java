@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 class Scopes{
   static final Painter$5c$0 idP = new Painter$5c$0(){ @Override public Object imm$run$1(Object p0){ return p0; } };

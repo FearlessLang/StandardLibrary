@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Data;
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import static base.Scopes.*;
+import static _base.Scopes.*;
 
 interface Sk{
   Paint paint = new Paint().setAntiAlias(true);

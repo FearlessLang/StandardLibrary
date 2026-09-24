@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Scopes.*;
+import static _base.Scopes.*;
 
 import java.awt.Component;
 import java.awt.Container;

@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public interface _ListCmp$5g$0{
   default Object imm$$hash$4(Object by, Object a, Object b, Object m){

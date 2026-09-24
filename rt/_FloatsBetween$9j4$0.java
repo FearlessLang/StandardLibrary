@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-public interface _FloatsBetween$9j4$0 extends base.Sealed$2o$0 {
+public interface _FloatsBetween$9j4$0 extends _base.Sealed$2o$0 {
   _FloatsBetween$9j4$0 instance = new _FloatsBetween$9j4$0() {};
 
   // Other than at -0.0 and 0.0:

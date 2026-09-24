@@ -1,9 +1,9 @@
-package base;
+package _base;
 
 import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public interface Maps$o$0 extends Sealed$2o$0{
   default Object imm$$hash$1(Object p0){ // (oh)
@@ -205,11 +205,11 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   }
   @Override public Object read$with$2(Object p0,Object p1){ return mut$with$2(p0,p1); }
   @Override public Object read$hash$1(Object p0){
-    var byE= (base.OrderHashBy$2ea$2)p0;
+    var byE= (_base.OrderHashBy$2ea$2)p0;
     long h= 0;
     for(var e: elems.entrySet()){
       long kh= e.getKey().hashCode();
-      long vh= natToLong(((base.OrderHash$lk$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
+      long vh= natToLong(((_base.OrderHash$lk$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
       h += kh ^ vh;
     }
     return new Nat$c$0Instance(h);

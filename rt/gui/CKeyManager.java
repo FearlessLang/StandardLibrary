@@ -1,7 +1,7 @@
-package base;
+package _base;
 
-import static base.Scopes.*;
-import static base.Util.*;
+import static _base.Scopes.*;
+import static _base.Util.*;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
