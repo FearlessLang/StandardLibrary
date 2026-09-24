@@ -90,20 +90,44 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
 
 
   .getIeeeFloat: Float -> this.tryGetIeeeFloat!;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  /// `this.tryGetIeeeFloat` returns `.ok` of `this.getIeeeFloat`, or the error info of `this.getIeeeFloat` if `this` is not a valid IEEE-754 string.
+  //>   .check{("1.5".tryGetIeeeFloat).ok.assertEq({::}, Opts# 1.5)}
+  //>   .check{"nope".tryGetIeeeFloat .assertInfo{::.isMsg{::.startsWith "Str.getIeeeFloat:"}}}
   .tryGetIeeeFloat: mut Action[Float];
   .getFloat: Float -> this.tryGetFloat!;          /// parse a string representing a valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not a valid Fearless Float.
+  //>   .check{("1.5".tryGetFloat).ok.assertEq({::}, Opts# 1.5)}
+  //>   .check{"nope".tryGetFloat .assertInfo{::.isMsg{::.startsWith "Str.getFloat:"}}}
   .tryGetFloat: mut Action[Float];
   .getSoftFloat: Float -> this.tryGetSoftFloat!;      /// parse a string representing to the closest valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, but *not* values that would round)
+  /// `this.tryGetSoftFloat` returns `.ok` of `this.getSoftFloat`, or the error info of `this.getSoftFloat` if `this` is not a valid Fearless Float.
+  //>   .check{("1.5".tryGetSoftFloat).ok.assertEq({::}, Opts# 1.5)}
+  //>   .check{"nope".tryGetSoftFloat .assertInfo{::.isMsg{::.startsWith "Str.getSoftFloat:"}}}
   .tryGetSoftFloat: mut Action[Float];
   .getInt: Int -> this.tryGetInt!;              /// parse a string representing a valid Fearless Int, throws if invalid (this includes out of range)
+  /// `this.tryGetInt` returns `.ok` of `this.getInt`, or the error info of `this.getInt` if `this` is not a valid Fearless Int.
+  //>   .check{("+42".tryGetInt).ok.assertEq({::}, Opts# +42)}
+  //>   .check{"nope".tryGetInt .assertInfo{::.isMsg{::.startsWith "Str.getInt:"}}}
   .tryGetInt: mut Action[Int];
   .getNum: Num -> this.tryGetNum!;              /// parse a string representing a valid Fearless Num; throws if invalid (this includes denominator == 0)
+  /// `this.tryGetNum` returns `.ok` of `this.getNum`, or the error info of `this.getNum` if `this` is not a valid Fearless Num.
+  //>   .check{("1/2".tryGetNum).ok.assertEq({::}, Opts#(1/2))}
+  //>   .check{"nope".tryGetNum .assertInfo{::.isMsg{::.startsWith "Str.getNum:"}}}
   .tryGetNum: mut Action[Num];
   .getNat: Nat -> this.tryGetNat!;              /// parse a string representing a valid Fearless Nat; throws if invalid (this includes out of range)
+  /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if `this` is not a valid Fearless Nat.
+  //>   .check{("42".tryGetNat).ok.assertEq({::}, Opts# 42)}
+  //>   .check{"nope".tryGetNat .assertInfo{::.isMsg{::.startsWith "Str.getNat:"}}}
   .tryGetNat: mut Action[Nat];
   .getByte: Byte -> this.tryGetByte!;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
+  /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not a valid Fearless Nat in ``[0,255]``.
+  //>   .check{("42".tryGetByte).ok.assertEq({::}, Opts#(42.getByte))}
+  //>   .check{"300".tryGetByte .assertInfo{::.isMsg{::.startsWith "Str.getByte:"}}}
   .tryGetByte: mut Action[Byte];
   .getBool: Bool -> this.tryGetBool!; /// parses exactly ``True``/``False`` as produced by Bool.str; throws if invalid
+  /// `this.tryGetBool` returns `.ok` of `this.getBool`, or the error info of `this.getBool` if `this` is not exactly ``True``/``False``.
+  //>   .check{("True".tryGetBool).ok.assertEq({::}, Opts# True)}
+  //>   .check{"maybe".tryGetBool .assertInfo{::.isMsg{::.startsWith "Str.getBool:"}}}
   .tryGetBool: mut Action[Bool] -> this.bool.match{.some b -> Actions.ok b; .empty -> Actions.msg("Str.getBool: "+(this.escape)+` is not "True" or "False".`)};
 
 

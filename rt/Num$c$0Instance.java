@@ -254,13 +254,13 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
 
   @Override public Object imm$getFloat$0(){
     if (!isRepresentableAsDouble()) {
-      throw err(read$str$0()+" is not exactly representable as a Float");
+      throw err("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
     return Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
   }
   @Override public Object imm$tryGetFloat$0(){
     if (!isRepresentableAsDouble()) {
-      return fail(read$str$0()+" is not exactly representable as a Float");
+      return fail("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
     return ok(Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
   }

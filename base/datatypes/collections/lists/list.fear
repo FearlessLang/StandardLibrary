@@ -11,10 +11,10 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .tryGet(i)->Actions.msg "List.get: called on empty list";
   .opt(i)->{};
 
-  .getFirst->Error.msg "List.get: .first called on empty list";
-  .getLast->Error.msg "List.get: .last called on empty list";
-  .tryGetFirst->Actions.msg "List.get: .first called on empty list";
-  .tryGetLast->Actions.msg "List.get: .last called on empty list";
+  .getFirst->Error.msg "List.getFirst: called on empty list";
+  .getLast->Error.msg "List.getLast: called on empty list";
+  .tryGetFirst->Actions.msg "List.getFirst: called on empty list";
+  .tryGetLast->Actions.msg "List.getLast: called on empty list";
   .first->{};
   .last->{};
 
@@ -77,6 +77,9 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
 
   mut  .get(i: Nat): E;                      /// element at i (0-based); throws if i >= size
   read .get(i: Nat): read/imm E;             /// element at i (0-based); throws if i >= size
+  /// ``this.tryGet(i)`` returns `.ok` of ``this.get(i)``, or the error info of ``this.get(i)`` iff ``i >= size``.
+  //>   .check{(Lists#(1,2,3).tryGet 1).ok.assertEq({::}, Opts# 2)}
+  //>   .check{Lists#(1,2,3).tryGet 5 .assertInfo{::.isMsg{::.startsWith "List.get:"}}}
   mut  .tryGet(i: Nat): mut Action[E];
   read .tryGet(i: Nat): mut Action[read/imm E];
 
@@ -86,11 +89,17 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
 
   mut  .getFirst: E;                            /// get(0); throws iff empty
   read .getFirst: read/imm E;                   /// get(0); throws iff empty
+  /// `this.tryGetFirst` returns `.ok` of `this.getFirst`, or the error info of `this.getFirst` iff empty.
+  //>   .check{(Lists#(1,2,3).tryGetFirst).ok.assertEq({::}, Opts# 1)}
+  //>   .check{List[Nat].tryGetFirst .assertInfo{::.isMsg{::.startsWith "List.getFirst:"}}}
   mut  .tryGetFirst: mut Action[E];
   read .tryGetFirst: mut Action[read/imm E];
 
   mut  .getLast: E;                             /// get(size-1); throws iff empty
   read .getLast: read/imm E;                    /// get(size-1); throws iff empty
+  /// `this.tryGetLast` returns `.ok` of `this.getLast`, or the error info of `this.getLast` iff empty.
+  //>   .check{(Lists#(1,2,3).tryGetLast).ok.assertEq({::}, Opts# 3)}
+  //>   .check{List[Nat].tryGetLast .assertInfo{::.isMsg{::.startsWith "List.getLast:"}}}
   mut  .tryGetLast: mut Action[E];
   read .tryGetLast: mut Action[read/imm E];
 

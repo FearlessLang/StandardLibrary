@@ -74,6 +74,9 @@ ESet[E]: Pipe[ESet[E]] {
   //>     .do{eset.size .assertEq 1}
   //>     .done}
   mut .getTake(elem: E): E -> this.tryGetTake(elem)!;
+  /// ``this.tryGetTake(e)`` returns `.ok` of ``this.getTake(e)``, or the error info of ``this.getTake(e)`` if no such element exists.
+  //>   .check{(ESets#[Nat,Nat]{::}.add(1).tryGetTake 1).ok.assertEq({::}, Opts# 1)}
+  //>   .check{ESets#[Nat,Nat]{::}.add(1).tryGetTake 3 .assertInfo{::.isMsg{::.startsWith "ESet.get:"}}}
   mut .tryGetTake(elem: E): mut Action[E] -> this.take(elem).match{
     .some e -> Actions.ok e;
     .empty -> this.tryGet(elem);
@@ -119,6 +122,9 @@ ESet[E]: Pipe[ESet[E]] {
   //>   .check{Sets#({::.imm.abs}, +1, -2).get(-1) .assertEq +1}
   //>   .checkDetErr({::}, {Sets#({::}, 1, 2).get(3)})
   mut .get(elem: E): E;
+  /// ``this.tryGet(e)`` returns `.ok` of ``this.get(e)``, or the error info of ``this.get(e)`` if no such element exists.
+  //>   .check{(ESets#[Nat,Nat]{::}.add(1).tryGet 1).ok.assertEq({::}, Opts# 1)}
+  //>   .check{ESets#[Nat,Nat]{::}.add(1).tryGet 3 .assertInfo{::.isMsg{::.startsWith "ESet.get:"}}}
   mut .tryGet(elem: E): mut Action[E];
 
   /// ``this.getOrInsert(e)`` returns the element in `this` equal to ``e`` under `this`'s orderHash,

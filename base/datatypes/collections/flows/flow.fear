@@ -70,10 +70,16 @@ Flow[E:*]: {
   mut .all(f: read F[E, Bool]):  Bool;
   mut .none(f: read F[E, Bool]): Bool;
   mut .get:   E -> this.tryGet!;//get the first element if size==1, throws otherwise
+  /// `this.tryGet` returns `.ok` of `this.get`, or the error info of `this.get` if the flow does not have exactly one element.
+  //>   .check{(Flows#(1).tryGet).ok.assertEq({::}, Opts# 1)}
+  //>   .check{(Flows#(1,2).tryGet).assertInfo{::.isMsg{::.startsWith "Flow.get:"}}}
   mut .tryGet: mut Action[E] -> this.list |> {xs -> xs.size == 1 ? {
     .then -> Actions.ok(xs.getFirst);
     .else -> Actions.msg("Flow.get: the flow has "+(xs.size)+" elements, but .get needs exactly one")}};
   mut .getOpt:   mut Opt[E] -> this.tryGetOpt!;//opt of the first element if size in {0,1} throws otherwise
+  /// `this.tryGetOpt` returns `.ok` of `this.getOpt`, or the error info of `this.getOpt` if the flow has more than one element.
+  //>   .check{(Flows#(1).tryGetOpt).assertOk}
+  //>   .check{(Flows#(1,2).tryGetOpt).assertInfo{::.isMsg{::.startsWith "Flow.getOpt:"}}}
   mut .tryGetOpt: mut Action[mut Opt[E]] -> this.list |> {xs -> xs.size <= 1 ? {
     .then -> Actions.ok(xs.first);
     .else -> Actions.msg("Flow.getOpt: the flow has "+(xs.size)+" elements, but .getOpt needs at most one")}};

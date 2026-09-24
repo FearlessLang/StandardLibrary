@@ -20,6 +20,9 @@ ExtentNat[S]: Wrapper[S,Nat] {
     .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
   *(k: Nat): S -> this#(this.get * k);
   .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
+  /// ``this.tryGetTruncDiv(k)`` returns `.ok` of ``this.getTruncDiv(k)``, or the error info of ``this.get.getTruncDiv(k)`` iff ``k == 0``.
+  //>   .check{((WidthNat#6).tryGetTruncDiv 2).assertOk}
+  //>   .check{(WidthNat#6).tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Nat.getTruncDiv:"}}}
   .tryGetTruncDiv(k: Nat): mut Action[S] -> this.get.tryGetTruncDiv(k).map{x -> this#x};
   .zero: S -> this#0;
   }
@@ -78,6 +81,9 @@ LevelByte[S]: Wrapper[S,Byte] {
     .let b = { this.close(other).get }
     .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
   .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
+  /// ``this.tryGetTruncDiv(k)`` returns `.ok` of ``this.getTruncDiv(k)``, or the error info of ``this.get.getTruncDiv(k)`` iff ``k == 0``.
+  //>   .check{((Red#(6.getByte)).tryGetTruncDiv 2).assertOk}
+  //>   .check{(Red#(6.getByte)).tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Byte.getTruncDiv:"}}}
   .tryGetTruncDiv(k: Nat): mut Action[S] -> this.get.tryGetTruncDiv(k).map{x -> this#x};
   .min: S -> this#(Math.minByte);
   .max: S -> this#(Math.maxByte);

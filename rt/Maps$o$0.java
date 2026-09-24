@@ -172,15 +172,16 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object mut$get$1(Object p0){
     var mk= mapKey(keyOh,p0);
     var e= elems.get(mk);
-    if (e == null){ throw err("Map key absent"); }
+    if (e == null){ throw err(absent(p0)); }
     return e;
   }
   @Override public Object mut$tryGet$1(Object p0){
     var mk= mapKey(keyOh,p0);
     var e= elems.get(mk);
-    if (e == null){ return fail("Map key absent"); }
+    if (e == null){ return fail(absent(p0)); }
     return ok(e);
   }
+  private String absent(Object p0){ return "Map.get: Tried to get key "+toStringBy((ToStrBy$5u$1)keyOh, p0)+" that is not contained in this map.\n Consider using `Map.opt` to properly handle the failure case."; }
   @Override public Object read$get$1(Object p0){ return mut$get$1(p0); }
   @Override public Object read$tryGet$1(Object p0){ return mut$tryGet$1(p0); }
 

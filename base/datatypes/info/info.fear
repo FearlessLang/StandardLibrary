@@ -34,9 +34,18 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .getMsg: Str-> this.tryGetMsg!;
   .getList: List[Info]->this.tryGetList!;
   .getMap: Map[Str,Info]->this.tryGetMap!;
+  /// `this.tryGetMsg` returns `.ok` of `this.getMsg`, or the error info of `this.getMsg` if `this` is not the `.msg` variant.
+  //>   .check{((Infos.msg "hi").tryGetMsg).ok.assertEq({::}, Opts# "hi")}
+  //>   .check{(Infos.list(Infos.msg "hi")).tryGetMsg .assertInfo{::.isMsg{::.startsWith "Info.getMsg:"}}}
   .tryGetMsg: mut Action[Str]-> this.msg.match{.some x -> Actions.ok x; .empty -> Actions.msg "Info.getMsg: Tried an Info that is not a .msg variant to a Str."};
+  /// `this.tryGetList` returns `.ok` of `this.getList`, or the error info of `this.getList` if `this` is not the `.list` variant.
+  //>   .check{(Infos.list(Infos.msg "hi")).tryGetList .assertOk}
+  //>   .check{(Infos.msg "hi").tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
   .tryGetList: mut Action[List[Info]]->this.list.match{.some x -> Actions.ok x; .empty -> Actions.msg "Info.getList: Tried an Info that is not a .list variant to a List[Info]."};
-  .tryGetMap: mut Action[Map[Str,Info]]->this.map.match{.some x -> Actions.ok x; .empty -> Actions.msg "Info.getMsg: Tried an Info that is not a .map variant to a Map[Str, Info]."};
+  /// `this.tryGetMap` returns `.ok` of `this.getMap`, or the error info of `this.getMap` if `this` is not the `.map` variant.
+  //>   .check{(Infos.map("k", Infos.msg "hi")).tryGetMap .assertOk}
+  //>   .check{(Infos.msg "hi").tryGetMap .assertInfo{::.isMsg{::.startsWith "Info.getMap:"}}}
+  .tryGetMap: mut Action[Map[Str,Info]]->this.map.match{.some x -> Actions.ok x; .empty -> Actions.msg "Info.getMap: Tried an Info that is not a .map variant to a Map[Str, Info]."};
 
   .softMsg: Str-> this.msg.orValue "";
   .softList: List[Info]->this.list.orValue {};

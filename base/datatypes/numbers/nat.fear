@@ -40,6 +40,9 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{7 .getTruncDiv 2 .assertEq 3}
   //>   .checkDetErr({::}, {7 .getDiv 0})
   .getTruncDiv(d: Nat): Nat;
+  /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
+  //>   .check{(7 .tryGetTruncDiv 2).ok.assertEq({::}, Opts# 3)}
+  //>   .check{7 .tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Nat.getTruncDiv:"}}}
   .tryGetTruncDiv(d: Nat): mut Action[Nat];
 
   /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``rem != 0``.
@@ -47,6 +50,9 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .checkDetErr({::}, {7 .getDiv 2})
   //>   .checkDetErr({::}, {7 .getDiv 0})
   .getDiv(d: Nat): Nat -> this.tryGetDiv(d)!;
+  /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``rem != 0``.
+  //>   .check{(6 .tryGetDiv 2).ok.assertEq({::}, Opts# 3)}
+  //>   .check{7 .tryGetDiv 2 .assertInfo{::.isMsg{::.startsWith "Nat.getDiv:"}}}
   .tryGetDiv(d: Nat): mut Action[Nat] -> Block#
     .if {d == 0} .return {Actions.msg "Nat.getDiv: Cannot divide by 0"}
     .let[Nat] rem = {this.getRem d}
@@ -57,6 +63,9 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{7 .getRem 2 .assertEq 1}
   //>   .checkDetErr({::}, {7 .getRem 0})
   .getRem(d: Nat): Nat;
+  /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
+  //>   .check{(7 .tryGetRem 2).ok.assertEq({::}, Opts# 1)}
+  //>   .check{7 .tryGetRem 0 .assertInfo{::.isMsg{::.startsWith "Nat.getRem:"}}}
   .tryGetRem(d: Nat): mut Action[Nat];
 
   /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` iff ``d == 0``.
@@ -90,6 +99,10 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5 .getIndexOffset(-3) .assertEq 2}
   //>   .checkDetErr({::}, {5 .getIndexOffset(-10)})
   .getIndexOffset(delta: Int): Nat;
+  /// ``this.tryGetIndexOffset(delta)`` returns `.ok` of ``this.getIndexOffset(delta)``, or the error info of
+  /// ``this.getIndexOffset(delta)`` if the result would underflow below ``0`` or overflow past `Math.maxNat`.
+  //>   .check{(5 .tryGetIndexOffset(+3)).ok.assertEq({::}, Opts# 8)}
+  //>   .check{5 .tryGetIndexOffset(-10) .assertInfo{::.isMsg{::.startsWith "Nat.getIndexOffset:"}}}
   .tryGetIndexOffset(delta: Int): mut Action[Nat];
 
   /// ``this.indexOffset(delta)`` returns `.some` of ``this + delta`` if it would neither underflow
@@ -128,18 +141,27 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5 .getInt .assertEq +5}
   //>   .checkDetErr({::}, {Math.maxNat .getInt})
   .getInt: Int;
+  /// `this.tryGetInt` returns `.ok` of `this.getInt`, or the error info of `this.getInt` if ``this > maxInt``.
+  //>   .check{(5 .tryGetInt).ok.assertEq({::}, Opts# +5)}
+  //>   .check{(Math.maxNat).tryGetInt .assertInfo{::.isMsg{::.startsWith "Nat.getInt:"}}}
   .tryGetInt: mut Action[Int];
 
   /// `this.getByte` converts `this` to a `Byte`. Throws if ``this > maxByte``.
   //>   .check{5 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({::}, {300 .getByte})
   .getByte: Byte;
+  /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if ``this > maxByte``.
+  //>   .check{(5 .tryGetByte).ok.assertEq({::}, Opts#(5.getByte))}
+  //>   .check{300 .tryGetByte .assertInfo{::.isMsg{::.startsWith "Nat.getByte:"}}}
   .tryGetByte: mut Action[Byte];
 
   /// `this.getFloat` converts `this` to a `Float`. Throws if `this` is not exactly representable.
   //>   .check{5 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {Math.maxNat.getFloat})
   .getFloat: Float;
+  /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not exactly representable.
+  //>   .check{(5 .tryGetFloat).ok.assertEq({::}, Opts# 5.0)}
+  //>   .check{(Math.maxNat).tryGetFloat .assertInfo{::.isMsg{::.startsWith "Nat.getFloat:"}}}
   .tryGetFloat: mut Action[Float];
 
   /// `this.softInt` converts `this` to an `Int` by clamping into ``[0, maxInt]``

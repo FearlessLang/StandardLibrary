@@ -11,6 +11,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {Math.nan .getSucc})
   //>   .checkDetErr({::}, {Math.inf .getSucc})
   .getSucc: Float;
+  /// `this.tryGetSucc` returns `.ok` of `this.getSucc`, or the error info of `this.getSucc` if `this` is `Math.nan` or `Math.inf`.
+  //>   .check{(1.0 .tryGetSucc).ok.assertEq({::}, Opts#(1.0 .getSucc))}
+  //>   .check{Math.inf .tryGetSucc .assertInfo{::.isMsg{::.startsWith "Float.getSucc:"}}}
   .tryGetSucc: mut Action[Float];
 
   /// `this.getPred` returns the closest Floating point number smaller than `this`.
@@ -21,6 +24,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {Math.nan .getPred})
   //>   .checkDetErr({::}, {Math.negInf .getPred})
   .getPred: Float;
+  /// `this.tryGetPred` returns `.ok` of `this.getPred`, or the error info of `this.getPred` if `this` is `Math.nan` or `Math.negInf`.
+  //>   .check{(1.0 .tryGetPred).ok.assertEq({::}, Opts#(1.0 .getPred))}
+  //>   .check{Math.negInf .tryGetPred .assertInfo{::.isMsg{::.startsWith "Float.getPred:"}}}
   .tryGetPred: mut Action[Float];
 
   /// ``this + x`` returns the IEEE 754 sum of `this` and ``x``. Never throws; NaN propagates.
@@ -74,14 +80,13 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{4.75 .getAbs .assertEq 4.75}
   //>   .check{-4.75 .getAbs .assertEq 4.75}
   //>   .checkDetErr({::}, {Math.nan .getAbs})
-  .getAbs: Float ->
-    this.isNaN .if {
-      .then -> Error.msg "Cannot take the absolute value of NaN";
-      .else -> this.absOrNaN;
-      };
+  .getAbs: Float -> this.tryGetAbs!;
+  /// `this.tryGetAbs` returns `.ok` of `this.getAbs`, or the error info of `this.getAbs` if `this` is NaN.
+  //>   .check{(-4.75 .tryGetAbs).ok.assertEq({::}, Opts# 4.75)}
+  //>   .check{Math.nan .tryGetAbs .assertInfo{::.isMsg{::.startsWith "Float.getAbs:"}}}
   .tryGetAbs: mut Action[Float] ->
     this.isNaN .if {
-      .then -> Actions.msg "Cannot take the absolute value of NaN";
+      .then -> Actions.msg "Float.getAbs: Cannot take the absolute value of NaN";
       .else -> Actions.ok(this.absOrNaN);
       };
 
@@ -101,6 +106,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{4.75 .getNegAbs .assertEq(-4.75)}
   //>   .checkDetErr({::}, {(Math.nan) .getNegAbs})
   .getNegAbs: Float -> this.getAbs * -1.0;
+  /// `this.tryGetNegAbs` returns `.ok` of `this.getNegAbs`, or the error info of `this.getAbs` if `this` is NaN.
+  //>   .check{(4.75 .tryGetNegAbs).ok.assertEq({::}, Opts# -4.75)}
+  //>   .check{Math.nan .tryGetNegAbs .assertInfo{::.isMsg{::.startsWith "Float.getAbs:"}}}
   .tryGetNegAbs: mut Action[Float] -> this.tryGetAbs.map{x -> x * -1.0};
 
   /// `this.sqrtOrNaN` returns the IEEE square root of `this`.
@@ -122,6 +130,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {-4.0 .getSqrt})
   //>   .checkDetErr({::}, {Math.nan .getSqrt})
   .getSqrt: Float -> this.tryGetSqrt!;
+  /// `this.tryGetSqrt` returns `.ok` of `this.getSqrt`, or the error info of `this.getSqrt` if `this` is NaN or negative.
+  //>   .check{(4.0 .tryGetSqrt).ok.assertEq({::}, Opts# 2.0)}
+  //>   .check{-4.0 .tryGetSqrt .assertInfo{::.isMsg{::.startsWith "Float.getSqrt:"}}}
   .tryGetSqrt: mut Action[Float] -> Block#
     .if{this.isNaN} .return {Actions.msg "Float.getSqrt: Cannot take the sqrt of NaN."}
     .if{this < 0.0} .return {Actions.msg("Float.getSqrt: Cannot take the sqrt of a negative number, given: "+this)}
@@ -144,12 +155,12 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.getSign` returns `this.signOrNaN`. Throws if `this` is NaN.
   //>   .check{-4.75 .getSign .assertEq -1.0}
   //>   .checkDetErr({::}, {Math.nan .getSign})
-  .getSign: Float -> this.isNaN .if {
-    .then -> Error.msg "Cannot get the sign of NaN";
-    .else -> this.signOrNaN;
-    };
+  .getSign: Float -> this.tryGetSign!;
+  /// `this.tryGetSign` returns `.ok` of `this.getSign`, or the error info of `this.getSign` if `this` is NaN.
+  //>   .check{(-4.75 .tryGetSign).ok.assertEq({::}, Opts# -1.0)}
+  //>   .check{Math.nan .tryGetSign .assertInfo{::.isMsg{::.startsWith "Float.getSign:"}}}
   .tryGetSign: mut Action[Float] -> this.isNaN .if {
-    .then -> Actions.msg "Cannot get the sign of NaN";
+    .then -> Actions.msg "Float.getSign: Cannot get the sign of NaN";
     .else -> Actions.ok(this.signOrNaN);
     };
 
@@ -173,13 +184,13 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{4.75 .getFloor .assertEq 4.0}
   //>   .checkDetErr({::}, {(Math.inf) .getFloor})
   //>   .checkDetErr({::}, {(Math.nan) .getFloor})
-  .getFloor: Float -> this.isFinite .if {
-    .then -> this.softFloor;
-    .else -> Error.msg("Floor expected finite number, got "+this);
-    };
+  .getFloor: Float -> this.tryGetFloor!;
+  /// `this.tryGetFloor` returns `.ok` of `this.getFloor`, or the error info of `this.getFloor` if `this` is not finite.
+  //>   .check{(4.75 .tryGetFloor).ok.assertEq({::}, Opts# 4.0)}
+  //>   .check{Math.inf .tryGetFloor .assertInfo{::.isMsg{::.startsWith "Float.getFloor:"}}}
   .tryGetFloor: mut Action[Float] -> this.isFinite .if {
     .then -> Actions.ok(this.softFloor);
-    .else -> Actions.msg("Floor expected finite number, got "+this);
+    .else -> Actions.msg("Float.getFloor: Expected finite number, got "+this);
     };
 
   /// `this.softCeil` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
@@ -202,13 +213,13 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{3.25 .getCeil .assertEq 4.0}
   //>   .checkDetErr({::}, {Math.negInf .getCeil})
   //>   .checkDetErr({::}, {Math.nan .getCeil})
-  .getCeil: Float -> this.isFinite .if {
-    .then -> this.softCeil;
-    .else -> Error.msg("Ceil expected finite number, got "+this);
-    };
+  .getCeil: Float -> this.tryGetCeil!;
+  /// `this.tryGetCeil` returns `.ok` of `this.getCeil`, or the error info of `this.getCeil` if `this` is not finite.
+  //>   .check{(3.25 .tryGetCeil).ok.assertEq({::}, Opts# 4.0)}
+  //>   .check{Math.nan .tryGetCeil .assertInfo{::.isMsg{::.startsWith "Float.getCeil:"}}}
   .tryGetCeil: mut Action[Float] -> this.isFinite .if {
     .then -> Actions.ok(this.softCeil);
-    .else -> Actions.msg("Ceil expected finite number, got "+this);
+    .else -> Actions.msg("Float.getCeil: Expected finite number, got "+this);
     };
 
   /// `this.softTrunc0` returns `this` unchanged if `this` is `Math.inf`, `Math.negInf`, or `Math.nan`,
@@ -231,10 +242,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{-2.75 .getTrunc0 .assertEq -2.0}
   //>   .checkDetErr({::}, {(Math.inf) .getTrunc0})
   //>   .checkDetErr({::}, {(Math.nan) .getTrunc0})
-  .getTrunc0: Float -> this.isFinite .if {
-    .then -> this.softTrunc0;
-    .else -> Error.msg("Float.getTrunc0: Expected finite number, got "+this);
-    };
+  .getTrunc0: Float -> this.tryGetTrunc0!;
+  /// `this.tryGetTrunc0` returns `.ok` of `this.getTrunc0`, or the error info of `this.getTrunc0` if `this` is not finite.
+  //>   .check{(-2.75 .tryGetTrunc0).ok.assertEq({::}, Opts# -2.0)}
+  //>   .check{Math.inf .tryGetTrunc0 .assertInfo{::.isMsg{::.startsWith "Float.getTrunc0:"}}}
   .tryGetTrunc0: mut Action[Float] -> this.isFinite .if {
     .then -> Actions.ok(this.softTrunc0);
     .else -> Actions.msg("Float.getTrunc0: Expected finite number, got "+this);
@@ -261,10 +272,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{-2.5 .getRound .assertEq(-3.0)}
   //>   .checkDetErr({::}, {(Math.inf) .getRound})
   //>   .checkDetErr({::}, {(Math.nan) .getRound})
-  .getRound: Float -> this.isFinite .if {
-    .then -> this.softRound;
-    .else -> Error.msg("Float.getRound: expected finite number, got "+this);
-    };
+  .getRound: Float -> this.tryGetRound!;
+  /// `this.tryGetRound` returns `.ok` of `this.getRound`, or the error info of `this.getRound` if `this` is not finite.
+  //>   .check{(-2.5 .tryGetRound).ok.assertEq({::}, Opts# -3.0)}
+  //>   .check{Math.nan .tryGetRound .assertInfo{::.isMsg{::.startsWith "Float.getRound:"}}}
   .tryGetRound: mut Action[Float] -> this.isFinite .if {
     .then -> Actions.ok(this.softRound);
     .else -> Actions.msg("Float.getRound: expected finite number, got "+this);
@@ -291,10 +302,10 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{2.5 .getRoundTiesEven .assertEq 2.0}
   //>   .checkDetErr({::}, {(Math.inf) .getRoundTiesEven})
   //>   .checkDetErr({::}, {(Math.nan) .getRoundTiesEven})
-  .getRoundTiesEven: Float -> this.isFinite .if {
-    .then -> this.softRoundTiesEven;
-    .else -> Error.msg("Float.getRoundTiesEven: expected finite number got "+this);
-    };
+  .getRoundTiesEven: Float -> this.tryGetRoundTiesEven!;
+  /// `this.tryGetRoundTiesEven` returns `.ok` of `this.getRoundTiesEven`, or the error info of `this.getRoundTiesEven` if `this` is not finite.
+  //>   .check{(2.5 .tryGetRoundTiesEven).ok.assertEq({::}, Opts# 2.0)}
+  //>   .check{Math.negInf .tryGetRoundTiesEven .assertInfo{::.isMsg{::.startsWith "Float.getRoundTiesEven:"}}}
   .tryGetRoundTiesEven: mut Action[Float] -> this.isFinite .if {
     .then -> Actions.ok(this.softRoundTiesEven);
     .else -> Actions.msg("Float.getRoundTiesEven: expected finite number got "+this);
@@ -433,18 +444,27 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {3.5 .getInt})
   //>   .checkDetErr({::}, {(Math.nan) .getInt})
   .getInt: Int;
+  /// `this.tryGetInt` returns `.ok` of `this.getInt`, or the error info of `this.getInt` if `this` is not an integer in ``[minInt, maxInt]``.
+  //>   .check{(3.0 .tryGetInt).ok.assertEq({::}, Opts# +3)}
+  //>   .check{3.5 .tryGetInt .assertInfo{::.isMsg{::.startsWith "Float.getInt:"}}}
   .tryGetInt: mut Action[Int];
 
   /// `this.getNat` converts `this` to a `Nat` if it is an integer in ``[0, maxNat]``; throws otherwise.
   //>   .check{3.0 .getNat .assertEq 3}
   //>   .checkDetErr({::}, {(-1.0) .getNat})
   .getNat: Nat;
+  /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if `this` is not an integer in ``[0, maxNat]``.
+  //>   .check{(3.0 .tryGetNat).ok.assertEq({::}, Opts# 3)}
+  //>   .check{-1.0 .tryGetNat .assertInfo{::.isMsg{::.startsWith "Float.getNat:"}}}
   .tryGetNat: mut Action[Nat];
 
   /// `this.getByte` converts `this` to a `Byte` if it is an integer in ``[0, maxByte]``; throws otherwise.
   //>   .check{3.0 .getByte.nat .assertEq 3}
   //>   .checkDetErr({::}, {300.0 .getByte})
   .getByte: Byte;
+  /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not an integer in ``[0, maxByte]``.
+  //>   .check{(3.0 .tryGetByte).ok.assertEq({::}, Opts#(3.getByte))}
+  //>   .check{300.0 .tryGetByte .assertInfo{::.isMsg{::.startsWith "Float.getByte:"}}}
   .tryGetByte: mut Action[Byte];
 
   /// `this.getNum` converts `this` to a `Num` if finite; throws on NaN/Inf.
@@ -452,6 +472,9 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .checkDetErr({::}, {(Math.inf) .getNum})
   //>   .checkDetErr({::}, {(Math.nan) .getNum})
   .getNum: Num -> this.tryGetNum!;
+  /// `this.tryGetNum` returns `.ok` of `this.getNum`, or the error info of `this.getNum` if `this` is NaN or Inf.
+  //>   .check{(3.5 .tryGetNum).ok.assertEq({::}, Opts#(7/2))}
+  //>   .check{Math.inf .tryGetNum .assertInfo{::.isMsg{::.startsWith "Float.getNum:"}}}
   .tryGetNum: mut Action[Num];
 
   /// `this.hash` returns a hash consistent with ``==``: ``-0.0`` hashes the same as ``+0.0``, and every
@@ -495,13 +518,13 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .getDeg# .assertEq(90.0)}
   //>   .checkDetErr({::}, {(Math.inf) .getDeg})
-  .getDeg: Degree -> this.isFinite .if {
-    .then -> {this};
-    .else -> Error.msg("Invalid angle, "+this+" is not finite.");
-    };
+  .getDeg: Degree -> this.tryGetDeg!;
+  /// `this.tryGetDeg` returns `.ok` of `this.getDeg`, or the error info of `this.getDeg` if `this` is not finite.
+  //>   .check{(90.0 .tryGetDeg).ok.assertEq({::}, Opts#(90.0.getDeg))}
+  //>   .check{Math.inf .tryGetDeg .assertInfo{::.isMsg{::.startsWith "Float.getDeg:"}}}
   .tryGetDeg: mut Action[Degree] -> this.isFinite .if {
     .then -> Actions.ok[Degree]{this};
-    .else -> Actions.msg("Invalid angle, "+this+" is not finite.");
+    .else -> Actions.msg("Float.getDeg: Invalid angle, "+this+" is not finite.");
     };
 
   /// `this.rad` returns `.some` of `this` interpreted as an angle in radians if `this` is finite,
@@ -514,13 +537,13 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.getRad` returns `this` as a `Radian`. Throws if `this` is NaN or ``+/-`` Infinity.
   //>   .check{1.5 .getRad# .assertEq 1.5}
   //>   .checkDetErr({::}, {(Math.nan) .getRad})
-  .getRad: Radian -> this.isFinite .if {
-    .then -> {this};
-    .else -> Error.msg("Invalid angle, "+this+" is not finite.");
-    };
+  .getRad: Radian -> this.tryGetRad!;
+  /// `this.tryGetRad` returns `.ok` of `this.getRad`, or the error info of `this.getRad` if `this` is not finite.
+  //>   .check{(1.5 .tryGetRad).ok.assertEq({::}, Opts#(1.5.getRad))}
+  //>   .check{Math.nan .tryGetRad .assertInfo{::.isMsg{::.startsWith "Float.getRad:"}}}
   .tryGetRad: mut Action[Radian] -> this.isFinite .if {
     .then -> Actions.ok[Radian]{this};
-    .else -> Actions.msg("Invalid angle, "+this+" is not finite.");
+    .else -> Actions.msg("Float.getRad: Invalid angle, "+this+" is not finite.");
     };
 
   /// ``this~~end`` returns the open range ``(this, end)``: from `this.getSucc` to `end.getPred`.

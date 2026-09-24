@@ -63,6 +63,9 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   //>   .check{Sets#({::.imm.abs}, +1, -2).get(-1) .assertEq +1}
   //>   .checkDetErr({::}, {Sets#({::}, 1, 2).get(3)})
   .get(elem: E): E;
+  /// ``this.tryGet(e)`` returns `.ok` of ``this.get(e)``, or the error info of ``this.get(e)`` if no such element exists.
+  //>   .check{(Sets#({::}, 1, 2).tryGet 2).ok.assertEq({::}, Opts# 2)}
+  //>   .check{Sets#({::}, 1, 2).tryGet 3 .assertInfo{::.isMsg{::.startsWith "Set.get:"}}}
   .tryGet(elem: E): mut Action[E];
 
   /// ``this + e`` returns a new Set[E] containing all elements of this plus ``e``.
