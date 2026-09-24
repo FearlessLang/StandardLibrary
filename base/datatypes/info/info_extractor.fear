@@ -13,18 +13,17 @@ Extractor[T:*, Self]: Extractor[T] {
 /// ``.where`` keeps the extracted value only if it satisfies an `InfoValidator`.
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-//>   .check{info.extract{::}! .assertEq info}
-//>   .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}! .assertEq "bob"}
-//>   .check{info.extract{:: > "friends" .extractList .where{::
+//>   .checkEq(info, {info.extract{::}!})
+//>   .checkEq("bob", {info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}!})
+//>   .checkEq("Bob, Alice", {info.extract{:: > "friends" .extractList .where{::
 //>       & > 0 > "name" .isMsg{:: == "Bob"}
 //>       & > 1 > "name" .isMsg{:: == "Alice"}
 //>       }}
-//>     .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!
-//>     .assertEq "Bob, Alice"}
-//>   .check{info.extract{:: > "friends" .extractList .where{::
+//>     .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!})
+//>   .checkTrue{info.extract{:: > "friends" .extractList .where{::
 //>       & > 0 > "name" .isMsg{:: == "Bob"}
 //>       & > 1 > "name" .isMsg{:: == "David"}
-//>       }}.isEmpty .assertTrue}
+//>       }}.isEmpty}
 InfoExtractor: Extractor[Info, InfoExtractor] {
   /// Descend one layer deeper into info,
   /// matching against it being a map with a key `key`

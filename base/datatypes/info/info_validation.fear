@@ -14,25 +14,25 @@ InfoValidators: Sealed {
 /// ``::`` alone holds for any `Info`, so ``:: & ...`` is a neutral start, while ``:: | ...`` always holds.
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-//>   .check{info.validate{::} .assertTrue}
-//>   .check{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}} .assertTrue}
-//>   .check{info.validate{::
+//>   .checkTrue{info.validate{::}}
+//>   .checkTrue{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}}}
+//>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-//>     } .assertTrue}
-//>   .check{info.validate{:: > "friends" .isList{::.size == 2}} .assertTrue}
-//>   .check{info.validate{::
+//>     }}
+//>   .checkTrue{info.validate{:: > "friends" .isList{::.size == 2}}}
+//>   .checkFalse{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-//>     & > "friends" > 2 > "name" .isMsg{:: == "David"}} .assertFalse}
-//>   .check{info.validate{::
+//>     & > "friends" > 2 > "name" .isMsg{:: == "David"}}}
+//>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     | > "friends" .where{::
 //>       & > 1 > "name" .isMsg{:: == "Alice"}
-//>       & > 2 > "name" .isMsg{:: == "David"}}} .assertTrue}
-//>   .check{info.validate{::
+//>       & > 2 > "name" .isMsg{:: == "David"}}}}
+//>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-//>     & > "friends" > 1 > "name" .isMsg{:: == "David"} .not} .assertTrue}
+//>     & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
 InfoValidator: Sealed {
   .close: Info;
   .isValid: Bool;
