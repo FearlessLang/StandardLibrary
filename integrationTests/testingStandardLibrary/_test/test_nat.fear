@@ -3,6 +3,11 @@ NatArithTests: Test {::
   .check{7 - 5 .assertEq 2}
   .check{3 * 4 .assertEq 12}
   .check{3 ** 3 .assertEq 27}
+  .check{5 ** 0 .assertEq 1}
+  .check{2 ** 63 .assertEq 9223372036854775808}
+  .check{3 ** 40 .assertEq 12157665459056928801}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {2 ** 64})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Nat **: overflow`}}, {(Math.maxNat) ** 2})
   .check{5 .assertLt 7}
   .check{7 .assertGt 5}
   .check{(-1).aluNat .assertGt 0}

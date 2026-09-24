@@ -220,13 +220,11 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     if (power == 0) { return Nat$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
     long result = 1;
-    try {
-      while (power > 0) {
-        result = mulChecked(result, this.val);
-        power -= 1;
-      }
+    while (power > 0) {
+      if (Long.compareUnsigned(result, Long.divideUnsigned(MAX_UNSIGNED_VALUE, val)) > 0){ throw nonDetErr("Nat **: overflow"); }
+      result *= val;
+      power -= 1;
     }
-    catch (Error _) { throw nonDetErr("Nat **: overflow"); }
     return Nat$c$0Instance.instance(result);
   }
   @Override public Object imm$softSqrt$0(){
