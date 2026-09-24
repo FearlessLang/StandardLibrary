@@ -47,29 +47,19 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
     frame.frame.queue.submit(new MF$7$1(){
       @Override public Object mut$$hash$0(){
-        var run=snapshot(keyActions,eventKey);
-        if (run.actions().isEmpty()){ return Void$o$0.instance; }
-
-        var ctx=new CKeyCtx(elapsed,screenWidth,screenHeight,panelWidth,panelHeight,run.key());
-
-        for (var a:run.actions()){ a.mut$accept$1(ctx); }
+        var actions=new ArrayList<Consumer$ao$1>();
+        KeyStroke$m8$0 key=null;
+        for (var ka:keyActions){
+          var k=matchingKey((EList$1k$1)ka.mut$match$0(),eventKey);
+          if (k == null){ continue; }
+          if (key == null){ key = k; }
+          copyActions((EList$1k$1)ka.mut$actions$0(),actions);
+        }
+        var ctx=new CKeyCtx(elapsed,screenWidth,screenHeight,panelWidth,panelHeight,key);
+        for (var a:actions){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
       }
     });
-  }
-
-  private static CKeyRun snapshot(List<KeyAction$m8$0> keyActions,String eventKey){
-    var actions=new ArrayList<Consumer$ao$1>();
-    KeyStroke$m8$0 key=null;
-
-    for (var ka:keyActions){
-      var k=matchingKey((EList$1k$1)ka.mut$match$0(),eventKey);
-      if (k == null){ continue; }
-      if (key == null){ key = k; }
-      copyActions((EList$1k$1)ka.mut$actions$0(),actions);
-    }
-
-    return new CKeyRun(key,actions);
   }
 
   private static KeyStroke$m8$0 matchingKey(EList$1k$1 match,String eventKey){
@@ -103,8 +93,6 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
     return this;
   }
 }
-
-record CKeyRun(KeyStroke$m8$0 key,List<Consumer$ao$1> actions){}
 
 record CKeyCtx(
   Instant$5c$0 elapsed,
