@@ -25,8 +25,6 @@ Debug: Sealed {
   //.identify[T](x: read T): Str -> _Magic!;//TODO: can this break observability?
   }
 
-As[X:**]: Sealed { #(x: X): X -> x }
-
 BaseId[T1:*,T2]: CaptureFree{ #(x: T1): T2 }
 BaseContainer[T1:*]: Sealed{ read .as[T2](f: BaseId[read/imm T1,T2]): BaseContainer[T2] }
 
