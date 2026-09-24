@@ -71,7 +71,23 @@ BlockArgLoopTests: Test {::
     ) .assertEq 5}
   }
 
+BlockDecidedTests: Test {::
+  .check{(Block#
+    .if {True} .return {5}
+    .error {"Block#.error after a taken .if .return"}
+    ) .assertEq 5}
+  .check{(Block#
+    .if {False} .error {"Block#.if{False}.error"}
+    .return {5}
+    ) .assertEq 5}
+  .checkDetErr({::.isMsg{:: == "taken"}}, {Block#[Nat]
+    .if {True} .error {"taken"}
+    .return {5}
+    })
+  }
+
 TestBlock: Test {::
   .test BlockLoopTests
   .test BlockArgLoopTests
+  .test BlockDecidedTests
   }

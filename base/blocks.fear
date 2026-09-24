@@ -82,6 +82,7 @@ _DecidedBlock: {
     .openIso _, _ -> res;
     .var     _, _ -> res;
     .repr    _, _ -> res;
+    .error   _    -> res;
     //.isoPod  _, _ -> res;
     .assert  _    -> self;
     .assert  _, _ -> self;

@@ -61,7 +61,7 @@ MapBasicsTests: Test {::
   .check{Maps#[Str,Str,Str] {::} .with("a", "x") .with("b", "y") .without "a" .containsKey "b" .assertEq True}
   .check{Maps#[Str,Str,Str] {::} .with("a", "x") .with("b", "y") .without "a" .size .assertEq 1}
   .check{Maps#[Str,Str,Str] {::} .with("a", "x") .with("b", "y") .without "a" .get "b" .assertEq "y"}
-  .check{Maps#({::},"a", "x","b", "y").info{::}.str.assertEq ("{a: "^"x"^", b: "^"y"^"}")}
+  .check{Maps#({::},"a", "x","b", "y").info{::}.str.assertEq (`{"a":"x","b":"y"}`)}
 
   .check{Maps#({::.orderHash{::}}, Maps#({::}, "aa", "x", "b", "y"), "v1")
     .with(Maps#({::}, "b", "y", "aa", "x"), "v3") .size .assertEq 2}

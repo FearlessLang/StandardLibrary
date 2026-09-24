@@ -77,18 +77,18 @@ MyTests:UnitTests{::
   .test TestNum
   .test TestStr
   .test TestEnum
- // .test TestWrappers
+  .test TestWrappers
   .test GridHitTestTests
   .test GuiLayoutTests
   .test TestList
   .test TestFlow
- // .test TestMap
- // .test TestAs
- // .test TestRepr
- // .test TestLiteralErrors
- // .test TestPipe
- // .test TestComparators
- // .test TestUStr
+  .test TestMap
+  .test TestAs
+  .test TestRepr
+  .test TestLiteralErrors
+  .test TestPipe
+  .test TestComparators
+  .test TestUStr
   .test MathUnitTests
   .test InfoTests
   .test TestBlock

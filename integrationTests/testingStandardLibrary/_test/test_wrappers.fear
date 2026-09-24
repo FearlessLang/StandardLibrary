@@ -125,7 +125,7 @@ InstantTests: Test {::
   .check{(Instant#1000000) .gap(Instant#4000000) .assertEq(Duration.seconds 3)}
   .check{Instant.origin .assertEq(Instant#0)}
   .check{(Instant#7) + ((Instant#7) .to(Instant#20)) .assertEq(Instant#20)}
-  .checkDetErr({::}, {(Instant#4000000) .to(Instant#1000000)})
+  .checkNonDetErr({::}, {(Instant#4000000) .to(Instant#1000000)})
   .checkNonDetErr({::}, {Instant.origin - (Duration.seconds 1)})
   }
 
