@@ -79,6 +79,7 @@ MyTests:UnitTests{::
   .test TestEnum
  // .test TestWrappers
   .test GridHitTestTests
+  .test GuiLayoutTests
   .test TestList
   .test TestFlow
  // .test TestMap

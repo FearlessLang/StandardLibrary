@@ -1,0 +1,27 @@
+GuiLayoutTests: Test {::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .pane{::
+      .width 100
+      .button{:: .width 60 .height 30 }
+      .button{:: .width 60 .height 30 }
+      .button{:: .width 60 .height 30 }
+      .paint{g -> Error.msg(g.panelHeight.str)}
+      }
+    }}}).run{
+      .ok _ -> Error.msg `The painter always stops the Gui before its window is shown`;
+      .info i -> i.validate{:: > `msg` .isMsg{:: == `Height[114]`}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .pane{::
+      .vertical
+      .height 80
+      .button{:: .width 60 .height 30 }
+      .button{:: .width 60 .height 30 }
+      .button{:: .width 60 .height 30 }
+      .paint{g -> Error.msg(g.panelWidth.str)}
+      }
+    }}}).run{
+      .ok _ -> Error.msg `The painter always stops the Gui before its window is shown`;
+      .info i -> i.validate{:: > `msg` .isMsg{:: == `Width[138]`}}.assertTrue{i};
+      }}
+  }
