@@ -22,13 +22,13 @@ record CMouseCtx(
   WidthNat$as$0 panelWidth,
   HeightNat$lg$0 panelHeight
 ) implements MouseEvent$174$0{
-  public Object imm$elapsed$0(){ return elapsed; }
-  public Object imm$mouseX$0(){ return mouseX; }
-  public Object imm$mouseY$0(){ return mouseY; }
-  public Object imm$screenWidth$0(){ return screenWidth; }
-  public Object imm$screenHeight$0(){ return screenHeight; }
-  public Object imm$panelWidth$0(){ return panelWidth; }
-  public Object imm$panelHeight$0(){ return panelHeight; }
+  @Override public Object read$elapsed$0(){ return elapsed; }
+  @Override public Object imm$mouseX$0(){ return mouseX; }
+  @Override public Object imm$mouseY$0(){ return mouseY; }
+  @Override public Object read$screenWidth$0(){ return screenWidth; }
+  @Override public Object read$screenHeight$0(){ return screenHeight; }
+  @Override public Object read$panelWidth$0(){ return panelWidth; }
+  @Override public Object read$panelHeight$0(){ return panelHeight; }
 }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
@@ -216,8 +216,8 @@ final class SkMouse extends MouseAdapter{
       frame.elapsed,
       Scopes.x(q.x),
       Scopes.y(q.y),
-      frame.screenSizeW,
-      frame.screenSizeH,
+      frame.screenWidth,
+      frame.screenHeight,
       Scopes.w(pw),
       Scopes.h(ph));
   }

@@ -40,17 +40,17 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
   private void dispatch(String eventKey,List<KeyAction$m8$0> keyActions){
     var elapsed=frame.elapsed;
-    var screenWidth=frame.screenSizeW;
-    var screenHeight=frame.screenSizeH;
-    var windowWidth=w(frame.frame.getWidth());
-    var windowHeight=h(frame.frame.getHeight());
+    var screenWidth=frame.screenWidth;
+    var screenHeight=frame.screenHeight;
+    var panelWidth=w(frame.top.component.getWidth());
+    var panelHeight=h(frame.top.component.getHeight());
 
     frame.frame.queue.submit(new MF$7$1(){
       @Override public Object mut$$hash$0(){
         var run=snapshot(keyActions,eventKey);
         if (run.actions().isEmpty()){ return Void$o$0.instance; }
 
-        var ctx=new CKeyCtx(elapsed,screenWidth,screenHeight,windowWidth,windowHeight,run.key());
+        var ctx=new CKeyCtx(elapsed,screenWidth,screenHeight,panelWidth,panelHeight,run.key());
 
         for (var a:run.actions()){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
@@ -110,14 +110,14 @@ record CKeyCtx(
   Instant$5c$0 elapsed,
   WidthNat$as$0 screenWidth,
   HeightNat$lg$0 screenHeight,
-  WidthNat$as$0 windowWidth,
-  HeightNat$lg$0 windowHeight,
+  WidthNat$as$0 panelWidth,
+  HeightNat$lg$0 panelHeight,
   KeyStroke$m8$0 keyStroke
   ) implements KeyEvent$b4$0{
-  @Override public Object imm$elapsed$0(){ return elapsed; }
-  @Override public Object imm$screenWidth$0(){ return screenWidth; }
-  @Override public Object imm$screenHeight$0(){ return screenHeight; }
-  @Override public Object imm$windowWidth$0(){ return windowWidth; }
-  @Override public Object imm$windowHeight$0(){ return windowHeight; }
+  @Override public Object read$elapsed$0(){ return elapsed; }
+  @Override public Object read$screenWidth$0(){ return screenWidth; }
+  @Override public Object read$screenHeight$0(){ return screenHeight; }
+  @Override public Object read$panelWidth$0(){ return panelWidth; }
+  @Override public Object read$panelHeight$0(){ return panelHeight; }
   @Override public Object imm$keyStroke$0(){ return keyStroke; }
 }

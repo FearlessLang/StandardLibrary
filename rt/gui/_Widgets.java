@@ -298,8 +298,8 @@ class _Frame implements Frame$1c$0{
   AWidget top;
   final int screenW;
   final int screenH;
-  final WidthNat$as$0 screenSizeW;
-  final HeightNat$lg$0 screenSizeH;
+  final WidthNat$as$0 screenWidth;
+  final HeightNat$lg$0 screenHeight;
   private long startNanos = System.nanoTime();// re-based in start(): game time zero = warmup end
   private Nat$c$0 fps = n(30);
   private Nat$c$0 modelFpsVal;
@@ -340,8 +340,8 @@ class _Frame implements Frame$1c$0{
       .getBounds();
     screenW = b.width;
     screenH = b.height;
-    screenSizeW = w(screenW);
-    screenSizeH = h(screenH);
+    screenWidth = w(screenW);
+    screenHeight = h(screenH);
   }
 
   void addTo(JComponent parent, Object scope, Function<_Frame, ? extends AWidget> make){
@@ -686,8 +686,8 @@ class _Frame implements Frame$1c$0{
   @Override public Object read$uTitle$0(){ return UStr$s$0Instance.instance(title); }
   @Override public Object read$fps$0(){ return fps; }
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object read$screenSizeW$0(){ return screenSizeW; }
-  @Override public Object read$screenSizeH$0(){ return screenSizeH; }
+  @Override public Object read$screenWidth$0(){ return screenWidth; }
+  @Override public Object read$screenHeight$0(){ return screenHeight; }
   @Override public Object read$locationX$0(){
     if (!started){ return locationOrErr(locationX); }
     return Scopes.x(onEdtAndWait(frame::getX));

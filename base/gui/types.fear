@@ -260,8 +260,8 @@ Frame:{
   mut .fps(fps: Nat): mut Frame;
   read .fps: Nat;
   read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
-  read .screenSizeW: WidthNat;
-  read .screenSizeH: HeightNat;
+  read .screenWidth: WidthNat;
+  read .screenHeight: HeightNat;
   read .locationX: XInt;
   read .locationY: YInt;
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
@@ -360,12 +360,7 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
     //read .opt: read Opt[read/imm E] -> e.get; //TODO: correctly returning Opt[E], but it is undesirable?
     }};
   }
-KeyEvent:{
-  .elapsed:Instant;
-  .screenWidth:WidthNat;
-  .screenHeight:HeightNat;
-  .windowWidth:WidthNat;
-  .windowHeight:HeightNat;
+KeyEvent:ScreenContext{
   .keyStroke:KeyStroke;
 }
 KeyActions:{#:mut KeyAction->Block#
