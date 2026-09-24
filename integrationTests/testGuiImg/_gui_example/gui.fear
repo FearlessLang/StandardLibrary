@@ -1,6 +1,6 @@
 
 Gui:Consumer[mut Frame]{::
-  .title `Gui buttons replace canvas painter`
+  .title "Gui buttons replace canvas painter"
   .fps 30
 //.modelFps(100)//behaves like a button.
   .contentB{::
@@ -25,23 +25,23 @@ ShapeButtons:Scope[Pane]{::
     .heightGap 12
     .widthGap 12
     .button{::
-      .text `Target`
+      .text "Target"
       .background (Color.rubberDuck)
       .action{this.model.imgTarget}
       }
     .button{::
-      .text `Box`
+      .text "Box"
       .background (Color.alienMint)
       .action{this.model.imgBox}
       }
     .button{::
-      .text `Portal`
+      .text "Portal"
       .background (Color.sleepyBlue)
       .foreground (Color.ghostWhite)
       .action{this.model.imgPortal}
       }
     .button{::
-      .text `Warning`
+      .text "Warning"
       .background (Color.dangerTomato)
       .foreground (Color.ghostWhite)
       .action{this.model.imgWarning}
@@ -100,6 +100,6 @@ PaintWarning:Painter{::
   }
 ShapeHeader:Scope[Pane]{::
     .background (Color.ghostWhite)
-    .label{:: .text `Press buttons to change the image` }
-    .label{:: .text `Buttons below replace the whole Painter of the canvas` }
+    .label{:: .text "Press buttons to change the image" }
+    .label{:: .text "Buttons below replace the whole Painter of the canvas" }
   }

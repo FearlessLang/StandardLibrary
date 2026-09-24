@@ -1,2 +1,2 @@
 use base.Str as Str;
-C:{.text:Str->`CTEXT`;}
+C:{.text:Str->"CTEXT";}

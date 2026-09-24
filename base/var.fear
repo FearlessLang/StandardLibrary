@@ -70,7 +70,7 @@ IsoPod[T]: {
   read .peek[R:iso,imm,mut,read,mutH](f: mut IsoViewer[T, R]): R;//Crucially not readH
   read .look[R:iso,imm,mut,read,mutH](f: mut MF[readH T, R]): R -> this.peek{
     .some x -> f#x;
-    .empty -> Error.msg `The IsoPod was open`;
+    .empty -> Error.msg "The IsoPod was open";
     };
   mut .open: iso T;                ///and makes .isClosed false; errors (deterministically) if already open
   read .isOpen: Bool -> this.isClosed.not;
@@ -102,7 +102,7 @@ IsoViewer[T, R:iso,imm,mut,read,mutH]: {//crucially readH not allowed
 Reprs: {
   #[T](x: iso T, inv: F[read T,Bool]): mut Repr[T] -> Block#
     .openIso _x = x
-    .if {inv#(_x).not} .error {Infos.msg`Invariant does not initially hold`} 
+    .if {inv#(_x).not} .error {Infos.msg"Invariant does not initially hold"} 
     .return{mut Repr[T]: {'self
       mut .mutate[R:iso,imm,mut,read](f: mut MF[mutH T,R]): R -> _IdOrErr#(f#(_x),inv#(_x),_ReprCacheFlush#(self));
       read .look[R](f: read F[read T,R]): R -> f#(_x);
@@ -112,7 +112,7 @@ Reprs: {
   }
 
 _IdOrErr: {#[R:iso,imm,mut,read](r:R,b:Bool,_:Void):R->Block#(//Needed for the iso case of R
-  b?{.then->Void; .else->Error.msg`Invariant does not hold after mutation`},
+  b?{.then->Void; .else->Error.msg"Invariant does not hold after mutation"},
   r
   )}
 

@@ -6,22 +6,22 @@ use base.Str as Str;
 use base.InMemoryLog as InMemoryLog;
 use base.FileLog as FileLog;
 
-Steps: InMemoryLog[Str]{`steps`}
-PkgLog: FileLog{`logging`}
-MyLog[T]:FileLog{`bah`}
+Steps: InMemoryLog[Str]{"steps"}
+PkgLog: FileLog{"logging"}
+MyLog[T]:FileLog{"bah"}
 
 LoggingExample: UnitTests {
   .tests t-> t.checkWithSys{sys-> Block#
-    .do{ Log.log(`starting logging example`) }
-    .do{ Steps.log(`step 1`) }
-    .do{ Log.log(`processed item 1`) }
-    .do{ Steps.log(`step 2`) }
-    .do{ Log.log(`processed item 2`) }
-    .do{ Steps.log(`step 3`) }
-    .do{ Log.log(`processed item 3`) }
-    .do{ Log.log(`finished`) }
-    .do{ PkgLog.log(`package-specific log entry`) }
-    .do{ Steps.reader(sys).consume.assertEq({::},Lists#(`step 1`,`step 2`,`step 3`)) }
+    .do{ Log.log("starting logging example") }
+    .do{ Steps.log("step 1") }
+    .do{ Log.log("processed item 1") }
+    .do{ Steps.log("step 2") }
+    .do{ Log.log("processed item 2") }
+    .do{ Steps.log("step 3") }
+    .do{ Log.log("processed item 3") }
+    .do{ Log.log("finished") }
+    .do{ PkgLog.log("package-specific log entry") }
+    .do{ Steps.reader(sys).consume.assertEq({::},Lists#("step 1","step 2","step 3")) }
     .done
-    }.checkNonDetErr({::},{MyLog[Str].log(`should not work`)})
+    }.checkNonDetErr({::},{MyLog[Str].log("should not work")})
   }

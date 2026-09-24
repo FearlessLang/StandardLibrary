@@ -27,83 +27,83 @@ Foo:base.Main{s->Block#
   .done
   }
 Gui01:Consumer[mut Frame]{::
-  .title `Gui01: two labels`
+  .title "Gui01: two labels"
   .content{::
-    .label{:: .text `Hello` }
-    .label{:: .text `World` }
+    .label{:: .text "Hello" }
+    .label{:: .text "World" }
     }
   }
 Gui02:Consumer[mut Frame]{::
-  .title `Gui02: many labels in flow`
+  .title "Gui02: many labels in flow"
   .content{::
-    .label{:: .text `One` }
-    .label{:: .text `Two` }
-    .label{:: .text `Three` }
-    .label{:: .text `Four` }
-    .label{:: .text `Five` }
-    .label{:: .text `Six` }
-    .label{:: .text `Seven` }
-    .label{:: .text `Eight` }
-    .label{:: .text `Nine` }
-    .label{:: .text `Ten` }
+    .label{:: .text "One" }
+    .label{:: .text "Two" }
+    .label{:: .text "Three" }
+    .label{:: .text "Four" }
+    .label{:: .text "Five" }
+    .label{:: .text "Six" }
+    .label{:: .text "Seven" }
+    .label{:: .text "Eight" }
+    .label{:: .text "Nine" }
+    .label{:: .text "Ten" }
     }
   }
 
 Gui03:Consumer[mut Frame]{::
-  .title `Gui03: nested panes with colors`
+  .title "Gui03: nested panes with colors"
   .content{::
     .background (Color.ghostWhite)
     .pane{::
       .background (Color.rubberDuck)
-      .label{:: .text `row 1 / left` }
-      .label{:: .text `row 1 / right` }
+      .label{:: .text "row 1 / left" }
+      .label{:: .text "row 1 / right" }
       }
     .pane{::
       .background (Color.sleepyBlue)
-      .label{:: .text `row 2 / left`.foreground (Color.ghostWhite) }
-      .label{:: .text `row 2 / middle`.foreground (Color.ghostWhite) }
-      .label{:: .text `row 2 / right`.foreground (Color.ghostWhite) }
+      .label{:: .text "row 2 / left".foreground (Color.ghostWhite) }
+      .label{:: .text "row 2 / middle".foreground (Color.ghostWhite) }
+      .label{:: .text "row 2 / right".foreground (Color.ghostWhite) }
       }
     }
   }
 
 Gui04:Consumer[mut Frame]{::
-  .title `Gui04: border layout with colors`
+  .title "Gui04: border layout with colors"
   .contentB{::
     .background (Color.ghostWhite)
     .north{:: 
       .background (Color.rubberDuck)
-      .label{:: .text `north` } }
+      .label{:: .text "north" } }
     .west{:: 
       .background (Color.goblinGreen)
-      .label{:: .text `west` } }
+      .label{:: .text "west" } }
     .center{:: 
       .background (Color.sleepyBlue)
-      .label{:: .text `center`.foreground (Color.ghostWhite) } }
+      .label{:: .text "center".foreground (Color.ghostWhite) } }
     .east{:: 
       .background (Color.lavaOrange)
-      .label{:: .text `east` } }
+      .label{:: .text "east" } }
     .south{:: 
       .background (Color.wizardPurple)
-      .label{:: .text `south`.foreground (Color.ghostWhite) } }
+      .label{:: .text "south".foreground (Color.ghostWhite) } }
     }
   }
 
 
 Gui05:Consumer[mut Frame]{::
-  .title `Gui05: buttons`
+  .title "Gui05: buttons"
   .content{::
-    .label{:: .text `Clicking buttons should not crash` }
-    .button{:: .text `button A`.action{Debug#"Button A Pressed" } }
-    .button{:: .text `button B`.action{Debug#"Button B Pressed" } }
-    .button{:: .text `button C`.action{Debug#"Button C Pressed" } }
+    .label{:: .text "Clicking buttons should not crash" }
+    .button{:: .text "button A".action{Debug#"Button A Pressed" } }
+    .button{:: .text "button B".action{Debug#"Button B Pressed" } }
+    .button{:: .text "button C".action{Debug#"Button C Pressed" } }
     }
   }
 Gui06:Consumer[mut Frame]{::
-  .title `Gui06: mouse handlers`
+  .title "Gui06: mouse handlers"
   .content{::
     .background (Color.ghostWhite)
-    .label{:: .text `Move/click inside the window, then close` }
+    .label{:: .text "Move/click inside the window, then close" }
     .pane{::
       .width 360
       .height 180
@@ -122,49 +122,49 @@ Gui06:Consumer[mut Frame]{::
   }
 
 Gui07:Consumer[mut Frame]{::
-  .title `Gui07: key bindings`
+  .title "Gui07: key bindings"
   .onKey{::
     .pressed{::
-      .matchOnly (Key#`A`)
+      .matchOnly (Key#"A")
       .doOnly{ e-> Debug#"pressed A" }
       }
     .released{::
-      .matchOnly (Key#`A`)
+      .matchOnly (Key#"A")
       .doOnly{ e-> Debug#"released A" }
       }
     .pressed{::
-      .matchOnly (Key#`SPACE`)
+      .matchOnly (Key#"SPACE")
       .doOnly{ e-> Debug#"pressed SPACE" }
       }
     .pressed{::
-      .matchOnly (Key#`ENTER`)
+      .matchOnly (Key#"ENTER")
       .doOnly{ e-> Debug#"pressed ENTER" }
       }
     .pressed{::
-      .matchOnly (Key#`LEFT`)
+      .matchOnly (Key#"LEFT")
       .doOnly{ e-> Debug#"pressed LEFT" }
       }
     .pressed{::
-      .matchOnly (Key#`RIGHT`)
+      .matchOnly (Key#"RIGHT")
       .doOnly{ e-> Debug#"pressed RIGHT" }
       }
     }
   .content{::
     .background (Color.ghostWhite)
-    .label{:: .text `Press A, SPACE, ENTER, LEFT, RIGHT` }
-    .label{:: .text `Then click the button and try the keys again` }
-    .button{:: .text `click me`.action{Debug#"button clicked"} }
+    .label{:: .text "Press A, SPACE, ENTER, LEFT, RIGHT" }
+    .label{:: .text "Then click the button and try the keys again" }
+    .button{:: .text "click me".action{Debug#"button clicked"} }
     }
   }
 
 Gui08:Consumer[mut Frame]{
   mut .slot: mut Slot[mut Label];
   ::
-  .title `Gui08: button mutates label`
+  .title "Gui08: button mutates label"
   .content{::
     .background (Color.ghostWhite)
    .label{::
-      .text `Hello`
+      .text "Hello"
       .width 500
       .height 80
       .textHeight 24
@@ -172,23 +172,23 @@ Gui08:Consumer[mut Frame]{
       .save (this.slot)
       }
     .button{::
-      .text `Add !`
+      .text "Add !"
       .action{
-        Block#(this.slot!.text ((this.slot!.text) + `!`),Void)
+        Block#(this.slot!.text ((this.slot!.text) + "!"),Void)
         }
       }
     }
   }
 
 Gui09:Consumer[mut Frame]{::
-  .uTitle (`Gui09: unicode text `.u `1F30D`)
+  .uTitle ("Gui09: unicode text ".u "1F30D")
   .content{::
     .background (Color.ghostWhite)
-    .label{:: .uText (`Latin caf`.u `00E9 0020 00DF 0020 0141 00F3 0064 017A 0020 0391 03B8 03AE 03BD 03B1 0020 041C 043E 0441 043A 0432 0430`) }
-    .label{:: .uText (``.u `0645 0631 062D 0628 0627 0020 05E9 05DC 05D5 05DD 0020 0928 092E 0938 094D 0924 0947 0020 0E2A 0E27 0E31 0E2A 0E14 0E35`) }
-    .label{:: .uText (``.u `4F60 597D 4E16 754C 0020 3053 3093 306B 3061 306F 0020 D55C AD6D C5B4`) }
-    .label{:: .uText (``.u `2200 0078 2208 211D 003A 0020 2211 222B 0020 2192 0020 25A0 25B2 25CF 0020 2660 2665`) }
-    .label{:: .uText (``.u `1F600 0020 2764 FE0F 0020 1F468 200D 1F469 200D 1F467 0020 1F1F3 1F1FF 0020 1F44D 1F3FD`).textHeight 32 }
-    .button{:: .uText (`Press `.u `1F680`).action{Debug#"rocket pressed"} }
+    .label{:: .uText ("Latin caf".u "00E9 0020 00DF 0020 0141 00F3 0064 017A 0020 0391 03B8 03AE 03BD 03B1 0020 041C 043E 0441 043A 0432 0430") }
+    .label{:: .uText ("".u "0645 0631 062D 0628 0627 0020 05E9 05DC 05D5 05DD 0020 0928 092E 0938 094D 0924 0947 0020 0E2A 0E27 0E31 0E2A 0E14 0E35") }
+    .label{:: .uText ("".u "4F60 597D 4E16 754C 0020 3053 3093 306B 3061 306F 0020 D55C AD6D C5B4") }
+    .label{:: .uText ("".u "2200 0078 2208 211D 003A 0020 2211 222B 0020 2192 0020 25A0 25B2 25CF 0020 2660 2665") }
+    .label{:: .uText ("".u "1F600 0020 2764 FE0F 0020 1F468 200D 1F469 200D 1F467 0020 1F1F3 1F1FF 0020 1F44D 1F3FD").textHeight 32 }
+    .button{:: .uText ("Press ".u "1F680").action{Debug#"rocket pressed"} }
     }
   }

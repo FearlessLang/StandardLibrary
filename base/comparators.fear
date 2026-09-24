@@ -74,34 +74,34 @@ OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr. 
   read .hash: Nat;
   read .close(t: read T): read OrderHash[T];
   
-  read .assertEq(expected: read T): Void -> this.assertEq(expected,{``});
+  read .assertEq(expected: read T): Void -> this.assertEq(expected,{""});
   read .assertEq(expected: read T, msg: read LazyInfo): Void ->
     Assert.expectedActual(this == expected, msg,(this.close expected), this);
 
-  read .assertNotEq(expected: read T): Void -> this.assertNotEq(expected,{``});
+  read .assertNotEq(expected: read T): Void -> this.assertNotEq(expected,{""});
   read .assertNotEq(expected: read T, msg: read LazyInfo): Void -> Assert!(
     this != expected,
-    { msg#.info + (`Unexpected equality between` | `Expected: `+(this.close(expected)) | `Actual: `+this .info) });
+    { msg#.info + ("Unexpected equality between" | "Expected: "+(this.close(expected)) | "Actual: "+this .info) });
 
-  read .assertLt(x: read T): Void -> this.assertLt(x,{``});
+  read .assertLt(x: read T): Void -> this.assertLt(x,{""});
   read .assertLt(x: read T, msg: read LazyInfo): Void -> Assert!(
     this < x,
-    { msg#.info + ( `Expected: `+this | ` < `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " < "+(this.close(x)) .info) });
     
-  read .assertLe(x: read T): Void -> this.assertLe(x,{``});
+  read .assertLe(x: read T): Void -> this.assertLe(x,{""});
   read .assertLe(x: read T, msg: read LazyInfo): Void -> Assert!(
     this <= x,
-    { msg#.info + ( `Expected: `+this | ` <= `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " <= "+(this.close(x)) .info) });
 
-  read .assertGt(x: read T): Void -> this.assertGt(x,{``});
+  read .assertGt(x: read T): Void -> this.assertGt(x,{""});
   read .assertGt(x: read T, msg: read LazyInfo): Void -> Assert!(
     this > x,
-    { msg#.info + ( `Expected: `+this | ` > `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " > "+(this.close(x)) .info) });
 
-  read .assertGe(x: read T): Void -> this.assertGe(x,{``});
+  read .assertGe(x: read T): Void -> this.assertGe(x,{""});
   read .assertGe(x: read T, msg: read LazyInfo): Void -> Assert!(
     this >= x,
-    { msg#.info + ( `Expected: `+this | ` >= `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " >= "+(this.close(x)) .info) });
   }
 
 OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashable+printable

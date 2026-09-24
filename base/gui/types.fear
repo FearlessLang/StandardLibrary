@@ -352,7 +352,7 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
     mut  !: E -> e.get!;
     read !: read/imm E -> e.get!;
     mut .fill(x: E): Void -> e.set(e.get.match{
-      .some _ -> Error.msg `Slot was already full`;
+      .some _ -> Error.msg "Slot was already full";
       .empty  -> Opts#x;
       });
     read .isFull: Bool -> e.get.isSome;

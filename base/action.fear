@@ -30,10 +30,10 @@ Action[T:*]: {
 
   mut .assertOk: Void -> this.run{
     .ok _ -> {};
-    .info i -> Assert.msg(`Success expected but an Info was thrown:` | i.str);
+    .info i -> Assert.msg("Success expected but an Info was thrown:" | i.str);
   };
   mut .assertInfo: Void -> this.run{
-    .ok _ -> Assert.msg `Failure expected but nothing was thrown`;
+    .ok _ -> Assert.msg "Failure expected but nothing was thrown";
     .info _->{};
     };
 

@@ -15,11 +15,11 @@ Ranges: F[Nat,Nat,mut Range] {min, max -> Block#
   read .max: Nat -> minMax.look{r -> r.max};
   mut .min(n: Nat): Void -> minMax.mutate{r -> r.min(n)};
   mut .max(n: Nat): Void -> minMax.mutate{r -> r.max(n)};
-  read .str: Str -> minMax.cachableLook{r -> `[`+(r.min)+`-`+(r.max)+`]`};
+  read .str: Str -> minMax.cachableLook{r -> "["+(r.min)+"-"+(r.max)+"]"};
   }}}
 
 TestReprTests: Test {::
-  .check{Ranges#(1,2).str.assertEq (`[1-2]`)}
+  .check{Ranges#(1,2).str.assertEq ("[1-2]")}
   }
 
 TestRepr: Test {::

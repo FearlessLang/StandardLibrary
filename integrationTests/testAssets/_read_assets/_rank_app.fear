@@ -20,7 +20,7 @@ AssetTextReadAsciiPlainFiles: Test { ::
   .checkWithSys { s->
     AutoLoadTestText
       .readStrUtf8(s.assetRead,UnexpectedBadStr)
-      .assertEq `Hello! We are automatically reading this file!`
+      .assertEq "Hello! We are automatically reading this file!"
     }
   .checkWithSys { s->
     GoodAsciiStr#(AssetTextGoodAscii.readStrUtf8(s.assetRead,UnexpectedBadStr))
@@ -43,7 +43,7 @@ AssetTextReadAsciiPlainFiles: Test { ::
   .checkWithSys { s->
     AutoZipLoadSubTestTextInZip
       .readStrUtf8(s.assetRead,UnexpectedBadStr)
-      .assertEq `Hello! We are automatically reading this file from a zip!`
+      .assertEq "Hello! We are automatically reading this file from a zip!"
     }
   }
 
@@ -59,57 +59,57 @@ AssetTextReadAsciiRepeatedRead: Test { ::
 
 AssetTextReadAsciiConsumeProtocol: Test { ::
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-1`,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-1",UnexpectedBadStr))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)),
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-2",UnexpectedBadStr)),
     sys.try#{
-      AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-2`,UnexpectedBadStr)
+      AssetTextGoodAscii.consumeStrUtf8("ascii-consume-2",UnexpectedBadStr)
       }.assertInfo)}
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-3a`,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-3a",UnexpectedBadStr))
     }
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8(`ascii-consume-3b`,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-3b",UnexpectedBadStr))
     }
   .check {
-    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8(`ascii-consume-4`,UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8("ascii-consume-4",UnexpectedBadUStr))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)),
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8("ascii-consume-5",UnexpectedBadUStr)),
     sys.try#{
-      AssetTextGoodAscii.consumeUStrUtf8(`ascii-consume-5`,UnexpectedBadUStr)
+      AssetTextGoodAscii.consumeUStrUtf8("ascii-consume-5",UnexpectedBadUStr)
       }.assertInfo)}
   }
 
 AssetOriginalFileName: Test { ::
-  .check { AutoLoadTestText.originalFileName.assertEq `test_text.txt` }
-  .check { AssetTextGoodAscii.originalFileName.assertEq `good_ascii.txt` }
-  .check { AutoZipLoadSubTestTextInZip.originalFileName.assertEq `test_text_in_zip.txt` }
+  .check { AutoLoadTestText.originalFileName.assertEq "test_text.txt" }
+  .check { AssetTextGoodAscii.originalFileName.assertEq "good_ascii.txt" }
+  .check { AutoZipLoadSubTestTextInZip.originalFileName.assertEq "test_text_in_zip.txt" }
   }
 
-GoodAsciiStr: F[Str,Void] { ::.assertEq `Hello safe Str!` }
+GoodAsciiStr: F[Str,Void] { ::.assertEq "Hello safe Str!" }
 
-GoodAsciiUStr: F[UStr,Void] { ::.scalarHex.assertEq `0048 0065 006C 006C 006F 0020 0073 0061 0066 0065 0020 0053 0074 0072 0021`}
+GoodAsciiUStr: F[UStr,Void] { ::.scalarHex.assertEq "0048 0065 006C 006C 006F 0020 0073 0061 0066 0065 0020 0053 0074 0072 0021"}
 
 UnexpectedBadStr: BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
-  `[unexpected recovery:`
+  "[unexpected recovery:"
   + (BadTextReasonName#reason)
-  + `:`
+  + ":"
   + byteOffset
-  + `:`
+  + ":"
   + byteLength
-  + `:`
+  + ":"
   + rejectedValue
-  + `]`
+  + "]"
   }
 
 UnexpectedBadUStr: BadUStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
   (UnexpectedBadStr#(reason,byteOffset,byteLength,rejectedValue)).u
   }
 BadTextReasonName: F[BadTextReason,Str] { ::.match {
-  .malformedEncoding -> `malformedEncoding`;
-  .truncatedEncoding -> `truncatedEncoding`;
-  .notScalar -> `notScalar`;
-  .notInStr -> `notInStr`;
+  .malformedEncoding -> "malformedEncoding";
+  .truncatedEncoding -> "truncatedEncoding";
+  .notScalar -> "notScalar";
+  .notInStr -> "notInStr";
   }}

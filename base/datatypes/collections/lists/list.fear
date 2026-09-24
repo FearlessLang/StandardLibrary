@@ -7,14 +7,14 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .isEmpty->True;
 
   /// Only assert if the method is .assertXXX
-  .get(i)->Error.msg `List.get: called on empty list`;
-  .tryGet(i)->Actions.msg `List.get: called on empty list`;
+  .get(i)->Error.msg "List.get: called on empty list";
+  .tryGet(i)->Actions.msg "List.get: called on empty list";
   .opt(i)->{};
 
-  .getFirst->Error.msg `List.get: .first called on empty list`;
-  .getLast->Error.msg `List.get: .last called on empty list`;
-  .tryGetFirst->Actions.msg `List.get: .first called on empty list`;
-  .tryGetLast->Actions.msg `List.get: .last called on empty list`;
+  .getFirst->Error.msg "List.get: .first called on empty list";
+  .getLast->Error.msg "List.get: .last called on empty list";
+  .tryGetFirst->Actions.msg "List.get: .first called on empty list";
+  .tryGetLast->Actions.msg "List.get: .last called on empty list";
   .first->{};
   .last->{};
 
@@ -27,20 +27,20 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   read +> e->Lists.singletonRead[E](e);
   
   .subList(start,end) -> Block#
-    .if{start!=0 || {end!=0}} .error{`.subList(`+start+`, `+end+`) called on empty list`}
+    .if{start!=0 || {end!=0}} .error{".subList("+start+", "+end+") called on empty list"}
     .return {{}};
 
   .subList(start)->this.subList(start,this.size);
 
-  .with(i,e)->Error.msg `.with called on empty list`;
+  .with(i,e)->Error.msg ".with called on empty list";
   mut .withAlso(i,e)->Block#
-    .if {i!=0} .error{`.withAlso(`+i+`, _) called on empty list`}
+    .if {i!=0} .error{".withAlso("+i+", _) called on empty list"}
     .return{Lists#e};
   read .withAlso(i,e)->Block#
-    .if {i!=0} .error{`.withAlso(`+i+`, _) called on empty list`}
+    .if {i!=0} .error{".withAlso("+i+", _) called on empty list"}
     .return{Lists.singletonRead[E]e};
 
-  .without(i)->Error.msg `.without called on empty list`;
+  .without(i)->Error.msg ".without called on empty list";
 
   .reverse->{};
 
@@ -52,7 +52,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .as f ->{};
 
   .imm by->{};
-  .str by->`[]`;
+  .str by->"[]";
   .info by->Block#
     .if {this.isEmpty} .return {Info}
     .let list= {this.flow.map{e->by#e.info}.list.as{::}}

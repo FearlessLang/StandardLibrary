@@ -18,7 +18,7 @@ ScanViaActorDirectPush: {
 
 LimitViaActorMut: {
   #[E:*](es: mut Flow[E], n: Nat): mut Flow[E] -> n == 0 ? {
-    .then -> Error.msg`.limit 0 asks a whole chain of stages for no elements`;
+    .then -> Error.msg".limit 0 asks a whole chain of stages for no elements";
     .else -> es.actorMut[mut base.Count[Nat], E](base.Count.nat n, {down, s, e -> Block#(
       down.push#(down, e),
       s--,

@@ -170,20 +170,20 @@ MaxMinTests: Test {::
   .check{Math.max({::}, 1, 2).assertEq(2)}
   .check{Math.min({::}, 2, 1).assertEq(1)}
   .check{
-    Math.max({::.age}, _Persons#(`Alice`, 32), _Persons#(`Bob`, 8))
-      .name.assertEq(`Alice`)
+    Math.max({::.age}, _Persons#("Alice", 32), _Persons#("Bob", 8))
+      .name.assertEq("Alice")
     }
   .check{
-    Math.min({::.age}, _Persons#(`Alice`, 32), _Persons#(`Bob`, 8))
-      .name.assertEq(`Bob`)
+    Math.min({::.age}, _Persons#("Alice", 32), _Persons#("Bob", 8))
+      .name.assertEq("Bob")
     }
   .check{
-    Math.min({::.age}, _Persons#(`Carol`, 32), _Persons#(`Daniel`, 32))
-      .name.assertEq(`Carol`)
+    Math.min({::.age}, _Persons#("Carol", 32), _Persons#("Daniel", 32))
+      .name.assertEq("Carol")
     }
   .check{
-    Math.max({::.age}, _Persons#(`Carol`, 32), _Persons#(`Daniel`, 32))
-      .name.assertEq(`Carol`)
+    Math.max({::.age}, _Persons#("Carol", 32), _Persons#("Daniel", 32))
+      .name.assertEq("Carol")
     }
   }
 

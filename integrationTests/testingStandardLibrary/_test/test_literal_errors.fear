@@ -21,22 +21,22 @@ ThrowListTests: Test {::
   .checkDetErr({::}, {List[Str].get 0})
   .checkDetErr({::}, {List[Str].getFirst})
   .checkDetErr({::}, {List[Str].getLast})
-  .checkDetErr({::}, {List[Str].with(0,`x`)})
+  .checkDetErr({::}, {List[Str].with(0,"x")})
   .checkDetErr({::}, {List[Str].without 0})
-  .checkDetErr({::}, {List[Str].withAlso(1,`x`)})
-  .checkDetErr({::}, {Lists#(`a`).get 1})
-  .checkDetErr({::}, {Lists#(`a`).without 1})
-  .checkDetErr({::}, {Lists#(`a`).with(1,`b`)})
-  .checkDetErr({::}, {Lists#(`a`).withAlso(2,`b`)})
-  .checkDetErr({::}, {Lists#(`a`,`b`).subList(0,3)})
+  .checkDetErr({::}, {List[Str].withAlso(1,"x")})
+  .checkDetErr({::}, {Lists#("a").get 1})
+  .checkDetErr({::}, {Lists#("a").without 1})
+  .checkDetErr({::}, {Lists#("a").with(1,"b")})
+  .checkDetErr({::}, {Lists#("a").withAlso(2,"b")})
+  .checkDetErr({::}, {Lists#("a","b").subList(0,3)})
   .checkDetErr({::}, {List[Str].subList(0,3)})
   }
 
 ThrowMapTests: Test {::
-  .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.get `a`})
-  .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.without `a`})
-  .checkDetErr({::}, {Maps#({::}, `a`, `x`).get `b`})
-  .checkDetErr({::}, {Maps#({::}, `a`, `x`).without `b`})
+  .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.get "a"})
+  .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.without "a"})
+  .checkDetErr({::}, {Maps#({::}, "a", "x").get "b"})
+  .checkDetErr({::}, {Maps#({::}, "a", "x").without "b"})
   }
 
 TestLiteralErrors: Test {::

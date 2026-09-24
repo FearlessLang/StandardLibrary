@@ -62,7 +62,7 @@ DataTypeBy[E,K,K0]: ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K] {
       });
 
     .hash by -> this#by.hash.hashWith(next#by.hash);
-    .str  by -> this#by.str + `, ` + (next#by.str);
+    .str  by -> this#by.str + ", " + (next#by.str);
     .info by -> this#by.info + (next#by.info);
     .imm  by -> mergeImm#(this#by.imm, next#by.imm);
     };

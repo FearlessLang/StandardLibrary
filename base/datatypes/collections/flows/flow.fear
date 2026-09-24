@@ -72,11 +72,11 @@ Flow[E:*]: {
   mut .get:   E -> this.tryGet!;//get the first element if size==1, throws otherwise
   mut .tryGet: mut Action[E] -> this.list |> {xs -> xs.size == 1 ? {
     .then -> Actions.ok(xs.getFirst);
-    .else -> Actions.msg(`Flow.get: the flow has `+(xs.size)+` elements, but .get needs exactly one`)}};
+    .else -> Actions.msg("Flow.get: the flow has "+(xs.size)+" elements, but .get needs exactly one")}};
   mut .getOpt:   mut Opt[E] -> this.tryGetOpt!;//opt of the first element if size in {0,1} throws otherwise
   mut .tryGetOpt: mut Action[mut Opt[E]] -> this.list |> {xs -> xs.size <= 1 ? {
     .then -> Actions.ok(xs.first);
-    .else -> Actions.msg(`Flow.getOpt: the flow has `+(xs.size)+` elements, but .getOpt needs at most one`)}};
+    .else -> Actions.msg("Flow.getOpt: the flow has "+(xs.size)+" elements, but .getOpt needs at most one")}};
   mut .first: mut Opt[E]; //opt of the first element
   /// `this.last` returns the last element in the flow, consuming `this`.
   /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(a))``
@@ -104,16 +104,16 @@ Flow[E:*]: {
     cont: mut FlowContinuation[E,DR,R]
   ): R-> this.list|>{xs->cont#(x#xs, xs)};
   // --Still to implement
-  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg`TODO`;
+  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg"TODO";
   /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
   /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.
   /// ``f`` answers `Continue` to be handed the next element, or `Break` to stop:
   /// the element after the current one is never pulled.
-  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg`TODO`;
+  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg"TODO";
   /// ``this.actorMut(state, f)`` is `Flow.actor` with the sink and the state handed
   /// over hygienically, which is what lets the emitted elements be ``mut``.
   /// See `ActorSink` for how such a sink is pushed to.
-  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg`TODO`;
-  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg`TODO`;
-  mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg`TODO`;
+  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg"TODO";
+  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg"TODO";
+  mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg"TODO";
   }

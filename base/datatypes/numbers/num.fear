@@ -203,16 +203,16 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 
   /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{2/1 .assertInRange((1/1)=~~=(4/1))}
-  .assertInRange(range: NumRange): Void -> this.assertInRange(range, {``});
+  .assertInRange(range: NumRange): Void -> this.assertInRange(range, {""});
 
   /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   //>   .check{(2/1) .assertInRange((1/1)=~~=(4/1), {`custom context`})}
   .assertInRange(range: NumRange, msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
-    { msg#.info + (`Expected in range: `+ (range.str)
-      | `lo: `+(range.start)
-      | `hi: `+(range.end)
-      | `actual: `+ this
+    { msg#.info + ("Expected in range: "+ (range.str)
+      | "lo: "+(range.start)
+      | "hi: "+(range.end)
+      | "actual: "+ this
       .info)});
 
   /// ``this.clampTo(range)`` returns `this` clamped into `range` (delegates to `range.clamp`).
