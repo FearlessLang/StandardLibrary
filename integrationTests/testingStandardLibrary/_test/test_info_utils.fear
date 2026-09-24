@@ -68,63 +68,65 @@ InfoTests: Test {::
   .check{Infos.msg "A".validate{::.isMsg{::.contains "A"} & .isMsg{::.contains "B"}}.assertFalse}
   .check{Infos.msg "B".validate{::.isMsg{::.contains "A"}& .isMsg{::.contains "B"}}.assertFalse}
   .check{Infos.msg "B".extract{:: > 0}.assertEmpty{::}}
+  .checkEq(`"hi"`, {Infos.msg "hi" .prettyStr})
+  .checkEq("null", {Infos.msg "" .prettyStr})
+  .checkEq("{" | "  a: [" | `    "x",` | `    "y"` | "  ]" | "}", {Infos.map("a", Infos.list("x", "y")).prettyStr})
   }
 
 InfoValidatorTests: Test {::
   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-  .check{info.validate{::} .assertTrue}
-  .check{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}} .assertTrue}
-  .check{info.validate{::
+  .checkTrue{info.validate{::}}
+  .checkTrue{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}}}
+  .checkTrue{info.validate{::
     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
     & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-    } .assertTrue}
-  .check{info.validate{:: > "friends" .isList{::.size == 2}} .assertTrue}
-  .check{info.validate{::
+    }}
+  .checkTrue{info.validate{:: > "friends" .isList{::.size == 2}}}
+  .checkFalse{info.validate{::
     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
     | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-    & > "friends" > 2 > "name" .isMsg{:: == "David"}} .assertFalse}
-  .check{info.validate{:: > "friends" .where{::
+    & > "friends" > 2 > "name" .isMsg{:: == "David"}}}
+  .checkFalse{info.validate{:: > "friends" .where{::
     & > 0 > "name" .isMsg{:: == "Bob"}
     | > 1 > "name" .isMsg{:: == "Alice"}
-    & > 2 > "name" .isMsg{:: == "David"}}} .assertFalse}
-  .check{info.validate{::
+    & > 2 > "name" .isMsg{:: == "David"}}}}
+  .checkTrue{info.validate{::
     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
     | > "friends" .where{::
       & > 1 > "name" .isMsg{:: == "Alice"}
-      & > 2 > "name" .isMsg{:: == "David"}}} .assertTrue}
-  .check{info.validate{::
+      & > 2 > "name" .isMsg{:: == "David"}}}}
+  .checkTrue{info.validate{::
     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-    & > "friends" > 1 > "name" .isMsg{:: == "David"} .not} .assertTrue}
-  .check{info.validate{:: > "friends" > 1 > "name" .isMsg{:: == "Alice"} .not} .assertFalse}
-  .check{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "Alice"}}}.isSome .assertTrue}
-  .check{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "David"}}}.isEmpty .assertTrue}
-  .check{info.extract{:: .extractMap .where{:: > "friends" .isList}}.isSome .assertTrue}
-  .check{info.extract{:: .extractMap .where{:: > "enemies" .isList}}.isEmpty .assertTrue}
+    & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
+  .checkFalse{info.validate{:: > "friends" > 1 > "name" .isMsg{:: == "Alice"} .not}}
+  .checkTrue{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "Alice"}}}.isSome}
+  .checkTrue{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "David"}}}.isEmpty}
+  .checkTrue{info.extract{:: .extractMap .where{:: > "friends" .isList}}.isSome}
+  .checkTrue{info.extract{:: .extractMap .where{:: > "enemies" .isList}}.isEmpty}
   .checkDetErr({::.isMsg{::.startsWith "Info.getList:"}}, {Infos.msg "hi" .getList})
   .check{Infos.msg "hi" .tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
   }
 
 InfoExtractorTests: Test {::
   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-  .check{info.extract{::}! .assertEq info}
-  .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}! .assertEq "bob"}
-  .check{info.extract{:: > "friends" .extractList .where{::
+  .checkEq(info, {info.extract{::}!})
+  .checkEq("bob", {info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}!})
+  .checkEq("Bob, Alice", {info.extract{:: > "friends" .extractList .where{::
       & > 0 > "name" .isMsg{:: == "Bob"}
       & > 1 > "name" .isMsg{:: == "Alice"}
       }}
-    .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!
-    .assertEq "Bob, Alice"}
-  .check{info.extract{:: > "friends" .extractList .where{::
+    .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!})
+  .checkTrue{info.extract{:: > "friends" .extractList .where{::
       & > 0 > "name" .isMsg{:: == "Bob"}
       & > 1 > "name" .isMsg{:: == "David"}
-      }}.isEmpty .assertTrue}
-  .check{info.extract{:: > "friends" > 2}.isEmpty .assertTrue}
-  .check{info.extract{:: > "friends" > 0 > "name" .extractMsg{:: == "Alice"}}.isEmpty .assertTrue}
-  .check{info.extract{:: .extractMap > "friends" .extractList > 1 > "name" .extractMsg}! .assertEq "Alice"}
-  .check{info.extract{:: > "friends" .extractMsg}.isEmpty .assertTrue}
-  .check{Infos.msg "" .extract{::.extractEmpty}.isSome .assertTrue}
-  .check{info.extract{::.extractEmpty}.isEmpty .assertTrue}
-  .check{(InfoValidators#info > "enemies").extract{::}.isEmpty .assertTrue}
-  .check{(InfoValidators#info > "friends").extract{:: > "friends" > 0 > "name" .extractMsg}! .assertEq "Bob"}
+      }}.isEmpty}
+  .checkTrue{info.extract{:: > "friends" > 2}.isEmpty}
+  .checkTrue{info.extract{:: > "friends" > 0 > "name" .extractMsg{:: == "Alice"}}.isEmpty}
+  .checkEq({::}, Opts# "Alice", {info.extract{:: .extractMap > "friends" .extractList > 1 > "name" .extractMsg}})
+  .checkTrue{info.extract{:: > "friends" .extractMsg}.isEmpty}
+  .checkTrue{Infos.msg "" .extract{::.extractEmpty}.isSome}
+  .checkTrue{info.extract{::.extractEmpty}.isEmpty}
+  .checkTrue{(InfoValidators#info > "enemies").extract{::}.isEmpty}
+  .checkEq("Bob", {(InfoValidators#info > "friends").extract{:: > "friends" > 0 > "name" .extractMsg}!})
   }
 
