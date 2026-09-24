@@ -104,3 +104,27 @@ InfoValidatorTests: Test {::
   .check{Infos.msg "hi" .tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
   }
 
+InfoExtractorTests: Test {::
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .check{info.extract{::}! .assertEq info}
+  .check{info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}! .assertEq "bob"}
+  .check{info.extract{:: > "friends" .extractList .where{::
+      & > 0 > "name" .isMsg{:: == "Bob"}
+      & > 1 > "name" .isMsg{:: == "Alice"}
+      }}
+    .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!
+    .assertEq "Bob, Alice"}
+  .check{info.extract{:: > "friends" .extractList .where{::
+      & > 0 > "name" .isMsg{:: == "Bob"}
+      & > 1 > "name" .isMsg{:: == "David"}
+      }}.isEmpty .assertTrue}
+  .check{info.extract{:: > "friends" > 2}.isEmpty .assertTrue}
+  .check{info.extract{:: > "friends" > 0 > "name" .extractMsg{:: == "Alice"}}.isEmpty .assertTrue}
+  .check{info.extract{:: .extractMap > "friends" .extractList > 1 > "name" .extractMsg}! .assertEq "Alice"}
+  .check{info.extract{:: > "friends" .extractMsg}.isEmpty .assertTrue}
+  .check{Infos.msg "" .extract{::.extractEmpty}.isSome .assertTrue}
+  .check{info.extract{::.extractEmpty}.isEmpty .assertTrue}
+  .check{(InfoValidators#info > "enemies").extract{::}.isEmpty .assertTrue}
+  .check{(InfoValidators#info > "friends").extract{:: > "friends" > 0 > "name" .extractMsg}! .assertEq "Bob"}
+  }
+
