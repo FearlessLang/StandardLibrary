@@ -141,7 +141,8 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
     long result = 1;
     while (power > 0) {
-      result = mulChecked(result, this.val);
+      try{ result = Math.multiplyExact(result, this.val); }
+      catch(ArithmeticException e){ throw nonDetErr("Int.** overflow"); }
       power -= 1;
     }
 

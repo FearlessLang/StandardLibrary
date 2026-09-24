@@ -4,6 +4,11 @@ ByteArithTests: Test {::
   .check{+3.getByte * (+4.getByte) .assertEq (+12.getByte)}
   .check{+9.getByte.softSqrt .assertEq +3.0}
   .check{3.getByte ** (3.getByte) .assertEq (27.getByte)}
+  .check{1.getByte ** (200.getByte) .assertEq (1.getByte)}
+  .check{0.getByte ** (200.getByte) .assertEq (0.getByte)}
+  .check{2.getByte ** (7.getByte) .assertEq (128.getByte)}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte.* overflow`}}, {2.getByte ** (200.getByte)})
+  .checkNonDetErr({::}, {2.getByte ** (128.getByte)})
   .check{+255.getByte .assertGt (+0.getByte)}
   .check{+0.getByte .assertLt (+255.getByte)}
   }
