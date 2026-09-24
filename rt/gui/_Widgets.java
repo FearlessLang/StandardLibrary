@@ -79,10 +79,10 @@ class _Pane extends AContainer implements Pane$o$0{
     super(frame);
     component.setLayout(new CenteredFlowLayout(this));
   }
-  @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(component, s, _Button::new); return this; }
-  @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(component, s, _Label::new); return this; }
-  @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(component, s, _Pane::new); return this; }
-  @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(component, s, _Border::new); return this; }
+  @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(component, null, s, _Button::new); return this; }
+  @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(component, null, s, _Label::new); return this; }
+  @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(component, null, s, _Pane::new); return this; }
+  @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(component, null, s, _Border::new); return this; }
   @Override public Object mut$clear$0(){
     return reStyle(() -> {
       // Removed widgets get no Exited events (DOM semantics: removal is not
@@ -305,10 +305,8 @@ class _Frame implements Frame$1c$0{
   private Bitmap bitmap;
   private Canvas canvas;
   private java.awt.image.BufferedImage bimg;
-  private int renderLogicalW = -1;
-  private int renderLogicalH = -1;
-  private double renderScaleX = Double.NaN;
-  private double renderScaleY = Double.NaN;
+  private int renderLogicalW;
+  private int renderLogicalH;
 
   _Frame(CompletableFuture<Void> done){
     frame = new FearlessFrame(done);
@@ -322,23 +320,13 @@ class _Frame implements Frame$1c$0{
     screenHeight = h(screenH);
   }
 
-  void addTo(JComponent parent, Object scope, Function<_Frame, ? extends AWidget> make){
-    var b = onEdtAndWait(() -> {
-      var bb = make.apply(this);
-      parent.add(bb.component);
-      return bb;
-    });
-    ((Scope$1c$1) scope).mut$run$1(b);
-    markLayoutDirty();
-  }
-
   void addTo(JComponent parent, String where, Object scope, Function<_Frame, ? extends AWidget> make){
     var b = onEdtAndWait(() -> {
       // Border slots are replaceable: a second .north evicts the first. The
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old = ((MutableBorderLayout) parent.getLayout()).at(where);
+      var old = where == null ? null : ((MutableBorderLayout) parent.getLayout()).at(where);
       if (old != null){
         mouse.detached((SkComponent) old);
         parent.remove(old);
@@ -415,26 +403,16 @@ class _Frame implements Frame$1c$0{
     int pw = Math.max(1, (int) Math.ceil(w * sx));
     int ph = Math.max(1, (int) Math.ceil(h * sy));
 
-    if (
-      bimg == null
-        || renderLogicalW != w
-        || renderLogicalH != h
-        || renderScaleX != sx
-        || renderScaleY != sy
-        || bimg.getWidth() != pw
-        || bimg.getHeight() != ph
-    ){
-      if (canvas != null){ canvas.close(); canvas = null; }
-      if (bitmap != null){ bitmap.close(); bitmap = null; }
+    boolean resized = bimg == null || bimg.getWidth() != pw || bimg.getHeight() != ph;
+    if (resized){
+      if (bimg != null){ canvas.close(); bitmap.close(); }
       bitmap = new Bitmap();
       bitmap.allocPixels(new ImageInfo(pw, ph, ColorType.BGRA_8888, ColorAlphaType.PREMUL));
       canvas = new Canvas(bitmap);
       bimg = new java.awt.image.BufferedImage(pw, ph, java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE);
-      renderLogicalW = w;
-      renderLogicalH = h;
-      renderScaleX = sx;
-      renderScaleY = sy;
     }
+    renderLogicalW = w;
+    renderLogicalH = h;
 
     canvas.clear(0);
     int save = canvas.save();
@@ -506,8 +484,7 @@ class _Frame implements Frame$1c$0{
       if (frameW != null){
         throw Util.detErr("A maximized window cannot also have an explicit size");
       }
-      frame.setSize(new Dimension(screenW, screenH));
-      frame.setLocation(0, 0);
+      frame.setBounds(0, 0, screenW, screenH);
     } else {
       checkWindowFits();
       if (locationX != null && locationY != null){
@@ -564,10 +541,7 @@ class _Frame implements Frame$1c$0{
   @Override public Object mut$maximized$0(){
     maximized = true;
     if (started){
-      onEdtAndWait(() -> {
-        frame.setSize(new Dimension(screenW, screenH));
-        frame.setLocation(0, 0);
-      });
+      onEdtAndWait(() -> frame.setBounds(0, 0, screenW, screenH));
     }
     return this;
   }
@@ -739,11 +713,10 @@ class _Frame implements Frame$1c$0{
 
   // Only the top component listens for mouse events: children have no AWT
   // listeners, so AWT routes everything here and SkMouse dispatches.
-  private <T extends AWidget> T install(T t){
+  private void install(AWidget t){
     top = t;
     t.component.addMouseListener(mouse);
     t.component.addMouseMotionListener(mouse);
-    return t;
   }
 
   private void uninstall(AWidget t){

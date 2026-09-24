@@ -249,8 +249,7 @@ interface Sk{
     int d = Math.max(3, Math.min(8, Math.min(w, h) / 9));
     d = Math.min(d, Math.min(Math.min(w(s.left), w(s.right)), Math.min(h(s.top), h(s.bottom))));
     d = Math.min(d, Math.min(w, h) / 2);
-    if (r > 0){ d = Math.min(d, r); }
-    return Math.max(0, d);
+    return r > 0 ? Math.min(d, r) : d;
   }
 
   private static int baseColor(int c, boolean over, boolean down){

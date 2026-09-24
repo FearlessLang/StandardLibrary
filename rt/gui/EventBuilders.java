@@ -210,16 +210,14 @@ final class SkMouse extends MouseAdapter{
 
   private MouseEvent$174$0 ctx(AWidget t, Point p){
     var q = SwingUtilities.convertPoint(top(), p, t.component);
-    int pw = t.component.getWidth();
-    int ph = t.component.getHeight();
     return new CMouseCtx(
       frame.elapsed,
       Scopes.x(q.x),
       Scopes.y(q.y),
       frame.screenWidth,
       frame.screenHeight,
-      Scopes.w(pw),
-      Scopes.h(ph));
+      Scopes.w(t.component.getWidth()),
+      Scopes.h(t.component.getHeight()));
   }
 
   private SkComponent top(){ return frame.top.component; }
