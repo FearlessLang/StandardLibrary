@@ -4,7 +4,29 @@ IntArithTests: Test {::
   .check{+3 * +4 .assertEq +12}
   .check{+3 ** 3 .assertEq +27}
   .check{-3 ** 3 .assertEq -27}
+  .check{+5 ** 0 .assertEq +1}
+  .check{(+5 ** 0) + +1 .assertEq +2}
+  .check{(+5 ** 0).str .assertEq `+1`}
+  .check{+2 ** 62 .assertEq +4611686018427387904}
+  .check{-1 ** (Math.maxNat) .assertEq -1}
+  .check{-1 ** (Math.maxNat - 1) .assertEq +1}
+  .check{+0 ** (Math.maxNat) .assertEq +0}
+  .check{+1 ** (Math.maxNat) .assertEq +1}
+  .check{-3 ** 5 .assertEq -243}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {-2 ** 64})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {+2 ** (Math.maxNat)})
+  .check{-2 ** 63 .assertEq(Math.minInt)}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {+2 ** 63})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int**: overflow`}}, {(Math.maxInt) ** 2})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int*: overflow`}}, {(Math.maxInt) * +2})
   .check{(-7).abs .assertEq 7}
+  .check{+16777217 .getFloat .assertEq +16777217.0}
+  .check{+9007199254740992 .getFloat .assertEq +9007199254740992.0}
+  .check{+9007199254740993 .float .assertEmpty {::}}
+  .check{Math.minInt .getFloat .assertEq -9223372036854775808.0}
+  .check{Math.maxInt .float .assertEmpty {::}}
+  .check{+9007199254740993 .tryGetFloat .assertInfo{::.isMsg{::.startsWith "Int.getFloat: cannot convert to Float 9007199254740993"}}}
+  .check{+300 .tryGetByte .assertInfo{::.isMsg{::.startsWith "Int.getByte: cannot convert to Byte 300 is greater than 255"}}}
   .check{+9.getFloat.getSqrt .assertEq +3.0}
   .check{(-1).getFloat.sqrtOrNaN.isNaN .assertEq True}
   .check{+1.assertLt(+2)}

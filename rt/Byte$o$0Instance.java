@@ -34,18 +34,18 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
 
   private static byte addChecked(byte a, byte b){
     int r= u8(a) + u8(b);
-    if (r > 255){ throw nonDetErr("Byte.+ overflow"); }
+    if (r > 255){ throw nonDetErr("Byte+: overflow"); }
     return (byte)r;
   }
   private static byte subChecked(byte a, byte b){
     if (Byte.compareUnsigned(a, b) < 0) {
-      throw nonDetErr("Byte.- underflow");
+      throw nonDetErr("Byte-: underflow");
     }
     return (byte) (a - b);
   }
   private static byte mulChecked(byte a, byte b){
     int r= u8(a) * u8(b);
-    if (r > 255){ throw nonDetErr("Byte.* overflow"); }
+    if (r > 255){ throw nonDetErr("Byte*: overflow"); }
     return (byte)r;
   }
 
@@ -53,19 +53,25 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
-    byte power = b(p0);
+    int power = u8(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    byte result = 1;
-    for (int i = 0; i < power; i++) {
-      result = mulChecked(result, this.val);
+    int result = 1, base = u8(val);
+    while (true) {
+      if ((power & 1) != 0){ result = powMul(result, base); }
+      power >>>= 1;
+      if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
+      base = powMul(base, base);
     }
-    return Byte$o$0Instance.instance(result);
+  }
+  private static int powMul(int a, int b){
+    if (a * b > 255){ throw nonDetErr("Byte**: overflow"); }
+    return a * b;
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L) {
-      throw err("Byte /: Cannot create a Num with denominator 0.");
+      throw err("Byte/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(val),

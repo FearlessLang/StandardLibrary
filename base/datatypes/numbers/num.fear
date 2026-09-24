@@ -144,7 +144,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{1/1 ~~ (4/1) .contains(1/1) .assertFalse}
   //>   .checkDetErr({::}, {1/1~~(1/1)})
   ~~(end: Num): NumRange -> Block#
-    .if {this >= end } .error {"Num ~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
+    .if {this >= end } .error {"Num~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
     .return {{
       .start -> this;
       .end -> end;
@@ -158,7 +158,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{(1/1~~=(4/3)) .contains(1/1) .assertFalse}
   //>   .checkDetErr({::}, {1/1~~=(1/1)})
   ~~=(endInclusive: Num): NumRange -> Block#
-    .if {this >= endInclusive } .error {"Num ~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive ("+endInclusive+")"}
+    .if {this >= endInclusive } .error {"Num~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive ("+endInclusive+")"}
     .return {{
       .start -> this;
       .end -> endInclusive;
@@ -172,7 +172,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{1/1=~~(4/3) .contains(4/3) .assertFalse}
   //>   .checkDetErr({::}, {1/1=~~(1/1)})
   =~~(end: Num): NumRange -> Block#
-    .if {this >= end } .error {"Num =~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
+    .if {this >= end } .error {"Num=~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
     .return {{
       .start -> this;
       .end -> end;
@@ -187,7 +187,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{(1/1=~~=(4/3)) .contains(1/1) .assertTrue}
   //>   .checkDetErr({::}, {4/1=~~=(1/1)})
   =~~=(endInclusive: Num): ClosedNumRange -> Block#
-    .if {this > endInclusive } .error {"Num =~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive ("+endInclusive+")"}
+    .if {this > endInclusive } .error {"Num=~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive ("+endInclusive+")"}
     .return {{
       .start -> this;
       .end -> endInclusive;
