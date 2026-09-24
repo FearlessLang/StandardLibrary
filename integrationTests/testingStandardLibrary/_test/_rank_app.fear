@@ -81,6 +81,7 @@ MyTests:UnitTests{::
   .test TestWrappers
   .test GridHitTestTests
   .test GuiLayoutTests
+  .test GuiBuilderTests
   .test TestList
   .test TestFlow
   .test TestMap
