@@ -91,6 +91,7 @@ MyTests:UnitTests{::
   .test TestUStr
   .test MathUnitTests
   .test InfoTests
+  .test InfoValidatorTests
   .test TestBlock
   .test TestInfoFromStr
   .test TestDungeon

@@ -105,24 +105,24 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
   mut .disabledCheck(Check): mut TestCap; 
   mut .checkWithSys(CheckSys): mut TestCap;
   mut .disabledCheckWithSys(CheckSys): mut TestCap;  
-  mut .checkDetErr[T:*](errorMatch: LazyInfoValidator, f: F[T]): mut TestCap -> this.check{
+  mut .checkDetErr[T:*](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.check{
     Try#(f).run {
      .ok _ -> Error.msg "Expected error but got success";
-     .info i -> errorMatch#(InfoValidators# i).match {
-       .valid _ -> Void;
-       .invalid _ -> Error.msg("Error did not match expected: " + (i.str));
+     .info i -> i.validate errorMatch .match {
+       .true -> Void;
+       .false -> Error.msg("Error did not match expected: " + (i.str));
        }
      }
     };
-  mut .checkNonDetErr[T](errorMatch: LazyInfoValidator, f: F[T]): mut TestCap -> this.checkWithSys{
+  mut .checkNonDetErr[T](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.checkWithSys{
     sys -> sys.try#({Try#(f).run {
       .ok _ -> "Expected error but got success";
       .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
     }}).run {
        .ok errMsg -> Error.msg errMsg;
-       .info i -> errorMatch#(InfoValidators# i) .match {
-         .valid _ -> Void;
-         .invalid _ -> Error.msg("Error did not match expected: " + (i.str));
+       .info i -> i.validate errorMatch .match {
+         .true -> Void;
+         .false -> Error.msg("Error did not match expected: " + (i.str));
          }
        }
      };
