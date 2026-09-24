@@ -70,3 +70,33 @@ InfoTests: Test {::
   .check{Infos.msg "B".extract{:: > 0}.assertEmpty{::}}
   }
 
+InfoValidatorTests: Test {::
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .check{info.validate{::} .assertTrue}
+  .check{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}} .assertTrue}
+  .check{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
+    } .assertTrue}
+  .check{info.validate{:: > "friends" .isList{::.size == 2}} .assertTrue}
+  .check{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
+    & > "friends" > 2 > "name" .isMsg{:: == "David"}} .assertFalse}
+  .check{info.validate{:: > "friends" .where{::
+    & > 0 > "name" .isMsg{:: == "Bob"}
+    | > 1 > "name" .isMsg{:: == "Alice"}
+    & > 2 > "name" .isMsg{:: == "David"}}} .assertFalse}
+  .check{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    | > "friends" .where{::
+      & > 1 > "name" .isMsg{:: == "Alice"}
+      & > 2 > "name" .isMsg{:: == "David"}}} .assertTrue}
+  .check{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    & > "friends" > 1 > "name" .isMsg{:: == "David"} .not} .assertTrue}
+  .check{info.validate{:: > "friends" > 1 > "name" .isMsg{:: == "Alice"} .not} .assertFalse}
+  .checkDetErr({::.isMsg{::.startsWith "Info.getList:"}}, {Infos.msg "hi" .getList})
+  .check{Infos.msg "hi" .tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
+  }
+

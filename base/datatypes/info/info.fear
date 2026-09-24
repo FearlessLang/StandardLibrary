@@ -78,7 +78,7 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
     };
 
   .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> f#{.close -> this; .extractedValue -> Opts# this }#;
-  .validate(f: read F[InfoValidator, InfoValidator]): Bool -> f#(InfoValidators# this)#;
+  .validate(f: read F[InfoValidator, InfoValidator]): Bool -> f#(InfoValidators# this).isValid;
   }
 
 ExtractionFunction[R:*]: F[InfoExtractor, Extractor[R]] {}
