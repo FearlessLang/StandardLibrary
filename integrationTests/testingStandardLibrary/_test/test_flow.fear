@@ -185,6 +185,12 @@ FlowPlusPlusTests: Test {::
   .check{Block#(Flows#(1, 2).map[Nat]{_ -> Error.msg"stage ran"} ++ (Lists#(3)), Void)}
   }
 
+FlowModeTests: Test {::
+  .check{Lists#(1,2,3).flow(Par#).map{e -> e + 1}.list .assertEq({::}, Lists#(2,3,4))}
+  .check{Lists#(base.Reprs#(base.Count.nat 0, {_ -> True}), base.Reprs#(base.Count.nat 1, {_ -> True}))
+    .flow(ParRepr#).map{r -> r.look{c -> c.get}}.list .assertEq({::}, Lists#(0,1))}
+  }
+
 TestFlow: Test {::
   .test FlowForEachTests
   .test FlowBuildOrderTests
@@ -196,4 +202,5 @@ TestFlow: Test {::
   .test FlowFlatMapTests
   .test FlowShortCircuitTests
   .test FlowPlusPlusTests
+  .test FlowModeTests
   }
