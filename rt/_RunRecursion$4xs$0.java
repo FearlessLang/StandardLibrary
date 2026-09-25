@@ -1,5 +1,7 @@
 package _base;
 
+import java.util.stream.Stream;
+
 public interface _RunRecursion$4xs$0{
   _RunRecursion$4xs$0 instance= new _RunRecursion$4xs$0(){};
   default Object imm$$hash$2(Object family, Object f){
@@ -41,6 +43,7 @@ final class RunRecursionThread extends Thread{
     }
     if (interrupted){ Thread.currentThread().interrupt(); }
     if (err == null){ return res; }
+    err.setStackTrace(Stream.concat(Stream.of(err.getStackTrace()), Stream.of(new Throwable().getStackTrace())).limit(1024).toArray(StackTraceElement[]::new));
     return sneakyThrow(err);
   }
   @SuppressWarnings("unchecked")

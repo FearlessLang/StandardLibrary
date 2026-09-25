@@ -14,6 +14,8 @@ Mixed: {#(n: Nat): Nat -> (n == 0).if{.then -> 0; .else -> SumBy#(Inner, 20) + (
 Nest: {.size: Nat}
 Build: {#(n: Nat): Nest -> (n == 0).if{.then -> {0}; .else -> Wrap#(RunRecursion#{this#(n - 1)})}}
 Wrap: {#(inner: Nest): Nest -> {RunRecursion#{inner.size} + 1}}
+Two: RunRecursion{.depth -> 2}
+Fail: {#(n: Nat): Nat -> (n == 0).if{.then -> Error.msg "deep boom"; .else -> Two#{this#(n - 1)}}}
 
 NaiveSum: Main{s -> Debug#(Naive#1_000_000)}
 DeepSum: Main{s -> Debug#(SumBy#(RunRecursion, 1_000_000))}
@@ -22,3 +24,4 @@ SpreadSum: Main{s -> Debug#(SumBy#(Spread, 1_000_000))}
 MixedSum: Main{s -> Debug#(Mixed#10_000)}
 NestSize: Main{s -> Debug#(Build#1_000_000.size)}
 ErrorsPropagate: Main{s -> Debug#(Try#{RunRecursion#{RunRecursion#[Nat]{Error.msg "deep boom"}}}.run{.ok n -> n.str; .info i -> i.softMsg})}
+GluedTrace: Main{s -> Debug#(Fail#4)}

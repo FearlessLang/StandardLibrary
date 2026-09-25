@@ -14,7 +14,7 @@
 RunRecursion: {
   #[R:**](f: mut MF[R]): R -> _RunRecursion#(this, f);
   /// How many calls of this family nest on one thread before the next one starts a new thread.
-  .depth: Nat -> 1_000;
+  .depth: Nat -> 10_000;
   /// The stack size in bytes requested for each new thread. The JVM takes it as a hint:
   /// requests under a platform minimum are rounded up, and requests of 4GB or more are unreliable
   /// (on some platforms they wrap around to a tiny or default size).
