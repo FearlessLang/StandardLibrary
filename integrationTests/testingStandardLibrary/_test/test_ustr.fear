@@ -188,9 +188,9 @@ TestUStr:Test{::
   .check{"f".u.escape.assertEq (""^"f"^".u")}
   .check{"ffeg".u.escape.assertEq (""^"ffeg"^".u")}
 
-  .check{"".u "F066".escape.assertEq (`"".u("F066")`)}
-  .check{"".u "F066 F067".escape.assertEq (`"".u("F066 F067")`)}
-  .check{"".u "10FFFF".escape.assertEq (`"".u("10FFFF")`)}
+  .check{"".u "F066".escape.assertEq (`"".u"F066"`)}
+  .check{"".u "F066 F067".escape.assertEq (`"".u"F066 F067"`)}
+  .check{"".u "10FFFF".escape.assertEq (`"".u"10FFFF"`)}
 
   // ------------------------------------------------------------
   // escape, safe special Str chars
@@ -202,41 +202,41 @@ TestUStr:Test{::
   .check{"".u "005C".escape.assertEq (""^"\"^".u")}
 
   .check{("a".u |).escape.assertEq (`("a"|).u`)}
-  .disabledCheck{("a".u ^).escape.assertEq (`("a"|).u`)}
+  .check{("a".u ^).escape.assertEq ("`a"^"`.u")}
 
   // ------------------------------------------------------------
   // escape, mixed safe/unsafe
   // ------------------------------------------------------------
 
-  .disabledCheck{"".u "0066 F066".escape.assertEq (
+  .check{"".u "0066 F066".escape.assertEq (
     ""^"f"^".u"^"F066"^)
     }
 
-  .disabledCheck{"".u "0066 F066 0066 0065 0067".escape.assertEq (
+  .check{"".u "0066 F066 0066 0065 0067".escape.assertEq (
     ""^"f"^".u"^"F066"^"+("^"feg"^".u)")
     }
 
-  .disabledCheck{"".u "0066 F066 F067".escape.assertEq (
+  .check{"".u "0066 F066 F067".escape.assertEq (
     ""^"f"^".u"^"F066 F067"^)
     }
 
-  .disabledCheck{"".u "F066 0066".escape.assertEq (
+  .check{"".u "F066 0066".escape.assertEq (
     ""^ ^ ".u"^"F066"^"+("^"f"^".u)")
     }
 
-  .disabledCheck{"".u "F066 0066 F067".escape.assertEq (
+  .check{"".u "F066 0066 F067".escape.assertEq (
     ""^ ^ ".u"^"F066"^"+("^"f"^".u"^"F067"^")")
     }
 
-  .disabledCheck{"".u "F066 F067 0066".escape.assertEq (
+  .check{"".u "F066 F067 0066".escape.assertEq (
     ""^ ^ ".u"^"F066 F067"^"+("^"f"^".u)")
     }
 
-  .disabledCheck{"".u "0061 F066 0062 F067 0063".escape.assertEq (
+  .check{"".u "0061 F066 0062 F067 0063".escape.assertEq (
     ""^"a"^".u"^"F066"^"+("^"b"^".u"^"F067"^")+("^"c"^".u)")
     }
 
-  .disabledCheck{"".u "F066 0061 F067 0062".escape.assertEq (
+  .check{"".u "F066 0061 F067 0062".escape.assertEq (
     ""^ ^ ".u"^"F066"^"+("^"a"^".u"^"F067"^")+("^"b"^".u)")
     }
 
@@ -244,11 +244,11 @@ TestUStr:Test{::
   // escape output shape, representative duplicated cases
   // ------------------------------------------------------------
 
-  .disabledCheck{"".u "0066 F066 0066 0065 0067".escape.assertEq (
+  .check{"".u "0066 F066 0066 0065 0067".escape.assertEq (
     ""^"f"^".u"^"F066"^"+("^"feg"^".u)")
     }
 
-  .disabledCheck{"hello".u.u "F066 0061".escape.assertEq (
+  .check{"hello".u.u "F066 0061".escape.assertEq (
     ""^"hello"^".u"^"F066"^"+("^"a"^".u)")
     }
 }

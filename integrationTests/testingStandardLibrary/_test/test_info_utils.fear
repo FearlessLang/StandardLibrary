@@ -69,8 +69,9 @@ InfoTests: Test {::
   .check{Infos.msg "B".validate{::.isMsg{::.contains "A"}& .isMsg{::.contains "B"}}.assertFalse}
   .check{Infos.msg "B".extract{:: > 0}.assertEmpty{::}}
   .checkEq(`"hi"`, {Infos.msg "hi" .prettyStr})
+  .checkEq(`"a\"b"`, {Infos.msg `a"b` .prettyStr})
   .checkEq("null", {Infos.msg "" .prettyStr})
-  .checkEq("{" | "  a: [" | `    "x",` | `    "y"` | "  ]" | "}", {Infos.map("a", Infos.list("x", "y")).prettyStr})
+  .checkEq("{" | `  "a": [` | `    "x",` | `    "y"` | "  ]" | "}", {Infos.map("a", Infos.list("x", "y")).prettyStr})
   }
 
 InfoValidatorTests: Test {::

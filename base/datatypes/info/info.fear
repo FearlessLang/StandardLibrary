@@ -250,8 +250,8 @@ _InfoToPrettyString: {
 
   #(i: Info, depth: Nat): Str -> (i.match InfoMatch[Str] {
     .empty -> "null";
-    .msg(msg) -> msg.escape;
+    .msg(msg) -> _JsonEscape#msg;
     .list list -> "[" | (list.flow.map{"  ".repeat(depth+1) + (this#(::, depth + 1))}.join(","|)) | + ("  ".repeat(depth)) + "]";
-    .map(map) -> "{" | (map.flow.map{"  ".repeat(depth+1) + (::.key + ": " + (this#(::.elem, depth + 1)))}.join(","|)) | + ("  ".repeat(depth)) +"}";
+    .map(map) -> "{" | (map.flow.map{"  ".repeat(depth+1) + (_JsonEscape#(::.key) + ": " + (this#(::.elem, depth + 1)))}.join(","|)) | + ("  ".repeat(depth)) +"}";
   });
 }
