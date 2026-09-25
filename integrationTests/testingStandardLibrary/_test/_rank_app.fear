@@ -101,4 +101,5 @@ MyTests:UnitTests{::
   .test TestInfoFromStr
   .test TestDungeon
   .test TestTryGet
+  .test TestFlowDesign
   }

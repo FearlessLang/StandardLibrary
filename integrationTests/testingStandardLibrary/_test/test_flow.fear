@@ -111,7 +111,7 @@ FlowFlatMapTests: Test {::
     .list .assertEq({::}, Lists#(11, 12, 12, 14))}
   }
 
-ErrIf: { #(b: Bool, msg: Str, e: Nat): Nat -> Block#[Nat].if{b}.error{msg}.return{e} }
+ErrIf: { #[E](b: Bool, msg: Str, e: E): E -> Block#[E].if{b}.error{msg}.return{e} }
 
 FlowShortCircuitTests: Test {::
   .check{Lists#(1,4,2,6).seqFlow.findFirst{e -> e > 3}.assertEq({::}, Opts#[Nat] 4)}
