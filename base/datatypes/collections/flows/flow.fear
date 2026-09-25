@@ -89,10 +89,12 @@ Flow[E:*]: {
   /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(e))``
   /// Complexity: O(n)
   mut .last: mut Opt[E];
-  mut .mapFilter[R](f: read F[E, mut Opt[R]]): mut Flow[R] ->
+  mut .mapFilter[R:*](f: read F[E, mut Opt[R]]): mut Flow[R] ->
     this.map(f)
       .filter{r -> r.isSome}
       .map{r -> r!};
+  mut .findFirst(f: read F[E, Bool]): mut Opt[E] -> this.filter f .first;
+  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R] -> this.mapFilter f .first;
   mut .peek(f: read F[E, Void]): mut Flow[E] ->//Only useful for invarians+debug, wonder if we should have a better name
     this.map{e -> Block#(f#e, e)};
   mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut Flow[E] -> //crucial to do IO side effects while flowing
@@ -121,6 +123,4 @@ Flow[E:*]: {
   /// over hygienically, which is what lets the emitted elements be ``mut``.
   /// See `ActorSink` for how such a sink is pushed to.
   mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg"TODO";
-  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R]->Error.msg"TODO";
-  mut .findFirst(f: read F[E, Bool]): Opt[E]->Error.msg"TODO";
   }
