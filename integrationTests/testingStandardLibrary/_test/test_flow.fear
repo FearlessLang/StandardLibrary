@@ -137,6 +137,54 @@ FlowShortCircuitTests: Test {::
   .check{Flows#[Nat].all{e -> e > 3}.assertTrue}
   }
 
+FlowAddress: { read .street: Str; mut .moveTo(street: Str): Void }
+FlowAddresses: { #(street: Str): mut FlowAddress -> Block#
+  .var[Str] s= {street}
+  .return {{ .street -> s.get; .moveTo st -> s.set st }}
+  }
+FlowPerson: {
+  read .name: Str;
+  read .address: read FlowAddress;
+  read .age: Nat;
+  mut .moveTo(street: Str): Void;
+  mut .birthday: Void;
+  }
+FlowPersons: { #(name: Str, address: mut FlowAddress): mut FlowPerson -> Block#
+  .var[Nat] age= {0}
+  .return {{
+    .name -> name;
+    .address -> address;
+    .age -> age.get;
+    .moveTo st -> address.moveTo st;
+    .birthday -> age.set(age.get + 1);
+    }}
+  }
+
+FlowPlusPlusTests: Test {::
+  .check{Block#
+    .let a= {FlowAddresses#"nowhere"}
+    .let persons= {Lists#(FlowPersons#("first", a), FlowPersons#("second", a))}
+    .do{persons.seqFlow.map{p -> Block#(p.moveTo(p.name), p)} ++ {} .map{q -> q.address.street}.list
+      .assertEq({::}, Lists#("second", "second"))}
+    .done
+    }
+  .check{Block#
+    .let ps= {Lists#(FlowPersons#("first", FlowAddresses#"north"), FlowPersons#("second", FlowAddresses#"south"))}
+    .let first= {ps.seqFlow.map{p -> Block#(p.birthday, p)} ++ {} .first}
+    .do{first!.name .assertEq "first"}
+    .do{ps.seqFlow.map{p -> p.age}.list .assertEq({::}, Lists#(1, 1))}
+    .done
+    }
+  .check{Flows#(1, 2) ++ (Lists#(3, 4)) .list .assertEq({::}, Lists#(1, 2, 3, 4))}
+  .check{Block#
+    .let[List[Nat]] xs= {Lists#(1, 2)}
+    .let[List[Nat]] ys= {(xs.flow.map{e -> e * 10}) ++ (xs.flow.map{e -> e + 1}.list) .list}
+    .do{ys.assertEq({::}, Lists#(10, 20, 2, 3))}
+    .done
+    }
+  .check{Block#(Flows#(1, 2).map[Nat]{_ -> Error.msg"stage ran"} ++ (Lists#(3)), Void)}
+  }
+
 TestFlow: Test {::
   .test FlowForEachTests
   .test FlowBuildOrderTests
@@ -147,4 +195,5 @@ TestFlow: Test {::
   .test FlowOverListTests
   .test FlowFlatMapTests
   .test FlowShortCircuitTests
+  .test FlowPlusPlusTests
   }

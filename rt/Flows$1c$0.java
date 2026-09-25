@@ -56,9 +56,10 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     //Note: all those try catches are relying on the JVM enforcing the stream consumptions,
     //but in the standard it is not guaranteed that it is checked. We need to add tests to all of the flow methods
     //to check that the current JVM does enforce it.
-    var other= ((Flow$o$1Instance)o).s;
-    try{ return new Flow$o$1Instance(Stream.concat(s, other)); }
-    catch(IllegalStateException e){ throw consumed(); }    
+    var tail= List$o$1Instance.asJava(o);
+    try{ return new Flow$o$1Instance(s.gather(Gatherer.<Object,ArrayList<Object>,Object>ofSequential(
+      ArrayList::new, (xs,e,_)->xs.add(e), (xs,d)->Stream.concat(xs.stream(),tail.stream()).allMatch(d::push)))); }
+    catch(IllegalStateException e){ throw consumed(); }
   }
   @Override public Object mut$forEach$1(Object p0){
     try{ s.toList().forEach(e->callMF$2(p0,e)); return Void$o$0.instance; }
