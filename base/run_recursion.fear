@@ -1,0 +1,25 @@
+/// ``RunRecursion#{..}`` runs the lambda on a fresh thread whose stack holds `.stackSize` bytes,
+/// so deeply recursive code (parsing, deserialization, tree walks) can go much deeper than the
+/// stack of its caller allows. The caller waits for the result; errors propagate to the caller.
+/// Each type implementing `RunRecursion` is a family, tuning its own constants:
+/// ``Parsing: RunRecursion{ .depth -> 7 }``.
+/// Calls nested inside a call of the same family on the same thread run inline, with no new
+/// thread, until `.depth` of them are nested there; the next nested one starts a new thread.
+/// A call of a different family always starts a new thread: mutually recursive methods should
+/// share one family, otherwise every step of their recursion starts a new thread.
+/// Thus a deeply recursive algorithm can call it on every recursive step: one thread every
+/// `.depth` steps, each step with about ``.stackSize / .depth`` bytes of stack.
+//>   .check{RunRecursion#{5}.assertEq 5}
+//>   .check{RunRecursion{.depth->1}#{RunRecursion{.depth->1}#{7}}.assertEq 7}
+RunRecursion: {
+  #[R:**](f: mut MF[R]): R -> _RunRecursion#(this, f);
+  /// How many calls of this family nest on one thread before the next one starts a new thread.
+  .depth: Nat -> 1_000;
+  /// The stack size in bytes requested for each new thread. The JVM takes it as a hint:
+  /// requests under a platform minimum are rounded up, and requests of 4GB or more are unreliable
+  /// (on some platforms they wrap around to a tiny or default size).
+  .stackSize: Nat -> 67_108_864;
+  }
+_RunRecursion: Sealed {
+  #[R:**](family: RunRecursion, f: mut MF[R]): R -> _Magic!;
+  }
