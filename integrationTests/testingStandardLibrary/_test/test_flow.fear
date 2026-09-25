@@ -67,7 +67,7 @@ FlowLetTests: Test {::
     self}) .assertEq({::}, Lists#(1,2,3))}
   .check{Flows#[Nat].let[Nat, Nat]({xs -> xs.size}, {n, self -> n + (self.size)}) .assertEq 0}
   .check{Flows#(1,2,3).let[Nat, mut List[Nat]]({xs -> xs.size}, {n, self ->
-    self.flow(Par#[Nat]).map{e -> e + n}.list}) .assertEq({::}, Lists#(4,5,6))}
+    self.flow(Par#).map{e -> e + n}.list}) .assertEq({::}, Lists#(4,5,6))}
   .check{Block#(Flows#(1,2,3).let[Nat, mut Flow[Nat]]({xs -> xs.size}, {_, self ->
     self.seqFlow.map[Nat]{_ -> Error.msg"the continuation flow ran before its terminal"}}), Void)}
   }
