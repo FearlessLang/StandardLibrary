@@ -46,7 +46,7 @@ Flow[E:*]: {
   mut .filter(f: read F[E, Bool]): mut Flow[E];
   mut .size: Nat -> this.list.size;
   mut .isEmpty: Bool -> this.size == 0;
-  mut ++ (mut Flow[E]): mut Flow[E];
+  mut ++ (b: read List[E]): mut Flow[read/imm E];
   mut .list: mut List[E];
   mut .eList: mut EList[E];
   mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
