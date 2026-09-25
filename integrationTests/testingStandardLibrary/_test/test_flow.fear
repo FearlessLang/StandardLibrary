@@ -111,6 +111,32 @@ FlowFlatMapTests: Test {::
     .list .assertEq({::}, Lists#(11, 12, 12, 14))}
   }
 
+ErrIf: { #(b: Bool, msg: Str, e: Nat): Nat -> Block#[Nat].if{b}.error{msg}.return{e} }
+
+FlowShortCircuitTests: Test {::
+  .check{Lists#(1,4,2,6).seqFlow.findFirst{e -> e > 3}.assertEq({::}, Opts#[Nat] 4)}
+  .check{Lists#(1,2,3).seqFlow.findFirst{e -> e > 3}.isEmpty.assertTrue}
+  .check{Flows#[Nat].findFirst{e -> e > 3}.isEmpty.assertTrue}
+  .check{Lists#(0,1,2,3).seqFlow.findFirst{e -> ErrIf#(e > 1, "pulled after", e) == 1}.assertEq({::}, Opts#[Nat] 1)}
+  .checkDetErr({::.isMsg{:: == "at 1"}}, {Lists#(0,1,2,3).seqFlow.findFirst{e -> ErrIf#(e == 1, "at 1", e) == 2}})
+  .check{Lists#(Vars#[Nat] 1, Vars#[Nat] 2).seqFlow.findFirst{v -> v.get > 1}!.get .assertEq 2}
+  .check{Lists#(1,4,2,6).seqFlow.findMap[Nat]{e -> e > 3 ? {.then -> Opts#(e * 10); .else -> {}}}.assertEq({::}, Opts#[Nat] 40)}
+  .check{Lists#(1,2,3).seqFlow.findMap[Nat]{e -> e > 3 ? {.then -> Opts#(e * 10); .else -> {}}}.isEmpty.assertTrue}
+  .check{Lists#(0,1,2,3).seqFlow.findMap[Nat]{e -> ErrIf#(e > 1, "pulled after", e) == 1 ? {.then -> Opts#(e * 10); .else -> {}}}.assertEq({::}, Opts#[Nat] 10)}
+  .checkDetErr({::.isMsg{:: == "at 1"}}, {Lists#(0,1,2,3).seqFlow.findMap[Nat]{e -> ErrIf#(e == 1, "at 1", e) == 2 ? {.then -> Opts#(e * 10); .else -> {}}}})
+  .check{Lists#(0,1,2,3).seqFlow.any{e -> ErrIf#(e > 1, "pulled after", e) == 1}.assertTrue}
+  .check{Lists#(0,1,2,3).seqFlow.none{e -> ErrIf#(e > 1, "pulled after", e) == 1}.assertFalse}
+  .checkDetErr({::.isMsg{:: == "at 1"}}, {Lists#(0,1,2,3).seqFlow.any{e -> ErrIf#(e == 1, "at 1", e) == 2}})
+  .checkDetErr({::.isMsg{:: == "at 1"}}, {Lists#(0,1,2,3).seqFlow.none{e -> ErrIf#(e == 1, "at 1", e) == 2}})
+  .check{Lists#(0,1,2,3).seqFlow.all{e -> ErrIf#(e > 1, "pulled after", e) < 1}.assertFalse}
+  .check{Lists#(0,1,2,3).seqFlow.any{e -> ErrIf#(e > 0, "pulled after", e) < 1}.assertTrue}
+  .checkDetErr({::.isMsg{:: == "at 1"}}, {Lists#(0,1,2,3).seqFlow.all{e -> ErrIf#(e == 1, "at 1", e) < 5}})
+  .checkDetErr({::.isMsg{:: == "at 1"}}, {Lists#(0,1,2,3).seqFlow.any{e -> (ErrIf#(e == 1, "at 1", e) < 5).not}})
+  .check{Flows#[Nat].any{e -> e > 3}.assertFalse}
+  .check{Flows#[Nat].none{e -> e > 3}.assertTrue}
+  .check{Flows#[Nat].all{e -> e > 3}.assertTrue}
+  }
+
 TestFlow: Test {::
   .test FlowForEachTests
   .test FlowBuildOrderTests
@@ -120,4 +146,5 @@ TestFlow: Test {::
   .test FlowLimitTests
   .test FlowOverListTests
   .test FlowFlatMapTests
+  .test FlowShortCircuitTests
   }
