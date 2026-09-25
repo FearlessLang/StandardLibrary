@@ -90,6 +90,27 @@ FlowOverListTests: Test {::
   .checkDetErr({::.isMsg{:: == "Flow.getOpt: the flow has 2 elements, but .getOpt needs at most one"}}, {Flows#(1,2).getOpt})
   }
 
+FlowFlatMapTests: Test {::
+  .checkDetErr({::.isMsg{:: == "poison"}}, {Lists#(Lists#("aa","bbb"), Lists#("c","poison","dd"), Lists#("e"))
+    .seqFlow
+    .flatMapMut{ss -> ss.flow
+      .map[Str]{s -> s == "poison" ? {.then -> Error.msg"poison"; .else -> s}}.list}
+    .limit 3
+    .map{s -> s.size}
+    .list})
+  .check{Lists#(Lists#("aa","bbb"), Lists#("c","poison","dd"), Lists#("e"))
+    .seqFlow
+    .flatMapMut{ss -> ss.flow
+      .map[Str]{s -> s == "poison" ? {.then -> Error.msg"poison"; .else -> s}}.list}
+    .limit 2
+    .map{s -> s.size}
+    .list .assertEq({::}, Lists#(2, 3))}
+  .check{Flows#(1, 2)
+    .flatMapMut{n -> Lists#(ELists#[Nat].addAnd n, ELists#[Nat].addAnd(n).addAnd(n))}
+    .map{l -> Block#(l.add 10, l.list.flow.sum 0)}
+    .list .assertEq({::}, Lists#(11, 12, 12, 14))}
+  }
+
 TestFlow: Test {::
   .test FlowForEachTests
   .test FlowBuildOrderTests
@@ -98,4 +119,5 @@ TestFlow: Test {::
   .test FlowLetTests
   .test FlowLimitTests
   .test FlowOverListTests
+  .test FlowFlatMapTests
   }
