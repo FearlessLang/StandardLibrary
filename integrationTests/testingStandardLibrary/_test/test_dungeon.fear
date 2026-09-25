@@ -21,7 +21,7 @@ Rooms: { #(chests: mut base.EList[mut base.EList[Item]], monsters: mut ESet[Mons
   .let[mut ESet[Str]] graves = {base.ESets#[Str,Str]{::}}
   .return {{
     .fight strength -> monsters.removeIf{m -> m.strength < strength}.size;
-    .loot -> chests.seqFlow.flatMap{c -> c.seqFlow}.fold({{}}, {acc, i -> acc +> i});
+    .loot -> chests.seqFlow.flatMap{c -> c.list}.fold({{}}, {acc, i -> acc +> i});
     .bury grave -> grave.ifSome{g -> Block#(graves.add(g.name), chests.add(g.items.flow.eList), Void)};
     .buried name -> graves.contains(name);
     }}
