@@ -58,6 +58,16 @@ OrderBy[T]: OrderBy[T,T] {           /// produces an ordering via .cmp
   # t -> { .close -> t; .cmp t0,t1,m -> this.cmp(t0,t1,m) }; /// close->t; compare uses this.cmp
   }
 
+Rev: {
+  /// ``Rev#by`` orders by the reverse of ``by``: it swaps the outcome, not the arguments.
+  /// It computes the key of ``t0`` before the key of ``t1``, as ``by`` does,
+  /// so every call ``by`` receives is the same call, in the same order, with and without `Rev`.
+  //>   .check{Lists#(3,1,2).flow.sort(Rev#{::}).list .assertEq({::}, Lists#(3,2,1))}
+  //>   .check{Lists#(3,1,3,2,1).flow.max(Rev#{::}).list .assertEq({::}, Lists#(1,1))}
+  #[T,K](by: OrderBy[T,K]): OrderBy[T] ->
+    {t0, t1, m -> by#t0 <=> (by#t1, {.lt -> m.gt; .eq -> m.eq; .gt -> m.lt})}
+  }
+
 Order[T,E:*]: {                      /// environment-dependent ordering of T (E supplies per-value orders)
   read .close: read T;
 
