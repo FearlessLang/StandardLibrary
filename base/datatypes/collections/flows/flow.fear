@@ -41,7 +41,8 @@ Flow[E:*]: {
   //>     .done}
   mut .forEach[A](a: mutH A, f: mut ForEachBody[A,E]): Void;
   mut .map[R:*](f: read F[E, R]): mut Flow[R];
-  mut .flatMap[R:*](f: read F[E, mut Flow[R]]): mut Flow[R];
+  mut .flatMap[R:*](f: read F[E, read List[R]]): mut Flow[read/imm R];
+  mut .flatMapMut[R:*](f: read F[E, mut List[R]]): mut Flow[R];
   mut .filter(f: read F[E, Bool]): mut Flow[E];
   mut .size: Nat -> this.list.size;
   mut .isEmpty: Bool -> this.size == 0;

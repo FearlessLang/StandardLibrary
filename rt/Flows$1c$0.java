@@ -126,9 +126,10 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
     m.put(mk, kem.imm$elem$1(e));
   }
   @Override public Object mut$flatMap$1(Object p0){
-    try{ return new Flow$o$1Instance(s.flatMap(e->((Flow$o$1Instance)callF$2(p0,e)).s)); }
+    try{ return new Flow$o$1Instance(s.flatMap(e->List$o$1Instance.asJava(callF$2(p0,e)).stream())); }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$flatMapMut$1(Object p0){ return mut$flatMap$1(p0); }
   //---
   @Override public Object mut$any$1(Object p0){
     try{ return bool(s.anyMatch(e->isTrue(callF$2(p0,e)))); }
