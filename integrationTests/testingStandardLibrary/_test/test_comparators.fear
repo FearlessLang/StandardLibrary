@@ -45,7 +45,7 @@ Persons: {
 
 Names: { #(ps: List[Person]): List[Str] -> ps.flow.map{::.name}.list }
 Doctors: { #(ps: List[Person]): List[Person] -> ps.flow.filter{::.name.startsWith "Dr."}.list }
-AllCats: { #(ps: List[Person]): List[Cat] -> ps.flow.flatMap(read F[Person, read List[Cat]]{::.cats}).list }
+AllCats: { #(ps: List[Person]): List[Cat] -> ps.flow.flatMap{::.cats}.list }
 AllNames: { #(ps: List[Person]): Str -> ps.flow.map{::.name}.join ", " }
 SumSizes: { #(ps: List[Person]): Nat -> ps.flow.map{::.name.size}.sum 0 }
 

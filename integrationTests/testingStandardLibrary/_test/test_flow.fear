@@ -93,14 +93,14 @@ FlowOverListTests: Test {::
 FlowFlatMapTests: Test {::
   .checkDetErr({::.isMsg{:: == "poison"}}, {Lists#(Lists#("aa","bbb"), Lists#("c","poison","dd"), Lists#("e"))
     .seqFlow
-    .flatMapMut{ss -> ss.flow
+    .flatMap{ss -> ss.flow
       .map[Str]{s -> s == "poison" ? {.then -> Error.msg"poison"; .else -> s}}.list}
     .limit 3
     .map{s -> s.size}
     .list})
   .check{Lists#(Lists#("aa","bbb"), Lists#("c","poison","dd"), Lists#("e"))
     .seqFlow
-    .flatMapMut{ss -> ss.flow
+    .flatMap{ss -> ss.flow
       .map[Str]{s -> s == "poison" ? {.then -> Error.msg"poison"; .else -> s}}.list}
     .limit 2
     .map{s -> s.size}
