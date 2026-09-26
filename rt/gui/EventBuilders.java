@@ -174,7 +174,7 @@ final class SkMouse extends MouseAdapter{
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
         if (b.actions.isEmpty()){ continue; }// nothing reaches the programmer: bubble
-        for (var a : b.actions){ frame.frame.queue.submit(a); }
+        frame.frame.queue.submitAll(b.actions);
         return;
       }
       if (fire(t, Clicked, p)){ return; }
@@ -184,17 +184,19 @@ final class SkMouse extends MouseAdapter{
   private void updateHover(Point p){ hoverTo(chainOf(deepestAt(p))); }
 
   private void hoverTo(List<AWidget> now){
+    var tasks = new ArrayList<MF$7$1>();
     for (var t : hover){// exits, deepest first
       if (now.contains(t)){ continue; }
       if (t instanceof _Button b){ b.over = false; }
-      fire(t, Exited, at);
+      handlers(t, Exited, at, tasks);
     }
     for (var t : now.reversed()){// enters, outermost first
       if (hover.contains(t)){ continue; }
       if (t instanceof _Button b){ b.over = true; }
-      fire(t, Entered, at);
+      handlers(t, Entered, at, tasks);
     }
     hover = now;
+    frame.frame.queue.submitAll(tasks);
   }
 
   private void dispatch(AWidget start, MouseKind kind, Point p){
@@ -204,18 +206,24 @@ final class SkMouse extends MouseAdapter{
   }
 
   private boolean fire(AWidget t, MouseKind kind, Point p){
+    var tasks = new ArrayList<MF$7$1>();
+    handlers(t, kind, p, tasks);
+    frame.frame.queue.submitAll(tasks);
+    return !tasks.isEmpty();
+  }
+
+  private void handlers(AWidget t, MouseKind kind, Point p, ArrayList<MF$7$1> tasks){
     var hs = t.handlers.get(kind);
-    if (hs == null || hs.isEmpty()){ return false; }
+    if (hs == null){ return; }
     var ctx = ctx(t, p);
     for (var h : hs){
-      frame.frame.queue.submit(new MF$7$1(){
+      tasks.add(new MF$7$1(){
         @Override public Object mut$$hash$0(){
           h.mut$accept$1(ctx);
           return Void$o$0.instance;
         }
       });
     }
-    return true;
   }
 
   private MouseEvent$174$0 ctx(AWidget t, Point p){

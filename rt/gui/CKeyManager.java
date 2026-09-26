@@ -22,27 +22,25 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   CKeyManager(_Frame frame){ this.frame=frame; }
 
   @Override public void keyPressed(KeyEvent e){
-    if (held.add(List.of(e.getKeyCode(),e.getKeyLocation()))){ dispatch(e.getKeyCode(),pressed); }
+    if (held.add(List.of(e.getKeyCode(),e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(),pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){
-    if (held.remove(List.of(e.getKeyCode(),e.getKeyLocation()))){ dispatch(e.getKeyCode(),released); }
+    if (held.remove(List.of(e.getKeyCode(),e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(),released)); }
   }
   @Override public void windowLostFocus(java.awt.event.WindowEvent e){
-    if (held.isEmpty()){ return; }
-    var keys=new ArrayList<>(held);
+    frame.frame.queue.submitAll(held.stream().map(k->task(k.getFirst(),released)).toList());
     held.clear();
-    for (var k:keys){ dispatch(k.getFirst(),released); }
   }
   @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
 
-  private void dispatch(int eventKey,List<KeyAction$m8$0> keyActions){
+  private MF$7$1 task(int eventKey,List<KeyAction$m8$0> keyActions){
     var elapsed=frame.elapsed;
     var screenWidth=frame.screenWidth;
     var screenHeight=frame.screenHeight;
     var panelWidth=w(frame.top.component.getWidth());
     var panelHeight=h(frame.top.component.getHeight());
 
-    frame.frame.queue.submit(new MF$7$1(){
+    return new MF$7$1(){
       @Override public Object mut$$hash$0(){
         var actions=new ArrayList<Consumer$ao$1>();
         KeyStroke$m8$0 key=null;
@@ -56,7 +54,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
         for (var a:actions){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
       }
-    });
+    };
   }
 
   private static KeyStroke$m8$0 matchingKey(EList$1k$1 match,int eventKey){

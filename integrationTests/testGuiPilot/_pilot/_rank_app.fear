@@ -31,6 +31,8 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Pane]] cleared = {Slots#[mut Pane]}
   .let[mut Slot[mut Border]] replaced = {Slots#[mut Border]}
   .let[mut Slot[mut Pane]] shifted = {Slots#[mut Pane]}
+  .let[mut Slot[mut Pane]] stage = {Slots#[mut Pane]}
+  .var[Nat] lost = {0}
   .return{f
     .title "GuiPilot"
     .resizable
@@ -43,6 +45,13 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
       .released{:: .matchOnly(Key#"SPACE") .doOnly{e -> Block#
         .do{released.set(released.get + 1)}
         .return{Block#(seen.set("SPACE pressed "+(pressed.get.str)+", released "+(released.get.str)), Void)}
+        }}
+      .released{:: .matchOnly(Key#"Q") .matchAlso(Key#"W") .doOnly{e -> Block#
+        .do{lost.set(lost.get + 1)}
+        .if{lost.get == 1} .return{Block#(stage!.paint{g -> Error.msg "A frame showed one key let go by a key map swap without the other"}, Void)}
+        .do{Wait#(f, Duration.milliSeconds 500)}
+        .do{Block#(stage!.paint{g -> g}, Void)}
+        .return{Block#(seen.set "Q and W released", Void)}
         }}
       }
     .content{::
@@ -119,6 +128,35 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
         .background(Color.rgb(230, 230, 60))
         .foreground(Color.rgb(20, 90, 200))
         .paint{g -> g.position(+20, +10).rect(20, 10)}
+        }
+      .pane{::
+        .widthGap 0
+        .save stage
+        .button{:: .text "Twice" .background(Color.rgb(220, 80, 220))
+          .action{Block#(stage!.paint{g -> Error.msg "A frame showed the first action of a click without the second"}, Void)}
+          .action{Block#
+            .do{Wait#(f, Duration.milliSeconds 500)}
+            .do{Block#(stage!.paint{g -> g}, Void)}
+            .return{Block#(seen.set "Twice ran", Void)}
+            }}
+        .pane{:: .width 60 .height 30 .background(Color.rgb(100, 160, 60)) .mouse{::
+          .pressed{e -> Block#(stage!.paint{g -> Error.msg "A frame showed the first handler of a press without the second"}, Void)}
+          .pressed{e -> Block#
+            .do{Wait#(f, Duration.milliSeconds 500)}
+            .do{Block#(stage!.paint{g -> g}, Void)}
+            .return{Block#(seen.set "pressed box P", Void)}
+            }
+          }}
+        .pane{:: .width 60 .height 30 .background(Color.rgb(60, 60, 180)) .mouse{::
+          .exited{e -> Block#(stage!.paint{g -> Error.msg "A frame showed the pointer leaving box Q without entering box R"}, Void)}
+          }}
+        .pane{:: .width 60 .height 30 .background(Color.rgb(180, 60, 60)) .mouse{::
+          .entered{e -> Block#
+            .do{Wait#(f, Duration.milliSeconds 500)}
+            .do{Block#(stage!.paint{g -> g}, Void)}
+            .return{Block#(seen.set "hover: box R", Void)}
+            }
+          }}
         }
       }
     }

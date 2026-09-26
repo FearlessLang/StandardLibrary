@@ -1,5 +1,6 @@
 package _base;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,6 +17,14 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
     t.start();
   }
   public void submit(MF$7$1 r){ synchronized (q){q.add(r);} } //synchronized needed to cooperate with the closeThen lock; q.add is synchronizing on another lock internally
+  public void submitAll(List<MF$7$1> rs){
+    if (rs.isEmpty()){ return; }
+    var all = List.copyOf(rs);
+    submit(new MF$7$1(){ public Object mut$$hash$0(){
+      for (var r : all){ r.mut$$hash$0(); }
+      return Void$o$0.instance;
+    }});
+  }
 
   public void closeThen(Runnable then){//synchronized needed to make sure poison is on top
     synchronized (q){
