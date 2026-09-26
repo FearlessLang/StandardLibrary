@@ -148,7 +148,7 @@ abstract class AWidget implements Widget$2o$1{
   final _Frame frame;
   final SkComponent component = new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
-  final EnumMap<MouseKind, ArrayList<Consumer$ao$1>> handlers = new EnumMap<>(MouseKind.class);
+  EnumMap<MouseKind, ArrayList<Consumer$ao$1>> handlers = new EnumMap<>(MouseKind.class);
 
   AWidget(_Frame frame){ this.frame = frame; }
 
@@ -257,8 +257,9 @@ abstract class AContainer extends AWidget{
   }
 
   public Object mut$mouse$1(Object s){
-    frame.onEdtAndWait(handlers::clear);// .mouse replaces earlier handlers
-    ((Scope$1c$1) s).mut$run$1(new CMouseBuilder(this));
+    var b = new CMouseBuilder(frame, new EnumMap<>(MouseKind.class));
+    ((Scope$1c$1) s).mut$run$1(b);
+    frame.onEdtAndWait(() -> handlers = b.handlers());// .mouse replaces earlier handlers
     return mut$self$0();
   }
 
@@ -281,7 +282,7 @@ class _Frame implements Frame$1c$0{
   private long startNanos = System.nanoTime();// re-based in start(): game time zero = warmup end
   private Nat$c$0 fps = n(30);
   private Nat$c$0 modelFpsVal;
-  private final ArrayList<MF$7$1> modelTickActions = new ArrayList<>();// live, EDT confined
+  private ArrayList<MF$7$1> modelTickActions = new ArrayList<>();// live, EDT confined
   private Alpha$1c$0 alpha = (Alpha$1c$0) Alpha$1c$0.instance.imm$opaque$0();
   private XInt$s$0 locationX;
   private YInt$s$0 locationY;
@@ -321,7 +322,9 @@ class _Frame implements Frame$1c$0{
   }
 
   void addTo(JComponent parent, String where, Object scope, Function<_Frame, ? extends AWidget> make){
-    var b = onEdtAndWait(() -> {
+    var b = onEdtAndWait(() -> make.apply(this));
+    ((Scope$1c$1) scope).mut$run$1(b);
+    onEdtAndWait(() -> {
       // Border slots are replaceable: a second .north evicts the first. The
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
@@ -331,11 +334,8 @@ class _Frame implements Frame$1c$0{
         mouse.detached((SkComponent) old);
         parent.remove(old);
       }
-      var bb = make.apply(this);
-      parent.add(bb.component, where);
-      return bb;
+      parent.add(b.component, where);
     });
-    ((Scope$1c$1) scope).mut$run$1(b);
     markLayoutDirty();
   }
 
@@ -658,21 +658,21 @@ class _Frame implements Frame$1c$0{
   @Override public Object mut$modelFps$2(Object f, Object scope){
     long nn = Util.natToLong(f);
     if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
-    modelFpsVal = (Nat$c$0) f;
-    onEdtAndWait(modelTickActions::clear);// replace semantics, like .mouse and .onKey
+    var actions = new ArrayList<MF$7$1>();
     ((Scope$1c$1) scope).mut$run$1(new ModelFps$as$0(){
       @Override public Object mut$action$1(Object r){
         // Live list: an action added later (through a saved builder) takes
         // part from the next due tick, exactly like Button.actions.
-        onEdtAndWait(() -> modelTickActions.add((MF$7$1) r));
+        onEdtAndWait(() -> actions.add((MF$7$1) r));
         return this;
       }
     });
-    if (started){
+    onEdtAndWait(() -> {
+      modelFpsVal = (Nat$c$0) f;
+      modelTickActions = actions;// replace semantics, like .mouse and .onKey
       // Live change: fixed-rate deadlines restart from now, no warmup.
-      long periodNs = Math.round(1e9 / nn);
-      onEdtAndWait(() -> frame.restartModelTimer(periodNs, 0, modelTickActions));
-    }
+      if (started){ frame.restartModelTimer(Math.round(1e9 / nn), 0, actions); }
+    });
     return this;
   }
   @Override public Object mut$content$1(Object s){ return newContent(s, _Pane::new); }

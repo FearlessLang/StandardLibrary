@@ -62,6 +62,11 @@ use base.Saturation as Saturation;
 use base.Brightness as Brightness;
 use base.Duration as Duration;
 use base.Instant as Instant;
+use base.Frame as Frame;
+use base.Pane as Pane;
+use base.ModelFps as ModelFps;
+use base.Slot as Slot;
+use base.Slots as Slots;
 use base.Rect as Rect;
 use base.Rects as Rects;
 use base.ToInfo as ToInfo;
@@ -84,6 +89,7 @@ MyTests:UnitTests{::
   .test GridHitTestTests
   .test GuiLayoutTests
   .test GuiBuilderTests
+  .test GuiLiveTests
   .test TestList
   .test TestFlow
   .test TestMap

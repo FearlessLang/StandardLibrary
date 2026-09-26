@@ -1,0 +1,67 @@
+GuiLiveTests: Test {::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut ModelFps]] old = {Slots#[mut ModelFps]}
+    .var[Nat] n = {0}
+    .do{Block#(f.modelFps(100, {:: .save old}), Void)}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .do{n.set(n.get + 1)}
+      .if{n.get >= 3} .do{Error.msg "Only the actions of the last .modelFps ran"}
+      .done}}), Void)}
+    .do{Block#(old!.action{Error.msg "A builder saved from a replaced .modelFps added an action"}, Void)}
+    .return{f.content{::}}
+    }}).run{
+      .ok _ -> Error.msg "A model action always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Only the actions of the last .modelFps ran"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .var[Nat] a = {0}
+    .var[Nat] b = {0}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .return{Block#(f.modelFps(100, {m -> Block#
+        .do{Block#(m.action{Block#
+          .do{a.set(a.get + 1)}
+          .if{a.get != (b.get + 1)} .do{Error.msg "An action of a .modelFps ran before its scope finished"}
+          .done}, Void)}
+        .do{GuiWait#(f, Duration.milliSeconds 300)}
+        .return{m.action{Block#
+          .do{b.set(b.get + 1)}
+          .if{b.get >= 5} .do{Error.msg "The actions of a .modelFps ran only once its scope finished"}
+          .done}}
+        }), Void)}
+      }}), Void)}
+    .return{f.content{::}}
+    }}).run{
+      .ok _ -> Error.msg "A model action always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The actions of a .modelFps ran only once its scope finished"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .return{Block#(root!.pane{p -> Block#
+        .do{Block#(p.paint{g -> Error.msg "A widget was painted before its scope finished"}, Void)}
+        .do{GuiWait#(f, Duration.milliSeconds 1)}
+        .return{p.paint{g -> Error.msg "A widget was painted only once its scope finished"}}
+        }, Void)}
+      }}), Void)}
+    .return{f.content{:: .save root}}
+    }}).run{
+      .ok _ -> Error.msg "A painter always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "A widget was painted only once its scope finished"}}.assertTrue{i};
+      }}
+  }
+GuiWait: {#(f: read Frame, d: Duration): Void -> Block#
+  .let[Instant] end = {f.elapsed + d}
+  .var[Nat] spins = {0}
+  .loop{Block#
+    .if{f.elapsed >= end || {spins.get >= 1000000000}} .return{Break#}
+    .do{spins.set(spins.get + 1)}
+    .return{Continue#}
+    }
+  .done
+  }

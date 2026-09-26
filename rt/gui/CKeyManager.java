@@ -23,8 +23,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
   @Override public void keyPressed(KeyEvent e){
     var k=keyText(e);
-    held.add(k);
-    dispatch(k,pressed);
+    if (held.add(k)){ dispatch(k,pressed); }
   }
   @Override public void keyReleased(KeyEvent e){
     var k=keyText(e);

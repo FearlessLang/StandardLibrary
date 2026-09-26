@@ -1,0 +1,107 @@
+use base.Main as Main;
+use base.Void as Void;
+use base.Nat as Nat;
+use base.Block as Block;
+use base.Frame as Frame;
+use base.Color as Color;
+use base.Label as Label;
+use base.Pane as Pane;
+use base.Mouse as Mouse;
+use base.Slot as Slot;
+use base.Slots as Slots;
+use base.KeyStroke as Key;
+use base.Duration as Duration;
+use base.Instant as Instant;
+use base.Break as Break;
+use base.Continue as Continue;
+
+Live:Main{sys -> sys.gui.run{f -> Block#
+  .let[mut Slot[mut Label]] status = {Slots#[mut Label]}
+  .let[mut Slot[mut Label]] countB = {Slots#[mut Label]}
+  .let[mut Slot[mut Label]] countD = {Slots#[mut Label]}
+  .let[mut Slot[mut Pane]] areaA = {Slots#[mut Pane]}
+  .let[mut Slot[mut Pane]] areaB = {Slots#[mut Pane]}
+  .let[mut Slot[mut Mouse]] oldC = {Slots#[mut Mouse]}
+  .var[Nat] pressedB = {0}
+  .var[Nat] releasedB = {0}
+  .var[Nat] pressedD = {0}
+  .var[Nat] releasedD = {0}
+  .return{f
+    .title "GuiLive: live changes are atomic"
+    .onKey{::
+      .pressed{:: .matchOnly(Key#"SPACE") .doOnly{e -> Block#
+        .do{pressedD.set(pressedD.get + 1)}
+        .return{Block#(countD!.text("SPACE pressed "+(pressedD.get.str)+", released "+(releasedD.get.str)), Void)}
+        }}
+      .released{:: .matchOnly(Key#"SPACE") .doOnly{e -> Block#
+        .do{releasedD.set(releasedD.get + 1)}
+        .return{Block#(countD!.text("SPACE pressed "+(pressedD.get.str)+", released "+(releasedD.get.str)), Void)}
+        }}
+      }
+    .content{::
+      .vertical
+      .background(Color.ghostWhite)
+      .label{:: .text "status: none" .save status}
+      .label{:: .text "A: press Add. For 3 seconds a button is built: nothing may appear in the green area."}
+      .label{:: .text "Then a yellow New button appears; clicking it must set the status to: New ran"}
+      .pane{::
+        .width 520 .height 50
+        .background(Color.alienMint)
+        .mouse{:: .clicked{e -> Block#(status!.text "status: green area clicked", Void)}}
+        .save areaA
+        }
+      .button{:: .text "Add" .action{Block#(areaA!.button{b -> Block#
+        .do{Block#(b.text "New", Void)}
+        .do{LiveWait#(f, Duration.seconds 3)}
+        .do{Block#(b.background(Color.rubberDuck), Void)}
+        .return{b.action{Block#(status!.text "status: New ran", Void)}}
+        }, Void)}}
+      .label{:: .text "B: press Rebind, then within 3 seconds click the blue area: the two counts must stay equal."}
+      .label{:: .text "pressed 0, released 0" .save countB}
+      .pane{::
+        .width 520 .height 50
+        .background(Color.sleepyBlue)
+        .mouse{::
+          .pressed{e -> Block#
+            .do{pressedB.set(pressedB.get + 1)}
+            .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
+            }
+          .released{e -> Block#
+            .do{releasedB.set(releasedB.get + 1)}
+            .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
+            }
+          }
+        .save areaB
+        }
+      .button{:: .text "Rebind" .action{Block#(areaB!.mouse{m -> Block#
+        .do{Block#(m.pressed{e -> Block#
+          .do{pressedB.set(pressedB.get + 1)}
+          .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
+          }, Void)}
+        .do{LiveWait#(f, Duration.seconds 3)}
+        .return{m.released{e -> Block#
+          .do{releasedB.set(releasedB.get + 1)}
+          .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
+          }}
+        }, Void)}}
+      .label{:: .text "C: click the purple area: the status must be: second .mouse ran"}
+      .pane{p -> Block#
+        .do{Block#(p.width 520 .height 50 .background(Color.wizardPurple), Void)}
+        .do{Block#(p.mouse{:: .save oldC .clicked{e -> Block#(status!.text "status: first .mouse ran", Void)}}, Void)}
+        .do{Block#(p.mouse{:: .clicked{e -> Block#(status!.text "status: second .mouse ran", Void)}}, Void)}
+        .do{Block#(oldC!.clicked{e -> Block#(status!.text "status: a builder saved from the replaced .mouse added a handler", Void)}, Void)}
+        .return{p}
+        }
+      .label{:: .text "D: hold SPACE for 2 seconds, then release it: each count must grow by exactly one."}
+      .label{:: .text "SPACE pressed 0, released 0" .save countD}
+      }
+    }
+  }}
+LiveWait: {#(f: read Frame, d: Duration): Void -> Block#
+  .let[Instant] end = {f.elapsed + d}
+  .loop{Block#
+    .if{f.elapsed >= end} .return{Break#}
+    .return{Continue#}
+    }
+  .done
+  }

@@ -6,6 +6,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import javax.swing.SwingUtilities;
 
@@ -32,10 +33,10 @@ record CMouseCtx(
 }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
-record CMouseBuilder(AWidget panel) implements Mouse$1c$0{
+record CMouseBuilder(_Frame frame, EnumMap<MouseKind, ArrayList<Consumer$ao$1>> handlers) implements Mouse$1c$0{
   private Mouse$1c$0 add(MouseKind k, Object a){
-    panel.frame.onEdtAndWait(() ->
-      panel.handlers.computeIfAbsent(k, _ -> new ArrayList<>()).add((Consumer$ao$1) a));
+    frame.onEdtAndWait(() ->
+      handlers.computeIfAbsent(k, _ -> new ArrayList<>()).add((Consumer$ao$1) a));
     return this;
   }
   @Override public Object mut$clicked$1(Object a){ return add(Clicked, a); }
