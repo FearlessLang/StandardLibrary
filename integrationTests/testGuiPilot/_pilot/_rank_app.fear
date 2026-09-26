@@ -33,6 +33,7 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Border]] replaced = {Slots#[mut Border]}
   .let[mut Slot[mut Pane]] shifted = {Slots#[mut Pane]}
   .let[mut Slot[mut Pane]] stage = {Slots#[mut Pane]}
+  .let[mut Slot[mut Label]] longer = {Slots#[mut Label]}
   .var[Nat] lost = {0}
   .return{f
     .title "GuiPilot"
@@ -163,6 +164,15 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
             .return{Block#(seen.set "hover: box R", Void)}
             }
           }}
+        }
+      .pane{::
+        .pane{:: .width 60 .height 30 .background(Color.rgb(90, 60, 140)) .mouse{::
+          .pressed{e -> Block#
+            .do{Block#(longer!.text "S WWWWWWWWWW", Void)}
+            .return{Block#(seen.set "pressed box S", Void)}
+            }
+          }}
+        .label{:: .text "S" .background(Color.rgb(250, 180, 200)) .save longer}
         }
       }
     }

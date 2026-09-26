@@ -2,7 +2,6 @@ package _base;
 
 import java.awt.Component;
 import java.awt.Point;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -68,7 +67,6 @@ record CMouseBuilder(_Frame frame, EnumMap<MouseKind, ArrayList<Consumer$ao$1>> 
 //   misleading.
 final class SkMouse extends MouseAdapter{
   private final _Frame frame;
-  boolean down;// any mouse button held; read by _Frame.tick to postpone relayout
   private List<AWidget> hover = List.of();// deepest first
   private Point at = new Point();
   private AWidget pressTarget;
@@ -77,9 +75,7 @@ final class SkMouse extends MouseAdapter{
   SkMouse(_Frame frame){ this.frame = frame; }
 
   // A subtree was removed from the live tree: forget every reference into it.
-  // The gesture itself continues on the (unchanged) top component, so `down`
-  // is untouched. pressedButton is always pressTarget or null, so both clear
-  // together.
+  // pressedButton is always pressTarget or null, so both clear together.
   void detached(SkComponent root){
     assert SwingUtilities.isEventDispatchThread();
     if (!hover.isEmpty()){
@@ -95,13 +91,9 @@ final class SkMouse extends MouseAdapter{
     }
   }
 
-  // The whole tree was replaced (content swap): forget everything, including
-  // `down`. The old top component holds the AWT mouse grab for any gesture in
-  // progress but no longer has listeners, so its release would never arrive
-  // here; leaving `down` true would postpone relayout forever.
+  // The whole tree was replaced (content swap): forget everything.
   void reset(){
     assert SwingUtilities.isEventDispatchThread();
-    down = false;
     hover = List.of();
     pressTarget = null;
     pressedButton = null;
@@ -117,7 +109,6 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mousePressed(MouseEvent e){
-    down = true;
     var p = point(e);
     var d = deepestAt(p);
     if (SwingUtilities.isLeftMouseButton(e)){
@@ -129,9 +120,6 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mouseReleased(MouseEvent e){
-    down = (e.getModifiersEx() & (InputEvent.BUTTON1_DOWN_MASK
-      | InputEvent.BUTTON2_DOWN_MASK
-      | InputEvent.BUTTON3_DOWN_MASK)) != 0;
     var p = point(e);
     boolean left = SwingUtilities.isLeftMouseButton(e);
     // mousePressed only ever captures a left press into pressTarget, so only

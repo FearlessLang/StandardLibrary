@@ -386,11 +386,11 @@ class _Frame implements Frame$1c$0{
   void tick(Instant$5c$0 elapsed){
     this.elapsed = elapsed;
     if (frame.queue.midTask().get()){ return; }
-    // Never relayout while a mouse button is held or a press/release is
-    // already queued behind this tick: moving components mid-gesture would
-    // change the bounds used to interpret that gesture. The dirty flag stays
-    // set, so the pending layout runs on a later tick.
-    if (layoutDirty.get() && !mouse.down && !mouseEventPending()){
+    // Never relayout while a press/release is already queued behind this
+    // tick: the user made it on the pixels on screen, so it is interpreted
+    // against the bounds those pixels show. The dirty flag stays set, so the
+    // pending layout runs on a later tick.
+    if (layoutDirty.get() && !mouseEventPending()){
       layoutDirty.set(false);
       // Only the invalid path (marked by reStyle/add) is re-laid-out.
       top.component.validate();
@@ -687,11 +687,9 @@ class _Frame implements Frame$1c$0{
       uninstall(top);
       install(t);
       frame.setContentPane(t.component);
-      // The old tree is gone: no Exited events for it, a gesture in progress
-      // is forgotten (an in-flight release finds no press target, like a
-      // release over empty space), and mouse.down is cleared so relayout
-      // gating cannot wait forever for a release the old tree will never
-      // deliver.
+      // The old tree is gone: no Exited events for it, and a gesture in
+      // progress is forgotten (an in-flight release finds no press target,
+      // like a release over empty space).
       mouse.reset();
       frame.validate();
     });
