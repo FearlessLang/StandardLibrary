@@ -1,0 +1,7 @@
+GuiKeyTests: Test {::
+  .checkDetErr({::.isMsg{:: == `KeyStroke#"Space" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}}, {Key#"Space"})
+  .checkDetErr({::.isMsg{:: == `KeyStroke#"a" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}}, {Key#"a"})
+  .checkDetErr({::.isMsg{:: == `KeyStroke#"ESC" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}}, {Key#"ESC"})
+  .check{Key#"SEPARATOR" .assertEq(Key#"SEPARATOR")}
+  .check{Key#"SEPARATER" .assertEq(Key#"SEPARATER")}
+  }

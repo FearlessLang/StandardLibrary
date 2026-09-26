@@ -60,8 +60,17 @@ use base.Color as Color;
 use base.Hue as Hue;
 use base.Saturation as Saturation;
 use base.Brightness as Brightness;
+use base.KeyStroke as Key;
 use base.Duration as Duration;
 use base.Instant as Instant;
+use base.Frame as Frame;
+use base.Pane as Pane;
+use base.Label as Label;
+use base.Mouse as Mouse;
+use base.Keys as Keys;
+use base.ModelFps as ModelFps;
+use base.Slot as Slot;
+use base.Slots as Slots;
 use base.Rect as Rect;
 use base.Rects as Rects;
 use base.ToInfo as ToInfo;
@@ -81,9 +90,14 @@ MyTests:UnitTests{::
   .test TestStr
   .test TestEnum
   .test TestWrappers
-  .test GridHitTestTests
   .test GuiLayoutTests
   .test GuiBuilderTests
+  .test GuiLiveTests
+  .test GuiExtentTests
+  .test GuiFrameTests
+  .test GuiSetterTests
+  .test GuiConnectedTests
+  .test GuiKeyTests
   .test TestList
   .test TestFlow
   .test TestMap

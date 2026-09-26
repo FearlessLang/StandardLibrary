@@ -2,10 +2,10 @@ package _base;
 
 import java.awt.Component;
 import java.awt.Point;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import javax.swing.SwingUtilities;
 
@@ -17,25 +17,32 @@ record CMouseCtx(
   Instant$5c$0 elapsed,
   XInt$s$0 mouseX,
   YInt$s$0 mouseY,
-  WidthNat$as$0 screenWidth,
-  HeightNat$lg$0 screenHeight,
+  _Frame frame,
   WidthNat$as$0 panelWidth,
   HeightNat$lg$0 panelHeight
 ) implements MouseEvent$174$0{
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object imm$mouseX$0(){ return mouseX; }
   @Override public Object imm$mouseY$0(){ return mouseY; }
-  @Override public Object read$screenWidth$0(){ return screenWidth; }
-  @Override public Object read$screenHeight$0(){ return screenHeight; }
+  @Override public Object read$screenWidth$0(){ return Scopes.w(frame.screenW); }
+  @Override public Object read$screenHeight$0(){ return Scopes.h(frame.screenH); }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
 }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
-record CMouseBuilder(AWidget panel) implements Mouse$1c$0{
+final class CMouseBuilder implements Mouse$1c$0{
+  final AWidget owner;
+  final EnumMap<MouseKind, Consumer$ao$1> handlers = new EnumMap<>(MouseKind.class);
+  boolean changeable = true;// EDT confined
+  CMouseBuilder(AWidget owner){ this.owner = owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
-    panel.frame.onEdtAndWait(() ->
-      panel.handlers.computeIfAbsent(k, _ -> new ArrayList<>()).add((Consumer$ao$1) a));
+    owner.frame.onEdtAndWait(() -> {
+      if (!changeable && (owner.handlers != handlers || !owner.canChange())){
+        throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
+      }
+      handlers.put(k, (Consumer$ao$1) a);
+    });
     return this;
   }
   @Override public Object mut$clicked$1(Object a){ return add(Clicked, a); }
@@ -56,7 +63,7 @@ record CMouseBuilder(AWidget panel) implements Mouse$1c$0{
 //   kind; the first widget with handlers consumes the event.
 // - A click bubbles from the press target to the nearest enclosing widget
 //   that consumes clicks AND still contains the release point (the DOM
-//   press/release common-ancestor rule). A button with no actions does not
+//   press/release common-ancestor rule). A button with no action does not
 //   consume, so clicks on it bubble.
 // - Entered/Exited fire on genuine containment transitions computed here by
 //   hit-testing, so synthetic AWT enter/exit noise cannot reach them. They
@@ -68,7 +75,6 @@ record CMouseBuilder(AWidget panel) implements Mouse$1c$0{
 //   misleading.
 final class SkMouse extends MouseAdapter{
   private final _Frame frame;
-  boolean down;// any mouse button held; read by _Frame.tick to postpone relayout
   private List<AWidget> hover = List.of();// deepest first
   private Point at = new Point();
   private AWidget pressTarget;
@@ -77,9 +83,7 @@ final class SkMouse extends MouseAdapter{
   SkMouse(_Frame frame){ this.frame = frame; }
 
   // A subtree was removed from the live tree: forget every reference into it.
-  // The gesture itself continues on the (unchanged) top component, so `down`
-  // is untouched. pressedButton is always pressTarget or null, so both clear
-  // together.
+  // pressedButton is always pressTarget or null, so both clear together.
   void detached(SkComponent root){
     assert SwingUtilities.isEventDispatchThread();
     if (!hover.isEmpty()){
@@ -95,20 +99,24 @@ final class SkMouse extends MouseAdapter{
     }
   }
 
-  // The whole tree was replaced (content swap): forget everything, including
-  // `down`. The old top component holds the AWT mouse grab for any gesture in
-  // progress but no longer has listeners, so its release would never arrive
-  // here; leaving `down` true would postpone relayout forever.
+  // The whole tree was replaced (content swap): forget everything.
   void reset(){
     assert SwingUtilities.isEventDispatchThread();
-    down = false;
     hover = List.of();
     pressTarget = null;
     pressedButton = null;
   }
 
+  void rehover(){
+    assert SwingUtilities.isEventDispatchThread();
+    if (java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(MouseEvent.MOUSE_MOVED) != null){ return; }
+    var p = top().getMousePosition();
+    if (p == null){ hoverTo(List.of()); return; }
+    at = p;
+    updateHover(p);
+  }
+
   @Override public void mousePressed(MouseEvent e){
-    down = true;
     var p = point(e);
     var d = deepestAt(p);
     if (SwingUtilities.isLeftMouseButton(e)){
@@ -120,9 +128,6 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mouseReleased(MouseEvent e){
-    down = (e.getModifiersEx() & (InputEvent.BUTTON1_DOWN_MASK
-      | InputEvent.BUTTON2_DOWN_MASK
-      | InputEvent.BUTTON3_DOWN_MASK)) != 0;
     var p = point(e);
     boolean left = SwingUtilities.isLeftMouseButton(e);
     // mousePressed only ever captures a left press into pressTarget, so only
@@ -163,8 +168,8 @@ final class SkMouse extends MouseAdapter{
     for (var t : chainOf(pressTarget)){
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
-        if (b.actions.isEmpty()){ continue; }// nothing reaches the programmer: bubble
-        for (var a : b.actions){ frame.frame.queue.submit(a); }
+        if (b.action == null){ continue; }// nothing reaches the programmer: bubble
+        frame.frame.queue.submit(whileShown(b, b.action));
         return;
       }
       if (fire(t, Clicked, p)){ return; }
@@ -174,17 +179,19 @@ final class SkMouse extends MouseAdapter{
   private void updateHover(Point p){ hoverTo(chainOf(deepestAt(p))); }
 
   private void hoverTo(List<AWidget> now){
+    var tasks = new ArrayList<MF$7$1>();
     for (var t : hover){// exits, deepest first
       if (now.contains(t)){ continue; }
       if (t instanceof _Button b){ b.over = false; }
-      fire(t, Exited, at);
+      handlers(t, Exited, at, tasks);
     }
     for (var t : now.reversed()){// enters, outermost first
       if (hover.contains(t)){ continue; }
       if (t instanceof _Button b){ b.over = true; }
-      fire(t, Entered, at);
+      handlers(t, Entered, at, tasks);
     }
     hover = now;
+    frame.frame.queue.submitAll(tasks);
   }
 
   private void dispatch(AWidget start, MouseKind kind, Point p){
@@ -194,18 +201,31 @@ final class SkMouse extends MouseAdapter{
   }
 
   private boolean fire(AWidget t, MouseKind kind, Point p){
-    var hs = t.handlers.get(kind);
-    if (hs == null || hs.isEmpty()){ return false; }
+    var tasks = new ArrayList<MF$7$1>();
+    handlers(t, kind, p, tasks);
+    frame.frame.queue.submitAll(tasks);
+    return !tasks.isEmpty();
+  }
+
+  private void handlers(AWidget t, MouseKind kind, Point p, ArrayList<MF$7$1> tasks){
+    var h = t.handlers.get(kind);
+    if (h == null){ return; }
     var ctx = ctx(t, p);
-    for (var h : hs){
-      frame.frame.queue.submit(new MF$7$1(){
-        @Override public Object mut$$hash$0(){
-          h.mut$accept$1(ctx);
-          return Void$o$0.instance;
-        }
-      });
-    }
-    return true;
+    tasks.add(whileShown(t, new MF$7$1(){
+      @Override public Object mut$$hash$0(){
+        h.mut$accept$1(ctx);
+        return Void$o$0.instance;
+      }
+    }));
+  }
+
+  private static MF$7$1 whileShown(AWidget t, MF$7$1 r){
+    return new MF$7$1(){
+      @Override public Object mut$$hash$0(){
+        if (!t.frame.onEdtAndWait(t::canChange)){ return Void$o$0.instance; }
+        return r.mut$$hash$0();
+      }
+    };
   }
 
   private MouseEvent$174$0 ctx(AWidget t, Point p){
@@ -214,8 +234,7 @@ final class SkMouse extends MouseAdapter{
       frame.elapsed,
       Scopes.x(q.x),
       Scopes.y(q.y),
-      frame.screenWidth,
-      frame.screenHeight,
+      frame,
       Scopes.w(t.component.getWidth()),
       Scopes.h(t.component.getHeight()));
   }

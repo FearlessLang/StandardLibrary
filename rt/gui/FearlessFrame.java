@@ -2,7 +2,9 @@ package _base;
 
 import java.awt.AWTEvent;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -93,38 +95,50 @@ final class FearlessFrame extends JFrame{
   }
 
   // Swaps window decoration live. AWT forbids setUndecorated on a displayable
-  // window, so: dispose, flip, show again with the same bounds — the standard
+  // window, so: dispose, flip, show again at the same location with the same
+  // content size (or with the given maximized bounds) — the standard
   // workaround. Runs entirely inside one EDT dispatch, so no repaint tick can
   // interleave while the frame is momentarily non-displayable. The dispose
   // posts one WINDOW_CLOSED event, suppressed via suppressClosed so it is not
   // taken as the user quitting. Expect a brief native flicker: the OS window
   // really is recreated.
-  void setDecoration(boolean undecorated, float opacity){
+  void setDecoration(boolean undecorated, float opacity, Rectangle maximized){
     assert SwingUtilities.isEventDispatchThread();
     if (!active()){ return; }
     if (isUndecorated() == undecorated){
       if (undecorated){ setOpacity(opacity); }// repeated call may still change alpha
       return;
     }
-    var b = getBounds();
+    var at = getLocation();
+    var c = getContentPane().getSize();
     if (!undecorated){ setOpacity(1f); }// opacity < 1 is illegal on decorated windows
     suppressClosed++;
     dispose();
+    boolean resizable = isResizable();
+    setResizable(true);
     setUndecorated(undecorated);
     if (undecorated){ setOpacity(opacity); }
-    setBounds(b);
+    setLocation(at);
+    setContentSize(c.width, c.height);
+    if (maximized != null){ setBounds(maximized); }
     setVisible(true);
+    setResizable(resizable);
     toFront();
+  }
+
+  void setContentSize(int w, int h){
+    getRootPane().setPreferredSize(new Dimension(w, h));
+    pack();
   }
 
   // Starts or replaces the model timer, fixed-rate semantics. warmupMillis
   // delays the first firing and the tick deadlines (WarmupMillis at startup,
   // 0 on a live modelFps change). The action list is live and EDT confined:
-  // an action added later by the model takes part from the next due tick,
-  // exactly like Button.actions. Each firing submits the whole action list
-  // once per model tick that became due since the previous firing; the
-  // submissions of one firing are contiguous on the queue (single EDT
-  // producer), so catch-up ticks cannot interleave with button or key events.
+  // an action set later by the model takes part from the next due tick.
+  // Each firing submits one task running the
+  // whole action list per model tick that became due since the previous
+  // firing; the submissions of one firing are contiguous on the queue (single
+  // EDT producer), so catch-up ticks cannot interleave with button or key events.
   void restartModelTimer(long periodNs, int warmupMillis, java.util.List<MF$7$1> actions){
     assert SwingUtilities.isEventDispatchThread();
     if (!active()){ return; }
@@ -148,7 +162,7 @@ final class FearlessFrame extends JFrame{
         todo = ModelCatchupMax;
       }
       for (long i = 0; i < todo; i++){
-        for (var a : actions){ queue.submit(a); }
+        queue.submitAll(actions);
         modelTicks++;
       }
       // Backlog: nothing is lost, but the queue thread is slower than the

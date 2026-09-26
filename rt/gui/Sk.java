@@ -25,6 +25,7 @@ import io.github.humbleui.skija.shaper.TextLineRunHandler;
 import io.github.humbleui.skija.shaper.TrivialLanguageRunIterator;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -135,11 +136,9 @@ interface Sk{
   }
 
   static TextLine line(AWidget s){
-    var key = h(s.textSize) + " " + s.text;
-    if (!key.equals(s.lineKey)){
-      if (s.line != null){ s.line.close(); }
-      s.line = shape(s.text, h(s.textSize));
-      s.lineKey = key;
+    if (s.line == null){
+      s.line = shape(s.text, s.textSize);
+      s.metrics = font(0, s.textSize).getMetrics();
     }
     return s.line;
   }
@@ -151,7 +150,8 @@ interface Sk{
 
   static void paintNode(SkComponent c, Canvas cv){
     c.w.sk(cv);
-    for (var k : c.getComponents()){
+    for (int i = 0; i < c.getComponentCount(); i++){
+      var k = c.getComponent(i);
       int save = cv.save();
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
@@ -161,40 +161,40 @@ interface Sk{
   }
 
   static void background(Canvas cv, AWidget s){
-    int col = color(s.background);
-    if (col >>> 24 == 0){ return; }
+    if (s.bg >>> 24 == 0){ return; }
     float w = s.component.getWidth();
     float h = s.component.getHeight();
-    paint.setColor(col);
-    cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(n(s.radius), Math.min(w, h) / 2)), paint);
+    paint.setColor(s.bg);
+    cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2)), paint);
   }
 
   static Dimension textSizeWithInsets(AWidget s){
     return new Dimension(
-      (int) Math.ceil(line(s).getWidth()) + w(s.left) + w(s.right),
-      (int) Math.ceil(font(0, h(s.textSize)).getMetrics().getHeight()) + h(s.top) + h(s.bottom));
+      (int) Math.ceil(line(s).getWidth()) + s.left + s.right,
+      (int) Math.ceil(s.metrics.getHeight()) + s.top + s.bottom);
   }
 
-  static Dimension preferred(Dimension auto, AWidget s){
-    return new Dimension(
-      s.preferredWidth == null ? auto.width : w(s.preferredWidth),
-      s.preferredHeight == null ? auto.height : h(s.preferredHeight));
+  static Dimension sizeFor(Component c, int width, int height){
+    var s = ((SkComponent) c).w;
+    int ww = s.preferredWidth == null ? width : s.preferredWidth;
+    int hh = s.preferredHeight == null ? height : s.preferredHeight;
+    var auto = s.autoSize(ww, hh);
+    return new Dimension(s.preferredWidth == null ? auto.width : ww, s.preferredHeight == null ? auto.height : hh);
   }
 
   static void text(Canvas cv, AWidget s, float dx, float dy){
     var c = s.component;
     var line = line(s);
-    var fm = font(0, h(s.textSize)).getMetrics();
-    float textH = fm.getHeight();
-    int x0 = w(s.left);
-    int y0 = h(s.top);
-    int cw = c.getWidth() - w(s.left) - w(s.right);
-    int ch = c.getHeight() - h(s.top) - h(s.bottom);
+    var fm = s.metrics;
+    int x0 = s.left;
+    int y0 = s.top;
+    int cw = c.getWidth() - s.left - s.right;
+    int ch = c.getHeight() - s.top - s.bottom;
     if (cw <= 0 || ch <= 0){ return; }
     int save = cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
-    paint.setColor(color(s.foreground));
-    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, y0 + (ch - textH) / 2 - fm.getAscent() + dy, paint);
+    paint.setColor(s.fg);
+    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, y0 + (ch - fm.getHeight()) / 2 - fm.getAscent() + dy, paint);
     cv.restoreToCount(save);
   }
 
@@ -204,9 +204,9 @@ interface Sk{
     if (w <= 0 || h <= 0){ return; }
     boolean down = s.down;
     boolean over = s.over && !down;
-    float r = Math.min(n(s.radius), Math.min(w, h) / 2f);
+    float r = Math.min(s.radius, Math.min(w, h) / 2f);
     int d = bevel(w, h, (int) r, s);
-    int center = baseColor(color(s.background), over, down);
+    int center = baseColor(s.bg, over, down);
     int light = mix(center, 0xFFFFFFFF, 45);
     int dark = mix(center, 0xFF000000, 45);
     var outer = RRect.makeXYWH(0, 0, w, h, r);
@@ -215,8 +215,7 @@ interface Sk{
     if (d > 0){
       // The bevel paths depend only on (w, h, radius, d) and are cached on
       // the button: a stable button costs zero path allocations per frame.
-      int rad = n(s.radius);
-      if (s.bevelW != w || s.bevelH != h || s.bevelR != rad || s.bevelD != d){
+      if (s.bevelW != w || s.bevelH != h || s.bevelR != s.radius || s.bevelD != d){
         if (s.bevelTl != null){ s.bevelTl.close(); s.bevelBr.close(); }
         Path o = Path.makeRRect(outer);
         Path i = Path.makeRRect(RRect.makeXYWH(d, d, w - 2f * d, h - 2f * d, Math.max(0, r - d)));
@@ -233,7 +232,7 @@ interface Sk{
         for (Path p : new Path[]{ o, i, diag, ring }){ p.close(); }
         s.bevelW = w;
         s.bevelH = h;
-        s.bevelR = rad;
+        s.bevelR = s.radius;
         s.bevelD = d;
       }
       paint.setColor(down ? dark : light);
@@ -247,7 +246,7 @@ interface Sk{
 
   private static int bevel(int w, int h, int r, AWidget s){
     int d = Math.max(3, Math.min(8, Math.min(w, h) / 9));
-    d = Math.min(d, Math.min(Math.min(w(s.left), w(s.right)), Math.min(h(s.top), h(s.bottom))));
+    d = Math.min(d, Math.min(Math.min(s.left, s.right), Math.min(s.top, s.bottom)));
     d = Math.min(d, Math.min(w, h) / 2);
     return r > 0 ? Math.min(d, r) : d;
   }

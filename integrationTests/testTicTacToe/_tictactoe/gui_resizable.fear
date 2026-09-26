@@ -7,7 +7,7 @@
 BoardBounds: { #(panelW: Width, panelH: Height): Rect -> Block#
   .let[Nat] pw = { panelW.get }
   .let[Nat] ph = { panelH.get }
-  .let[Nat] side = { (pw < ph).if{.then->pw; .else->ph} }
+  .let[Nat] side = { ((pw < ph).if{.then->pw; .else->ph} .getTruncDiv 3) * 3 }
   .let[Nat] offX = { (pw - side) .getTruncDiv 2 }
   .let[Nat] offY = { (ph - side) .getTruncDiv 2 }
   .return { Rects#(X.origin + (Width#offX), Y.origin + (Height#offY), Width#side, Height#side) }
@@ -147,11 +147,8 @@ ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[m
           .let[Nat] cell = { board.width.get .getTruncDiv 3 }
           .if { (cell > 0) && {model.winner.isEmpty} && {board.contains(e.mouseX, e.mouseY)} }
             .do { Block#
-              //board.contains is inclusive of the board's own right/bottom pixel,
-              //where truncating division always yields the out-of-range index 3
-              //(side >= 3*cell by construction): clamp back into the 0..2 grid.
-              .let[Nat] col  = { (board.x.to(e.mouseX).get .getTruncDiv cell) .clampTo(0=~~=2) }
-              .let[Nat] row  = { (board.y.to(e.mouseY).get .getTruncDiv cell) .clampTo(0=~~=2) }
+              .let[Nat] col  = { board.x.to(e.mouseX).get .getTruncDiv cell }
+              .let[Nat] row  = { board.y.to(e.mouseY).get .getTruncDiv cell }
               .do { model.play(row*3 + col) }
               .do { dirty.set(True) }
               .done

@@ -67,8 +67,8 @@ Rect: {
   .right: XInt -> this.x + (this.width);
   .bottom: YInt -> this.y + (this.height);
   .contains(x: XInt, y: YInt): Bool ->
-    x >= (this.x) && { x <= (this.right) }
-    && { y >= (this.y) } && { y <= (this.bottom) };
+    x >= (this.x) && { x < (this.right) }
+    && { y >= (this.y) } && { y < (this.bottom) };
   }
 Rects: { #(x: XInt, y: YInt, width: WidthNat, height: HeightNat): Rect ->
   { .x -> x; .y -> y; .width -> width; .height -> height; } }
@@ -92,6 +92,8 @@ LevelByte[S]: Wrapper[S,Byte] {
 LevelFloat[S]: Wrapper[S,Float] {
   read .lowest: Float;
   read .highest: Float;
+  read ._unchecked(t: Float): S;
+  # t -> Block#(t.assertInRange(this.lowest =~~= (this.highest), {this.name + " must be between " + (this.lowest.str) + " and " + (this.highest.str)}), this._unchecked t);
   +(other: S): S -> this#(this.get + (this.close(other).get));
   -(other: S): S -> this#(this.get - (this.close(other).get));
   .gap(other: S): S -> this#((this.get - (this.close(other).get)).getAbs);
@@ -112,28 +114,30 @@ Alpha:LevelByte[Alpha]{.name->"Alpha"; .getDataType -> 0.getByte;
   }
 CyclicFloat[S]: Wrapper[S,Float] {
   read .period: Float;
+  read ._unchecked(t: Float): S;
+  # t -> Block#(t.assertInRange(0.0 =~~ (this.period), {this.name + " must be at least 0 and less than " + (this.period.str)}), this._unchecked t);
   +(other: S): S -> this#(Math.euclideanMod(this.get + (this.close(other).get), this.period));
   -(other: S): S -> this#(Math.euclideanMod(this.get - (this.close(other).get), this.period));
-  .normalize: S -> this#(Math.euclideanMod(this.get, this.period));
   }
 
 Hue:CyclicFloat[Hue]{.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
-  # t ->Block#(t.assertInRange(0.0=~~=1.0, {"Hue must be between 0 and 1"}),
-  { .getDataType->t });
+  ._unchecked t -> { .getDataType->t };
   .close->this; .close->::; }
 Saturation:LevelFloat[Saturation]{.name->"Saturation"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
-  # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Saturation must be between 0 and 1"}),
-  { .getDataType->t });
+  ._unchecked t -> { .getDataType->t };
   .close->this; .close->::; }
 Brightness:LevelFloat[Brightness]{.name->"Brightness"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
-  # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Brightness must be between 0 and 1"}),
-  { .getDataType->t });
+  ._unchecked t -> { .getDataType->t };
   .close->this; .close->::; }
 
-KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "";
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
+_KeyNames: Sealed{ .isName(name: Str): Bool -> _Magic!; }
+KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "UNDEFINED";
+  # t ->Block#
+    .if{_KeyNames.isName(t).not}.error{`KeyStroke#"`+t+`" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}
+    .return{{ .getDataType->t }};
+  .close->this; .close->::; }
 
 Duration:ExtentNat[Duration]{.name->"Duration"; .getDataType -> 0;
   # t ->{ .getDataType->t };
@@ -186,9 +190,13 @@ Color:DataType[Color,Color]{
   .cardboard:Color->this.rgb(178,136,86);
   .moonCheese:Color->this.rgb(236,226,148);
   }
-Widget[S]:{
+_Styled[S]:{
   mut .self:mut S;
   mut .save(c:mut Consumer[mut S]):mut S->Block#(c.accept(this.self),this.self);
+  mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
+}
+Widget[S]:_Styled[S]{
+  mut .changeDetached(mut Scope[S]):mut S;
   mut .topInset(n:Nat):mut S->this.topInset'(HeightNat#n);
   mut .topInset'(HeightNat):mut S;
   mut .bottomInset(n:Nat):mut S->this.bottomInset'(HeightNat#n);
@@ -197,10 +205,6 @@ Widget[S]:{
   mut .leftInset'(WidthNat):mut S;
   mut .rightInset(n:Nat):mut S->this.rightInset'(WidthNat#n);
   mut .rightInset'(WidthNat):mut S;
-  mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
-  mut .heightGap'(HeightNat):mut S;
-  mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
-  mut .widthGap'(WidthNat):mut S;
   mut .width(n:Nat):mut S->this.width'(WidthNat#n);
   mut .width'(WidthNat):mut S;
   mut .height(n:Nat):mut S->this.height'(HeightNat#n);
@@ -211,22 +215,28 @@ Widget[S]:{
   mut .foreground(Color):mut S;
   mut .background(Color):mut S;
   mut .autoSize:mut S->Block#(this.autoWidth,this.autoHeight);
-  mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
   read .topInset: HeightNat;
   read .bottomInset: HeightNat;
   read .leftInset:WidthNat;
   read .rightInset:WidthNat;
-  read .heightGap:HeightNat;
-  read .widthGap:WidthNat;
   read .width:Opt[WidthNat];
   read .height:Opt[HeightNat];
   read .radius:Nat;
   read .foreground:Color;
   read .background:Color;
 }
-Border:Widget[Border]{
+_Container[S]:Widget[S]{
+  mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
+  mut .heightGap'(HeightNat):mut S;
+  mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
+  mut .widthGap'(WidthNat):mut S;
+  mut .mouse(mut Scope[Mouse]):mut S;
+  mut .paint(Painter):mut S;
+  read .heightGap:HeightNat;
+  read .widthGap:WidthNat;
+}
+Border:_Container[Border]{
   .self->this;
-  mut .mouse(mut Scope[Mouse]):mut Border;
   mut .north(mut Scope[Pane]):mut Border;
   mut .south(mut Scope[Pane]):mut Border;
   mut .east(mut Scope[Pane]):mut Border;
@@ -237,7 +247,6 @@ Border:Widget[Border]{
   mut .eastB(mut Scope[Border]):mut Border;
   mut .westB(mut Scope[Border]):mut Border;
   mut .centerB(mut Scope[Border]):mut Border;
-  mut .paint(Painter):mut Border;
 }
 _TextWidget[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
@@ -253,12 +262,10 @@ Button: _TextWidget[Button]{
   mut .action(mut MF[Void]):mut Button;
 }
 
-ModelFps: {
+ModelFps:_Styled[ModelFps]{ .self->this;
   mut .action(mut MF[Void]): mut ModelFps;
-  mut .save(c: mut Consumer[mut ModelFps]): mut ModelFps -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[ModelFps]): mut ModelFps -> Block#(s.run(this), this);
 }
-Frame:{
+Frame:_Styled[Frame]{ .self->this;
   mut .title(s: Str): mut Frame -> this.uTitle(s.u);
   mut .uTitle(UStr): mut Frame;
   read .title: Str -> this.uTitle.getStr; ///throws if the title was set with .uTitle and is not a valid Str
@@ -278,18 +285,20 @@ Frame:{
   mut .maximized: mut Frame;
   //The user may resize by dragging the window edges; without arguments the
   //initial size is computed from the content, with arguments it is as given.
+  //The arguments are the content size, in the same unit as panelWidth and
+  //panelHeight; the title bar and borders of a decorated window come on top.
   //Note: an undecorated window can be technically resizable, but there is no
   //border to drag, so the user cannot actually resize it.
   mut .resizable: mut Frame;
   mut .resizable(w: WidthNat, h: HeightNat): mut Frame;
   //The window size cannot be changed by the user; without arguments the size
   //is computed from the content, with arguments it is exactly as given.
+  //The arguments are the content size, in the same unit as panelWidth and
+  //panelHeight; the title bar and borders of a decorated window come on top.
   mut .fixedSize: mut Frame;
   mut .fixedSize(w: WidthNat, h: HeightNat): mut Frame;
   mut .undecorated(a: Alpha): mut Frame;
   mut .decorated: mut Frame;
-  mut .save(c: mut Consumer[mut Frame]): mut Frame -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[Frame]): mut Frame -> Block#(s.run(this), this);
   }
 ScreenContext:{
   read .elapsed: Instant;
@@ -313,7 +322,7 @@ Gui:{ mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run
 Label:_TextWidget[Label]{
   .self->this;
 }
-Mouse:{
+Mouse:_Styled[Mouse]{ .self->this;
   mut .clicked(mut Consumer[MouseEvent]):mut Mouse;
   mut .pressed(mut Consumer[MouseEvent]):mut Mouse;
   mut .released(mut Consumer[MouseEvent]):mut Mouse;
@@ -321,22 +330,18 @@ Mouse:{
   mut .dragged(mut Consumer[MouseEvent]):mut Mouse;
   mut .entered(mut Consumer[MouseEvent]):mut Mouse;
   mut .exited(mut Consumer[MouseEvent]):mut Mouse;
-  mut .save(c: mut Consumer[mut Mouse]): mut Mouse -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[Mouse]): mut Mouse -> Block#(s.run(this), this);
 }
 MouseEvent:ScreenContext{
   .mouseX:XInt;
   .mouseY:YInt;
 }
-Pane:Widget[Pane]{
+Pane:_Container[Pane]{
   .self->this;
-  mut .mouse(mut Scope[Mouse]):mut Pane;
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
   mut .clear:mut Pane;
-  mut .paint(Painter):mut Pane;
   //Flow axis: .horizontal (default) lays children left-to-right, wrapping
   //into new rows; .vertical lays them top-to-bottom, wrapping into new
   //columns.
@@ -374,7 +379,7 @@ KeyEvent:ScreenContext{
 KeyActions:{#:mut KeyAction->Block#
   .let[mut EList[KeyStroke]] match= {ELists#}
   .let[mut EList[mut Consumer[KeyEvent]]] actions= {ELists#}
-  .return{mut KeyAction:{'self
+  .return{mut KeyAction:_Styled[KeyAction]{'self .self->self;
     mut .match: mut EList[KeyStroke]->match;
     mut .actions: mut EList[mut Consumer[KeyEvent]]->actions;
     mut .matchOnly( k:KeyStroke): mut KeyAction->
@@ -385,15 +390,9 @@ KeyActions:{#:mut KeyAction->Block#
       Block#(actions.clear,self.doAlso(c));
     mut .doAlso( c:mut Consumer[KeyEvent]): mut KeyAction->
       Block#(actions.add(c),self);
-    mut .save(c:mut Consumer[mut KeyAction]):mut KeyAction->
-      Block#(c.accept(self),self);
-    mut .style(s:mut Scope[KeyAction]):mut KeyAction->
-      Block#(s.run(self),self);
   }}
 }
-Keys:{
+Keys:_Styled[Keys]{ .self->this;
   mut .pressed(mut Scope[KeyAction]):mut Keys;
   mut .released(mut Scope[KeyAction]):mut Keys;
-  mut .save(c: mut Consumer[mut Keys]): mut Keys -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[Keys]): mut Keys -> Block#(s.run(this), this);
   }

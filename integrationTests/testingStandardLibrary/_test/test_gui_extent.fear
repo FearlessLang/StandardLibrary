@@ -1,0 +1,50 @@
+GuiExtentTests: Test {::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+    .paint{g -> Error.msg(g
+      .color(Color.goblinGreen)
+      .position(X#(-50000), Y#(-50000))
+      .rect(Width#100000, Height#100000)
+      .oval(Width#100000, Height#100000)
+      .line(X#(+50000), Y#(+50000))
+      .position(X#(+50000), Y#(+50000))
+      .rect(Width#10, Height#10)
+      .panelWidth.str)}
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+    .pane{::
+      .width 50000
+      .height 50000
+      .topInset 50000
+      .bottomInset 50000
+      .leftInset 50000
+      .rightInset 50000
+      .widthGap 50000
+      .heightGap 50000
+      .radius 50000
+      .background(Color.goblinGreen)
+      .label{:: .text "big" .textHeight 50000 .radius 50000 .background(Color.rubberDuck) }
+      .button{:: .text "big" .textHeight 50000 .radius 50000 }
+      }
+    .pane{:: .width 1 .height 1 .paint{g -> Error.msg "painted after the big widgets"} }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "painted after the big widgets"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .pane{:: .width 100001 }}}}).run{
+      .ok _ -> Error.msg "A widget width over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "widget width 100001 is too large; it must be <= 100000"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .pane{:: .radius 18446744073709551615 } .paint{g -> Error.msg "A radius over the limit was accepted"} }}}).run{
+      .ok _ -> Error.msg "A radius over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "radius 18446744073709551615 is too large; it must be <= 100000"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+    .paint{g -> g.rect(Width#3000000000, Height#1)}
+    }}}).run{
+      .ok _ -> Error.msg "A rect wider than an int always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Nat 3000000000 is too large to be represented as an integer"}}.assertTrue{i};
+      }}
+  }

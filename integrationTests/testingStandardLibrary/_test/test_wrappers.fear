@@ -86,6 +86,7 @@ LevelFloatTests: Test {::
   .check{(Saturation#(0.25)) + (Saturation#(0.5)) .assertEq(Saturation#(0.75))}
   .check{(Brightness#(0.75)) - (Brightness#(0.25)) .assertEq(Brightness#(0.5))}
   .check{(Saturation#(0.25)) .gap(Saturation#(0.75)) .assertEq(Saturation#(0.5))}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Saturation must be between +0.0 and +1.0"}}, {Saturation#(+1.5)})
   .check{(Saturation#(0.75)) .gap(Saturation#(0.25)) .assertEq(Saturation#(0.5))}
   .check{Saturation.min .assertEq(Saturation#(0.0))}
   .check{Saturation.max .assertEq(Saturation#(+1.0))}
@@ -101,7 +102,8 @@ CyclicFloatTests: Test {::
   .check{(Hue#(0.25)) - (Hue#(0.5)) .assertEq(Hue#(0.75))}
   .check{(Hue#(0.5)) - (Hue#(0.25)) .assertEq(Hue#(0.25))}
   .check{(Hue#(0.5)) + (Hue#(0.5)) .assertEq(Hue#(0.0))}
-  .check{(Hue#(0.25)) .normalize .assertEq(Hue#(0.25))}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Hue must be at least 0 and less than +1.0"}}, {Hue#(+1.0)})
+  .check{((Hue#(0.0)) - (Hue#(0.00000000000000001soft))).get .assertEq(1.0.getPred)}
   .check{Hue.period .assertEq(+1.0)}
   .check{(Hue#(0.5)) + (Hue#(0.25)) + (Hue#(0.5)) .assertEq((Hue#(0.25)) + (Hue#(0.5)) + (Hue#(0.5)))}
   }
@@ -149,12 +151,14 @@ RectTests: Test {::
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .bottom .assertEq(Y#(+60))}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+35)) .assertTrue}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+10), Y#(+20)) .assertTrue}
-  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+40), Y#(+60)) .assertTrue}
+  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+39), Y#(+59)) .assertTrue}
+  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+40), Y#(+35)) .assertFalse}
+  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+60)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+9), Y#(+35)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+41), Y#(+35)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+19)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+61)) .assertFalse}
-  .check{Rects#(X#(+0), Y#(+0), Width.zero, Height.zero) .contains(X#(+0), Y#(+0)) .assertTrue}
+  .check{Rects#(X#(+0), Y#(+0), Width.zero, Height.zero) .contains(X#(+0), Y#(+0)) .assertFalse}
   .check{Rects#(X#(+0), Y#(+0), Width.zero, Height.zero) .contains(X#(+1), Y#(+0)) .assertFalse}
   }
 

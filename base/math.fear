@@ -86,7 +86,7 @@ Math: Sealed, _MagicMath {
   .euclideanMod(base: Float, divisor: Float): Float -> Block#
     .let mod = {base.ieeeRemainder(divisor)}
     .return { (mod < +0.0).if {
-        .then -> mod + divisor;
+        .then -> (mod + divisor < divisor).if{.then -> mod + divisor; .else -> divisor.getPred};
         .else -> mod
       }};
 
