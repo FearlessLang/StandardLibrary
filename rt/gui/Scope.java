@@ -28,13 +28,6 @@ class Scopes{
   static int green(Object g){ return byt(((Green$1c$0) g).read$get$0()); }
   static int blue(Object b){ return byt(((Blue$o$0) b).read$get$0()); }
   static int alpha(Object a){ return byt(((Alpha$1c$0) a).read$get$0()); }
-  static Color$1c$0 color(int c){
-    return (Color$1c$0) Color$1c$0.instance.imm$$hash$4(
-      Red$c$0.instance.read$$hash$1(Byte$o$0Instance.instance((byte) (c >> 16))),
-      Green$1c$0.instance.read$$hash$1(Byte$o$0Instance.instance((byte) (c >> 8))),
-      Blue$o$0.instance.read$$hash$1(Byte$o$0Instance.instance((byte) c)),
-      Alpha$1c$0.instance.read$$hash$1(Byte$o$0Instance.instance((byte) (c >>> 24))));
-  }
   static String ustr(Object u){
     var cps = ((UStr$s$0Instance) u).val();
     return new String(cps, 0, cps.length);

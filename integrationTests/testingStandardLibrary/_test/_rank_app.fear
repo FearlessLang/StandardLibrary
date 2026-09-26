@@ -93,7 +93,6 @@ MyTests:UnitTests{::
   .test GuiExtentTests
   .test GuiFrameTests
   .test GuiSetterTests
-  .test GuiPaintTests
   .test TestList
   .test TestFlow
   .test TestMap

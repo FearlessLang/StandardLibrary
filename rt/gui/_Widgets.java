@@ -307,7 +307,7 @@ class _Frame implements Frame$1c$0{
   // happens-before. Single mutator at every point in time: no volatile.
   private boolean started;
   private final AtomicBoolean layoutDirty = new AtomicBoolean();
-  Bitmap bitmap;
+  private Bitmap bitmap;
   private Canvas canvas;
   private java.awt.image.BufferedImage bimg;
   private int renderLogicalW;

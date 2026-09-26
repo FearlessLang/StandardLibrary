@@ -314,8 +314,6 @@ Graphics:ScreenContext{
   mut .oval(w: Nat, h: Nat): mut Graphics -> this.oval'(WidthNat#w, HeightNat#h);
   mut .oval'(WidthNat, HeightNat): mut Graphics;
   mut .image(Image): mut Graphics;
-  read .pixel(x: Int, y: Int): Color -> this.pixel'(XInt#x, YInt#y);
-  read .pixel'(XInt, YInt): Color;
   }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
