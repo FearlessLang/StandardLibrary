@@ -130,6 +130,11 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
         .paint{g -> g.position(+20, +10).rect(20, 10)}
         }
       .pane{::
+        .width 60 .height 30
+        .background(Color.rgb(200, 120, 40))
+        .paint{g -> Block#(g.position(+20, +10), g.color(Color.rgb(40, 200, 120)).rect(20, 10))}
+        }
+      .pane{::
         .widthGap 0
         .save stage
         .button{:: .text "Twice" .background(Color.rgb(220, 80, 220))

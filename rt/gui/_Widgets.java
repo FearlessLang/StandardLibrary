@@ -252,8 +252,6 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
         frame.elapsed,
         Scopes.w(component.getWidth()),
         Scopes.h(component.getHeight()),
-        0,
-        0,
         p
       ));
     }

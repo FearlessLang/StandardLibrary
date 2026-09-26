@@ -6,16 +6,23 @@ import io.github.humbleui.skija.PaintMode;
 import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.types.Rect;
 
-record CGraphicsCtx(
-  Canvas cv,
-  _Frame frame,
-  Instant$5c$0 elapsed,
-  WidthNat$as$0 panelWidth,
-  HeightNat$lg$0 panelHeight,
-  float x,
-  float y,
-  Paint paint// shared by all positions of one Painter run; owned by AContainer.sk
-  ) implements Graphics$ao$0{
+final class CGraphicsCtx implements Graphics$ao$0{
+  final Canvas cv;
+  final _Frame frame;
+  final Instant$5c$0 elapsed;
+  final WidthNat$as$0 panelWidth;
+  final HeightNat$lg$0 panelHeight;
+  final Paint paint;// owned by AContainer.sk
+  float x;
+  float y;
+  CGraphicsCtx(Canvas cv, _Frame frame, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint){
+    this.cv = cv;
+    this.frame = frame;
+    this.elapsed = elapsed;
+    this.panelWidth = panelWidth;
+    this.panelHeight = panelHeight;
+    this.paint = paint;
+  }
 
   @Override public Object mut$color$1(Object color){
     paint.setColor(Sk.color((Color$1c$0) color));
@@ -24,7 +31,9 @@ record CGraphicsCtx(
   // Drawing outside the panel silently clips (canvas is clipped to the panel),
   // otherwise user can cause errors by resizing the gui by hand
   @Override public Object mut$position$p1$2(Object x, Object y){
-    return new CGraphicsCtx(cv, frame, elapsed, panelWidth, panelHeight, at(((XInt$s$0) x).read$get$0()), at(((YInt$s$0) y).read$get$0()), paint);
+    this.x = at(((XInt$s$0) x).read$get$0());
+    this.y = at(((YInt$s$0) y).read$get$0());
+    return this;
   }
   // Correctly does not update the position.
   @Override public Object mut$line$p1$2(Object x, Object y){
