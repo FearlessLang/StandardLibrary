@@ -136,11 +136,9 @@ interface Sk{
   }
 
   static TextLine line(AWidget s){
-    var key = h(s.textSize) + " " + s.text;
-    if (!key.equals(s.lineKey)){
-      if (s.line != null){ s.line.close(); }
+    if (s.line == null){
       s.line = shape(s.text, h(s.textSize));
-      s.lineKey = key;
+      s.metrics = font(0, h(s.textSize)).getMetrics();
     }
     return s.line;
   }
@@ -152,7 +150,8 @@ interface Sk{
 
   static void paintNode(SkComponent c, Canvas cv){
     c.w.sk(cv);
-    for (var k : c.getComponents()){
+    for (int i = 0; i < c.getComponentCount(); i++){
+      var k = c.getComponent(i);
       int save = cv.save();
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
@@ -162,18 +161,17 @@ interface Sk{
   }
 
   static void background(Canvas cv, AWidget s){
-    int col = color(s.background);
-    if (col >>> 24 == 0){ return; }
+    if (s.bg >>> 24 == 0){ return; }
     float w = s.component.getWidth();
     float h = s.component.getHeight();
-    paint.setColor(col);
+    paint.setColor(s.bg);
     cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(n(s.radius), Math.min(w, h) / 2)), paint);
   }
 
   static Dimension textSizeWithInsets(AWidget s){
     return new Dimension(
       (int) Math.ceil(line(s).getWidth()) + w(s.left) + w(s.right),
-      (int) Math.ceil(font(0, h(s.textSize)).getMetrics().getHeight()) + h(s.top) + h(s.bottom));
+      (int) Math.ceil(s.metrics.getHeight()) + h(s.top) + h(s.bottom));
   }
 
   static Dimension sizeFor(Component c, int width, int height){
@@ -187,8 +185,7 @@ interface Sk{
   static void text(Canvas cv, AWidget s, float dx, float dy){
     var c = s.component;
     var line = line(s);
-    var fm = font(0, h(s.textSize)).getMetrics();
-    float textH = fm.getHeight();
+    var fm = s.metrics;
     int x0 = w(s.left);
     int y0 = h(s.top);
     int cw = c.getWidth() - w(s.left) - w(s.right);
@@ -196,8 +193,8 @@ interface Sk{
     if (cw <= 0 || ch <= 0){ return; }
     int save = cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
-    paint.setColor(color(s.foreground));
-    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, y0 + (ch - textH) / 2 - fm.getAscent() + dy, paint);
+    paint.setColor(s.fg);
+    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, y0 + (ch - fm.getHeight()) / 2 - fm.getAscent() + dy, paint);
     cv.restoreToCount(save);
   }
 
@@ -209,7 +206,7 @@ interface Sk{
     boolean over = s.over && !down;
     float r = Math.min(n(s.radius), Math.min(w, h) / 2f);
     int d = bevel(w, h, (int) r, s);
-    int center = baseColor(color(s.background), over, down);
+    int center = baseColor(s.bg, over, down);
     int light = mix(center, 0xFFFFFFFF, 45);
     int dark = mix(center, 0xFF000000, 45);
     var outer = RRect.makeXYWH(0, 0, w, h, r);

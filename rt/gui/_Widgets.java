@@ -19,6 +19,7 @@ import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.ColorAlphaType;
 import io.github.humbleui.skija.ColorType;
+import io.github.humbleui.skija.FontMetrics;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
@@ -137,9 +138,11 @@ abstract class AWidget implements Widget$2o$1{
   HeightNat$lg$0 preferredHeight;
   Color$1c$0 foreground = (Color$1c$0) Color$1c$0.instance;
   Color$1c$0 background = (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
+  int fg = Sk.color(foreground);
+  int bg = Sk.color(background);
   HeightNat$lg$0 textSize = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(defText);
   TextLine line;
-  String lineKey;
+  FontMetrics metrics;
   // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
   // expose Fearless methods to change it, but it lives here alongside the
   // other style fields.
@@ -172,6 +175,14 @@ abstract class AWidget implements Widget$2o$1{
     return mut$self$0();
   }
 
+  final Object reText(Runnable r){
+    return reStyle(() -> {
+      r.run();
+      if (line != null){ line.close(); }
+      line = null;
+    });
+  }
+
   @Override public Object mut$topInset$p1$1(Object v){
     extent((HeightNat$lg$0) v, "top inset");
     return reStyle(() -> top = (HeightNat$lg$0) v);
@@ -202,18 +213,18 @@ abstract class AWidget implements Widget$2o$1{
   }
   public Object mut$textHeight$p1$1(Object t){
     extent((HeightNat$lg$0) t, "text size");
-    return reStyle(() -> textSize = (HeightNat$lg$0) t);
+    return reText(() -> textSize = (HeightNat$lg$0) t);
   }
   public Object read$textHeight$0(){ return textSize; }
   public Object mut$uText$1(Object t){
     var s = ustr(t);
-    return reStyle(() -> text = s);
+    return reText(() -> text = s);
   }
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   @Override public Object mut$autoWidth$0(){ return reStyle(() -> preferredWidth = null); }
   @Override public Object mut$autoHeight$0(){ return reStyle(() -> preferredHeight = null); }
-  @Override public Object mut$foreground$1(Object c){ return onEdt(() -> foreground = (Color$1c$0) c); }
-  @Override public Object mut$background$1(Object c){ return onEdt(() -> background = (Color$1c$0) c); }
+  @Override public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
+  @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
   @Override public Object read$topInset$0(){ return top; }
   @Override public Object read$bottomInset$0(){ return bottom; }
   @Override public Object read$leftInset$0(){ return left; }
@@ -234,7 +245,8 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
 
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
-    try (var p = new Paint().setAntiAlias(true).setColor(Sk.color(foreground))){
+    if (paint == Scopes.idP){ return; }
+    try (var p = new Paint().setAntiAlias(true).setColor(fg)){
       paint.imm$run$1(new CGraphicsCtx(
         cv,
         frame,
@@ -310,6 +322,7 @@ class _Frame implements Frame$1c$0{
   private Bitmap bitmap;
   private Canvas canvas;
   private java.awt.image.BufferedImage bimg;
+  private java.nio.IntBuffer pixels;
   private int renderLogicalW;
   private int renderLogicalH;
 
@@ -421,21 +434,18 @@ class _Frame implements Frame$1c$0{
       bitmap.allocPixels(new ImageInfo(pw, ph, ColorType.BGRA_8888, ColorAlphaType.PREMUL));
       canvas = new Canvas(bitmap);
       bimg = new java.awt.image.BufferedImage(pw, ph, java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE);
+      pixels = bitmap.peekPixels().getBuffer().order(java.nio.ByteOrder.LITTLE_ENDIAN).asIntBuffer();
     }
     renderLogicalW = w;
     renderLogicalH = h;
 
-    int col = Sk.color(top.background);
-    canvas.clear(col >>> 24 == 0 ? Sk.color((Color$1c$0) Color$1c$0.instance.imm$boringGray$0()) : col | 0xFF000000);
+    canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
     int save = canvas.save();
     canvas.scale((float) sx, (float) sy);
     Sk.paintNode(c, canvas);
     canvas.restoreToCount(save);
 
-    var bb = bitmap.peekPixels();
-    assert bb != null;
-    bb.getBuffer().order(java.nio.ByteOrder.LITTLE_ENDIAN).asIntBuffer()
-      .get(((java.awt.image.DataBufferInt) bimg.getRaster().getDataBuffer()).getData());
+    pixels.get(0, ((java.awt.image.DataBufferInt) bimg.getRaster().getDataBuffer()).getData());
   }
 
   void blit(java.awt.Graphics g, SkComponent c){
