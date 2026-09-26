@@ -285,6 +285,8 @@ Frame:{
   mut .maximized: mut Frame;
   //The user may resize by dragging the window edges; without arguments the
   //initial size is computed from the content, with arguments it is as given.
+  //The arguments are the content size, in the same unit as panelWidth and
+  //panelHeight; the title bar and borders of a decorated window come on top.
   //Note: an undecorated window can be technically resizable, but there is no
   //border to drag, so the user cannot actually resize it.
   mut .resizable: mut Frame;
@@ -292,6 +294,8 @@ Frame:{
   mut .resizable'(WidthNat, HeightNat): mut Frame;
   //The window size cannot be changed by the user; without arguments the size
   //is computed from the content, with arguments it is exactly as given.
+  //The arguments are the content size, in the same unit as panelWidth and
+  //panelHeight; the title bar and borders of a decorated window come on top.
   mut .fixedSize: mut Frame;
   mut .fixedSize(w: Nat, h: Nat): mut Frame -> this.fixedSize'(WidthNat#w, HeightNat#h);
   mut .fixedSize'(WidthNat, HeightNat): mut Frame;

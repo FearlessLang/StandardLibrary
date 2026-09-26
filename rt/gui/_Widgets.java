@@ -2,6 +2,8 @@ package _base;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
@@ -300,7 +302,7 @@ class _Frame implements Frame$1c$0{
   private Alpha$1c$0 alpha = (Alpha$1c$0) Alpha$1c$0.instance.imm$opaque$0();
   private XInt$s$0 locationX;
   private YInt$s$0 locationY;
-  // Explicit window size, or null to size from the content (pack). Set by
+  // Explicit content size, or null to size from the content (pack). Set by
   // .resizable(w,h) and .fixedSize(w,h); resizability is orthogonal and kept
   // in `resizable`. Note an undecorated window can be technically resizable,
   // but there is no border to drag, so the user cannot actually resize it.
@@ -456,20 +458,26 @@ class _Frame implements Frame$1c$0{
   }
 
   private void checkWindowFits(int w, int h){
-    if (w > screenW || h > screenH){
-      throw Util.detErr("Window must fit on screen: window="
-        + w + "x" + h
-        + ", screen=" + screenW + "x" + screenH);
-    }
+    var i = onEdtAndWait(frame::getInsets);
+    if (w + i.left + i.right <= screenW && h + i.top + i.bottom <= screenH){ return; }
+    throw Util.detErr("Window must fit on screen: window="
+      + window(w, h, i)
+      + ", screen=" + screenW + "x" + screenH);
   }
 
   private void checkWindowLocationFits(long x, long y, int w, int h){
-    if (x < 0 || y < 0 || x > screenW - w || y > screenH - h){
-      throw Util.detErr("Window location puts window outside screen: location="
-        + x + "," + y
-        + ", window=" + w + "x" + h
-        + ", screen=" + screenW + "x" + screenH);
-    }
+    var i = onEdtAndWait(frame::getInsets);
+    if (x >= 0 && y >= 0 && x <= screenW - w - i.left - i.right && y <= screenH - h - i.top - i.bottom){ return; }
+    throw Util.detErr("Window location puts window outside screen: location="
+      + x + "," + y
+      + ", window=" + window(w, h, i)
+      + ", screen=" + screenW + "x" + screenH);
+  }
+
+  private static String window(int w, int h, Insets i){
+    int dw = i.left + i.right;
+    int dh = i.top + i.bottom;
+    return w + "x" + h + (dw + dh == 0 ? "" : " plus decoration " + dw + "x" + dh);
   }
 
   void start(){
@@ -482,11 +490,11 @@ class _Frame implements Frame$1c$0{
     frame.setUndecorated(undecorated);
     frame.setResizable(resizable);
     frame.pack();
-    if (frameW != null){// explicit size overrides the packed (content) size
-      frame.setSize(new Dimension(extent(frameW, "window width"), extent(frameH, "window height")));
+    if (frameW == null){
+      windowW = top.component.getWidth();
+      windowH = top.component.getHeight();
     }
-    windowW = frame.getWidth();
-    windowH = frame.getHeight();
+    frame.setContentSize(windowW, windowH);
 
     if (maximized){ frame.setBounds(0, 0, screenW, screenH); }
     else {
@@ -567,7 +575,7 @@ class _Frame implements Frame$1c$0{
     if (started){
       onEdtAndWait(() -> {
         frame.setResizable(r);
-        if (w != null){ frame.setSize(new Dimension(ww, hh)); }
+        if (w != null){ frame.setContentSize(ww, hh); }
       });
     }
     return this;
@@ -579,15 +587,16 @@ class _Frame implements Frame$1c$0{
       // Live decoration swap: dispose + re-show inside one EDT block; the
       // synthetic WINDOW_CLOSED is suppressed in FearlessFrame.
       float op = Scopes.alpha(alpha) / 255f;
-      onEdtAndWait(() -> frame.setDecoration(true, op));
+      onEdtAndWait(() -> frame.setDecoration(true, op, maximizedBounds()));
     }
     return this;
   }
   @Override public Object mut$decorated$0(){
     undecorated = false;
-    if (started){ onEdtAndWait(() -> frame.setDecoration(false, 1f)); }
+    if (started){ onEdtAndWait(() -> frame.setDecoration(false, 1f, maximizedBounds())); }
     return this;
   }
+  private Rectangle maximizedBounds(){ return maximized ? new Rectangle(0, 0, screenW, screenH) : null; }
   @Override public Object mut$location$p1$2(Object x, Object y){
     long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
     long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
