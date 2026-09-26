@@ -1,0 +1,78 @@
+/// The maximum found without a flow, by recursion and by a loop, and the plain
+/// functions the fences ``max``, ``sortDistinct`` and ``distinctMut`` desugar through.
+Better: { #[K](a: read base.Order[K], b: read base.Order[K]): read base.Order[K] ->
+  a <=> (b, { .lt -> b; .eq -> a; .gt -> a }) }
+MaxRec: { #[E:*,K](xs: read List[E], by: OrderBy[imm E,K], i: Nat, best: read base.Order[K]): read base.Order[K] ->
+  i == (xs.size) ?[read base.Order[K]]{ .then -> best; .else -> MaxRec#(xs, by, i + 1, Better#(best, by#(xs.get i))) } }
+MaxByRecursion: { #[E:*,K](xs: read List[E], by: OrderBy[imm E,K]): mut Opt[read base.Order[K]] ->
+  xs.isEmpty ?[mut Opt[read base.Order[K]]]{ .then -> {}; .else -> Opts#(MaxRec#(xs, by, 1, by#(xs.get 0))) } }
+BestOf: { #[K](cur: mut Opt[read base.Order[K]], o: read base.Order[K]): read base.Order[K] ->
+  cur.match{ .empty -> o; .some c -> Better#(c, o) } }
+MaxByLoop: { #[E:*,K](xs: read List[E], by: OrderBy[imm E,K]): mut Opt[read base.Order[K]] -> Block#
+  .var[mut Opt[read base.Order[K]]] best = {{}}
+  .var[Nat] i = {0}
+  .loop{ i.get == (xs.size) ?[mut base.ControlFlow[mut Opt[read base.Order[K]]]]{ .then -> Break#; .else -> Block#(
+    best.set(Opts#(BestOf#(best.get, by#(xs.get(i.get))))),
+    i.set(i.get + 1),
+    Continue#) } }
+  .return{ best.get } }
+
+Maxes: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K]): mut List[E] -> Block#
+  .var[mut Opt[read base.Order[K]]] best = {{}}
+  .var[mut base.EList[E]] run = {ELists#[E]}
+  .var[Nat] i = {0}
+  .loop{ i.get == (xs.size) ?[mut base.ControlFlow[mut List[E]]]{ .then -> Break#; .else -> Block#(
+    MaxesStep#(best, run, by#(xs.get(i.get)), xs.get(i.get)),
+    i.set(i.get + 1),
+    Continue#) } }
+  .return{ run.get.list } }
+MaxesStep: { #[E:*,K](best: mut base.Var[mut Opt[read base.Order[K]]], run: mut base.Var[mut base.EList[E]], o: read base.Order[K], e: E): Void ->
+  best.get.match{
+    .empty -> Block#(best.set(Opts#o), run.get.add(e), Void);
+    .some b -> o <=> (b, {
+      .lt -> Void;
+      .eq -> Block#(run.get.add(e), Void);
+      .gt -> Block#(best.set(Opts#o), run.set(ELists#[E]), run.get.add(e), Void) }) } }
+
+Collapse: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K]): mut List[E] -> Block#
+  .var[mut Opt[read base.Order[K]]] last = {{}}
+  .var[mut base.EList[E]] kept = {ELists#[E]}
+  .var[Nat] i = {0}
+  .loop{ i.get == (xs.size) ?[mut base.ControlFlow[mut List[E]]]{ .then -> Break#; .else -> Block#(
+    CollapseStep#(last, kept, by#(xs.get(i.get)), xs.get(i.get)),
+    i.set(i.get + 1),
+    Continue#) } }
+  .return{ kept.get.list } }
+CollapseStep: { #[E:*,K](last: mut base.Var[mut Opt[read base.Order[K]]], kept: mut base.Var[mut base.EList[E]], o: read base.Order[K], e: E): Void ->
+  last.get.match{
+    .empty -> Block#(last.set(Opts#o), kept.get.add(e), Void);
+    .some b -> o <=> (b, {
+      .lt -> Block#(last.set(Opts#o), kept.get.add(e), Void);
+      .eq -> Void;
+      .gt -> Block#(last.set(Opts#o), kept.get.add(e), Void) }) } }
+
+Distinct: { #[E:*,K](xs: mut List[E], by: OrderHashBy[imm E,K]): mut List[E] -> Block#
+  .var[read List[read base.Order[K]]] keys = {{}}
+  .var[mut base.EList[E]] kept = {ELists#[E]}
+  .var[Nat] i = {0}
+  .loop{ i.get == (xs.size) ?[mut base.ControlFlow[mut List[E]]]{ .then -> Break#; .else -> Block#(
+    DistinctStep#(keys, kept, by#(xs.get(i.get)), xs.get(i.get)),
+    i.set(i.get + 1),
+    Continue#) } }
+  .return{ kept.get.list } }
+DistinctStep: { #[E:*,K](keys: mut base.Var[read List[read base.Order[K]]], kept: mut base.Var[mut base.EList[E]], o: read base.Order[K], e: E): Void ->
+  keys.get.flow.none{k -> o == (k.close)} ? { .then -> Block#(keys.set(keys.get +> o), kept.get.add(e), Void); .else -> Void } }
+
+TestMaxShapes: Test {::
+  .check{ (MaxByRecursion#[Nat,Nat](Lists#(3,1,4,1,5,9,2,6), {::})! == 9) .assertTrue }
+  .check{ MaxByRecursion#[Nat,Nat]({}, {::}).isEmpty .assertTrue }
+  .check{ (MaxByLoop#[Nat,Nat](Lists#(3,1,4,1,5,9,2,6), {::})! == 9) .assertTrue }
+  .check{ MaxByLoop#[Nat,Nat]({}, {::}).isEmpty .assertTrue }
+  .check{ Maxes#[Nat,Nat](Lists#(3,1,3,2), {::}) .assertEq({::}, Lists#(3,3)) }
+  .check{ Maxes#[Nat,Nat](Lists#(3,1,3,2), Rev#{::}) .assertEq({::}, Lists#(1)) }
+  .check{ Maxes#[Nat,Nat]({}, {::}).isEmpty .assertTrue }
+  .check{ Collapse#[Nat,Nat](Lists#(1,1,2,3,3), {::}) .assertEq({::}, Lists#(1,2,3)) }
+  .check{ Collapse#[Nat,Nat](Lists#(3,1,3,2,1).flow.sort{::}.list, {::}) .assertEq({::}, Lists#(1,2,3)) }
+  .check{ Distinct#[Nat,Nat](Lists#(3,1,3,2,1), {::}) .assertEq({::}, Lists#(3,1,2)) }
+  .check{ Distinct#[Nat,Nat]({}, {::}).isEmpty .assertTrue }
+  }

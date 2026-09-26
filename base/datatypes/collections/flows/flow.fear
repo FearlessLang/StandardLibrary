@@ -65,7 +65,11 @@ Flow[E:*]: {
   mut .max[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
   mut .min[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
   mut .sort[K](by: OrderBy[imm E,K]):         mut Flow[E] -> _Magic!;
-  mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[E] -> _Magic!;
+  /// ``this.distinct(by)`` keeps, for each class of elements ``by`` ranks together, the
+  /// one with the smallest index, in flow order, and emits the elements as ``read`` or
+  /// ``imm``: the key it keeps may be the element itself, and nothing after it may
+  /// mutate what a kept key aliases. `Flow.distinctMut` keeps the elements ``mut``.
+  mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[read/imm E] -> _Magic!;
   mut .sortDistinct[K](by: OrderBy[imm E,K]): mut Flow[E] -> _Magic!;
   mut .any(f: read F[E, Bool]):  Bool;
   mut .all(f: read F[E, Bool]):  Bool;
@@ -114,6 +118,13 @@ Flow[E:*]: {
     cont: mut FlowContinuation[E,DR,R]
   ): R-> this.list|>{xs->cont#(x#xs, xs)};
   // --Still to implement
+  /// ``this.allToAll(f)`` is the fence every fence desugars to: once every element
+  /// has arrived, ``f`` receives them all as a list, and the elements of the list it
+  /// returns flow on.
+  mut .allToAll[R:*](f: read F[mut List[E], mut List[R]]): mut Flow[R]->Error.msg"TODO";
+  /// ``this.distinctMut(by)`` is `Flow.distinct` keeping the elements ``mut``, as a fence:
+  /// it emits nothing until every element has arrived and every kept key is decided.
+  mut .distinctMut[K](by: OrderHashBy[imm E,K]): mut Flow[E]->Error.msg"TODO";
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg"TODO";
   /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
   /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.

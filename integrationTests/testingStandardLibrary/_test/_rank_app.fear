@@ -102,4 +102,5 @@ MyTests:UnitTests{::
   .test TestDungeon
   .test TestTryGet
   .test TestFlowDesign
+  .test TestMaxShapes
   }
