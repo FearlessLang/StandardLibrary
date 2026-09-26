@@ -213,7 +213,6 @@ record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1{
 
 sealed abstract class BestGatherer implements Gatherer<Object, ArrayList<Object>, Object> {
   private final OrderBy$5e$2 ordering;
-  private Object best = null;
 
   BestGatherer(OrderBy$5e$2 ordering) { this.ordering = ordering; }
 
@@ -223,31 +222,21 @@ sealed abstract class BestGatherer implements Gatherer<Object, ArrayList<Object>
   public Supplier<ArrayList<Object>> initializer() { return ArrayList::new; }
   @Override
   public Integrator<ArrayList<Object>, Object, Object> integrator() {
-    return (state, element, _) -> {
-      if (this.best == null) {
-        this.best = element;
-        state.add(element);
-        return true;
-      }
-      int cmp = cmp(ordering, element, best);
-      if (better(cmp)) {
-        this.best = element;
-        state.clear();
-        state.add(element);
-        return true;
-      }
-      if (cmp == 0) { state.add(element); }
-      return true;
-    };
+    return (all, element, _) -> all.add(element);
   }
   @Override
   public BiConsumer<ArrayList<Object>, Downstream<? super Object>> finisher() {
-    return (state, downstream) -> {
-      if (!downstream.isRejecting()) {
-        state.forEach(downstream::push);
-        state.clear();
-      }
+    return (all, downstream) -> {
+      var state= new ArrayList<Object>();
+      all.forEach(e -> keep(state, e));
+      state.stream().allMatch(downstream::push);
     };
+  }
+  private void keep(ArrayList<Object> state, Object element){
+    if (state.isEmpty()) { state.add(element); return; }
+    int cmp = cmp(ordering, element, state.getFirst());
+    if (better(cmp)) { state.clear(); state.add(element); return; }
+    if (cmp == 0) { state.add(element); }
   }
 }
 
