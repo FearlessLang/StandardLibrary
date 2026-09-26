@@ -415,7 +415,8 @@ class _Frame implements Frame$1c$0{
     renderLogicalW = w;
     renderLogicalH = h;
 
-    canvas.clear(0);
+    int col = Sk.color(top.background);
+    canvas.clear(col >>> 24 == 0 ? Sk.color((Color$1c$0) Color$1c$0.instance.imm$boringGray$0()) : col | 0xFF000000);
     int save = canvas.save();
     canvas.scale((float) sx, (float) sy);
     Sk.paintNode(c, canvas);
@@ -432,10 +433,10 @@ class _Frame implements Frame$1c$0{
     g.drawImage(bimg, 0, 0, renderLogicalW, renderLogicalH, null);
   }
 
-  private void checkWindowFits(){
-    if (frame.getWidth() > screenW || frame.getHeight() > screenH){
+  private void checkWindowFits(int w, int h){
+    if (w > screenW || h > screenH){
       throw Util.detErr("Window must fit on screen: window="
-        + frame.getWidth() + "x" + frame.getHeight()
+        + w + "x" + h
         + ", screen=" + screenW + "x" + screenH);
     }
   }
@@ -454,7 +455,6 @@ class _Frame implements Frame$1c$0{
     assert top != null;
 
     frame.setTitle(title);
-    forceTopStyle();
 
     frame.setContentPane(top.component);
     frame.setUndecorated(undecorated);
@@ -464,16 +464,9 @@ class _Frame implements Frame$1c$0{
       frame.setSize(new Dimension(extent(frameW, "window width"), extent(frameH, "window height")));
     }
 
-    if (maximized){
-      if (locationX != null || locationY != null){
-        throw Util.detErr("A maximized window cannot also have an explicit location");
-      }
-      if (frameW != null){
-        throw Util.detErr("A maximized window cannot also have an explicit size");
-      }
-      frame.setBounds(0, 0, screenW, screenH);
-    } else {
-      checkWindowFits();
+    if (maximized){ frame.setBounds(0, 0, screenW, screenH); }
+    else {
+      checkWindowFits(frame.getWidth(), frame.getHeight());
       if (locationX != null && locationY != null){
         long xx = Util.intToLong(locationX.read$get$0());
         long yy = Util.intToLong(locationY.read$get$0());
@@ -510,22 +503,9 @@ class _Frame implements Frame$1c$0{
     started = true;
   }
 
-  private void forceTopStyle(){
-    top.mut$radius$1(n(0));
-    var col = (Color$1c$0) top.read$background$0();
-    if (Scopes.alpha(col.read$alpha$0()) == 0){
-      top.mut$background$1(Color$1c$0.instance.imm$boringGray$0());
-    } else {
-      top.mut$background$1(Color$1c$0.instance.imm$$hash$4(
-        col.read$red$0(),
-        col.read$green$0(),
-        col.read$blue$0(),
-        Alpha$1c$0.instance.imm$opaque$0()
-      ));
-    }
-  }
-
   @Override public Object mut$maximized$0(){
+    if (locationX != null){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
+    if (frameW != null){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
     maximized = true;
     if (started){
       onEdtAndWait(() -> frame.setBounds(0, 0, screenW, screenH));
@@ -550,6 +530,8 @@ class _Frame implements Frame$1c$0{
     int hh = h == null ? 0 : extent(h, "window height");
     resizable = r;
     if (w != null){
+      if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
+      checkWindowFits(ww, hh);
       frameW = w;
       frameH = h;
     }
@@ -583,6 +565,7 @@ class _Frame implements Frame$1c$0{
   @Override public Object mut$location$2(Object x, Object y){
     long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
     long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
+    if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
     locationX = (XInt$s$0) x;
     locationY = (YInt$s$0) y;
     if (started){
@@ -683,7 +666,6 @@ class _Frame implements Frame$1c$0{
     onEdtAndWait(() -> {
       uninstall(top);
       install(t);
-      forceTopStyle();
       frame.setContentPane(t.component);
       // The old tree is gone: no Exited events for it, a gesture in progress
       // is forgotten (an in-flight release finds no press target, like a

@@ -4,6 +4,10 @@ use base.Nat as Nat;
 use base.Block as Block;
 use base.Frame as Frame;
 use base.Color as Color;
+use base.Red as Red;
+use base.Green as Green;
+use base.Blue as Blue;
+use base.Alpha as Alpha;
 use base.Label as Label;
 use base.Pane as Pane;
 use base.Mouse as Mouse;
@@ -21,6 +25,7 @@ Live:Main{sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Label]] countD = {Slots#[mut Label]}
   .let[mut Slot[mut Pane]] areaA = {Slots#[mut Pane]}
   .let[mut Slot[mut Pane]] areaB = {Slots#[mut Pane]}
+  .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
   .let[mut Slot[mut Mouse]] oldC = {Slots#[mut Mouse]}
   .var[Nat] pressedB = {0}
   .var[Nat] releasedB = {0}
@@ -41,6 +46,7 @@ Live:Main{sys -> sys.gui.run{f -> Block#
     .content{::
       .vertical
       .background(Color.ghostWhite)
+      .save root
       .label{:: .text "status: none" .save status}
       .label{:: .text "A: press Add. For 3 seconds a button is built: nothing may appear in the green area."}
       .label{:: .text "Then a yellow New button appears; clicking it must set the status to: New ran"}
@@ -94,6 +100,11 @@ Live:Main{sys -> sys.gui.run{f -> Block#
         }
       .label{:: .text "D: hold SPACE for 2 seconds, then release it: each count must grow by exactly one."}
       .label{:: .text "SPACE pressed 0, released 0" .save countD}
+      .label{:: .text "E: press Gray: the whole window turns gray (160,160,160) up to its corners; then Red: it turns opaque red (230,64,48)."}
+      .pane{::
+        .button{:: .text "Gray" .action{Block#(root!.radius 20 .background(Color.transparent), Void)}}
+        .button{:: .text "Red" .action{Block#(root!.background(Color#(Red#(230.getByte), Green#(64.getByte), Blue#(48.getByte), Alpha#(128.getByte))), Void)}}
+        }
       }
     }
   }}
