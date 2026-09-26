@@ -92,6 +92,8 @@ LevelByte[S]: Wrapper[S,Byte] {
 LevelFloat[S]: Wrapper[S,Float] {
   read .lowest: Float;
   read .highest: Float;
+  read ._unchecked(t: Float): S;
+  # t -> Block#(t.assertInRange(this.lowest =~~= (this.highest), {this.name + " must be between " + (this.lowest.str) + " and " + (this.highest.str)}), this._unchecked t);
   +(other: S): S -> this#(this.get + (this.close(other).get));
   -(other: S): S -> this#(this.get - (this.close(other).get));
   .gap(other: S): S -> this#((this.get - (this.close(other).get)).getAbs);
@@ -123,13 +125,11 @@ Hue:CyclicFloat[Hue]{.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
   .close->this; .close->::; }
 Saturation:LevelFloat[Saturation]{.name->"Saturation"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
-  # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Saturation must be between 0 and 1"}),
-  { .getDataType->t });
+  ._unchecked t -> { .getDataType->t };
   .close->this; .close->::; }
 Brightness:LevelFloat[Brightness]{.name->"Brightness"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
-  # t ->Block#(t.assertInRange(0.0=~~=1.0,{"Brightness must be between 0 and 1"}),
-  { .getDataType->t });
+  ._unchecked t -> { .getDataType->t };
   .close->this; .close->::; }
 
 _KeyNames: Sealed{ .isName(name: Str): Bool -> _Magic!; }

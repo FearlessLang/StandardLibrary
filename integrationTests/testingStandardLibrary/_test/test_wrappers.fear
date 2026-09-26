@@ -86,6 +86,7 @@ LevelFloatTests: Test {::
   .check{(Saturation#(0.25)) + (Saturation#(0.5)) .assertEq(Saturation#(0.75))}
   .check{(Brightness#(0.75)) - (Brightness#(0.25)) .assertEq(Brightness#(0.5))}
   .check{(Saturation#(0.25)) .gap(Saturation#(0.75)) .assertEq(Saturation#(0.5))}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Saturation must be between +0.0 and +1.0"}}, {Saturation#(+1.5)})
   .check{(Saturation#(0.75)) .gap(Saturation#(0.25)) .assertEq(Saturation#(0.5))}
   .check{Saturation.min .assertEq(Saturation#(0.0))}
   .check{Saturation.max .assertEq(Saturation#(+1.0))}
