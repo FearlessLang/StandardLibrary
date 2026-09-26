@@ -101,6 +101,7 @@ Flow[E:*]: {
     this.map(ctx, {c, e -> Block#(f#(c, e), e)});
   mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S];
   mut .limit(n: Nat): mut Flow[E];
+  mut .suppressOrderingErrors: mut Flow[E] -> this;
   /// ``this.let(x, cont)`` consumes `this` into a list, hands that list to ``x``,
   /// then hands `cont` the result of ``x`` together with the same list, and returns
   /// what `cont` returns. The elements are needed twice, so they are materialised
