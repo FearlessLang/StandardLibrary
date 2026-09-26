@@ -113,9 +113,9 @@ Live:Main{sys -> sys.gui.run{f -> Block#
       .label{:: .text "G: press Resizable, make the window larger by dragging its edge, then press Corner: it moves to the bottom right and nothing fails."}
       .label{:: .text "H: hold SPACE, click Swap keys while holding it, then release SPACE: the two SPACE counts of D must be equal."}
       .pane{::
-        .button{:: .text "Fix" .action{Block#(f.fixedSize(Width#840, Height#900), Void)}}
+        .button{:: .text "Fix" .action{Block#(f.fixedSize(840, 900), Void)}}
         .button{:: .text "Resizable" .action{Block#(f.resizable, Void)}}
-        .button{:: .text "Corner" .action{Block#(f.location(X#(+0) + (f.screenWidth - (Width#840)), Y#(+0) + (f.screenHeight - (Height#900))), Void)}}
+        .button{:: .text "Corner" .action{Block#(f.location'(X.origin + (f.screenWidth - (Width#840)), Y.origin + (f.screenHeight - (Height#900))), Void)}}
         .button{:: .text "Swap keys" .action{Block#(f.onKey{::
           .pressed{:: .matchOnly(Key#"SPACE") .doOnly{e -> Block#
             .do{pressedD.set(pressedD.get + 1)}

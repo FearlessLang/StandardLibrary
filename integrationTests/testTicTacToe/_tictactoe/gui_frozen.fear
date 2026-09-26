@@ -9,7 +9,7 @@ FrozenGui: Consumer[mut Frame] {
   mut .model: mut Model;
   ::
   .title "Tic-Tac-Toe: frozen"
-  .fixedSize(Width#262, Height#360)
+  .fixedSize(262, 360)
   .contentB{::
     .background (Color.ghostWhite)
     .north{:: .label{:: .text(this.model.status) .save(this.model.statusSlot) } }

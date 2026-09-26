@@ -28,8 +28,8 @@ XMark: { #(r: Rect): Painter -> { g -> Block#
   .let[Nat] far  = { w - pad }
   .return { g
     .color (Color.sleepyBlue)
-    .position(r.x + (Width#pad), r.y + (Height#pad)) .line(r.x + (Width#far), r.y + (Height#far))
-    .position(r.x + (Width#far), r.y + (Height#pad)) .line(r.x + (Width#pad), r.y + (Height#far))
+    .position'(r.x + (Width#pad), r.y + (Height#pad)) .line'(r.x + (Width#far), r.y + (Height#far))
+    .position'(r.x + (Width#far), r.y + (Height#pad)) .line'(r.x + (Width#pad), r.y + (Height#far))
     }
   }}
 
@@ -39,8 +39,8 @@ OMark: { #(r: Rect): Painter -> { g -> Block#
   .let[Nat] d   = { w - (pad*2) }
   .return { g
     .color (Color.dangerTomato)
-    .position(r.x + (Width#pad), r.y + (Height#pad))
-    .oval(Width#d, Height#d)
+    .position'(r.x + (Width#pad), r.y + (Height#pad))
+    .oval(d, d)
     }
   }}
 
@@ -58,10 +58,10 @@ GridLines: { #(board: Rect): Painter -> { g -> Block#
   .let y2 = { board.y + (Height#(cell*2)) }
   .return { g
     .color (Color.boringGray)
-    .position(x1, board.y) .line(x1, board.bottom)
-    .position(x2, board.y) .line(x2, board.bottom)
-    .position(board.x, y1) .line(board.right, y1)
-    .position(board.x, y2) .line(board.right, y2)
+    .position'(x1, board.y) .line'(x1, board.bottom)
+    .position'(x2, board.y) .line'(x2, board.bottom)
+    .position'(board.x, y1) .line'(board.right, y1)
+    .position'(board.x, y2) .line'(board.right, y2)
     }
   }}
 
