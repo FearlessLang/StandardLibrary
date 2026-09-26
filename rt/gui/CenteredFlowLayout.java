@@ -26,8 +26,8 @@ import java.util.List;
 // depend on any given size, so it already is the final layout. When the
 // container is later given less size than that (chunk unset only),
 // layoutContainer wraps into more lines; the container's cross-axis size
-// must then come from heightFor(width), which MutableBorderLayout queries
-// with the exact slot width it assigns.
+// must then come from sizeFor, which every layout queries with the exact
+// size it assigns.
 public final class CenteredFlowLayout implements LayoutManager, Serializable{
   private static final long serialVersionUID = 1L;
 
@@ -42,17 +42,11 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // when chunk is unset (so a later resize below this can wrap it), or the
   // full chunked grouping when chunk is set (already final, since it does
   // not depend on any given size).
-  @Override public Dimension preferredLayoutSize(Container target){
-    return sizeFor(target,
-      gap.preferredWidth == null ? Integer.MAX_VALUE : w(gap.preferredWidth),
-      gap.preferredHeight == null ? Integer.MAX_VALUE : h(gap.preferredHeight));
-  }
+  @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
 
   // Below-preferred minimums are deliberately not supported: content wraps
   // or clips instead of shrinking.
-  @Override public Dimension minimumLayoutSize(Container target){
-    return preferredLayoutSize(target);
-  }
+  @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
 
   Dimension sizeFor(Container target, int width, int height){
     synchronized (target.getTreeLock()){
@@ -89,8 +83,9 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
           ? y0 + Math.max(0, (availH - ln.primary()) / 2)
           : x0 + Math.max(0, (availW - ln.primary()) / 2);
         int primary = primaryStart;
-        for (var c : ln.comps()){
-          var d = c.getPreferredSize();
+        for (var it : ln.items()){
+          var c = it.c();
+          var d = it.d();
           int pSize = vert ? d.height : d.width;
           int cSize = vert ? d.width : d.height;
           int off = cross + (ln.cross() - cSize) / 2;
@@ -103,7 +98,9 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     }
   }
 
-  private record Line(List<Component> comps, int primary, int cross){}
+  private record Item(Component c, Dimension d){}
+
+  private record Line(List<Item> items, int primary, int cross){}
 
   // Groups the visible children into lines. If gap.chunk > 0, every line is
   // exactly that many children (the last one may be shorter), and
@@ -117,28 +114,28 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     int chunk = gap.chunk;
     int pg = vert ? h(gap.heightGap) : w(gap.widthGap);
     var res = new ArrayList<Line>();
-    var comps = new ArrayList<Component>();
+    var items = new ArrayList<Item>();
     int lp = 0;
     int lc = 0;
     for (var c : target.getComponents()){
       if (!c.isVisible()){ continue; }
-      var d = c.getPreferredSize();
+      var d = vert ? Sk.sizeFor(c, Integer.MAX_VALUE, availPrimary) : Sk.sizeFor(c, availPrimary, Integer.MAX_VALUE);
       int cp = vert ? d.height : d.width;
       int cc = vert ? d.width : d.height;
       boolean breakBefore = chunk > 0
-        ? !comps.isEmpty() && comps.size() >= chunk
-        : !comps.isEmpty() && (lp + pg + cp) > availPrimary;
+        ? !items.isEmpty() && items.size() >= chunk
+        : !items.isEmpty() && (lp + pg + cp) > availPrimary;
       if (breakBefore){
-        res.add(new Line(comps, lp, lc));
-        comps = new ArrayList<>();
+        res.add(new Line(items, lp, lc));
+        items = new ArrayList<>();
         lp = 0;
         lc = 0;
       }
-      lp = comps.isEmpty() ? cp : lp + pg + cp;
+      lp = items.isEmpty() ? cp : lp + pg + cp;
       lc = Math.max(lc, cc);
-      comps.add(c);
+      items.add(new Item(c, d));
     }
-    if (!comps.isEmpty()){ res.add(new Line(comps, lp, lc)); }
+    if (!items.isEmpty()){ res.add(new Line(items, lp, lc)); }
     return res;
   }
 

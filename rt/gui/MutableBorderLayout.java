@@ -65,15 +65,9 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
     if (comp == center){ center = null; }
   }
 
-  @Override public Dimension preferredLayoutSize(Container target){
-    synchronized (target.getTreeLock()){
-      return size();
-    }
-  }
+  @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
 
-  @Override public Dimension minimumLayoutSize(Container target){
-    return preferredLayoutSize(target);
-  }
+  @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
 
   @Override public Dimension maximumLayoutSize(Container target){
     return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -83,87 +77,64 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
   @Override public float getLayoutAlignmentY(Container target){ return 0.5f; }
   @Override public void invalidateLayout(Container target){}
 
-  @Override public void layoutContainer(Container target){
-    synchronized (target.getTreeLock()){
-      int left = w(gap.left);
-      int right = target.getWidth() - w(gap.right);
-      int top = h(gap.top);
-      int bottom = target.getHeight() - h(gap.bottom);
-      boolean middle = west != null || center != null || east != null;
+  @Override public void layoutContainer(Container target){ lay(target, target.getWidth(), target.getHeight(), true); }
 
-      if (north != null){
-        int hh = wrapped(north, span(right - left), Integer.MAX_VALUE).height;
-        north.setBounds(left, top, span(right - left), hh);
-        top += hh;
-        if (middle || south != null){ top += h(gap.heightGap); }
-      }
-
-      if (south != null){
-        int hh = wrapped(south, span(right - left), Integer.MAX_VALUE).height;
-        bottom -= hh;
-        south.setBounds(left, bottom, span(right - left), hh);
-        if (middle){ bottom -= h(gap.heightGap); }
-      }
-
-      if (west != null){
-        var d = wrapped(west, Integer.MAX_VALUE, span(bottom - top));
-        west.setBounds(left, top, d.width, span(bottom - top));
-        left += d.width;
-        if (center != null || east != null){ left += w(gap.widthGap); }
-      }
-
-      if (east != null){
-        var d = wrapped(east, Integer.MAX_VALUE, span(bottom - top));
-        right -= d.width;
-        east.setBounds(right, top, d.width, span(bottom - top));
-        if (center != null){ right -= w(gap.widthGap); }
-      }
-
-      if (center != null){
-        center.setBounds(left, top, span(right - left), span(bottom - top));
-      }
-    }
-  }
-
-  // Height for a north/south slot given the exact width it will receive. A
-  // flow pane wraps into more rows when the window is narrower than its
-  // one-row preferred width, so its height depends on that width; asking
-  // getPreferredSize().height would return the one-row height and the
-  // wrapped rows would be clipped. An explicit user .height wins over the
-  // wrap-based height.
-  private Dimension wrapped(Component c, int width, int height){
-    if (c instanceof SkComponent s && s.getLayout() instanceof CenteredFlowLayout f){
-      return Sk.preferred(f.sizeFor(s, width, height), s.w);
-    }
-    return c.getPreferredSize();
-  }
-
-  private int span(int n){ return Math.max(0, n); }
+  Dimension sizeFor(Container target, int width, int height){ return lay(target, width, height, false); }
 
   // Whether a gap is owed before the next slot depends on whether a slot was
   // already placed, never on whether its measured size happens to be 0: a
   // widget can legitimately have width or height 0 (Nat includes 0), and
   // that must not be mistaken for "nothing here yet" the way it would be
   // with a plain `total == 0` check.
-  private Dimension size(){
-    var total = new Dimension();
-    boolean hasContent = false;
-    for (var c : new Component[]{ west, center, east }){
-      if (c == null){ continue; }
-      var d = c.getPreferredSize();
-      total.width += (hasContent ? w(gap.widthGap) : 0) + d.width;
-      total.height = Math.max(total.height, d.height);
-      hasContent = true;
+  private Dimension lay(Container target, int width, int height, boolean place){
+    synchronized (target.getTreeLock()){
+      int left = w(gap.left);
+      int right = width - w(gap.right);
+      int top = h(gap.top);
+      int bottom = height - h(gap.bottom);
+      boolean middle = west != null || center != null || east != null;
+      int slotsW = 0;
+      int middleH = 0;
+      int centerW = 0;
+      if (north != null){
+        var d = Sk.sizeFor(north, span(right - left), Integer.MAX_VALUE);
+        if (place){ north.setBounds(left, top, span(right - left), d.height); }
+        slotsW = d.width;
+        top += d.height;
+        if (middle || south != null){ top += h(gap.heightGap); }
+      }
+      if (south != null){
+        var d = Sk.sizeFor(south, span(right - left), Integer.MAX_VALUE);
+        bottom -= d.height;
+        if (place){ south.setBounds(left, bottom, span(right - left), d.height); }
+        slotsW = Math.max(slotsW, d.width);
+        if (middle){ bottom -= h(gap.heightGap); }
+      }
+      if (west != null){
+        var d = Sk.sizeFor(west, Integer.MAX_VALUE, span(bottom - top));
+        if (place){ west.setBounds(left, top, d.width, span(bottom - top)); }
+        middleH = d.height;
+        left += d.width;
+        if (center != null || east != null){ left += w(gap.widthGap); }
+      }
+      if (east != null){
+        var d = Sk.sizeFor(east, Integer.MAX_VALUE, span(bottom - top));
+        right -= d.width;
+        if (place){ east.setBounds(right, top, d.width, span(bottom - top)); }
+        middleH = Math.max(middleH, d.height);
+        if (center != null){ right -= w(gap.widthGap); }
+      }
+      if (center != null){
+        var d = Sk.sizeFor(center, span(right - left), span(bottom - top));
+        if (place){ center.setBounds(left, top, span(right - left), span(bottom - top)); }
+        middleH = Math.max(middleH, d.height);
+        centerW = d.width;
+      }
+      return new Dimension(
+        Math.max(slotsW + w(gap.left) + w(gap.right), left + centerW + (width - right)),
+        top + middleH + (height - bottom));
     }
-    for (var c : new Component[]{ north, south }){
-      if (c == null){ continue; }
-      var d = c.getPreferredSize();
-      total.width = Math.max(total.width, d.width);
-      total.height = (hasContent ? total.height + h(gap.heightGap) : 0) + d.height;
-      hasContent = true;
-    }
-    total.width += w(gap.left) + w(gap.right);
-    total.height += h(gap.top) + h(gap.bottom);
-    return total;
   }
+
+  private int span(int n){ return Math.max(0, n); }
 }

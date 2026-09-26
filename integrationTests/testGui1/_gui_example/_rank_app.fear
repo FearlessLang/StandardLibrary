@@ -10,6 +10,8 @@ use base.KeyStroke as Key;
 use base.Label as Label;
 use base.Slot as Slot;
 use base.Slots as Slots;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
 
 
 Foo:base.Main{s->Block#
@@ -24,6 +26,8 @@ Foo:base.Main{s->Block#
   .let label={Slots#[mut Label]}
   .do{ g.run mut Gui08{label} }
   .do{ g.run Gui09 }
+  .do{ g.run Gui10 }
+  .do{ g.run Gui11 }
   .done
   }
 Gui01:Consumer[mut Frame]{::
@@ -190,5 +194,40 @@ Gui09:Consumer[mut Frame]{::
     .label{:: .uText ("".u "2200 0078 2208 211D 003A 0020 2211 222B 0020 2192 0020 25A0 25B2 25CF 0020 2660 2665") }
     .label{:: .uText ("".u "1F600 0020 2764 FE0F 0020 1F468 200D 1F469 200D 1F467 0020 1F1F3 1F1FF 0020 1F44D 1F3FD").textHeight 32 }
     .button{:: .uText ("Press ".u "1F680").action{Debug#"rocket pressed"} }
+    }
+  }
+
+Gui10:Consumer[mut Frame]{::
+  .title "Gui10: nested pane wraps"
+  .fixedSize(Width#200, Height#150)
+  .content{::
+    .pane{::
+      .background (Color.rubberDuck)
+      .button{:: .text "Open file".action{Debug#"Open file pressed"} }
+      .button{:: .text "Save file".action{Debug#"Save file pressed"} }
+      .button{:: .text "Export as image".action{Debug#"Export as image pressed"} }
+      .button{:: .text "Quit".action{Debug#"Quit pressed"} }
+      }
+    }
+  }
+
+Gui11:Consumer[mut Frame]{::
+  .title "Gui11: north border wraps when narrowed"
+  .resizable
+  .contentB{::
+    .background (Color.ghostWhite)
+    .northB{::
+      .background (Color.rubberDuck)
+      .center{::
+        .button{:: .text "Open file".action{Debug#"Open file pressed"} }
+        .button{:: .text "Save file".action{Debug#"Save file pressed"} }
+        .button{:: .text "Export as image".action{Debug#"Export as image pressed"} }
+        .button{:: .text "Quit".action{Debug#"Quit pressed"} }
+        }
+      }
+    .center{::
+      .background (Color.sleepyBlue)
+      .label{:: .text "Narrow the window".foreground (Color.ghostWhite) }
+      }
     }
   }

@@ -37,8 +37,7 @@ final class SkComponent extends JComponent{
     setOpaque(false);
     setFocusable(false);
   }
-  Dimension layoutSize(){ return super.getPreferredSize(); }// layout-manager size
-  @Override public Dimension getPreferredSize(){ return Sk.preferred(w.autoSize(), w); }
+  @Override public Dimension getPreferredSize(){ return Sk.sizeFor(this, Integer.MAX_VALUE, Integer.MAX_VALUE); }
   @Override public Dimension getMinimumSize(){ return getPreferredSize(); }
   @Override protected void paintComponent(java.awt.Graphics g){ w.frame.blit(g, this); }
 }
@@ -60,14 +59,14 @@ class _Button extends AWidget implements Button$2o$0{
     frame.onEdtAndWait(() -> actions.add((MF$7$1) r));
     return this;
   }
-  @Override Dimension autoSize(){ return Sk.textSizeWithInsets(this); }
+  @Override Dimension autoSize(int width, int height){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){ Sk.button(cv, this); }
 }
 
 class _Label extends AWidget implements Label$1c$0{
   _Label(_Frame frame){ super(frame); }
 
-  @Override Dimension autoSize(){ return Sk.textSizeWithInsets(this); }
+  @Override Dimension autoSize(int width, int height){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
     Sk.text(cv, this, 0, 0);
@@ -79,6 +78,7 @@ class _Pane extends AContainer implements Pane$o$0{
     super(frame);
     component.setLayout(new CenteredFlowLayout(this));
   }
+  @Override Dimension autoSize(int width, int height){ return ((CenteredFlowLayout) component.getLayout()).sizeFor(component, width, height); }
   @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(component, null, s, _Button::new); return this; }
   @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(component, null, s, _Label::new); return this; }
   @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(component, null, s, _Pane::new); return this; }
@@ -106,6 +106,7 @@ class _Border extends AContainer implements Border$2o$0{
     super(frame);
     component.setLayout(new MutableBorderLayout(this));
   }
+  @Override Dimension autoSize(int width, int height){ return ((MutableBorderLayout) component.getLayout()).sizeFor(component, width, height); }
   @Override public Border$2o$0 mut$north$1(Object s){ frame.addTo(component, BorderLayout.NORTH, s, _Pane::new); return this; }
   @Override public Border$2o$0 mut$south$1(Object s){ frame.addTo(component, BorderLayout.SOUTH, s, _Pane::new); return this; }
   @Override public Border$2o$0 mut$east$1(Object s){ frame.addTo(component, BorderLayout.EAST, s, _Pane::new); return this; }
@@ -153,7 +154,7 @@ abstract class AWidget implements Widget$2o$1{
   AWidget(_Frame frame){ this.frame = frame; }
 
   abstract void sk(Canvas cv);
-  Dimension autoSize(){ return component.layoutSize(); }
+  abstract Dimension autoSize(int width, int height);
 
   final Object onEdt(Runnable r){
     frame.onEdtAndWait(r);

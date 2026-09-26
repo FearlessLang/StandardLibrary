@@ -25,6 +25,7 @@ import io.github.humbleui.skija.shaper.TextLineRunHandler;
 import io.github.humbleui.skija.shaper.TrivialLanguageRunIterator;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -175,10 +176,12 @@ interface Sk{
       (int) Math.ceil(font(0, h(s.textSize)).getMetrics().getHeight()) + h(s.top) + h(s.bottom));
   }
 
-  static Dimension preferred(Dimension auto, AWidget s){
-    return new Dimension(
-      s.preferredWidth == null ? auto.width : w(s.preferredWidth),
-      s.preferredHeight == null ? auto.height : h(s.preferredHeight));
+  static Dimension sizeFor(Component c, int width, int height){
+    var s = ((SkComponent) c).w;
+    int ww = s.preferredWidth == null ? width : w(s.preferredWidth);
+    int hh = s.preferredHeight == null ? height : h(s.preferredHeight);
+    var auto = s.autoSize(ww, hh);
+    return new Dimension(s.preferredWidth == null ? auto.width : ww, s.preferredHeight == null ? auto.height : hh);
   }
 
   static void text(Canvas cv, AWidget s, float dx, float dy){
