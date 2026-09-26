@@ -51,35 +51,35 @@ ShapeButtons:Scope[Pane]{::
 
 PaintTarget:Painter{::
   .color (Color.ghostWhite)
-  .position(this.size.getInt, +50)
-  .oval(180, 180)
+  .position(X#(this.size.getInt), Y#(+50))
+  .oval(Width#180, Height#180)
   .color(Color.rubberDuck)
-  .position(+205, +85)
-  .oval(110, 110)
+  .position(X#(+205), Y#(+85))
+  .oval(Width#110, Height#110)
   .color (Color.dangerTomato)
-  .position(+240, +120)
-  .oval(40, 40);
+  .position(X#(+240), Y#(+120))
+  .oval(Width#40, Height#40);
 
   .size:Nat;
   }
 
 PaintBox:Painter{::
   .color (Color.alienMint)
-  .position(+150, +70)
-  .rect(220, 150)
+  .position(X#(+150), Y#(+70))
+  .rect(Width#220, Height#150)
 
   .color (Color.goblinGreen)
-  .position(+190, +105)
-  .rect(140, 80)
+  .position(X#(+190), Y#(+105))
+  .rect(Width#140, Height#80)
 
   .color (Color.toxicSlime)
-  .position(+235, +130)
-  .rect(50, 30)
+  .position(X#(+235), Y#(+130))
+  .rect(Width#50, Height#30)
   }
 
 PaintPortal:Painter{::
   .color (Color.wizardPurple)
-  .position(+0, +0)
+  .position(X#(+0), Y#(+0))
   .image(base.Cache.of
     {Fishing.consumeImage("A",3_000_000)
       .scaleToHeight(300)})
@@ -87,16 +87,16 @@ PaintPortal:Painter{::
 
 PaintWarning:Painter{::
   .color (Color.dangerTomato)
-  .position(+140, +70)
-  .rect(240, 150)
+  .position(X#(+140), Y#(+70))
+  .rect(Width#240, Height#150)
 
   .color (Color.lavaOrange)
-  .position(+170, +100)
-  .rect(180, 90)
+  .position(X#(+170), Y#(+100))
+  .rect(Width#180, Height#90)
 
   .color (Color.rubberDuck)
-  .position(+230, +120)
-  .rect(60, 50)
+  .position(X#(+230), Y#(+120))
+  .rect(Width#60, Height#50)
   }
 ShapeHeader:Scope[Pane]{::
     .background (Color.ghostWhite)

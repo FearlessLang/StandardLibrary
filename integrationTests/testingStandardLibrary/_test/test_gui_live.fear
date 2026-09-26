@@ -106,7 +106,7 @@ GuiLiveTests: Test {::
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(inner!.pane{:: .width 50 .height 20}.pane{:: .width 50 .height 20}.paint{g -> Error.msg("Painted at "+(g.panelWidth.str))}, Void)}
       }}), Void)}
-    .return{f.fixedSize(300, 80).content{::}}
+    .return{f.fixedSize(Width#300, Height#80).content{::}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted at Width[118]"}}.assertTrue{i};

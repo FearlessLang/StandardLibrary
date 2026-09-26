@@ -10,6 +10,10 @@ use base.KeyStroke as Key;
 use base.Label as Label;
 use base.Slot as Slot;
 use base.Slots as Slots;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
+use base.XInt as X;
+use base.YInt as Y;
 
 
 Foo:base.Main{s->Block#
@@ -198,7 +202,7 @@ Gui09:Consumer[mut Frame]{::
 
 Gui10:Consumer[mut Frame]{::
   .title "Gui10: nested pane wraps"
-  .fixedSize(200, 150)
+  .fixedSize(Width#200, Height#150)
   .content{::
     .pane{::
       .background (Color.rubberDuck)
@@ -233,17 +237,17 @@ Gui11:Consumer[mut Frame]{::
 
 Gui12:Consumer[mut Frame]{::
   .title "Gui12: sizes and drawing beyond any screen"
-  .resizable(400, 300)
+  .resizable(Width#400, Height#300)
   .content{::
     .paint{g -> g
       .color(Color.sleepyBlue)
-      .position(+0, +0)
-      .rect'(g.panelWidth, g.panelHeight)
+      .position(X.origin, Y.origin)
+      .rect(g.panelWidth, g.panelHeight)
       .color(Color.rubberDuck)
-      .position(-5000, +60)
-      .rect(5100, 40)
-      .position(-5000, -5000)
-      .line(+5000, +5000)
+      .position(X#(-5000), Y#(+60))
+      .rect(Width#5100, Height#40)
+      .position(X#(-5000), Y#(-5000))
+      .line(X#(+5000), Y#(+5000))
       }
     .label{:: .text "Blue fills the window at any size" .foreground(Color.ghostWhite) }
     .pane{:: .width 5000 .height 30 .background(Color.dangerTomato) }

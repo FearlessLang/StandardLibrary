@@ -29,9 +29,9 @@ Menu: Painter { g -> Block#
   .let menuBounds = { MenuBounds#(g.panelWidth, g.panelHeight) }
   .return {g
   .color lightGrey
-    .position(+0, +0)
+    .position(X.origin, Y.origin)
     .image(Court#(g.panelHeight.get))
-    .position'(menuBounds.x, menuBounds.y)
+    .position(menuBounds.x, menuBounds.y)
     .image(ButtonImg#(menuBounds.width.get))
     }}
 
@@ -40,13 +40,13 @@ Game: Painter { g -> Block#
   .let playerBounds = { PlayerBounds#(this.state.px, this.state.py, g.panelWidth) }
   .let ballBounds   = { BallBounds#(this.state.bx, this.state.by, g.panelWidth) }
   .return {g
-    .position(+0, +0)
+    .position(X.origin, Y.origin)
     .image(Court#(g.panelHeight.get))
-    .position'(squareBounds.x - (squareBounds.width .getTruncDiv 7), squareBounds.y)
+    .position(squareBounds.x - (squareBounds.width .getTruncDiv 7), squareBounds.y)
     .image(Hoop#((squareBounds.width * 9 .getTruncDiv 7).get))
-    .position'(playerBounds.x, playerBounds.y)
+    .position(playerBounds.x, playerBounds.y)
     .image(PlayerImg#(playerBounds.width.get))
-    .position'(ballBounds.x, ballBounds.y)
+    .position(ballBounds.x, ballBounds.y)
     .image(BallImg#(ballBounds.width.get))
     };
   .state: State;

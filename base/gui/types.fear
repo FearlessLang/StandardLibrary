@@ -279,8 +279,7 @@ Frame:_Styled[Frame]{ .self->this;
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
   mut .content(s: mut Scope[Pane]): Void;
   mut .contentB(s: mut Scope[Border]): Void;
-  mut .location(x: Int, y: Int): mut Frame -> this.location'(XInt#x, YInt#y);
-  mut .location'(XInt, YInt): mut Frame;
+  mut .location(XInt, YInt): mut Frame;
   mut .onKey(mut Scope[Keys]): mut Frame;
   mut .maximized: mut Frame;
   //The user may resize by dragging the window edges; without arguments the
@@ -290,15 +289,13 @@ Frame:_Styled[Frame]{ .self->this;
   //Note: an undecorated window can be technically resizable, but there is no
   //border to drag, so the user cannot actually resize it.
   mut .resizable: mut Frame;
-  mut .resizable(w: Nat, h: Nat): mut Frame -> this.resizable'(WidthNat#w, HeightNat#h);
-  mut .resizable'(WidthNat, HeightNat): mut Frame;
+  mut .resizable(w: WidthNat, h: HeightNat): mut Frame;
   //The window size cannot be changed by the user; without arguments the size
   //is computed from the content, with arguments it is exactly as given.
   //The arguments are the content size, in the same unit as panelWidth and
   //panelHeight; the title bar and borders of a decorated window come on top.
   mut .fixedSize: mut Frame;
-  mut .fixedSize(w: Nat, h: Nat): mut Frame -> this.fixedSize'(WidthNat#w, HeightNat#h);
-  mut .fixedSize'(WidthNat, HeightNat): mut Frame;
+  mut .fixedSize(w: WidthNat, h: HeightNat): mut Frame;
   mut .undecorated(a: Alpha): mut Frame;
   mut .decorated: mut Frame;
   }
@@ -311,14 +308,10 @@ ScreenContext:{
   }
 Graphics:ScreenContext{
   mut .color(Color): mut Graphics;
-  mut .position(x: Int, y: Int): mut Graphics -> this.position'(XInt#x, YInt#y);
-  mut .position'(XInt, YInt): mut Graphics;
-  mut .line(x: Int, y: Int): mut Graphics -> this.line'(XInt#x, YInt#y);
-  mut .line'(XInt, YInt): mut Graphics;
-  mut .rect(w: Nat, h: Nat): mut Graphics -> this.rect'(WidthNat#w, HeightNat#h);
-  mut .rect'(WidthNat, HeightNat): mut Graphics;
-  mut .oval(w: Nat, h: Nat): mut Graphics -> this.oval'(WidthNat#w, HeightNat#h);
-  mut .oval'(WidthNat, HeightNat): mut Graphics;
+  mut .position(XInt, YInt): mut Graphics;
+  mut .line(XInt, YInt): mut Graphics;
+  mut .rect(WidthNat, HeightNat): mut Graphics;
+  mut .oval(WidthNat, HeightNat): mut Graphics;
   mut .image(Image): mut Graphics;
   }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,

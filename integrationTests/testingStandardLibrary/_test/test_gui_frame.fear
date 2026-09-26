@@ -2,7 +2,7 @@ GuiFrameTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
     .do{Block#(f.modelFps(100, {:: .action{Error.msg(root!.background.str + " " + (root!.radius.str))}}), Void)}
-    .return{f.undecorated(Alpha.opaque).fixedSize(300, 80).content{::
+    .return{f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
       .radius 20
       .background(Color#(Red#(200.getByte), Green#(0.getByte), Blue#(0.getByte), Alpha#(128.getByte)))
       .save root
@@ -19,54 +19,54 @@ GuiFrameTests: Test {::
       .do{swapped.set True}
       .return{f.content{:: .save root}}
       }}), Void)}
-    .return{f.undecorated(Alpha.opaque).fixedSize(300, 80).content{::}}
+    .return{f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == (Color.transparent.str + " 12")}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{Block#(f.maximized, Error.msg "A maximized window kept its explicit location")}}), Void)}
-    .return{f.undecorated(Alpha.opaque).location(+0, +0).content{::}}
+    .return{f.undecorated(Alpha.opaque).location(X#(+0), Y#(+0)).content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A maximized window cannot also have an explicit location"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{Block#(f.maximized, Error.msg "A maximized window kept its explicit size")}}), Void)}
-    .return{f.undecorated(Alpha.opaque).fixedSize(300, 80).content{::}}
+    .return{f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A maximized window cannot also have an explicit size"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
-    .do{Block#(f.modelFps(100, {:: .action{Block#(f.location(+0, +0), Error.msg "A maximized window accepted an explicit location")}}), Void)}
+    .do{Block#(f.modelFps(100, {:: .action{Block#(f.location(X#(+0), Y#(+0)), Error.msg "A maximized window accepted an explicit location")}}), Void)}
     .return{f.undecorated(Alpha.opaque).maximized.content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A maximized window cannot also have an explicit location"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
-    .do{Block#(f.modelFps(100, {:: .action{Block#(f.resizable(300, 80), Error.msg "A maximized window accepted an explicit size")}}), Void)}
+    .do{Block#(f.modelFps(100, {:: .action{Block#(f.resizable(Width#300, Height#80), Error.msg "A maximized window accepted an explicit size")}}), Void)}
     .return{f.undecorated(Alpha.opaque).maximized.content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A maximized window cannot also have an explicit size"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
-    .do{Block#(f.modelFps(100, {:: .action{Block#(f.fixedSize(100000, 80), Error.msg "A window larger than the screen was accepted")}}), Void)}
-    .return{f.undecorated(Alpha.opaque).location(+0, +0).content{::}}
+    .do{Block#(f.modelFps(100, {:: .action{Block#(f.fixedSize(Width#100000, Height#80), Error.msg "A window larger than the screen was accepted")}}), Void)}
+    .return{f.undecorated(Alpha.opaque).location(X#(+0), Y#(+0)).content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: .startsWith "Window must fit on screen: window=100000x80, screen="}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
-    .do{Block#(f.modelFps(100, {:: .action{Block#(f.resizable'(f.screenWidth, f.screenHeight).fixedSize'(f.screenWidth, f.screenHeight), Error.msg "A shown window with no explicit location took the screen size")}}), Void)}
-    .return{f.undecorated(Alpha.opaque).fixedSize(300, 80).content{::}}
+    .do{Block#(f.modelFps(100, {:: .action{Block#(f.resizable(f.screenWidth, f.screenHeight).fixedSize(f.screenWidth, f.screenHeight), Error.msg "A shown window with no explicit location took the screen size")}}), Void)}
+    .return{f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A shown window with no explicit location took the screen size"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fixedSize(300, 80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fixedSize(Width#300, Height#80).content{::
     .paint{g -> (g.elapsed >= (Instant.origin + (Duration.milliSeconds 300))).if{
       .then -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str));
       .else -> g
@@ -81,7 +81,7 @@ GuiFrameTests: Test {::
     .do{Block#(f.modelFps(100, {:: .action{Block#
       .if{started.get} .return{Void}
       .do{started.set True}
-      .do{Block#(f.fixedSize(300, 80), Void)}
+      .do{Block#(f.fixedSize(Width#300, Height#80), Void)}
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(root!.paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}, Void)}
       }}), Void)}
@@ -100,7 +100,7 @@ GuiFrameTests: Test {::
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(root!.paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}, Void)}
       }}), Void)}
-    .return{f.undecorated(Alpha.opaque).fixedSize(300, 80).content{:: .save root}}
+    .return{f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{:: .save root}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300] Height[80]"}}.assertTrue{i};
@@ -123,7 +123,7 @@ GuiFrameTests: Test {::
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(root!.paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}, Void)}
       }}), Void)}
-    .return{f.undecorated(Alpha.opaque).fixedSize(300, 80).content{:: .save root}}
+    .return{f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{:: .save root}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300] Height[80]"}}.assertTrue{i};
@@ -138,7 +138,7 @@ GuiFrameTests: Test {::
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(root!.paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}, Void)}
       }}), Void)}
-    .return{f.fixedSize(300, 80).content{:: .save root}}
+    .return{f.fixedSize(Width#300, Height#80).content{:: .save root}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300] Height[80]"}}.assertTrue{i};
@@ -159,15 +159,15 @@ GuiFrameTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[0] Height[0]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
-    .do{Block#(f.modelFps(100, {:: .action{Block#(f.fixedSize'(f.screenWidth, f.screenHeight), Error.msg "A decorated window whose content is as large as the screen was accepted")}}), Void)}
+    .do{Block#(f.modelFps(100, {:: .action{Block#(f.fixedSize(f.screenWidth, f.screenHeight), Error.msg "A decorated window whose content is as large as the screen was accepted")}}), Void)}
     .return{f.content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: .startsWith "Window must fit on screen: window="}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
-    .do{Block#(f.modelFps(100, {:: .action{Block#(f.location'(X.origin, Y.origin + (f.screenHeight - (Height#80))), Error.msg "A decorated window whose content ends at the bottom of the screen was accepted")}}), Void)}
-    .return{f.fixedSize(300, 80).location(+0, +0).content{::}}
+    .do{Block#(f.modelFps(100, {:: .action{Block#(f.location(X.origin, Y.origin + (f.screenHeight - (Height#80))), Error.msg "A decorated window whose content ends at the bottom of the screen was accepted")}}), Void)}
+    .return{f.fixedSize(Width#300, Height#80).location(X#(+0), Y#(+0)).content{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: .startsWith "Window location puts window outside screen: location=0,"}}.assertTrue{i};

@@ -30,23 +30,23 @@ final class CGraphicsCtx implements Graphics$ao$0{
   }
   // Drawing outside the panel silently clips (canvas is clipped to the panel),
   // otherwise user can cause errors by resizing the gui by hand
-  @Override public Object mut$position$p1$2(Object x, Object y){
+  @Override public Object mut$position$2(Object x, Object y){
     this.x = at(((XInt$s$0) x).read$get$0());
     this.y = at(((YInt$s$0) y).read$get$0());
     return this;
   }
   // Correctly does not update the position.
-  @Override public Object mut$line$p1$2(Object x, Object y){
+  @Override public Object mut$line$2(Object x, Object y){
     paint.setMode(PaintMode.STROKE).setStrokeWidth(1);
     cv.drawLine(this.x, this.y, at(((XInt$s$0) x).read$get$0()), at(((YInt$s$0) y).read$get$0()), paint);
     return this;
   }
-  @Override public Object mut$rect$p1$2(Object w, Object h){
+  @Override public Object mut$rect$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
     cv.drawRect(shapeRect(w, h), paint);
     return this;
   }
-  @Override public Object mut$oval$p1$2(Object w, Object h){
+  @Override public Object mut$oval$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
     cv.drawOval(shapeRect(w, h), paint);
     return this;

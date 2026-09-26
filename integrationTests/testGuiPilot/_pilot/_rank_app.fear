@@ -16,6 +16,7 @@ use base.KeyStroke as Key;
 use base.XInt as X;
 use base.YInt as Y;
 use base.WidthNat as Width;
+use base.HeightNat as Height;
 use base.Frame as Frame;
 use base.Duration as Duration;
 use base.Instant as Instant;
@@ -60,11 +61,11 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
       .pane{::
         .button{:: .text "Swap keys" .background(Color.rgb(96, 200, 250)) .action{Block#(f.onKey{:: .pressed escape}, Void)}}
         .button{:: .text "Fix" .background(Color.rgb(250, 150, 90)) .action{Block#
-          .do{Block#(f.fixedSize'(f.screenWidth.getTruncDiv 2, f.screenHeight.getTruncDiv 2), Void)}
+          .do{Block#(f.fixedSize(f.screenWidth.getTruncDiv 2, f.screenHeight.getTruncDiv 2), Void)}
           .return{Block#(seen.set "Fix ran", Void)}
           }}
         .button{:: .text "Corner" .background(Color.rgb(170, 110, 240)) .action{Block#
-          .do{Block#(f.location'(X.origin + (f.screenWidth.getTruncDiv 4), Y.origin + (f.screenHeight.getTruncDiv 4)), Void)}
+          .do{Block#(f.location(X.origin + (f.screenWidth.getTruncDiv 4), Y.origin + (f.screenHeight.getTruncDiv 4)), Void)}
           .return{Block#(seen.set "Corner ran", Void)}
           }}
         .button{:: .text "Swap content" .background(Color.rgb(240, 90, 170)) .action{f.content{::
@@ -103,7 +104,7 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
         .pane{:: .mouse{:: .entered{e -> Block#(seen.set "hover: Nudge", Void)}} .button{:: .text "Nudge" .background(Color.rgb(60, 210, 200)) .action{Block#
           .let[X] x = {f.locationX}
           .let[X] to = {(x >= (X#(+100))).if{.then -> x - (Width#100); .else -> x + (Width#100)}}
-          .return{Block#(f.location'(to, f.locationY), Void)}
+          .return{Block#(f.location(to, f.locationY), Void)}
           }}}
         .pane{:: .width 100 .height 30 .background(Color.dustyRose) .mouse{:: .entered{e -> Block#(seen.set "hover: right box L", Void)}}}
         }
@@ -127,12 +128,12 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
         .width 60 .height 30
         .background(Color.rgb(230, 230, 60))
         .foreground(Color.rgb(20, 90, 200))
-        .paint{g -> g.position(+20, +10).rect(20, 10)}
+        .paint{g -> g.position(X#(+20), Y#(+10)).rect(Width#20, Height#10)}
         }
       .pane{::
         .width 60 .height 30
         .background(Color.rgb(200, 120, 40))
-        .paint{g -> Block#(g.position(+20, +10), g.color(Color.rgb(40, 200, 120)).rect(20, 10))}
+        .paint{g -> Block#(g.position(X#(+20), Y#(+10)), g.color(Color.rgb(40, 200, 120)).rect(Width#20, Height#10))}
         }
       .pane{::
         .widthGap 0

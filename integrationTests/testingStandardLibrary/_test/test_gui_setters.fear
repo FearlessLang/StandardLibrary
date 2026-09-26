@@ -1,15 +1,15 @@
 GuiSetterTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f ->
-    Error.msg(f.location(+3, +4).locationX.str + " " + (f.location'(X#(+5), Y#(+6)).locationY.str))
+    Error.msg(f.location(X#(+3), Y#(+4)).locationX.str + " " + (f.locationY.str))
     }}).run{
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "X[+3] Y[+6]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "X[+3] Y[+4]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.resizable(100001, 80).content{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.resizable(Width#100001, Height#80).content{::}}}).run{
       .ok _ -> Error.msg "A window width over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "window width 100001 is too large; it must be <= 100000"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fixedSize'(Width#300, Height#100001).content{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fixedSize(Width#300, Height#100001).content{::}}}).run{
       .ok _ -> Error.msg "A window height over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "window height 100001 is too large; it must be <= 100000"}}.assertTrue{i};
       }}

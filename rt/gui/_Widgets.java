@@ -539,11 +539,11 @@ class _Frame implements Frame$1c$0{
   // Note: an undecorated window can be technically resizable, but there is
   // no border to drag, so the user cannot actually resize it.
   @Override public Object mut$resizable$0(){ return setResizable(true, null, null); }
-  @Override public Object mut$resizable$p1$2(Object w, Object h){
+  @Override public Object mut$resizable$2(Object w, Object h){
     return setResizable(true, (WidthNat$as$0) w, (HeightNat$lg$0) h);
   }
   @Override public Object mut$fixedSize$0(){ return setResizable(false, null, null); }
-  @Override public Object mut$fixedSize$p1$2(Object w, Object h){
+  @Override public Object mut$fixedSize$2(Object w, Object h){
     return setResizable(false, (WidthNat$as$0) w, (HeightNat$lg$0) h);
   }
   private Object setResizable(boolean r, WidthNat$as$0 w, HeightNat$lg$0 h){
@@ -582,7 +582,7 @@ class _Frame implements Frame$1c$0{
     return this;
   }
   private Rectangle maximizedBounds(){ return maximized ? new Rectangle(0, 0, screenW, screenH) : null; }
-  @Override public Object mut$location$p1$2(Object x, Object y){
+  @Override public Object mut$location$2(Object x, Object y){
     long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
     long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
     if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }

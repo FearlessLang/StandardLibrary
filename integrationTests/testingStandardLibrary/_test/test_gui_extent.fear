@@ -1,19 +1,19 @@
 GuiExtentTests: Test {::
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(300, 80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
     .paint{g -> Error.msg(g
       .color(Color.goblinGreen)
-      .position(-50000, -50000)
-      .rect(100000, 100000)
-      .oval(100000, 100000)
-      .line(+50000, +50000)
-      .position(+50000, +50000)
-      .rect(10, 10)
+      .position(X#(-50000), Y#(-50000))
+      .rect(Width#100000, Height#100000)
+      .oval(Width#100000, Height#100000)
+      .line(X#(+50000), Y#(+50000))
+      .position(X#(+50000), Y#(+50000))
+      .rect(Width#10, Height#10)
       .panelWidth.str)}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(300, 80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
     .pane{::
       .width 50000
       .height 50000
@@ -41,8 +41,8 @@ GuiExtentTests: Test {::
       .ok _ -> Error.msg "A radius over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "radius 18446744073709551615 is too large; it must be <= 100000"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(300, 80).content{::
-    .paint{g -> g.rect(3000000000, 1)}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+    .paint{g -> g.rect(Width#3000000000, Height#1)}
     }}}).run{
       .ok _ -> Error.msg "A rect wider than an int always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Nat 3000000000 is too large to be represented as an integer"}}.assertTrue{i};
