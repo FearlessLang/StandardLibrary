@@ -114,12 +114,15 @@ final class FearlessFrame extends JFrame{
     if (!undecorated){ setOpacity(1f); }// opacity < 1 is illegal on decorated windows
     suppressClosed++;
     dispose();
+    boolean resizable = isResizable();
+    setResizable(true);
     setUndecorated(undecorated);
     if (undecorated){ setOpacity(opacity); }
     setLocation(at);
     setContentSize(c.width, c.height);
     if (maximized != null){ setBounds(maximized); }
     setVisible(true);
+    setResizable(resizable);
     toFront();
   }
 
