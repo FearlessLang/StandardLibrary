@@ -101,7 +101,8 @@ CyclicFloatTests: Test {::
   .check{(Hue#(0.25)) - (Hue#(0.5)) .assertEq(Hue#(0.75))}
   .check{(Hue#(0.5)) - (Hue#(0.25)) .assertEq(Hue#(0.25))}
   .check{(Hue#(0.5)) + (Hue#(0.5)) .assertEq(Hue#(0.0))}
-  .check{(Hue#(0.25)) .normalize .assertEq(Hue#(0.25))}
+  .check{(Hue#(+1.0)) .assertEq(Hue#(0.0))}
+  .check{(((Hue#(0.0)) - (Hue#(0.00000000000000001soft))).get < +1.0) .assertTrue}
   .check{Hue.period .assertEq(+1.0)}
   .check{(Hue#(0.5)) + (Hue#(0.25)) + (Hue#(0.5)) .assertEq((Hue#(0.25)) + (Hue#(0.5)) + (Hue#(0.5)))}
   }
