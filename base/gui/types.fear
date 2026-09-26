@@ -132,8 +132,12 @@ Brightness:LevelFloat[Brightness]{.name->"Brightness"; .getDataType -> 0.0;
   { .getDataType->t });
   .close->this; .close->::; }
 
-KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "";
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
+_KeyNames: Sealed{ .isName(name: Str): Bool -> _Magic!; }
+KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "UNDEFINED";
+  # t ->Block#
+    .if{_KeyNames.isName(t).not}.error{`KeyStroke#"`+t+`" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}
+    .return{{ .getDataType->t }};
+  .close->this; .close->::; }
 
 Duration:ExtentNat[Duration]{.name->"Duration"; .getDataType -> 0;
   # t ->{ .getDataType->t };

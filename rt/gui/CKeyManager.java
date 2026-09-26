@@ -17,27 +17,25 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   // without this, a key held during a focus switch leaves any state the
   // model set on .pressed (e.g. "moving left") stuck forever, since the
   // matching .released handler never runs.
-  private final java.util.Set<String> held=new java.util.HashSet<>();
+  private final java.util.Set<List<Integer>> held=new java.util.HashSet<>();
 
   CKeyManager(_Frame frame){ this.frame=frame; }
 
   @Override public void keyPressed(KeyEvent e){
-    var k=keyText(e);
-    if (held.add(k)){ dispatch(k,pressed); }
+    if (held.add(List.of(e.getKeyCode(),e.getKeyLocation()))){ dispatch(e.getKeyCode(),pressed); }
   }
   @Override public void keyReleased(KeyEvent e){
-    var k=keyText(e);
-    if (held.remove(k)){ dispatch(k,released); }
+    if (held.remove(List.of(e.getKeyCode(),e.getKeyLocation()))){ dispatch(e.getKeyCode(),released); }
   }
   @Override public void windowLostFocus(java.awt.event.WindowEvent e){
     if (held.isEmpty()){ return; }
     var keys=new ArrayList<>(held);
     held.clear();
-    for (var k:keys){ dispatch(k,released); }
+    for (var k:keys){ dispatch(k.getFirst(),released); }
   }
   @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
 
-  private void dispatch(String eventKey,List<KeyAction$m8$0> keyActions){
+  private void dispatch(int eventKey,List<KeyAction$m8$0> keyActions){
     var elapsed=frame.elapsed;
     var screenWidth=frame.screenWidth;
     var screenHeight=frame.screenHeight;
@@ -61,11 +59,11 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
     });
   }
 
-  private static KeyStroke$m8$0 matchingKey(EList$1k$1 match,String eventKey){
+  private static KeyStroke$m8$0 matchingKey(EList$1k$1 match,int eventKey){
     int size=natToInt(match.read$size$0());
     for (long i=0;i < size;i++){
       var k=(KeyStroke$m8$0)match.mut$get$1(n(i));
-      if (keyText(k).equals(eventKey)){ return k; }
+      if (_KeyNames$b4$0.codes.get(((Str$c$0Instance)k.read$get$0()).val()) == eventKey){ return k; }
     }
     return null;
   }
@@ -76,11 +74,6 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
       to.add((Consumer$ao$1)from.mut$get$1(n(i)));
     }
   }
-
-  private static String keyText(KeyStroke$m8$0 k){
-    return ((Str$c$0Instance)k.read$get$0()).val();
-  }
-  private static String keyText(KeyEvent e){ return KeyNames.of(e.getKeyCode()); }
 
   @Override public Object mut$pressed$1(Object scope){ return addKeyAction(scope,pressed); }
   @Override public Object mut$released$1(Object scope){ return addKeyAction(scope,released); }
