@@ -2,6 +2,8 @@ package _base;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.concurrent.CompletableFuture;
@@ -322,6 +324,12 @@ class _Frame implements Frame$1c$0{
     screenH = b.height;
     screenWidth = w(screenW);
     screenHeight = h(screenH);
+    var geometry = new ComponentAdapter(){
+      @Override public void componentResized(ComponentEvent e){ markLayoutDirty(); }
+      @Override public void componentMoved(ComponentEvent e){ markLayoutDirty(); }
+    };
+    frame.addComponentListener(geometry);
+    frame.getRootPane().addComponentListener(geometry);
   }
 
   void addTo(JComponent parent, String where, Object scope, Function<_Frame, ? extends AWidget> make){
@@ -378,6 +386,7 @@ class _Frame implements Frame$1c$0{
       layoutDirty.set(false);
       // Only the invalid path (marked by reStyle/add) is re-laid-out.
       top.component.validate();
+      mouse.rehover();
     }
     render();
     // Paint synchronously: after this tick the pixels on screen and the

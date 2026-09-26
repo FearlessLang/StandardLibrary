@@ -108,6 +108,15 @@ final class SkMouse extends MouseAdapter{
     pressedButton = null;
   }
 
+  void rehover(){
+    assert SwingUtilities.isEventDispatchThread();
+    if (java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(MouseEvent.MOUSE_MOVED) != null){ return; }
+    var p = top().getMousePosition();
+    if (p == null){ hoverTo(List.of()); return; }
+    at = p;
+    updateHover(p);
+  }
+
   @Override public void mousePressed(MouseEvent e){
     down = true;
     var p = point(e);
