@@ -101,7 +101,7 @@ CyclicFloatTests: Test {::
   .check{(Hue#(0.25)) - (Hue#(0.5)) .assertEq(Hue#(0.75))}
   .check{(Hue#(0.5)) - (Hue#(0.25)) .assertEq(Hue#(0.25))}
   .check{(Hue#(0.5)) + (Hue#(0.5)) .assertEq(Hue#(0.0))}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Hue must be at least 0 and less than 1"}}, {Hue#(+1.0)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Hue must be at least 0 and less than +1.0"}}, {Hue#(+1.0)})
   .check{((Hue#(0.0)) - (Hue#(0.00000000000000001soft))).get .assertEq(1.0.getPred)}
   .check{Hue.period .assertEq(+1.0)}
   .check{(Hue#(0.5)) + (Hue#(0.25)) + (Hue#(0.5)) .assertEq((Hue#(0.25)) + (Hue#(0.5)) + (Hue#(0.5)))}

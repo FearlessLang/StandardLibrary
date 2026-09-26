@@ -112,13 +112,14 @@ Alpha:LevelByte[Alpha]{.name->"Alpha"; .getDataType -> 0.getByte;
   }
 CyclicFloat[S]: Wrapper[S,Float] {
   read .period: Float;
+  read ._unchecked(t: Float): S;
+  # t -> Block#(t.assertInRange(0.0 =~~ (this.period), {this.name + " must be at least 0 and less than " + (this.period.str)}), this._unchecked t);
   +(other: S): S -> this#(Math.euclideanMod(this.get + (this.close(other).get), this.period));
   -(other: S): S -> this#(Math.euclideanMod(this.get - (this.close(other).get), this.period));
   }
 
 Hue:CyclicFloat[Hue]{.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
-  # t ->Block#(t.assertInRange(0.0 =~~ 1.0, {"Hue must be at least 0 and less than 1"}),
-  { .getDataType->t });
+  ._unchecked t -> { .getDataType->t };
   .close->this; .close->::; }
 Saturation:LevelFloat[Saturation]{.name->"Saturation"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
