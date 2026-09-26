@@ -31,10 +31,9 @@ record CMouseCtx(
 }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
-record CMouseBuilder(_Frame frame, EnumMap<MouseKind, ArrayList<Consumer$ao$1>> handlers) implements Mouse$1c$0{
+record CMouseBuilder(_Frame frame, EnumMap<MouseKind, Consumer$ao$1> handlers) implements Mouse$1c$0{
   private Mouse$1c$0 add(MouseKind k, Object a){
-    frame.onEdtAndWait(() ->
-      handlers.computeIfAbsent(k, _ -> new ArrayList<>()).add((Consumer$ao$1) a));
+    frame.onEdtAndWait(() -> handlers.put(k, (Consumer$ao$1) a));
     return this;
   }
   @Override public Object mut$clicked$1(Object a){ return add(Clicked, a); }
@@ -55,7 +54,7 @@ record CMouseBuilder(_Frame frame, EnumMap<MouseKind, ArrayList<Consumer$ao$1>> 
 //   kind; the first widget with handlers consumes the event.
 // - A click bubbles from the press target to the nearest enclosing widget
 //   that consumes clicks AND still contains the release point (the DOM
-//   press/release common-ancestor rule). A button with no actions does not
+//   press/release common-ancestor rule). A button with no action does not
 //   consume, so clicks on it bubble.
 // - Entered/Exited fire on genuine containment transitions computed here by
 //   hit-testing, so synthetic AWT enter/exit noise cannot reach them. They
@@ -160,8 +159,8 @@ final class SkMouse extends MouseAdapter{
     for (var t : chainOf(pressTarget)){
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
-        if (b.actions.isEmpty()){ continue; }// nothing reaches the programmer: bubble
-        frame.frame.queue.submitAll(b.actions);
+        if (b.action == null){ continue; }// nothing reaches the programmer: bubble
+        frame.frame.queue.submit(b.action);
         return;
       }
       if (fire(t, Clicked, p)){ return; }
@@ -200,17 +199,15 @@ final class SkMouse extends MouseAdapter{
   }
 
   private void handlers(AWidget t, MouseKind kind, Point p, ArrayList<MF$7$1> tasks){
-    var hs = t.handlers.get(kind);
-    if (hs == null){ return; }
+    var h = t.handlers.get(kind);
+    if (h == null){ return; }
     var ctx = ctx(t, p);
-    for (var h : hs){
-      tasks.add(new MF$7$1(){
-        @Override public Object mut$$hash$0(){
-          h.mut$accept$1(ctx);
-          return Void$o$0.instance;
-        }
-      });
-    }
+    tasks.add(new MF$7$1(){
+      @Override public Object mut$$hash$0(){
+        h.mut$accept$1(ctx);
+        return Void$o$0.instance;
+      }
+    });
   }
 
   private MouseEvent$174$0 ctx(AWidget t, Point p){

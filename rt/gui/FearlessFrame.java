@@ -134,8 +134,8 @@ final class FearlessFrame extends JFrame{
   // Starts or replaces the model timer, fixed-rate semantics. warmupMillis
   // delays the first firing and the tick deadlines (WarmupMillis at startup,
   // 0 on a live modelFps change). The action list is live and EDT confined:
-  // an action added later by the model takes part from the next due tick,
-  // exactly like Button.actions. Each firing submits one task running the
+  // an action set later by the model takes part from the next due tick.
+  // Each firing submits one task running the
   // whole action list per model tick that became due since the previous
   // firing; the submissions of one firing are contiguous on the queue (single
   // EDT producer), so catch-up ticks cannot interleave with button or key events.

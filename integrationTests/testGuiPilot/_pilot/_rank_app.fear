@@ -140,19 +140,11 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
         .widthGap 0
         .save stage
         .button{:: .text "Twice" .background(Color.rgb(220, 80, 220))
-          .action{Block#(stage!.paint{g -> Error.msg "A frame showed the first action of a click without the second"}, Void)}
-          .action{Block#
-            .do{Wait#(f, Duration.milliSeconds 500)}
-            .do{Block#(stage!.paint{g -> g}, Void)}
-            .return{Block#(seen.set "Twice ran", Void)}
-            }}
+          .action{Error.msg "The first action of a button ran after a second .action replaced it"}
+          .action{Block#(seen.set "Twice ran", Void)}}
         .pane{:: .width 60 .height 30 .background(Color.rgb(100, 160, 60)) .mouse{::
-          .pressed{e -> Block#(stage!.paint{g -> Error.msg "A frame showed the first handler of a press without the second"}, Void)}
-          .pressed{e -> Block#
-            .do{Wait#(f, Duration.milliSeconds 500)}
-            .do{Block#(stage!.paint{g -> g}, Void)}
-            .return{Block#(seen.set "pressed box P", Void)}
-            }
+          .pressed{e -> Error.msg "The first pressed handler ran after a second .pressed replaced it"}
+          .pressed{e -> Block#(seen.set "pressed box P", Void)}
           }}
         .pane{:: .width 60 .height 30 .background(Color.rgb(60, 60, 180)) .mouse{::
           .exited{e -> Block#(stage!.paint{g -> Error.msg "A frame showed the pointer leaving box Q without entering box R"}, Void)}

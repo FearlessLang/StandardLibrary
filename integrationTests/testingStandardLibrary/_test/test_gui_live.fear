@@ -112,24 +112,14 @@ GuiLiveTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted at Width[118]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
-    .var started = {False}
-    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
     .do{Block#(f.modelFps(100, {::
-      .action{Block#
-        .if{started.get} .return{Void}
-        .return{Block#(root!.paint{g -> Error.msg "A frame showed the first model action of a tick without the second"}, Void)}
-        }
-      .action{Block#
-        .if{started.get} .return{Void}
-        .do{started.set True}
-        .do{GuiWait#(f, Duration.milliSeconds 300)}
-        .return{Block#(root!.paint{g -> Error.msg "A frame showed both model actions of a tick"}, Void)}
-        }
+      .action{Error.msg "The first model action ran after a second .action replaced it"}
+      .action{Error.msg "The second model action ran"}
       }), Void)}
-    .return{f.content{:: .save root}}
+    .return{f.content{::}}
     }}).run{
-      .ok _ -> Error.msg "A painter always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "A frame showed both model actions of a tick"}}.assertTrue{i};
+      .ok _ -> Error.msg "A model action always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The second model action ran"}}.assertTrue{i};
       }}
   }
 GuiWait: {#(f: read Frame, d: Duration): Void -> Block#

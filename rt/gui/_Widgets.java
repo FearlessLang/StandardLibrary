@@ -48,7 +48,7 @@ final class SkComponent extends JComponent{
 }
 
 class _Button extends AWidget implements Button$2o$0{
-  final ArrayList<MF$7$1> actions = new ArrayList<>();// EDT confined
+  MF$7$1 action;// EDT confined
   boolean down;// visual pressed state, maintained by SkMouse, read by Sk.button
   boolean over;// visual rollover state, maintained by SkMouse, read by Sk.button
   // Bevel path cache, used and maintained by Sk.button; EDT confined. The
@@ -61,7 +61,7 @@ class _Button extends AWidget implements Button$2o$0{
   _Button(_Frame frame){ super(frame); }
 
   @Override public Object mut$action$1(Object r){
-    frame.onEdtAndWait(() -> actions.add((MF$7$1) r));
+    frame.onEdtAndWait(() -> action = (MF$7$1) r);
     return this;
   }
   @Override Dimension autoSize(int width, int height){ return Sk.textSizeWithInsets(this); }
@@ -150,7 +150,7 @@ abstract class AWidget implements Widget$2o$1{
   final _Frame frame;
   final SkComponent component = new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
-  EnumMap<MouseKind, ArrayList<Consumer$ao$1>> handlers = new EnumMap<>(MouseKind.class);
+  EnumMap<MouseKind, Consumer$ao$1> handlers = new EnumMap<>(MouseKind.class);
 
   AWidget(_Frame frame){ this.frame = frame; }
 
@@ -651,9 +651,7 @@ class _Frame implements Frame$1c$0{
     var actions = new ArrayList<MF$7$1>();
     ((Scope$1c$1) scope).mut$run$1(new ModelFps$as$0(){
       @Override public Object mut$action$1(Object r){
-        // Live list: an action added later (through a saved builder) takes
-        // part from the next due tick, exactly like Button.actions.
-        onEdtAndWait(() -> actions.add((MF$7$1) r));
+        onEdtAndWait(() -> { actions.clear(); actions.add((MF$7$1) r); });
         return this;
       }
     });
