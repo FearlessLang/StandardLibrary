@@ -174,43 +174,43 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   @Override public Object mut$topInset$p1$1(Object v){
-    frame.height((HeightNat$lg$0) v, "top inset");
+    extent((HeightNat$lg$0) v, "top inset");
     return reStyle(() -> top = (HeightNat$lg$0) v);
   }
   @Override public Object mut$bottomInset$p1$1(Object v){
-    frame.height((HeightNat$lg$0) v, "bottom inset");
+    extent((HeightNat$lg$0) v, "bottom inset");
     return reStyle(() -> bottom = (HeightNat$lg$0) v);
   }
   @Override public Object mut$leftInset$p1$1(Object v){
-    frame.width((WidthNat$as$0) v, "left inset");
+    extent((WidthNat$as$0) v, "left inset");
     return reStyle(() -> left = (WidthNat$as$0) v);
   }
   @Override public Object mut$rightInset$p1$1(Object v){
-    frame.width((WidthNat$as$0) v, "right inset");
+    extent((WidthNat$as$0) v, "right inset");
     return reStyle(() -> right = (WidthNat$as$0) v);
   }
   @Override public Object mut$heightGap$p1$1(Object v){
-    frame.height((HeightNat$lg$0) v, "height gap");
+    extent((HeightNat$lg$0) v, "height gap");
     return reStyle(() -> heightGap = (HeightNat$lg$0) v);
   }
   @Override public Object mut$widthGap$p1$1(Object v){
-    frame.width((WidthNat$as$0) v, "width gap");
+    extent((WidthNat$as$0) v, "width gap");
     return reStyle(() -> widthGap = (WidthNat$as$0) v);
   }
   @Override public Object mut$width$p1$1(Object w){
-    frame.width((WidthNat$as$0) w, "widget width");
+    extent((WidthNat$as$0) w, "widget width");
     return reStyle(() -> preferredWidth = (WidthNat$as$0) w);
   }
   @Override public Object mut$height$p1$1(Object h){
-    frame.height((HeightNat$lg$0) h, "widget height");
+    extent((HeightNat$lg$0) h, "widget height");
     return reStyle(() -> preferredHeight = (HeightNat$lg$0) h);
   }
   @Override public Object mut$radius$1(Object r){
-    frame.size((Nat$c$0) r, "radius");
+    extent(r, "radius");
     return reStyle(() -> radius = (Nat$c$0) r);
   }
   public Object mut$textHeight$p1$1(Object t){
-    frame.height((HeightNat$lg$0) t, "text size");
+    extent((HeightNat$lg$0) t, "text size");
     return reStyle(() -> textSize = (HeightNat$lg$0) t);
   }
   public Object read$textHeight$0(){ return textSize; }
@@ -432,20 +432,6 @@ class _Frame implements Frame$1c$0{
     g.drawImage(bimg, 0, 0, renderLogicalW, renderLogicalH, null);
   }
 
-  int width(WidthNat$as$0 v, String what){ return bounded(nat(v.read$get$0()), screenW, what, "screen width"); }
-  int height(HeightNat$lg$0 v, String what){ return bounded(nat(v.read$get$0()), screenH, what, "screen height"); }
-  int xPos(XInt$s$0 v, String what){ return bounded(Util.intToLong(v.read$get$0()), screenW - 1, what, "screen x"); }
-  int yPos(YInt$s$0 v, String what){ return bounded(Util.intToLong(v.read$get$0()), screenH - 1, what, "screen y"); }
-  int size(Nat$c$0 v, String what){ return bounded(nat(v), Math.min(screenW, screenH), what, "screen size"); }
-
-  private long nat(Object n){ return Util.natToLong(n); }
-
-  private int bounded(long v, int max, String what, String bound){
-    if (v > max){ throw Util.detErr(what + " must be <= " + max + " (" + bound + ")"); }
-    if (v < -max){ throw Util.detErr(what + " must be >= " + (-max) + " (" + bound + ")"); }
-    return Math.toIntExact(v);
-  }
-
   private void checkWindowFits(){
     if (frame.getWidth() > screenW || frame.getHeight() > screenH){
       throw Util.detErr("Window must fit on screen: window="
@@ -454,8 +440,8 @@ class _Frame implements Frame$1c$0{
     }
   }
 
-  private void checkWindowLocationFits(int x, int y){
-    if (x < 0 || y < 0 || x + frame.getWidth() > screenW || y + frame.getHeight() > screenH){
+  private void checkWindowLocationFits(long x, long y){
+    if (x < 0 || y < 0 || x > screenW - frame.getWidth() || y > screenH - frame.getHeight()){
       throw Util.detErr("Window location puts window outside screen: location="
         + x + "," + y
         + ", window=" + frame.getWidth() + "x" + frame.getHeight()
@@ -475,7 +461,7 @@ class _Frame implements Frame$1c$0{
     frame.setResizable(resizable);
     frame.pack();
     if (frameW != null){// explicit size overrides the packed (content) size
-      frame.setSize(new Dimension(width(frameW, "window width"), height(frameH, "window height")));
+      frame.setSize(new Dimension(extent(frameW, "window width"), extent(frameH, "window height")));
     }
 
     if (maximized){
@@ -489,10 +475,10 @@ class _Frame implements Frame$1c$0{
     } else {
       checkWindowFits();
       if (locationX != null && locationY != null){
-        int xx = xPos(locationX, "window x location");
-        int yy = yPos(locationY, "window y location");
+        long xx = Util.intToLong(locationX.read$get$0());
+        long yy = Util.intToLong(locationY.read$get$0());
         checkWindowLocationFits(xx, yy);
-        frame.setLocation(xx, yy);
+        frame.setLocation((int) xx, (int) yy);
       } else {
         frame.setLocationRelativeTo(null);
       }
@@ -560,8 +546,8 @@ class _Frame implements Frame$1c$0{
     return setResizable(false, (WidthNat$as$0) w, (HeightNat$lg$0) h);
   }
   private Object setResizable(boolean r, WidthNat$as$0 w, HeightNat$lg$0 h){
-    int ww = w == null ? 0 : width(w, "window width");// validate eagerly, deterministic error
-    int hh = h == null ? 0 : height(h, "window height");
+    int ww = w == null ? 0 : extent(w, "window width");// validate eagerly, deterministic error
+    int hh = h == null ? 0 : extent(h, "window height");
     resizable = r;
     if (w != null){
       frameW = w;
@@ -595,14 +581,14 @@ class _Frame implements Frame$1c$0{
     return this;
   }
   @Override public Object mut$location$2(Object x, Object y){
-    int xx = xPos((XInt$s$0) x, "window x location");
-    int yy = yPos((YInt$s$0) y, "window y location");
+    long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
+    long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
     locationX = (XInt$s$0) x;
     locationY = (YInt$s$0) y;
     if (started){
       onEdtAndWait(() -> {
         checkWindowLocationFits(xx, yy);
-        frame.setLocation(xx, yy);
+        frame.setLocation((int) xx, (int) yy);
       });
     }
     return this;

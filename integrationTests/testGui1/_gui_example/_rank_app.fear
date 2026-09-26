@@ -12,6 +12,8 @@ use base.Slot as Slot;
 use base.Slots as Slots;
 use base.WidthNat as Width;
 use base.HeightNat as Height;
+use base.XInt as X;
+use base.YInt as Y;
 
 
 Foo:base.Main{s->Block#
@@ -28,6 +30,7 @@ Foo:base.Main{s->Block#
   .do{ g.run Gui09 }
   .do{ g.run Gui10 }
   .do{ g.run Gui11 }
+  .do{ g.run Gui12 }
   .done
   }
 Gui01:Consumer[mut Frame]{::
@@ -229,5 +232,24 @@ Gui11:Consumer[mut Frame]{::
       .background (Color.sleepyBlue)
       .label{:: .text "Narrow the window".foreground (Color.ghostWhite) }
       }
+    }
+  }
+
+Gui12:Consumer[mut Frame]{::
+  .title "Gui12: sizes and drawing beyond any screen"
+  .resizable(Width#400, Height#300)
+  .content{::
+    .paint{g -> g
+      .color(Color.sleepyBlue)
+      .position(X.origin, Y.origin)
+      .rect(g.panelWidth, g.panelHeight)
+      .color(Color.rubberDuck)
+      .position(X#(-5000), Y#(+60))
+      .rect(Width#5100, Height#40)
+      .position(X#(-5000), Y#(-5000))
+      .line(X#(+5000), Y#(+5000))
+      }
+    .label{:: .text "Blue fills the window at any size" .foreground(Color.ghostWhite) }
+    .pane{:: .width 5000 .height 30 .background(Color.dangerTomato) }
     }
   }

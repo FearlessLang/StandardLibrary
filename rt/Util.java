@@ -95,7 +95,7 @@ public class Util{
   public static int natToInt(Object n){
     long nat = ((Nat$c$0Instance)n).val();
     if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {
-      throw err("Nat "+Long.toUnsignedString(nat)+"is too large to represented as an integer");
+      throw err("Nat "+Long.toUnsignedString(nat)+" is too large to be represented as an integer");
     }
     return (int) nat;
   }

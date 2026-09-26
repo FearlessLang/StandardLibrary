@@ -15,8 +15,14 @@ class Scopes{
   static int n(Nat$c$0 n){ return nat(n); }
   static int w(WidthNat$as$0 w){ return nat(w.read$get$0()); }
   static int h(HeightNat$lg$0 h){ return nat(h.read$get$0()); }
-  static int x(XInt$s$0 x){ return Math.toIntExact(Util.intToLong(x.read$get$0())); }
-  static int y(YInt$s$0 y){ return Math.toIntExact(Util.intToLong(y.read$get$0())); }
+  static final int maxExtent = 100_000;
+  static int extent(WidthNat$as$0 w, String what){ return extent(w.read$get$0(), what); }
+  static int extent(HeightNat$lg$0 h, String what){ return extent(h.read$get$0(), what); }
+  static int extent(Object n, String what){
+    long v = Util.natToLong(n);
+    if (Long.compareUnsigned(v, maxExtent) > 0){ throw Util.detErr(what + " " + Long.toUnsignedString(v) + " is too large; it must be <= " + maxExtent); }
+    return (int) v;
+  }
 
   static int red(Object r){ return byt(((Red$c$0) r).read$get$0()); }
   static int green(Object g){ return byt(((Green$1c$0) g).read$get$0()); }

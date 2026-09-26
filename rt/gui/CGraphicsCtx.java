@@ -24,42 +24,32 @@ record CGraphicsCtx(
   // Drawing outside the panel silently clips (canvas is clipped to the panel),
   // otherwise user can cause errors by resizing the gui by hand
   @Override public Object mut$position$2(Object x, Object y){
-    frame.xPos((XInt$s$0) x, "graphics x position");
-    frame.yPos((YInt$s$0) y, "graphics y position");
     return new CGraphicsCtx(cv, frame, elapsed, panelWidth, panelHeight, (XInt$s$0) x, (YInt$s$0) y, paint);
   }
   // Correctly does not update the position.
   @Override public Object mut$line$2(Object x, Object y){
     paint.setMode(PaintMode.STROKE).setStrokeWidth(1);
-    cv.drawLine(
-      frame.xPos(currentX, "graphics current x"),
-      frame.yPos(currentY, "graphics current y"),
-      frame.xPos((XInt$s$0) x, "graphics line x"),
-      frame.yPos((YInt$s$0) y, "graphics line y"),
-      paint);
+    cv.drawLine(at(currentX.read$get$0()), at(currentY.read$get$0()), at(((XInt$s$0) x).read$get$0()), at(((YInt$s$0) y).read$get$0()), paint);
     return this;
   }
   @Override public Object mut$rect$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawRect(shapeRect("rect", w, h), paint);
+    cv.drawRect(shapeRect(w, h), paint);
     return this;
   }
   @Override public Object mut$oval$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawOval(shapeRect("oval", w, h), paint);
+    cv.drawOval(shapeRect(w, h), paint);
     return this;
   }
-  private Rect shapeRect(String what, Object w, Object h){
-    return Rect.makeXYWH(
-      frame.xPos(currentX, "graphics " + what + " x"),
-      frame.yPos(currentY, "graphics " + what + " y"),
-      frame.width((WidthNat$as$0) w, "graphics " + what + " width"),
-      frame.height((HeightNat$lg$0) h, "graphics " + what + " height"));
+  private Rect shapeRect(Object w, Object h){
+    return Rect.makeXYWH(at(currentX.read$get$0()), at(currentY.read$get$0()), Scopes.w((WidthNat$as$0) w), Scopes.h((HeightNat$lg$0) h));
   }
+  private static float at(Object coord){ return Util.intToLong(coord); }
   @Override public Object mut$image$1(Object image){
     var img = ((Image$1c$0Instance) image).image();
-    var x = frame.xPos(currentX, "graphics image x");
-    var y = frame.yPos(currentY, "graphics image y");
+    var x = at(currentX.read$get$0());
+    var y = at(currentY.read$get$0());
     cv.drawImageRect(
       img,
       Rect.makeWH(img.getWidth(), img.getHeight()),
