@@ -27,13 +27,13 @@ LimitViaActorMut: {
   }
 
 Trim: { #(w: List[Nat], width: Nat): List[Nat] -> w.size > width ? { .then -> w.subList(1); .else -> w } }
+Full: { #(w: List[Nat], width: Nat): mut Opt[List[Nat]] -> w.size == width ?[mut Opt[List[Nat]]]{ .then -> Opts#w; .else -> {} } }
 WindowsViaActor: {
   #(es: mut Flow[Nat], width: Nat): mut Flow[List[Nat]] ->
-    es.actor[mut base.Var[List[Nat]], List[Nat]](Vars#[List[Nat]]({}), {down, s, e -> Block#
-      .do{s.set(Trim#(s.get +> e, width))}
-      .do{s.get.size == width ? { .then -> down.push#(down, s.get); .else -> Void }}
-      .return{Continue#}
-      });
+    es.actor[mut base.Var[List[Nat]], List[Nat]](Vars#[List[Nat]]({}), {down, s, e -> Block#(
+      s.set(Trim#(s.get +> e, width)),
+      down.pushOpt#(down, Full#(s.get, width)),
+      Continue#)});
   }
 
 DungeonRoomViaActorMut: {
@@ -60,6 +60,14 @@ MapWithContextViaActorMut: {
     es.actorMut[base.ToIso[C], R](ctx, {down, s, e -> Block#(
       down.push#(down, g#(s.iso.close, e)),
       Continue#)});
+  }
+
+IfSome: { #[E:*](b: Bool, e: E): mut Opt[E] -> b ?[mut Opt[E]]{ .then -> Opts#e; .else -> {} } }
+BreakOnBig: {
+  #(es: mut Flow[Nat]): mut Flow[Nat] ->
+    es.actorMut[Void, Nat](Void, {down, _, e -> Block#(
+      down.pushOpt#(down, IfSome#(e <= 5, e)),
+      e > 5 ? { .then -> Break#; .else -> Continue# })});
   }
 
 Pairs: { read .a: List[Str]; read .b: List[Str]; }
