@@ -117,8 +117,8 @@ CyclicFloat[S]: Wrapper[S,Float] {
   }
 
 Hue:CyclicFloat[Hue]{.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
-  # t ->Block#(t.assertInRange(0.0=~~=1.0, {"Hue must be between 0 and 1"}),
-  { .getDataType->(t == +1.0).if{.then -> 0.0; .else -> t} });
+  # t ->Block#(t.assertInRange(0.0=~~=(1.0.getPred), {"Hue must be at least 0 and less than 1"}),
+  { .getDataType->t });
   .close->this; .close->::; }
 Saturation:LevelFloat[Saturation]{.name->"Saturation"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
