@@ -197,10 +197,6 @@ Widget[S]:{
   mut .leftInset'(WidthNat):mut S;
   mut .rightInset(n:Nat):mut S->this.rightInset'(WidthNat#n);
   mut .rightInset'(WidthNat):mut S;
-  mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
-  mut .heightGap'(HeightNat):mut S;
-  mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
-  mut .widthGap'(WidthNat):mut S;
   mut .width(n:Nat):mut S->this.width'(WidthNat#n);
   mut .width'(WidthNat):mut S;
   mut .height(n:Nat):mut S->this.height'(HeightNat#n);
@@ -216,17 +212,24 @@ Widget[S]:{
   read .bottomInset: HeightNat;
   read .leftInset:WidthNat;
   read .rightInset:WidthNat;
-  read .heightGap:HeightNat;
-  read .widthGap:WidthNat;
   read .width:Opt[WidthNat];
   read .height:Opt[HeightNat];
   read .radius:Nat;
   read .foreground:Color;
   read .background:Color;
 }
-Border:Widget[Border]{
+_Container[S]:Widget[S]{
+  mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
+  mut .heightGap'(HeightNat):mut S;
+  mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
+  mut .widthGap'(WidthNat):mut S;
+  mut .mouse(mut Scope[Mouse]):mut S;
+  mut .paint(Painter):mut S;
+  read .heightGap:HeightNat;
+  read .widthGap:WidthNat;
+}
+Border:_Container[Border]{
   .self->this;
-  mut .mouse(mut Scope[Mouse]):mut Border;
   mut .north(mut Scope[Pane]):mut Border;
   mut .south(mut Scope[Pane]):mut Border;
   mut .east(mut Scope[Pane]):mut Border;
@@ -237,7 +240,6 @@ Border:Widget[Border]{
   mut .eastB(mut Scope[Border]):mut Border;
   mut .westB(mut Scope[Border]):mut Border;
   mut .centerB(mut Scope[Border]):mut Border;
-  mut .paint(Painter):mut Border;
 }
 _TextWidget[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
@@ -312,6 +314,8 @@ Graphics:ScreenContext{
   mut .oval(w: Nat, h: Nat): mut Graphics -> this.oval'(WidthNat#w, HeightNat#h);
   mut .oval'(WidthNat, HeightNat): mut Graphics;
   mut .image(Image): mut Graphics;
+  read .pixel(x: Int, y: Int): Color -> this.pixel'(XInt#x, YInt#y);
+  read .pixel'(XInt, YInt): Color;
   }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
@@ -335,15 +339,13 @@ MouseEvent:ScreenContext{
   .mouseX:XInt;
   .mouseY:YInt;
 }
-Pane:Widget[Pane]{
+Pane:_Container[Pane]{
   .self->this;
-  mut .mouse(mut Scope[Mouse]):mut Pane;
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
   mut .clear:mut Pane;
-  mut .paint(Painter):mut Pane;
   //Flow axis: .horizontal (default) lays children left-to-right, wrapping
   //into new rows; .vertical lays them top-to-bottom, wrapping into new
   //columns.

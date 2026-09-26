@@ -76,6 +76,9 @@ class _Label extends AWidget implements Label$1c$0{
 }
 
 class _Pane extends AContainer implements Pane$o$0{
+  boolean vertical = false;
+  int chunk = 0;
+
   _Pane(_Frame frame){
     super(frame);
     component.setLayout(new CenteredFlowLayout(this));
@@ -129,8 +132,6 @@ abstract class AWidget implements Widget$2o$1{
   HeightNat$lg$0 top = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
   WidthNat$as$0 right = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
   HeightNat$lg$0 bottom = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
-  WidthNat$as$0 widthGap = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
-  HeightNat$lg$0 heightGap = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
   Nat$c$0 radius = defText;
   WidthNat$as$0 preferredWidth;
   HeightNat$lg$0 preferredHeight;
@@ -143,10 +144,6 @@ abstract class AWidget implements Widget$2o$1{
   // expose Fearless methods to change it, but it lives here alongside the
   // other style fields.
   String text = "";
-  // Read live by CenteredFlowLayout; only _Pane exposes Fearless methods to
-  // change them, but they live here alongside the other style fields.
-  boolean vertical = false;
-  int chunk = 0;
 
   final _Frame frame;
   final SkComponent component = new SkComponent(this);
@@ -191,14 +188,6 @@ abstract class AWidget implements Widget$2o$1{
     extent((WidthNat$as$0) v, "right inset");
     return reStyle(() -> right = (WidthNat$as$0) v);
   }
-  @Override public Object mut$heightGap$p1$1(Object v){
-    extent((HeightNat$lg$0) v, "height gap");
-    return reStyle(() -> heightGap = (HeightNat$lg$0) v);
-  }
-  @Override public Object mut$widthGap$p1$1(Object v){
-    extent((WidthNat$as$0) v, "width gap");
-    return reStyle(() -> widthGap = (WidthNat$as$0) v);
-  }
   @Override public Object mut$width$p1$1(Object w){
     extent((WidthNat$as$0) w, "widget width");
     return reStyle(() -> preferredWidth = (WidthNat$as$0) w);
@@ -229,8 +218,6 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object read$bottomInset$0(){ return bottom; }
   @Override public Object read$leftInset$0(){ return left; }
   @Override public Object read$rightInset$0(){ return right; }
-  @Override public Object read$heightGap$0(){ return heightGap; }
-  @Override public Object read$widthGap$0(){ return widthGap; }
   @Override public Object read$width$0(){ return preferredWidth == null ? Util.optEmpty() : Util.optSome(preferredWidth); }
   @Override public Object read$height$0(){ return preferredHeight == null ? Util.optEmpty() : Util.optSome(preferredHeight); }
   @Override public Object read$radius$0(){ return radius; }
@@ -238,14 +225,16 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object read$background$0(){ return background; }
 }
 
-abstract class AContainer extends AWidget{
+abstract class AContainer extends AWidget implements _Container$lc$1{
+  WidthNat$as$0 widthGap = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
+  HeightNat$lg$0 heightGap = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
   Painter$5c$0 paint = Scopes.idP;
 
   AContainer(_Frame frame){ super(frame); }
 
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
-    try (var p = new Paint().setAntiAlias(true)){
+    try (var p = new Paint().setAntiAlias(true).setColor(Sk.color(foreground))){
       paint.imm$run$1(new CGraphicsCtx(
         cv,
         frame,
@@ -259,14 +248,24 @@ abstract class AContainer extends AWidget{
     }
   }
 
-  public Object mut$mouse$1(Object s){
+  @Override public Object mut$heightGap$p1$1(Object v){
+    extent((HeightNat$lg$0) v, "height gap");
+    return reStyle(() -> heightGap = (HeightNat$lg$0) v);
+  }
+  @Override public Object mut$widthGap$p1$1(Object v){
+    extent((WidthNat$as$0) v, "width gap");
+    return reStyle(() -> widthGap = (WidthNat$as$0) v);
+  }
+  @Override public Object read$heightGap$0(){ return heightGap; }
+  @Override public Object read$widthGap$0(){ return widthGap; }
+  @Override public Object mut$mouse$1(Object s){
     var b = new CMouseBuilder(frame, new EnumMap<>(MouseKind.class));
     ((Scope$1c$1) s).mut$run$1(b);
     frame.onEdtAndWait(() -> handlers = b.handlers());// .mouse replaces earlier handlers
     return mut$self$0();
   }
 
-  public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$5c$0) p); }
+  @Override public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$5c$0) p); }
 }
 
 class _Frame implements Frame$1c$0{
@@ -308,7 +307,7 @@ class _Frame implements Frame$1c$0{
   // happens-before. Single mutator at every point in time: no volatile.
   private boolean started;
   private final AtomicBoolean layoutDirty = new AtomicBoolean();
-  private Bitmap bitmap;
+  Bitmap bitmap;
   private Canvas canvas;
   private java.awt.image.BufferedImage bimg;
   private int renderLogicalW;

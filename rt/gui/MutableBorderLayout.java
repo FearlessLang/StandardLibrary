@@ -12,14 +12,14 @@ import java.io.Serializable;
 public final class MutableBorderLayout implements LayoutManager2, Serializable{
   private static final long serialVersionUID = 1L;
 
-  private final AWidget gap;
+  private final AContainer gap;
   private Component north;
   private Component south;
   private Component east;
   private Component west;
   private Component center;
 
-  public MutableBorderLayout(AWidget gap){ this.gap = gap; }
+  public MutableBorderLayout(AContainer gap){ this.gap = gap; }
 
   // Current occupant of a slot, or null. Used by _Frame.addTo to evict the
   // old occupant before adding a replacement, which is what keeps the

@@ -59,6 +59,20 @@ record CGraphicsCtx(
       true);
     return this;
   }
+  @Override public Object read$pixel$p1$2(Object x, Object y){
+    long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
+    long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
+    int w = Scopes.w(panelWidth);
+    int h = Scopes.h(panelHeight);
+    var m = cv.getLocalToDeviceAsMatrix33().getMat();
+    int dx = (int) Math.floor(m[0] * (xx + .5f) + m[2]);
+    int dy = (int) Math.floor(m[4] * (yy + .5f) + m[5]);
+    boolean visible = xx >= 0 && yy >= 0 && xx < w && yy < h && cv.getDeviceClipBounds().contains(dx, dy);
+    if (!visible){
+      throw Util.detErr("Pixel position puts pixel outside the visible panel: position=" + xx + "," + yy + ", panel=" + w + "x" + h);
+    }
+    return Scopes.color(frame.bitmap.getColor(dx, dy));
+  }
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object read$screenWidth$0(){ return frame.screenWidth; }
   @Override public Object read$screenHeight$0(){ return frame.screenHeight; }

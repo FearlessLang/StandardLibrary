@@ -13,7 +13,7 @@ import java.util.List;
 // Flow layout with lines centered on the cross axis and the block of lines
 // centered on the flow axis. Insets and gaps are read live from the owning
 // widget, like MutableBorderLayout. Two independent knobs, both read live
-// from `gap` (an AWidget):
+// from `gap` (the _Pane):
 //  - gap.vertical: flow axis. false (default) flows left-to-right and
 //    stacks rows top-to-bottom; true flows top-to-bottom and stacks columns
 //    left-to-right.
@@ -31,9 +31,9 @@ import java.util.List;
 public final class CenteredFlowLayout implements LayoutManager, Serializable{
   private static final long serialVersionUID = 1L;
 
-  private final AWidget gap;
+  private final _Pane gap;
 
-  public CenteredFlowLayout(AWidget gap){ this.gap = gap; }
+  public CenteredFlowLayout(_Pane gap){ this.gap = gap; }
 
   @Override public void addLayoutComponent(String name, Component comp){}
   @Override public void removeLayoutComponent(Component comp){}
