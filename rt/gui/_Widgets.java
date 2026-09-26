@@ -293,6 +293,8 @@ class _Frame implements Frame$1c$0{
   // but there is no border to drag, so the user cannot actually resize it.
   private WidthNat$as$0 frameW;
   private HeightNat$lg$0 frameH;
+  private int windowW;
+  private int windowH;
   private String title = "";
   private boolean maximized;
   private boolean resizable;
@@ -441,11 +443,11 @@ class _Frame implements Frame$1c$0{
     }
   }
 
-  private void checkWindowLocationFits(long x, long y){
-    if (x < 0 || y < 0 || x > screenW - frame.getWidth() || y > screenH - frame.getHeight()){
+  private void checkWindowLocationFits(long x, long y, int w, int h){
+    if (x < 0 || y < 0 || x > screenW - w || y > screenH - h){
       throw Util.detErr("Window location puts window outside screen: location="
         + x + "," + y
-        + ", window=" + frame.getWidth() + "x" + frame.getHeight()
+        + ", window=" + w + "x" + h
         + ", screen=" + screenW + "x" + screenH);
     }
   }
@@ -463,14 +465,16 @@ class _Frame implements Frame$1c$0{
     if (frameW != null){// explicit size overrides the packed (content) size
       frame.setSize(new Dimension(extent(frameW, "window width"), extent(frameH, "window height")));
     }
+    windowW = frame.getWidth();
+    windowH = frame.getHeight();
 
     if (maximized){ frame.setBounds(0, 0, screenW, screenH); }
     else {
-      checkWindowFits(frame.getWidth(), frame.getHeight());
+      checkWindowFits(windowW, windowH);
       if (locationX != null && locationY != null){
         long xx = Util.intToLong(locationX.read$get$0());
         long yy = Util.intToLong(locationY.read$get$0());
-        checkWindowLocationFits(xx, yy);
+        checkWindowLocationFits(xx, yy, windowW, windowH);
         frame.setLocation((int) xx, (int) yy);
       } else {
         frame.setLocationRelativeTo(null);
@@ -528,20 +532,22 @@ class _Frame implements Frame$1c$0{
   private Object setResizable(boolean r, WidthNat$as$0 w, HeightNat$lg$0 h){
     int ww = w == null ? 0 : extent(w, "window width");// validate eagerly, deterministic error
     int hh = h == null ? 0 : extent(h, "window height");
-    resizable = r;
     if (w != null){
       if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
       checkWindowFits(ww, hh);
+      if (started && locationX != null){
+        checkWindowLocationFits(Util.intToLong(locationX.read$get$0()), Util.intToLong(locationY.read$get$0()), ww, hh);
+      }
       frameW = w;
       frameH = h;
+      windowW = ww;
+      windowH = hh;
     }
+    resizable = r;
     if (started){
       onEdtAndWait(() -> {
         frame.setResizable(r);
-        if (w != null){
-          frame.setSize(new Dimension(ww, hh));
-          checkWindowLocationFits(frame.getX(), frame.getY());
-        }
+        if (w != null){ frame.setSize(new Dimension(ww, hh)); }
       });
     }
     return this;
@@ -566,14 +572,10 @@ class _Frame implements Frame$1c$0{
     long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
     long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
     if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
+    if (started){ checkWindowLocationFits(xx, yy, windowW, windowH); }
     locationX = (XInt$s$0) x;
     locationY = (YInt$s$0) y;
-    if (started){
-      onEdtAndWait(() -> {
-        checkWindowLocationFits(xx, yy);
-        frame.setLocation((int) xx, (int) yy);
-      });
-    }
+    if (started){ onEdtAndWait(() -> frame.setLocation((int) xx, (int) yy)); }
     return this;
   }
   @Override public Object mut$onKey$1(Object scope){
@@ -582,7 +584,10 @@ class _Frame implements Frame$1c$0{
     onEdtAndWait(() -> {
       for (var l : frame.getKeyListeners()){ frame.removeKeyListener(l); }
       frame.addKeyListener(keys);
-      for (var l : frame.getWindowFocusListeners()){ frame.removeWindowFocusListener(l); }
+      for (var l : frame.getWindowFocusListeners()){
+        ((CKeyManager) l).windowLostFocus(null);
+        frame.removeWindowFocusListener(l);
+      }
       frame.addWindowFocusListener(keys);
     });
     return this;
