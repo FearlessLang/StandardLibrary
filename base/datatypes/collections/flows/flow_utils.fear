@@ -16,18 +16,16 @@ ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
 ParPod[T]:FlowMode[mut IsoPod[T]]{this}
 
 ActorImpl[S:*,E:*,R]: {
-  read #(down: mutH ActorSink[R], state: S, e: E): mut ContinueBreak[Void]
+  read #(down: mut ActorSink[R], state: S, e: E): mut ContinueBreak[Void]
   }
 ActorImplMut[S:*,E:*,R:*]: {
   read #(down: mutH ActorSink[R], state: mutH S, e: E): mut ContinueBreak[Void]
   }
 
-/// Where an actor lambda pushes the elements it emits. The sink is ``mutH`` in
-/// `ActorImpl` and `ActorImplMut`: it can be pushed to and passed on, never
-/// stored or captured.
-/// ``down#e`` pushes an ``imm`` ``e``, as `ActorImpl` emits.
-/// ``down.push#(down, e)`` pushes any ``e``, a ``mut`` one of `ActorImplMut`
-/// included.
+/// Where an actor lambda pushes the elements it emits.
+/// ``down#e`` pushes ``e`` on a ``mut`` sink, as in `ActorImpl`.
+/// ``down.push#(down, e)`` pushes ``e`` on any sink, the ``mutH`` one of
+/// `ActorImplMut` included.
 /// ``down.pushOpt#(down, o)`` pushes what ``o`` holds, and nothing when it holds
 /// nothing.
 ActorSink[E:*]: Sealed {
@@ -36,7 +34,7 @@ ActorSink[E:*]: Sealed {
   mut #(E): Void;
   }
 
-/// ``ActorSinkHelper#(down, e)`` is ``down#e`` for any ``e``, ``mut`` included.
+/// ``ActorSinkHelper#(down, e)`` is ``down#e``, on a ``mutH`` sink too.
 ActorSinkHelper: Sealed {
   imm #[E:*](down: mutH ActorSink[E], e: E): Void -> _Magic!;
   }

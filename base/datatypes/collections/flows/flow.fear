@@ -120,8 +120,8 @@ Flow[E:*]: {
   /// ``f`` answers `Continue` to be handed the next element, or `Break` to stop:
   /// the element after the current one is never pulled.
   mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg"TODO";
-  /// ``this.actorMut(state, f)`` is `Flow.actor` with the state handed over
-  /// hygienically too, which is what lets the emitted elements be ``mut``.
+  /// ``this.actorMut(state, f)`` is `Flow.actor` with the sink and the state handed
+  /// over hygienically, which is what lets the emitted elements be ``mut``.
   /// See `ActorSink` for how such a sink is pushed to.
   mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg"TODO";
   }
