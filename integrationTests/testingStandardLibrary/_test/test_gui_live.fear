@@ -54,6 +54,63 @@ GuiLiveTests: Test {::
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A widget was painted only once its scope finished"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .do{Block#(root!.clear, Void)}
+      .do{GuiWait#(f, Duration.milliSeconds 300)}
+      .return{Block#(root!.pane{:: .width 50 .height 20}.pane{:: .width 50 .height 20}.paint{g -> Error.msg("Painted at "+(g.panelWidth.str))}, Void)}
+      }}), Void)}
+    .return{f.content{:: .pane{::
+      .save root
+      .pane{:: .width 50 .height 20}
+      .pane{:: .width 50 .height 20}
+      .paint{g -> (g.panelWidth.get >= 100).if{.then -> g; .else -> Error.msg "A pane was painted cleared before its task refilled it"}}
+      }}}
+    }}).run{
+      .ok _ -> Error.msg "A painter always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted at Width[118]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .do{Block#(root!.width 200, Void)}
+      .do{GuiWait#(f, Duration.milliSeconds 300)}
+      .return{Block#(root!.paint{g -> Error.msg("Painted at "+(g.panelWidth.str))}, Void)}
+      }}), Void)}
+    .return{f.content{:: .pane{::
+      .save root
+      .width 100 .height 30
+      .paint{g -> (g.panelWidth.get == 100).if{.then -> g; .else -> Error.msg "A pane was painted with its new width and its old painter"}}
+      }}}
+    }}).run{
+      .ok _ -> Error.msg "A painter always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted at Width[200]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] inner = {Slots#[mut Pane]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .do{f.content{:: .pane{::
+        .save inner
+        .paint{g -> (g.panelWidth.get >= 100).if{.then -> g; .else -> Error.msg "A new content was painted before its task filled it"}}
+        }}}
+      .do{GuiWait#(f, Duration.milliSeconds 300)}
+      .return{Block#(inner!.pane{:: .width 50 .height 20}.pane{:: .width 50 .height 20}.paint{g -> Error.msg("Painted at "+(g.panelWidth.str))}, Void)}
+      }}), Void)}
+    .return{f.fixedSize(300, 80).content{::}}
+    }}).run{
+      .ok _ -> Error.msg "A painter always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted at Width[118]"}}.assertTrue{i};
+      }}
   }
 GuiWait: {#(f: read Frame, d: Duration): Void -> Block#
   .let[Instant] end = {f.elapsed + d}

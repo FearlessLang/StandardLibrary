@@ -16,6 +16,11 @@ use base.KeyStroke as Key;
 use base.XInt as X;
 use base.YInt as Y;
 use base.WidthNat as Width;
+use base.Frame as Frame;
+use base.Duration as Duration;
+use base.Instant as Instant;
+use base.Break as Break;
+use base.Continue as Continue;
 
 Pilot:Main{sys -> sys.gui.run{f -> Block#
   .var[Str] seen = {"nothing seen"}
@@ -25,6 +30,7 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Label]] grown = {Slots#[mut Label]}
   .let[mut Slot[mut Pane]] cleared = {Slots#[mut Pane]}
   .let[mut Slot[mut Border]] replaced = {Slots#[mut Border]}
+  .let[mut Slot[mut Pane]] shifted = {Slots#[mut Pane]}
   .return{f
     .title "GuiPilot"
     .resizable
@@ -93,6 +99,22 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
         .pane{:: .width 100 .height 30 .background(Color.dustyRose) .mouse{:: .entered{e -> Block#(seen.set "hover: right box L", Void)}}}
         }
       .pane{::
+        .width 300 .height 40
+        .widthGap 40
+        .background(Color.rgb(180, 220, 200))
+        .save shifted
+        .button{:: .text "Shift" .background(Color.rgb(140, 100, 60)) .action{Block#
+          .do{Block#(seen.set "Shift ran", Void)}
+          .do{Block#(shifted!.clear.pane{::
+            .width 60 .height 30
+            .background(Color.dustyRose)
+            .mouse{:: .entered{e -> Block#(seen.set "hover: box M", Void)}}
+            }, Void)}
+          .do{Wait#(f, Duration.milliSeconds 500)}
+          .return{Block#(shifted!.pane{:: .width 60 .height 30 .background(Color.dustyRose)}, Void)}
+          }}
+        }
+      .pane{::
         .width 60 .height 30
         .background(Color.rgb(230, 230, 60))
         .foreground(Color.rgb(20, 90, 200))
@@ -101,3 +123,13 @@ Pilot:Main{sys -> sys.gui.run{f -> Block#
       }
     }
   }}
+Wait: {#(f: read Frame, d: Duration): Void -> Block#
+  .let[Instant] end = {f.elapsed + d}
+  .var[Nat] spins = {0}
+  .loop{Block#
+    .if{f.elapsed >= end || {spins.get >= 1000000000}} .return{Break#}
+    .do{spins.set(spins.get + 1)}
+    .return{Continue#}
+    }
+  .done
+  }

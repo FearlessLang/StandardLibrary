@@ -380,6 +380,7 @@ class _Frame implements Frame$1c$0{
   }
 
   void onEdtAndWait(Runnable r){
+    if (started){ frame.queue.midTask().set(true); }
     onEdtAndWait(() -> {
       r.run();
       return null;
@@ -390,6 +391,7 @@ class _Frame implements Frame$1c$0{
 
   void tick(Instant$5c$0 elapsed){
     this.elapsed = elapsed;
+    if (frame.queue.midTask().get()){ return; }
     // Never relayout while a mouse button is held or a press/release is
     // already queued behind this tick: moving components mid-gesture would
     // change the bounds used to interpret that gesture. The dirty flag stays
@@ -697,7 +699,6 @@ class _Frame implements Frame$1c$0{
       // deliver.
       mouse.reset();
       frame.validate();
-      render();// fresh pixels before the next paint, never the old tree's image
     });
     markLayoutDirty();
     return Void$o$0.instance;
