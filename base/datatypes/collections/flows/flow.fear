@@ -122,9 +122,9 @@ Flow[E:*]: {
   /// has arrived, ``f`` receives them all as a list, and the elements of the list it
   /// returns flow on.
   mut .allToAll[R:*](f: read F[mut List[E], mut List[R]]): mut Flow[R]->Error.msg"TODO";
-  /// ``this.distinctMut(key, by)`` is `Flow.distinct` keeping the elements ``mut``: it
-  /// keeps only the ``imm`` keys ``key`` computes, ordered by ``by``.
-  mut .distinctMut[K](key: read F[E,K], by: OrderHashBy[K]): mut Flow[E]->Error.msg"TODO";
+  /// ``this.distinctMut(by)`` is `Flow.distinct` keeping the elements ``mut``, as a fence:
+  /// it emits nothing until every element has arrived and every kept key is decided.
+  mut .distinctMut[K](by: OrderHashBy[imm E,K]): mut Flow[E]->Error.msg"TODO";
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg"TODO";
   /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
   /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.
