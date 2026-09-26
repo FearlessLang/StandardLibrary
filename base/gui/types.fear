@@ -195,6 +195,7 @@ _Styled[S]:{
   mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
 }
 Widget[S]:_Styled[S]{
+  mut .changeDetached(mut Scope[S]):mut S;
   mut .topInset(n:Nat):mut S->this.topInset'(HeightNat#n);
   mut .topInset'(HeightNat):mut S;
   mut .bottomInset(n:Nat):mut S->this.bottomInset'(HeightNat#n);

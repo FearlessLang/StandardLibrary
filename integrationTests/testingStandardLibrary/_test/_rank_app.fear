@@ -65,6 +65,9 @@ use base.Duration as Duration;
 use base.Instant as Instant;
 use base.Frame as Frame;
 use base.Pane as Pane;
+use base.Label as Label;
+use base.Mouse as Mouse;
+use base.Keys as Keys;
 use base.ModelFps as ModelFps;
 use base.Slot as Slot;
 use base.Slots as Slots;
@@ -93,6 +96,7 @@ MyTests:UnitTests{::
   .test GuiExtentTests
   .test GuiFrameTests
   .test GuiSetterTests
+  .test GuiConnectedTests
   .test GuiKeyTests
   .test TestList
   .test TestFlow

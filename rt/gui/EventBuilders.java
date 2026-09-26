@@ -31,9 +31,18 @@ record CMouseCtx(
 }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
-record CMouseBuilder(_Frame frame, EnumMap<MouseKind, Consumer$ao$1> handlers) implements Mouse$1c$0{
+final class CMouseBuilder implements Mouse$1c$0{
+  final AWidget owner;
+  final EnumMap<MouseKind, Consumer$ao$1> handlers = new EnumMap<>(MouseKind.class);
+  boolean changeable = true;// EDT confined
+  CMouseBuilder(AWidget owner){ this.owner = owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
-    frame.onEdtAndWait(() -> handlers.put(k, (Consumer$ao$1) a));
+    owner.frame.onEdtAndWait(() -> {
+      if (!changeable && (owner.handlers != handlers || !owner.canChange())){
+        throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
+      }
+      handlers.put(k, (Consumer$ao$1) a);
+    });
     return this;
   }
   @Override public Object mut$clicked$1(Object a){ return add(Clicked, a); }
@@ -160,7 +169,7 @@ final class SkMouse extends MouseAdapter{
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
         if (b.action == null){ continue; }// nothing reaches the programmer: bubble
-        frame.frame.queue.submit(b.action);
+        frame.frame.queue.submit(whileShown(b, b.action));
         return;
       }
       if (fire(t, Clicked, p)){ return; }
@@ -202,12 +211,21 @@ final class SkMouse extends MouseAdapter{
     var h = t.handlers.get(kind);
     if (h == null){ return; }
     var ctx = ctx(t, p);
-    tasks.add(new MF$7$1(){
+    tasks.add(whileShown(t, new MF$7$1(){
       @Override public Object mut$$hash$0(){
         h.mut$accept$1(ctx);
         return Void$o$0.instance;
       }
-    });
+    }));
+  }
+
+  private static MF$7$1 whileShown(AWidget t, MF$7$1 r){
+    return new MF$7$1(){
+      @Override public Object mut$$hash$0(){
+        if (!t.frame.onEdtAndWait(t::canChange)){ return Void$o$0.instance; }
+        return r.mut$$hash$0();
+      }
+    };
   }
 
   private MouseEvent$174$0 ctx(AWidget t, Point p){

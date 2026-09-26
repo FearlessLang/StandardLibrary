@@ -1,0 +1,72 @@
+GuiConnectedTests: Test {::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
+    .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+    .do{f.content{:: .save p .label{:: .text "a" .save l}}}
+    .do{Block#(p!.clear, Void)}
+    .return{Block#(l!.text "b", Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a removed widget always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
+    .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+    .do{f.content{:: .save p .label{:: .text "a" .save l}}}
+    .do{Block#(p!.clear, Void)}
+    .do{Block#(l!.changeDetached{:: .text "b"}, Void)}
+    .return{Error.msg(l!.text)}
+    }}).run{
+      .ok _ -> Error.msg "The label text always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "b"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
+    .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+    .do{f.content{:: .save p .label{:: .text "a" .save l}}}
+    .do{Block#(p!.clear, Void)}
+    .do{Block#(l!.changeDetached{:: .text "b"}, Void)}
+    .return{Block#(l!.text "c", Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a removed widget after .changeDetached always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Pane]] outer = {Slots#[mut Pane]}
+    .let[mut Slot[mut Pane]] inner = {Slots#[mut Pane]}
+    .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+    .do{f.content{:: .save outer .pane{:: .save inner .label{:: .text "a" .save l}}}}
+    .do{Block#(outer!.clear, Void)}
+    .do{Block#(inner!.changeDetached{q -> Block#(l!.text "d", q)}, Void)}
+    .return{Error.msg(l!.text)}
+    }}).run{
+      .ok _ -> Error.msg "The label text always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "d"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+    .do{f.content{:: .label{:: .text "a" .save l}}}
+    .do{f.content{::}}
+    .return{Block#(l!.text "b", Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a widget of a replaced content always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Mouse]] m = {Slots#[mut Mouse]}
+    .do{f.content{:: .mouse{:: .save m} .mouse{::}}}
+    .return{Block#(m!.clicked{e -> Void}, Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a replaced Mouse always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Keys]] k = {Slots#[mut Keys]}
+    .do{Block#(f.onKey{:: .save k}.onKey{::}, Void)}
+    .do{Block#(k!.pressed{:: .matchOnly(Key#"A")}, Void)}
+    .return{f.content{::}}
+    }}).run{
+      .ok _ -> Error.msg "Changing a replaced Keys always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Keys was replaced by a later .onKey, so a key action added now would never run"}}.assertTrue{i};
+      }}
+  }

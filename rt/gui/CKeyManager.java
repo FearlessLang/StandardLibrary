@@ -19,6 +19,8 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   // matching .released handler never runs.
   private final java.util.Set<List<Integer>> held=new java.util.HashSet<>();
 
+  boolean changeable=true;// EDT confined
+
   CKeyManager(_Frame frame){ this.frame=frame; }
 
   @Override public void keyPressed(KeyEvent e){
@@ -75,6 +77,11 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   @Override public Object mut$released$1(Object scope){ return addKeyAction(scope,released); }
 
   private Object addKeyAction(Object scope,List<KeyAction$m8$0> list){
+    frame.onEdtAndWait(()->{
+      if (!changeable && !List.of(frame.frame.getKeyListeners()).contains(this)){
+        throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");
+      }
+    });
     var keyAction=(KeyAction$m8$0)KeyActions$18g$0.instance.imm$$hash$0();
     ((Scope$1c$1)scope).mut$run$1(keyAction);
     list.add(keyAction);

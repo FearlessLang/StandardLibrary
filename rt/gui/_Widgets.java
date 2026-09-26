@@ -60,8 +60,7 @@ class _Button extends AWidget implements Button$2o$0{
   _Button(_Frame frame){ super(frame); }
 
   @Override public Object mut$action$1(Object r){
-    frame.onEdtAndWait(() -> action = (MF$7$1) r);
-    return this;
+    return onEdt(() -> action = (MF$7$1) r);
   }
   @Override Dimension autoSize(int width, int height){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){ Sk.button(cv, this); }
@@ -86,16 +85,15 @@ class _Pane extends AContainer implements Pane$o$0{
     component.setLayout(new CenteredFlowLayout(this));
   }
   @Override Dimension autoSize(int width, int height){ return ((CenteredFlowLayout) component.getLayout()).sizeFor(component, width, height); }
-  @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(component, null, s, _Button::new); return this; }
-  @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(component, null, s, _Label::new); return this; }
-  @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(component, null, s, _Pane::new); return this; }
-  @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(component, null, s, _Border::new); return this; }
+  @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(this, null, s, _Button::new); return this; }
+  @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(this, null, s, _Label::new); return this; }
+  @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(this, null, s, _Pane::new); return this; }
+  @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(this, null, s, _Border::new); return this; }
   @Override public Object mut$clear$0(){
     return reStyle(() -> {
       // Removed widgets get no Exited events (DOM semantics: removal is not
       // an exit); SkMouse just forgets its references into the subtrees.
-      // Handler tasks already queued for removed widgets still run; they
-      // mutate orphans, which is harmless and deterministic.
+      // Handler tasks already queued for removed widgets are skipped.
       for (var c : component.getComponents()){ frame.mouse.detached((SkComponent) c); }
       component.removeAll();
     });
@@ -114,16 +112,16 @@ class _Border extends AContainer implements Border$2o$0{
     component.setLayout(new MutableBorderLayout(this));
   }
   @Override Dimension autoSize(int width, int height){ return ((MutableBorderLayout) component.getLayout()).sizeFor(component, width, height); }
-  @Override public Border$2o$0 mut$north$1(Object s){ frame.addTo(component, BorderLayout.NORTH, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$south$1(Object s){ frame.addTo(component, BorderLayout.SOUTH, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$east$1(Object s){ frame.addTo(component, BorderLayout.EAST, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$west$1(Object s){ frame.addTo(component, BorderLayout.WEST, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$center$1(Object s){ frame.addTo(component, BorderLayout.CENTER, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$northB$1(Object s){ frame.addTo(component, BorderLayout.NORTH, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$southB$1(Object s){ frame.addTo(component, BorderLayout.SOUTH, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$eastB$1(Object s){ frame.addTo(component, BorderLayout.EAST, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$westB$1(Object s){ frame.addTo(component, BorderLayout.WEST, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$centerB$1(Object s){ frame.addTo(component, BorderLayout.CENTER, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$north$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$south$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$east$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$west$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$center$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Pane::new); return this; }
+  @Override public Border$2o$0 mut$northB$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$southB$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$eastB$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$westB$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$centerB$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Border::new); return this; }
 }
 
 abstract class AWidget implements Widget$2o$1{
@@ -150,14 +148,33 @@ abstract class AWidget implements Widget$2o$1{
   final SkComponent component = new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
   EnumMap<MouseKind, Consumer$ao$1> handlers = new EnumMap<>(MouseKind.class);
+  boolean changeable = true;// EDT confined
 
   AWidget(_Frame frame){ this.frame = frame; }
+
+  boolean canChange(){
+    return changeable || this == frame.top || component.getParent() instanceof SkComponent p && p.w.canChange();
+  }
+
+  final void change(){
+    if (canChange()){ return; }
+    throw Util.detErr("This " + getClass().getSimpleName().substring(1)
+      + " is not in the window any more: .clear, a replaced Border slot or a new .content removed it,"
+      + " so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}");
+  }
+
+  @Override public Object mut$changeDetached$1(Object s){
+    boolean was = frame.onEdtAndWait(() -> { var c = changeable; changeable = true; return c; });
+    ((Scope$1c$1) s).mut$run$1(mut$self$0());
+    frame.onEdtAndWait(() -> changeable = was);
+    return mut$self$0();
+  }
 
   abstract void sk(Canvas cv);
   abstract Dimension autoSize(int width, int height);
 
   final Object onEdt(Runnable r){
-    frame.onEdtAndWait(r);
+    frame.onEdtAndWait(() -> { change(); r.run(); });
     return mut$self$0();
   }
 
@@ -166,6 +183,7 @@ abstract class AWidget implements Widget$2o$1{
     // own, and _Frame.tick re-lays-out just the invalid path, so unchanged
     // widgets keep their exact bounds.
     frame.onEdtAndWait(() -> {
+      change();
       r.run();
       component.invalidate();
     });
@@ -267,9 +285,13 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
   @Override public Object read$heightGap$0(){ return h(heightGap); }
   @Override public Object read$widthGap$0(){ return w(widthGap); }
   @Override public Object mut$mouse$1(Object s){
-    var b = new CMouseBuilder(frame, new EnumMap<>(MouseKind.class));
+    var b = new CMouseBuilder(this);
     ((Scope$1c$1) s).mut$run$1(b);
-    frame.onEdtAndWait(() -> handlers = b.handlers());// .mouse replaces earlier handlers
+    frame.onEdtAndWait(() -> {
+      change();
+      handlers = b.handlers;// .mouse replaces earlier handlers
+      b.changeable = false;
+    });
     return mut$self$0();
   }
 
@@ -337,7 +359,8 @@ class _Frame implements Frame$1c$0{
     frame.getRootPane().addComponentListener(geometry);
   }
 
-  void addTo(JComponent parent, String where, Object scope, Function<_Frame, ? extends AWidget> make){
+  void addTo(AWidget into, String where, Object scope, Function<_Frame, ? extends AWidget> make){
+    var parent = into.component;
     var b = onEdtAndWait(() -> make.apply(this));
     ((Scope$1c$1) scope).mut$run$1(b);
     onEdtAndWait(() -> {
@@ -350,7 +373,9 @@ class _Frame implements Frame$1c$0{
         mouse.detached((SkComponent) old);
         parent.remove(old);
       }
+      into.change();
       parent.add(b.component, where);
+      b.changeable = false;
     });
     markLayoutDirty();
   }
@@ -366,6 +391,7 @@ class _Frame implements Frame$1c$0{
     }
     catch (ExecutionException e){
       var c = e.getCause();
+      if (c instanceof Deterministic d){ Error$1c$0.instance.imm$$bang$1(d.i); }
       if (c instanceof RuntimeException re){ throw re; }
       if (c instanceof Error er){ throw er; }
       throw new RuntimeException(c);
@@ -583,6 +609,7 @@ class _Frame implements Frame$1c$0{
         frame.removeWindowFocusListener(l);
       }
       frame.addWindowFocusListener(keys);
+      keys.changeable = false;
     });
     return this;
   }
@@ -628,15 +655,24 @@ class _Frame implements Frame$1c$0{
     long nn = Util.natToLong(f);
     if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
     var actions = new ArrayList<MF$7$1>();
-    ((Scope$1c$1) scope).mut$run$1(new ModelFps$as$0(){
+    var b = new ModelFps$as$0(){
+      boolean changeable = true;
       @Override public Object mut$action$1(Object r){
-        onEdtAndWait(() -> { actions.clear(); actions.add((MF$7$1) r); });
+        onEdtAndWait(() -> {
+          if (!changeable && modelTickActions != actions){
+            throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
+          }
+          actions.clear();
+          actions.add((MF$7$1) r);
+        });
         return this;
       }
-    });
+    };
+    ((Scope$1c$1) scope).mut$run$1(b);
     onEdtAndWait(() -> {
       modelPeriodNs = Math.round(1e9 / nn);
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
+      b.changeable = false;
       // Live change: fixed-rate deadlines restart from now, no warmup.
       if (started){ frame.restartModelTimer(modelPeriodNs, 0, actions); }
     });
@@ -678,6 +714,7 @@ class _Frame implements Frame$1c$0{
   // listeners, so AWT routes everything here and SkMouse dispatches.
   private void install(AWidget t){
     top = t;
+    t.changeable = false;
     t.component.addMouseListener(mouse);
     t.component.addMouseMotionListener(mouse);
   }

@@ -1,17 +1,13 @@
 GuiLiveTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut ModelFps]] old = {Slots#[mut ModelFps]}
-    .var[Nat] n = {0}
     .do{Block#(f.modelFps(100, {:: .save old}), Void)}
-    .do{Block#(f.modelFps(100, {:: .action{Block#
-      .do{n.set(n.get + 1)}
-      .if{n.get >= 3} .do{Error.msg "Only the actions of the last .modelFps ran"}
-      .done}}), Void)}
-    .do{Block#(old!.action{Error.msg "A builder saved from a replaced .modelFps added an action"}, Void)}
+    .do{Block#(f.modelFps(100, {::}), Void)}
+    .do{Block#(old!.action{Void}, Void)}
     .return{f.content{::}}
     }}).run{
-      .ok _ -> Error.msg "A model action always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Only the actions of the last .modelFps ran"}}.assertTrue{i};
+      .ok _ -> Error.msg "Changing a replaced ModelFps always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This ModelFps was replaced by a later .modelFps, so an action set now would never run"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .var started = {False}
