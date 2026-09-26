@@ -150,6 +150,7 @@ FlowDesignTwoMax: Test {::
   .checkDetErr({::.isMsg{:: == "by6"}}, {L#.flow.map{x -> x}.max(By#Quarter).max(By#(Parity, 6)).list})
   .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.map{x -> x}.max(By#(Quarter, 3)).max(By#Parity).list})
   .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", x)}.max(By#Quarter).max(By#Parity).list})
+  .checkDetErr({::.isMsg{:: == "f6"}}, {L#.flow.map{x -> ErrIf#(x == 6, "f6", x)}.max(By#(Quarter, 3)).max(By#Parity).list})
   }
 
 Purchase: { .product: Str }
@@ -183,6 +184,7 @@ FlowDesignMaxLimit: Test {::
   .check{L#.flow.map{x -> x}.max(Rev#(By#Up)).limit 2 .list .assertEq({::}, Lists#(0))}
   .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.max(By#Quarter).limit 2 .list})
   .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.map{x -> x}.max(By#(Quarter, 3)).limit 2 .list})
+  .checkDetErr({::.isMsg{:: == "f6"}}, {L#.flow.map{x -> ErrIf#(x == 6, "f6", x)}.max(By#(Quarter, 3)).limit 2 .list})
   }
 
 FlowDesignSortLast: Test {::
