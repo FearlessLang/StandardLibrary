@@ -114,6 +114,10 @@ Flow[E:*]: {
     cont: mut FlowContinuation[E,DR,R]
   ): R-> this.list|>{xs->cont#(x#xs, xs)};
   // --Still to implement
+  /// ``this.allToAll(f)`` is the fence every fence desugars to: once every element
+  /// has arrived, ``f`` receives them all as a list, and the elements of the list it
+  /// returns flow on.
+  mut .allToAll[R:*](f: read F[mut List[E], mut List[R]]): mut Flow[R]->Error.msg"TODO";
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg"TODO";
   /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
   /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.
