@@ -150,12 +150,14 @@ RectTests: Test {::
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .bottom .assertEq(Y#(+60))}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+35)) .assertTrue}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+10), Y#(+20)) .assertTrue}
-  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+40), Y#(+60)) .assertTrue}
+  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+39), Y#(+59)) .assertTrue}
+  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+40), Y#(+35)) .assertFalse}
+  .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+60)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+9), Y#(+35)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+41), Y#(+35)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+19)) .assertFalse}
   .check{Rects#(X#(+10), Y#(+20), Width#30, Height#40) .contains(X#(+25), Y#(+61)) .assertFalse}
-  .check{Rects#(X#(+0), Y#(+0), Width.zero, Height.zero) .contains(X#(+0), Y#(+0)) .assertTrue}
+  .check{Rects#(X#(+0), Y#(+0), Width.zero, Height.zero) .contains(X#(+0), Y#(+0)) .assertFalse}
   .check{Rects#(X#(+0), Y#(+0), Width.zero, Height.zero) .contains(X#(+1), Y#(+0)) .assertFalse}
   }
 

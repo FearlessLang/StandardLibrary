@@ -67,8 +67,8 @@ Rect: {
   .right: XInt -> this.x + (this.width);
   .bottom: YInt -> this.y + (this.height);
   .contains(x: XInt, y: YInt): Bool ->
-    x >= (this.x) && { x <= (this.right) }
-    && { y >= (this.y) } && { y <= (this.bottom) };
+    x >= (this.x) && { x < (this.right) }
+    && { y >= (this.y) } && { y < (this.bottom) };
   }
 Rects: { #(x: XInt, y: YInt, width: WidthNat, height: HeightNat): Rect ->
   { .x -> x; .y -> y; .width -> width; .height -> height; } }
