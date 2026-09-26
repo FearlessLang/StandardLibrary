@@ -2,7 +2,6 @@ package _base;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -331,8 +330,8 @@ class _Frame implements Frame$1c$0{
     screenW = b.width;
     screenH = b.height;
     var geometry = new ComponentAdapter(){
-      @Override public void componentResized(ComponentEvent e){ markLayoutDirty(); }
-      @Override public void componentMoved(ComponentEvent e){ markLayoutDirty(); }
+      @Override public void componentResized(ComponentEvent e){ markLayoutDirty(); keepVisible(); }
+      @Override public void componentMoved(ComponentEvent e){ markLayoutDirty(); keepVisible(); }
     };
     frame.addComponentListener(geometry);
     frame.getRootPane().addComponentListener(geometry);
@@ -449,27 +448,16 @@ class _Frame implements Frame$1c$0{
     g.drawImage(bimg, 0, 0, renderLogicalW, renderLogicalH, null);
   }
 
-  private void checkWindowFits(int w, int h){
-    var i = onEdtAndWait(frame::getInsets);
-    if (w + i.left + i.right <= screenW && h + i.top + i.bottom <= screenH){ return; }
-    throw Util.detErr("Window must fit on screen: window="
-      + window(w, h, i)
-      + ", screen=" + screenW + "x" + screenH);
+  private void keepVisible(){ place(frame.getX(), frame.getY()); }
+
+  private void place(long x, long y){
+    assert SwingUtilities.isEventDispatchThread();
+    frame.setLocation(visible(x, frame.getWidth(), screenW), visible(y, frame.getHeight(), screenH));
   }
 
-  private void checkWindowLocationFits(long x, long y, int w, int h){
-    var i = onEdtAndWait(frame::getInsets);
-    if (x >= 0 && y >= 0 && x <= screenW - w - i.left - i.right && y <= screenH - h - i.top - i.bottom){ return; }
-    throw Util.detErr("Window location puts window outside screen: location="
-      + x + "," + y
-      + ", window=" + window(w, h, i)
-      + ", screen=" + screenW + "x" + screenH);
-  }
-
-  private static String window(int w, int h, Insets i){
-    int dw = i.left + i.right;
-    int dh = i.top + i.bottom;
-    return w + "x" + h + (dw + dh == 0 ? "" : " plus decoration " + dw + "x" + dh);
+  private static int visible(long at, int size, int screen){
+    int v = Math.min(screen / 3, size);
+    return Math.clamp(at, v - size, screen - v);
   }
 
   void start(){
@@ -489,15 +477,8 @@ class _Frame implements Frame$1c$0{
     frame.setContentSize(windowW, windowH);
 
     if (maximized){ frame.setBounds(0, 0, screenW, screenH); }
-    else {
-      checkWindowFits(windowW, windowH);
-      if (located){
-        checkWindowLocationFits(locationX, locationY, windowW, windowH);
-        frame.setLocation((int) locationX, (int) locationY);
-      } else {
-        frame.setLocationRelativeTo(null);
-      }
-    }
+    else if (located){ place(locationX, locationY); }
+    else { frame.setLocationRelativeTo(null); }
 
     if (undecorated){ frame.setOpacity(opacity); }
 
@@ -551,8 +532,6 @@ class _Frame implements Frame$1c$0{
     int hh = h == null ? 0 : extent(h, "window height");
     if (w != null){
       if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
-      checkWindowFits(ww, hh);
-      if (started && located){ checkWindowLocationFits(locationX, locationY, ww, hh); }
       sized = true;
       windowW = ww;
       windowH = hh;
@@ -562,6 +541,7 @@ class _Frame implements Frame$1c$0{
       onEdtAndWait(() -> {
         frame.setResizable(r);
         if (w != null){ frame.setContentSize(ww, hh); }
+        keepVisible();
       });
     }
     return this;
@@ -572,13 +552,13 @@ class _Frame implements Frame$1c$0{
     if (started){
       // Live decoration swap: dispose + re-show inside one EDT block; the
       // synthetic WINDOW_CLOSED is suppressed in FearlessFrame.
-      onEdtAndWait(() -> frame.setDecoration(true, opacity, maximizedBounds()));
+      onEdtAndWait(() -> { frame.setDecoration(true, opacity, maximizedBounds()); keepVisible(); });
     }
     return this;
   }
   @Override public Object mut$decorated$0(){
     undecorated = false;
-    if (started){ onEdtAndWait(() -> frame.setDecoration(false, 1f, maximizedBounds())); }
+    if (started){ onEdtAndWait(() -> { frame.setDecoration(false, 1f, maximizedBounds()); keepVisible(); }); }
     return this;
   }
   private Rectangle maximizedBounds(){ return maximized ? new Rectangle(0, 0, screenW, screenH) : null; }
@@ -586,11 +566,10 @@ class _Frame implements Frame$1c$0{
     long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
     long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
     if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
-    if (started){ checkWindowLocationFits(xx, yy, windowW, windowH); }
     located = true;
     locationX = xx;
     locationY = yy;
-    if (started){ onEdtAndWait(() -> frame.setLocation((int) xx, (int) yy)); }
+    if (started){ onEdtAndWait(() -> place(xx, yy)); }
     return this;
   }
   @Override public Object mut$onKey$1(Object scope){
