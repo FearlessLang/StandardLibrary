@@ -12,7 +12,6 @@ class Scopes{
   static YInt$s$0 y(long n){ return (YInt$s$0) YInt$s$0.instance.read$$hash$1(new Int$c$0Instance(n)); }
   static int nat(Object n){ return Util.natToInt(n); }
   static int byt(Object b){ return Byte.toUnsignedInt(((Byte$o$0Instance) b).val()); }
-  static int n(Nat$c$0 n){ return nat(n); }
   static int w(WidthNat$as$0 w){ return nat(w.read$get$0()); }
   static int h(HeightNat$lg$0 h){ return nat(h.read$get$0()); }
   static final int maxExtent = 100_000;

@@ -190,9 +190,12 @@ Color:DataType[Color,Color]{
   .cardboard:Color->this.rgb(178,136,86);
   .moonCheese:Color->this.rgb(236,226,148);
   }
-Widget[S]:{
+_Styled[S]:{
   mut .self:mut S;
   mut .save(c:mut Consumer[mut S]):mut S->Block#(c.accept(this.self),this.self);
+  mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
+}
+Widget[S]:_Styled[S]{
   mut .topInset(n:Nat):mut S->this.topInset'(HeightNat#n);
   mut .topInset'(HeightNat):mut S;
   mut .bottomInset(n:Nat):mut S->this.bottomInset'(HeightNat#n);
@@ -211,7 +214,6 @@ Widget[S]:{
   mut .foreground(Color):mut S;
   mut .background(Color):mut S;
   mut .autoSize:mut S->Block#(this.autoWidth,this.autoHeight);
-  mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
   read .topInset: HeightNat;
   read .bottomInset: HeightNat;
   read .leftInset:WidthNat;
@@ -259,12 +261,10 @@ Button: _TextWidget[Button]{
   mut .action(mut MF[Void]):mut Button;
 }
 
-ModelFps: {
+ModelFps:_Styled[ModelFps]{ .self->this;
   mut .action(mut MF[Void]): mut ModelFps;
-  mut .save(c: mut Consumer[mut ModelFps]): mut ModelFps -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[ModelFps]): mut ModelFps -> Block#(s.run(this), this);
 }
-Frame:{
+Frame:_Styled[Frame]{ .self->this;
   mut .title(s: Str): mut Frame -> this.uTitle(s.u);
   mut .uTitle(UStr): mut Frame;
   read .title: Str -> this.uTitle.getStr; ///throws if the title was set with .uTitle and is not a valid Str
@@ -301,8 +301,6 @@ Frame:{
   mut .fixedSize'(WidthNat, HeightNat): mut Frame;
   mut .undecorated(a: Alpha): mut Frame;
   mut .decorated: mut Frame;
-  mut .save(c: mut Consumer[mut Frame]): mut Frame -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[Frame]): mut Frame -> Block#(s.run(this), this);
   }
 ScreenContext:{
   read .elapsed: Instant;
@@ -330,7 +328,7 @@ Gui:{ mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run
 Label:_TextWidget[Label]{
   .self->this;
 }
-Mouse:{
+Mouse:_Styled[Mouse]{ .self->this;
   mut .clicked(mut Consumer[MouseEvent]):mut Mouse;
   mut .pressed(mut Consumer[MouseEvent]):mut Mouse;
   mut .released(mut Consumer[MouseEvent]):mut Mouse;
@@ -338,8 +336,6 @@ Mouse:{
   mut .dragged(mut Consumer[MouseEvent]):mut Mouse;
   mut .entered(mut Consumer[MouseEvent]):mut Mouse;
   mut .exited(mut Consumer[MouseEvent]):mut Mouse;
-  mut .save(c: mut Consumer[mut Mouse]): mut Mouse -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[Mouse]): mut Mouse -> Block#(s.run(this), this);
 }
 MouseEvent:ScreenContext{
   .mouseX:XInt;
@@ -389,7 +385,7 @@ KeyEvent:ScreenContext{
 KeyActions:{#:mut KeyAction->Block#
   .let[mut EList[KeyStroke]] match= {ELists#}
   .let[mut EList[mut Consumer[KeyEvent]]] actions= {ELists#}
-  .return{mut KeyAction:{'self
+  .return{mut KeyAction:_Styled[KeyAction]{'self .self->self;
     mut .match: mut EList[KeyStroke]->match;
     mut .actions: mut EList[mut Consumer[KeyEvent]]->actions;
     mut .matchOnly( k:KeyStroke): mut KeyAction->
@@ -400,15 +396,9 @@ KeyActions:{#:mut KeyAction->Block#
       Block#(actions.clear,self.doAlso(c));
     mut .doAlso( c:mut Consumer[KeyEvent]): mut KeyAction->
       Block#(actions.add(c),self);
-    mut .save(c:mut Consumer[mut KeyAction]):mut KeyAction->
-      Block#(c.accept(self),self);
-    mut .style(s:mut Scope[KeyAction]):mut KeyAction->
-      Block#(s.run(self),self);
   }}
 }
-Keys:{
+Keys:_Styled[Keys]{ .self->this;
   mut .pressed(mut Scope[KeyAction]):mut Keys;
   mut .released(mut Scope[KeyAction]):mut Keys;
-  mut .save(c: mut Consumer[mut Keys]): mut Keys -> Block#(c.accept(this), this);
-  mut .style(s: mut Scope[Keys]): mut Keys -> Block#(s.run(this), this);
   }

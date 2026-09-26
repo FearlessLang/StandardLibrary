@@ -18,16 +18,15 @@ record CMouseCtx(
   Instant$5c$0 elapsed,
   XInt$s$0 mouseX,
   YInt$s$0 mouseY,
-  WidthNat$as$0 screenWidth,
-  HeightNat$lg$0 screenHeight,
+  _Frame frame,
   WidthNat$as$0 panelWidth,
   HeightNat$lg$0 panelHeight
 ) implements MouseEvent$174$0{
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object imm$mouseX$0(){ return mouseX; }
   @Override public Object imm$mouseY$0(){ return mouseY; }
-  @Override public Object read$screenWidth$0(){ return screenWidth; }
-  @Override public Object read$screenHeight$0(){ return screenHeight; }
+  @Override public Object read$screenWidth$0(){ return Scopes.w(frame.screenW); }
+  @Override public Object read$screenHeight$0(){ return Scopes.h(frame.screenH); }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
 }
@@ -232,8 +231,7 @@ final class SkMouse extends MouseAdapter{
       frame.elapsed,
       Scopes.x(q.x),
       Scopes.y(q.y),
-      frame.screenWidth,
-      frame.screenHeight,
+      frame,
       Scopes.w(t.component.getWidth()),
       Scopes.h(t.component.getHeight()));
   }

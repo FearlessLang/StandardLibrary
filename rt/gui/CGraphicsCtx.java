@@ -12,8 +12,8 @@ record CGraphicsCtx(
   Instant$5c$0 elapsed,
   WidthNat$as$0 panelWidth,
   HeightNat$lg$0 panelHeight,
-  XInt$s$0 currentX,
-  YInt$s$0 currentY,
+  float x,
+  float y,
   Paint paint// shared by all positions of one Painter run; owned by AContainer.sk
   ) implements Graphics$ao$0{
 
@@ -24,12 +24,12 @@ record CGraphicsCtx(
   // Drawing outside the panel silently clips (canvas is clipped to the panel),
   // otherwise user can cause errors by resizing the gui by hand
   @Override public Object mut$position$p1$2(Object x, Object y){
-    return new CGraphicsCtx(cv, frame, elapsed, panelWidth, panelHeight, (XInt$s$0) x, (YInt$s$0) y, paint);
+    return new CGraphicsCtx(cv, frame, elapsed, panelWidth, panelHeight, at(((XInt$s$0) x).read$get$0()), at(((YInt$s$0) y).read$get$0()), paint);
   }
   // Correctly does not update the position.
   @Override public Object mut$line$p1$2(Object x, Object y){
     paint.setMode(PaintMode.STROKE).setStrokeWidth(1);
-    cv.drawLine(at(currentX.read$get$0()), at(currentY.read$get$0()), at(((XInt$s$0) x).read$get$0()), at(((YInt$s$0) y).read$get$0()), paint);
+    cv.drawLine(this.x, this.y, at(((XInt$s$0) x).read$get$0()), at(((YInt$s$0) y).read$get$0()), paint);
     return this;
   }
   @Override public Object mut$rect$p1$2(Object w, Object h){
@@ -43,13 +43,11 @@ record CGraphicsCtx(
     return this;
   }
   private Rect shapeRect(Object w, Object h){
-    return Rect.makeXYWH(at(currentX.read$get$0()), at(currentY.read$get$0()), Scopes.w((WidthNat$as$0) w), Scopes.h((HeightNat$lg$0) h));
+    return Rect.makeXYWH(x, y, Scopes.w((WidthNat$as$0) w), Scopes.h((HeightNat$lg$0) h));
   }
   private static float at(Object coord){ return Util.intToLong(coord); }
   @Override public Object mut$image$1(Object image){
     var img = ((Image$1c$0Instance) image).image();
-    var x = at(currentX.read$get$0());
-    var y = at(currentY.read$get$0());
     cv.drawImageRect(
       img,
       Rect.makeWH(img.getWidth(), img.getHeight()),
@@ -60,8 +58,8 @@ record CGraphicsCtx(
     return this;
   }
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object read$screenWidth$0(){ return frame.screenWidth; }
-  @Override public Object read$screenHeight$0(){ return frame.screenHeight; }
+  @Override public Object read$screenWidth$0(){ return Scopes.w(frame.screenW); }
+  @Override public Object read$screenHeight$0(){ return Scopes.h(frame.screenH); }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
 }

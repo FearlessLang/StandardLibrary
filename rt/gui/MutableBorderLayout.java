@@ -1,7 +1,5 @@
 package _base;
 
-import static _base.Scopes.*;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -88,10 +86,10 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
   // with a plain `total == 0` check.
   private Dimension lay(Container target, int width, int height, boolean place){
     synchronized (target.getTreeLock()){
-      int left = w(gap.left);
-      int right = width - w(gap.right);
-      int top = h(gap.top);
-      int bottom = height - h(gap.bottom);
+      int left = gap.left;
+      int right = width - gap.right;
+      int top = gap.top;
+      int bottom = height - gap.bottom;
       boolean middle = west != null || center != null || east != null;
       int slotsW = 0;
       int middleH = 0;
@@ -101,28 +99,28 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
         if (place){ north.setBounds(left, top, span(right - left), d.height); }
         slotsW = d.width;
         top += d.height;
-        if (middle || south != null){ top += h(gap.heightGap); }
+        if (middle || south != null){ top += gap.heightGap; }
       }
       if (south != null){
         var d = Sk.sizeFor(south, span(right - left), Integer.MAX_VALUE);
         bottom -= d.height;
         if (place){ south.setBounds(left, bottom, span(right - left), d.height); }
         slotsW = Math.max(slotsW, d.width);
-        if (middle){ bottom -= h(gap.heightGap); }
+        if (middle){ bottom -= gap.heightGap; }
       }
       if (west != null){
         var d = Sk.sizeFor(west, Integer.MAX_VALUE, span(bottom - top));
         if (place){ west.setBounds(left, top, d.width, span(bottom - top)); }
         middleH = d.height;
         left += d.width;
-        if (center != null || east != null){ left += w(gap.widthGap); }
+        if (center != null || east != null){ left += gap.widthGap; }
       }
       if (east != null){
         var d = Sk.sizeFor(east, Integer.MAX_VALUE, span(bottom - top));
         right -= d.width;
         if (place){ east.setBounds(right, top, d.width, span(bottom - top)); }
         middleH = Math.max(middleH, d.height);
-        if (center != null){ right -= w(gap.widthGap); }
+        if (center != null){ right -= gap.widthGap; }
       }
       if (center != null){
         var d = Sk.sizeFor(center, span(right - left), span(bottom - top));
@@ -131,7 +129,7 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
         centerW = d.width;
       }
       return new Dimension(
-        Math.max(slotsW + w(gap.left) + w(gap.right), left + centerW + (width - right)),
+        Math.max(slotsW + gap.left + gap.right, left + centerW + (width - right)),
         top + middleH + (height - bottom));
     }
   }

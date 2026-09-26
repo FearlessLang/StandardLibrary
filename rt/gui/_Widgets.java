@@ -128,21 +128,18 @@ class _Border extends AContainer implements Border$2o$0{
 }
 
 abstract class AWidget implements Widget$2o$1{
-  static final Nat$c$0 def = Nat$c$0Instance.instance(6);
-  static final Nat$c$0 defText = Nat$c$0Instance.instance(12);
-
-  WidthNat$as$0 left = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
-  HeightNat$lg$0 top = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
-  WidthNat$as$0 right = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
-  HeightNat$lg$0 bottom = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
-  Nat$c$0 radius = defText;
-  WidthNat$as$0 preferredWidth;
-  HeightNat$lg$0 preferredHeight;
+  int left = 6;
+  int top = 6;
+  int right = 6;
+  int bottom = 6;
+  int radius = 12;
+  Integer preferredWidth;
+  Integer preferredHeight;
   Color$1c$0 foreground = (Color$1c$0) Color$1c$0.instance;
   Color$1c$0 background = (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
   int fg = Sk.color(foreground);
   int bg = Sk.color(background);
-  HeightNat$lg$0 textSize = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(defText);
+  int textSize = 12;
   TextLine line;
   FontMetrics metrics;
   // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
@@ -186,38 +183,38 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   @Override public Object mut$topInset$p1$1(Object v){
-    extent((HeightNat$lg$0) v, "top inset");
-    return reStyle(() -> top = (HeightNat$lg$0) v);
+    int n = extent((HeightNat$lg$0) v, "top inset");
+    return reStyle(() -> top = n);
   }
   @Override public Object mut$bottomInset$p1$1(Object v){
-    extent((HeightNat$lg$0) v, "bottom inset");
-    return reStyle(() -> bottom = (HeightNat$lg$0) v);
+    int n = extent((HeightNat$lg$0) v, "bottom inset");
+    return reStyle(() -> bottom = n);
   }
   @Override public Object mut$leftInset$p1$1(Object v){
-    extent((WidthNat$as$0) v, "left inset");
-    return reStyle(() -> left = (WidthNat$as$0) v);
+    int n = extent((WidthNat$as$0) v, "left inset");
+    return reStyle(() -> left = n);
   }
   @Override public Object mut$rightInset$p1$1(Object v){
-    extent((WidthNat$as$0) v, "right inset");
-    return reStyle(() -> right = (WidthNat$as$0) v);
+    int n = extent((WidthNat$as$0) v, "right inset");
+    return reStyle(() -> right = n);
   }
   @Override public Object mut$width$p1$1(Object w){
-    extent((WidthNat$as$0) w, "widget width");
-    return reStyle(() -> preferredWidth = (WidthNat$as$0) w);
+    int n = extent((WidthNat$as$0) w, "widget width");
+    return reStyle(() -> preferredWidth = n);
   }
   @Override public Object mut$height$p1$1(Object h){
-    extent((HeightNat$lg$0) h, "widget height");
-    return reStyle(() -> preferredHeight = (HeightNat$lg$0) h);
+    int n = extent((HeightNat$lg$0) h, "widget height");
+    return reStyle(() -> preferredHeight = n);
   }
   @Override public Object mut$radius$1(Object r){
-    extent(r, "radius");
-    return reStyle(() -> radius = (Nat$c$0) r);
+    int n = extent(r, "radius");
+    return reStyle(() -> radius = n);
   }
   public Object mut$textHeight$p1$1(Object t){
-    extent((HeightNat$lg$0) t, "text size");
-    return reText(() -> textSize = (HeightNat$lg$0) t);
+    int n = extent((HeightNat$lg$0) t, "text size");
+    return reText(() -> textSize = n);
   }
-  public Object read$textHeight$0(){ return textSize; }
+  public Object read$textHeight$0(){ return h(textSize); }
   public Object mut$uText$1(Object t){
     var s = ustr(t);
     return reText(() -> text = s);
@@ -227,20 +224,20 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$autoHeight$0(){ return reStyle(() -> preferredHeight = null); }
   @Override public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
-  @Override public Object read$topInset$0(){ return top; }
-  @Override public Object read$bottomInset$0(){ return bottom; }
-  @Override public Object read$leftInset$0(){ return left; }
-  @Override public Object read$rightInset$0(){ return right; }
-  @Override public Object read$width$0(){ return preferredWidth == null ? Util.optEmpty() : Util.optSome(preferredWidth); }
-  @Override public Object read$height$0(){ return preferredHeight == null ? Util.optEmpty() : Util.optSome(preferredHeight); }
-  @Override public Object read$radius$0(){ return radius; }
+  @Override public Object read$topInset$0(){ return h(top); }
+  @Override public Object read$bottomInset$0(){ return h(bottom); }
+  @Override public Object read$leftInset$0(){ return w(left); }
+  @Override public Object read$rightInset$0(){ return w(right); }
+  @Override public Object read$width$0(){ return preferredWidth == null ? Util.optEmpty() : Util.optSome(w(preferredWidth)); }
+  @Override public Object read$height$0(){ return preferredHeight == null ? Util.optEmpty() : Util.optSome(h(preferredHeight)); }
+  @Override public Object read$radius$0(){ return n(radius); }
   @Override public Object read$foreground$0(){ return foreground; }
   @Override public Object read$background$0(){ return background; }
 }
 
 abstract class AContainer extends AWidget implements _Container$lc$1{
-  WidthNat$as$0 widthGap = (WidthNat$as$0) WidthNat$as$0.instance.read$$hash$1(def);
-  HeightNat$lg$0 heightGap = (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(def);
+  int widthGap = 6;
+  int heightGap = 6;
   Painter$5c$0 paint = Scopes.idP;
 
   AContainer(_Frame frame){ super(frame); }
@@ -255,23 +252,23 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
         frame.elapsed,
         Scopes.w(component.getWidth()),
         Scopes.h(component.getHeight()),
-        XInt$s$0.instance,
-        YInt$s$0.instance,
+        0,
+        0,
         p
       ));
     }
   }
 
   @Override public Object mut$heightGap$p1$1(Object v){
-    extent((HeightNat$lg$0) v, "height gap");
-    return reStyle(() -> heightGap = (HeightNat$lg$0) v);
+    int n = extent((HeightNat$lg$0) v, "height gap");
+    return reStyle(() -> heightGap = n);
   }
   @Override public Object mut$widthGap$p1$1(Object v){
-    extent((WidthNat$as$0) v, "width gap");
-    return reStyle(() -> widthGap = (WidthNat$as$0) v);
+    int n = extent((WidthNat$as$0) v, "width gap");
+    return reStyle(() -> widthGap = n);
   }
-  @Override public Object read$heightGap$0(){ return heightGap; }
-  @Override public Object read$widthGap$0(){ return widthGap; }
+  @Override public Object read$heightGap$0(){ return h(heightGap); }
+  @Override public Object read$widthGap$0(){ return w(widthGap); }
   @Override public Object mut$mouse$1(Object s){
     var b = new CMouseBuilder(frame, new EnumMap<>(MouseKind.class));
     ((Scope$1c$1) s).mut$run$1(b);
@@ -293,21 +290,20 @@ class _Frame implements Frame$1c$0{
   AWidget top;
   final int screenW;
   final int screenH;
-  final WidthNat$as$0 screenWidth;
-  final HeightNat$lg$0 screenHeight;
   private long startNanos = System.nanoTime();// re-based in start(): game time zero = warmup end
-  private Nat$c$0 fps = n(30);
-  private Nat$c$0 modelFpsVal;
+  private int fps = 30;
+  private long modelPeriodNs;
   private ArrayList<MF$7$1> modelTickActions = new ArrayList<>();// live, EDT confined
-  private Alpha$1c$0 alpha = (Alpha$1c$0) Alpha$1c$0.instance.imm$opaque$0();
-  private XInt$s$0 locationX;
-  private YInt$s$0 locationY;
-  // Explicit content size, or null to size from the content (pack). Set by
-  // .resizable(w,h) and .fixedSize(w,h); resizability is orthogonal and kept
-  // in `resizable`. Note an undecorated window can be technically resizable,
-  // but there is no border to drag, so the user cannot actually resize it.
-  private WidthNat$as$0 frameW;
-  private HeightNat$lg$0 frameH;
+  private float opacity = 1f;
+  private boolean located;
+  private long locationX;
+  private long locationY;
+  // Explicit content size windowW x windowH when sized, otherwise sized from
+  // the content (pack). Set by .resizable(w,h) and .fixedSize(w,h);
+  // resizability is orthogonal and kept in `resizable`. Note an undecorated
+  // window can be technically resizable, but there is no border to drag, so
+  // the user cannot actually resize it.
+  private boolean sized;
   private int windowW;
   private int windowH;
   private String title = "";
@@ -336,8 +332,6 @@ class _Frame implements Frame$1c$0{
       .getBounds();
     screenW = b.width;
     screenH = b.height;
-    screenWidth = w(screenW);
-    screenHeight = h(screenH);
     var geometry = new ComponentAdapter(){
       @Override public void componentResized(ComponentEvent e){ markLayoutDirty(); }
       @Override public void componentMoved(ComponentEvent e){ markLayoutDirty(); }
@@ -490,7 +484,7 @@ class _Frame implements Frame$1c$0{
     frame.setUndecorated(undecorated);
     frame.setResizable(resizable);
     frame.pack();
-    if (frameW == null){
+    if (!sized){
       windowW = top.component.getWidth();
       windowH = top.component.getHeight();
     }
@@ -499,17 +493,15 @@ class _Frame implements Frame$1c$0{
     if (maximized){ frame.setBounds(0, 0, screenW, screenH); }
     else {
       checkWindowFits(windowW, windowH);
-      if (locationX != null && locationY != null){
-        long xx = Util.intToLong(locationX.read$get$0());
-        long yy = Util.intToLong(locationY.read$get$0());
-        checkWindowLocationFits(xx, yy, windowW, windowH);
-        frame.setLocation((int) xx, (int) yy);
+      if (located){
+        checkWindowLocationFits(locationX, locationY, windowW, windowH);
+        frame.setLocation((int) locationX, (int) locationY);
       } else {
         frame.setLocationRelativeTo(null);
       }
     }
 
-    if (undecorated){ frame.setOpacity(Scopes.alpha(alpha) / 255f); }
+    if (undecorated){ frame.setOpacity(opacity); }
 
     frame.validate();
     layoutDirty.set(false);
@@ -523,21 +515,20 @@ class _Frame implements Frame$1c$0{
     // is already visible showing the frame rendered above. Game time zero
     // is warmup end, so elapsed, the model tick deadlines and warning
     // timestamps agree, and the first tick behaves like every later one.
-    long modelPeriodNs = modelFpsVal == null ? 0 : Math.round(1e9 / Scopes.nat(modelFpsVal));
     startNanos = System.nanoTime() + FearlessFrame.WarmupMillis * 1_000_000L;
     frame.startRuntime(
-      Math.round(1000.0f / Scopes.nat(fps)),
+      Math.round(1000.0f / fps),
       () -> tick(timeNanos(System.nanoTime() - startNanos))
     );
-    if (modelFpsVal != null){
+    if (modelPeriodNs != 0){
       frame.restartModelTimer(modelPeriodNs, FearlessFrame.WarmupMillis, modelTickActions);
     }
     started = true;
   }
 
   @Override public Object mut$maximized$0(){
-    if (locationX != null){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
-    if (frameW != null){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
+    if (located){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
+    if (sized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
     maximized = true;
     if (started){
       onEdtAndWait(() -> frame.setBounds(0, 0, screenW, screenH));
@@ -563,11 +554,8 @@ class _Frame implements Frame$1c$0{
     if (w != null){
       if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
       checkWindowFits(ww, hh);
-      if (started && locationX != null){
-        checkWindowLocationFits(Util.intToLong(locationX.read$get$0()), Util.intToLong(locationY.read$get$0()), ww, hh);
-      }
-      frameW = w;
-      frameH = h;
+      if (started && located){ checkWindowLocationFits(locationX, locationY, ww, hh); }
+      sized = true;
       windowW = ww;
       windowH = hh;
     }
@@ -582,12 +570,11 @@ class _Frame implements Frame$1c$0{
   }
   @Override public Object mut$undecorated$1(Object a){
     undecorated = true;
-    alpha = (Alpha$1c$0) a;
+    opacity = alpha(a) / 255f;
     if (started){
       // Live decoration swap: dispose + re-show inside one EDT block; the
       // synthetic WINDOW_CLOSED is suppressed in FearlessFrame.
-      float op = Scopes.alpha(alpha) / 255f;
-      onEdtAndWait(() -> frame.setDecoration(true, op, maximizedBounds()));
+      onEdtAndWait(() -> frame.setDecoration(true, opacity, maximizedBounds()));
     }
     return this;
   }
@@ -602,8 +589,9 @@ class _Frame implements Frame$1c$0{
     long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
     if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
     if (started){ checkWindowLocationFits(xx, yy, windowW, windowH); }
-    locationX = (XInt$s$0) x;
-    locationY = (YInt$s$0) y;
+    located = true;
+    locationX = xx;
+    locationY = yy;
     if (started){ onEdtAndWait(() -> frame.setLocation((int) xx, (int) yy)); }
     return this;
   }
@@ -629,9 +617,9 @@ class _Frame implements Frame$1c$0{
   @Override public Object mut$fps$1(Object f){
     long nn = Util.natToLong(f);
     if (nn < 1 || nn > 500){ throw Util.detErr("FPS must be between 1 and 500"); }
-    fps = (Nat$c$0) f;
+    fps = (int) nn;
     if (started){
-      int delay = Math.round(1000.0f / nn);
+      int delay = Math.round(1000.0f / fps);
       onEdtAndWait(() -> frame.setTickDelay(delay));
     }
     return this;
@@ -640,20 +628,20 @@ class _Frame implements Frame$1c$0{
   // single-mutator model, elapsed is volatile, the location getters hop to
   // the EDT for the real, current window position (including user drags).
   @Override public Object read$uTitle$0(){ return UStr$s$0Instance.instance(title); }
-  @Override public Object read$fps$0(){ return fps; }
+  @Override public Object read$fps$0(){ return n(fps); }
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object read$screenWidth$0(){ return screenWidth; }
-  @Override public Object read$screenHeight$0(){ return screenHeight; }
+  @Override public Object read$screenWidth$0(){ return w(screenW); }
+  @Override public Object read$screenHeight$0(){ return h(screenH); }
   @Override public Object read$locationX$0(){
-    if (!started){ return locationOrErr(locationX); }
-    return Scopes.x(onEdtAndWait(frame::getX));
+    if (!started){ return x(locationOrErr(locationX)); }
+    return x(onEdtAndWait(frame::getX));
   }
   @Override public Object read$locationY$0(){
-    if (!started){ return locationOrErr(locationY); }
-    return Scopes.y(onEdtAndWait(frame::getY));
+    if (!started){ return y(locationOrErr(locationY)); }
+    return y(onEdtAndWait(frame::getY));
   }
-  private Object locationOrErr(Object loc){
-    if (loc == null){
+  private long locationOrErr(long loc){
+    if (!located){
       throw Util.detErr("The window location is not known before the window is"
         + " visible, unless .location was called");
     }
@@ -672,10 +660,10 @@ class _Frame implements Frame$1c$0{
       }
     });
     onEdtAndWait(() -> {
-      modelFpsVal = (Nat$c$0) f;
+      modelPeriodNs = Math.round(1e9 / nn);
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
       // Live change: fixed-rate deadlines restart from now, no warmup.
-      if (started){ frame.restartModelTimer(Math.round(1e9 / nn), 0, actions); }
+      if (started){ frame.restartModelTimer(modelPeriodNs, 0, actions); }
     });
     return this;
   }

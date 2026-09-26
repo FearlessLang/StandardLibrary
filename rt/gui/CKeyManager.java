@@ -35,8 +35,6 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
   private MF$7$1 task(int eventKey,List<KeyAction$m8$0> keyActions){
     var elapsed=frame.elapsed;
-    var screenWidth=frame.screenWidth;
-    var screenHeight=frame.screenHeight;
     var panelWidth=w(frame.top.component.getWidth());
     var panelHeight=h(frame.top.component.getHeight());
 
@@ -50,7 +48,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
           if (key == null){ key = k; }
           copyActions((EList$1k$1)ka.mut$actions$0(),actions);
         }
-        var ctx=new CKeyCtx(elapsed,screenWidth,screenHeight,panelWidth,panelHeight,key);
+        var ctx=new CKeyCtx(elapsed,frame,panelWidth,panelHeight,key);
         for (var a:actions){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
       }
@@ -86,15 +84,14 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
 record CKeyCtx(
   Instant$5c$0 elapsed,
-  WidthNat$as$0 screenWidth,
-  HeightNat$lg$0 screenHeight,
+  _Frame frame,
   WidthNat$as$0 panelWidth,
   HeightNat$lg$0 panelHeight,
   KeyStroke$m8$0 keyStroke
   ) implements KeyEvent$b4$0{
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object read$screenWidth$0(){ return screenWidth; }
-  @Override public Object read$screenHeight$0(){ return screenHeight; }
+  @Override public Object read$screenWidth$0(){ return w(frame.screenW); }
+  @Override public Object read$screenHeight$0(){ return h(frame.screenH); }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
   @Override public Object imm$keyStroke$0(){ return keyStroke; }
