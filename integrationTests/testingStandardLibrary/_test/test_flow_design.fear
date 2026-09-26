@@ -203,9 +203,19 @@ FlowDesignDistinctFirst: Test {::
   }
 
 FlowDesignSortFilter: Test {::
-  .check{L#.flow.map{x -> x}.sort(Rev#(By#Up)).filter{::>3}.list .assertEq({::}, Lists#(7,6,5,4))}
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(Rev#(By#Up)).filter{::>3}.list})
-  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.map{x -> x}.sort(Rev#(By#(Up, 3))).filter{::>3}.list})
+  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).filter{::>3}.list .assertEq({::}, Lists#(7,6,5,4))}
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(Rev#(By#Up)).filter{::>3}.list})
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#(Up, 3))).filter{::>3}.list})
+  .checkDetErr({::.isMsg{:: == "p6"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).filter{x -> ErrIf#(x == 2, "p2", ErrIf#(x == 6, "p6", x > 3))}.list})
+  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).filter{x -> ErrIf#(x == 8, "p8", (x.getRem 2) == 0)}.list .assertEq({::}, Lists#(6,4,2,0))}
+  }
+
+FlowDesignSortSort: Test {::
+  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(By#Parity).sort(By#Quarter).list .assertEq({::}, Lists#(0,2,1,3,4,6,5,7))}
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(By#Parity).sort(By#Quarter).list})
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(By#(Parity, 3)).sort(By#Quarter).list})
+  .checkDetErr({::.isMsg{:: == "by5"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(By#Parity).sort(By#(Quarter, 5)).list})
+  .checkDetErr({::.isMsg{:: == "f6"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 6, "f6", x)}.sort(By#(Parity, 3)).sort(By#Quarter).list})
   }
 
 FlowDesignUnreadStage: Test {::
@@ -214,6 +224,12 @@ FlowDesignUnreadStage: Test {::
   .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x * 2))}.last})
   .check{L#.seqFlow.map{x -> x * 2}.size .assertEq 8}
   .checkDetErr({::.isMsg{:: == "f3"}}, {L#.seqFlow.map{x -> ErrIf#(x == 3, "f3", x * 2)}.size})
+  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).sort(Rev#(By#Up)).list .assertEq({::}, Lists#(7,6,5,4,3,2,1,0))}
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).sort(Rev#(By#(Up, 3))).list})
+  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).size .assertEq 8}
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#(Up, 3))).size})
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 2, "f2", x)}.sort(Rev#(By#Up)).size})
+  .check{L#.flow.suppressOrderingErrors.map{x -> x * 2}.size .assertEq 8}
   }
 
 FlowDesignRecompute: Test {::
@@ -286,6 +302,7 @@ TestFlowDesign: Test {::
   .test FlowDesignSortLast
   .test FlowDesignDistinctFirst
   .test FlowDesignSortFilter
+  .test FlowDesignSortSort
   .test FlowDesignUnreadStage
   .test FlowDesignRecompute
   .test FlowDesignCloseCalls
