@@ -62,6 +62,14 @@ MapWithContextViaActorMut: {
       Continue#)});
   }
 
+IfSome: { #[E:*](b: Bool, e: E): mut Opt[E] -> b ?[mut Opt[E]]{ .then -> Opts#e; .else -> {} } }
+BreakOnBig: {
+  #(es: mut Flow[Nat]): mut Flow[Nat] ->
+    es.actorMut[Void, Nat](Void, {down, _, e -> Block#(
+      down.pushOpt#(down, IfSome#(e <= 5, e)),
+      e > 5 ? { .then -> Break#; .else -> Continue# })});
+  }
+
 Pairs: { read .a: List[Str]; read .b: List[Str]; }
 SameSize: { #(pre: Str, x: Str, y: Str): mut Opt[Str] ->
   x.size == (y.size) ?[mut Opt[Str]]{ .then -> Opts#(pre + x + y); .else -> {} } }

@@ -32,7 +32,6 @@ ActorSink[E:*]: Sealed {
   read .push: ActorSinkHelper -> ActorSinkHelper;
   read .pushOpt: ActorSinkOptHelper -> ActorSinkOptHelper;
   mut #(E): Void;
-  mut .pushError(Info): Void;
   }
 
 /// ``ActorSinkHelper#(down, e)`` is ``down#e``, on a ``mutH`` sink too.
