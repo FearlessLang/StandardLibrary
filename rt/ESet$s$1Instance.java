@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import static base.Util.*;
 import static base.Set$c$1Instance.extractKey;
 
-final class ESet$s$1Instance implements ESet$s$1 {
+public final class ESet$s$1Instance implements ESet$s$1 {
     /// A map to allow for O(1) get
     private LinkedHashMap<MapKey, Object> set;
     private final OrderHashBy$2ea$2 ordering;

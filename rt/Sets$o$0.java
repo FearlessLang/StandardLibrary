@@ -1,8 +1,9 @@
 package base;
 
+import base.Set$c$1Instance;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 
 public interface Sets$o$0 extends Sealed$2o$0 {

@@ -63,6 +63,18 @@ public class Util{
       if (o == null) {return optEmpty();}
       return optSome(o);
   }
+  public static Object optToNull(Object opt) {
+    if (optIsSome(opt)) {
+      return optGet(opt);
+    }
+    return null;
+  }
+  public static boolean optIsSome(Object opt) {
+    return isTrue(((Opt$c$1) opt).read$isSome$0());
+  }
+  public static boolean optGet(Object opt) {
+    return isTrue(((Opt$c$1) opt).read$$bang$0());
+  }
   public static Opt$c$1 toOpt(Optional<?> opt) {
     return optNullable(opt.orElse(null));
   }

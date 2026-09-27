@@ -75,7 +75,7 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.fillWith(list)`` uses the elements in ``list`` to fill the holes in this, starting from index 0,
   /// expanding the capacity of this if necessary to fit all elements in ``list``.
-  mut .fillAndExpand(EList[E]): mut ESparseList[E];
+  mut .fillAndExpand(source: EList[E]): mut ESparseList[E];
 
   /// ``this.seqFlowOpts`` drains the spare list into a sequential flow of ``Opt[E]``.
   /// where .empty if the element is a hole, and .some(e) if there is e is present.
@@ -133,5 +133,6 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.list`` returns ``this`` as .some of an``Elist`` if there are no holes. ``.empty`` if holes are present.
   /// Note: this operation drains the collection if it succeeds so ``this`` will be empty with the same capacity.
-  mut .list: mut Opt[mut EList[E]] -> this.isFull .toOpt {this.getList};
+  /// Warning: Throws if ``this.capacity > 2147483647``, as the list uses a Java list under the hood, which cannot be larger than 2147483647.
+  mut .list: mut Opt[mut EList[E]];
   }

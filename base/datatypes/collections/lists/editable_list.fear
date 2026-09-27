@@ -44,11 +44,6 @@ _EditableList[E:*, Self]: Pipe[Self],ToInfo[E] {
   /// ``this.remove(i)`` removes the element at index ``i``, returning ``this``.
   /// If the index is already empty this does nothing.
   /// Throws if ``i`` is out of bounds.
-  mut .softRemove(Nat): mut Self;
-
-  /// ``this.remove(i)`` removes the element at index ``i``, returning ``this``.
-  /// If the index is already empty this does nothing.
-  /// Throws if ``i`` is out of bounds.
   mut .remove(Nat): mut Self;
 
   /// ``this.removeAll indices`` removes each element at index ``i``.
