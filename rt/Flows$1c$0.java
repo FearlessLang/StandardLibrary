@@ -28,7 +28,7 @@ public interface Flows$1c$0 extends Sealed$2o$0{
   default Object imm$fromImmList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream()); }
 
 
-  default Object imm$seqFromMutList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream()); }//sequential
+  default Object imm$seqFromMutList$1(Object p0){ return _base.Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream()); }//sequential
   default Object imm$seqFromReadList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream()); }//parallel!
   default Object imm$seqFromImmList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0).stream()); }//parallel!
 

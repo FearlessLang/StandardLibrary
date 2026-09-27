@@ -17,7 +17,7 @@ public record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1 {
   private static Error consumed(){ return _base.Util.err("Flow consumed"); }
   static Flow$o$1Instance of(Object... args){ return Flow$o$1Instance.of(Stream.of(args)); }
   static Flow$o$1Instance of(Stream<Object> stream) {return new Flow$o$1Instance(stream);}
-
+  static Stream<Object> unwrap(Object p0) { return ((Flow$o$1Instance) p0).s; }
   @Override public Object mut$map$1(Object p0){
     try{ return new Flow$o$1Instance(s.map(e-> _base.Util.callF$2(p0,e))); }
     catch(IllegalStateException e){ throw consumed(); }
@@ -73,6 +73,9 @@ public record Flow$o$1Instance(Stream<Object> s) implements Flow$o$1 {
     }
     catch(IllegalStateException e){ throw consumed(); }
   }
+  @Override public Object mut$with$1(Object p0) {return new _base.BiFlow(this.s, unwrap(p0));}
+  @Override public Object mut$withBoth$1(Object p0) {return new _base.TriFlow(new _base.SingleChannelFlow(this.s), (_base.BiFlow) p0);}
+  @Override public Object mut$withAll$1(Object p0) {return new _base.QuadFlow(new _base.SingleChannelFlow(this.s), (_base.TriFlow) p0); }
   @Override public Object mut$fold$2(Object p0,Object p1){
     try{
       var it= s.iterator();

@@ -56,6 +56,12 @@ Flow[E:*]: {
   mut .eList: mut EList[E];
   mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
   mut .eSet[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): mut ESet[E'];
+  /// ``this.with(flow)`` returns a BiFlow with ``flow`` added as a new channel.
+  mut .with[B:*](flow: mut Flow[B]): mut BiFlow[E,B];
+  /// ``this.withBoth(flow)`` returns a TriFlow with both channels from ``flow`` added.
+  mut .withBoth[B:*,C:*](flow: mut BiFlow[B,C]): mut TriFlow[E,B,C];
+  /// ``this.withAll(flow)`` returns a QuadFlow with both channels from ``flow`` added.
+  mut .withAll[B:*,C:*,D:*](flow: mut TriFlow[B,C,D]): mut QuadFlow[E,B,C,D];
   /// ``this.mapping(by, kem)`` returns a map holding one entry per element of `this`,
   /// keyed by ``kem.key`` under ``by`` and holding ``kem.elem``, in flow order.
   /// Throws a deterministic error when two elements produce the same key.
