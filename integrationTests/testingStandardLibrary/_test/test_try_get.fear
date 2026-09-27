@@ -46,7 +46,7 @@ TryGetCollectionTests: Test {::
   .check{ESets#[Nat,Nat]{::}.add(1).tryGetTake 3 .assertInfo{::.isMsg{::.startsWith `ESet.get`}}}
   .check{(ESets#[Nat,Nat]{::}.add(1).tryGetTake 1).ok.assertEq({::}, Opts#(1))}
   .check{(ELists#[Nat].add(4).tryGet 0).ok.assertEq({::}, Opts#(4))}
-  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 0 out of range for EList of length 0"}}}
+  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 0 out of bounds for EList of length 0"}}}
   .check{(Flows#(1,2).tryGet).assertInfo{::.isMsg{::.startsWith `Flow.get`}}}
   .check{(Flows#(1).tryGet).ok.assertEq({::}, Opts#(1))}
   .check{(Flows#(1,2).tryGetOpt).assertInfo{::.isMsg{::.startsWith `Flow.getOpt`}}}
@@ -78,12 +78,12 @@ FloatNumConversionTests: Test {::
 SuccPredTests: Test {::
   .check{5 .succ .assertEq 6}
   .check{+5 .pred .assertEq +4}
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat+: overflow"}}, {(Math.maxNat).succ})
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat-: underflow"}}, {0 .pred})
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int+`}}, {(Math.maxInt).succ})
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int+`}}, {(Math.minInt).pred})
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Byte+`}}, {(Math.maxByte).succ})
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Byte-`}}, {(Math.minByte).pred})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.succ: cannot take the successor of 18446744073709551615"}}, {(Math.maxNat).succ})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.pred: cannot take the predecessor of 0"}}, {0 .pred})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int.succ:`}}, {(Math.maxInt).succ})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int.pred:`}}, {(Math.minInt).pred})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Byte.succ:`}}, {(Math.maxByte).succ})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Byte.pred:`}}, {(Math.minByte).pred})
   .checkDetErr({::.isMsg{::.startsWith `Float.getSucc`}}, {Math.nan.getSucc})
   .check{Math.inf.tryGetSucc.assertInfo{::.isMsg{::.startsWith `Float.getSucc`}}}
   .check{(1.0 .tryGetSucc).ok.assertEq({::}, Opts#(1.0 .getSucc))}
@@ -116,8 +116,8 @@ TryGetNamesGetTests: Test {::
   .check{List[Nat].tryGetLast.assertInfo{::.isMsg{::.startsWith "List.getLast: called on empty list"}}}
   .checkDetErr({::.isMsg{::.startsWith "Map.get: Tried to get key "}}, {Maps#({::}, "a", 1).get "b"})
   .check{Maps#({::}, "a", 1).tryGet "b" .assertInfo{::.isMsg{::.startsWith "Map.get: Tried to get key "}}}
-  .checkDetErr({::.isMsg{::.startsWith "EList.get: EList index 3 out of range for EList of length 1"}}, {ELists#[Nat].add(4).get 3})
-  .check{ELists#[Nat].add(4).tryGet 3 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 3 out of range for EList of length 1"}}}
+  .checkDetErr({::.isMsg{::.startsWith "EList.get: EList index 3 out of bounds for EList of length 1"}}, {ELists#[Nat].add(4).get 3})
+  .check{ELists#[Nat].add(4).tryGet 3 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 3 out of bounds for EList of length 1"}}}
   }
 
 TestTryGet: Test {::

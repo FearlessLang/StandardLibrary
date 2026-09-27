@@ -151,7 +151,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, unwrap(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
-    long power = unsignedLongFromNat(p0);
+    long power = Nat$c$0Instance.unwrap(p0);
     if (power == 0) { return Int$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
     long result = 1, base = val;
@@ -164,10 +164,10 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
       }
     }
     catch(ArithmeticException e){
-      if (unsignedLongFromNat(p0) % 2 == 1 && this.val < 0) {
-        throw nonDetErr(underflowMessage("**", val, unwrap(p0)));
+      if (Nat$c$0Instance.unwrap(p0) % 2 == 1 && this.val < 0) {
+        throw nonDetErr(underflowMessage("**", val, Nat$c$0Instance.unwrap(p0)));
       }
-      throw nonDetErr(overflowMessage("**", val, unwrap(p0)));
+      throw nonDetErr(overflowMessage("**", val, Nat$c$0Instance.unwrap(p0)));
     }
   }
 
