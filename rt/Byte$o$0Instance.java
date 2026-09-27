@@ -33,10 +33,10 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   private static long natBits(Object o){ return ((Nat$c$0Instance)o).val(); }
 
   private static String overflowErrorMsg(String operator, byte a, byte b) {
-    return "Byte " + operator + ": overflow " + u8(a) + " " + operator + " " + u8(b) + " is greater than " + Long.toUnsignedString(MAX_VALUE_LONG);
+    return "Byte" + operator + ": overflow " + u8(a) + " " + operator + " " + u8(b) + " is greater than " + Long.toUnsignedString(MAX_VALUE_LONG);
   }
   private static String underflowErrorMsg(String operator, byte a, byte b) {
-    return "Byte " + operator + ": underflow " + u8(a) + " " + operator + " " + u8(b) + " is less than 0";
+    return "Byte" + operator + ": underflow " + u8(a) + " " + operator + " " + u8(b) + " is less than 0";
   }
 
   private static byte addChecked(byte a, byte b){
@@ -73,16 +73,17 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0), "*")); }
   @Override public Object imm$$star_star$1(Object p0) {
     int power = u8(p0);
+    byte pow = b(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
     int result = 1, base = u8(val);
-    String overflowMsg = overflowErrorMsg("**", this.val, (byte) power);
+    String overflowMsg = overflowErrorMsg("**", this.val, pow);
     while (true) {
-      if ((power & 1) != 0){ result = powMul(result, base, val, power); }
+      if ((power & 1) != 0){ result = powMul(result, base, val, pow); }
       power >>>= 1;
       if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
 
-      base = powMul(base, base, val, power);
+      base = powMul(base, base, val, pow);
     }
   }
   private static int powMul(int a, int b, byte val, Object power){

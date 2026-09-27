@@ -54,7 +54,7 @@ public abstract class MultiFlow {
     return data;
   }
 
-  protected Stream<Object> zipExact(Function<Object[], T> merger) {
+  protected Stream<Object> zipExact(Function<Object[], Object> merger) {
     var self = this;
 
     Iterator<Object> iter = new Iterator<>() {

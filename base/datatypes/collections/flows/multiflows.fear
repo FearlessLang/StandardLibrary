@@ -1,201 +1,201 @@
-_MultiFlow[Self]: {
-  /// `this.noMoreThan(n)` returns a `this` limited to the first `n` elements of each channel,
-  /// truncating silently if `n` exceeds a channel's size.
+_MultiFlow[Self]: Pipe[Self]{
+  /// ``this.noMoreThan(n)`` returns a ``this`` limited to the first ``n`` elements of each channel,
+  /// truncating silently if ``n`` exceeds a channel's size.
   mut .noMoreThan(n: Nat): mut Self;
 
-  /// `this.cutToSmallest` explicitly limits this multiflow to the smallest of the n channels.
+  /// ``this.cutToSmallest`` explicitly limits this multiflow to the smallest of the n channels.
   mut .cutToSmallest: mut Self;
   }
 
-BiFlow[A:*,B:*]: Pipe[BiFlow[A,B]] {
+BiFlow[A:*,B:*]: _MultiFlow[BiFlow[A,B]] {
 
-  /// `this.with(flow)` returns a TriFlow with `flow` added as a new channel.
+  /// ``this.with(flow)`` returns a TriFlow with ``flow`` added as a new channel.
   mut .with[C:*](flow: mut Flow[C]): mut TriFlow[A,B,C];
 
-  /// `this.withBoth(flow)` returns a QuadFlow with both channels from `flow` added.
+  /// ``this.withBoth(flow)`` returns a QuadFlow with both channels from ``flow`` added.
   mut .withBoth[C:*,D:*](flow: mut BiFlow[C,D]): mut QuadFlow[A,B,C,D];
 
-  /// `this.enumerate` returns a TriFlow with a channel of indices (starting from 0) prepended.
-  /// The index channel has size equal to `this.maxSize`.
-  /// Note: this mutates this BiFlow; references to it before this call will be broken.
-  mut .enumerate: mut TriFlow[Nat,A,B]
-    -> 0=~~(this.maxSize).flow.withBoth(this);
+  // ``this.enumerate`` returns a TriFlow with a channel of indices (starting from 0) prepended.
+  // The index channel has size equal to ``this.maxSize``.
+  // Note: this mutates this BiFlow; references to it before this call will be broken.
+  //mut .enumerate: mut TriFlow[Nat,A,B]
+  //  -> 0=~~(this.maxSize).flow.withBoth(this);
 
-  /// `this.getMerge(f)` merges both channels using `f`.
+  /// ``this.getMerge(f)`` merges both channels using ``f``.
   /// Throws if the channels differ in size.
   mut .getMerge[R:*](f: read F[A,B,R]): mut Flow[R];
 
-  /// `this.merge(f)` returns `.some` of the merged flow if the channels are the same size,
-  /// otherwise `.empty`.
+  /// ``this.merge(f)`` returns ``.some`` of the merged flow if the channels are the same size,
+  /// otherwise ``.empty``.
   mut .merge[R:*](f: read F[A,B,R]): mut Opt[mut Flow[R]];
 
-  /// `this.mergeOpts(f)` merges both channels using `f`, passing `.empty` for missing values.
+  /// ``this.mergeOpts(f)`` merges both channels using ``f``, passing ``.empty`` for missing values.
   /// Continues until all channels are exhausted.
   mut .mergeOpts[R:*](f: read F[Opt[A],Opt[B],R]): mut Flow[R];
 
-  /// `this.getFold(acc, f)` folds both channels pairwise from left to right, starting from `acc`.
-  /// For each pair `(a, b)` the accumulator is updated to `f#(acc, a, b)`.
+  /// ``this.getFold(acc, f)`` folds both channels pairwise from left to right, starting from ``acc``.
+  /// For each pair ``(a, b)`` the accumulator is updated to ``f#(acc, a, b)``.
   /// Throws if the channels differ in size.
   mut .getFold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,R]): R;
 
-  /// `this.fold(acc, f)` returns `.some` of the fold result if the channels are the same size,
-  /// otherwise `.empty`.
+  /// ``this.fold(acc, f)`` returns ``.some`` of the fold result if the channels are the same size,
+  /// otherwise ``.empty``.
   mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,R]): mut Opt[R];
 
-  /// `this.foldOpts(acc, f)` folds both channels pairwise from left to right, starting from `acc`,
-  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  /// ``this.foldOpts(acc, f)`` folds both channels pairwise from left to right, starting from ``acc``,
+  /// passing ``.empty`` for missing values. Continues until all channels are exhausted.
   mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],R]): R;
 
-  /// `this.getFoldUntil(acc, f, pred)` folds both channels pairwise from left to right, starting
-  /// from `acc`, updating the accumulator with `f` at each pair and stopping as soon as `pred`
-  /// is true of the resulting accumulator (that pair is included in the result). If `pred` is
+  /// ``this.getFoldUntil(acc, f, pred)`` folds both channels pairwise from left to right, starting
+  /// from ``acc``, updating the accumulator with ``f`` at each pair and stopping as soon as ``pred``
+  /// is true of the resulting accumulator (that pair is included in the result). If ``pred`` is
   /// never satisfied, folds all the way through and returns the final accumulator.
   /// Throws if the channels differ in size.
   mut .getFoldUntil[R:*](acc: mut MF[R], f: read F[R,A,B,R], pred: read F[R,Bool]): R;
 
-  /// `this.foldUntil(acc, f, pred)` returns `.some` of the `getFoldUntil` result if the channels
-  /// are the same size, otherwise `.empty`.
+  /// ``this.foldUntil(acc, f, pred)`` returns ``.some`` of the ``getFoldUntil`` result if the channels
+  /// are the same size, otherwise ``.empty``.
   mut .foldUntil[R:*](acc: mut MF[R], f: read F[R,A,B,R], pred: read F[R,Bool]): mut Opt[R];
 
-  /// `this.foldOptsUntil(acc, f, pred)` folds both channels pairwise from left to right, starting
-  /// from `acc`, passing `.empty` for missing values, and stopping as soon as `pred` is true of
-  /// the resulting accumulator. Continues until all channels are exhausted or `pred` is satisfied.
+  /// ``this.foldOptsUntil(acc, f, pred)`` folds both channels pairwise from left to right, starting
+  /// from ``acc``, passing ``.empty`` for missing values, and stopping as soon as ``pred`` is true of
+  /// the resulting accumulator. Continues until all channels are exhausted or ``pred`` is satisfied.
   mut .foldOptsUntil[R:*](acc: mut MF[R], f: read F[R,Opt[A],Opt[B],R], pred: read F[R,Bool]): R;
 
-  /// `this.fillA(f)` returns a BiFlow where missing values in channel A are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillA(f)`` returns a BiFlow where missing values in channel A are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillA(f: read F[Nat,A]): mut BiFlow[A,B];
 
-  /// `this.fillB(f)` returns a BiFlow where missing values in channel B are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillB(f)`` returns a BiFlow where missing values in channel B are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillB(f: read F[Nat,B]): mut BiFlow[A,B];
   }
 
 
-TriFlow[A:*,B:*,C:*]: Pipe[TriFlow[A,B,C]], _MultiFlow {
+TriFlow[A:*,B:*,C:*]: _MultiFlow[TriFlow[A,B,C]] {
 
-  /// `this.with(flow)` returns a QuadFlow with `flow` added as a new channel.
+  /// ``this.with(flow)`` returns a QuadFlow with ``flow`` added as a new channel.
   mut .with[D:*](flow: mut Flow[D]): mut QuadFlow[A,B,C,D];
 
-  /// `this.enumerate` returns a QuadFlow with a channel of indices (starting from 0) prepended.
-  /// The index channel has size equal to `this.maxSize`.
-  /// Note: this mutates this TriFlow; references to it before this call will be broken.
-  mut .enumerate: mut QuadFlow[Nat,A,B,C]
-    -> 0~~(this.maxSize).list.flow.withAll(this);
+  // ``this.enumerate`` returns a QuadFlow with a channel of indices (starting from 0) prepended.
+  // The index channel has size equal to ``this.maxSize``.
+  // Note: this mutates this TriFlow; references to it before this call will be broken.
+  // mut .enumerate: mut QuadFlow[Nat,A,B,C]
+  //  -> 0~~(this.maxSize).list.flow.withAll(this);
 
-  /// `this.fillA(f)` returns a TriFlow where missing values in channel A are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillA(f)`` returns a TriFlow where missing values in channel A are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillA(f: read F[Nat,A]): mut TriFlow[A,B,C];
 
-  /// `this.fillB(f)` returns a TriFlow where missing values in channel B are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillB(f)`` returns a TriFlow where missing values in channel B are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillB(f: read F[Nat,B]): mut TriFlow[A,B,C];
 
-  /// `this.fillC(f)` returns a TriFlow where missing values in channel C are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillC(f)`` returns a TriFlow where missing values in channel C are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillC(f: read F[Nat,C]): mut TriFlow[A,B,C];
 
-  /// `this.getMerge(f)` merges all three channels using `f`.
+  /// ``this.getMerge(f)`` merges all three channels using ``f``.
   /// Throws if the channels differ in size.
   mut .getMerge[R:*](f: read F[A,B,C,R]): mut Flow[R];
 
-  /// `this.merge(f)` returns `.some` of the merged flow if all channels are the same size,
-  /// otherwise `.empty`.
+  /// ``this.merge(f)`` returns ``.some`` of the merged flow if all channels are the same size,
+  /// otherwise ``.empty``.
   mut .merge[R:*](f: read F[A,B,C,R]): mut Opt[mut Flow[R]];
 
-  /// `this.mergeOpts(f)` merges all three channels using `f`, passing `.empty` for missing values.
+  /// ``this.mergeOpts(f)`` merges all three channels using ``f``, passing ``.empty`` for missing values.
   /// Continues until all channels are exhausted.
   mut .mergeOpts[R:*](f: read F[Opt[A],Opt[B],Opt[C],R]): mut Flow[R];
 
-  /// `this.getFold(acc, f)` folds all three channels from left to right, starting from `acc`.
-  /// For each triple `(a, b, c)` the accumulator is updated to `f#(acc, a, b, c)`.
+  /// ``this.getFold(acc, f)`` folds all three channels from left to right, starting from ``acc``.
+  /// For each triple ``(a, b, c)`` the accumulator is updated to ``f#(acc, a, b, c)``.
   /// Throws if the channels differ in size.
   mut .getFold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,R]): R;
 
-  /// `this.fold(acc, f)` returns `.some` of the fold result if all channels are the same size,
-  /// otherwise `.empty`.
+  /// ``this.fold(acc, f)`` returns ``.some`` of the fold result if all channels are the same size,
+  /// otherwise ``.empty``.
   mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,R]): mut Opt[R];
 
-  /// `this.foldOpts(acc, f)` folds all three channels from left to right, starting from `acc`,
-  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  /// ``this.foldOpts(acc, f)`` folds all three channels from left to right, starting from ``acc``,
+  /// passing ``.empty`` for missing values. Continues until all channels are exhausted.
   mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],Opt[C],R]): R;
 
-  /// `this.getFoldUntil(acc, f, pred)` folds all three channels from left to right, starting
-  /// from `acc`, updating the accumulator with `f` at each triple and stopping as soon as `pred`
-  /// is true of the resulting accumulator (that triple is included in the result). If `pred` is
+  /// ``this.getFoldUntil(acc, f, pred)`` folds all three channels from left to right, starting
+  /// from ``acc``, updating the accumulator with ``f`` at each triple and stopping as soon as ``pred``
+  /// is true of the resulting accumulator (that triple is included in the result). If ``pred`` is
   /// never satisfied, folds all the way through and returns the final accumulator.
   /// Throws if the channels differ in size.
-  mut .getFoldUntil[R:*](acc: mut MF[R], f: read F[R,A,B,C,R], pred: read F[R,Bool]): R;
+  mut .getFoldUntil[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,R], pred: read F[R,Bool]): R;
 
-  /// `this.foldUntil(acc, f, pred)` returns `.some` of the `getFoldUntil` result if all channels
-  /// are the same size, otherwise `.empty`.
+  /// ``this.foldUntil(acc, f, pred)`` returns ``.some`` of the ``getFoldUntil`` result if all channels
+  /// are the same size, otherwise ``.empty``.
   mut .foldUntil[R:*](acc: mut MF[R], f: read F[R,A,B,C,R], pred: read F[R,Bool]): mut Opt[R];
 
-  /// `this.foldOptsUntil(acc, f, pred)` folds all three channels from left to right, starting
-  /// from `acc`, passing `.empty` for missing values, and stopping as soon as `pred` is true of
-  /// the resulting accumulator. Continues until all channels are exhausted or `pred` is satisfied.
+  /// ``this.foldOptsUntil(acc, f, pred)`` folds all three channels from left to right, starting
+  /// from ``acc``, passing ``.empty`` for missing values, and stopping as soon as ``pred`` is true of
+  /// the resulting accumulator. Continues until all channels are exhausted or ``pred`` is satisfied.
   mut .foldOptsUntil[R:*](acc: mut MF[R], f: read F[R,Opt[A],Opt[B],Opt[C],R], pred: read F[R,Bool]): R;
   }
 
 
-QuadFlow[A:*,B:*,C:*,D:*]: Pipe[QuadFlow[A,B,C,D]], _MultiFlow {
+QuadFlow[A:*,B:*,C:*,D:*]: _MultiFlow[QuadFlow[A,B,C,D]] {
 
-  /// `this.fillA(f)` returns a QuadFlow where missing values in channel A are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillA(f)`` returns a QuadFlow where missing values in channel A are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillA(f: read F[Nat,A]): mut QuadFlow[A,B,C,D];
 
-  /// `this.fillB(f)` returns a QuadFlow where missing values in channel B are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillB(f)`` returns a QuadFlow where missing values in channel B are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillB(f: read F[Nat,B]): mut QuadFlow[A,B,C,D];
 
-  /// `this.fillC(f)` returns a QuadFlow where missing values in channel C are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillC(f)`` returns a QuadFlow where missing values in channel C are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillC(f: read F[Nat,C]): mut QuadFlow[A,B,C,D];
 
-  /// `this.fillD(f)` returns a QuadFlow where missing values in channel D are filled using `f(n)`
-  /// where `n` is the index of the missing slot.
+  /// ``this.fillD(f)`` returns a QuadFlow where missing values in channel D are filled using ``f(n)``
+  /// where ``n`` is the index of the missing slot.
   mut .fillD(f: read F[Nat,D]): mut QuadFlow[A,B,C,D];
 
-  /// `this.getMerge(f)` merges all four channels using `f`.
+  /// ``this.getMerge(f)`` merges all four channels using ``f``.
   /// Throws if the channels differ in size.
   mut .getMerge[R:*](f: read F[A,B,C,D,R]): mut Flow[R];
 
-  /// `this.merge(f)` returns `.some` of the merged flow if all channels are the same size,
-  /// otherwise `.empty`.
+  /// ``this.merge(f)`` returns ``.some`` of the merged flow if all channels are the same size,
+  /// otherwise ``.empty``.
   mut .merge[R:*](f: read F[A,B,C,D,R]): mut Opt[mut Flow[R]];
 
-  /// `this.mergeOpts(f)` merges all four channels using `f`, passing `.empty` for missing values.
+  /// ``this.mergeOpts(f)`` merges all four channels using ``f``, passing ``.empty`` for missing values.
   /// Continues until all channels are exhausted.
   mut .mergeOpts[R:*](f: read F[Opt[A],Opt[B],Opt[C],Opt[D],R]): mut Flow[R];
 
-  /// `this.getFold(acc, f)` folds all four channels from left to right, starting from `acc`.
-  /// For each tuple `(a, b, c, d)` the accumulator is updated to `f#(acc, a, b, c, d)`.
+  /// ``this.getFold(acc, f)`` folds all four channels from left to right, starting from ``acc``.
+  /// For each tuple ``(a, b, c, d)`` the accumulator is updated to ``f#(acc, a, b, c, d)``.
   /// Throws if the channels differ in size.
   mut .getFold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R]): R;
 
-  /// `this.fold(acc, f)` returns `.some` of the fold result if all channels are the same size,
-  /// otherwise `.empty`.
+  /// ``this.fold(acc, f)`` returns ``.some`` of the fold result if all channels are the same size,
+  /// otherwise ``.empty``.
   mut .fold[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R]): mut Opt[R];
 
-  /// `this.foldOpts(acc, f)` folds all four channels from left to right, starting from `acc`,
-  /// passing `.empty` for missing values. Continues until all channels are exhausted.
+  /// ``this.foldOpts(acc, f)`` folds all four channels from left to right, starting from ``acc``,
+  /// passing ``.empty`` for missing values. Continues until all channels are exhausted.
   mut .foldOpts[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],Opt[C],Opt[D],R]): R;
 
-  /// `this.getFoldUntil(acc, f, pred)` folds all four channels from left to right, starting
-  /// from `acc`, updating the accumulator with `f` at each tuple and stopping as soon as `pred`
-  /// is true of the resulting accumulator (that tuple is included in the result). If `pred` is
+  /// ``this.getFoldUntil(acc, f, pred)`` folds all four channels from left to right, starting
+  /// from ``acc``, updating the accumulator with ``f`` at each tuple and stopping as soon as ``pred``
+  /// is true of the resulting accumulator (that tuple is included in the result). If ``pred`` is
   /// never satisfied, folds all the way through and returns the final accumulator.
   /// Throws if the channels differ in size.
-  mut .getFoldUntil[R:*](acc: mut MF[R], f: read F[R,A,B,C,D,R], pred: read F[R,Bool]): R;
+  mut .getFoldUntil[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R], pred: read F[R,Bool]): R;
 
-  /// `this.foldUntil(acc, f, pred)` returns `.some` of the `getFoldUntil` result if all channels
-  /// are the same size, otherwise `.empty`.
-  mut .foldUntil[R:*](acc: mut MF[R], f: read F[R,A,B,C,D,R], pred: read F[R,Bool]): mut Opt[R];
+  /// ``this.foldUntil(acc, f, pred)`` returns ``.some`` of the ``getFoldUntil`` result if all channels
+  /// are the same size, otherwise ``.empty``.
+  mut .foldUntil[R:*](acc: mut MF[R], f: read MultiAcc[A,B,C,D,R], pred: read F[R,Bool]): mut Opt[R];
 
-  /// `this.foldOptsUntil(acc, f, pred)` folds all four channels from left to right, starting
-  /// from `acc`, passing `.empty` for missing values, and stopping as soon as `pred` is true of
-  /// the resulting accumulator. Continues until all channels are exhausted or `pred` is satisfied.
-  mut .foldOptsUntil[R:*](acc: mut MF[R], f: read F[R,Opt[A],Opt[B],Opt[C],Opt[D],R], pred: read F[R,Bool]): R;
+  /// ``this.foldOptsUntil(acc, f, pred)`` folds all four channels from left to right, starting
+  /// from ``acc``, passing ``.empty`` for missing values, and stopping as soon as ``pred`` is true of
+  /// the resulting accumulator. Continues until all channels are exhausted or ``pred`` is satisfied.
+  mut .foldOptsUntil[R:*](acc: mut MF[R], f: read MultiAcc[Opt[A],Opt[B],Opt[C],Opt[D],R], pred: read F[R,Bool]): R;
   }
 
 

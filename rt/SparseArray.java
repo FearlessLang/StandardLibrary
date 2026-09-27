@@ -434,7 +434,7 @@ public class SparseArray implements ESparseList$2rs$1 {
   }
 
   @Override
-  public Object mut$getList$0() {
+  public Object mut$getEList$0() {
     if (numHoles != 0) {
       throw err("ESparseList.getList: Cannot create an EList from an ESparseList that is not full ("
         + numHoles + " of " + capacity + " slots are holes). Fill the holes first.");
@@ -443,7 +443,7 @@ public class SparseArray implements ESparseList$2rs$1 {
   }
 
   @Override
-  public Object mut$list$0() {
+  public Object mut$eList$0() {
     if (numHoles != 0) {
       return optEmpty();
     }

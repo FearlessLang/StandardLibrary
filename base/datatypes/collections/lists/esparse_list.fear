@@ -132,14 +132,14 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.getList`` returns ``this`` as an ``EList``, throws if there are any holes in the collection.
   /// Note: this operation drains the collection  if it succeeds so ``this`` will be empty with the same capacity.
-  mut .getList: mut EList[E];
+  mut .getEList: mut EList[E];
 
   /// ``this.list`` returns ``this`` as .some of an``Elist`` if there are no holes. ``.empty`` if holes are present.
   /// Note: this operation drains the collection if it succeeds so ``this`` will be empty with the same capacity.
   /// Warning: Throws if ``this.capacity > 2147483647``, as the list uses a Java list under the hood, which cannot be larger than 2147483647.
   //>   .check{Block#
   //>   .let slist = {ESparseLists.backedWithArray[Nat] 3 .fillHoles {::}}
-  //>   .do{slist.list.assertEq({::}, Lists#(0,1,2))}
+  //>   .do{slist.getEList.list.assertEq({::}, Lists#(0,1,2))}
   //>   .do{slist.isEmpty.assertTrue}.done}
-  mut .list: mut Opt[mut EList[E]];
+  mut .eList: mut Opt[mut EList[E]];
   }

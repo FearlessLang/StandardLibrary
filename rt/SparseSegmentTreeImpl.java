@@ -322,7 +322,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
     // There exists a more efficient implementation, but this works for now
     List<Object> source = EList$1k$1Instance.unwrap(p0);
     if (lessThan(this.inner.numHoles(), source.size())) {
-      this.mut$softIncreaseCapacity$1(this.inner.capacity() +Nat$c$0Instance.instance(source.size()));
+      this.mut$softIncreaseCapacity$1(this.inner.capacity() + Nat$c$0Instance.unwrap(source.size()));
     }
     this.mut$fillFrom$1(p0);
     return this;
@@ -352,7 +352,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
   public Object mut$flatFlow$1(Object p0) { return Flow$o$1Instance.of(drainExcludeNull().parallel()); }
 
   @Override
-  public Object mut$getList$0() {
+  public Object mut$getEList$0() {
     if (inner.numHoles() != 0) {
       throw err("ESparseList.getList: Cannot create an EList from an ESparseList that is not full ("
         + inner.numHoles() + " of " + inner.capacity() + " slots are holes). Fill the holes first.");
@@ -366,7 +366,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
     return EList$1k$1Instance.unsafeWrap(eList);
   }
 
-  @Override public Object mut$list$0() {
+  @Override public Object mut$eList$0() {
     if (inner.numHoles() != 0) { return optEmpty(); }
     // should we return optEmpty for capacity >= Integer.MAX_VALUE, or just wrap this into an OOM error?
     ArrayList<Object> eList = new ArrayList<>((int) inner.capacity());

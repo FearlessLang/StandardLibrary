@@ -376,7 +376,7 @@ public class SparseMap implements ESparseList$2rs$1 {
   }
 
   @Override
-  public Object mut$getList$0() {
+  public Object mut$getEList$0() {
     if (holes() != 0) {
       throw err(
         "ESparseList.getSeqFlow: Cannot create a list from an ESparseList that is not full."
@@ -387,7 +387,7 @@ public class SparseMap implements ESparseList$2rs$1 {
   }
 
   @Override
-  public Object mut$list$0() {
+  public Object mut$eList$0() {
     if (holes() != 0) {
       return optEmpty();
     }

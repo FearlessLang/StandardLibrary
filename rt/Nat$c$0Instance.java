@@ -40,10 +40,10 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   private static long n(Object o){ return ((Nat$c$0Instance)o).val; }
   private static long i(Object o){ return ((Int$c$0Instance)o).val(); }
   private static String overflowMsg(String op, long a, long b) {
-    return "Nat " + op + ": overflow " + Long.toUnsignedString(a) + " " + op + " " + Long.toUnsignedString(b) + " is greater than " + Long.toUnsignedString(MAX_UNSIGNED_VALUE);
+    return "Nat" + op + ": overflow " + Long.toUnsignedString(a) + " " + op + " " + Long.toUnsignedString(b) + " is greater than " + Long.toUnsignedString(MAX_UNSIGNED_VALUE);
   }
   private static String underflowMsg(String op, long a, long b) {
-    return "Nat " + op + ": underflow " + Long.toUnsignedString(a) + " " + op + " " + Long.toUnsignedString(b) + " is less than 0";
+    return "Nat" + op + ": underflow " + Long.toUnsignedString(a) + " " + op + " " + Long.toUnsignedString(b) + " is less than 0";
   }
   /**
    * For a long to overflow a + b has to be greater than Long.MAX_VALUE

@@ -126,10 +126,10 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     );
   }
   private static String overflowMessage(String operator, long a, long b) {
-    return "Int "+operator+": overflow "+a+" "+operator+" "+b+" is greater than "+MAX_VALUE;
+    return "Int"+operator+": overflow "+a+" "+operator+" "+b+" is greater than "+MAX_VALUE;
   }
   private static String underflowMessage(String operator, long a, long b) {
-    return "Int "+operator+": underflow "+a+" "+operator+" "+b+" is greater than "+MAX_VALUE;
+    return "Int"+operator+": underflow "+a+" "+operator+" "+b+" is greater than "+MAX_VALUE;
   }
   @Override public Object imm$$plus$1(Object p0) {
     try {return instance(Math.addExact(val, unwrap(p0)));}

@@ -21,7 +21,7 @@ FlowForEachTests: Test {::
     }
   .check{Block#
     .let acc={ELists#[Nat]}
-    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.map{e->e+1}.forEach(acc, {a, e->a.add e})}
+    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.map{e->e+1}.forEach(acc, {a, e->a.add e .void})}
     .do{acc.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16))}
     .done
     }
