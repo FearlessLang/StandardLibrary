@@ -1,0 +1,62 @@
+/// A EList which guarantees sorted order of it's elements.
+/// Many operations will break the sorted order of this list,
+/// thus these operations must drain ``this`` so any references to it are still valid.
+SortedEList[E:*,K]: EList[E] {
+  read .order: OrderBy[imm E,K];
+  /// ``this.binarySearch(e)`` returns ``.found(i)`` where ``i`` is the index of the first found element that is equal to ``e``.
+  /// If no element exists, ``.notFound(i)``, where ``i`` is the index where ``e`` should be inserted to maintain the sort order.
+  /// Complexity: O(log(n)) where n is the number of elements in this list.
+  read .binarySearch[R:**](E, FoundMatcher[R]): R;
+
+  /// ``this.max`` returns the maximum element in this collection (determined by ``this.order``)
+  /// Complexity: O(1)
+  //>
+  read .max: mut Opt[read/imm E] -> this.last;
+  mut .max: mut Opt[E] -> this.last;
+
+  /// ``this.max`` returns the minimum element in this collection (determined by ``this.order``)
+  /// Complexity: O(1)
+  read .min: mut Opt[read/imm E] -> this.first;
+  mut .min: mut Opt[E] -> this.first;
+
+  /// ``this.clear`` removes all elements from this list.
+  mut .clear: mut SortedEList[E, K];
+  /// ``this.removeIf(f)`` removes all elements from this list for which ``f`` returns true.
+  mut .removeIf(mut MF[E, Bool]): mut SortedEList[E, K];
+  /// ``this.retainIf(f)`` removes all elements from this list for which ``f`` returns false.
+  mut .retainIf(mut MF[E, Bool]): mut SortedEList[E, K];
+  /// ``this.remove(i)`` removes the element at index i from this list.
+  /// Throws if ``i >= this.size``.
+  /// Complexity: O(n) in the worst case as the elements after the removed element must be shifted down.
+  /// Note: this operation mutates ``this``
+  mut .remove(Nat): mut SortedEList[E, K];
+  /// ``this.removeFirstWhere(f)`` removes the first element from this list for which ``f`` returns true.
+  /// Complexity: O(n)
+  /// Note: this operation mutates ``this``
+  mut .removeFirstWhere(mut MF[E, Bool]): mut SortedEList[E,K];
+  mut .removeLastWhere(mut MF[E, Bool]): mut SortedEList[E,K];
+
+  mut .distinct[K'](by: OrderHashBy[imm E,K']): mut SortedEList[E,K];
+
+  mut .trimTo(start: Nat, end: Nat): mut SortedEList[E,K];
+
+  /// ``this.reverse`` returns this with the order (and sort order) of the elements reversed.
+  mut .reverse: mut SortedEList[E,K];
+
+  /// ``this.insert(e)`` returns this with e inserted in the correct place to maintain the sort order.
+  /// Note the element will be inserted before the first found match.
+  ///   However the first found match may not be the first element in the list that is equal.
+  mut .insert(E): mut SortedEList[E,K];
+
+  /// ``this.shallow_clone`` returns a shallow clone of this.
+  /// The main use of this is to allow to hold onto an identical editable list after this one has been drained.
+  /// Note elements in the resulting list will still point to the same elements as the ones in this.
+  mut .shallow_clone: mut SortedEList[E,K];
+
+
+  }
+
+FoundMatcher[R:**]: {
+  mut .found(index: Nat): R;
+  mut .notFound(index: Nat): R;
+  }

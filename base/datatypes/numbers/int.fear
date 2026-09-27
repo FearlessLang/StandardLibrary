@@ -1,34 +1,41 @@
 /// Int: signed 64-bit.
 /// Note: / is not provided; use div/rem (divisor is Nat).
 Int: Sealed,DataType[Int,Int],SumNumber[Int] {
-  /// `this.succ` returns ``this + +1``. Throws if `this` is `Math.maxInt` (overflow).
+  /// `this.succ` returns ``this + +1``. Overflows if ``this == 9_223_372_036_854_775_807``.
   //>   .check{+5 .succ .assertEq +6}
-  //>   .checkNonDetErr({::}, {(Math.maxInt) .succ})
-  .succ: Int -> this + +1;
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.succ:"}}, {(Math.maxInt) .succ})
+  .succ: Int;
 
-  /// `this.pred` returns ``this - +1``. Throws if `this` is `Math.minInt` (underflow).
+  /// `this.pred` returns ``this - +1``. Underflows if ``this == -9_223_372_036_854_775_808``.
   //>   .check{+5 .pred .assertEq +4}
-  //>   .checkNonDetErr({::}, {(Math.minInt) .pred})
-  .pred: Int -> this + -1;
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.pred"}}, {(Math.minInt) .pred})
+  .pred: Int;
 
-  /// ``this + x`` returns the checked sum of `this` and ``x``. Throws on overflow/underflow.
+  /// ``this + x`` returns the checked sum of `this` and ``x``.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+2 + +3) .assertEq +5}
   //>   .checkNonDetErr({::}, {(Math.maxInt) + +1})
   +(x: Int): Int;
 
-  /// ``this - x`` returns the checked difference of `this` and ``x``. Throws on overflow/underflow.
+  /// ``this - x`` returns the checked difference of `this` and ``x``.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+5 - +3) .assertEq +2}
   //>   .checkNonDetErr({::}, {(Math.minInt) - +1})
   -(x: Int): Int;
 
   /// ``this * x`` returns the checked product of `this` and ``x``. Throws on overflow/underflow.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+6 * +7) .assertEq +42}
   //>   .checkNonDetErr({::}, {(Math.maxInt) * +2})
   *(x: Int): Int;
 
   /// ``this ** x`` returns the checked power of `this` raised to ``x``.
   /// Note: ``x`` is `Nat` (not `Int`), as negative exponents would produce fractional results.
-  /// Throws on overflow/underflow.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+2 ** 6) .assertEq +64}
   //>   .checkNonDetErr({::}, {(Math.maxInt) ** 2})
   **(x: Nat): Int;
@@ -54,6 +61,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .checkDetErr({::}, {+7 .getDiv 3})
   //>   .checkDetErr({::}, {+7 .getDiv 0})
   .getDiv(d: Nat): Int -> this.tryGetDiv(d)!;
+
   /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``this.rem == 1``.
   //>   .check{(+6 .tryGetDiv 2).ok.assertEq({::}, Opts# +3)}
   //>   .check{+7 .tryGetDiv 3 .assertInfo{::.isMsg{::.startsWith "Int.getDiv:"}}}
@@ -67,6 +75,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+7 .getRem 2 .assertEq +1}
   //>   .checkDetErr({::}, {+7 .getRem 0})
   .getRem(d: Nat): Int;
+
   /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
   //>   .check{(+7 .tryGetRem 2).ok.assertEq({::}, Opts# +1)}
   //>   .check{+7 .tryGetRem 0 .assertInfo{::.isMsg{::.startsWith "Int.getRem:"}}}
@@ -121,6 +130,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+8 .getWrapIndex 7 .assertEq 1}
   //>   .checkDetErr({::}, {+5 .getWrapIndex 0})
   .getWrapIndex(len: Nat): Nat;
+
   /// ``this.tryGetWrapIndex(len)`` returns `.ok` of ``this.getWrapIndex(len)``, or the error info of ``this.getWrapIndex(len)`` iff ``len == 0``.
   //>   .check{(-1 .tryGetWrapIndex 7).ok.assertEq({::}, Opts# 6)}
   //>   .check{+5 .tryGetWrapIndex 0 .assertInfo{::.isMsg{::.startsWith "Int.getWrapIndex:"}}}
@@ -155,6 +165,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+5 .getNat .assertEq 5}
   //>   .checkDetErr({::}, {-5 .getNat})
   .getNat: Nat;
+
   /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if ``this < 0``.
   //>   .check{(+5 .tryGetNat).ok.assertEq({::}, Opts# 5)}
   //>   .check{-5 .tryGetNat .assertInfo{::.isMsg{::.startsWith "Int.getNat:"}}}
@@ -164,6 +175,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+5 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({::}, {+300 .getByte})
   .getByte: Byte;
+
   /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not in ``[0, maxByte]``.
   //>   .check{(+5 .tryGetByte).ok.assertEq({::}, Opts#(5.getByte))}
   //>   .check{+300 .tryGetByte .assertInfo{::.isMsg{::.startsWith "Int.getByte:"}}}
@@ -173,6 +185,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+5 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {Math.minInt + +1 .getFloat})
   .getFloat: Float;
+
   /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not exactly representable.
   //>   .check{(+5 .tryGetFloat).ok.assertEq({::}, Opts# 5.0)}
   //>   .check{(Math.minInt + +1).tryGetFloat .assertInfo{::.isMsg{::.startsWith "Int.getFloat:"}}}

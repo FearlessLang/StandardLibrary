@@ -636,7 +636,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
 _FloatRanges: Sealed {
     #(startInclusive: Float, endInclusive: Float, str: Str): Range[Float] -> {'self
-        /// Magic method that counts all floats in a given range.
+        /// _Magic method that counts all floats in a given range.
         /// Counts -0.0 and +0.0 as the same float i.e. -0.0 =~~= +0.0 .size == 1;
         .size -> _FloatsBetween#(startInclusive, endInclusive);
         .start -> startInclusive;

@@ -51,6 +51,7 @@ public class Util{
   }
   public static Bool$o$0 bool(boolean b){ return b ? True$o$0.instance : False$1c$0.instance; }
   public static boolean isTrue(Object b){ return b == True$o$0.instance; }
+  public static boolean isFalse(Object b) { return !isTrue(b); }
   public static boolean isGeneric(Object o){ return !o.getClass().getInterfaces()[0].getSimpleName().endsWith("$0"); }
   public static Object ord(int i, Object mm){
     var m= (OrderMatch$174$1)mm;
@@ -61,6 +62,18 @@ public class Util{
   public static Opt$c$1 optNullable(Object o) {
       if (o == null) {return optEmpty();}
       return optSome(o);
+  }
+  public static Object optToNull(Object opt) {
+    if (optIsSome(opt)) {
+      return optGet(opt);
+    }
+    return null;
+  }
+  public static boolean optIsSome(Object opt) {
+    return isTrue(((Opt$c$1) opt).read$isSome$0());
+  }
+  public static boolean optGet(Object opt) {
+    return isTrue(((Opt$c$1) opt).read$$bang$0());
   }
   public static Opt$c$1 toOpt(Optional<?> opt) {
     return optNullable(opt.orElse(null));
@@ -103,6 +116,7 @@ public class Util{
   public static Object callMF$1(Object f){ return ((MF$7$1)f).mut$$hash$0(); }
   public static Object callMF$2(Object f, Object x){ return ((MF$7$2)f).mut$$hash$1(x); }
   public static Object callMF$3(Object f,Object x,Object y){ return ((MF$7$3)f).mut$$hash$2(x,y); }
+  public static Object callMF$4(Object f,Object x,Object y, Object z){ return ((MF$7$4)f).mut$$hash$3(x,y,z); }
   public static Object callF$1(Object f){ return ((F$3$1)f).read$$hash$0(); }
   public static Object callF$2(Object f, Object x){ return ((F$3$2)f).read$$hash$1(x); }
   public static Object callF$3(Object f,Object x,Object y){ return ((F$3$3)f).read$$hash$2(x,y); }
