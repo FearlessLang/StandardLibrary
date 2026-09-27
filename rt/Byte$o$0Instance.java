@@ -73,7 +73,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0), "*")); }
   @Override public Object imm$$star_star$1(Object p0) {
     int power = u8(p0);
-    byte pow = b(p0);
+    byte pow = Byte$o$0Instance.unwrap(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
     int result = 1, base = u8(val);
@@ -86,9 +86,9 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
       base = powMul(base, base, val, pow);
     }
   }
-  private static int powMul(int a, int b, byte val, Object power){
+  private static int powMul(int a, int b, byte val, byte power){
     int res = a * b;
-    if (res > 255){ throw nonDetErr(overflowErrorMsg("**", val, b(power))); }
+    if (res > 255){ throw nonDetErr(overflowErrorMsg("**", val, power)); }
     return res;
   }
   @Override public Object imm$$slash$1(Object p0){
