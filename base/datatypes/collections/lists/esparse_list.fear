@@ -1,22 +1,22 @@
 ESparseLists: {
   /// ``this.backedWithArray(capacity)`` returns an empty ESparseList with the given capacity, backed by an array.
   /// Note: the array this is backed with has a max size of (2147483647) 2^31-1.
-  .backedWithArray[E:*](capacity: Nat): ESparseList[E] -> _Magic!;
+  .backedWithArray[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   /// ``this.backedWithMap(capacity)`` returns an empty ESparseList with the given capacity, backed by a Map.\
   /// This requires a higher overhead than the array option so should only be used for very sparse lists.
-  .backedWithMap[E:*](capacity: Nat): ESparseList[E] -> _Magic!;
+  .backedWithMap[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   /// ``this.backedWithSparseSegmentTree``
   /// This requires a high overhead to manage the segment tree data-structure,
   /// so should only be used for implementations which expect dense islands of values surrounded by vast seas of holes
-  .backedWithSparseSegmentTree[E:*](capacity: Nat): ESparseList[E] -> _Magic!;
+  .backedWithSparseSegmentTree[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   }
 
 /// A list with "holes".
 ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// ``this.isFull`` returns `True` if there are no holes in this collection.
   /// Equivalent to: ``this.hasHoles.not``
-  //> .checkTrue{ESparseLists.backedWithArray(3).set(0, 1).set(1, 2).set(2, 3).isFull};
-  //> .checkFalse{ESparseLists.backedWithArray(3).set(0, 1).set(2, 3).isFull};
+  //> .checkTrue{ESparseLists.backedWithArray(3).set(0, 1).set(1, 2).set(2, 3).isFull}
+  //> .checkFalse{ESparseLists.backedWithArray(3).set(0, 1).set(2, 3).isFull}
   read .isFull: Bool -> this.numHoles == 0;
 
   /// ``this.hasHoles`` returns `True` if any of the elements in this are holes, returns false otherwise.
@@ -25,18 +25,21 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.isEmpty`` returns `True` if there are no elements in this collection and `False` otherwise.
   /// In other words this method returns `True` if the list is all holes (or is has 0 capacity).
-  //> .checkTrue{ESparseLists.backedWithMap(3).isEmpty};
-  //> .checkFalse{ESparseLists.backedWithMap(3).set(0, 1).isEmpty};
+  //> .checkTrue{ESparseLists.backedWithMap(3).isEmpty}
+  //> .checkFalse{ESparseLists.backedWithMap(3).set(0, 1).isEmpty}
   read .isEmpty: Bool -> this.numHoles == (this.capacity);
 
   /// The limit of the largest index that can be inserted into this collection.
   /// This also means that the capacity is the maximum number of elements that can be inside this collection.
-  //> .check{SparseLists.backedWithArray(3).capacity.assert}
-  //>   };
+  //> .checkEq(3, {ESparseLists.backedWithArray(3).capacity})
   read .capacity: Nat;
 
   /// ``this.numHoles`` returns the number of holes left in this collection.
-  //> .backedWithArray[E:*](capacity: Nat)
+  //> .check{Block#
+  //>   .let list={ESparseLists.backedWithArray[Nat](3)}
+  //>   .do{list.numHoles.assertEq 3}
+  //>   .do{list.set(0, 1).numHoles.assertEq(2)}
+  //>   .done}
   read .numHoles: Nat;
 
   /// ``this.increaseCapacity(n)`` returns ``this`` after expanding it's capacity, throws if ``n <= (this.currentCapacity)``

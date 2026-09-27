@@ -6,7 +6,6 @@ SortedEList[E:*,K]: EList[E] {
   /// ``this.binarySearch(e)`` returns ``.found(i)`` where ``i`` is the index of the first found element that is equal to ``e``.
   /// If no element exists, ``.notFound(i)``, where ``i`` is the index where ``e`` should be inserted to maintain the sort order.
   /// Complexity: O(log(n)) where n is the number of elements in this list.
-  //> .check{}
   read .binarySearch[R:**](E, FoundMatcher[R]): R;
 
   /// ``this.max`` returns the maximum element in this collection (determined by ``this.order``)

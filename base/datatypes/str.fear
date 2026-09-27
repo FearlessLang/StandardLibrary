@@ -73,8 +73,8 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .lastIndexOf(Str): Opt[Nat];      /// index of the last occurrence of the parameter. Returns ``this.length`` if the parameter is ``""``
   /// ``this.indiciesOf s`` returns a flow of all occurrences of ``s`` in ``this``. Returns every index if ``s`` is ``.
   /// Returns an empty flow if ``s`` is not found.
-  //> .check{"aaa".indicesOf("aa").flow.toList.assertEq({::}, Lists#(0,1)}
-  .indicesOf(Str): Flow[Nat];    /// flow of indicies of all non-overlapping occurrences of the parameter. Returns every index if the parameter is ``. Returns empty flow if the parameter is not found.
+  //> .check{"aaa".indicesOf("aa").list.assertEq({::}, Lists#(0, 1))}
+  .indicesOf(Str): mut Flow[Nat];    /// flow of indices of all non-overlapping occurrences of the parameter. Returns every index if the parameter is ``. Returns empty flow if the parameter is not found.
 
   .sub(from: Nat, to: Nat): Str;    /// substring [from,to); throws on from/to out of the string boundaries or from > to
   .replaceSimultaneous(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement; throws on empty keys, duplicated keys, odd sized lists, keys with prefixes

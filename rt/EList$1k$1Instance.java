@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 
 import java.util.ArrayList;
@@ -7,9 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static base.Util.*;
+import static _base.SparseSegmentTreeImpl.lessThan;
+import static _base.Util.*;
+import _base.Nat$c$0Instance;
 
-public final class EList$1k$1Instance implements EList$1k$1 {
+public class EList$1k$1Instance implements EList$1k$1 {
   static EList$1k$1Instance wrap(List<Object> l){ return new EList$1k$1Instance(new ArrayList<>(l)); }
   static List<Object> unwrap(Object p0) {
     return ((EList$1k$1Instance) p0).xs;
@@ -19,8 +21,8 @@ public final class EList$1k$1Instance implements EList$1k$1 {
   static Object unsafeWrap(ArrayList<Object> l){ return new EList$1k$1Instance(l); }
   EList$1k$1Instance(List<Object> l){ xs= l; }
   EList$1k$1Instance(){ xs= new ArrayList<>(); }
-  private List<Object> xs;
-  private List<Object> drain(){
+  protected List<Object> xs;
+  protected List<Object> drain(){
     var r= xs;
     xs= new ArrayList<>();
     return r;
@@ -148,7 +150,7 @@ public final class EList$1k$1Instance implements EList$1k$1 {
   @Override public Object mut$insertBefore$2(Object p0, Object p1) {
     long index = Nat$c$0Instance.unwrap(p0);
     check(
-      Long.compareUnsigned(index, this.xs.size()) > 0,
+      lessThan(index, this.xs.size()),
       "EList.insertBefore: Index "+Long.toUnsignedString(index)+" out of bounds, for list of length: "+this.xs.size()
     );
     xs.add((int) index, p1);
@@ -156,12 +158,29 @@ public final class EList$1k$1Instance implements EList$1k$1 {
   }
   @Override public Object mut$getFirst$0() {
     if (!xs.isEmpty()) { return xs.getFirst(); }
-    throw err("EList.getLast: Tried to get the last element of an empty EList.");
+    throw err("EList.getFirst: Tried to get the first element of an empty EList.");
   }
   @Override public Object mut$getLast$0() {
     if (!xs.isEmpty()) { return xs.getLast(); }
     throw err("EList.getLast: Tried to get the last element of an empty EList.");
   }
+  @Override public Object mut$get$1(Object p0) {
+    long index = Nat$c$0Instance.unwrap(p0);
+    check(
+      lessThan(index, this.xs.size()),
+      "EList.get: Index "+Long.toUnsignedString(index)+" out of bounds for EList of length "+xs.size()
+    );
+    return this.xs.get((int) index);
+  }
+
+  @Override public Object mut$tryGet$1(Object p0) {
+    long index = Nat$c$0Instance.unwrap(p0);
+    if (lessThan(index, this.xs.size())) { return ok(this.xs.get((int) index)); }
+    return fail(
+      "EList.get: Index "+Long.toUnsignedString(index)+" out of bounds for EList of length "+xs.size()
+    );
+  }
+
   @Override public Object mut$sort$1(Object p0){
     var by= (OrderBy$5e$2)p0;
     xs.sort((a,b)->cmp(by,a,b));
@@ -218,14 +237,14 @@ public final class EList$1k$1Instance implements EList$1k$1 {
   @Override public Object mut$fold$2(Object p0,  Object p1) {
     var acc = callMF$1(p0);
     for (int i=0; i<this.xs.size(); i++) {
-      acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i));
+      acc = callMF$4(p1, Nat$c$0Instance.instance(i), acc, xs.get(i));
     }
     return acc;
   }
   @Override public Object mut$foldRight$2(Object p0,  Object p1) {
     var acc = callMF$1(p0);
     for (int i=this.xs.size()-1; i>=0; i--) {
-      acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i));
+      acc = callMF$4(p1, Nat$c$0Instance.instance(i), acc, xs.get(i));
     }
     return acc;
   }
@@ -247,7 +266,7 @@ public final class EList$1k$1Instance implements EList$1k$1 {
   }
   @Override public Object mut$accumulateInPlace$1(Object p0) {
     if (this.xs.size() < 2) { return this; }
-    var acc = callMF$2(p0, xs.getFirst());
+    Object acc = this.xs.getFirst();
     for (int i=1; i<this.xs.size(); i++) {
       acc = callMF$3(p0, acc, xs.get(i));
       xs.set(i, acc);
@@ -256,7 +275,7 @@ public final class EList$1k$1Instance implements EList$1k$1 {
   }
   @Override public Object mut$accumulateRightInPlace$1(Object p0) {
     if (this.xs.size() < 2) { return this; }
-    var acc = callMF$2(p0, xs.getLast());
+    var acc = xs.getLast();
     for (int i=xs.size()-2; i>=0; i--) {
       acc = callMF$3(p0, acc, xs.get(i));
       xs.set(i, acc);
@@ -272,8 +291,15 @@ public final class EList$1k$1Instance implements EList$1k$1 {
   @Override public Object mut$eView$2(Object p0, Object p1) {
     int i1 = idx(p0, ".eView");
     int i2 = idx(p1, ".eView");
-    if (i2 > i1) { throw err("List.eView: The first index cannot be larger than the second, but "+i1+" > "+i2+"."); }
-    return new EList$1k$1Instance(xs.subList(i1, i2));
+    if (i2 < i1) { throw err("List.eView: The first index cannot be larger than the second, but "+i1+" > "+i2+"."); }
+    return new EList$1k$1Instance(xs.subList(i1, i2)) {
+      // just swapping out the list isn't good enough, need to reflect this in the parent also
+      protected List<Object> drain() {
+        var r = new ArrayList<>(this.xs);
+        this.xs.clear();
+        return r;
+      }
+    };
   }
 
 

@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
   SparseSegmentTree inner;

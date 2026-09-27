@@ -117,20 +117,20 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   }
   @Override public Object imm$indicesOf$1(Object p0){
     var splitToken = unwrap(p0);
-    String remaining = val;
     final List<Integer> indices = new ArrayList<>();
-    while (true) {
-      int index = remaining.indexOf(splitToken);
-      if (index == -1) break;
+
+    for (int index = val.indexOf(splitToken);
+         index != -1;
+         index = val.indexOf(splitToken, index + 1)) {
       indices.add(index);
-      // a better implementation would not make a new object...
-      remaining = remaining.substring(index + splitToken.length());
     }
+
     return Flow$o$1Instance.of(
       indices.stream()
         .map(Nat$c$0Instance::instance)
     );
   }
+
   @Override public Object imm$sub$2(Object p1, Object p2){
     long from= ((Nat$c$0Instance)p1).val();
     long to= ((Nat$c$0Instance)p2).val();

@@ -1,6 +1,6 @@
 package _base;
 
-import base.Set$c$1Instance;
+import _base.Set$c$1Instance;
 
 import java.util.ArrayList;
 import java.util.List;

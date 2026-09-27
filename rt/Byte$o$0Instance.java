@@ -78,18 +78,17 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     int result = 1, base = u8(val);
     String overflowMsg = overflowErrorMsg("**", this.val, (byte) power);
     while (true) {
-      if ((power & 1) != 0){ result = powMul(result, base); }
+      if ((power & 1) != 0){ result = powMul(result, base, val, power); }
       power >>>= 1;
       if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
 
-      int nextPow = base*base;
-      if (nextPow > 255){ throw overflowErrorMsg("**", this.val, (byte) base); }
-      base = nextPow;
+      base = powMul(base, base, val, power);
     }
   }
-  private static int powMul(int a, int b){
-    if (a * b > 255){ throw overflowErrorMsg("**") }
-    return a * b;
+  private static int powMul(int a, int b, byte val, Object power){
+    int res = a * b;
+    if (res > 255){ throw nonDetErr(overflowErrorMsg("**", val, b(power))); }
+    return res;
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);

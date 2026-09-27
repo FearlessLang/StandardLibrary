@@ -1,10 +1,9 @@
-package base;
+package _base;
 
 import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import static base.Util.check;
+import static _base.Util.check;
 
 public sealed interface SparseSegmentTree permits
   SparseSegmentLeaf,

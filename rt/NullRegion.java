@@ -1,11 +1,11 @@
-package base;
+package _base;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static base.SparseSegmentTreeImpl.lessThanEq;
-import static base._NumFlow$5k$0.unsignedClosedRange;
+import static _base.SparseSegmentTreeImpl.lessThanEq;
+import static _base._NumFlow$5k$0.unsignedClosedRange;
 
 public final class NullRegion implements SparseSegmentTree {
   long start;

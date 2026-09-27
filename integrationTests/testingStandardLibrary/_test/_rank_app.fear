@@ -119,7 +119,6 @@ MyTests:UnitTests{::
   .test InfoTests
   .test InfoValidatorTests
   .test InfoExtractorTests
-  .test BlockUnitTests
   .test TestInfoValidation
   .test TestInfoExtraction
   .test TestBlock

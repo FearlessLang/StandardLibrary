@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -7,9 +7,9 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static base.SparseSegmentTreeImpl.lessThan;
-import static base.SparseSegmentTreeImpl.lessThanEq;
-import static base.Util.err;
+import static _base.SparseSegmentTreeImpl.lessThan;
+import static _base.SparseSegmentTreeImpl.lessThanEq;
+import static _base.Util.err;
 
 public final class SparseSegmentLeaf implements SparseSegmentTree {
   // Not final as reversal/growth may happen

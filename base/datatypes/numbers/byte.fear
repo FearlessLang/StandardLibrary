@@ -3,12 +3,12 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.succ` returns ``this + 1``. Overflows if `this` is ``255``.
   //>   .check{5.getByte .succ .assertEq(6.getByte)}
   //>   .checkNonDetErr({::}, {(255.getByte) .succ})
-  .succ: Byte -> this + (1.getByte);
+  .succ: Byte;
 
   /// `this.pred` returns ``this - 1``. Underflows if `this` is ``0``.
   //>   .check{5.getByte .pred .assertEq(4.getByte)}
   //>   .checkNonDetErr({::}, {(0.getByte) .pred})
-  .pred: Byte -> this - (1.getByte);
+  .pred: Byte;
 
   /// ``this + x`` returns the checked sum of `this` and ``x``. Overflows if the result would exceed ``255``.
   //>   .check{(2.getByte + (3.getByte)) .assertEq(5.getByte)}

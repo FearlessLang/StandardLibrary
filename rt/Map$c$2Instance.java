@@ -1,12 +1,9 @@
-package base;
+package _base;
 
-
-import base.Util.MapKey;
 
 import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
-
-import static base.Util.*;
+import static _base.Util.*;
 
 public record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> elems) implements Map$c$2{
 
@@ -19,17 +16,25 @@ public record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Obje
     var byK= (ToStrBy$5u$1)keyOh;
     String res= elems.entrySet().stream().map(e->
       toS(byK.imm$$hash$1(e.getKey().key))
-        +": "+toS(byE.imm$$hash$1(e.getValue()))
-    ).collect(Collectors.joining(", ","{","}"));
+      +": "+toS(byE.imm$$hash$1(e.getValue()))
+      ).collect(Collectors.joining(", ","{","}"));
     return Str$c$0Instance.instance(res);
   }
   @Override public Object mut$get$1(Object p0){
     var mk= mapKey(keyOh,p0);
     var e= elems.get(mk);
-    if (e == null){ throw err("Map key absent"); }
+    if (e == null){ throw err(absent(p0)); }
     return e;
   }
+  @Override public Object mut$tryGet$1(Object p0){
+    var mk= mapKey(keyOh,p0);
+    var e= elems.get(mk);
+    if (e == null){ return fail(absent(p0)); }
+    return ok(e);
+  }
+  private String absent(Object p0){ return "Map.get: Tried to get key "+toStringBy((ToStrBy$5u$1)keyOh, p0)+" that is not contained in this map.\n Consider using `Map.opt` to properly handle the failure case."; }
   @Override public Object read$get$1(Object p0){ return mut$get$1(p0); }
+  @Override public Object read$tryGet$1(Object p0){ return mut$tryGet$1(p0); }
 
   @Override public Object mut$opt$1(Object p0){
     var mk= mapKey(keyOh,p0);
@@ -51,11 +56,11 @@ public record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Obje
   }
   @Override public Object read$with$2(Object p0,Object p1){ return mut$with$2(p0,p1); }
   @Override public Object read$hash$1(Object p0){
-    var byE= (base.OrderHashBy$2ea$2)p0;
+    var byE= (_base.OrderHashBy$2ea$2)p0;
     long h= 0;
     for(var e: elems.entrySet()){
       long kh= e.getKey().hashCode();
-      long vh= natToLong(((base.OrderHash$lk$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
+      long vh= natToLong(((_base.OrderHash$lk$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
       h += kh ^ vh;
     }
     return new Nat$c$0Instance(h);
@@ -125,8 +130,7 @@ public record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Obje
   @Override public Object read$imm$1(Object p0){
     var by= (ToImmBy$5u$2)p0;
     var m=new LinkedHashMap<MapKey,Object>();
-    elems.entrySet().stream().forEach(e->m.put(e.getKey(), ((ToImm$1g$1)by.imm$$hash$1(e.getValue())).read$imm$0()));
+    elems.forEach((k, v) -> m.put(k, ((ToImm$1g$1)by.imm$$hash$1(v)).read$imm$0()));
     return new Map$c$2Instance(keyOh,m);
   }
 }
-

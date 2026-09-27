@@ -1,9 +1,9 @@
-package base;
+package _base;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public class SparseArray implements ESparseList$2rs$1 {
   int capacity;

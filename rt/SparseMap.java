@@ -1,10 +1,10 @@
-package base;
+package _base;
 
 import java.util.*;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 
 

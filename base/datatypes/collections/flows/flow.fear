@@ -41,7 +41,7 @@ Flow[E:*]: {
   /// as `Block.loop` hands it to every iteration.
   //>   .check{Block#
   //>     .let acc={ELists#[Nat]}
-  //>     .do{Flows#(1, 2, 3).forEach(acc, {a, e -> a.add(e * 2)})}
+  //>     .do{Flows#(1, 2, 3).forEach(acc, {a, e -> a.add(e * 2).void})}
   //>     .do{acc.list .assertEq({::}, Lists#(2, 4, 6))}
   //>     .done}
   mut .forEach[A](a: mutH A, f: mut ForEachBody[A,E]): Void;

@@ -1,11 +1,11 @@
-package base;
+package _base;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static base.SparseSegmentTreeImpl.lessThan;
-import static base.SparseSegmentTreeImpl.lessThanEq;
+import static _base.SparseSegmentTreeImpl.lessThan;
+import static _base.SparseSegmentTreeImpl.lessThanEq;
 
 public final class SparseSegmentNode implements SparseSegmentTree {
   // Not final as reversal/growth may happen

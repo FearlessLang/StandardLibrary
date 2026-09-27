@@ -239,12 +239,15 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     long result = 1, base = val;
     String errorMsg = overflowMsg("**", this.val, n(p0));
     while (true) {
-      if ((power & 1) != 0){ result = powMul(result, base); }
+      if ((power & 1) != 0) { result = powMul(result, base, p0); }
       power >>>= 1;
       if (power == 0){ return Nat$c$0Instance.instance(result); }
-      if (Long.compareUnsigned(base, Long.divideUnsigned(MAX_UNSIGNED_VALUE, base)) > 0){ throw nonDetErr(overflowMsg("**", this.val, power)); }
-      base = base * base;
+      base = powMul(base, base, p0);
     }
+  }
+  long powMul(long a, long b, Object power) {
+    if (Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0){ throw nonDetErr(overflowMsg("**", this.val, unwrap(power))); }
+    return a * b;
   }
   @Override public Object imm$softSqrt$0(){
     return Float$1c$0Instance.instance(Math.sqrt(unsignedLongToDouble(val)));
@@ -290,8 +293,6 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
           + Long.toUnsignedString(val)+" by "+offset+"this+delta must be <= "
           + Long.toUnsignedString(MAX_UNSIGNED_VALUE));
     }
-    return instance(val + offset);
-    if (Long.compareUnsigned(val, MAX_UNSIGNED_VALUE - offset) > 0){ throw err(offsetErr(val, offset, "greater than Math.maxNat")); }
     return instance(val + offset);
   }
   @Override public Object imm$tryGetIndexOffset$1(Object p0){
