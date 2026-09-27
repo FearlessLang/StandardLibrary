@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import static _base.SparseSegmentTreeImpl.lessThan;
 import static _base.SparseSegmentTreeImpl.lessThanEq;
+import static _base.Util.*;
 
 public final class SparseSegmentNode implements SparseSegmentTree {
   // Not final as reversal/growth may happen
@@ -16,7 +17,14 @@ public final class SparseSegmentNode implements SparseSegmentTree {
   SparseSegmentTree left, right;
 
   SparseSegmentNode(long start, long end) {
-    this(start, end, null, null);
+//    this(start, end, _base.NullRegion(0, midPoint), null);
+    this.start = start;
+    this.end = end;
+    long size = end - start;
+    this.midPoint = start + Long.divideUnsigned(size, 2);
+    this.numHoles = size;
+    this.left = new NullRegion(start, midPoint);
+    this.right = new NullRegion(midPoint, end);
   }
 
   SparseSegmentNode(long start, long end, SparseSegmentTree left, SparseSegmentTree right) {
@@ -63,17 +71,6 @@ public final class SparseSegmentNode implements SparseSegmentTree {
     return explorer.node(this);
   }
 
-  // Only the right child's range depends on `end`, and a null right child means "all holes",
-  // so growing is just extending the right spine.
-  @Override public SparseSegmentTree grow(long newEnd) {
-    long added = newEnd - end;
-    if (right != null) { right = right.grow(newEnd); }
-    end = newEnd;
-    numHoles += added;
-    return this;
-  }
-
-
   @Override public SparseSegmentNode shallowCopy() {
     return new SparseSegmentNode(
       start,
@@ -100,7 +97,7 @@ public final class SparseSegmentNode implements SparseSegmentTree {
 
   @Override
   public Stream<IndexedElement<Object>> reversedIndexStream() {
-    return Stream.concat(right.indexedStream(), left.indexedStream());
+    return Stream.concat(right.reversedIndexStream(), left.reversedIndexStream());
   }
 
   @Override
@@ -126,6 +123,22 @@ public final class SparseSegmentNode implements SparseSegmentTree {
   }
 
   @Override
+  public SparseSegmentTree grow(long newEnd) {
+    check(
+      Long.compareUnsigned(newEnd, end) > 0,
+      "SparseSegmentTree.grow: newEnd (" + Long.toUnsignedString(newEnd) + ") must be > current end ("
+        + Long.toUnsignedString(end) + ")"
+    );
+    long added = newEnd - end;
+    // The right child always spans [midPoint, end); growing the node's end means
+    // the right child's span grows too. Left is untouched — its range is unaffected.
+    this.right = this.right.grow(newEnd);
+    this.end = newEnd;
+    this.numHoles += added;
+    return this;
+  }
+
+  @Override
   public void reverse() {
     var temp = this.left;
     this.left = this.right;
@@ -142,7 +155,7 @@ public final class SparseSegmentNode implements SparseSegmentTree {
   @Override
   public void swap(long i, long j) {
     boolean iInsideLeft = lessThanEq(start, i) && lessThan(i, end);
-    boolean jInsideLeft = lessThanEq(start, i) && lessThan(i, end);
+    boolean jInsideLeft = lessThanEq(start, j) && lessThan(j, end);
     if (iInsideLeft && jInsideLeft) {
       left.swap(i, j);
       return;

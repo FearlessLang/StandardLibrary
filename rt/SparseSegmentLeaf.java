@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import static _base.SparseSegmentTreeImpl.lessThan;
 import static _base.SparseSegmentTreeImpl.lessThanEq;
+import static _base.Util.check;
 import static _base.Util.err;
 
 public final class SparseSegmentLeaf implements SparseSegmentTree {
@@ -68,23 +69,6 @@ public final class SparseSegmentLeaf implements SparseSegmentTree {
     return explorer.leaf(this);
   }
 
-  @Override public SparseSegmentTree grow(long newEnd) {
-    long added = newEnd - end;
-    if (Long.compareUnsigned(newEnd - start, THRESHOLD) <= 0) {
-      // Still small enough to be a single leaf.
-      data = Arrays.copyOf(data, (int) (newEnd - start));
-      numHoles += (int) added;
-      end = newEnd;
-      return this;
-    }
-    // Too big for a leaf: hang this leaf under a node whose midPoint is the old end,
-    // so every existing index keeps routing to it.
-    SparseSegmentNode root = new SparseSegmentNode(start, newEnd, this, null);
-    root.midPoint = this.end;
-    root.numHoles = this.numHoles + added;
-    return root;
-  }
-
   @Override
   public SparseSegmentLeaf shallowCopy() {
     return new SparseSegmentLeaf(
@@ -93,6 +77,33 @@ public final class SparseSegmentLeaf implements SparseSegmentTree {
       Arrays.copyOf(data, data.length)
     );
   }
+
+
+  @Override
+  public SparseSegmentTree grow(long newEnd) {
+    check(
+      Long.compareUnsigned(newEnd, end) > 0,
+      "SparseSegmentTree.grow: newEnd (" + Long.toUnsignedString(newEnd) + ") must be > current end ("
+        + Long.toUnsignedString(end) + ")"
+    );
+    long added = newEnd - end;
+    if (Long.compareUnsigned(newEnd - start, THRESHOLD) <= 0) {
+      // Still small enough to stay a single leaf.
+      data = Arrays.copyOf(data, (int) (newEnd - start));
+      numHoles += added;
+      end = newEnd;
+      return this;
+    }
+    // Too big for a leaf: hang this leaf under a node whose midPoint is the old end,
+    // so every existing index still routes to it, and the new range is a lazy NullRegion.
+    SparseSegmentNode root = new SparseSegmentNode(
+      start, newEnd, this, new NullRegion(this.end, newEnd)
+    );
+    root.midPoint = this.end;
+    root.numHoles = this.numHoles + added;
+    return root;
+  }
+
 
   @Override
   public Stream<Object> nullStream() {

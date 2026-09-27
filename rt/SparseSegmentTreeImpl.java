@@ -228,7 +228,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
   @Override
   public Object mut$softIncreaseCapacity$1(Object p0) {
     long proposedCapacity = Nat$c$0Instance.unwrap(p0);
-    this.inner.grow(proposedCapacity);
+    this.inner = this.inner.grow(proposedCapacity);
     return this;
   }
 
@@ -248,7 +248,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
       if (leaf.numHoles == 0) { return; }
       for (int i = 0; i < leaf.data.length; i++) {
         if (leaf.data[i] != null) { continue; }
-        leaf.data[i] = callMF$2(p0, Nat$c$0Instance.instance(i));
+        leaf.data[i] = callMF$2(p0, Nat$c$0Instance.instance(i+leaf.start));
       }
       leaf.numHoles = 0;
     }));
@@ -260,7 +260,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
     this.inner.explore(NodeExplorer.passThroughToLeaf(leaf -> {
       for (int i = 0; i < leaf.data.length; i++) {
         Object elem = leaf.data[i];
-        Object result = callMF$3(p0, Nat$c$0Instance.instance(i), optNullable(leaf.data[i]));
+        Object result = callMF$3(p0, Nat$c$0Instance.instance(i+leaf.start), optNullable(leaf.data[i]));
         if (optIsSome(result)) {
           leaf.data[i] = optGet(result);
           if (elem == null) { leaf.numHoles--; }
@@ -282,7 +282,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
       int consumedIndex = 0;
       @Override
       public Integer leaf(SparseSegmentLeaf leaf) {
-        for (int i=0; i<leaf.data.length || consumedIndex == elist.size(); i++) {
+        for (int i=0; i<leaf.data.length && consumedIndex < elist.size(); i++) {
           Object elem = leaf.data[i];
           if (elem == null) {
             leaf.data[i] = elist.get(consumedIndex);
@@ -314,8 +314,6 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
         throw new UnsupportedOperationException("Tried to set into nullRegion, should replace this at the parent first");
       }
     });
-    // remove all in one chunk
-    elist.subList(0, amountUsed).clear();
     return this;
   }
 
@@ -324,7 +322,7 @@ public class SparseSegmentTreeImpl implements ESparseList$2rs$1 {
     // There exists a more efficient implementation, but this works for now
     List<Object> source = EList$1k$1Instance.unwrap(p0);
     if (lessThan(this.inner.numHoles(), source.size())) {
-      this.mut$softIncreaseCapacity$1(Nat$c$0Instance.instance(source.size()));
+      this.mut$softIncreaseCapacity$1(this.inner.capacity() +Nat$c$0Instance.instance(source.size()));
     }
     this.mut$fillFrom$1(p0);
     return this;
@@ -401,7 +399,7 @@ interface RemoveFirst extends NodeExplorer<Boolean> {
 interface RemoveLast extends NodeExplorer<Boolean> {
   boolean shouldRemove(Object elem);
   default Boolean leaf(SparseSegmentLeaf leaf) {
-    for (int i=leaf.data.length-1; i<=0; i++) {
+    for (int i=leaf.data.length-1; i>=0; i--) {
       Object elem = leaf.data[i];
       if (elem != null && shouldRemove(elem)) {
         leaf.data[i] = null;

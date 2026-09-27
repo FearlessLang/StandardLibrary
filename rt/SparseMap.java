@@ -6,11 +6,18 @@ import java.util.stream.Stream;
 
 import static _base.Util.*;
 
-
-
 public class SparseMap implements ESparseList$2rs$1 {
   /// Please note this is unsigned
   long capacity;
+  /// sorted because we need iteration order in index order
+  /// There's a good argument for making this a sortedList
+  /// Pros:
+  ///   - Much more cache-friendly
+  ///   - Able to use primitives and avoid boxing
+  ///   - Iteration is so much faster
+  ///   - Avoids Hashing
+  /// Cons:
+  ///   - Adding/removing elements is slower O(n) rather than O(log(n))
   SortedMap<Long, Object> inner;
 
   SparseMap(SparseMap other) {
@@ -48,7 +55,7 @@ public class SparseMap implements ESparseList$2rs$1 {
     return index;
   }
 
-  private void setOrRemove(long i, Object e) {
+  private void setOrRemove(Long i, Object e) {
     if (e == null) {
       inner.remove(i);
     } else {
@@ -125,7 +132,7 @@ public class SparseMap implements ESparseList$2rs$1 {
 
   @Override
   public Object mut$lastIndexWhere$1(Object p0) {
-    for (Map.Entry<Long, Object> e : inner.entrySet()) {
+    for (Map.Entry<Long, Object> e : inner.reversed().entrySet()) {
       if (isTrue(callMF$2(p0, e.getValue()))) {
         return optSome(Nat$c$0Instance.instance(e.getKey()));
       }
@@ -187,7 +194,7 @@ public class SparseMap implements ESparseList$2rs$1 {
   @Override
   public Object mut$removeFirstWhere$1(Object p0) {
     for (Map.Entry<Long, Object> e : inner.entrySet()) {
-      if (e != null && isTrue(callMF$2(p0, e.getKey()))) {
+      if (e != null && isTrue(callMF$2(p0, e.getValue()))) {
         inner.remove(e.getKey());
         break;
       }
@@ -198,13 +205,12 @@ public class SparseMap implements ESparseList$2rs$1 {
   @Override
   public Object mut$removeLastWhere$1(Object p0) {
     for (Map.Entry<Long, Object> e : inner.reversed().entrySet()) {
-      if (e != null && isTrue(callMF$2(p0, e.getKey()))) {
+      if (e != null && isTrue(callMF$2(p0, e.getValue()))) {
         inner.remove(e.getKey());
         break;
       }
     }
     return this;
-
   }
 
   // Keeps [start, end) and re-bases it; capacity shrinks to end-start (same as SparseArray).
@@ -229,14 +235,16 @@ public class SparseMap implements ESparseList$2rs$1 {
     if (inner.isEmpty()) {
       return this;
     }
-    inner = inner.reversed();
+    SortedMap<Long, Object> reversed = new TreeMap<>(Long::compareUnsigned);
+    inner.forEach((k, v) -> reversed.put(capacity - 1 - k, v));
+    inner = reversed;
     return this;
   }
 
   @Override
   public Object mut$mapInPlace$1(Object p0) {
     for (Map.Entry<Long, Object> e : inner.entrySet()) {
-      inner.put(e.getKey(), callMF$2(p0, e));
+      inner.put(e.getKey(), callMF$2(p0, e.getValue()));
     }
     return this;
   }
@@ -245,11 +253,10 @@ public class SparseMap implements ESparseList$2rs$1 {
   public Object mut$swap$2(Object p0, Object p1) {
     long i = idx(p0, ".swap");
     long j = idx(p1, ".swap");
-    if (i == j) {
-      return this;
-    }
-    Object temp = inner.put(i, inner.get(j));
-    inner.put(j, temp);
+    if (i == j) { return this; }
+    Object vi = inner.get(i), vj = inner.get(j);
+    setOrRemove(i, vj);
+    setOrRemove(j, vi);
     return this;
   }
 
@@ -345,7 +352,7 @@ public class SparseMap implements ESparseList$2rs$1 {
   }
 
   private Stream<Object> flatFlowOf(Map<Long, Object> snapshot) {
-    return inner.values().stream();
+    return snapshot.values().stream();
   }
 
   @Override
@@ -384,6 +391,6 @@ public class SparseMap implements ESparseList$2rs$1 {
     if (holes() != 0) {
       return optEmpty();
     }
-    return EList$1k$1Instance.unsafeWrap(new ArrayList<>(drain().values()));
+    return optSome(EList$1k$1Instance.unsafeWrap(new ArrayList<>(drain().values())));
   }
 }

@@ -65,7 +65,7 @@ public class SparseArray implements ESparseList$2rs$1 {
 
   private void checkCapacity(long proposed, String method) {
     check(
-      Long.compareUnsigned(proposed, Integer.MAX_VALUE) < 0,
+      Long.compareUnsigned(proposed, Integer.MAX_VALUE) <= 0,
       "ESparseList" + method + ": Cannot create an array-based Sparse List with capacity >= " + Integer.MAX_VALUE
         + " (requested " + Long.toUnsignedString(proposed) + ")"
     );
@@ -440,5 +440,13 @@ public class SparseArray implements ESparseList$2rs$1 {
         + numHoles + " of " + capacity + " slots are holes). Fill the holes first.");
     }
     return EList$1k$1Instance.unsafeWrap(new ArrayList<>(Arrays.asList(drain())));
+  }
+
+  @Override
+  public Object mut$list$0() {
+    if (numHoles != 0) {
+      return optEmpty();
+    }
+    return optSome(EList$1k$1Instance.unsafeWrap(new ArrayList<>(Arrays.asList(drain()))));
   }
 }

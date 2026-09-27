@@ -3,6 +3,8 @@ package _base;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static _base.SparseSegmentTreeImpl.lessThan;
 import static _base.Util.check;
 
 public sealed interface SparseSegmentTree permits
@@ -45,11 +47,10 @@ public sealed interface SparseSegmentTree permits
   Stream<IndexedElement<Object>> indexedStream();
   Stream<IndexedElement<Object>> reversedIndexStream();
 
-  default long idx(Object p0, String method){
+  default long idx(Object p0, String method) {
     long i= Nat$c$0Instance.unwrap(p0);
-    // Lists cannot get larger than an int
     check(
-      0 <= i && i < capacity(),
+      lessThan(i, this.capacity()),
       "EList"+method+": Index "+Long.toUnsignedString(i)+" out of bounds, for SparseList with capacity: "+capacity()
     );
     return (int) i;
