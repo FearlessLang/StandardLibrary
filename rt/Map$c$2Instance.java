@@ -107,8 +107,10 @@ public record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Obje
   @Override public Object read$as$1(Object p0){ return this; }
 
   @Override public Object mut$flow$0(){
-    return Flow$o$1Instance.of(elems.entrySet().stream()
-      .map(e->(Object)KeyElems$b4$0.instance.imm$$hash$2(e.getKey().key,e.getValue())));
+    return new _base.BiFlow(
+      elems.keySet().stream().map(k -> k.key),
+      elems.values().stream()
+    );
   }
   @Override public Object read$flow$0(){ return mut$flow$0(); }
   @Override public Object imm$flow$0(){ return mut$flow$0(); }
