@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public final class _Output$2o$0 implements Output$2o$0{
   @Override public final Object mut$iso$0(){ return this; }

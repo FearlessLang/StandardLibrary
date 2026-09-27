@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 public interface UnitTestLog$2f8$0{
   UnitTestLog$2f8$0 instance= new UnitTestLog$2f8$0(){};
   AppLog mainLog= AppLog.open(java.nio.file.Path.of(".out","logs","_base","unit_test_log.log"),true);

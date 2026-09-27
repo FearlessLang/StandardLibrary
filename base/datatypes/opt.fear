@@ -5,16 +5,16 @@ Opt[E:*]: _Opt[E] {
   .isEmpty    -> this.match{.some _ -> False; .empty -> True};
   .isSome     -> this.match{.some _ -> True; .empty -> False};
 
-  .assertEmpty by -> this.assertEmpty(by, {``});
+  .assertEmpty by -> this.assertEmpty(by, {""});
   .assertEmpty by, msg -> this.match {
     .some x -> Assert.expectedActual(False, msg, ".empty", ".some "+(by#(x)));
     .empty -> Void;
     };
-  .assertSome -> this.assertSome {``};
+  .assertSome -> this.assertSome {""};
   .assertSome msg -> Assert.expectedActual(this.isSome, msg, ".some _", ".empty ");
 
-  !           -> this.match{.some x -> x; .empty -> Error.msg `Opt was empty`};
-  ! lazyToInfo       -> this.match{.some x -> x; .empty -> Error!(lazyToInfo#.info)};
+  !           -> this.match{.some x -> x; .empty -> Error.msg "Opt was empty"};
+  ! msg       -> this.match{.some x -> x; .empty -> Error!(msg#.info)};
 
   .or other -> this.match{.some _ -> this; .empty -> other};
   |   other -> this.or(other);
@@ -34,7 +34,7 @@ Opt[E:*]: _Opt[E] {
   .ifSome  f  -> this.match{.some x -> f#x; .empty -> {}};
   .ifEmpty f  -> this.match{.some _ -> {}; .empty -> f#};
 
-  .str  f  -> this.match{ .some x -> `Opt[`+(f#x)+`]`; .empty -> `Opt[]` };
+  .str  f  -> this.match{ .some x -> "Opt["+(f#x)+"]"; .empty -> "Opt[]" };
   .info f  -> this.match{ .some x -> Infos.list(f#x); .empty -> {} };
   
   .cmp by, a, b, m -> a.match{

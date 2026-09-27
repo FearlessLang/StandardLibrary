@@ -1,5 +1,5 @@
-package base;
-public interface CacheReprF$175$3 extends base.CacheHandler$4sg$0{
+package _base;
+public interface CacheReprF$175$3 extends _base.CacheHandler$4sg$0{
   default Object imm$$hash$2(Object p0, Object p1){
     throw new AssertionError("Uncallable method: CacheReprF$175$3.imm$$hash$2"+this.getClass().getName());
   }

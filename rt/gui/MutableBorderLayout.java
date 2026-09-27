@@ -1,6 +1,4 @@
-package base;
-
-import static base.Scopes.*;
+package _base;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -12,14 +10,14 @@ import java.io.Serializable;
 public final class MutableBorderLayout implements LayoutManager2, Serializable{
   private static final long serialVersionUID = 1L;
 
-  private final AWidget gap;
+  private final AContainer gap;
   private Component north;
   private Component south;
   private Component east;
   private Component west;
   private Component center;
 
-  public MutableBorderLayout(AWidget gap){ this.gap = gap; }
+  public MutableBorderLayout(AContainer gap){ this.gap = gap; }
 
   // Current occupant of a slot, or null. Used by _Frame.addTo to evict the
   // old occupant before adding a replacement, which is what keeps the
@@ -65,17 +63,9 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
     if (comp == center){ center = null; }
   }
 
-  @Override public Dimension preferredLayoutSize(Container target){
-    synchronized (target.getTreeLock()){
-      return size(target, Component::getPreferredSize);
-    }
-  }
+  @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
 
-  @Override public Dimension minimumLayoutSize(Container target){
-    synchronized (target.getTreeLock()){
-      return size(target, Component::getMinimumSize);
-    }
-  }
+  @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
 
   @Override public Dimension maximumLayoutSize(Container target){
     return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -85,125 +75,64 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
   @Override public float getLayoutAlignmentY(Container target){ return 0.5f; }
   @Override public void invalidateLayout(Container target){}
 
-  @Override public void layoutContainer(Container target){
-    synchronized (target.getTreeLock()){
-      var a = area(target);
-      int left = a.left();
-      int right = a.right();
-      int top = a.top();
-      int bottom = a.bottom();
-      boolean middle = west != null || center != null || east != null;
+  @Override public void layoutContainer(Container target){ lay(target, target.getWidth(), target.getHeight(), true); }
 
-      if (north != null){
-        int hh = wrapHeight(north, span(right - left));
-        north.setBounds(left, top, span(right - left), hh);
-        top += hh;
-        if (middle || south != null){ top += h(gap.heightGap); }
-      }
-
-      if (south != null){
-        int hh = wrapHeight(south, span(right - left));
-        bottom -= hh;
-        south.setBounds(left, bottom, span(right - left), hh);
-        if (middle){ bottom -= h(gap.heightGap); }
-      }
-
-      if (west != null){
-        var d = west.getPreferredSize();
-        west.setBounds(left, top, d.width, span(bottom - top));
-        left += d.width;
-        if (center != null || east != null){ left += w(gap.widthGap); }
-      }
-
-      if (east != null){
-        var d = east.getPreferredSize();
-        right -= d.width;
-        east.setBounds(right, top, d.width, span(bottom - top));
-        if (center != null){ right -= w(gap.widthGap); }
-      }
-
-      if (center != null){
-        center.setBounds(left, top, span(right - left), span(bottom - top));
-      }
-    }
-  }
-
-  // Height for a north/south slot given the exact width it will receive. A
-  // flow pane wraps into more rows when the window is narrower than its
-  // one-row preferred width, so its height depends on that width; asking
-  // getPreferredSize().height would return the one-row height and the
-  // wrapped rows would be clipped. An explicit user .height wins over the
-  // wrap-based height.
-  private int wrapHeight(Component c, int width){
-    if (c instanceof SkComponent s
-      && s.w.preferredHeight == null
-      && s.getLayout() instanceof CenteredFlowLayout f){
-      return f.heightFor(s, width);
-    }
-    return c.getPreferredSize().height;
-  }
-
-  private int span(int n){ return Math.max(0, n); }
-
-  private Area area(Container target){
-    var in = target.getInsets();
-    return new Area(
-      in.left + w(gap.left),
-      in.top + h(gap.top),
-      target.getWidth() - in.right - w(gap.right),
-      target.getHeight() - in.bottom - h(gap.bottom)
-      );
-  }
+  Dimension sizeFor(Container target, int width, int height){ return lay(target, width, height, false); }
 
   // Whether a gap is owed before the next slot depends on whether a slot was
   // already placed, never on whether its measured size happens to be 0: a
   // widget can legitimately have width or height 0 (Nat includes 0), and
   // that must not be mistaken for "nothing here yet" the way it would be
   // with a plain `total == 0` check.
-  private Dimension size(Container target, Dim dim){
-    boolean hasMiddle = west != null || center != null || east != null;
-    var total = middleSize(dim);
-    boolean hasContent = hasMiddle;
-
-    if (north != null){
-      var d = dim.of(north);
-      total.width = Math.max(total.width, d.width);
-      total.height = hasContent ? total.height + h(gap.heightGap) + d.height : d.height;
-      hasContent = true;
+  private Dimension lay(Container target, int width, int height, boolean place){
+    synchronized (target.getTreeLock()){
+      int left = gap.left;
+      int right = width - gap.right;
+      int top = gap.top;
+      int bottom = height - gap.bottom;
+      boolean middle = west != null || center != null || east != null;
+      int slotsW = 0;
+      int middleH = 0;
+      int centerW = 0;
+      if (north != null){
+        var d = Sk.sizeFor(north, span(right - left), Integer.MAX_VALUE);
+        if (place){ north.setBounds(left, top, span(right - left), d.height); }
+        slotsW = d.width;
+        top += d.height;
+        if (middle || south != null){ top += gap.heightGap; }
+      }
+      if (south != null){
+        var d = Sk.sizeFor(south, span(right - left), Integer.MAX_VALUE);
+        bottom -= d.height;
+        if (place){ south.setBounds(left, bottom, span(right - left), d.height); }
+        slotsW = Math.max(slotsW, d.width);
+        if (middle){ bottom -= gap.heightGap; }
+      }
+      if (west != null){
+        var d = Sk.sizeFor(west, Integer.MAX_VALUE, span(bottom - top));
+        if (place){ west.setBounds(left, top, d.width, span(bottom - top)); }
+        middleH = d.height;
+        left += d.width;
+        if (center != null || east != null){ left += gap.widthGap; }
+      }
+      if (east != null){
+        var d = Sk.sizeFor(east, Integer.MAX_VALUE, span(bottom - top));
+        right -= d.width;
+        if (place){ east.setBounds(right, top, d.width, span(bottom - top)); }
+        middleH = Math.max(middleH, d.height);
+        if (center != null){ right -= gap.widthGap; }
+      }
+      if (center != null){
+        var d = Sk.sizeFor(center, span(right - left), span(bottom - top));
+        if (place){ center.setBounds(left, top, span(right - left), span(bottom - top)); }
+        middleH = Math.max(middleH, d.height);
+        centerW = d.width;
+      }
+      return new Dimension(
+        Math.max(slotsW + gap.left + gap.right, left + centerW + (width - right)),
+        top + middleH + (height - bottom));
     }
-
-    if (south != null){
-      var d = dim.of(south);
-      total.width = Math.max(total.width, d.width);
-      total.height = hasContent ? total.height + h(gap.heightGap) + d.height : d.height;
-    }
-
-    var in = target.getInsets();
-    total.width += in.left + in.right + w(gap.left) + w(gap.right);
-    total.height += in.top + in.bottom + h(gap.top) + h(gap.bottom);
-    return total;
   }
 
-  private Dimension middleSize(Dim dim){
-    var total = new Dimension();
-    boolean hasContent = addMiddle(total, dim, west, false);
-    hasContent = addMiddle(total, dim, center, hasContent);
-    addMiddle(total, dim, east, hasContent);
-    return total;
-  }
-
-  private boolean addMiddle(Dimension total, Dim dim, Component c, boolean hasContent){
-    if (c == null){ return hasContent; }
-    var d = dim.of(c);
-    if (hasContent){ total.width += w(gap.widthGap); }
-    total.width += d.width;
-    total.height = Math.max(total.height, d.height);
-    return true;
-  }
-
-  private record Area(int left, int top, int right, int bottom){}
-
-  private interface Dim{
-    Dimension of(Component c);
-  }
+  private int span(int n){ return Math.max(0, n); }
 }

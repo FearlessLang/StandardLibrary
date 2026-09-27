@@ -1,10 +1,10 @@
-package base;
+package _base;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 class NatCache {
   private static final long max = 255L;
@@ -73,8 +73,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   private static long mulChecked(long a, long b){
     if (a == 0 || b == 0) {return 0;}
     boolean overflow = Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0;
-    if (overflow){ throw nonDetErr(overflowMsg("*", a, b));
-    }
+    if (overflow){ throw nonDetErr(overflowMsg("*", a, b)); }
     return a * b;
   }
 
@@ -108,7 +107,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   @Override public Object imm$$slash$1(Object p0){
     long d=n(p0);
     if (d == 0L) {
-      throw err("Nat /: Cannot create a Num with denominator 0.");
+      throw err("Nat/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
       unsignedLongToBigInteger(val),
@@ -170,7 +169,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   static boolean canConvertToFloat(long val) {
     // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
     // The largest integer that can be exactly represented in a double is 2^53.
-    if (Long.compareUnsigned(val, 9007199254740993L) <= 0) {
+    if (Long.compareUnsigned(val, 1L << 53) <= 0) {
       return true;
     }
     BigInteger bigInteger = toUnsignedBigInteger(val);
@@ -196,9 +195,15 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   }
   @Override public Object imm$getInt$0() {
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
-      throw err("Nat.getInt: cannot convert to Int, "+Long.toUnsignedString(val)+" is greater than Math.maxInt ("+Long.toUnsignedString(-1)+")");
+      throw err("Nat.getInt: cannot convert to Int, "+Long.toUnsignedString(val)+" is greater than Math.maxInt ("+Long.MAX_VALUE+")");
     }
     return Int$c$0Instance.instance(val);
+  }
+  @Override public Object imm$tryGetInt$0() {
+    if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0) {
+      return fail("Nat.getInt: cannot convert to Int, "+Long.toUnsignedString(val)+" is greater than Math.maxInt ("+Long.MAX_VALUE+")");
+    }
+    return ok(Int$c$0Instance.instance(val));
   }
   @Override public Object imm$getByte$0() {
     if (Long.compareUnsigned(val, 255L) > 0) {
@@ -206,11 +211,23 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     }
     return Byte$o$0Instance.instance((byte) val);
   }
+  @Override public Object imm$tryGetByte$0() {
+    if (Long.compareUnsigned(val, 255L) > 0) {
+      return fail("Nat.getByte: cannot convert to Byte, "+Long.toUnsignedString(val)+" is greater than Math.maxByte (255)");
+    }
+    return ok(Byte$o$0Instance.instance((byte) val));
+  }
   @Override public Object imm$getFloat$0() {
     if (!canConvertToFloat(val)) {
       throw err("Nat.getFloat: cannot convert to Float "+Long.toUnsignedString(val)+" without losing precision");
     }
     return Float$1c$0Instance.instance(unsignedLongToDouble(val));
+  }
+  @Override public Object imm$tryGetFloat$0() {
+    if (!canConvertToFloat(val)) {
+      return fail("Nat.getFloat: cannot convert to Float "+Long.toUnsignedString(val)+" without losing precision");
+    }
+    return ok(Float$1c$0Instance.instance(unsignedLongToDouble(val)));
   }
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,n(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,n(p0))); }
@@ -219,18 +236,15 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     long power = n(p0);
     if (power == 0) { return Nat$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    long result = 1;
-    try {
-      while (power > 0) {
-        result = mulChecked(result, this.val);
-        power -= 1;
-      }
+    long result = 1, base = val;
+    String errorMsg = overflowMsg("**", this.val, n(p0));
+    while (true) {
+      if ((power & 1) != 0){ result = powMul(result, base); }
+      power >>>= 1;
+      if (power == 0){ return Nat$c$0Instance.instance(result); }
+      if (Long.compareUnsigned(base, Long.divideUnsigned(MAX_UNSIGNED_VALUE, base)) > 0){ throw nonDetErr(overflowMsg("**", this.val, power)); }
+      base = base * base;
     }
-    catch (Error _) {
-      // re-wrap the error for a better message
-      throw nonDetErr(overflowMsg("**", this.val, n(p0)));
-    }
-    return Nat$c$0Instance.instance(result);
   }
   @Override public Object imm$softSqrt$0(){
     return Float$1c$0Instance.instance(Math.sqrt(unsignedLongToDouble(val)));
@@ -242,14 +256,24 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     if (d == 0){ throw err("Nat.getTruncDiv: d==0"); }
     return instance(Long.divideUnsigned(val,d));
   }
+  @Override public Object imm$tryGetTruncDiv$1(Object p0){
+    long d= n(p0);
+    if (d == 0){ return fail("Nat.getTruncDiv: d==0"); }
+    return ok(instance(Long.divideUnsigned(val,d)));
+  }
   @Override public Object imm$getRem$1(Object p0){
     long d= n(p0);
     if (d == 0){ throw err("Nat.getRem: d==0"); }
     return instance(Long.remainderUnsigned(val,d));
   }
+  @Override public Object imm$tryGetRem$1(Object p0){
+    long d= n(p0);
+    if (d == 0){ return fail("Nat.getRem: d==0"); }
+    return ok(instance(Long.remainderUnsigned(val,d)));
+  }
+  private static String offsetErr(long val, long offset, String why){ return "Nat.getIndexOffset: "+Long.toUnsignedString(val)+" .getIndexOffset("+(offset < 0 ? "" : "+")+offset+") would be "+why; }
   @Override public Object imm$getIndexOffset$1(Object p0){
     long offset = i(p0);
-
     if (offset <= 0) {
       if (Long.compareUnsigned(val, -offset) < 0) {
         throw detErr(
@@ -257,7 +281,8 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
           + Long.toUnsignedString(val)+" by "+offset+", this must be >= delta");
       }
       // works for Long.MIN_VALUE as well, as Long.MIN_VALUE when read unsigned is LONG.MAX_VALUE + 1
-      return instance(subChecked(val, -offset));
+      if (Long.compareUnsigned(val, -offset) < 0){ throw err(offsetErr(val, offset, "less than 0")); }
+      return instance(val + offset);
     }
     if (Long.compareUnsigned(val, MAX_UNSIGNED_VALUE - offset) > 0) {
       throw detErr(
@@ -265,7 +290,18 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
           + Long.toUnsignedString(val)+" by "+offset+"this+delta must be <= "
           + Long.toUnsignedString(MAX_UNSIGNED_VALUE));
     }
-    return instance(addChecked(val, offset));
+    return instance(val + offset);
+    if (Long.compareUnsigned(val, MAX_UNSIGNED_VALUE - offset) > 0){ throw err(offsetErr(val, offset, "greater than Math.maxNat")); }
+    return instance(val + offset);
+  }
+  @Override public Object imm$tryGetIndexOffset$1(Object p0){
+    long offset = i(p0);
+    if (offset <= 0) {
+      if (Long.compareUnsigned(val, -offset) < 0){ return fail(offsetErr(val, offset, "less than 0")); }
+      return ok(instance(val + offset));
+    }
+    if (Long.compareUnsigned(val, MAX_UNSIGNED_VALUE - offset) > 0){ return fail(offsetErr(val, offset, "greater than Math.maxNat")); }
+    return ok(instance(val + offset));
   }
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance(val + n(p0)); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance(val - n(p0)); }

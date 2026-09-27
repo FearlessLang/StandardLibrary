@@ -2,22 +2,22 @@ _AssertApprox[T]: DataType[T,T] {
   .eqDelta(n: T, delta: T): Bool;
   .assertEqDelta(expected: T, delta: T): Void -> Assert!(
     this.eqDelta(expected,delta),
-    { `Expected within delta`
-      | `expected: `+(this.close(expected))
-      | `delta: `+(this.close(delta))
-      | `actual: `+this });
+    { "Expected within delta"
+      | "expected: "+(this.close(expected))
+      | "delta: "+(this.close(delta))
+      | "actual: "+this });
   .assertEqDelta(expected: T, delta: T, msg: read LazyInfo): Void -> Assert!(
     this.eqDelta(expected,delta),
     { msg#.info + (""
-      | `expected: `+(this.close(expected))
-      | `delta: `+(this.close(delta))
-      | `actual: `+this .info)});
+      | "expected: "+(this.close(expected))
+      | "delta: "+(this.close(delta))
+      | "actual: "+this .info)});
   }
   
 _AssertSize: {
   read .size: Nat;
 
-  read .assertSize(expected: Nat): Void -> this.assertSize(expected,{``});
+  read .assertSize(expected: Nat): Void -> this.assertSize(expected,{""});
   read .assertSize(expected: Nat, msg: read LazyInfo): Void -> Assert!(
     this.size == expected,
     { msg#.info + (""
@@ -28,18 +28,18 @@ _AssertSize: {
 _AssertImmSize: {
   imm .size: Nat;
 
-  imm .assertSize(expected: Nat): Void -> this.assertSize(expected,{``});
+  imm .assertSize(expected: Nat): Void -> this.assertSize(expected,{""});
   imm .assertSize(expected: Nat, msg: read LazyInfo): Void -> Assert!(
     this.size == expected,
     { msg#.info + (""
-      | `Expected size: `+expected
-      | `Actual size: `+(this.size) .info) });
+      | "Expected size: "+expected
+      | "Actual size: "+(this.size) .info) });
   }
 
 _AssertEmpty: {
   read .isEmpty: Bool;
 
-  read .assertEmpty: Void -> this.assertEmpty({``});
+  read .assertEmpty: Void -> this.assertEmpty({""});
   read .assertEmpty(msg: read LazyInfo): Void -> Assert!(
     this.isEmpty,
     { msg#.info + ("" | "Expected empty" .info)});
@@ -48,7 +48,7 @@ _AssertEmpty: {
 _AssertImmEmpty: {
   imm .isEmpty: Bool;
 
-  imm .assertEmpty: Void -> this.assertEmpty({``});
+  imm .assertEmpty: Void -> this.assertEmpty({""});
   imm .assertEmpty(msg: read LazyInfo): Void -> Assert!(
     this.isEmpty,
     { msg#.info + ("" | "Expected empty" .info)});

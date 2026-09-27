@@ -1,9 +1,9 @@
-package base;
+package _base;
 
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 class IntCache {
   private static final long min = -128;
@@ -48,14 +48,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     }
   }
   static boolean canSafelyConvertToDouble(long val) {
-    // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
-    // The largest integer that can be exactly represented in a double is 2^53.
-    if (-9007199254740993L <= val && val <= 9007199254740993L) {
-      return true;
-    }
-
-    // Further optimisations exist here, I just can't be bothered right now...
-    return val == (long) ((double) val);
+    return val != Long.MAX_VALUE && val == (long) ((double) val);
   }
 
   @Override public Object imm$succ$0() {
@@ -78,7 +71,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$byte$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$o$0Instance.instance((byte)val)); }
   @Override public Object imm$float$0(){
     if (canSafelyConvertToDouble(val)) {
-      return optSome(Float$1c$0Instance.instance((float) val));
+      return optSome(Float$1c$0Instance.instance((double) val));
     }
     return optEmpty();
   }
@@ -88,21 +81,46 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     }
     return Nat$c$0Instance.instance(val);
   }
+  @Override public Object imm$tryGetNat$0(){
+    if (val < 0) {
+      return fail("Int.getNat: cannot convert negative Int "+val+" to Nat");
+    }
+    return ok(Nat$c$0Instance.instance(val));
+  }
   @Override public Object imm$getByte$0(){
     if (val < 0) {
-      throw err("Int.byteExact: cannot convert to Byte "+val+" is less than 0");
+      throw err("Int.getByte: cannot convert to Byte "+val+" is less than 0");
     }
     if (val > 255) {
-      throw err("Int.byteExact: cannot convert to Byte "+val+" is greater than 255");
+      throw err("Int.getByte: cannot convert to Byte "+val+" is greater than 255");
     }
     return Byte$o$0Instance.instance((byte)val);
   }
+  @Override public Object imm$tryGetByte$0(){
+    if (val < 0) {
+      return fail("Int.getByte: cannot convert to Byte "+val+" is less than 0");
+    }
+    if (val > 255) {
+      return fail("Int.getByte: cannot convert to Byte "+val+" is greater than 255");
+    }
+    return ok(Byte$o$0Instance.instance((byte)val));
+  }
   @Override public Object imm$getFloat$0(){
     if (canSafelyConvertToDouble(val)) {
-      return Float$1c$0Instance.instance((float) val);
+      return Float$1c$0Instance.instance((double) val);
     }
     throw err(
-  "Int.floatExact: cannot convert to Float "
+  "Int.getFloat: cannot convert to Float "
+        + val
+        + " is too large to be represented as a Float without loss of precision"
+    );
+  }
+  @Override public Object imm$tryGetFloat$0(){
+    if (canSafelyConvertToDouble(val)) {
+      return ok(Float$1c$0Instance.instance((double) val));
+    }
+    return fail(
+  "Int.getFloat: cannot convert to Float "
         + val
         + " is too large to be represented as a Float without loss of precision"
     );
@@ -124,7 +142,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$$slash$1(Object p0){
     long d=Nat$c$0Instance.unwrap(p0);
     if (d == 0L) {
-      throw err("Int /: Cannot create a Num with denominator 0.");
+      throw err("Int/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(val),
@@ -134,27 +152,23 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, unwrap(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
     long power = unsignedLongFromNat(p0);
-    if (power == 0) { return Nat$c$0Instance.instance(1); }
+    if (power == 0) { return Int$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-
-    long result = 1;
-    try {
-      while (power > 0) {
-        result = Math.multiplyExact(result, this.val);
-        power -= 1;
+    long result = 1, base = val;
+    try{
+      while (true) {
+        if ((power & 1) != 0){ result = Math.multiplyExact(result, base); }
+        power >>>= 1;
+        if (power == 0){ return Int$c$0Instance.instance(result); }
+        base = Math.multiplyExact(base, base);
       }
-
-      return Int$c$0Instance.instance(result);
-    } catch(ArithmeticException e){
-      // Unsure what the best approach here is, the whole expression would underflow
-      // As value is negative, and power is odd. But the intermediate expression might
-      // fail with either underflow or overflow
+    }
+    catch(ArithmeticException e){
       if (unsignedLongFromNat(p0) % 2 == 1 && this.val < 0) {
         throw nonDetErr(underflowMessage("**", val, unwrap(p0)));
       }
       throw nonDetErr(overflowMessage("**", val, unwrap(p0)));
     }
-
   }
 
   @Override public Object imm$abs$0(){
@@ -163,7 +177,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
 
   @Override public Object imm$negAbs$0(){
-    // Long.MAX_VALUE correctly untouched
+    // Long.MIN_VALUE correctly converted to Long.MAX_VALUE + 1
     if (val < 0) {
       return this;
     }
@@ -199,6 +213,14 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     // In the range of unsigned longs, so we can just do the division.
     return instance(val / d);
   }
+  @Override public Object imm$tryGetTruncDiv$1(Object p0){
+    long d= unsignedLongFromNat(p0);
+    if (d == 0L){ return fail("Int.getTruncDiv: d==0"); }
+    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0) {
+      return ok(instance(0L));
+    }
+    return ok(instance(val / d));
+  }
   public static long remainderWithUnsignedLong(long signed, long unsignedRemainder) {
     // if a % b = a if b> a,
     if (Long.compareUnsigned(unsignedRemainder, Long.MAX_VALUE) > 0) {
@@ -210,6 +232,11 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     long d= unsignedLongFromNat(p0);
     if (d == 0L){ throw err("Int.getRem: d==0"); }
     return instance(remainderWithUnsignedLong(val, d));
+  }
+  @Override public Object imm$tryGetRem$1(Object p0){
+    long d= unsignedLongFromNat(p0);
+    if (d == 0L){ return fail("Int.getRem: d==0"); }
+    return ok(instance(remainderWithUnsignedLong(val, d)));
   }
 
   /**
@@ -230,7 +257,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
    */
   @Override public Object imm$getWrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
-    if (len == 0L){ throw err("Int.wrapIndex: len==0"); }
+    if (len == 0L){ throw err("Int.getWrapIndex: len==0"); }
     // handle case where len cannot be represented as a signed long.
     if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {
       // safe to treat len as signed long
@@ -246,6 +273,17 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     // Otherwise, val is negative, so we can
     // add len to it to get the correct result.
     return Nat$c$0Instance.instance(len + val);
+  }
+  @Override public Object imm$tryGetWrapIndex$1(Object p0){
+    long len= unsignedLongFromNat(p0);
+    if (len == 0L){ return fail("Int.getWrapIndex: len==0"); }
+    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {
+      return ok(Nat$c$0Instance.instance(Math.floorMod(val, len)));
+    }
+    if (val >= 0) {
+      return ok(Nat$c$0Instance.instance(val));
+    }
+    return ok(Nat$c$0Instance.instance(len + val));
   }
   @Override public Object imm$wrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);

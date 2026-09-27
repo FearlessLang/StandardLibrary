@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 public interface _CacheFlush$174$0{
   default Object imm$flush$1(Object p0){
@@ -11,7 +11,7 @@ public interface _CacheFlush$174$0{
       case CacheF$2p$1 c-> c._cache0().entry().set(null);
       default->{}
     }
-    return base.Void$o$0.instance;
+    return _base.Void$o$0.instance;
   }
   //repr caches are flushed by repr instead
   //CacheReprF$175$3

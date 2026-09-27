@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 import java.math.BigInteger;
 import java.util.stream.LongStream;
@@ -73,15 +73,15 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     if (qr[1].signum() == 0){ return q; }
     return n.signum() > 0 ? q.add(one) : q;
   }
-  private static int clampIntZ(BigInteger z){
-    if (z.compareTo(minInt) < 0){ return Integer.MIN_VALUE; }
-    if (z.compareTo(maxInt) > 0){ return Integer.MAX_VALUE; }
-    return z.intValue();
+  private static long clampIntZ(BigInteger z){
+    if (z.compareTo(minInt) < 0){ return Long.MIN_VALUE; }
+    if (z.compareTo(maxInt) > 0){ return Long.MAX_VALUE; }
+    return z.longValue();
   }
-  private static int clampNatBitsZ(BigInteger z){
+  private static long clampNatBitsZ(BigInteger z){
     if (z.signum() <= 0){ return 0; }
     if (z.compareTo(maxNat) >= 0){ return -1; } // 0xFFFF_FFFF
-    return (int)z.longValue();
+    return z.longValue();
   }
   private static byte clampByteBitsZ(BigInteger z){
     if (z.signum() <= 0){ return 0; }
@@ -102,6 +102,8 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   }
   public static BigInteger pow(BigInteger n, long exponent) {
     assert exponent >= 0;
+    if (n.signum() == 0 || n.equals(one)){ return exponent == 0 ? one : n; }
+    if (n.equals(one.negate())){ return (exponent & 1) == 0 ? one : n; }
     if (exponent <= Integer.MAX_VALUE) {
       // is small enough to safely cast
       return n.pow((int) exponent);
@@ -127,6 +129,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
               pow(numerator, exponent), pow(denominator, exponent)
       );
     }
+    if (numerator.signum() == 0){ throw err("Num**: cannot raise +0/1 to the negative power "+exponent); }
     // Since negative flip fraction
     if (exponent == Long.MIN_VALUE) {
       // Since |Long.MIN_VALUE| is too large to fit in long
@@ -143,7 +146,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
 
   @Override public Object imm$$slash$1(Object p0){
     var o= num(p0);
-    if (o.numerator.signum() == 0){ throw err("Num./: x==0"); }
+    if (o.numerator.signum() == 0){ throw err("Num/: x==0"); }
     return instance(numerator.multiply(o.denominator), denominator.multiply(o.numerator));
   }
   @Override public Object imm$abs$0(){ return numerator.signum() < 0 ? instance(numerator.negate(), denominator) : this; }
@@ -211,43 +214,55 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     if (!isRepresentableAsDouble()) { return optEmpty(); }
     return optSome(Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
   }
-  public void assertInteger(String message) {
-    if (!this.isInteger()) {throw err(message);}
-  }
-  public void assertInRange(String message, BigInteger min, BigInteger max) {
-    if (this.numerator.compareTo(min) < 0 || this.numerator.compareTo(max) > 0) {
-      throw err(message);
-    }
-  }
+  private boolean outOfRange(BigInteger min, BigInteger max){ return numerator.compareTo(min) < 0 || numerator.compareTo(max) > 0; }
+  private String notInteger(String m, String to){ return "Num."+m+": cannot convert Num " + this.asString() + " to "+to+" as the denominator is not 1."; }
+  private String notInRange(String m, String to, BigInteger min, BigInteger max){ return "Num."+m+": cannot convert Num " + this.asString() + " to "+to+" as the numerator is not in the range ["+min+", "+max+"]"; }
   @Override public Object imm$getInt$0() {
-    assertInteger("Num.getInt: cannot convert Num " + this.asString() + " to Int as the denominator is not 1.");
+    if (!isInteger()){ throw err(notInteger("getInt", "Int")); }
     // We know the denominator must be one.
-    assertInRange(
-      "Num.getInt: cannot convert Num " + this.asString() + " to Int as the numerator is not in the range ["+minInt+", "+maxInt+"]",
-      minInt, maxInt);
+    if (outOfRange(minInt, maxInt)){ throw err(notInRange("getInt", "Int", minInt, maxInt)); }
     return Int$c$0Instance.instance(this.numerator.longValue());
+  }
+  @Override public Object imm$tryGetInt$0() {
+    if (!isInteger()){ return fail(notInteger("getInt", "Int")); }
+    if (outOfRange(minInt, maxInt)){ return fail(notInRange("getInt", "Int", minInt, maxInt)); }
+    return ok(Int$c$0Instance.instance(this.numerator.longValue()));
   }
 
   @Override public Object imm$getNat$0() {
-    assertInteger("Num.getNat: cannot convert Num " + this.asString() + " to Nat as the denominator is not 1.");
-    assertInRange("Num.getNat: cannot convert Num " + this.asString() + " to Nat as the numerator is not in the range [0, "+maxNat+"]", zero, maxNat);
+    if (!isInteger()){ throw err(notInteger("getNat", "Nat")); }
+    if (outOfRange(zero, maxNat)){ throw err(notInRange("getNat", "Nat", zero, maxNat)); }
     return Nat$c$0Instance.instance(this.numerator.longValue());
+  }
+  @Override public Object imm$tryGetNat$0() {
+    if (!isInteger()){ return fail(notInteger("getNat", "Nat")); }
+    if (outOfRange(zero, maxNat)){ return fail(notInRange("getNat", "Nat", zero, maxNat)); }
+    return ok(Nat$c$0Instance.instance(this.numerator.longValue()));
   }
 
 
   @Override public Object imm$getByte$0() {
-    assertInteger("Num.getInt: cannot convert Num " + this.asString() + " to Byte as the denominator is not 1.");
-    assertInRange("Nat.getInt: cannot convert Num " + this.asString() + " to Byte as the numerator is not in the range [0, "+maxByte+"]",
-      zero, maxByte);
+    if (!isInteger()){ throw err(notInteger("getByte", "Byte")); }
+    if (outOfRange(zero, maxByte)){ throw err(notInRange("getByte", "Byte", zero, maxByte)); }
     return Byte$o$0Instance.instance(this.numerator.byteValue());
   }
-
+  @Override public Object imm$tryGetByte$0() {
+    if (!isInteger()){ return fail(notInteger("getByte", "Byte")); }
+    if (outOfRange(zero, maxByte)){ return fail(notInRange("getByte", "Byte", zero, maxByte)); }
+    return ok(Byte$o$0Instance.instance(this.numerator.byteValue()));
+  }
 
   @Override public Object imm$getFloat$0(){
     if (!isRepresentableAsDouble()) {
-      throw err(read$str$0()+" is not exactly representable as a Float");
+      throw err("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
     return Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
+  }
+  @Override public Object imm$tryGetFloat$0(){
+    if (!isRepresentableAsDouble()) {
+      return fail("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
+    }
+    return ok(Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
   }
 
   @Override public Object imm$softInt$0(){

@@ -7,7 +7,7 @@
 BoardBounds: { #(panelW: Width, panelH: Height): Rect -> Block#
   .let[Nat] pw = { panelW.get }
   .let[Nat] ph = { panelH.get }
-  .let[Nat] side = { (pw < ph).if{.then->pw; .else->ph} }
+  .let[Nat] side = { ((pw < ph).if{.then->pw; .else->ph} .getTruncDiv 3) * 3 }
   .let[Nat] offX = { (pw - side) .getTruncDiv 2 }
   .let[Nat] offY = { (ph - side) .getTruncDiv 2 }
   .return { Rects#(X.origin + (Width#offX), Y.origin + (Height#offY), Width#side, Height#side) }

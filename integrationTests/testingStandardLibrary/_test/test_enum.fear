@@ -11,29 +11,29 @@ Direction: Enum[Direction]{
   .close->this; .close->::;
   }
 
-North: Direction{::.north; .imm->North; `North`}
-East:  Direction{::.east;  .imm->East;  `East` }
-South: Direction{::.south; .imm->South; `South`}
-West:  Direction{::.west;  .imm->West;  `West` }
+North: Direction{::.north; .imm->North; "North"}
+East:  Direction{::.east;  .imm->East;  "East" }
+South: Direction{::.south; .imm->South; "South"}
+West:  Direction{::.west;  .imm->West;  "West" }
 
 EnumTests: Test {::
   .check{Directions.list.size.assertEq 4}
   .check{Directions.list.get(0).assertEq North}
   .check{Directions.list.get(3).assertEq West}
 
-  .check{North.str.assertEq `North`}
-  .check{West.str.assertEq `West`}
+  .check{North.str.assertEq "North"}
+  .check{West.str.assertEq "West"}
 
   .check{North.index.assertEq 0}
   .check{East.index.assertEq 1}
   .check{South.index.assertEq 2}
   .check{West.index.assertEq 3}
 
-  .check{Directions.map.get(`North`).assertEq North}
-  .check{Directions.map.get(`West`).assertEq West}
+  .check{Directions.map.get("North").assertEq North}
+  .check{Directions.map.get("West").assertEq West}
   .check{Directions.map.size.assertEq 4}
 
-  .check{Directions.fromInfo(Infos.msg `East`).assertEq East}
+  .check{Directions.fromInfo(Infos.msg "East").assertEq East}
   .check{Directions.fromInfo(North.info).assertEq North}
 
   .check{North == North .assertTrue}
@@ -43,10 +43,10 @@ EnumTests: Test {::
   .check{North.hash.assertNotEq(East.hash)}
   .check{North.hash.assertEq 0}
 
-  .check{North.match(DirectionMatch[Str]{ .north->`n`; .east->`e`; .south->`s`; .west->`w`; }).assertEq `n`}
-  .check{West.match(DirectionMatch[Str]{ .north->`n`; .east->`e`; .south->`s`; .west->`w`; }).assertEq `w`}
+  .check{North.match(DirectionMatch[Str]{ .north->"n"; .east->"e"; .south->"s"; .west->"w"; }).assertEq "n"}
+  .check{West.match(DirectionMatch[Str]{ .north->"n"; .east->"e"; .south->"s"; .west->"w"; }).assertEq "w"}
 
-  .check{North.info.assertEq(Infos.msg `North`)}
+  .check{North.info.assertEq(Infos.msg "North")}
   .check{North.imm.assertEq North}
   }
 

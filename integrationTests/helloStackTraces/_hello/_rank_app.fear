@@ -5,4 +5,4 @@ use base.Void as Void;
 
 Hello:Main{s->Foo.foo}
 Foo:{.foo:Void->Bar.bar}
-Bar:{.bar:Void->Error.msg`AAAAh`}
+Bar:{.bar:Void->Error.msg"AAAAh"}

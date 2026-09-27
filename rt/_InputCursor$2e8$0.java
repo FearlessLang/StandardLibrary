@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public final class _InputCursor$2e8$0 implements InputCursor$2e8$0{
   @Override public final Object mut$iso$0(){ return this; }

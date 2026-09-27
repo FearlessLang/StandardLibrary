@@ -7,11 +7,14 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .isEmpty->True;
 
   /// Only assert if the method is .assertXXX
-  .get(i)->Error.msg `List.get: called on empty list`;
+  .get(i)->Error.msg "List.get: called on empty list";
+  .tryGet(i)->Actions.msg "List.get: called on empty list";
   .opt(i)->{};
 
-  .getFirst->Error.msg `List.get: .first called on empty list`;
-  .getLast->Error.msg `List.get: .last called on empty list`;
+  .getFirst->Error.msg "List.getFirst: called on empty list";
+  .getLast->Error.msg "List.getLast: called on empty list";
+  .tryGetFirst->Actions.msg "List.getFirst: called on empty list";
+  .tryGetLast->Actions.msg "List.getLast: called on empty list";
   .first->{};
   .last->{};
 
@@ -24,20 +27,20 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   read +> e->Lists.singletonRead[E](e);
   
   .subList(start,end) -> Block#
-    .if{start!=0 || {end!=0}} .error{`.subList(`+start+`, `+end+`) called on empty list`}
+    .if{start!=0 || {end!=0}} .error{".subList("+start+", "+end+") called on empty list"}
     .return {{}};
 
   .subList(start)->this.subList(start,this.size);
 
-  .with(i,e)->Error.msg `.with called on empty list`;
+  .with(i,e)->Error.msg ".with called on empty list";
   mut .withAlso(i,e)->Block#
-    .if {i!=0} .error{`.withAlso(`+i+`, _) called on empty list`}
+    .if {i!=0} .error{".withAlso("+i+", _) called on empty list"}
     .return{Lists#e};
   read .withAlso(i,e)->Block#
-    .if {i!=0} .error{`.withAlso(`+i+`, _) called on empty list`}
+    .if {i!=0} .error{".withAlso("+i+", _) called on empty list"}
     .return{Lists.singletonRead[E]e};
 
-  .without(i)->Error.msg `.without called on empty list`;
+  .without(i)->Error.msg ".without called on empty list";
 
   .reverse->{};
 
@@ -52,7 +55,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .as f ->{};
 
   .imm by->{};
-  .str by->`[]`;
+  .str by->"[]";
   .info by->Block#
     .if {this.isEmpty} .return {Info}
     .let list= {this.flow.map{e->by#e.info}.list.as{::}}
@@ -77,6 +80,11 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
 
   mut  .get(i: Nat): E;                      /// element at i (0-based); throws if i >= size
   read .get(i: Nat): read/imm E;             /// element at i (0-based); throws if i >= size
+  /// ``this.tryGet(i)`` returns `.ok` of ``this.get(i)``, or the error info of ``this.get(i)`` iff ``i >= size``.
+  //>   .check{(Lists#(1,2,3).tryGet 1).ok.assertEq({::}, Opts# 2)}
+  //>   .check{Lists#(1,2,3).tryGet 5 .assertInfo{::.isMsg{::.startsWith "List.get:"}}}
+  mut  .tryGet(i: Nat): mut Action[E];
+  read .tryGet(i: Nat): mut Action[read/imm E];
 
   mut  .opt(i: Nat): mut Opt[E];             /// .some(get(i)) if i < size; .empty otherwise
   read .opt(i: Nat): mut Opt[read/imm E];    /// .some(get(i)) if i < size; .empty otherwise
@@ -84,9 +92,19 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
 
   mut  .getFirst: E;                            /// get(0); throws iff empty
   read .getFirst: read/imm E;                   /// get(0); throws iff empty
+  /// `this.tryGetFirst` returns `.ok` of `this.getFirst`, or the error info of `this.getFirst` iff empty.
+  //>   .check{(Lists#(1,2,3).tryGetFirst).ok.assertEq({::}, Opts# 1)}
+  //>   .check{List[Nat].tryGetFirst .assertInfo{::.isMsg{::.startsWith "List.getFirst:"}}}
+  mut  .tryGetFirst: mut Action[E];
+  read .tryGetFirst: mut Action[read/imm E];
 
   mut  .getLast: E;                             /// get(size-1); throws iff empty
   read .getLast: read/imm E;                    /// get(size-1); throws iff empty
+  /// `this.tryGetLast` returns `.ok` of `this.getLast`, or the error info of `this.getLast` iff empty.
+  //>   .check{(Lists#(1,2,3).tryGetLast).ok.assertEq({::}, Opts# 3)}
+  //>   .check{List[Nat].tryGetLast .assertInfo{::.isMsg{::.startsWith "List.getLast:"}}}
+  mut  .tryGetLast: mut Action[E];
+  read .tryGetLast: mut Action[read/imm E];
 
   mut  .first: mut Opt[E];                /// .some(first) if non-empty; .empty otherwise
   read .first: mut Opt[read/imm E];       /// .some(first) if non-empty; .empty otherwise

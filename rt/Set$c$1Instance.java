@@ -1,10 +1,12 @@
-package base;
+package _base;
+
+import _base.Util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public final class Set$c$1Instance implements Set$c$1 {
   private final OrderHashBy$2ea$2 ordering;
@@ -66,6 +68,14 @@ public final class Set$c$1Instance implements Set$c$1 {
       + " Consider using `Set.opt` to properly handle the failure case"
     );}
     return key;
+  }
+  public Object imm$tryGet$1(Object p0) {
+    Object key = set.get(mapKey(ordering, p0));
+    if (key == null) { return fail(
+      "Set.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
+      + " Consider using `Set.opt` to properly handle the failure case"
+    );}
+    return ok(key);
   }
   @Override
   public Object imm$opt$1(Object p0) { return optNullable(set.get(mapKey(ordering, p0))); }

@@ -105,7 +105,7 @@ MainFlushCache:Main{s->Block#
 ///cached body and the expected Debug trace is what the Java side asserts.
 
 NormAnimal: { .name: Str }
-NormCat: NormAnimal { .name -> `cat` }
+NormCat: NormAnimal { .name -> "cat" }
 
 ///Memoized production of a Norm[NormCat]. Equal keys must hand back the very
 ///same Norm, since caches keyed on a Norm key it by identity, not by content.

@@ -98,21 +98,37 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{5/1 .getInt .assertEq +5}
   //>   .checkDetErr({::}, {(1 / 2) .getInt})
   .getInt: Int;
+  /// `this.tryGetInt` returns `.ok` of `this.getInt`, or the error info of `this.getInt` if `this` is not an integer in ``[Math.minInt, Math.maxInt]``.
+  //>   .check{((5/1).tryGetInt).ok.assertEq({::}, Opts# +5)}
+  //>   .check{(1/2).tryGetInt .assertInfo{::.isMsg{::.startsWith "Num.getInt:"}}}
+  .tryGetInt: mut Action[Int];
 
   /// `this.getNat` converts `this` to a `Nat` if it's an integer in ``[0, Math.maxNat]``; throws otherwise.
   //>   .check{5/1 .getNat .assertEq 5}
   //>   .checkDetErr({::}, {(-5) .getNat})
   .getNat: Nat;
+  /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if `this` is not an integer in ``[0, Math.maxNat]``.
+  //>   .check{((5/1).tryGetNat).ok.assertEq({::}, Opts# 5)}
+  //>   .check{(1/2).tryGetNat .assertInfo{::.isMsg{::.startsWith "Num.getNat:"}}}
+  .tryGetNat: mut Action[Nat];
 
   /// `this.getByte` converts `this` to a `Byte` if it's an integer in ``[0, Math.maxByte]``; throws otherwise.
   //>   .check{5/1 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({::}, {300 .getByte})
   .getByte: Byte;
+  /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not an integer in ``[0, Math.maxByte]``.
+  //>   .check{((5/1).tryGetByte).ok.assertEq({::}, Opts#(5.getByte))}
+  //>   .check{(300/1).tryGetByte .assertInfo{::.isMsg{::.startsWith "Num.getByte:"}}}
+  .tryGetByte: mut Action[Byte];
 
   /// `this.getFloat` converts `this` to a `Float`. Throws if not exactly representable.
   //>   .check{5/1 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {(1 / 3) .getFloat})
   .getFloat: Float;
+  /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not exactly representable.
+  //>   .check{((5/1).tryGetFloat).ok.assertEq({::}, Opts# 5.0)}
+  //>   .check{(1/3).tryGetFloat .assertInfo{::.isMsg{::.startsWith "Num.getFloat:"}}}
+  .tryGetFloat: mut Action[Float];
 
   /// `this.softInt` converts `this` to an `Int` by truncating towards ``0``, then clamping into
   /// ``[minInt, maxInt]``.
@@ -140,7 +156,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{1/1 ~~ (4/1) .contains(1/1) .assertFalse}
   //>   .checkDetErr({::}, {1/1~~(1/1)})
   ~~(end: Num): NumRange -> Block#
-    .if {this >= end } .error {"Num ~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
+    .if {this >= end } .error {"Num~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
     .return {{
       .start -> this;
       .end -> end;
@@ -154,7 +170,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{(1/1~~=(4/3)) .contains(1/1) .assertFalse}
   //>   .checkDetErr({::}, {1/1~~=(1/1)})
   ~~=(endInclusive: Num): NumRange -> Block#
-    .if {this >= endInclusive } .error {"Num ~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive ("+endInclusive+")"}
+    .if {this >= endInclusive } .error {"Num~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive ("+endInclusive+")"}
     .return {{
       .start -> this;
       .end -> endInclusive;
@@ -168,7 +184,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{1/1=~~(4/3) .contains(4/3) .assertFalse}
   //>   .checkDetErr({::}, {1/1=~~(1/1)})
   =~~(end: Num): NumRange -> Block#
-    .if {this >= end } .error {"Num =~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
+    .if {this >= end } .error {"Num=~~: Tried to produce an empty range, start ("+this+") must be < end ("+end+")"}
     .return {{
       .start -> this;
       .end -> end;
@@ -183,7 +199,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{(1/1=~~=(4/3)) .contains(1/1) .assertTrue}
   //>   .checkDetErr({::}, {4/1=~~=(1/1)})
   =~~=(endInclusive: Num): ClosedNumRange -> Block#
-    .if {this > endInclusive } .error {"Num =~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive ("+endInclusive+")"}
+    .if {this > endInclusive } .error {"Num=~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive ("+endInclusive+")"}
     .return {{
       .start -> this;
       .end -> endInclusive;
@@ -199,16 +215,16 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 
   /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{2/1 .assertInRange((1/1)=~~=(4/1))}
-  .assertInRange(range: NumRange): Void -> this.assertInRange(range, {``});
+  .assertInRange(range: NumRange): Void -> this.assertInRange(range, {""});
 
   /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   //>   .check{(2/1) .assertInRange((1/1)=~~=(4/1), {`custom context`})}
   .assertInRange(range: NumRange, msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
-    { msg#.info + (`Expected in range: `+ (range.str)
-      | `lo: `+(range.start)
-      | `hi: `+(range.end)
-      | `actual: `+ this
+    { msg#.info + ("Expected in range: "+ (range.str)
+      | "lo: "+(range.start)
+      | "hi: "+(range.end)
+      | "actual: "+ this
       .info)});
 
   /// ``this.clampTo(range)`` returns `this` clamped into `range` (delegates to `range.clamp`).
@@ -218,7 +234,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   .clampTo(range: ClosedNumRange): Num -> range.clamp(this);
 
   .hash -> this.str.hash;           /// hash via string
-  .close->::; .close->this;         /// fixpoint type closed
+  .close->::; .close->this;
   .sumNumber xs ->                  /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Num];

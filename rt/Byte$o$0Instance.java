@@ -1,9 +1,9 @@
-package base;
+package _base;
 
 import java.math.BigInteger;
 import java.util.stream.IntStream;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 class ByteCache {
   final static int max = 255;
@@ -50,7 +50,6 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     }
     return (byte) (a - b);
   }
-
   private static byte mulChecked(byte a, byte b, String operator){
     int r= u8(a) * u8(b);
     if (r > 255){ throw nonDetErr(overflowErrorMsg(operator, a, b)); }
@@ -73,19 +72,29 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0), "*")); }
   @Override public Object imm$$star_star$1(Object p0) {
-    byte power = b(p0);
+    int power = u8(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    byte result = 1;
-    for (int i = 0; i < power; i++) {
-      result = mulChecked(result, this.val, "**");
+    int result = 1, base = u8(val);
+    String overflowMsg = overflowErrorMsg("**", this.val, (byte) power);
+    while (true) {
+      if ((power & 1) != 0){ result = powMul(result, base); }
+      power >>>= 1;
+      if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
+
+      int nextPow = base*base;
+      if (nextPow > 255){ throw overflowErrorMsg("**", this.val, (byte) base); }
+      base = nextPow;
     }
-    return Byte$o$0Instance.instance(result);
+  }
+  private static int powMul(int a, int b){
+    if (a * b > 255){ throw overflowErrorMsg("**") }
+    return a * b;
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L) {
-      throw err("Byte /: Cannot create a Num with denominator 0.");
+      throw err("Byte/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(val),
@@ -103,12 +112,23 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     if (d == 0L){ throw err("Byte.getTruncDiv: d==0"); }
     return instance((byte)(u8(val) / d));
   }
+  @Override public Object imm$tryGetTruncDiv$1(Object p0){
+    long d= natBits(p0);
+
+    if (d == 0L){ return fail("Byte.getTruncDiv: d==0"); }
+    return ok(instance((byte)(u8(val) / d)));
+  }
   /// for a % b = c, c <= a.
   /// Therefore it is safe to cast this % nat to byte
   @Override public Object imm$getRem$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0){ throw err("Byte.getRem: d==0"); }
     return instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d));
+  }
+  @Override public Object imm$tryGetRem$1(Object p0){
+    long d= Nat$c$0Instance.unwrap(p0);
+    if (d == 0){ return fail("Byte.getRem: d==0"); }
+    return ok(instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)));
   }
   @Override public Object imm$softSqrt$0(){ return Float$1c$0Instance.instance(Math.sqrt((double)u8(val))); }
   @Override public Object imm$nat$0(){ return Nat$c$0Instance.instance(u8(val)); }

@@ -33,17 +33,61 @@ BlockLoopTests: Test {::
     ) .assertEq 500000}
   }
 
-BlockUnitTests: Test {::
-  .check{Block#
-    .if{True} .return {Void}
-    .error{"BlockUnit test failed, error was run when it should be"}
-    }
-  .check{Block#
-    .if{False} .error{"BlockUnit test failed, error was run when it should be"}
-    .return {Void}
-    }
+TenTimesAt: { #(n: Nat, limit: Nat): mut ControlFlow[Nat] ->
+  n >= limit ? { .then -> OuterReturn#(n * 10); .else -> Continue# } }
+
+BlockArgLoopTests: Test {::
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      (c.get) >= 5 ? { .then -> Break#; .else -> Continue# })})
+    .return {i.get}
+    ) .assertEq 5}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      TenTimesAt#(c.get, 3))})
+    .return {Unreachable!}
+    ) .assertEq 30}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      (c.get) >= 500000 ? { .then -> Break#; .else -> Continue# })})
+    .return {i.get}
+    ) .assertEq 500000}
+
+  .check{(Block#
+    .var[Nat] i = {0}
+    .if {True} .return {5}
+    .loop(i, {c -> Block#(
+      c.set((c.get) + 1),
+      OuterReturn#(c.get))})
+    .return {Unreachable!}
+    ) .assertEq 5}
+  }
+
+BlockDecidedTests: Test {::
+  .check{(Block#
+    .if {True} .return {5}
+    .error {"Block#.error after a taken .if .return"}
+    ) .assertEq 5}
+  .check{(Block#
+    .if {False} .error {"Block#.if{False}.error"}
+    .return {5}
+    ) .assertEq 5}
+  .checkDetErr({::.isMsg{:: == "taken"}}, {Block#[Nat]
+    .if {True} .error {"taken"}
+    .return {5}
+    })
   }
 
 TestBlock: Test {::
   .test BlockLoopTests
+  .test BlockArgLoopTests
+  .test BlockDecidedTests
   }

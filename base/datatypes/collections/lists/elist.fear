@@ -61,6 +61,11 @@ EList[E:*]: _EditableList[E, EList[E]] {
   mut .get(Nat): E; //simpler model with most methods ``mut``
   read .get(Nat): read/imm E; //simpler model with most methods ``mut``
 
+  /// ``this.tryGet(i)`` returns `.ok` of ``this.get(i)``, or the error info of ``this.get(i)`` iff ``i >= size``.
+  //>   .check{(ELists#[Nat].addAnd(4).tryGet 0).ok.assertEq({::}, Opts# 4)}
+  //>   .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get:"}}}
+  mut .tryGet(Nat): mut Action[E];
+
   /// ``this.opt(index)`` returns ``this.get(index)`` if ``index < this.size``, ``.empty`` otherwise
   /// Time Complexity: O(1)
   //> .check{ELists# 1 .opt(0) .assertEq .some 1}

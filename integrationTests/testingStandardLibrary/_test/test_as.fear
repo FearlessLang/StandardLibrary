@@ -1,5 +1,5 @@
 AsPerson: { .name: Str }
-AsCustomer: AsPerson { .name -> `c` }
+AsCustomer: AsPerson { .name -> "c" }
 
 AsWiden: {
   .list(cs: List[AsCustomer]): List[AsPerson] -> cs.as{::};
@@ -21,22 +21,22 @@ AsPersonName: { #(p: Norm[AsPerson]): Str -> Cache#(p, {p2 -> p2.get.name}) }
 
 AsTests: Test {::
   .check{AsWiden.list(Lists#(AsCustomer)) .size .assertEq 1}
-  .check{AsWiden.list(Lists#(AsCustomer)) .get 0 .name .assertEq `c`}
-  .check{AsWiden.same(Lists#(AsCustomer)) .get 0 .name .assertEq `c`}
-  .check{AsWiden.nested(Lists#(Lists#(AsCustomer))) .get 0 .get 0 .name .assertEq `c`}
-  .check{AsWiden.map(Maps#({::}, `k`, AsCustomer)) .get `k` .name .assertEq `c`}
-  .check{AsWiden.map(Maps#({::}, `k`, AsCustomer)) .size .assertEq 1}
-  .check{AsWiden.mapInList(Lists#(Maps#({::}, `k`, AsCustomer))) .get 0 .get `k` .name .assertEq `c`}
-  .check{AsWiden.opt(Opts#AsCustomer) ! .name .assertEq `c`}
-  .check{AsWiden.optOfList(Opts#(Lists#(AsCustomer))) ! .get 0 .name .assertEq `c`}
-  .check{AsWiden.norm(AsCustomerNorm#(`k`.norm)) .get .name .assertEq `c`}
-  .check{AsWiden.normTwice(AsCustomerNorm#(`k`.norm)) .get .name .assertEq `c`}
-  .check{AsWiden.normInList(Lists#(AsCustomerNorm#(`k`.norm)).norm{::}) .get .size .assertEq 1}
-  .check{AsWiden.normInList(Lists#(AsCustomerNorm#(`k`.norm)).norm{::}) .get .get 0 .get .name .assertEq `c`}
+  .check{AsWiden.list(Lists#(AsCustomer)) .get 0 .name .assertEq "c"}
+  .check{AsWiden.same(Lists#(AsCustomer)) .get 0 .name .assertEq "c"}
+  .check{AsWiden.nested(Lists#(Lists#(AsCustomer))) .get 0 .get 0 .name .assertEq "c"}
+  .check{AsWiden.map(Maps#({::}, "k", AsCustomer)) .get "k" .name .assertEq "c"}
+  .check{AsWiden.map(Maps#({::}, "k", AsCustomer)) .size .assertEq 1}
+  .check{AsWiden.mapInList(Lists#(Maps#({::}, "k", AsCustomer))) .get 0 .get "k" .name .assertEq "c"}
+  .check{AsWiden.opt(Opts#AsCustomer) ! .name .assertEq "c"}
+  .check{AsWiden.optOfList(Opts#(Lists#(AsCustomer))) ! .get 0 .name .assertEq "c"}
+  .check{AsWiden.norm(AsCustomerNorm#("k".norm)) .get .name .assertEq "c"}
+  .check{AsWiden.normTwice(AsCustomerNorm#("k".norm)) .get .name .assertEq "c"}
+  .check{AsWiden.normInList(Lists#(AsCustomerNorm#("k".norm)).norm{::}) .get .size .assertEq 1}
+  .check{AsWiden.normInList(Lists#(AsCustomerNorm#("k".norm)).norm{::}) .get .get 0 .get .name .assertEq "c"}
   // A Norm widened by .as is the same Norm, so it is usable as a cache key and
   // lands on the entry of the Norm it came from, however many times it is widened.
-  .check{AsPersonName#(AsWiden.norm(AsCustomerNorm#(`k`.norm))) .assertEq `c`}
-  .check{AsPersonName#(AsWiden.normTwice(AsCustomerNorm#(`k`.norm))) .assertEq `c`}
+  .check{AsPersonName#(AsWiden.norm(AsCustomerNorm#("k".norm))) .assertEq "c"}
+  .check{AsPersonName#(AsWiden.normTwice(AsCustomerNorm#("k".norm))) .assertEq "c"}
   }
 
 /// The empty cases go through the fearless level implementations of .as,

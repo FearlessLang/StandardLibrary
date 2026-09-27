@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 
 public interface FileLog$5g$0 extends CaptureFree$2dk$0{
   default Object imm$name$0(){

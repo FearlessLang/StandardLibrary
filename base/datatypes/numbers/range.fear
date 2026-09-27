@@ -1,7 +1,7 @@
 Container[N:**]: {
   .contains(N): Bool;
   .assertContains(n: N, err: LazyInfo): Void -> this.contains(n).assertTrue err;
-  .assertContains(n: N): Void -> this.assertContains(n, {``});
+  .assertContains(n: N): Void -> this.assertContains(n, {""});
   }
 
 

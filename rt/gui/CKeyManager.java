@@ -1,72 +1,67 @@
-package base;
+package _base;
 
-import static base.Scopes.*;
-import static base.Util.*;
+import static _base.Scopes.*;
+import static _base.Util.*;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-final class CKeyManager extends KeyAdapter implements Keys$o$0{
+final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.WindowFocusListener{
   final _Frame frame;
-  final List<KeyAction$m8$0> pressed=new ArrayList<>();
-  final List<KeyAction$m8$0> released=new ArrayList<>();
+  final ArrayList<KeyAction$m8$0> pressed=new ArrayList<>();
+  final ArrayList<KeyAction$m8$0> released=new ArrayList<>();
+  // Keys currently down, tracked so a lost window focus (alt-tab, OS focus
+  // switch) can synthesize the releases AWT will otherwise never deliver:
+  // without this, a key held during a focus switch leaves any state the
+  // model set on .pressed (e.g. "moving left") stuck forever, since the
+  // matching .released handler never runs.
+  private final java.util.Set<List<Integer>> held=new java.util.HashSet<>();
+
+  boolean changeable=true;// EDT confined
 
   CKeyManager(_Frame frame){ this.frame=frame; }
 
-  @Override public void keyPressed(KeyEvent e){ dispatch(e,pressed); }
-  @Override public void keyReleased(KeyEvent e){ dispatch(e,released); }
+  @Override public void keyPressed(KeyEvent e){
+    if (held.add(List.of(e.getKeyCode(),e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(),pressed)); }
+  }
+  @Override public void keyReleased(KeyEvent e){
+    if (held.remove(List.of(e.getKeyCode(),e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(),released)); }
+  }
+  @Override public void windowLostFocus(java.awt.event.WindowEvent e){
+    frame.frame.queue.submitAll(held.stream().map(k->task(k.getFirst(),released)).toList());
+    held.clear();
+  }
+  @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
 
-  private void dispatch(KeyEvent e,List<KeyAction$m8$0> keyActions){
-    var event=new CKeyEventData(
-      frame.elapsed,
-      frame.screenSizeW,
-      frame.screenSizeH,
-      w(frame.frame.getWidth()),
-      h(frame.frame.getHeight()),
-      keyText(e)
-      );
+  private MF$7$1 task(int eventKey,List<KeyAction$m8$0> keyActions){
+    var elapsed=frame.elapsed;
+    var panelWidth=w(frame.top.component.getWidth());
+    var panelHeight=h(frame.top.component.getHeight());
 
-    frame.frame.queue.submit(new MF$7$1(){
+    return new MF$7$1(){
       @Override public Object mut$$hash$0(){
-        var run=snapshot(keyActions,event.keyText());
-        if (run.actions().isEmpty()){ return Void$o$0.instance; }
-
-        var ctx=new CKeyCtx(
-          event.elapsed(),
-          event.screenWidth(),
-          event.screenHeight(),
-          event.windowWidth(),
-          event.windowHeight(),
-          run.key()
-          );
-
-        for (var a:run.actions()){ a.mut$accept$1(ctx); }
+        var actions=new ArrayList<Consumer$ao$1>();
+        KeyStroke$m8$0 key=null;
+        for (var ka:keyActions){
+          var k=matchingKey((EList$1k$1)ka.mut$match$0(),eventKey);
+          if (k == null){ continue; }
+          if (key == null){ key = k; }
+          copyActions((EList$1k$1)ka.mut$actions$0(),actions);
+        }
+        var ctx=new CKeyCtx(elapsed,frame,panelWidth,panelHeight,key);
+        for (var a:actions){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
       }
-    });
+    };
   }
 
-  private static CKeyRun snapshot(List<KeyAction$m8$0> keyActions,String eventKey){
-    var actions=new ArrayList<Consumer$ao$1>();
-    KeyStroke$m8$0 key=null;
-
-    for (var ka:keyActions){
-      var k=matchingKey((EList$1k$1)ka.mut$match$0(),eventKey);
-      if (k == null){ continue; }
-      if (key == null){ key = k; }
-      copyActions((EList$1k$1)ka.mut$actions$0(),actions);
-    }
-
-    return new CKeyRun(key,actions);
-  }
-
-  private static KeyStroke$m8$0 matchingKey(EList$1k$1 match,String eventKey){
+  private static KeyStroke$m8$0 matchingKey(EList$1k$1 match,int eventKey){
     int size=natToInt(match.read$size$0());
     for (long i=0;i < size;i++){
       var k=(KeyStroke$m8$0)match.mut$get$1(n(i));
-      if (keyText(k).equals(eventKey)){ return k; }
+      if (_KeyNames$b4$0.codes.get(((Str$c$0Instance)k.read$get$0()).val()) == eventKey){ return k; }
     }
     return null;
   }
@@ -78,49 +73,33 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0{
     }
   }
 
-  private static String keyText(KeyStroke$m8$0 k){
-    return ((Str$c$0Instance)k.read$get$0()).val();
-  }
-  private static String keyText(KeyEvent e){ return KeyNames.of(e.getKeyCode()); }
+  @Override public Object mut$pressed$1(Object scope){ return addKeyAction(scope,pressed); }
+  @Override public Object mut$released$1(Object scope){ return addKeyAction(scope,released); }
 
-  @Override public Object mut$pressed$1(Object scope){
+  private Object addKeyAction(Object scope,List<KeyAction$m8$0> list){
+    frame.onEdtAndWait(()->{
+      if (!changeable && !List.of(frame.frame.getKeyListeners()).contains(this)){
+        throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");
+      }
+    });
     var keyAction=(KeyAction$m8$0)KeyActions$18g$0.instance.imm$$hash$0();
     ((Scope$1c$1)scope).mut$run$1(keyAction);
-    pressed.add(keyAction);
-    return this;
-  }
-
-  @Override public Object mut$released$1(Object scope){
-    var keyAction=(KeyAction$m8$0)KeyActions$18g$0.instance.imm$$hash$0();
-    ((Scope$1c$1)scope).mut$run$1(keyAction);
-    released.add(keyAction);
+    list.add(keyAction);
     return this;
   }
 }
 
-record CKeyEventData(
-  Instant$5c$0 elapsed,
-  WidthNat$as$0 screenWidth,
-  HeightNat$lg$0 screenHeight,
-  WidthNat$as$0 windowWidth,
-  HeightNat$lg$0 windowHeight,
-  String keyText
-  ){}
-
-record CKeyRun(KeyStroke$m8$0 key,List<Consumer$ao$1> actions){}
-
 record CKeyCtx(
   Instant$5c$0 elapsed,
-  WidthNat$as$0 screenWidth,
-  HeightNat$lg$0 screenHeight,
-  WidthNat$as$0 windowWidth,
-  HeightNat$lg$0 windowHeight,
+  _Frame frame,
+  WidthNat$as$0 panelWidth,
+  HeightNat$lg$0 panelHeight,
   KeyStroke$m8$0 keyStroke
   ) implements KeyEvent$b4$0{
-  @Override public Object imm$elapsed$0(){ return elapsed; }
-  @Override public Object imm$screenWidth$0(){ return screenWidth; }
-  @Override public Object imm$screenHeight$0(){ return screenHeight; }
-  @Override public Object imm$windowWidth$0(){ return windowWidth; }
-  @Override public Object imm$windowHeight$0(){ return windowHeight; }
+  @Override public Object read$elapsed$0(){ return elapsed; }
+  @Override public Object read$screenWidth$0(){ return w(frame.screenW); }
+  @Override public Object read$screenHeight$0(){ return h(frame.screenH); }
+  @Override public Object read$panelWidth$0(){ return panelWidth; }
+  @Override public Object read$panelHeight$0(){ return panelHeight; }
   @Override public Object imm$keyStroke$0(){ return keyStroke; }
 }

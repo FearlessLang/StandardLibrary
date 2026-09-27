@@ -1,5 +1,5 @@
-package base;
-import static base.Util.*;
+package _base;
+import static _base.Util.*;
 
 public interface _MagicDebug$174$0 extends Sealed$2o$0{
   default Object imm$$hash$1(Object p0){

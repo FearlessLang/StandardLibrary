@@ -1,4 +1,4 @@
-package base;
+package _base;
 import java.util.*;
 
 public final class _System$2o$0 implements System$2o$0{

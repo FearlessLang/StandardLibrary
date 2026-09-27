@@ -1,14 +1,14 @@
-package base;
+package _base;
 
 
-import base.Util.MapKey;
+import _base.Util.MapKey;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static base.Util.*;
-import static base.Set$c$1Instance.extractKey;
+import static _base.Util.*;
+import static _base.Set$c$1Instance.extractKey;
 
 public final class ESet$s$1Instance implements ESet$s$1 {
     /// A map to allow for O(1) get
@@ -97,8 +97,15 @@ public final class ESet$s$1Instance implements ESet$s$1 {
              + " Consider using `ESet.opt` to properly handle the failure case."
          );
     }
-    @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey)); }
-    @Override public Object mut$flow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey).parallel()); }
+    @Override public Object mut$tryGet$1(Object p0) {
+        Object key = this.set.get(mapKey(this.ordering, p0));
+        if (key != null) { return ok(key); }
+         return fail(
+           "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
+             + " Consider using `ESet.opt` to properly handle the failure case."
+         );
+    }
+    @Override public Object mut$flow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey)); }
     @Override public Object mut$set$0(){ return Set$c$1Instance.of(ordering, drain()); }
     @Override public Object mut$distinctBy$1(Object p0){
         reOrderHash((OrderHashBy$2ea$2) p0);

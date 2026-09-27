@@ -1,8 +1,8 @@
 PipeBasicsTests: Test {::
   .check{(+3|>{x->x* +2}).assertEq +6}
-  .check{(`a`|>{s->s+`b`}).assertEq `ab`}
+  .check{("a"|>{s->s+"b"}).assertEq "ab"}
   .check{(Lists#(+1,+2)|>{xs->xs.size}).assertEq 2}
-  .check{(Maps#({::}, `a`, `x`)|>{::.get `a`}).assertEq `x`}
+  .check{(Maps#({::}, "a", "x")|>{::.get "a"}).assertEq "x"}
   .check{(Opts#(+1)|>{o->o.isSome}).assertEq True}
   }
 
@@ -23,7 +23,7 @@ PipeExtensionMethodsTests: Test {::
 
 PipeViaDataTypeByTests: Test {::
   .check{IntBy# +3.imm|>{n->n + +1}.assertEq +4}
-  .check{StrBy#`a`.imm|>{s->s+`b`}.assertEq `ab`}
+  .check{StrBy#"a".imm|>{s->s+"b"}.assertEq "ab"}
   }
 
 TestPipe: Test {::

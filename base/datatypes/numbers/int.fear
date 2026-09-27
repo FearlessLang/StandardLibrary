@@ -1,47 +1,41 @@
 /// Int: signed 64-bit.
 /// Note: / is not provided; use div/rem (divisor is Nat).
 Int: Sealed,DataType[Int,Int],SumNumber[Int] {
-  /// `this.succ` returns ``this + +1``.
-  /// Overflow behaviour depends on the chosen backend, overflows if ``this == 9_223_372_036_854_775_807``.
+  /// `this.succ` returns ``this + +1``. Overflows if ``this == 9_223_372_036_854_775_807``.
   //>   .check{+5 .succ .assertEq +6}
   //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.succ:"}}, {(Math.maxInt) .succ})
   .succ: Int;
 
-  /// `this.pred` returns ``this - +1``.
-  /// Underflow behaviour depends on the chosen backend, underflows if ``this == -9_223_372_036_854_775_808``.
+  /// `this.pred` returns ``this - +1``. Underflows if ``this == -9_223_372_036_854_775_808``.
   //>   .check{+5 .pred .assertEq +4}
   //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.pred"}}, {(Math.minInt) .pred})
   .pred: Int;
 
   /// ``this + x`` returns the checked sum of `this` and ``x``.
-  /// Overflow/underflow behaviour depends on the chosen backend,
-  ///   overflows if the result would exceed ``9_223_372_036_854_775_807``,
-  ///   underflows if the result is less than ``-9_223_372_036_854_775_808``.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+2 + +3) .assertEq +5}
   //>   .checkNonDetErr({::}, {(Math.maxInt) + +1})
   +(x: Int): Int;
 
   /// ``this - x`` returns the checked difference of `this` and ``x``.
-  /// Overflow/underflow behaviour depends on the chosen backend,
-  ///   overflows if the result would exceed ``9_223_372_036_854_775_807``,
-  ///   underflows if the result is less than ``-9_223_372_036_854_775_808``.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+5 - +3) .assertEq +2}
   //>   .checkNonDetErr({::}, {(Math.minInt) - +1})
   -(x: Int): Int;
 
   /// ``this * x`` returns the checked product of `this` and ``x``. Throws on overflow/underflow.
-  /// Overflow/underflow behaviour depends on the chosen backend,
-  ///   overflows if the result would exceed ``9_223_372_036_854_775_807``,
-  ///   underflows if the result is less than ``-9_223_372_036_854_775_808``.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+6 * +7) .assertEq +42}
   //>   .checkNonDetErr({::}, {(Math.maxInt) * +2})
   *(x: Int): Int;
 
   /// ``this ** x`` returns the checked power of `this` raised to ``x``.
   /// Note: ``x`` is `Nat` (not `Int`), as negative exponents would produce fractional results.
-  /// Overflow/underflow behaviour depends on the chosen backend,
-  ///   overflows if the result would exceed ``9_223_372_036_854_775_807``,
-  ///   underflows if the result is less than ``-9_223_372_036_854_775_808``.
+  /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
+  /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+2 ** 6) .assertEq +64}
   //>   .checkNonDetErr({::}, {(Math.maxInt) ** 2})
   **(x: Nat): Int;
@@ -57,21 +51,35 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{-7 .getTruncDiv 2 .assertEq -3}
   //>   .checkDetErr({::}, {+7 .getTruncDiv 0})
   .getTruncDiv(d: Nat): Int;
+  /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
+  //>   .check{(-7 .tryGetTruncDiv 2).ok.assertEq({::}, Opts# -3)}
+  //>   .check{+7 .tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Int.getTruncDiv:"}}}
+  .tryGetTruncDiv(d: Nat): mut Action[Int];
 
   /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
   //>   .check{(+6) .getDiv 2 .assertEq(+3)}
   //>   .checkDetErr({::}, {+7 .getDiv 3})
   //>   .checkDetErr({::}, {+7 .getDiv 0})
-  .getDiv(d: Nat): Int -> Block#
-    .if {d == 0} .error {"Int.getDiv: Cannot divide by 0"}
+  .getDiv(d: Nat): Int -> this.tryGetDiv(d)!;
+
+  /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``this.rem == 1``.
+  //>   .check{(+6 .tryGetDiv 2).ok.assertEq({::}, Opts# +3)}
+  //>   .check{+7 .tryGetDiv 3 .assertInfo{::.isMsg{::.startsWith "Int.getDiv:"}}}
+  .tryGetDiv(d: Nat): mut Action[Int] -> Block#
+    .if {d == 0} .return {Actions.msg "Int.getDiv: Cannot divide by 0"}
     .let[Int] rem = {this.getRem d}
-    .if {rem != +0} .error {"Int.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+"."}
-    .return {this.getTruncDiv d};
+    .if {rem != +0} .return {Actions.msg("Int.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
+    .return {this.tryGetTruncDiv d};
 
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{+7 .getRem 2 .assertEq +1}
   //>   .checkDetErr({::}, {+7 .getRem 0})
   .getRem(d: Nat): Int;
+
+  /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
+  //>   .check{(+7 .tryGetRem 2).ok.assertEq({::}, Opts# +1)}
+  //>   .check{+7 .tryGetRem 0 .assertInfo{::.isMsg{::.startsWith "Int.getRem:"}}}
+  .tryGetRem(d: Nat): mut Action[Int];
 
   /// ``this.rem(d)`` returns `.some` of ``this.getRem(d)`` if ``d != 0``, `.empty` iff ``d == 0``.
   //>   .check{+7 .rem 2 .assertEq({::}, Opts# +1)}
@@ -123,6 +131,11 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .checkDetErr({::}, {+5 .getWrapIndex 0})
   .getWrapIndex(len: Nat): Nat;
 
+  /// ``this.tryGetWrapIndex(len)`` returns `.ok` of ``this.getWrapIndex(len)``, or the error info of ``this.getWrapIndex(len)`` iff ``len == 0``.
+  //>   .check{(-1 .tryGetWrapIndex 7).ok.assertEq({::}, Opts# 6)}
+  //>   .check{+5 .tryGetWrapIndex 0 .assertInfo{::.isMsg{::.startsWith "Int.getWrapIndex:"}}}
+  .tryGetWrapIndex(len: Nat): mut Action[Nat];
+
   /// ``this.wrapIndex(len)`` returns `.some` of ``this.getWrapIndex(len)`` if ``len != 0``, `.empty` iff ``len == 0``.
   //>   .check{-1 .wrapIndex 7 .assertEq({::}, Opts# 6)}
   //>   .check{+5 .wrapIndex 0 .assertEmpty {::}}
@@ -153,15 +166,30 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .checkDetErr({::}, {-5 .getNat})
   .getNat: Nat;
 
+  /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if ``this < 0``.
+  //>   .check{(+5 .tryGetNat).ok.assertEq({::}, Opts# 5)}
+  //>   .check{-5 .tryGetNat .assertInfo{::.isMsg{::.startsWith "Int.getNat:"}}}
+  .tryGetNat: mut Action[Nat];
+
   /// `this.getByte` converts `this` to a `Byte`. Throws if `this` is not in ``[0, maxByte]``.
   //>   .check{+5 .getByte .assertEq(5.getByte)}
   //>   .checkDetErr({::}, {+300 .getByte})
   .getByte: Byte;
 
+  /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not in ``[0, maxByte]``.
+  //>   .check{(+5 .tryGetByte).ok.assertEq({::}, Opts#(5.getByte))}
+  //>   .check{+300 .tryGetByte .assertInfo{::.isMsg{::.startsWith "Int.getByte:"}}}
+  .tryGetByte: mut Action[Byte];
+
   /// `this.getFloat` converts `this` to a `Float`. Throws if `this` is not exactly representable.
   //>   .check{+5 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {Math.minInt + +1 .getFloat})
   .getFloat: Float;
+
+  /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not exactly representable.
+  //>   .check{(+5 .tryGetFloat).ok.assertEq({::}, Opts# 5.0)}
+  //>   .check{(Math.minInt + +1).tryGetFloat .assertInfo{::.isMsg{::.startsWith "Int.getFloat:"}}}
+  .tryGetFloat: mut Action[Float];
 
   /// `this.softNat` converts `this` to a `Nat` by flooring negative values to ``0``
   //>   .check{+5 .softNat .assertEq 5}
@@ -175,7 +203,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.softFloat` converts `this` to the closest representable `Float`
   //>   .check{+5 .softFloat .assertEq 5.0}
-  //>   .check{Math.maxInt - +1 .softFloat.softNat .assertEq(Math.maxInt.getNat)}
+  //>   .check{Math.maxInt - +1 .softFloat.softNat .assertEq(Math.maxInt.getNat + 1)}
   .softFloat: Float;
 
   /// ``this.aluAddWrap(x)`` returns ``this + x`` mod ``2^64`` (i64 wraparound add)
@@ -237,12 +265,12 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{(+1~~ +4) .start .assertEq +2}
   //>   .checkDetErr({::}, {+1~~ +2})
   ~~(end: Int): Range[Int] -> Block#
-    .if {this == (Math.maxInt)} .error{"Int ~~: Start of open range cannot be Math.maxInt"}
-    .if {end == (Math.minInt)} .error{"Int ~~: End of open range cannot be Math.minInt"}
+    .if {this == (Math.maxInt)} .error{"Int~~: Start of open range cannot be Math.maxInt"}
+    .if {end == (Math.minInt)} .error{"Int~~: End of open range cannot be Math.minInt"}
     .let endInclusive={end.pred}
     .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Int ~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
+      "Int~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
     .return {_IntRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
 
@@ -251,9 +279,9 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{(+1~~= +4) .end .assertEq +4}
   //>   .checkDetErr({::}, {+1~~= +1})
   ~~=(endInclusive: Int): Range[Int] -> Block#
-    .if {this == (Math.maxInt)} .error{"Int ~~=: Start of open range cannot be Math.maxInt"}
+    .if {this == (Math.maxInt)} .error{"Int~~=: Start of open range cannot be Math.maxInt"}
     .if {this >= endInclusive } .error {
-      "Int ~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
+      "Int~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
     .return {_IntRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
 
@@ -263,10 +291,10 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .checkDetErr({::}, {+1=~~ +1})
   =~~(end: Int): Range[Int] -> Block#
     .if {end == (Math.minInt)} .error{
-      "Int =~~: End of open range cannot be Math.minInt"
+      "Int=~~: End of open range cannot be Math.minInt"
       }
     .if {this >= end } .error {
-      "Int =~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
+      "Int=~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
       }
     .return {_IntRanges#(this, end.pred, "["+this+", "+end+")")};
 
@@ -276,7 +304,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .checkDetErr({::}, {+4=~~= +1})
   =~~=(endInclusive: Int): Range[Int] -> Block#
     .if {this > endInclusive } .error {
-      "Int =~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
+      "Int=~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
       }
     .return {_IntRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
 
@@ -288,16 +316,16 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// ``this.assertInRange(range)`` asserts ``this.inRange(range)``, using a default empty message.
   //>   .check{+2 .assertInRange(+1=~~= +4)}
   //>   .checkNonDetErr({::}, {+5 .assertInRange(+1=~~= +4)})
-  .assertInRange(range: Range[Int]): Void -> this.assertInRange(range, {``});
+  .assertInRange(range: Range[Int]): Void -> this.assertInRange(range, {""});
 
   /// ``this.assertInRange(range, msg)`` asserts ``this.inRange(range)`` with custom error message.
   //>   .check{+2 .assertInRange(+1=~~= +4, {`custom context`})}
   .assertInRange(range: Range[Int], msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
-    { msg#.info + (`Expected in range: `+ (range.str) // technically a DD point...
-      | `lo: `+(range.start)
-      | `hi: `+(range.end)
-      | `actual: `+this
+    { msg#.info + ("Expected in range: "+ (range.str) // technically a DD point...
+      | "lo: "+(range.start)
+      | "hi: "+(range.end)
+      | "actual: "+this
       .info)});
 
   /// ``this.clampTo(range)`` returns `this` clamped into ``[range.start, range.end]``
@@ -310,7 +338,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   .hash -> this.str.hash;                   /// hash via str
   .info: Info;              /// info via str
-  .close -> ::; .close -> this;             /// fixpoint type closed
+  .close -> ::; .close -> this;
   .sumNumber xs ->                          /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Int];

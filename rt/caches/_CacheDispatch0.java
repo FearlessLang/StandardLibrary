@@ -1,5 +1,5 @@
-package base;
-interface _CacheDispatch0 extends base.CacheHandler$4sg$0{
+package _base;
+interface _CacheDispatch0 extends _base.CacheHandler$4sg$0{
   default Object imm$$hash$0(){
     throw new AssertionError("Uncallable method: imm$$hash$0 on "+this.getClass().getName());
   }

@@ -1,8 +1,8 @@
-package base;
+package _base;
 
-import static base.Util.err;
+import static _base.Util.err;
 
-public interface _MagicMath$lk$0 extends base.Sealed$2o$0 {
+public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
   static void logContract(String methodName, double x) {
     if (x < 0.0) {
       throw err("Math."+methodName+": Cannot take the "+methodName+" of a negative number, given " + x);

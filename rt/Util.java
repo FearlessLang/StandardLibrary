@@ -1,4 +1,4 @@
-package base;
+package _base;
 
 import java.math.BigInteger;
 import java.util.Comparator;
@@ -78,6 +78,8 @@ public class Util{
   public static Opt$c$1 toOpt(Optional<?> opt) {
     return optNullable(opt.orElse(null));
   }
+  public static Object ok(Object x){ return Actions$5c$0.instance.imm$ok$1(x); }
+  public static Object fail(String msg){ return Actions$5c$0.instance.imm$msg$1(new Str$c$0Instance(msg)); }
   public static Error nonDetErr(String msg){
     return (Error)Error$1c$0.instance.imm$nonDeterministic$1(new Str$c$0Instance(msg));
     }
@@ -85,7 +87,7 @@ public class Util{
     return detErr(msg);
     }
   public static Error detErr(String msg) {
-    var info = base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
+    var info = _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
     return (Error) Error$1c$0.instance.imm$$bang$1(info);
   }
   public static BigInteger unsignedLongToBigInteger(long x){
@@ -106,7 +108,7 @@ public class Util{
   public static int natToInt(Object n){
     long nat = ((Nat$c$0Instance)n).val();
     if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {
-      throw err("Nat "+Long.toUnsignedString(nat)+"is too large to represented as an integer");
+      throw err("Nat "+Long.toUnsignedString(nat)+" is too large to be represented as an integer");
     }
     return (int) nat;
   }

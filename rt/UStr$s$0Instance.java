@@ -1,9 +1,8 @@
-package base;
+package _base;
 
-import static base.Util.*;
+import static _base.Util.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -45,9 +44,9 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
 
   @Override public Object imm$isStr$0(){ return bool(isStr(val)); }
 
-  @Override public Object imm$getStr$0(){
-    if (isStr(val)) { return Str$c$0Instance.instance(new String(val,0,val.length)); }
-    throw err("Cannot convert this "+ Arrays.toString(this.val)
+  @Override public Object imm$tryGetStr$0(){
+    if (isStr(val)) { return ok(Str$c$0Instance.instance(new String(val,0,val.length))); }
+    return fail("UStr.getStr: cannot convert "+ Arrays.toString(this.val)
             + " into a valid fearless Str as it contains invalid unicode characters: "
             + Arrays.stream(this.val).filter(c -> !isStr(c)).boxed().toList());
   }
@@ -152,33 +151,21 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     return res;
   }
   private static String escapeText(int[] cps){
-    if (cps.length == 0){ return "\"\".u"; }
-    var terms= new ArrayList<String>();
-    for(int i= 0; i < cps.length; ){
-      boolean safe= isStr(cps[i]);
-      int j= i + 1;
-      while (j < cps.length && isStr(cps[j]) == safe){ j++; }
-      var part= Arrays.copyOfRange(cps,i,j);
-      terms.add(safe ? strTerm(part) : uCodeTerm(part));
-      i= j;
-    }
-    return joinTerms(terms);
-  }
-  private static String strTerm(int[] cps){
-    return receiver(strExpr(new String(cps,0,cps.length)))+".u";
-  }
-  private static String uCodeTerm(int[] cps){
-    return "\"\".u("+strExpr(strUCode(cps))+")";
-  }
-  private static String joinTerms(List<String> terms){
-    assert !terms.isEmpty();
-    if (terms.size() == 1){ return terms.getFirst(); }
     var res= new StringBuilder();
-    for(int i= 0; i < terms.size(); i++){
-      if (i != 0){ res.append(" + "); }
-      res.append('(').append(terms.get(i)).append(')');
-    }
+    int i= 0;
+    do{
+      int j= run(cps,i,true);
+      int k= run(cps,j,false);
+      var hex= k == j ? "" : "\""+strUCode(Arrays.copyOfRange(cps,j,k))+"\"";
+      var term= receiver(strExpr(new String(cps,i,j-i)))+".u"+hex;
+      res.append(i == 0 ? term : "+("+term+")");
+      i= k;
+    } while (i < cps.length);
     return res.toString();
+  }
+  private static int run(int[] cps,int i,boolean safe){
+    while (i < cps.length && isStr(cps[i]) == safe){ i++; }
+    return i;
   }
   private static String receiver(String e){
     return isOneLiteral(e) ? e : "("+e+")";

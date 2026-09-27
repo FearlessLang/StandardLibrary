@@ -58,12 +58,23 @@ OrderBy[T]: OrderBy[T,T] {           /// produces an ordering via .cmp
   # t -> { .close -> t; .cmp t0,t1,m -> this.cmp(t0,t1,m) }; /// close->t; compare uses this.cmp
   }
 
+Rev: {
+  /// ``Rev#by`` orders by the reverse of ``by``: it swaps the outcome, not the arguments.
+  /// It computes the key of ``t0`` before the key of ``t1``, as ``by`` does,
+  /// so every call ``by`` receives is the same call, in the same order, with and without `Rev`.
+  //>   .check{Lists#(3,1,2).flow.sort(Rev#{::}).list .assertEq({::}, Lists#(3,2,1))}
+  //>   .check{Lists#(3,1,3,2,1).flow.max(Rev#{::}).list .assertEq({::}, Lists#(1,1))}
+  #[T,K](by: OrderBy[T,K]): OrderBy[T] ->
+    {t0, t1, m -> by#t0 <=> (by#t1, {.lt -> m.gt; .eq -> m.eq; .gt -> m.lt})}
+  }
+
 Order[T,E:*]: {                      /// environment-dependent ordering of T (E supplies per-value orders)
   read .close: read T;
 
   read .cmp[K,R:**](by: OrderBy[imm E,K], t0: read T, t1: read T, m: mut OrderMatch[R]): R; /// compare using by
 
-  read .order[K](by: OrderBy[imm E,K]): read Order[T] -> {  /// freeze by into a plain Order[T]
+  read .order[K](by: OrderBy[imm E,K]): read Order[T] ->  /// freeze by into a plain Order[T]
+    {
     .close -> this.close;
     .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
     };
@@ -73,41 +84,42 @@ OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr. 
   read .hash: Nat;
   read .close(t: read T): read OrderHash[T];
   
-  read .assertEq(expected: read T): Void -> this.assertEq(expected,{``});
+  read .assertEq(expected: read T): Void -> this.assertEq(expected,{""});
   read .assertEq(expected: read T, msg: read LazyInfo): Void ->
     Assert.expectedActual(this == expected, msg,(this.close expected), this);
 
-  read .assertNotEq(expected: read T): Void -> this.assertNotEq(expected,{``});
+  read .assertNotEq(expected: read T): Void -> this.assertNotEq(expected,{""});
   read .assertNotEq(expected: read T, msg: read LazyInfo): Void -> Assert!(
     this != expected,
-    { msg#.info + (`Unexpected equality between` | `Expected: `+(this.close(expected)) | `Actual: `+this .info) });
+    { msg#.info + ("Unexpected equality between" | "Expected: "+(this.close(expected)) | "Actual: "+this .info) });
 
-  read .assertLt(x: read T): Void -> this.assertLt(x,{``});
+  read .assertLt(x: read T): Void -> this.assertLt(x,{""});
   read .assertLt(x: read T, msg: read LazyInfo): Void -> Assert!(
     this < x,
-    { msg#.info + ( `Expected: `+this | ` < `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " < "+(this.close(x)) .info) });
     
-  read .assertLe(x: read T): Void -> this.assertLe(x,{``});
+  read .assertLe(x: read T): Void -> this.assertLe(x,{""});
   read .assertLe(x: read T, msg: read LazyInfo): Void -> Assert!(
     this <= x,
-    { msg#.info + ( `Expected: `+this | ` <= `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " <= "+(this.close(x)) .info) });
 
-  read .assertGt(x: read T): Void -> this.assertGt(x,{``});
+  read .assertGt(x: read T): Void -> this.assertGt(x,{""});
   read .assertGt(x: read T, msg: read LazyInfo): Void -> Assert!(
     this > x,
-    { msg#.info + ( `Expected: `+this | ` > `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " > "+(this.close(x)) .info) });
 
-  read .assertGe(x: read T): Void -> this.assertGe(x,{``});
+  read .assertGe(x: read T): Void -> this.assertGe(x,{""});
   read .assertGe(x: read T, msg: read LazyInfo): Void -> Assert!(
     this >= x,
-    { msg#.info + ( `Expected: `+this | ` >= `+(this.close(x)) .info) });
+    { msg#.info + ( "Expected: "+this | " >= "+(this.close(x)) .info) });
   }
 
 OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashable+printable
   read .hash[K](by: OrderHashBy[imm E,K]): Nat; /// hash using by
   read .close(t: read T): read OrderHash[T,E];
   
-  read .orderHash[K](by: OrderHashBy[imm E,K]): read OrderHash[T] -> { /// freeze by into plain OrderHash[T]
+  read .orderHash[K](by: OrderHashBy[imm E,K]): read OrderHash[T] ->  /// freeze by into plain OrderHash[T]
+    {
     .close -> this.close;
     .close t -> this.close(t).orderHash(by);
     .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
@@ -136,7 +148,8 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
 OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-value printing of T
   #(t: read T): read OrderHash[K];          /// build closed OrderHash[K] for t's key
 
-  .thenHash[K0](next: OrderHashBy[T,K0]): OrderHashBy[T] -> {  /// lexicographic order; hash mixes both keys
+  .thenHash[K0](next: OrderHashBy[T,K0]): OrderHashBy[T] ->  /// lexicographic order; hash mixes both keys
+    {
     .cmp t0,t1,m -> this#t0<=>(this#t1,{
       .lt ->m.lt;
       .eq ->next#t0<=>(next#t1,m);
@@ -145,7 +158,8 @@ OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-va
     .str t->this#t.str;
     };
 
-  .viewHash[A](f: F[read A,read T]): OrderHashBy[A] -> {         /// contramap for both cmp and hash
+  .viewHash[A](f: F[read A,read T]): OrderHashBy[A] ->           /// contramap for both cmp and hash
+    {
     .cmp a0,a1,m -> this#(f#a0)<=>(this#(f#a1),m);
     .hash a -> this#(f#a).hash;
     .str t->this#(f#t).str;
@@ -161,8 +175,9 @@ OrderHashBy[T]: OrderHashBy[T,T] {         /// direct order+hash for T
   .cmp[R:**](t0: read T,t1: read T,m: mut OrderMatch[R]): R;
   .hash(t: read T): Nat;
   .str(t: read T): Str; 
-  # t -> {                                /// close->t; compare/hash delegate to this.cmp/this.hash
-    .close -> t; .close t0 -> this#t0; 
+  # t ->                                  /// close->t; compare/hash delegate to this.cmp/this.hash
+    {
+    .close -> t; .close t0 -> this#t0;
     .cmp t0,t1,m -> this.cmp(t0,t1,m);
     .hash -> this.hash t;
     .str -> this.str t; 

@@ -1,6 +1,6 @@
-package base;
+package _base;
 
-public interface _RadianTrig$16w$0 extends base.Sealed$2o$0 {
+public interface _RadianTrig$16w$0 extends _base.Sealed$2o$0 {
     static double rad(Object radian) {
         Float$1c$0Instance f = (Float$1c$0Instance) ((Radian$2o$0) radian).read$$hash$0();
         return f.val();

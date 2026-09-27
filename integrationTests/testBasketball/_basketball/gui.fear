@@ -4,11 +4,11 @@ Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  h
     .undecorated(Alpha.opaque)
     .fps 30
     .onKey {::
-      .pressed  {:: .matchOnly(Key#`W`) .doOnly { e -> model!.player.jump } }
-      .pressed  {:: .matchOnly(Key#`A`) .doOnly { e -> model!.player.left True } }
-      .released {:: .matchOnly(Key#`A`) .doOnly { e -> model!.player.left False } }
-      .pressed  {:: .matchOnly(Key#`D`) .doOnly { e -> model!.player.right True } }
-      .released {:: .matchOnly(Key#`D`) .doOnly { e -> model!.player.right False } }
+      .pressed  {:: .matchOnly(Key#"W") .doOnly { e -> model!.player.jump } }
+      .pressed  {:: .matchOnly(Key#"A") .doOnly { e -> model!.player.left True } }
+      .released {:: .matchOnly(Key#"A") .doOnly { e -> model!.player.left False } }
+      .pressed  {:: .matchOnly(Key#"D") .doOnly { e -> model!.player.right True } }
+      .released {:: .matchOnly(Key#"D") .doOnly { e -> model!.player.right False } }
       }
     .modelFps(30, {:: .action { model!.tick } })
     .content {::

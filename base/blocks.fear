@@ -1,5 +1,5 @@
 Continuation[T:*,R:*]: {mut #(x: T, self: mut Block[R]): R}
-FlowContinuation[T:*,R:*]: {mut #(x: T, self: mut Flow[R]): R}
+FlowContinuation[E:*,T:*,R:*]: {mut #(x: T, self: mut List[E]): R}
 OpenIsoContinuation[T,R:*]: {mut #(x: mut T, self: mut Block[R]): R}//Only needed for limitations of inference
 //otherwise the same as Continuation[mut X,R]
 ReprWithInvariant[T]: { mut .elem: iso T; mut .invariant: F[read T,Bool];}
@@ -55,11 +55,17 @@ Block[R:*]: Sealed {
   ///     .return v -> _DecidedBlock#v;
   ///     };
   mut .loop(body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _NativeLoop#(this, body);
+  /// ``this.loop(a, body)`` is `Block.loop` handing ``a`` to every iteration.
+  mut .loop[A](a: mutH A, body: mut LoopBody[A,R]): mut Block[R] ->
+    _NativeLoop#(this, a, body);
   }
 
 _NativeLoop: Sealed {
   #[R:*](self: mut Block[R], body: mut MF[mut ControlFlow[R]]): mut Block[R] -> _Magic!;
+  #[A,R:*](self: mut Block[R], a: mutH A, body: mut LoopBody[A,R]): mut Block[R] -> _Magic!;
   }
+
+LoopBody[A,R:*]: { mut #(a: mutH A): mut ControlFlow[R] }
 
 BlockIf[R:*]: {
   mut .return(a: mut MF[R]): mut Block[R];
@@ -76,11 +82,12 @@ _DecidedBlock: {
     .openIso _, _ -> res;
     .var     _, _ -> res;
     .repr    _, _ -> res;
-    .error   _   -> res;
+    .error   _    -> res;
     //.isoPod  _, _ -> res;
     .assert  _    -> self;
     .assert  _, _ -> self;
     .loop    _    -> self;
+    .loop    _, _ -> self;
     .if      _    -> {
       .return _ -> self;
       .do     _ -> self;
@@ -96,6 +103,8 @@ ControlFlowMatch[R:*]: {
   mut .break: mut Block[R];
   mut .return(v: R): mut Block[R];
   }
-Continue: {#[R:*]: mut ControlFlow[R]->{::.continue}}
-Break: {#[R:*]: mut ControlFlow[R]->{::.break}}
+/// `Continue` or `Break`, never `OuterReturn`: the `ControlFlow` an actor lambda answers.
+ContinueBreak[R:*]: ControlFlow[R] {}
+Continue: {#[R:*]: mut ContinueBreak[R]->{::.continue}}
+Break: {#[R:*]: mut ContinueBreak[R]->{::.break}}
 OuterReturn: {#[R:*](r: R): mut ControlFlow[R]->{::.return r} }

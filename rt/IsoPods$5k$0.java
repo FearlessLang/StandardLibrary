@@ -1,5 +1,5 @@
-package base;
-import static base.Util.*;
+package _base;
+import static _base.Util.*;
 public interface IsoPods$5k$0{
   default Object imm$$hash$1(Object p0){ return new IsoPod$2s$1Instance(p0); }
   IsoPods$5k$0 instance= new IsoPods$5k$0(){};

@@ -1,4 +1,4 @@
-package base;
+package _base;
 public interface Vars$o$0 extends Sealed$2o$0{
   default Object imm$$hash$1(Object p0){ return new Var$c$1Instance(p0); }
   Vars$o$0 instance= new Vars$o$0(){};
