@@ -46,7 +46,7 @@ TryGetCollectionTests: Test {::
   .check{ESets#[Nat,Nat]{::}.add(1).tryGetTake 3 .assertInfo{::.isMsg{::.startsWith `ESet.get`}}}
   .check{(ESets#[Nat,Nat]{::}.add(1).tryGetTake 1).ok.assertEq({::}, Opts#(1))}
   .check{(ELists#[Nat].add(4).tryGet 0).ok.assertEq({::}, Opts#(4))}
-  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 0 out of bounds for EList of length 0"}}}
+  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get: Index 0 out of bounds for EList of length 0"}}}
   .check{(Flows#(1,2).tryGet).assertInfo{::.isMsg{::.startsWith `Flow.get`}}}
   .check{(Flows#(1).tryGet).ok.assertEq({::}, Opts#(1))}
   .check{(Flows#(1,2).tryGetOpt).assertInfo{::.isMsg{::.startsWith `Flow.getOpt`}}}
@@ -116,8 +116,8 @@ TryGetNamesGetTests: Test {::
   .check{List[Nat].tryGetLast.assertInfo{::.isMsg{::.startsWith "List.getLast: called on empty list"}}}
   .checkDetErr({::.isMsg{::.startsWith "Map.get: Tried to get key "}}, {Maps#({::}, "a", 1).get "b"})
   .check{Maps#({::}, "a", 1).tryGet "b" .assertInfo{::.isMsg{::.startsWith "Map.get: Tried to get key "}}}
-  .checkDetErr({::.isMsg{::.startsWith "EList.get: EList index 3 out of bounds for EList of length 1"}}, {ELists#[Nat].add(4).get 3})
-  .check{ELists#[Nat].add(4).tryGet 3 .assertInfo{::.isMsg{::.startsWith "EList.get: EList index 3 out of bounds for EList of length 1"}}}
+  .checkDetErr({::.isMsg{::.startsWith "EList.get: Index 3 out of bounds for EList of length 1"}}, {ELists#[Nat].add(4).get 3})
+  .check{ELists#[Nat].add(4).tryGet 3 .assertInfo{::.isMsg{::.startsWith "EList.get: Index 3 out of bounds for EList of length 1"}}}
   }
 
 TestTryGet: Test {::

@@ -35,8 +35,16 @@ public abstract class MultiFlow {
     fillers[channelIndex] = channelFiller;
   }
   boolean hasNext() {
+    if (hasNextOpts()) {
+      return IntStream.rangeClosed(0, numChannels)
+        .allMatch(i -> Objects.nonNull(fillers[i]) || channels[i].hasNext());
+    }
+    return false;
+  }
+
+  boolean hasNextOpts() {
     return IntStream.rangeClosed(0, numChannels)
-      .allMatch(i -> Objects.nonNull(fillers[i]) || channels[i].hasNext());
+      .anyMatch(i -> channels[i].hasNext());
   }
 
   Object[] next() {
@@ -54,7 +62,11 @@ public abstract class MultiFlow {
     return data;
   }
 
-  protected Stream<Object> zipExact(Function<Object[], Object> merger) {
+  Object[] nextOpts() {
+
+  }
+
+  protected Stream<Object> mergeExact(Function<Object[], Object> merger) {
     var self = this;
 
     Iterator<Object> iter = new Iterator<>() {
