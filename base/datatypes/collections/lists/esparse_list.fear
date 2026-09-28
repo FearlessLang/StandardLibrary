@@ -1,0 +1,145 @@
+ESparseLists: {
+  /// ``this.backedWithArray(capacity)`` returns an empty ESparseList with the given capacity, backed by an array.
+  /// Note: the array this is backed with has a max size of (2147483647) 2^31-1.
+  .backedWithArray[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
+  /// ``this.backedWithMap(capacity)`` returns an empty ESparseList with the given capacity, backed by a Map.\
+  /// This requires a higher overhead than the array option so should only be used for very sparse lists.
+  .backedWithMap[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
+  /// ``this.backedWithSparseSegmentTree``
+  /// This requires a high overhead to manage the segment tree data-structure,
+  /// so should only be used for implementations which expect dense islands of values surrounded by vast seas of holes
+  .backedWithSparseSegmentTree[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
+  }
+
+/// A list with "holes".
+ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
+  /// ``this.isFull`` returns `True` if there are no holes in this collection.
+  /// Equivalent to: ``this.hasHoles.not``
+  //> .checkTrue{ESparseLists.backedWithArray(3).set(0, 1).set(1, 2).set(2, 3).isFull}
+  //> .checkFalse{ESparseLists.backedWithArray(3).set(0, 1).set(2, 3).isFull}
+  read .isFull: Bool -> this.numHoles == 0;
+
+  /// ``this.hasHoles`` returns `True` if any of the elements in this are holes, returns false otherwise.
+  /// Note: ``this.hasHoles`` returns `False` .isFull == True;if the collection is empty
+  read .hasHoles: Bool -> this.isFull.not;
+
+  /// ``this.isEmpty`` returns `True` if there are no elements in this collection and `False` otherwise.
+  /// In other words this method returns `True` if the list is all holes (or is has 0 capacity).
+  //> .checkTrue{ESparseLists.backedWithMap(3).isEmpty}
+  //> .checkFalse{ESparseLists.backedWithMap(3).set(0, 1).isEmpty}
+  read .isEmpty: Bool -> this.numHoles == (this.capacity);
+
+  /// The limit of the largest index that can be inserted into this collection.
+  /// This also means that the capacity is the maximum number of elements that can be inside this collection.
+  //> .checkEq(3, {ESparseLists.backedWithArray(3).capacity})
+  read .capacity: Nat;
+
+  /// ``this.numHoles`` returns the number of holes left in this collection.
+  //> .check{Block#
+  //>   .let list={ESparseLists.backedWithArray[Nat](3)}
+  //>   .do{list.numHoles.assertEq 3}
+  //>   .do{list.set(0, 1).numHoles.assertEq(2)}
+  //>   .done}
+  read .numHoles: Nat;
+
+  /// ``this.increaseCapacity(n)`` returns ``this`` after expanding it's capacity, throws if ``n <= (this.currentCapacity)``
+  mut .increaseCapacity(proposedCapacity: Nat): mut ESparseList[E] ->
+    proposedCapacity >= (this.capacity) .if {
+      .then -> this.softIncreaseCapacity(proposedCapacity);
+      .else -> Error.msg(
+        "Must truly increase capacity, proposed capacity "
+        + proposedCapacity + " must be >= current capacity "
+        + (this.capacity)
+        )
+      };
+
+  /// ``this.softIncreaseCapacity(n)`` returns ``this`` after expanding it's capacity.
+  /// Note if n <= this.capacity then calling ``this.increase`` capacity does nothing.
+  mut .softIncreaseCapacity(Nat): mut ESparseList[E];
+
+  /// ``this.get(i)`` returns the element at index ``i``. .some(e) if e is present, and .empty if it is a hole.
+  read .get(Nat): mut Opt[read/imm E];
+
+  /// ``this.get(i)`` returns the element at index ``i``. .some(e) if e is present, and .empty if it is a hole.
+  mut .get(Nat): mut Opt[E];
+
+  /// ``this.fillHoles(f)`` fills the holes in this, using the given map.
+  /// Equivalent to: ``this.mapOpts{i, e -> e.orLazy{f#(i)}}``
+  mut .fillHoles(mut MF[Nat, E]): mut ESparseList[E];
+
+  /// ``this.mapOpts(f)`` returns ``this`` after it's contents have been updated by f.
+  /// ``f`` is given the index of each element, and ``.some(e)`` if there is an element there an ``.none`` if there is a hole.
+  /// If ``f`` returns ``.some(e)`` ``e`` is placed at that index, otherwise a hole is put there instead.
+  mut .mapOpts(mut MF[Nat, mut Opt[E], mut Opt[E]]): mut ESparseList[E];
+
+  /// ``this.fillFrom(list)`` uses the elements in ``list`` to fill the holes in this, starting from index 0,
+  /// until either there are no more holes or no more elements in ``list``.
+  mut .fillFrom(EList[E]): mut ESparseList[E];
+
+  /// ``this.fillWith(list)`` uses the elements in ``list`` to fill the holes in this, starting from index 0,
+  /// expanding the capacity of this if necessary to fit all elements in ``list``.
+  mut .fillAndExpand(source: EList[E]): mut ESparseList[E];
+
+  /// ``this.seqFlowOpts`` drains the spare list into a sequential flow of ``Opt[E]``.
+  /// where .empty if the element is a hole, and .some(e) if there is e is present.
+  /// Equivalent to: ``0~~(this.capacity).map{i -> this.get(i)}``
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut .seqFlowOpts: mut Flow[mut Opt[E]];
+
+  /// ``this.flowOpts`` drains the spare list into a flow of ``Opt[E]``.
+  /// where .empty if the element is a hole, and .some(e) if there is e is present.
+  /// Equivalent to: ``0~~(this.capacity).map{i -> this.get(i)}``
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut .flowOpts(mode: FlowMode[E]): mut Flow[mut Opt[E]];
+
+  /// ``this.flatSeqFlow`` drains the ESparseList into a sequential Flow of ``E`` skipping the holes.
+  /// Equivalent to: ``this.seqflowOpts.flatMap{::.flow}``
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut .flatSeqFlow: mut Flow[E];
+
+  /// ``this.flatFlow`` drains this into a flow of ``E`` skipping the holes.
+  /// Equivalent to: ``this.flowOpts.flatMap{::.flow}``
+  /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  mut .flatFlow(mode: FlowMode[E]): mut Flow[E];
+
+  /// ``this.seqFlow`` drains this into a ``.some`` sequential flow if there are no holes, .empty if there are holes.
+  /// Mutates: This drains self, but only if .some is returned.
+  mut .seqFlow(): mut Opt[mut Flow[E]] -> this.isFull .toOpt {this.flatSeqFlow};
+
+  /// ``this.flow`` drains this into a ``.some`` flow if there are no holes, .empty if there are holes.
+  /// Mutates: This drains self, but only if .some is returned.
+  mut .flow(mode: FlowMode[E]): mut Opt[mut Flow[E]] -> this.isFull .toOpt {this.flatFlow(mode)};
+
+  /// ``this.seqFlowExact`` drains this into a ``.some`` sequential flow if there are no holes, otherwise it throws.
+  /// Mutates: This drains self, but only if operation succeeds.
+  mut .getSeqFlow(): mut Flow[E] -> this.isFull .if {
+    .then -> this.flatSeqFlow;
+    .else -> Error.msg(
+      "ESparseList.getSeqFlow: Cannot create a flow of an ESparseList that is not full."
+      | `Use a "hole-safe" flow method, or fill the holes first.`
+      );
+    };
+
+  /// ``this.flowExact`` drains this into a ``.some`` flow if there are no holes, otherwise it throws.
+  /// Mutates: This drains self, but only if operation succeeds.
+  mut .getFlow(mode: FlowMode[E]): mut Flow[E] -> this.isFull .if {
+    .then -> this.flatFlow(mode);
+    .else -> Error.msg(
+      "ESparseList.getFlow: Cannot create a flow of an ESparseList that is not full."
+      | `Use a "hole-safe" flow method, or fill the holes first.`
+      );
+    };
+
+  /// ``this.getList`` returns ``this`` as an ``EList``, throws if there are any holes in the collection.
+  /// Note: this operation drains the collection  if it succeeds so ``this`` will be empty with the same capacity.
+  mut .getEList: mut EList[E];
+
+  /// ``this.list`` returns ``this`` as .some of an``Elist`` if there are no holes. ``.empty`` if holes are present.
+  /// Note: this operation drains the collection if it succeeds so ``this`` will be empty with the same capacity.
+  /// Warning: Throws if ``this.capacity > 2147483647``, as the list uses a Java list under the hood, which cannot be larger than 2147483647.
+  //>   .check{Block#
+  //>   .let slist = {ESparseLists.backedWithArray[Nat] 3 .fillHoles {::}}
+  //>   .do{slist.getEList.list.assertEq({::}, Lists#(0,1,2))}
+  //>   .do{slist.isEmpty.assertTrue}.done}
+  mut .eList: mut Opt[mut EList[E]];
+  }

@@ -52,9 +52,9 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
 //  TODO: for the future, but there are big questions about the exact type signature(s)
 //  mut  .merge(merge: mut F[E,E,E], other: mut Map[K,E]): mut Map[K,E];
 
-  mut  .flow: mut Flow[KeyElem[K,E]];              /// entries as a flow (The flow order follows the map insertion order)
-  read .flow: mut Flow[KeyElem[K,read/imm E]];     /// entries as a flow (The flow order follows the map insertion order)
-  imm  .flow: mut Flow[KeyElem[K,imm E]];          /// entries as a flow (The flow order follows the map insertion order)
+  mut  .flow: mut BiFlow[K,E];              /// entries as a flow (The flow order follows the map insertion order)
+  read .flow: mut BiFlow[K,read/imm E];     /// entries as a flow (The flow order follows the map insertion order)
+  imm  .flow: mut BiFlow[K,imm E];          /// entries as a flow (The flow order follows the map insertion order)
 
   mut  .flow[R:*](read F[K,E,R]): mut Flow[R];          /// entries as a flow (The flow order follows the map insertion order)
   read .flow[R:*](read F[K,read/imm E,R]): mut Flow[R]; /// entries as a flow (The flow order follows the map insertion order)
@@ -81,12 +81,12 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
     }};*/
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let map= {this.flow.fold(
+    .let map= {this.flow.getFold(
       {Maps#[Str,Str,Info]{::}.as{::}},
-      {acc,ke->Block#
-        .let base= {this.keyOh#(ke.key).str}
+      {acc,key,elem->Block#
+        .let base= {this.keyOh#(key).str}
         .let k= {_InfoFreshKey#(acc, base, 0)}
-        .return{acc.with(k, by#(ke.elem).info).as{::}}
+        .return{acc.with(k, by#(elem).info).as{::}}
     })}
   .return{{'i //correct to make the Info object (as for List), calling .info here would go in stack overflow
     .match->::.map map;

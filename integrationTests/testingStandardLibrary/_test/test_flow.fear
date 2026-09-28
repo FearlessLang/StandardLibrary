@@ -1,13 +1,13 @@
 FlowForEachTests: Test {::
   .check{Block#
     .let acc={ELists#[Nat]}
-    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.forEach{e->acc.add e}}
+    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.forEach{e->acc.add e .void}}
     .do{acc.list .assertEq({::}, Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15))}
     .done
     }
   .check{Block#
     .let acc={ELists#[Nat]}
-    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.map{e->e+1}.forEach{e->acc.add e}}
+    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.map{e->e+1}.forEach{e->acc.add e .void}}
     .do{acc.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16))}
     .done
     }
@@ -21,7 +21,7 @@ FlowForEachTests: Test {::
     }
   .check{Block#
     .let acc={ELists#[Nat]}
-    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.map{e->e+1}.forEach(acc, {a, e->a.add e})}
+    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.map{e->e+1}.forEach(acc, {a, e->a.add e .void})}
     .do{acc.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16))}
     .done
     }
@@ -106,7 +106,7 @@ FlowFlatMapTests: Test {::
     .map{s -> s.size}
     .list .assertEq({::}, Lists#(2, 3))}
   .check{Flows#(1, 2)
-    .flatMapMut{n -> Lists#(ELists#[Nat].addAnd n, ELists#[Nat].addAnd(n).addAnd(n))}
+    .flatMapMut{n -> Lists#(ELists#[Nat].add n, ELists#[Nat].add(n).add(n))}
     .map{l -> Block#(l.add 10, l.list.flow.sum 0)}
     .list .assertEq({::}, Lists#(11, 12, 12, 14))}
   }

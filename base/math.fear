@@ -81,8 +81,6 @@ Math: Sealed, _MagicMath {
 
   /// Return the euclidean modulus of two floats.
   /// This is the "non-negative" mod if the divisor is positive:
-  /// Math.euclideanMod(-3.0, +7.0) .assertEq +4.0;
-  /// Math.euclideanMod(+3.0, +7.0) .assertEq +3.0;
   .euclideanMod(base: Float, divisor: Float): Float -> Block#
     .let mod = {base.ieeeRemainder(divisor)}
     .return { (mod < +0.0).if {

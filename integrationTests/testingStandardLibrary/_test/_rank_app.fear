@@ -98,8 +98,16 @@ MyTests:UnitTests{::
   .test GuiSetterTests
   .test GuiConnectedTests
   .test GuiKeyTests
+  .test TestWrappers
   .test TestList
   .test TestFlow
+  .test TestMap
+  .test TestAs
+  .test TestRepr
+  .test TestLiteralErrors
+  .test TestPipe
+  .test TestComparators
+  .test TestUStr
   .test TestMap
   .test TestAs
   .test TestRepr
@@ -111,6 +119,8 @@ MyTests:UnitTests{::
   .test InfoTests
   .test InfoValidatorTests
   .test InfoExtractorTests
+  .test TestInfoValidation
+  .test TestInfoExtraction
   .test TestBlock
   .test TestInfoFromStr
   .test TestDungeon

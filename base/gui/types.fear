@@ -8,9 +8,10 @@ Wrapper[S,T]: DataType[S,S] {
   .cmp(a,b,m) ->
     this.getDataType.cmp(this.close(a).get, this.close(b).get, m);
   read .close(s: read S): read Wrapper[S,T];
-  .info->this.getDataType.close(this.get).info;
-  .imm->this#(this.get);
-}
+  .info -> this.getDataType.close(this.get).info;
+  .imm -> this#(this.get);
+  }
+
 ExtentNat[S]: Wrapper[S,Nat] {
   +(other: S): S -> this#(this.get + (this.close(other).get));
   -(other: S): S -> this#(this.get - (this.close(other).get));
@@ -53,14 +54,14 @@ CoordInt[S,E]: Wrapper[S,Int] {
   .origin: S -> this#(+0);
   }
 
-XInt:CoordInt[XInt,WidthNat]{.name->"X"; .getDataType -> +0; .extent -> WidthNat;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-YInt:CoordInt[YInt,HeightNat]{.name->"Y"; .getDataType -> +0; .extent -> HeightNat;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-WidthNat:ExtentNat[WidthNat]{.name->"Width"; .getDataType -> 0;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-HeightNat:ExtentNat[HeightNat]{.name->"Height"; .getDataType -> 0;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
+XInt: CoordInt[XInt,WidthNat] {.name->"X"; .getDataType -> +0; .extent -> WidthNat;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+YInt: CoordInt[YInt,HeightNat] {.name->"Y"; .getDataType -> +0; .extent -> HeightNat;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+WidthNat:ExtentNat[WidthNat] {.name->"Width"; .getDataType -> 0;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+HeightNat:ExtentNat[HeightNat] {.name->"Height"; .getDataType -> 0;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
 
 Rect: {
   .x: XInt; .y: YInt; .width: WidthNat; .height: HeightNat;
@@ -101,16 +102,16 @@ LevelFloat[S]: Wrapper[S,Float] {
   .max: S -> this#(this.highest);
   }
 
-Red:LevelByte[Red]{.name->"Red"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-Green:LevelByte[Green]{.name->"Green"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-Blue:LevelByte[Blue]{.name->"Blue"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-Alpha:LevelByte[Alpha]{.name->"Alpha"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType->t }; .close->this; .close->::;
-  .opaque:Alpha->Alpha.max;
-  .transparent:Alpha->Alpha.min;
+Red: LevelByte[Red] {.name->"Red"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+Green: LevelByte[Green] {.name->"Green"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+Blue: LevelByte[Blue] {.name->"Blue"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+Alpha: LevelByte[Alpha] {.name->"Alpha"; .getDataType -> 0.getByte;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::;
+  .opaque: Alpha->Alpha.max;
+  .transparent: Alpha->Alpha.min;
   }
 CyclicFloat[S]: Wrapper[S,Float] {
   read .period: Float;
@@ -139,24 +140,26 @@ KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "UNDEFINED"
     .return{{ .getDataType->t }};
   .close->this; .close->::; }
 
-Duration:ExtentNat[Duration]{.name->"Duration"; .getDataType -> 0;
-  # t ->{ .getDataType->t };
-  .seconds(t:Nat):Duration->this#(t*1000000);
-  .milliSeconds(t:Nat):Duration->this#(t*1000);
-  .close->this; .close->::; }
-Instant:CoordNat[Instant,Duration]{.name->"Instant"; .getDataType -> 0; .extent -> Duration;
-  # t ->{ .getDataType->t }; .close->this; .close->::; }
-Color:DataType[Color,Color]{
-  .close->this; .close->::;
-  read .red:Red->{};
-  read .green:Green->{};
-  read .blue:Blue->{};
-  read .alpha:Alpha->Alpha.opaque;
-  #(red:Red,green:Green,blue:Blue,alpha:Alpha):Color->{
-    .red->red;
-    .green->green;
-    .blue->blue;
-    .alpha->alpha;
+Duration:ExtentNat[Duration] {.name->"Duration"; .getDataType -> 0;
+  # t ->{ .getDataType-> t };
+  .seconds(t: Nat):Duration -> this#(t*1000000);
+  .milliSeconds(t: Nat):Duration -> this#(t*1000);
+  .close-> this; .close->::; }
+
+Instant: CoordNat[Instant,Duration] {.name->"Instant"; .getDataType -> 0; .extent -> Duration;
+  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+
+Color: DataType[Color,Color] {
+  .close-> this; .close->::;
+  read .red: Red -> {};
+  read .green: Green -> {};
+  read .blue: Blue -> {};
+  read .alpha: Alpha->Alpha.opaque;
+  #(red: Red, green: Green, blue: Blue, alpha: Alpha): Color ->{
+    .red -> red;
+    .green -> green;
+    .blue -> blue;
+    .alpha -> alpha;
     };
   .str -> "Color["+(this.red)+", "+(this.green)+", "+(this.blue)+", "+(this.alpha)+"]";
   .hash ->     this.red.hash
@@ -194,7 +197,7 @@ _Styled[S]:{
   mut .self:mut S;
   mut .save(c:mut Consumer[mut S]):mut S->Block#(c.accept(this.self),this.self);
   mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
-}
+  }
 Widget[S]:_Styled[S]{
   mut .changeDetached(mut Scope[S]):mut S;
   mut .topInset(n:Nat):mut S->this.topInset'(HeightNat#n);
@@ -224,7 +227,7 @@ Widget[S]:_Styled[S]{
   read .radius:Nat;
   read .foreground:Color;
   read .background:Color;
-}
+  }
 _Container[S]:Widget[S]{
   mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
   mut .heightGap'(HeightNat):mut S;
@@ -234,7 +237,7 @@ _Container[S]:Widget[S]{
   mut .paint(Painter):mut S;
   read .heightGap:HeightNat;
   read .widthGap:WidthNat;
-}
+  }
 Border:_Container[Border]{
   .self->this;
   mut .north(mut Scope[Pane]):mut Border;
@@ -247,7 +250,7 @@ Border:_Container[Border]{
   mut .eastB(mut Scope[Border]):mut Border;
   mut .westB(mut Scope[Border]):mut Border;
   mut .centerB(mut Scope[Border]):mut Border;
-}
+  }
 _TextWidget[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
   mut .uText(UStr):mut S;
@@ -256,15 +259,15 @@ _TextWidget[S]: Widget[S]{
   read .text:Str->this.uText.getStr; ///throws if the text was set with .uText and is not a valid Str
   read .uText:UStr;
   read .textHeight:HeightNat;
-}
+  }
 Button: _TextWidget[Button]{
   .self-> this;
   mut .action(mut MF[Void]):mut Button;
-}
+  }
 
 ModelFps:_Styled[ModelFps]{ .self->this;
   mut .action(mut MF[Void]): mut ModelFps;
-}
+  }
 Frame:_Styled[Frame]{ .self->this;
   mut .title(s: Str): mut Frame -> this.uTitle(s.u);
   mut .uTitle(UStr): mut Frame;
@@ -345,23 +348,24 @@ Pane:_Container[Pane]{
   //Flow axis: .horizontal (default) lays children left-to-right, wrapping
   //into new rows; .vertical lays them top-to-bottom, wrapping into new
   //columns.
-  mut .horizontal:mut Pane;
-  mut .vertical:mut Pane;
+  mut .horizontal: mut Pane;
+  mut .vertical: mut Pane;
   //Breaks the flow into fixed-size lines of exactly n children each,
   //regardless of the container's available size along the flow axis (so,
   //unlike the default wrap, it neither depends on nor changes with a
   //resize). 0 (the default) means "no chunking": wrap by available size,
   //as before.
-  mut .chunk(Nat):mut Pane;
-}
-Scope[T]:{ mut .run(mut T): mut T; }
-Painter:{ .run(mut Graphics): mut Graphics; }
+  mut .chunk(Nat): mut Pane;
+  }
 
-Consumer[E:*]:{ mut .accept(E):Void; }
+Scope[T]: { mut .run(mut T): mut T; }
+Painter: { .run(mut Graphics): mut Graphics; }
+
+Consumer[E:*]: { mut .accept(E): Void; }
 Slots: {#[E:*]: mut Slot[E] -> Block#
   .var[mut Opt[E]] e = {{}}
-  .return {mut Slot[E:*]:Consumer[E] {'slot
-    .accept x-> slot.fill x;
+  .return {mut Slot[E:*]: Consumer[E] {'slot
+    .accept x -> slot.fill x;
     mut  !: E -> e.get!;
     read !: read/imm E -> e.get!;
     mut .fill(x: E): Void -> e.set(e.get.match{
@@ -382,13 +386,13 @@ KeyActions:{#:mut KeyAction->Block#
   .return{mut KeyAction:_Styled[KeyAction]{'self .self->self;
     mut .match: mut EList[KeyStroke]->match;
     mut .actions: mut EList[mut Consumer[KeyEvent]]->actions;
-    mut .matchOnly( k:KeyStroke): mut KeyAction->
+    mut .matchOnly(k: KeyStroke): mut KeyAction ->
       Block#(match.clear,self.matchAlso(k));
-    mut .matchAlso( k:KeyStroke): mut KeyAction->
+    mut .matchAlso(k: KeyStroke): mut KeyAction ->
       Block#(match.add(k),self);
-    mut .doOnly( c:mut Consumer[KeyEvent]): mut KeyAction->
+    mut .doOnly(c: mut Consumer[KeyEvent]): mut KeyAction ->
       Block#(actions.clear,self.doAlso(c));
-    mut .doAlso( c:mut Consumer[KeyEvent]): mut KeyAction->
+    mut .doAlso(c: mut Consumer[KeyEvent]): mut KeyAction ->
       Block#(actions.add(c),self);
   }}
 }

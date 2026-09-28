@@ -1,90 +1,101 @@
 package _base;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
+import _base.EList$1k$1Instance;
 
-import static _base.Util.*;
+import static _base.SparseSegmentTreeImpl.lessThan;
+import static _base.Util.check;
 
-public interface ELists$34$0 extends Sealed$2o$0{
+public interface ELists$34$0 extends Sealed$2o$0 {
+  default Object imm$withCapacity$1(Object p0) {
+    long capacity = _base.Nat$c$0Instance.unwrap(p0);
+    check(
+      lessThan(capacity, Integer.MAX_VALUE),
+      "ELists.withCapacity: Cannot create a list with a capacity > "+Integer.MAX_VALUE
+    );
+    return EList$1k$1Instance.unsafeWrap(new ArrayList<>((int) capacity));
+  }
   default Object imm$$hash$0(){ return new EList$1k$1Instance(); }
+  default Object imm$$hash$1(Object p0){
+    ArrayList<Object> list = new ArrayList<>(1);
+    list.add(p0);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$2(Object p0, Object p1){
+    ArrayList<Object> list = new ArrayList<>(2);
+    list.add(p0); list.add(p1);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$3(Object p0, Object p1, Object p2){
+    ArrayList<Object> list = new ArrayList<>(3);
+    list.add(p0); list.add(p1); list.add(p2);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$4(Object p0, Object p1, Object p2, Object p3){
+    ArrayList<Object> list = new ArrayList<>(4);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){
+    ArrayList<Object> list = new ArrayList<>(5);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$6(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5){
+    ArrayList<Object> list = new ArrayList<>(6);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){
+    ArrayList<Object> list = new ArrayList<>(7);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$8(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7){
+    ArrayList<Object> list = new ArrayList<>(8);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){
+    ArrayList<Object> list = new ArrayList<>(9);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$10(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){
+    ArrayList<Object> list = new ArrayList<>(10);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8); list.add(p9);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){
+    ArrayList<Object> list = new ArrayList<>(11);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8); list.add(p9); list.add(p10);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$12(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){
+    ArrayList<Object> list = new ArrayList<>(12);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8); list.add(p9); list.add(p10); list.add(p11);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){
+    ArrayList<Object> list = new ArrayList<>(13);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8); list.add(p9); list.add(p10); list.add(p11); list.add(p12);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$14(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){
+    ArrayList<Object> list = new ArrayList<>(14);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8); list.add(p9); list.add(p10); list.add(p11); list.add(p12); list.add(p13);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){
+    ArrayList<Object> list = new ArrayList<>(15);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8); list.add(p9); list.add(p10); list.add(p11); list.add(p12); list.add(p13); list.add(p14);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+  default Object imm$$hash$16(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){
+    ArrayList<Object> list = new ArrayList<>(16);
+    list.add(p0); list.add(p1); list.add(p2); list.add(p3); list.add(p4); list.add(p5); list.add(p6); list.add(p7); list.add(p8); list.add(p9); list.add(p10); list.add(p11); list.add(p12); list.add(p13); list.add(p14); list.add(p15);
+    return EList$1k$1Instance.unsafeWrap(list);
+  }
+
   ELists$34$0 instance= new ELists$34$0(){};
-}
-final class EList$1k$1Instance implements EList$1k$1{
-  static Object wrap(List<Object> l){ return new EList$1k$1Instance(new ArrayList<>(l)); }
-  /// unsafeWrap takes assumes sole ownership of l. This should never be called on a list which can have other aliases to it,
-  /// Avoid an unnecessary clone of the list compared to wrap.
-  static Object unsafeWrap(ArrayList<Object> l){ return new EList$1k$1Instance(l); }
-  EList$1k$1Instance(ArrayList<Object> l){ xs= l; }
-  EList$1k$1Instance(){ xs= new ArrayList<>(); }
-  private ArrayList<Object> xs;
-  private ArrayList<Object> drain(){
-    var r= xs;
-    xs= new ArrayList<>();
-    return r;
-  }
-  private int idx(Object p0){
-    long i= natToLong(p0);
-    // Lists cannot get larger than an int
-    if (0 <= i && i < xs.size()){ return (int) i; }
-    throw err(outOfRange(i));
-  }
-  private String outOfRange(long i){ return "EList.get: EList index "+Long.toUnsignedString(i)+" out of range for EList of length "+xs.size(); }
-  @Override public Object mut$add$1(Object p0){ xs.add(p0); return Void$o$0.instance; }
-  @Override public Object mut$addAnd$1(Object p0){ xs.add(p0); return this; }
-  @Override public Object mut$clear$0(){ xs.clear(); return Void$o$0.instance; }
-  @Override public Object mut$clearAnd$0(){ xs.clear(); return this; }
-  @Override public Object mut$get$1(Object p0){ return xs.get(idx(p0)); }
-  @Override public Object mut$tryGet$1(Object p0){
-    long i= natToLong(p0);
-    if (0 <= i && i < xs.size()){ return ok(xs.get((int) i)); }
-    return fail(outOfRange(i));
-  }
-  @Override public Object read$size$0(){ return Nat$c$0Instance.instance(xs.size()); }
-  @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().stream()); }
-  @Override public Object mut$flow$1(Object p0){ return Flow$o$1Instance.of(drain().stream()); }
-  @Override public Object mut$list$0(){ return List$o$1Instance.wrap(drain()); }
-  @Override public Object mut$sort$1(Object p0){
-    var by= (OrderBy$5e$2)p0;
-    xs.sort((a,b)->cmp(by,a,b));
-    return Void$o$0.instance;
-  }
-  @Override public Object mut$sortAnd$1(Object p0){
-    mut$sort$1(p0);
-    return this;
-  }
-  private void distinctByHash(Object p0){
-    if(xs.size() < 2){ return; }
-    var by= (OrderHashBy$2ea$2)p0;
-    var seen= new LinkedHashSet<MapKey>(xs.size()*2);
-    var ys= new ArrayList<Object>(xs.size());//bad use of space here, we could avoid two copies
-    for(var e: xs){ if(seen.add(mapKey(by,e))){ ys.add(e); } }
-    xs= ys;
-  }
-  @Override public Object mut$distinct$1(Object p0){
-    distinctByHash(p0);
-    return Void$o$0.instance;
-  }
-  @Override public Object mut$distinctAnd$1(Object p0){
-    distinctByHash(p0);
-    return this;
-  }
-  private void sortDistinctInPlace(Object p0){
-    if(xs.size() < 2){ return; }
-    var by= (OrderBy$5e$2)p0;
-    xs.sort((a,b)->cmp(by,a,b));
-    int w= 1;
-    for(int i= 1; i < xs.size(); i++){//unsure if this is correct
-      if(cmp(by,xs.get(w-1),xs.get(i)) != 0){ xs.set(w++, xs.get(i)); }
-    }
-    if(w < xs.size()){ xs.subList(w,xs.size()).clear(); }
-  }
-  @Override public Object mut$sortDistinct$1(Object p0){
-    sortDistinctInPlace(p0);
-    return Void$o$0.instance;
-  }
-  @Override public Object mut$sortDistinctAnd$1(Object p0){
-    sortDistinctInPlace(p0);
-    return this;
-  }
 }

@@ -1,4 +1,4 @@
-System: ToIso[System], WidenTo[System] {
+System: ToIso[System],WidenTo[System] {
   //mut .io: mut IO;
   //mut .rng: mut RandomSeed;
   mut .try: mut CapTry;
@@ -15,7 +15,7 @@ System: ToIso[System], WidenTo[System] {
   }
   
 /// This try-catch will catch non-deterministic errors.
-CapTry: ToIso[CapTry], WidenTo[CapTry] {
+CapTry: ToIso[CapTry],WidenTo[CapTry] {
   /// This method upholds strong exception safety, so you can observe changes to
   ///  the program state from any exception-causing code.
   mut #[R:*](try: read F[R]): mut Action[R];
@@ -33,19 +33,19 @@ CapTry: ToIso[CapTry], WidenTo[CapTry] {
 
 CapTrys: F[mut System, mut CapTry] {sys -> sys.try}
   
-Output: ToIso[Output], WidenTo[Output] {
-  mut .print(ToStr):Void;
-  mut .println(ToStr):Void;//later add printU and printlnU
-  mut .byte(Byte):Void;///Does not flush
-  mut .bytes(List[Byte]):Void;//Does flush
+Output: ToIso[Output],WidenTo[Output] {
+  mut .print(ToStr): Void;
+  mut .println(ToStr): Void;//later add printU and printlnU
+  mut .byte(Byte): Void;///Does not flush
+  mut .bytes(List[Byte]): Void;//Does flush
   }
 
-InputCursor: ToIso[InputCursor], WidenTo[InputCursor] {
+InputCursor: ToIso[InputCursor],WidenTo[InputCursor] {
   mut #: mut Opt[mut InputCursorNode];
   mut .next: mut InputCursor;
   }
 
-InputCursorNode: ToIso[InputCursorNode], WidenTo[InputCursorNode] {
+InputCursorNode: ToIso[InputCursorNode],WidenTo[InputCursorNode] {
   mut .label: Str; ///best effort portable name to help debugging
   mut .text: Opt[Str]; /// fresh read+decode each call; throws on I/O failure
   // mut .uText: Opt[UStr];

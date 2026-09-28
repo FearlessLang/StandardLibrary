@@ -3,6 +3,7 @@ package _base;
 import static _base.Util.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   public static Str$c$0 instance(String val){ return new Str$c$0Instance(val); }
   @Override public String toString(){ return toS(this); }
-  private static String s(Object o){ return ((Str$c$0Instance)o).val; }
+  private static String unwrap(Object o){ return ((Str$c$0Instance)o).val; }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this); }
   @Override public Object read$str$0(){ return this; }
@@ -75,7 +76,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$u$0(){
     return UStr$s$0Instance.instance(val);
   }
-  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(s(p0).compareTo(s(p1)),p2); }
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(unwrap(p0).compareTo(unwrap(p1)),p2); }
   
   static final Pattern signedInt= Pattern.compile("[+-][0-9](?:[0-9_]*[0-9])?");
   static final Pattern unsignedInt= Pattern.compile("[0-9](?:[0-9_]*[0-9])?");
@@ -104,11 +105,32 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
               + " must be in ["+Int$c$0Instance.MIN_VALUE+", "+Int$c$0Instance.MAX_VALUE+"]");
     }
   }
-  @Override public Object imm$indexOf$1(Object p1){
-    String text= ((Str$c$0Instance)p1).val();
+  @Override public Object imm$indexOf$1(Object p0){
+    String text= ((Str$c$0Instance)p0).val();
     var res= val.indexOf(text);
     return res==-1? optEmpty(): optSome(Nat$c$0Instance.instance(res));
   }
+  @Override public Object imm$lastIndexOf$1(Object p0){
+    String text= ((Str$c$0Instance)p0).val();
+    var res= val.lastIndexOf(text);
+    return res==-1? optEmpty(): optSome(Nat$c$0Instance.instance(res));
+  }
+  @Override public Object imm$indicesOf$1(Object p0){
+    var splitToken = unwrap(p0);
+    final List<Integer> indices = new ArrayList<>();
+
+    for (int index = val.indexOf(splitToken);
+         index != -1;
+         index = val.indexOf(splitToken, index + 1)) {
+      indices.add(index);
+    }
+
+    return Flow$o$1Instance.of(
+      indices.stream()
+        .map(Nat$c$0Instance::instance)
+    );
+  }
+
   @Override public Object imm$sub$2(Object p1, Object p2){
     long from= ((Nat$c$0Instance)p1).val();
     long to= ((Nat$c$0Instance)p2).val();
@@ -351,12 +373,49 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     var other= ((Str$c$0Instance)p0).val;
     return bool(val.startsWith(other));  
   }
+  @Override public Object imm$endsWith$1(Object p0){
+    var other= ((Str$c$0Instance)p0).val;
+    return bool(val.endsWith(other));
+  }
   @Override public Object imm$contains$1(Object p0){
     var other= ((Str$c$0Instance)p0).val;
     return bool(val.contains(other));
   }
+  @Override public Object imm$count$1(Object p0){
+    var token = unwrap(p0);
+    if (token.isEmpty()) {
+      return Nat$c$0Instance.instance(val.length());
+    }
+    String remaining = val;
+    int count = 0;
+    while (true) {
+      int index = remaining.indexOf(token);
+      if (index == -1) break;
+      count++;
+      // a better implementation would not make a new object...
+      remaining = remaining.substring(index + token.length());
+    }
+    return Nat$c$0Instance.instance(count);
+  }
   @Override public Object imm$lower$0(){ return new Str$c$0Instance(val.toLowerCase()); }
   @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase()); }
+  @Override public Object imm$trim$0(){
+    return new Str$c$0Instance(val.trim());
+  }
+  @Override public Object imm$split$1(Object p0){
+    // not using regular split as that uses regex
+    var splitToken = unwrap(p0);
+    String remaining = val;
+    final List<Object> splits = new ArrayList<>();
+    while (true) {
+      int index = remaining.indexOf(splitToken);
+      if (index == -1) break;
+      splits.add(remaining.substring(0, index));
+      // a better implementation would not make a new object...
+      remaining = remaining.substring(index + splitToken.length());
+    }
+    return List$o$1Instance.wrap(splits);
+  }
   @Override public Object imm$norm$0(){
     if (val.length() < 64){ return this; }
     return myCache.computeIfAbsent(val,_->new Norm(this));

@@ -5,7 +5,7 @@ Var[E:imm,mut,read]: {
   mut .set(v: E): Void -> Block#(this.swap(v), Void);
   }
 
-Vars:Sealed{#[E:*](var: E): mut Var[E] -> _Magic!}
+Vars: Sealed{#[E:*](var: E): mut Var[E] -> _Magic!}
 
 Count[N]: Var[N] {
   mut ++: Void;
@@ -102,7 +102,7 @@ IsoViewer[T, R:iso,imm,mut,read,mutH]: {//crucially readH not allowed
 Reprs: {
   #[T](x: iso T, inv: F[read T,Bool]): mut Repr[T] -> Block#
     .openIso _x = x
-    .if {inv#(_x).not} .error {Infos.msg"Invariant does not initially hold"} 
+    .if {inv#(_x).not} .error {Infos.msg"Invariant does not initially hold"}
     .return{mut Repr[T]: {'self
       mut .mutate[R:iso,imm,mut,read](f: mut MF[mutH T,R]): R -> _IdOrErr#(f#(_x),inv#(_x),_ReprCacheFlush#(self));
       read .look[R](f: read F[read T,R]): R -> f#(_x);
@@ -117,7 +117,7 @@ _IdOrErr: {#[R:iso,imm,mut,read](r:R,b:Bool,_:Void):R->Block#(//Needed for the i
   )}
 
 FilterAny: {
-  /// ``FilterAny#(r, pred, fallback)`` returns ``r`` if ``pred#(r)`` is ``True``, otherwise calls and returns ``fallback#``.
+  /// ``FilterAny#(r, pred, fallback)`` returns ``r`` if ``pred#(r)`` is `True`, otherwise calls and returns ``fallback#``.
   //>   .check{FilterAny#(+5, {n -> n == +5}, {-1}) .assertEq +5}
   //>   .check{FilterAny#(+3, {n -> n == +5}, {-1}) .assertEq -1}
   #[R:**](R,F[R,Bool],F[R]):R->_Magic!
