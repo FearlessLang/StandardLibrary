@@ -59,12 +59,7 @@ public abstract class MultiFlow {
     return this;
   }
 
-  /**
-   * `cutToSmallest()`: from now on, if any channel (without a filler) runs out while others
-   * still have data, the flow just ends instead of throwing — i.e. it's implicitly limited to
-   * the size of its smallest channel, discovered lazily as iteration proceeds rather than by
-   * pre-scanning. Mutates `this` in place and returns `this` for chaining.
-   */
+  /// Make the flow just terminate when the first channel runs out
   protected MultiFlow cutToSmallest() {
     this.cutToSmallestMode = true;
     return this;
@@ -77,6 +72,7 @@ public abstract class MultiFlow {
     return IntStream.range(0, numChannels)
       .allMatch(i -> Objects.nonNull(fillers[i]) || channels.get(i).hasNext());
   }
+
   /// Returns false if any of the channels have been exhausted and there isn't a filler present.
   /// Or if all of the channels have been exhausted/hit their limit
   /// true otherwise
@@ -164,8 +160,6 @@ public abstract class MultiFlow {
     }
   }
 
-  /** `mergeOpts`: never throws; continues until every channel is exhausted, using `.empty`
-   *  for any channel (without a filler) that has already run dry. */
   protected Stream<Object> mergeOpts(Function<Object[], Object> merger) {
     var self = this;
 
@@ -187,7 +181,6 @@ public abstract class MultiFlow {
     );
   }
 
-
   /** `getFold`: throws (via hasNext()) as soon as channels are found to differ in length. */
   protected Object foldExact(Object acc, BiFunction<Object, Object[], Object> folder) {
     Object current = acc;
@@ -197,8 +190,6 @@ public abstract class MultiFlow {
     return current;
   }
 
-  /** `fold`: like {@link #foldExact}, but returns `.empty` instead of throwing on a length
-   *  mismatch. May consume part of the flow before discovering the mismatch. */
   protected Object fold(Object acc, BiFunction<Object, Object[], Object> folder) {
     try {
       return optSome(foldExact(acc, folder));
@@ -207,8 +198,6 @@ public abstract class MultiFlow {
     }
   }
 
-  /** `foldOpts`: never throws; folds using `.empty` for any channel (without a filler) that
-   *  has already run dry, continuing until every channel is exhausted. */
   protected Object foldOptsExact(Object acc, BiFunction<Object, Object[], Object> folder) {
     Object current = acc;
     while (this.anyHasNext()) {
@@ -218,8 +207,6 @@ public abstract class MultiFlow {
   }
 
 
-  /** `getFoldUntil`: throws (via hasNext()) as soon as channels are found to differ in
-   *  length, unless `pred` is satisfied first. */
   protected Object foldUntilExact(Object acc, BiFunction<Object, Object[], Object> folder, Predicate<Object> pred) {
     Object current = acc;
     while (this.hasNext(".getFoldUntil")) {
@@ -229,8 +216,6 @@ public abstract class MultiFlow {
     return current;
   }
 
-  /** `foldUntil`: like {@link #foldUntilExact}, but returns `.empty` instead of throwing on a
-   *  length mismatch (unless `pred` is satisfied first). */
   protected Object foldUntil(Object acc, BiFunction<Object, Object[], Object> folder, Predicate<Object> pred) {
     try {
       return optSome(foldUntilExact(acc, folder, pred));
@@ -239,9 +224,6 @@ public abstract class MultiFlow {
     }
   }
 
-  /** `foldOptsUntil`: never throws; folds using `.empty` for any channel (without a filler)
-   *  that has already run dry, stopping early if `pred` is satisfied, otherwise continuing
-   *  until every channel is exhausted. */
   protected Object foldOptsUntil(Object acc, BiFunction<Object, Object[], Object> folder, Predicate<Object> pred) {
     Object current = acc;
     while (this.anyHasNext()) {
@@ -302,6 +284,20 @@ final class BiFlow extends MultiFlow implements _MultiFlow$lk$1, BiFlow$2w$2 {
     return tri;
   }
 
+  @Override public Object mut$mapping$2(Object p0,Object p1){
+    var kem= (BiKeyElemMapper$15i8$4)p1;
+    var orderHash = (OrderHashBy$2ea$2) p0;
+    var m = new LinkedHashMap<MapKey,Object>();
+    while (hasNext(".mapping")) {
+      Object[] entry = next();
+      MapKey key = mapKey(orderHash, kem.imm$key$2(entry[0], entry[1]));
+      if (m.containsKey(key)) { throw detErr("BiFlow.mapping: attempted to add duplicate element."); }
+      Object value = kem.imm$elem$2(entry[0], entry[1]);
+      m.put(key, value);
+    }
+    return new _base.Map$c$2Instance(Maps$o$0.toKey(orderHash), m);
+  }
+
   @Override public Object mut$getMerge$1(Object p0) {
     return _base.Flow$o$1Instance.of(
       this.mergeExact(tuple -> callF$3(p0, tuple[0], tuple[1]))
@@ -319,20 +315,20 @@ final class BiFlow extends MultiFlow implements _MultiFlow$lk$1, BiFlow$2w$2 {
   }
 
   @Override public Object mut$getFold$2(Object p0, Object p1) {
-    return this.foldExact(p0, (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]));
+    return this.foldExact(callMF$1(p0), (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]));
   }
 
   @Override public Object mut$fold$2(Object p0, Object p1) {
-    return this.fold(p0, (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]));
+    return this.fold(callMF$1(p0), (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]));
   }
 
   @Override public Object mut$foldOpts$2(Object p0, Object p1) {
-    return this.foldOptsExact(p0, (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]));
+    return this.foldOptsExact(callMF$1(p0), (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]));
   }
 
   @Override public Object mut$getFoldUntil$3(Object p0, Object p1, Object p2) {
     return this.foldUntilExact(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -340,7 +336,7 @@ final class BiFlow extends MultiFlow implements _MultiFlow$lk$1, BiFlow$2w$2 {
 
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2) {
     return this.foldUntil(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -348,7 +344,7 @@ final class BiFlow extends MultiFlow implements _MultiFlow$lk$1, BiFlow$2w$2 {
 
   @Override public Object mut$foldOptsUntil$3(Object p0, Object p1, Object p2) {
     return this.foldOptsUntil(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$4(p1, acc, tuple[0], tuple[1]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -407,20 +403,20 @@ final class TriFlow extends MultiFlow implements _MultiFlow$lk$1, TriFlow$5k$3 {
   }
 
   @Override public Object mut$getFold$2(Object p0, Object p1) {
-    return this.foldExact(p0, (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]));
+    return this.foldExact(callMF$1(p0), (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]));
   }
 
   @Override public Object mut$fold$2(Object p0, Object p1) {
-    return this.fold(p0, (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]));
+    return this.fold(callMF$1(p0), (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]));
   }
 
   @Override public Object mut$foldOpts$2(Object p0, Object p1) {
-    return this.foldOptsExact(p0, (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]));
+    return this.foldOptsExact(callMF$1(p0), (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]));
   }
 
   @Override public Object mut$getFoldUntil$3(Object p0, Object p1, Object p2) {
     return this.foldUntilExact(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -428,7 +424,7 @@ final class TriFlow extends MultiFlow implements _MultiFlow$lk$1, TriFlow$5k$3 {
 
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2) {
     return this.foldUntil(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -436,7 +432,7 @@ final class TriFlow extends MultiFlow implements _MultiFlow$lk$1, TriFlow$5k$3 {
 
   @Override public Object mut$foldOptsUntil$3(Object p0, Object p1, Object p2) {
     return this.foldOptsUntil(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$5(p1, acc, tuple[0], tuple[1], tuple[2]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -491,20 +487,20 @@ final class QuadFlow extends MultiFlow implements _MultiFlow$lk$1, QuadFlow$aw$4
   }
 
   @Override public Object mut$getFold$2(Object p0, Object p1) {
-    return this.foldExact(p0, (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]));
+    return this.foldExact(callMF$1(p0), (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]));
   }
 
   @Override public Object mut$fold$2(Object p0, Object p1) {
-    return this.fold(p0, (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]));
+    return this.fold(callMF$1(p0), (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]));
   }
 
   @Override public Object mut$foldOpts$2(Object p0, Object p1) {
-    return this.foldOptsExact(p0, (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]));
+    return this.foldOptsExact(callMF$1(p0), (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]));
   }
 
   @Override public Object mut$getFoldUntil$3(Object p0, Object p1, Object p2) {
     return this.foldUntilExact(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -512,7 +508,7 @@ final class QuadFlow extends MultiFlow implements _MultiFlow$lk$1, QuadFlow$aw$4
 
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2) {
     return this.foldUntil(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]),
       acc -> isTrue(callF$2(p2, acc))
     );
@@ -520,7 +516,7 @@ final class QuadFlow extends MultiFlow implements _MultiFlow$lk$1, QuadFlow$aw$4
 
   @Override public Object mut$foldOptsUntil$3(Object p0, Object p1, Object p2) {
     return this.foldOptsUntil(
-      p0,
+      callMF$1(p0),
       (acc, tuple) -> callF$6(p1, acc, tuple[0], tuple[1], tuple[2], tuple[3]),
       acc -> isTrue(callF$2(p2, acc))
     );

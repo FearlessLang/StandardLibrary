@@ -8,6 +8,7 @@ ESparseLists: {
   /// ``this.backedWithSparseSegmentTree``
   /// This requires a high overhead to manage the segment tree data-structure,
   /// so should only be used for implementations which expect dense islands of values surrounded by vast seas of holes
+  //> .check{ESparseLists.backedWithSparseSegmentTree[Nat](3).capacity.assertEq 3}
   .backedWithSparseSegmentTree[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   }
 
@@ -43,6 +44,7 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   read .numHoles: Nat;
 
   /// ``this.increaseCapacity(n)`` returns ``this`` after expanding it's capacity, throws if ``n <= (this.currentCapacity)``
+  //> .check{ESparseLists.backedWithArray[Nat](2).increaseCapacity(4).capacity.assertEq 4}
   mut .increaseCapacity(proposedCapacity: Nat): mut ESparseList[E] ->
     proposedCapacity >= (this.capacity) .if {
       .then -> this.softIncreaseCapacity(proposedCapacity);
@@ -55,9 +57,11 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.softIncreaseCapacity(n)`` returns ``this`` after expanding it's capacity.
   /// Note if n <= this.capacity then calling ``this.increase`` capacity does nothing.
+  //> .check{ESparseLists.backedWithArray[Nat](2).softIncreaseCapacity(4).capacity.assertEq 4}
   mut .softIncreaseCapacity(Nat): mut ESparseList[E];
 
   /// ``this.get(i)`` returns the element at index ``i``. .some(e) if e is present, and .empty if it is a hole.
+  //> .check{ESparseLists.backedWithArray[Nat](2).set(1, 7).get(0).assertEmpty {::}}
   read .get(Nat): mut Opt[read/imm E];
 
   /// ``this.get(i)`` returns the element at index ``i``. .some(e) if e is present, and .empty if it is a hole.
@@ -65,6 +69,8 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.fillHoles(f)`` fills the holes in this, using the given map.
   /// Equivalent to: ``this.mapOpts{i, e -> e.orLazy{f#(i)}}``
+  //> .check{ESparseLists.backedWithArray[Nat](3).set(1, 7).fillHoles{index -> index}.getEList.list
+  //>   .assertEq({::}, Lists#(0,7,2))}
   mut .fillHoles(mut MF[Nat, E]): mut ESparseList[E];
 
   /// ``this.mapOpts(f)`` returns ``this`` after it's contents have been updated by f.
@@ -74,10 +80,14 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.fillFrom(list)`` uses the elements in ``list`` to fill the holes in this, starting from index 0,
   /// until either there are no more holes or no more elements in ``list``.
+  //> .check{ESparseLists.backedWithArray[Nat](3).set(1, 9).fillFrom(ELists#(4,5)).getEList.list
+  //>   .assertEq({::}, Lists#(4,9,5))}
   mut .fillFrom(EList[E]): mut ESparseList[E];
 
   /// ``this.fillWith(list)`` uses the elements in ``list`` to fill the holes in this, starting from index 0,
   /// expanding the capacity of this if necessary to fit all elements in ``list``.
+  //> .check{ESparseLists.backedWithArray[Nat](1).fillAndExpand(ELists#(4,5)).getEList.list
+  //>   .assertEq({::}, Lists#(4,5))}
   mut .fillAndExpand(source: EList[E]): mut ESparseList[E];
 
   /// ``this.seqFlowOpts`` drains the spare list into a sequential flow of ``Opt[E]``.
@@ -95,6 +105,8 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// ``this.flatSeqFlow`` drains the ESparseList into a sequential Flow of ``E`` skipping the holes.
   /// Equivalent to: ``this.seqflowOpts.flatMap{::.flow}``
   /// Mutates: This drains self, so this sparse list is empty, with the same capacity.
+  //> .check{ESparseLists.backedWithArray[Nat](3).set(0, 1).set(2, 3).flatSeqFlow.list
+  //>   .assertEq({::}, Lists#(1,3))}
   mut .flatSeqFlow: mut Flow[E];
 
   /// ``this.flatFlow`` drains this into a flow of ``E`` skipping the holes.
@@ -112,6 +124,8 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.seqFlowExact`` drains this into a ``.some`` sequential flow if there are no holes, otherwise it throws.
   /// Mutates: This drains self, but only if operation succeeds.
+  //> .check{ESparseLists.backedWithArray[Nat](2).set(0, 1).set(1, 2).getSeqFlow.list
+  //>   .assertEq({::}, Lists#(1,2))}
   mut .getSeqFlow(): mut Flow[E] -> this.isFull .if {
     .then -> this.flatSeqFlow;
     .else -> Error.msg(

@@ -1,14 +1,23 @@
 _MultiFlow[Self]: Pipe[Self]{
   /// ``this.noMoreThan(n)`` returns a ``this`` limited to the first ``n`` elements of each channel,
   /// truncating silently if ``n`` exceeds a channel's size.
+  //> .check{Flows#(1,2).with(Flows#(3,4)).noMoreThan(1).getMerge{a,b -> a+b}.list
+  //>   .assertEq({::}, Lists#(4))}
   mut .noMoreThan(n: Nat): mut Self;
 
   /// ``this.cutToSmallest`` explicitly limits this multiflow to the smallest of the n channels.
+  //> .check{Flows#(1,2).with(Flows#(3)).cutToSmallest.getMerge{a,b -> a+b}.list
+  //>   .assertEq({::}, Lists#(4))}
   mut .cutToSmallest: mut Self;
   }
 
-BiFlow[A:*,B:*]: _MultiFlow[BiFlow[A,B]] {
 
+BiKeyElemMapper[A:*,B:*,K,E:*]: {
+  .key(A,B): K;
+  .elem(A,B): E;
+  }
+
+BiFlow[A:*,B:*]: _MultiFlow[BiFlow[A,B]] {
   /// ``this.with(flow)`` returns a TriFlow with ``flow`` added as a new channel.
   mut .with[C:*](flow: mut Flow[C]): mut TriFlow[A,B,C];
 
@@ -20,14 +29,24 @@ BiFlow[A:*,B:*]: _MultiFlow[BiFlow[A,B]] {
   // Note: this mutates this BiFlow; references to it before this call will be broken.
   mut .enumerate: mut TriFlow[Nat,A,B];
 
+  /// ``this.mapping(by, kem)`` returns a map holding one entry per element of `this`,
+  /// with key's and values determined by ``kem``
+  /// Throws a deterministic error when two elements produce the same key, or if the channels have different numbers of elements
+  //> .check{Flows#(1,2).with(Flows#(10,20)).mapping({::},{.key a,b -> a; .elem a,b -> b}).size.assertEq 2}
+  mut .mapping[K,K',E:*](OrderHashBy[K,K'], read BiKeyElemMapper[A,B,K,E]): mut Map[K,E];
+
   /// ``this.getMerge(f)`` merges both channels using ``f``.
   /// Warning: downstream operations will throw if the channels differ in size.
   /// Note: we have no ``.merge`` as we have to know if the flow is the right size at call time we have to collect it.
   ///   if you want the `Opt` use ``this.mergeToList f``
+  //> .check{Flows#(1,2).with(Flows#(10,20)).getMerge{a,b -> a+b}.list
+  //>   .assertEq({::}, Lists#(11,22))}
   mut .getMerge[R:*](f: read F[A,B,R]): mut Flow[R];
 
   /// ``this.mergeToList(f)`` returns ``.some`` of the merged flow if the channels are the same size,
   /// otherwise ``.empty``.
+  //> .check{Flows#(1,2).with(Flows#(10,20))
+  //>   .mergeToList{a,b -> a+b}!.assertEq({::}, Lists#(11,22))}
   mut .mergeToList[R:*](f: read F[A,B,R]): mut Opt[mut List[R]];
 
   /// ``this.mergeOpts(f)`` merges both channels using ``f``, passing ``.empty`` for missing values.
@@ -37,10 +56,12 @@ BiFlow[A:*,B:*]: _MultiFlow[BiFlow[A,B]] {
   /// ``this.getFold(acc, f)`` folds both channels pairwise from left to right, starting from ``acc``.
   /// For each pair ``(a, b)`` the accumulator is updated to ``f#(acc, a, b)``.
   /// Throws if the channels differ in size.
+  //> .check{Flows#(1,2).with(Flows#(10,20)).getFold({0},{acc,a,b -> acc+a+b}).assertEq 33}
   mut .getFold[R:*](acc: mut MF[R], f: read F[R, A, B, R]): R;
 
   /// ``this.fold(acc, f)`` returns ``.some`` of the fold result if the channels are the same size,
   /// otherwise ``.empty``.
+  //> .check{Flows#(1,2).with(Flows#(10)).fold({0},{acc,a,b -> acc+a+b}).assertEmpty {::}}
   mut .fold[R:*](acc: mut MF[R], f: read F[R, A, B, R]): mut Opt[R];
 
   /// ``this.foldOpts(acc, f)`` folds both channels pairwise from left to right, starting from ``acc``,
@@ -65,10 +86,14 @@ BiFlow[A:*,B:*]: _MultiFlow[BiFlow[A,B]] {
 
   /// ``this.fillA(f)`` returns a BiFlow where missing values in channel A are filled using ``f(n)``
   /// where ``n`` is the index of the missing slot.
+  //> .check{Flows#(1).with(Flows#(10,20)).fillA{n -> n}.getMerge{a,b -> a+b}.list
+  //>   .assertEq({::}, Lists#(11,21))}
   mut .fillA(f: read F[Nat,A]): mut BiFlow[A,B];
 
   /// ``this.fillB(f)`` returns a BiFlow where missing values in channel B are filled using ``f(n)``
   /// where ``n`` is the index of the missing slot.
+  //> .check{Flows#(1,2).with(Flows#(10)).fillB{n -> n}.getMerge{a,b -> a+b}.list
+  //>   .assertEq({::}, Lists#(11,3))}
   mut .fillB(f: read F[Nat,B]): mut BiFlow[A,B];
   }
 
@@ -81,6 +106,8 @@ TriFlow[A:*,B:*,C:*]: _MultiFlow[TriFlow[A,B,C]] {
   // ``this.enumerate`` returns a QuadFlow with a channel of indices (starting from 0) prepended.
   // The index channel has size equal to ``this.maxSize``.
   // Note: this mutates this TriFlow; references to it before this call will be broken.
+  //> .check{Flows#(10,20).with(Flows#(1,2)).with(Flows#(100,200)).enumerate
+  //>   .getMerge{i,a,b,c -> i+a+b+c}.list.assertEq({::}, Lists#(111,223))}
   mut .enumerate: mut QuadFlow[Nat,A,B,C];
 
   /// ``this.fillA(f)`` returns a TriFlow where missing values in channel A are filled using ``f(n)``
@@ -97,6 +124,8 @@ TriFlow[A:*,B:*,C:*]: _MultiFlow[TriFlow[A,B,C]] {
 
   /// ``this.getMerge(f)`` merges all three channels using ``f``.
   /// Throws if the channels differ in size.
+  //> .check{Flows#(1,2).with(Flows#(10,20)).with(Flows#(100,200)).getMerge{a,b,c -> a+b+c}.list
+  //>   .assertEq({::}, Lists#(111,222))}
   mut .getMerge[R:*](f: read F[A,B,C,R]): mut Flow[R];
 
   /// ``this.merge(f)`` returns ``.some`` of the merged flow if all channels are the same size,
@@ -158,6 +187,8 @@ QuadFlow[A:*,B:*,C:*,D:*]: _MultiFlow[QuadFlow[A,B,C,D]] {
 
   /// ``this.getMerge(f)`` merges all four channels using ``f``.
   /// Throws if the channels differ in size.
+  //> .check{Flows#(1,2).with(Flows#(10,20)).with(Flows#(100,200)).with(Flows#(1000,2000))
+  //>   .getMerge{a,b,c,d -> a+b+c+d}.list.assertEq({::}, Lists#(1111,2222))}
   mut .getMerge[R:*](f: read F[A,B,C,D,R]): mut Flow[R];
 
   /// ``this.mergeToList(f)`` returns ``.some`` of the merged flow if all channels are the same size,

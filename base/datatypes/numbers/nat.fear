@@ -16,7 +16,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// Overflows if the result would exceed ``18_446_744_073_709_551_615``.
   //>   .checkEq(5, {2 + 3})
   //>   .checkNonDetErr(
-  //>     {:: > "msg" .isMsg{::.startsWith "Nat +" & (::.contains "overflow")}},
+  //>     {:: > "msg" .isMsg{::.startsWith "Nat+:" & (::.contains "overflow")}},
   //>     {(Math.maxNat - 1) + 2}
   //>     )
   +(x: Nat): Nat;

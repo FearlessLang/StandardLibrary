@@ -1,5 +1,5 @@
-MapStrSizes: { #(m: mut Map[Str,Str]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key ke->ke.key; .elem ke->ke.elem.size}) }
-MapListSizes: { #(m: mut Map[Str,List[Str]]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key ke->ke.key; .elem ke->ke.elem.size}) }
+MapStrSizes: { #(m: mut Map[Str,Str]): mut Map[Str,Nat] -> m.flow.mapping(OrderHashBy[Str,Str] {::}, {.key k,_ -> k; .elem _,e -> e.size}) }
+MapListSizes: { #(m: mut Map[Str,List[Str]]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key k, _ -> k; .elem _, e -> e.size}) }
 
 MapBasicsTests: Test {::
   .check{Maps#[Str,Str,Int] {::} .size .assertEq 0}
@@ -48,6 +48,7 @@ MapBasicsTests: Test {::
   .check{Maps#({::}, "a", "x") ++ (Maps#({::}, "b", "y")) ++ (Maps#({::}, "c", "z")) .get "c" .assertEq "z"}
   .check{Maps#({::}, "a", "x") ++ (Maps#({::}, "b", "y")) .str{::.str} .assertEq(
     Maps#[Str,Str,Str] {::} .with("a", "x") .with("b", "y") .str{::.str})}
+  .debug{"EMPTY MAP SIZE: "+(MapStrSizes#(Maps#[Str,Str,Str] {::}) .size)}
   .check{MapStrSizes#(Maps#[Str,Str,Str] {::}) .size .assertEq 0}
   .check{MapStrSizes#(Maps#({::}, "a", "xx", "bb", "y")) .size .assertEq 2}
   .check{MapStrSizes#(Maps#({::}, "a", "xx", "bb", "y")) .get "a" .assertEq 2}
