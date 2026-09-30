@@ -77,7 +77,7 @@ Flow[E:*]: {
         s--,
         s.get == 0 ? { .then -> Break#; .else -> Continue# })});
     };
-  mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S] -> this.actor[mut Var[imm S], S](Vars#[imm S](acc), {down, s, e ->
+  mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S] -> this.actor[mut Var[imm S], S](Vars#(acc), {down, s, e ->
     Block#(s.set(f#(s.get, e)), down.push#(down, s.get), Continue#)});
   mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R] -> this.actorMut[ToIso[C], R](ctx, {down, s, e ->
     Block#(down.push#(down, f#(s.iso.close, e)), Continue#)});
@@ -95,16 +95,16 @@ Flow[E:*]: {
   //desugared terminals
   mut .for(f: mut MF[E,Void]): Void -> this.for(Void, {_, e -> f#e});
   mut .forEach(f: mut MF[E,Void]): Void -> this.forEach(Void, {_, e -> f#e});
-  mut .eList: mut EList[E] -> this.fold({ELists#[E]}, {acc, e -> Block#(acc.add e, acc)});
+  mut .eList: mut EList[E] -> this.fold({ELists#}, {acc, e -> Block#(acc.add e, acc)});
   mut .list: mut List[E] -> this.eList.list;
-  mut .eSet[E', K](asImm: mut AsImm[E, E'], by: OrderHashBy[E', K]): mut ESet[E'] -> this.fold({ESets#[E', K](by)}, {s, e -> s.add(asImm#e)});
+  mut .eSet[E', K](asImm: mut AsImm[E, E'], by: OrderHashBy[E', K]): mut ESet[E'] -> this.fold({ESets#(by)}, {s, e -> s.add(asImm#e)});
   mut .set[E', K](asImm: mut AsImm[E, E'], by: OrderHashBy[E', K]): Set[E'] -> this.eSet(asImm, by).set;
   /// ``this.mapping(by, kem)`` returns a map holding one entry per element of `this`,
   /// keyed by ``kem.key`` under ``by`` and holding ``kem.elem``, in flow order.
   /// Throws a deterministic error when two elements produce the same key.
   //>   .check{Flows#(1, 2).mapping({::},{.key e->e; .elem e->e}).size .assertEq 2}
   //>   .checkDetErr({::}, {Flows#(1, 1).mapping({::},{.key e->e; .elem e->e})})
-  mut .mapping[K,K0,E0:*](by: OrderHashBy[K,K0], kem: KeyElemMapper[E,K,E0]): mut Map[K,E0] -> this.fold({Maps#[K,K0,E0](by)}, {m, e -> _MappingStep#(m, kem.key(e), kem.elem(e))});
+  mut .mapping[K,K0,E0:*](by: OrderHashBy[K,K0], kem: KeyElemMapper[E,K,E0]): mut Map[K,E0] -> this.fold({Maps#(by)}, {m, e -> _MappingStep#(m, kem.key(e), kem.elem(e))});
   mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R -> this.fold(acc, {a, e -> a.acc e}).result;
   mut .sum(sn: SumNumber[E]): E -> sn.sumNumber(this);
   mut .join(js: JoinStr[E]): E -> js.joinStr(this);

@@ -52,5 +52,5 @@ ActorSinkOptHelper: Sealed {
   }
 _PushOptStep[E:*]: { read #(down: mutH ActorSink[E], e: mut Opt[E]): Void }
 
-IfSome: { #[E:*](b: Bool, e: E): mut Opt[E] -> b ?[mut Opt[E]]{ .then -> Opts#e; .else -> {} } }
+IfSome: { #[E:*](b: Bool, e: E): mut Opt[E] -> b ?{ .then -> Opts#e; .else -> {} } }
 Yield: Sealed { #: Void -> Void }
