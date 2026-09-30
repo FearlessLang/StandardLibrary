@@ -23,7 +23,7 @@ public final class AppLog{
   public static final int keepLogs= 10;
   public static final int keepErrLogs= 100;
   public static final int maxStampRetries= 10;
-  public static Path errPath= Path.of(".out","logs","err.log");
+  public static Path errPath;
   public static final String stampPattern= "yyyyMMdd_HHmmss_SSS'Z'";
   private static final DateTimeFormatter stampFmt= DateTimeFormatter.ofPattern(stampPattern).withZone(ZoneOffset.UTC);
   private static final ConcurrentLinkedQueue<AppLog> all= new ConcurrentLinkedQueue<>();
@@ -32,6 +32,7 @@ public final class AppLog{
   public static AppLog open(Path path, boolean raw){
     String rootStr= System.getProperty("fearlessUser.dir");
     var root= Path.of(rootStr);
+    errPath= root.resolve(".out","logs","err.log");
     var p= root.resolve(path).normalize();
     startupFor(errPath, keepErrLogs);
     startupFor(p, keepLogs);
