@@ -1,18 +1,18 @@
 Maps: Sealed {
-  #[K,K',E](OrderHashBy[K,K']):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K']):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
   
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
-  #[K,K',E](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
+  #[K,K',E:*](OrderHashBy[K,K'], K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E,K,E):mut Map[K,E]->_Magic!;
 
   .singletonRead[K,K',E:*](OrderHashBy[K,K'], K, read E): read Map[K,E]->_Magic!;
   }
@@ -40,6 +40,9 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
 
   read .containsKey(k: K): Bool;         /// true iff k present
 
+  /// ``this.with(k, e)`` binds ``k`` to ``e``; elements can be ``mut``.
+  //>   .check{Maps#[Str,Str,mut Var[Nat]]({::}).with("a", Vars#[Nat](1)).get "a" .get .assertEq 1}
+  //>   .check{Maps#[Str,Str,mut Var[Nat]]({::}, "a", Vars#[Nat](1)).with("b", Vars#[Nat](2)).get "a" .get .assertEq 1}
   mut  .with(k: K, e: E): mut Map[K,E];           /// insert/replace binding for k
   read .with(k: K, e: read E): read Map[K,E];     /// insert/replace binding for k
 
