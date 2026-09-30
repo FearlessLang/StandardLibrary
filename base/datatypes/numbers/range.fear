@@ -10,7 +10,7 @@ Container[N:**]: {
 /// so it is safe when implementing a new Range of those types to call those methods, without it going in loop.
 /// Warning: Because of `this`, if you define your own discrete type that overrides `.contains` or `.clamp` the symmetry of these methods will be broken,
 ///   That is ``MyRange.contains(n)`` may not be equivalent to ``n.inRange(n)``
-Range[N]: Container[N], Pipe[Range[N]], ToStr {
+Range[N]: ToFlow[N], Container[N], Pipe[Range[N]], ToStr {
   .close -> this;
   /// `this.start` returns the first value of this range
   .start: N;
@@ -31,6 +31,8 @@ Range[N]: Container[N], Pipe[Range[N]], ToStr {
   /// `this.flow` creates a flow of all the elements in the range
   //> .check{1=~~=6.flow.list .assertEq({::}, Lists#(1,2,3,4,5,6))}
   .flow: mut Flow[N];
+  read .seqFlow: mut Flow[read/imm N];
+  mut  .seqFlow: mut Flow[N];
 
   /// `this.list` creates a list of all the elements in the range
   /// Equivalent to: ``this.flow.list``

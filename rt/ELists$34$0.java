@@ -41,9 +41,12 @@ final class EList$1k$1Instance implements EList$1k$1{
     return fail(outOfRange(i));
   }
   @Override public Object read$size$0(){ return Nat$c$0Instance.instance(xs.size()); }
-  @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().stream()); }
-  @Override public Object mut$flow$1(Object p0){ return Flow$o$1Instance.of(drain().stream()); }
+  @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain(), FlowMode.Seq); }
+  @Override public Object mut$flow$1(Object p0){ return Flow$o$1Instance.of(drain(), FlowMode.of(p0)); }
+  @Override public Object imm$flow$0(){ return Flow$o$1Instance.of(new ArrayList<>(xs), FlowMode.ParImm); }
   @Override public Object mut$list$0(){ return List$o$1Instance.wrap(drain()); }
+  @Override public Object mut$close$0(){ return this; }
+  @Override public Object read$close$0(){ return this; }
   @Override public Object mut$sort$1(Object p0){
     var by= (OrderBy$5e$2)p0;
     xs.sort((a,b)->cmp(by,a,b));

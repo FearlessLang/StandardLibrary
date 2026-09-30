@@ -245,6 +245,7 @@ _ByteRanges: Sealed {
         .start -> startInclusive;
         .end -> endInclusive;
         .flow -> _NumFlow.bytes(startInclusive, endInclusive);
+        .seqFlow -> Flows.fromMutList(_NumFlow.bytes(startInclusive, endInclusive).list);
         .flow step -> _NumFlow.bytes(startInclusive, endInclusive, step);
         .contains n -> n.inRange(self);
         .clamp n -> n.clampTo(self);

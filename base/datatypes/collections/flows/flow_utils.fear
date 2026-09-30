@@ -8,8 +8,14 @@ JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
 SumNumber[E:*]: { .sumNumber(mut Flow[E]): E }
 
 FlowMode[T:*]:Sealed{.flowMode:FlowMode[T];}
-Par:Sealed{#[T:imm,read]:Par[T]->Par[T]}
-Par[T:imm,read]:FlowMode[T]{this}
+ToFlow[E:*]: Sealed {
+  read .seqFlow: mut Flow[read/imm E];
+  mut  .seqFlow: mut Flow[E];
+  }
+ParImm:Sealed{#[T:imm]:ParImm[T]->ParImm[T]}
+ParImm[T:imm]:FlowMode[T]{this}
+ParRead:Sealed{#[T:imm,read]:ParRead[T]->ParRead[T]}
+ParRead[T:imm,read]:FlowMode[T]{this}
 ParRepr:Sealed{#[T]:ParRepr[T]->ParRepr[T]}
 ParRepr[T]:FlowMode[mut Repr[T]]{this}
 ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
@@ -45,3 +51,6 @@ ActorSinkOptHelper: Sealed {
     #(down, e);
   }
 _PushOptStep[E:*]: { read #(down: mutH ActorSink[E], e: mut Opt[E]): Void }
+
+IfSome: { #[E:*](b: Bool, e: E): mut Opt[E] -> b ?{ .then -> Opts#e; .else -> {} } }
+Yield: Sealed { #: Void -> Void }

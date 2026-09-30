@@ -61,7 +61,7 @@ Distinct: { #[E:*,K](xs: mut List[E], by: OrderHashBy[imm E,K]): mut List[E] -> 
     Continue#) } }
   .return{ kept.get.list } }
 DistinctStep: { #[E:*,K](keys: mut base.Var[read List[read base.Order[K]]], kept: mut base.Var[mut base.EList[E]], o: read base.Order[K], e: E): Void ->
-  keys.get.flow.none{k -> o == (k.close)} ? { .then -> Block#(keys.set(keys.get +> o), kept.get.add(e), Void); .else -> Void } }
+  keys.get.seqFlow.none{k -> o == (k.close)} ? { .then -> Block#(keys.set(keys.get +> o), kept.get.add(e), Void); .else -> Void } }
 
 TestMaxShapes: Test {::
   .check{ (MaxByRecursion#[Nat,Nat](Lists#(3,1,4,1,5,9,2,6), {::})! == 9) .assertTrue }

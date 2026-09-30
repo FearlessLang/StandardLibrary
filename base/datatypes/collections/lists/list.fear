@@ -45,9 +45,10 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .reverse->{};
 
   mut  .seqFlow-> Flows.fromMutList(this);
-  read  .flow-> Flows.fromReadList(this);
+  read .seqFlow-> Flows.fromReadList(this);
   imm  .flow-> Flows.fromImmList(this);
   mut  .flow mode-> Flows.fromMutList(this,mode);
+  read .flow mode-> Flows.fromReadList(this,mode);
   
   .as f ->{};
 
@@ -55,7 +56,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .str by->"[]";
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let list= {this.flow.map{e->by#e.info}.list.as{::}}
+    .let list= {this.seqFlow.map{e->by#e.info}.list.as{::}}
     //.return{list.info{::}};This would go in stack overflow
     .return{Info {'i
       .match->::.list list;
@@ -64,14 +65,14 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
     }};
   .hash by -> Block#
     .let size= {this.size}
-    .return {this.flow.fold({ size },
+    .return {this.seqFlow.fold({ size },
        { acc, e -> acc.hashWith(by#e.hash)}
        )};
   .cmp by, a, b, m -> _ListCmp#(by, a, b, m);
   .norm f ->_ListNorm#(this,f);
   }
 
-_List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
+_List[E:*]: Sealed,ToFlow[E],BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
   read .size: Nat;                           /// number of elements
   read .isEmpty: Bool;                       /// `True` iff size == 0
 
@@ -142,9 +143,10 @@ _List[E:*]: Sealed,BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
 //  read .flow: mut Flow[read/imm E];          /// view as flow
 //  imm  .flow: mut Flow[imm E];               /// view as flow
   mut  .seqFlow: mut Flow[E];                /// sequential flow
-  read .flow: mut Flow[read/imm E];          /// view as flow
+  read .seqFlow: mut Flow[read/imm E];       /// sequential flow
   imm  .flow: mut Flow[imm E];               /// view as flow
-  mut  .flow(mode: FlowMode[E]): mut Flow[E]; /// sequential flow
+  mut  .flow(mode: FlowMode[E]): mut Flow[E]; /// flow in the mode passed
+  read .flow(mode: FlowMode[read/imm E]): mut Flow[read/imm E]; /// flow in the mode passed
 
   read .as[T2](f: BaseId[read/imm E,T2]): List[T2];        /// zero cost retyping, returns `this`
   imm .norm[R](mut MF[E,Norm[R]]): Norm[List[Norm[R]]];/// list normalization

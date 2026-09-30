@@ -47,12 +47,12 @@ DungeonRoomViaActorMut: {
 FlatMapMutViaActorMut: {
   #[E:*,R:*](es: mut Flow[E], f: read F[E, mut List[R]]): mut Flow[R] ->
     es.actorMut[Void, R](Void, {down, _, e ->
-      Block#(f#e .seqFlow.forEach(down, {d, x -> d.push#(d, x)}), Continue#)});
+      Block#(f#e .seqFlow.for(down, {d, x -> d.push#(d, x)}), Continue#)});
   }
 
 FlatMapViaFlatMapMut: {
   #[E:*,R:*](es: mut Flow[E], f: read F[E, read List[R]]): mut Flow[read/imm R] ->
-    FlatMapMutViaActorMut#(es, {e -> f#e .flow.list});
+    FlatMapMutViaActorMut#(es, {e -> f#e .seqFlow.list});
   }
 
 MapWithContextViaActorMut: {

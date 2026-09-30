@@ -25,7 +25,10 @@ Opt[E:*]: _Opt[E] {
 
   .orLazy default -> this.match{.some x -> x; .empty -> default#};
 
-  .flow      -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
+  .seqFlow   -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
+  imm  .flow -> Flows.fromImmList(this.seqFlow.list);
+  mut  .flow mode -> Flows.fromMutList(this.seqFlow.list, mode);
+  read .flow mode -> Flows.fromReadList(this.seqFlow.list, mode);
 
   .as f       -> _OptAs#this;
   /// ``this.mapSome(f)`` returns .empty if this is .empty otherwise .some of `this`'s value mapped by `f`.
@@ -51,7 +54,7 @@ Opt[E:*]: _Opt[E] {
     };
   }
   
-_Opt[E:*]: BaseContainer[E],DataType[Opt[E],Opt[imm E],E,imm E] {
+_Opt[E:*]: ToFlow[E],BaseContainer[E],DataType[Opt[E],Opt[imm E],E,imm E] {
   mut  .match[R:**](mut OptMatch[E, R]): R;
   read .match[R:**](mut OptMatch[read/imm E, R]): R;
   imm  .match[R:**](mut OptMatch[imm E, R]): R;
@@ -81,9 +84,11 @@ _Opt[E:*]: BaseContainer[E],DataType[Opt[E],Opt[imm E],E,imm E] {
   mut  !(read LazyInfo): E;
   read !(read LazyInfo): read/imm E;
 
-  mut  .flow: mut Flow[E];
-  read .flow: mut Flow[read/imm E];
+  mut  .seqFlow: mut Flow[E];
+  read .seqFlow: mut Flow[read/imm E];
   imm  .flow: mut Flow[imm E];
+  mut  .flow(mode: FlowMode[E]): mut Flow[E];
+  read .flow(mode: FlowMode[read/imm E]): mut Flow[read/imm E];
 
   mut  .ifSome(mut MF[E, Void]): Void;
   read .ifSome(mut MF[read/imm E, Void]): Void;

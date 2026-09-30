@@ -213,8 +213,8 @@ TestOrderByAndFlowsTests: Test {::
   .check{Lists#(3,1,2).flow.sort(Rev#{::}).list.assertEq({::}, Lists#(3,2,1))}
   .check{Lists#(3,1,3,2,1).flow.min{::}.list.assertEq({::}, Lists#(1,1))}
   .check{Lists#(3,1,3,2,1).flow.max(Rev#{::}).list.assertEq({::}, Lists#(1,1))}
-  .checkDetErr({::.isMsg{:: == "cmp 2 1"}}, {Lists#(3,1,3,2,1).seqFlow.min ThrowOnTwo .list})
-  .checkDetErr({::.isMsg{:: == "cmp 2 1"}}, {Lists#(3,1,3,2,1).seqFlow.max(Rev#ThrowOnTwo).list})
+  .checkDetErr({::.isMsg{:: == "cmp 3 2"}}, {Lists#(3,1,3,2,1).seqFlow.min ThrowOnTwo .list})
+  .checkDetErr({::.isMsg{:: == "cmp 3 2"}}, {Lists#(3,1,3,2,1).seqFlow.max(Rev#ThrowOnTwo).list})
   .check{
     Lists#(
       Persons#(25,"Bob",List[Cat]),

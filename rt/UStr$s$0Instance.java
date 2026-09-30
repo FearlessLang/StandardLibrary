@@ -4,7 +4,6 @@ import static _base.Util.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   private static final Pattern uCodeText= Pattern.compile("[0-9A-F]{1,6}(?: [0-9A-F]{1,6})*");
@@ -56,8 +55,10 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
       : optEmpty();
   }
   @Override public Object imm$flow$0(){
-    return Flow$o$1Instance.of(Arrays.stream(val).mapToObj(e->Nat$c$0Instance.instance((long)e)));
+    return Flow$o$1Instance.of(Arrays.stream(val).mapToObj(e->(Object)Nat$c$0Instance.instance((long)e)), FlowMode.ParImm);
   }
+  @Override public Object read$seqFlow$0(){ return Flow$o$1Instance.of(Arrays.stream(val).mapToObj(e->(Object)Nat$c$0Instance.instance((long)e)), FlowMode.Seq); }
+  @Override public Object mut$seqFlow$0(){ return read$seqFlow$0(); }
   @Override public Object imm$equalRepr$1(Object p0){
     return bool(Arrays.equals(val,((UStr$s$0Instance)p0).val));
   }
@@ -68,9 +69,8 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     return new UStr$s$0Instance(cat(val,parseUCode(((Str$c$0Instance)p0).val())));
   }
   @Override public Object imm$joinStr$1(Object p0){
-    Stream<Object> s= ((Flow$o$1Instance)p0).s();
     @SuppressWarnings("unchecked")
-    List<UStr$s$0Instance> parts= (List<UStr$s$0Instance>)(Object)s.toList();
+    List<UStr$s$0Instance> parts= (List<UStr$s$0Instance>)(Object)Flow$o$1Instance.toJava(p0);
     return new UStr$s$0Instance(join(val,parts));
   }
   @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_->new Norm(this)); }

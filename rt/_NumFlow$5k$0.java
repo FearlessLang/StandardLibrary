@@ -13,7 +13,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     int start = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p0));
     int end = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p1));
     assert start <= end;
-    return Flow$o$1Instance.of(IntStream.rangeClosed(start, end)
+    return Flow$o$1Instance.range(IntStream.rangeClosed(start, end)
       .mapToObj(i -> Byte$o$0Instance.instance((byte) i)));
   }
 
@@ -23,7 +23,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     int step = Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p2));
     assert start <= end;
     if (step == 0){ throw badStep(p2); }
-    return Flow$o$1Instance.of(IntStream.iterate(start, i -> i <= end, i -> i + step)
+    return Flow$o$1Instance.range(IntStream.iterate(start, i -> i <= end, i -> i + step)
       .mapToObj(i -> Byte$o$0Instance.instance((byte) i)));
   }
 
@@ -31,7 +31,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     long start = Int$c$0Instance.unwrap(p0);
     long end = Int$c$0Instance.unwrap(p1);
     assert start <= end;
-    return Flow$o$1Instance.of(LongStream.rangeClosed(start, end)
+    return Flow$o$1Instance.range(LongStream.rangeClosed(start, end)
       .mapToObj(Int$c$0Instance::instance));
   }
 
@@ -41,7 +41,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     long step = Int$c$0Instance.unwrap(p2);
     assert start <= end;
     if (step <= 0){ throw badStep(p2); }
-    return Flow$o$1Instance.of(
+    return Flow$o$1Instance.range(
       Stream.iterate(start, d -> d != null, d -> Long.compareUnsigned(end - d, step) < 0 ? null : d + step)
         .map(Int$c$0Instance::instance)
     );
@@ -52,14 +52,14 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     long end = Nat$c$0Instance.unwrap(p1);
     assert Long.compareUnsigned(start, end) <= 0;
     if (Long.compareUnsigned(end, Long.MAX_VALUE) <= 0) {
-      return Flow$o$1Instance.of(LongStream.rangeClosed(start, end)
+      return Flow$o$1Instance.range(LongStream.rangeClosed(start, end)
         .mapToObj(Nat$c$0Instance::instance));
     }
     if (Long.compareUnsigned(start, Long.MAX_VALUE) > 0) {
-      return Flow$o$1Instance.of(LongStream.rangeClosed(start, end)
+      return Flow$o$1Instance.range(LongStream.rangeClosed(start, end)
         .mapToObj(Nat$c$0Instance::instance));
     }
-    return Flow$o$1Instance.of(LongStream.concat(
+    return Flow$o$1Instance.range(LongStream.concat(
       LongStream.rangeClosed(start, Long.MAX_VALUE),
       LongStream.rangeClosed(Long.MIN_VALUE, end)
     ).mapToObj(Nat$c$0Instance::instance));
@@ -71,7 +71,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     long step = Nat$c$0Instance.unwrap(p2);
     assert Long.compareUnsigned(start, end) <= 0;
     if (step == 0){ throw badStep(p2); }
-    return Flow$o$1Instance.of(
+    return Flow$o$1Instance.range(
       Stream.iterate(start, d -> d != null, d -> Long.compareUnsigned(end - d, step) < 0 ? null : d + step)
         .map(Nat$c$0Instance::instance)
     );
@@ -81,7 +81,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     double start = Float$1c$0Instance.unwrap(p0);
     double end = Float$1c$0Instance.unwrap(p1);
     assert start <= end;
-    return Flow$o$1Instance.of(
+    return Flow$o$1Instance.range(
       streamDoublesBetweenAsBits(start, end)
         .mapToObj(bits -> Float$1c$0Instance.instance(Double.longBitsToDouble(bits)))
     );
@@ -93,7 +93,7 @@ _NumFlow$5k$0 instance = new _NumFlow$5k$0() {};
     double step = Float$1c$0Instance.unwrap(p2);
     assert start <= end;
     if (!(step > 0)){ throw badStep(p2); }
-    return Flow$o$1Instance.of(
+    return Flow$o$1Instance.range(
       Stream.iterate(start, d -> d != null, d -> d == end || d + step > end ? null : grown(d, step))
         .map(Float$1c$0Instance::instance)
     );
