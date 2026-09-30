@@ -337,7 +337,7 @@ _IntRanges: Sealed {
     .start -> startInclusive;
     .end -> endInclusive;
     .flow -> _NumFlow.ints(startInclusive, endInclusive);
-    .seqFlow -> _SeqFlow#(_NumFlow.ints(startInclusive, endInclusive));
+    .seqFlow -> Flows.fromMutList(_NumFlow.ints(startInclusive, endInclusive).list);
     .flow step -> _NumFlow.ints(startInclusive, endInclusive, step);
     .contains n -> n.inRange(self);
     .clamp n -> n.clampTo(self);

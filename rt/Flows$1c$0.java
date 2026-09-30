@@ -75,31 +75,28 @@ final class Flow$o$1Instance implements Flow$o$1{
   static Flow$o$1Instance of(Iterable<Object> source, FlowMode mode){ return new Flow$o$1Instance(new FlowChain(source, mode)); }
   static Flow$o$1Instance of(Stream<Object> source, FlowMode mode){ Iterable<Object> it= source::iterator; return of(it, mode); }
   static Flow$o$1Instance range(Stream<Object> source){ return of(source, FlowMode.ParImm); }
-  Flow$o$1Instance asSeq(){ return of(take().source, FlowMode.Seq); }
   static List<Object> toJava(Object flow){ return List$o$1Instance.asJava(((Flow$o$1)flow).mut$list$0()); }
   private FlowChain take(){
     check(!consumed, "Flow: this flow is already consumed: a flow is consumed by the call that adds the next stage or the terminal.");
     consumed= true;
     return chain;
   }
-  private Object stage(String name, FlowCore c, Object... args){
+  private Object stage(FlowCore c){
     var ch= take();
-    record(ch, name, args);
     ch.core.add(c);
     return new Flow$o$1Instance(ch);
   }
-  private static void record(FlowChain ch, String name, Object... args){ ch.shape.add(new FlowStep(name, List.of(args))); }
   @Override public Object mut$actor$2(Object state, Object f){
-    return stage("actor", d->new FlowActorSink(d, state, f), f);
+    return stage(d->new FlowActorSink(d, state, f));
   }
   @Override public Object mut$actorMut$2(Object state, Object f){
-    return stage("actorMut", d->new FlowActorSink(d, state, f), f);
+    return stage(d->new FlowActorSink(d, state, f));
   }
   @Override public Object mut$allToAll$1(Object f){
-    return stage("allToAll", d->new FlowAllToAllSink(d, f), f);
+    return stage(d->new FlowAllToAllSink(d, f));
   }
   @Override public Object mut$distinct$1(Object by){
-    return stage("distinct", d->new FlowDistinctSink(d, (OrderHashBy$2ea$2)by), by);
+    return stage(d->new FlowDistinctSink(d, (OrderHashBy$2ea$2)by));
   }
   @Override public Object mut$suppressMisuseExceptions$0(){
     var ch= take();
@@ -108,7 +105,6 @@ final class Flow$o$1Instance implements Flow$o$1{
   }
   @Override public Object mut$fold$2(Object acc, Object f){
     var ch= take();
-    record(ch, "fold", f);
     //if (!ch.suppress){ FlowMisuse.check(ch); }
     var r= new FlowFoldSink(callMF$1(acc), f);
     run(ch, r);
@@ -116,7 +112,6 @@ final class Flow$o$1Instance implements Flow$o$1{
   }
   @Override public Object mut$forEach$2(Object a, Object f){
     var ch= take();
-    record(ch, "forEach", f);
     //if (!ch.suppress){ FlowMisuse.check(ch); }
     run(ch, new FlowForEachSink(a, (ForEachBody$2h4$2)f));
     return Void$o$0.instance;

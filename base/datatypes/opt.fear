@@ -26,9 +26,9 @@ Opt[E:*]: _Opt[E] {
   .orLazy default -> this.match{.some x -> x; .empty -> default#};
 
   .seqFlow   -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
-  imm  .flow -> Flows.fromImmList(this.match{.empty -> {}; .some x -> Lists#x});
-  mut  .flow mode -> Flows.fromMutList(this.match{.empty -> {}; .some x -> Lists#x}, mode);
-  read .flow mode -> Flows.fromReadList(this.match{.empty -> {}; .some x -> Lists#x}, mode);
+  imm  .flow -> Flows.fromImmList(this.seqFlow.list);
+  mut  .flow mode -> Flows.fromMutList(this.seqFlow.list, mode);
+  read .flow mode -> Flows.fromReadList(this.seqFlow.list, mode);
 
   .as f       -> _OptAs#this;
   /// ``this.mapSome(f)`` returns .empty if this is .empty otherwise .some of `this`'s value mapped by `f`.

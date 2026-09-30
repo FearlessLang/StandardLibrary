@@ -8,7 +8,6 @@ JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
 SumNumber[E:*]: { .sumNumber(mut Flow[E]): E }
 
 FlowMode[T:*]:Sealed{.flowMode:FlowMode[T];}
-_SeqFlow: Sealed { #[E:*](f: mut Flow[E]): mut Flow[E] -> _Magic! }
 ToFlow[E:*]: Sealed {
   read .seqFlow: mut Flow[read/imm E];
   mut  .seqFlow: mut Flow[E];
