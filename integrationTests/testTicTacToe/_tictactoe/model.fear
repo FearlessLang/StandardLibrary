@@ -37,7 +37,7 @@ Models: { #: mut Model -> Block#
     mut .cell(i: Nat): Cell -> board.get.get(i);
     mut .cellText(i: Nat): Str -> self.cell(i).text;
     mut .winner: mut Opt[Cell] -> Winner#(board.get);
-    mut .full: Bool -> board.get.flow.all{c -> c.isEmpty.not};
+    mut .full: Bool -> board.get.seqFlow.all{c -> c.isEmpty.not};
     mut .status: Str -> self.winner.match{
       .some m -> m.text + " wins!";
       .empty -> self.full.if{.then->"Draw!"; .else->(turn.get?{.then->"X"; .else->"O"}) + "'s turn"};

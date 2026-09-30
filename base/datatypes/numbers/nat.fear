@@ -333,6 +333,7 @@ _NatRanges: Sealed {
     .start -> startInclusive;
     .end -> endInclusive;
     .flow -> _NumFlow.nats(startInclusive, endInclusive);
+    .seqFlow -> _SeqFlow#(_NumFlow.nats(startInclusive, endInclusive));
     .flow step -> _NumFlow.nats(startInclusive, endInclusive, step);
     .contains n -> n.inRange(self);
     .clamp n -> n.clampTo(self);

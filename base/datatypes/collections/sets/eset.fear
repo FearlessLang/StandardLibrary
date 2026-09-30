@@ -163,6 +163,7 @@ ESet[E]: Pipe[ESet[E]] {
   //>     .do{eset.isEmpty .assertTrue}
   //>     .done}
   mut .flow: mut Flow[E];
+  mut .seqFlow: mut Flow[E];
 
   /// `this.set` returns a Set of all the elements of `this`.
   /// Note this operation drains `this`, so any future accesses to this will point to an empty ESet.

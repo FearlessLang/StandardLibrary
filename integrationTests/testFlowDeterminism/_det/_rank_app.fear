@@ -41,7 +41,7 @@ FlowOrderIsEncounterOrder: Test {::
   .check{DetNats#.flow.mapping({::}, {.key k -> k; .elem k -> k}).flow.map{::.key}.list .assertEq({::}, DetNats#)}
   .check{Block#
     .let acc= {ELists#[Nat]}
-    .do{DetNats#.flow.forEach{e -> acc.add e}}
+    .do{DetNats#.flow.for{e -> acc.add e}}
     .return{acc.list .assertEq({::}, DetNats#)}
     }
   .check{DetNats#.flow.eSet({e -> e}, {::}).flow.list .assertEq({::}, DetNats#)}
@@ -59,8 +59,8 @@ FlowStopsAtTheDecision: Test {::
   .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.any{e -> e == 100} .assertTrue}
   .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.all{e -> e < 100} .assertFalse}
   .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.first! .assertEq 0}
-  .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.limit 50 .list .assertEq({::}, (0 =~~= 49).flow.list)}
-  .check{DetNats#.flow.map{e -> DetErrIf#(e > 100, `late`, e)}.scan(0, {acc, e -> acc + e}).limit 3 .list .assertEq({::}, Lists#(0, 1, 3))}
+  .check{DetNats#.flow.suppressMisuseExceptions.map{e -> DetErrIf#(e > 100, `late`, e)}.limit 50 .list .assertEq({::}, (0 =~~= 49).flow.list)}
+  .check{DetNats#.flow.suppressMisuseExceptions.map{e -> DetErrIf#(e > 100, `late`, e)}.scan(0, {acc, e -> acc + e}).limit 3 .list .assertEq({::}, Lists#(0, 1, 3))}
   }
 
 TestFlowDeterminism: Test {::

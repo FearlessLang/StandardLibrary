@@ -19,7 +19,7 @@ Maps: Sealed {
 
 /// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,...].
 /// The flow order, .str order etc all respect/follow the map insertion order.
-Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize {
+Map[K,E:*]: Sealed,ToFlow[mut KeyElem[K,E]],BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize {
 
   read .size: Nat;                 /// number of elements
   read .isEmpty: Bool;             /// `True` iff size == 0
@@ -64,6 +64,8 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
   imm  .flow[R:*](read F[K,imm E,R]): mut Flow[R];      /// entries as a flow (The flow order follows the map insertion order)
 
   // Optional but commonly useful conveniences (still consistent with List style):
+  mut  .seqFlow: mut Flow[mut KeyElem[K,E]];  /// entries as a sequential flow (same iteration order as .flow)
+  read .seqFlow: mut Flow[read KeyElem[K,E]]; /// entries as a sequential flow (same iteration order as .flow)
   read .keys: mut Flow[K];               /// keys as a flow (same iteration order as .flow)
   read .elems: mut Flow[read/imm E];     /// values as a flow (same iteration order as .flow)
 

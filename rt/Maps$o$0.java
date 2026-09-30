@@ -257,21 +257,26 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   
   @Override public Object mut$flow$0(){
     return Flow$o$1Instance.of(elems.entrySet().stream()
-      .map(e->(Object)KeyElems$b4$0.instance.imm$$hash$2(e.getKey().key,e.getValue())));
+      .map(e->(Object)KeyElems$b4$0.instance.imm$$hash$2(e.getKey().key,e.getValue())), FlowMode.Seq);
   }
   @Override public Object read$flow$0(){ return mut$flow$0(); }
-  @Override public Object imm$flow$0(){ return mut$flow$0(); }
+  @Override public Object imm$flow$0(){ return Flow$o$1Instance.of(elems.entrySet().stream()
+      .map(e->(Object)KeyElems$b4$0.instance.imm$$hash$2(e.getKey().key,e.getValue())), FlowMode.ParImm); }
 
   @Override public Object mut$flow$1(Object p0){
     return Flow$o$1Instance.of(elems.entrySet().stream()
-      .map(e-> callF$3(p0,e.getKey().key,e.getValue())));
+      .map(e-> callF$3(p0,e.getKey().key,e.getValue())), FlowMode.Seq);
   }
   @Override public Object read$flow$1(Object p0){ return mut$flow$1(p0); }
-  @Override public Object imm$flow$1(Object p0){ return mut$flow$1(p0); }
+  @Override public Object imm$flow$1(Object p0){ return Flow$o$1Instance.of(elems.entrySet().stream()
+      .map(e-> callF$3(p0,e.getKey().key,e.getValue())), FlowMode.ParImm); }
 
 
-  @Override public Object read$keys$0(){ return Flow$o$1Instance.of(elems.keySet().stream().map(k->k.key)); }
-  @Override public Object read$elems$0(){ return Flow$o$1Instance.of(elems.values().stream()); }
+  @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(elems.entrySet().stream()
+      .map(e->(Object)KeyElems$b4$0.instance.imm$$hash$2(e.getKey().key,e.getValue())), FlowMode.Seq); }
+  @Override public Object read$seqFlow$0(){ return mut$seqFlow$0(); }
+  @Override public Object read$keys$0(){ return Flow$o$1Instance.of(elems.keySet().stream().map(k->k.key), FlowMode.ParImm); }
+  @Override public Object read$elems$0(){ return Flow$o$1Instance.of(elems.values().stream(), FlowMode.Seq); }
 
   @Override public Object read$close$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }

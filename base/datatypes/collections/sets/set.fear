@@ -22,7 +22,7 @@ Sets: Sealed {
 /// The implementation of a Set[E] the set keys must be imm to prevent breaking set invariants through mutating it's contents.
 /// This set is immutable so this + e will produce a new set with e included, and will not change `this`.
 /// This set maintains a sorted list of elements, such that the set ordering is predictable given the OrderHash.
-Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
+Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   .close -> this; .close -> ::;
 
   /// `this.imm` returns `this` recovering imm reference capability.
@@ -209,6 +209,8 @@ Set[E]: Sealed,DataType[Set[E],Set[E],E,E] {
   /// `this.flow` returns a potentially parallel flow over the elements of `this`.
   //>   .check{Sets#({::}, 1, 2, 3).flow.list .assertEq({::}, Lists#(1, 2, 3))}
   .flow: mut Flow[E] -> this.list.flow;
+  read .seqFlow: mut Flow[read/imm E];
+  mut  .seqFlow: mut Flow[E];
 
   /// ``this.str(by)`` returns a string representation of this set,
   /// using `by` as the ToStr for each element.

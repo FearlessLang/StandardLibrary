@@ -1,7 +1,7 @@
 FlowForEachTests: Test {::
   .check{Block#
     .let acc={ELists#[Nat]}
-    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.forEach{e->acc.add e}}
+    .do{Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).flow.for{e->acc.add e}}
     .do{acc.list .assertEq({::}, Lists#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15))}
     .done
     }
@@ -14,7 +14,7 @@ FlowForEachTests: Test {::
   .check{Block#
     .let v={Vars#[Nat](0)}
     .let acc={ELists#[Nat]}
-    .do{Lists#(0,1,2,3,4,5,6,7).flow.map{_->v.get}.forEach{x->Block#(acc.add x, v.set(v.get + 1))}}
+    .do{Lists#(0,1,2,3,4,5,6,7).flow.map{_->v.get}.for{x->Block#(acc.add x, v.set(v.get + 1))}}
     .do{acc.list .assertEq({::}, Lists#(0,0,0,0,0,0,0,0))}
     .do{v.get .assertEq 8}
     .done
@@ -28,7 +28,7 @@ FlowForEachTests: Test {::
   .check{Block#
     .let v={Vars#[Nat](0)}
     .let acc={ELists#[Nat]}
-    .do{Lists#(0,1,2,3,4,5,6,7).flow.map{_->v.get}.forEach(v, {c, x->Block#(acc.add x, c.set(c.get + 1))})}
+    .do{Lists#(0,1,2,3,4,5,6,7).flow.map{_->v.get}.for(v, {c, x->Block#(acc.add x, c.set(c.get + 1))})}
     .do{acc.list .assertEq({::}, Lists#(0,0,0,0,0,0,0,0))}
     .do{v.get .assertEq 8}
     .done
@@ -67,7 +67,7 @@ FlowLetTests: Test {::
     self}) .assertEq({::}, Lists#(1,2,3))}
   .check{Flows#[Nat].let[Nat, Nat]({xs -> xs.size}, {n, self -> n + (self.size)}) .assertEq 0}
   .check{Flows#(1,2,3).let[Nat, mut List[Nat]]({xs -> xs.size}, {n, self ->
-    self.flow(Par#).map{e -> e + n}.list}) .assertEq({::}, Lists#(4,5,6))}
+    self.flow(ParRead#).map{e -> e + n}.list}) .assertEq({::}, Lists#(4,5,6))}
   .check{Block#(Flows#(1,2,3).let[Nat, mut Flow[Nat]]({xs -> xs.size}, {_, self ->
     self.seqFlow.map[Nat]{_ -> Error.msg"the continuation flow ran before its terminal"}}), Void)}
   }
@@ -78,8 +78,25 @@ FlowLimitTests: Test {::
   }
 
 FlowOverListTests: Test {::
-  .check{Flows#(1,2,3).map{e -> e * 2}.size .assertEq 3}
-  .checkDetErr({::.isMsg{:: == "stage ran"}}, {Flows#(1,2,3).map[Nat]{_ -> Error.msg"stage ran"}.size})
+  .check{Sets#({::}, 3, 1, 2).seqFlow.list .assertEq({::}, Lists#(1,2,3))}
+  .check{ESets#[Nat,Nat]{::}.add(2).add(1).seqFlow.list .assertEq({::}, Lists#(2,1))}
+  .check{Maps#({::}, "a", 1, "b", 2).seqFlow.map{ke -> ke.key}.list .assertEq({::}, Lists#("a","b"))}
+  .check{(1 =~~= 3).seqFlow.list .assertEq({::}, Lists#(1,2,3))}
+  .check{"ab".u.seqFlow.list .assertEq({::}, Lists#(97,98))}
+  .check{Flows#(1,2).flatMap{n -> Sets#({::}, n, 10)}.list .assertEq({::}, Lists#(1,10,2,10))}
+  .check{Lists#(Vars#[Nat](1), Vars#[Nat](2)).seqFlow.readOnly.map{v -> v.get}.list .assertEq({::}, Lists#(1,2))}
+  .checkDetErr({::.isMsg{::.startsWith "Flow: this flow is already consumed"}}, {Block#
+    .let f={Lists#(1,2).flow}
+    .do{Block#(f.map{x -> x}, Void)}
+    .return{f.size}
+    })
+  .check{Opts#(3).flow(ParRead#).list .assertEq({::}, Lists#(3))}
+  .check{Opts#(3).seqFlow.list .assertEq({::}, Lists#(3))}
+  .check{Opts#(4).flow.list .assertEq({::}, Lists#(4))}
+  .check{ReadSources#(Lists#(1,2)) .assertEq({::}, Lists#(1,2,1,2))}
+  .check{ELists#[Nat].addAnd(1).addAnd(2).flow(ParRead#).list .assertEq({::}, Lists#(1,2))}
+  .check{Flows#(1,2,3).suppressMisuseExceptions.map{e -> e * 2}.size .assertEq 3}
+  .checkDetErr({::.isMsg{:: == "stage ran"}}, {Flows#(1,2,3).suppressMisuseExceptions.map[Nat]{_ -> Error.msg"stage ran"}.size})
   .check{Flows#(5).get .assertEq 5}
   .check{Flows#(5).getOpt! .assertEq 5}
   .check{Flows#[Nat].getOpt.isEmpty .assertTrue}
@@ -93,21 +110,21 @@ FlowOverListTests: Test {::
 FlowFlatMapTests: Test {::
   .checkDetErr({::.isMsg{:: == "poison"}}, {Lists#(Lists#("aa","bbb"), Lists#("c","poison","dd"), Lists#("e"))
     .seqFlow
-    .flatMap{ss -> ss.flow
+    .flatMap[Str]{ss -> ss.seqFlow
       .map[Str]{s -> s == "poison" ? {.then -> Error.msg"poison"; .else -> s}}.list}
     .limit 3
     .map{s -> s.size}
     .list})
   .check{Lists#(Lists#("aa","bbb"), Lists#("c","poison","dd"), Lists#("e"))
     .seqFlow
-    .flatMap{ss -> ss.flow
+    .flatMap[Str]{ss -> ss.seqFlow
       .map[Str]{s -> s == "poison" ? {.then -> Error.msg"poison"; .else -> s}}.list}
     .limit 2
     .map{s -> s.size}
     .list .assertEq({::}, Lists#(2, 3))}
   .check{Flows#(1, 2)
-    .flatMapMut{n -> Lists#(ELists#[Nat].addAnd n, ELists#[Nat].addAnd(n).addAnd(n))}
-    .map{l -> Block#(l.add 10, l.list.flow.sum 0)}
+    .flatMapMut[mut base.EList[Nat]]{n -> Lists#(ELists#[Nat].addAnd n, ELists#[Nat].addAnd(n).addAnd(n))}
+    .map{l -> Block#(l.add 10, l.list.seqFlow.sum 0)}
     .list .assertEq({::}, Lists#(11, 12, 12, 14))}
   }
 
@@ -164,13 +181,13 @@ FlowPlusPlusTests: Test {::
   .check{Block#
     .let a= {FlowAddresses#"nowhere"}
     .let persons= {Lists#(FlowPersons#("first", a), FlowPersons#("second", a))}
-    .do{persons.seqFlow.map{p -> Block#(p.moveTo(p.name), p)} ++ {} .map{q -> q.address.street}.list
+    .do{persons.seqFlow.map{p -> Block#(p.moveTo(p.name), p)} ++ List[mut FlowPerson] .map{q -> q.address.street}.list
       .assertEq({::}, Lists#("second", "second"))}
     .done
     }
   .check{Block#
     .let ps= {Lists#(FlowPersons#("first", FlowAddresses#"north"), FlowPersons#("second", FlowAddresses#"south"))}
-    .let first= {ps.seqFlow.map{p -> Block#(p.birthday, p)} ++ {} .first}
+    .let first= {ps.seqFlow.map{p -> Block#(p.birthday, p)} ++ List[mut FlowPerson] .first}
     .do{first!.name .assertEq "first"}
     .do{ps.seqFlow.map{p -> p.age}.list .assertEq({::}, Lists#(1, 1))}
     .done
@@ -186,7 +203,7 @@ FlowPlusPlusTests: Test {::
   }
 
 FlowModeTests: Test {::
-  .check{Lists#(1,2,3).flow(Par#).map{e -> e + 1}.list .assertEq({::}, Lists#(2,3,4))}
+  .check{Lists#(1,2,3).flow(ParRead#).map{e -> e + 1}.list .assertEq({::}, Lists#(2,3,4))}
   .check{Lists#(base.Reprs#(base.Count.nat 0, {_ -> True}), base.Reprs#(base.Count.nat 1, {_ -> True}))
     .flow(ParRepr#).map{r -> r.look{c -> c.get}}.list .assertEq({::}, Lists#(0,1))}
   }
@@ -224,3 +241,5 @@ TestFlow: Test {::
   .test FlowModeTests
   .test FlowMaxFenceTests
   }
+
+ReadSources: { #(xs: read List[Nat]): mut List[Nat] -> xs.seqFlow.list ++ (xs.flow(ParRead#).list) }

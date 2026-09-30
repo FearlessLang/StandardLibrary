@@ -22,10 +22,10 @@ HashBy: {
 Apart: OrderHashBy[Nat]{ .cmp _, _, m -> m.lt; .hash _ -> 0; .str a -> a.str; }
 
 FlowDesignSize: Test {::
-  .checkDetErr({::.isMsg{:: == "boom"}}, {L#.seqFlow.map[Nat]{_ -> Error.msg"boom"}.size})
-  .check{L#.seqFlow.map{x -> x + 1}.size .assertEq 8}
-  .checkDetErr({::.isMsg{:: == "f5"}}, {L#.seqFlow.map{x -> ErrIf#(x == 5, "f5", x)}.size})
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.seqFlow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.size})
+  .checkDetErr({::.isMsg{:: == "boom"}}, {L#.seqFlow.suppressMisuseExceptions.map[Nat]{_ -> Error.msg"boom"}.size})
+  .check{L#.seqFlow.suppressMisuseExceptions.map{x -> x + 1}.size .assertEq 8}
+  .checkDetErr({::.isMsg{:: == "f5"}}, {L#.seqFlow.suppressMisuseExceptions.map{x -> ErrIf#(x == 5, "f5", x)}.size})
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.seqFlow.suppressMisuseExceptions.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.size})
   }
 
 FlowDesignShortCircuit: Test {::
@@ -66,45 +66,45 @@ FlowDesignDistinct: Test {::
   }
 
 FlowDesignLimit: Test {::
-  .check{L#.flow.map{x -> x + 1}.limit 3 .map{x -> x * 2}.list .assertEq({::}, Lists#(2,4,6))}
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", x + 1)}.limit 3 .map{x -> x * 2}.list})
-  .checkDetErr({::.isMsg{:: == "g2"}}, {L#.flow.map{x -> x + 1}.limit 3 .map{x -> ErrIf#(x == 2, "g2", x * 2)}.list})
-  .check{L#.flow.map{x -> ErrIf#(x == 5, "f5", x + 1)}.limit 3 .map{x -> x * 2}.list .assertEq({::}, Lists#(2,4,6))}
-  .check{L#.flow.map{x -> ErrIf#(x == 3, "f3", x + 1)}.limit 3 .map{x -> x * 2}.list .assertEq({::}, Lists#(2,4,6))}
-  .check{L#.flow.map{x -> x + 1}.limit 3 .map{x -> ErrIf#(x == 4, "g4", x * 2)}.list .assertEq({::}, Lists#(2,4,6))}
-  .checkDetErr({::.isMsg{:: == "g2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", x + 1)}.limit 3 .map{x -> ErrIf#(x == 2, "g2", x * 2)}.list})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x + 1}.limit 3 .map{x -> x * 2}.list .assertEq({::}, Lists#(2,4,6))}
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 2, "f2", x + 1)}.limit 3 .map{x -> x * 2}.list})
+  .checkDetErr({::.isMsg{:: == "g2"}}, {L#.flow.suppressMisuseExceptions.map{x -> x + 1}.limit 3 .map{x -> ErrIf#(x == 2, "g2", x * 2)}.list})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 5, "f5", x + 1)}.limit 3 .map{x -> x * 2}.list .assertEq({::}, Lists#(2,4,6))}
+  .check{L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 3, "f3", x + 1)}.limit 3 .map{x -> x * 2}.list .assertEq({::}, Lists#(2,4,6))}
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x + 1}.limit 3 .map{x -> ErrIf#(x == 4, "g4", x * 2)}.list .assertEq({::}, Lists#(2,4,6))}
+  .checkDetErr({::.isMsg{:: == "g2"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 2, "f2", x + 1)}.limit 3 .map{x -> ErrIf#(x == 2, "g2", x * 2)}.list})
   }
 
 FlowDesignLet: Test {::
-  .check{L#.flow.map{x -> x + 1}.let[Nat, mut List[Nat]]({xs -> xs.flow.sum 0}, {total, xs -> xs.flow.map{n -> n + total}.list})
+  .check{L#.flow.map{x -> x + 1}.let[Nat, mut List[Nat]]({xs -> xs.seqFlow.sum 0}, {total, xs -> xs.seqFlow.map{n -> n + total}.list})
     .assertEq({::}, Lists#(37,38,39,40,41,42,43,44))}
-  .checkDetErr({::.isMsg{:: == "f3"}}, {L#.flow.map{x -> ErrIf#(x == 3, "f3", x + 1)}.let[Nat, mut List[Nat]]({xs -> xs.flow.sum 0}, {total, xs -> xs.flow.map{n -> n + total}.list})})
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x + 1))}.let[Nat, mut List[Nat]]({xs -> xs.flow.sum 0}, {total, xs -> xs.flow.map{n -> n + total}.list})})
+  .checkDetErr({::.isMsg{:: == "f3"}}, {L#.flow.map{x -> ErrIf#(x == 3, "f3", x + 1)}.let[Nat, mut List[Nat]]({xs -> xs.seqFlow.sum 0}, {total, xs -> xs.seqFlow.map{n -> n + total}.list})})
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x + 1))}.let[Nat, mut List[Nat]]({xs -> xs.seqFlow.sum 0}, {total, xs -> xs.seqFlow.map{n -> n + total}.list})})
   }
 
 FlowDesignForEach: Test {::
   .check{Block#
     .let v={Vars#[Nat](0)}
     .let acc={ELists#[Nat]}
-    .do{L#.flow.map{_ -> v.get}.forEach{x -> Block#(acc.add x, v.set(v.get + 1))}}
-    .do{acc.list .assertEq({::}, Lists#(0,0,0,0,0,0,0,0))}
+    .do{L#.flow.suppressMisuseExceptions.map{_ -> v.get}.forEach{x -> Block#(acc.add x, v.set(v.get + 1))}}
+    .do{acc.list .assertEq({::}, Lists#(0,1,2,3,4,5,6,7))}
     .do{v.get .assertEq 8}
     .done
     }
   .checkDetErr({::.isMsg{:: == "f5"}}, {Block#
     .let v={Vars#[Nat](0)}
     .let acc={ELists#[Nat]}
-    .return{L#.flow.map{x -> ErrIf#(x == 5, "f5", v.get)}.forEach{x -> Block#(acc.add x, v.set(v.get + 1))}}
+    .return{L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 5, "f5", v.get)}.forEach{x -> Block#(acc.add x, v.set(v.get + 1))}}
     })
   .checkDetErr({::.isMsg{:: == "forEach3"}}, {Block#
     .let v={Vars#[Nat](0)}
     .let acc={ELists#[Nat]}
-    .return{L#.flow.map{_ -> v.get}.forEach{x -> Block#(acc.add(ErrIf#(v.get == 3, "forEach3", x)), v.set(v.get + 1))}}
+    .return{L#.flow.suppressMisuseExceptions.map{_ -> v.get}.forEach{x -> Block#(acc.add(ErrIf#(v.get == 3, "forEach3", x)), v.set(v.get + 1))}}
     })
-  .checkDetErr({::.isMsg{:: == "f5"}}, {Block#
+  .checkDetErr({::.isMsg{:: == "forEach0"}}, {Block#
     .let v={Vars#[Nat](0)}
     .let acc={ELists#[Nat]}
-    .return{L#.flow.map{x -> ErrIf#(x == 5, "f5", v.get)}.forEach{x -> Block#(acc.add(ErrIf#(v.get == 0, "forEach0", x)), v.set(v.get + 1))}}
+    .return{L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 5, "f5", v.get)}.forEach{x -> Block#(acc.add(ErrIf#(v.get == 0, "forEach0", x)), v.set(v.get + 1))}}
     })
   }
 
@@ -119,7 +119,7 @@ FlowDesignFilterParRepr: Test {::
   .check{Block#
     .let rs={Counters#}
     .do{Block#(rs.flow(ParRepr#).filter{r -> r.mutate{c -> Block#(c++, c.get)} > 3}.size, Void)}
-    .do{rs.flow.map{r -> r.look{c -> c.get}}.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8))}
+    .do{rs.seqFlow.map{r -> r.look{c -> c.get}}.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8))}
     .done
     }
   .checkDetErr({::.isMsg{:: == "r5"}}, {Counters#.flow(ParRepr#).filter{r -> r.mutate{c -> Block#(c++, ErrIf#(c.get == 6, "r5", c.get))} > 3}.size})
@@ -166,10 +166,10 @@ FlowDesignMemo: Test {::
   }
 
 FlowDesignScanLimit: Test {::
-  .check{L#.flow.scan(0, {acc, e -> acc + e}).limit 3 .list .assertEq({::}, Lists#(0,1,3))}
-  .checkDetErr({::.isMsg{:: == "h2"}}, {L#.flow.scan(0, {acc, e -> ErrIf#(e == 2, "h2", acc + e)}).limit 3 .list})
-  .check{L#.flow.scan(0, {acc, e -> ErrIf#(e == 3, "h3", acc + e)}).limit 3 .list .assertEq({::}, Lists#(0,1,3))}
-  .check{L#.flow.scan(0, {acc, e -> ErrIf#(e == 6, "h6", acc + e)}).limit 3 .list .assertEq({::}, Lists#(0,1,3))}
+  .check{L#.flow.suppressMisuseExceptions.scan(0, {acc, e -> acc + e}).limit 3 .list .assertEq({::}, Lists#(0,1,3))}
+  .checkDetErr({::.isMsg{:: == "h2"}}, {L#.flow.suppressMisuseExceptions.scan(0, {acc, e -> ErrIf#(e == 2, "h2", acc + e)}).limit 3 .list})
+  .check{L#.flow.suppressMisuseExceptions.scan(0, {acc, e -> ErrIf#(e == 3, "h3", acc + e)}).limit 3 .list .assertEq({::}, Lists#(0,1,3))}
+  .check{L#.flow.suppressMisuseExceptions.scan(0, {acc, e -> ErrIf#(e == 6, "h6", acc + e)}).limit 3 .list .assertEq({::}, Lists#(0,1,3))}
   }
 
 FlowDesignScanLast: Test {::
@@ -188,48 +188,48 @@ FlowDesignMaxLimit: Test {::
   }
 
 FlowDesignSortLast: Test {::
-  .check{L#.flow.map{x -> x}.sort(By#Quarter).last .assertEq({::}, Opts#[Nat]7)}
-  .check{L#.flow.map{x -> x}.sort(Rev#(By#Quarter)).last .assertEq({::}, Opts#[Nat]3)}
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(By#Quarter).last})
-  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.map{x -> x}.sort(By#(Quarter, 3)).last})
-  .checkDetErr({::.isMsg{:: == "f6"}}, {L#.flow.map{x -> ErrIf#(x == 6, "f6", x)}.sort(By#(Quarter, 3)).last})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x}.sort(By#Quarter).last .assertEq({::}, Opts#[Nat]7)}
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#Quarter)).last .assertEq({::}, Opts#[Nat]3)}
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(By#Quarter).last})
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressMisuseExceptions.map{x -> x}.sort(By#(Quarter, 3)).last})
+  .checkDetErr({::.isMsg{:: == "f6"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 6, "f6", x)}.sort(By#(Quarter, 3)).last})
   }
 
 FlowDesignDistinctFirst: Test {::
-  .check{L#.flow.map{x -> x + 1}.distinct(HashBy#Up).first .assertEq({::}, Opts#[Nat]1)}
-  .checkDetErr({::.isMsg{:: == "f0"}}, {L#.flow.map{x -> ErrIf#(x == 0, "f0", x + 1)}.distinct(HashBy#Up).first})
-  .check{L#.flow.map{x -> ErrIf#(x == 1, "f1", x + 1)}.distinct(HashBy#Up).first .assertEq({::}, Opts#[Nat]1)}
-  .check{Flows#[Nat].map[Nat]{_ -> Error.msg"f ran"}.distinct(HashBy#Up).first .isEmpty .assertTrue}
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x + 1}.distinct(HashBy#Up).first .assertEq({::}, Opts#[Nat]1)}
+  .checkDetErr({::.isMsg{:: == "f0"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 0, "f0", x + 1)}.distinct(HashBy#Up).first})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 1, "f1", x + 1)}.distinct(HashBy#Up).first .assertEq({::}, Opts#[Nat]1)}
+  .check{Flows#[Nat].suppressMisuseExceptions.map[Nat]{_ -> Error.msg"f ran"}.distinct(HashBy#Up).first .isEmpty .assertTrue}
   }
 
 FlowDesignSortFilter: Test {::
-  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).filter{::>3}.list .assertEq({::}, Lists#(7,6,5,4))}
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(Rev#(By#Up)).filter{::>3}.list})
-  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#(Up, 3))).filter{::>3}.list})
-  .checkDetErr({::.isMsg{:: == "p6"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).filter{x -> ErrIf#(x == 2, "p2", ErrIf#(x == 6, "p6", x > 3))}.list})
-  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).filter{x -> ErrIf#(x == 8, "p8", (x.getRem 2) == 0)}.list .assertEq({::}, Lists#(6,4,2,0))}
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#Up)).filter{::>3}.list .assertEq({::}, Lists#(7,6,5,4))}
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(Rev#(By#Up)).filter{::>3}.list})
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#(Up, 3))).filter{::>3}.list})
+  .checkDetErr({::.isMsg{:: == "p6"}}, {L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#Up)).filter{x -> ErrIf#(x == 2, "p2", ErrIf#(x == 6, "p6", x > 3))}.list})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#Up)).filter{x -> ErrIf#(x == 8, "p8", (x.getRem 2) == 0)}.list .assertEq({::}, Lists#(6,4,2,0))}
   }
 
 FlowDesignSortSort: Test {::
-  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(By#Parity).sort(By#Quarter).list .assertEq({::}, Lists#(0,2,1,3,4,6,5,7))}
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(By#Parity).sort(By#Quarter).list})
-  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(By#(Parity, 3)).sort(By#Quarter).list})
-  .checkDetErr({::.isMsg{:: == "by5"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(By#Parity).sort(By#(Quarter, 5)).list})
-  .checkDetErr({::.isMsg{:: == "f6"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 6, "f6", x)}.sort(By#(Parity, 3)).sort(By#Quarter).list})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x}.sort(By#Parity).sort(By#Quarter).list .assertEq({::}, Lists#(0,2,1,3,4,6,5,7))}
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x))}.sort(By#Parity).sort(By#Quarter).list})
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressMisuseExceptions.map{x -> x}.sort(By#(Parity, 3)).sort(By#Quarter).list})
+  .checkDetErr({::.isMsg{:: == "by5"}}, {L#.flow.suppressMisuseExceptions.map{x -> x}.sort(By#Parity).sort(By#(Quarter, 5)).list})
+  .checkDetErr({::.isMsg{:: == "f6"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 6, "f6", x)}.sort(By#(Parity, 3)).sort(By#Quarter).list})
   }
 
 FlowDesignUnreadStage: Test {::
   .check{L#.flow.map{x -> x * 2}.last .assertEq({::}, Opts#[Nat]14)}
   .checkDetErr({::.isMsg{:: == "f3"}}, {L#.flow.map{x -> ErrIf#(x == 3, "f3", x * 2)}.last})
   .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.map{x -> ErrIf#(x == 2, "f2", ErrIf#(x == 6, "f6", x * 2))}.last})
-  .check{L#.seqFlow.map{x -> x * 2}.size .assertEq 8}
-  .checkDetErr({::.isMsg{:: == "f3"}}, {L#.seqFlow.map{x -> ErrIf#(x == 3, "f3", x * 2)}.size})
-  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).sort(Rev#(By#Up)).list .assertEq({::}, Lists#(7,6,5,4,3,2,1,0))}
-  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).sort(Rev#(By#(Up, 3))).list})
-  .check{L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#Up)).size .assertEq 8}
-  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressOrderingErrors.map{x -> x}.sort(Rev#(By#(Up, 3))).size})
-  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressOrderingErrors.map{x -> ErrIf#(x == 2, "f2", x)}.sort(Rev#(By#Up)).size})
-  .check{L#.flow.suppressOrderingErrors.map{x -> x * 2}.size .assertEq 8}
+  .check{L#.seqFlow.suppressMisuseExceptions.map{x -> x * 2}.size .assertEq 8}
+  .checkDetErr({::.isMsg{:: == "f3"}}, {L#.seqFlow.suppressMisuseExceptions.map{x -> ErrIf#(x == 3, "f3", x * 2)}.size})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#Up)).sort(Rev#(By#Up)).list .assertEq({::}, Lists#(7,6,5,4,3,2,1,0))}
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#Up)).sort(Rev#(By#(Up, 3))).list})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#Up)).size .assertEq 8}
+  .checkDetErr({::.isMsg{:: == "by3"}}, {L#.flow.suppressMisuseExceptions.map{x -> x}.sort(Rev#(By#(Up, 3))).size})
+  .checkDetErr({::.isMsg{:: == "f2"}}, {L#.flow.suppressMisuseExceptions.map{x -> ErrIf#(x == 2, "f2", x)}.sort(Rev#(By#Up)).size})
+  .check{L#.flow.suppressMisuseExceptions.map{x -> x * 2}.size .assertEq 8}
   }
 
 FlowDesignRecompute: Test {::
@@ -246,20 +246,20 @@ FlowDesignCloseCalls: Test {::
   }
 
 FlowDesignPlusPlusParRepr: Test {::
-  .check{Counters#.flow(ParRepr#).map{r -> Block#(r.mutate{c -> c++}, r)} ++ {} .any{r -> r.look{c -> c.get > 6}} .assertTrue}
-  .check{Counters#.flow(ParRepr#).map{r -> Block#(r.mutate{c -> c++}, r)} ++ {} .any{r -> r.look{c -> c.get > 8}} .assertFalse}
+  .check{Counters#.flow(ParRepr#).map{r -> Block#(r.mutate{c -> c++}, r)} ++ List[mut base.Repr[base.Count[Nat]]] .any{r -> r.look{c -> c.get > 6}} .assertTrue}
+  .check{Counters#.flow(ParRepr#).map{r -> Block#(r.mutate{c -> c++}, r)} ++ List[mut base.Repr[base.Count[Nat]]] .any{r -> r.look{c -> c.get > 8}} .assertFalse}
   .check{Block#
     .let rs={Counters#}
-    .do{Block#(rs.flow(ParRepr#).map{r -> Block#(r.mutate{c -> c++}, r)} ++ {} .any{r -> r.look{c -> c.get > 0}}, Void)}
-    .do{rs.flow.map{r -> r.look{c -> c.get}}.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8))}
+    .do{Block#(rs.flow(ParRepr#).map{r -> Block#(r.mutate{c -> c++}, r)} ++ List[mut base.Repr[base.Count[Nat]]] .any{r -> r.look{c -> c.get > 0}}, Void)}
+    .do{rs.seqFlow.map{r -> r.look{c -> c.get}}.list .assertEq({::}, Lists#(1,2,3,4,5,6,7,8))}
     .done
     }
-  .checkDetErr({::.isMsg{:: == "r6"}}, {Counters#.flow(ParRepr#).map{r -> Block#(r.mutate{c -> Block#(c++, ErrIf#(c.get == 7, "r6", c.get))}, r)} ++ {} .any{r -> r.look{c -> c.get > 0}}})
+  .checkDetErr({::.isMsg{:: == "r6"}}, {Counters#.flow(ParRepr#).map{r -> Block#(r.mutate{c -> Block#(c++, ErrIf#(c.get == 7, "r6", c.get))}, r)} ++ List[mut base.Repr[base.Count[Nat]]] .any{r -> r.look{c -> c.get > 0}}})
   }
 
-FExp: F[Nat, read List[Nat]]{e -> e == 0 ? {.then -> Lists#(1,2); .else -> Lists#(e)}}
-GExp: F[Nat, read List[Nat]]{a -> a == 1 ? {.then -> Lists#(10,11,12); .else -> Error.msg"g2"}}
-Twice: { #(bad: Nat): F[Nat, read List[Nat]] -> {e -> e == bad ? {.then -> Error.msg("f"+e); .else -> Lists#(e, e)}} }
+FExp: F[Nat, read base.ToFlow[Nat]]{e -> e == 0 ? {.then -> Lists#(1,2); .else -> Lists#(e)}}
+GExp: F[Nat, read base.ToFlow[Nat]]{a -> a == 1 ? {.then -> Lists#(10,11,12); .else -> Error.msg"g2"}}
+Twice: { #(bad: Nat): F[Nat, read base.ToFlow[Nat]] -> {e -> e == bad ? {.then -> Error.msg("f"+e); .else -> Lists#(e, e)}} }
 FlowDesignFlatMapFlatMap: Test {::
   .check{L#.flow.flatMap FExp .flatMap GExp .limit 3 .list .assertEq({::}, Lists#(10,11,12))}
   .checkDetErr({::.isMsg{:: == "g2"}}, {L#.flow.flatMap FExp .flatMap GExp .list})
@@ -270,16 +270,16 @@ FlowDesignFlatMapFlatMap: Test {::
 FlowDesignFenceFirst: Test {::
   .check{Block#
     .let ps={Lists#(Vars#[Nat](30), Vars#[Nat](40), Vars#[Nat](50))}
-    .let first={ps.seqFlow.map{p -> Block#(p.set(p.get + 1), p)} ++ {} .first}
+    .let first={ps.seqFlow.map{p -> Block#(p.set(p.get + 1), p)} ++ List[mut base.Var[Nat]] .first}
     .do{first!.get .assertEq 31}
-    .do{ps.flow.map{p -> p.get}.list .assertEq({::}, Lists#(31,41,51))}
+    .do{ps.seqFlow.map{p -> p.get}.list .assertEq({::}, Lists#(31,41,51))}
     .done
     }
   .checkDetErr({::.isMsg{:: == "birthday2"}}, {Block#
     .let ps={Lists#(Vars#[Nat](30), Vars#[Nat](40), Vars#[Nat](50))}
-    .return{ps.seqFlow.map{p -> Block#(p.set(ErrIf#(p.get == 50, "birthday2", p.get + 1)), p)} ++ {} .first}
+    .return{ps.seqFlow.map{p -> Block#(p.set(ErrIf#(p.get == 50, "birthday2", p.get + 1)), p)} ++ List[mut base.Var[Nat]] .first}
     })
-  .check{Flows#[mut base.Var[Nat]].map{p -> Block#(p.set(p.get + 1), p)} ++ {} .first .isEmpty .assertTrue}
+  .check{Flows#[mut base.Var[Nat]].map{p -> Block#(p.set(p.get + 1), p)} ++ List[mut base.Var[Nat]] .first .isEmpty .assertTrue}
   }
 
 TestFlowDesign: Test {::

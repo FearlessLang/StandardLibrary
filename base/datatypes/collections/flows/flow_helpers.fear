@@ -1,0 +1,90 @@
+_Collapse: {
+  #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K]): mut List[E] -> Block#
+    .var[mut Opt[read Order[K]]] last = {{}}
+    .var[mut EList[E]] kept = {ELists#[E]}
+    .var[Nat] i = {0}
+    .loop{ i.get == (xs.size) ?[mut ControlFlow[mut List[E]]]{
+      .then -> Break#;
+      .else -> Block#(
+        _CollapseStep#(last, kept, by#(xs.get(i.get)), xs.get(i.get)),
+        i.set(i.get + 1),
+        Continue#)
+      }}
+    .return{ kept.get.list }
+  }
+_CollapseStep: {
+  #[E:*,K](last: mut Var[mut Opt[read Order[K]]], kept: mut Var[mut EList[E]], o: read Order[K], e: E): Void ->
+    last.get.match{
+      .empty -> Block#(last.set(Opts#o), kept.get.add(e), Void);
+      .some b -> o <=> (b, {
+        .lt -> Block#(last.set(Opts#o), kept.get.add(e), Void);
+        .eq -> Void;
+        .gt -> Block#(last.set(Opts#o), kept.get.add(e), Void) })
+      }
+  }
+_MappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
+  m.containsKey(k) ?[mut Map[K,E]]{
+    .then -> Error.msg"Flow.mapping: two elements have the same key";
+    .else -> m.with(k, e)
+  }}
+_Keyed[E:*,K]: { mut .elem: E; read .key: read Order[K]; }
+_Keyeds: { #[E:*,K](key: read Order[K], elem: E): mut _Keyed[E,K] ->
+  { .elem -> elem; .key -> key; } }
+_TreeMerge[E:*,K]: { read #(a: mut List[mut _Keyed[E,K]], b: mut List[mut _Keyed[E,K]]): mut List[mut _Keyed[E,K]] }
+_Sort: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K], k: Nat): mut List[E] -> _Tree#(xs, by, _Merges#[E,K](k)) }
+_Max: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K]): mut List[E] -> _Tree#(xs, by, _MaxMerges#[E,K]) }
+_Tree: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K], m: _TreeMerge[E,K]): mut List[E] -> Block#
+  .var[mut List[mut List[mut _Keyed[E,K]]]] blocks = {{}}
+  .var[Nat] j = {0}
+  .loop{ j.get == (xs.size) ?[mut ControlFlow[mut List[E]]]{
+    .then -> Break#;
+    .else -> Block#(
+      blocks.set(_Carry#(blocks.get, Lists#(_Keyeds#[E,K](by#(xs.get(j.get)), xs.get(j.get))), j.get, m)),
+      j.set(j.get + 1),
+      Continue#)
+    } }
+  .return{ blocks.get.isEmpty ?[mut List[E]]{
+    .then -> {};
+    .else -> _Elems#(_Rest#(blocks.get, m))
+  } } }
+_Carry: { #[E:*,K](blocks: mut List[mut List[mut _Keyed[E,K]]], b: mut List[mut _Keyed[E,K]], n: Nat, m: _TreeMerge[E,K]): mut List[mut List[mut _Keyed[E,K]]] ->
+  n.getRem(2) == 1 ?[mut List[mut List[mut _Keyed[E,K]]]]{
+    .then -> _Carry#(blocks.subList(0, blocks.size - 1), m#(blocks.getLast, b), n.getTruncDiv(2), m);
+    .else -> blocks +> b } }
+_Rest: { #[E:*,K](blocks: mut List[mut List[mut _Keyed[E,K]]], m: _TreeMerge[E,K]): mut List[mut _Keyed[E,K]] ->
+  blocks.size == 1 ?[mut List[mut _Keyed[E,K]]]{
+    .then -> blocks.getLast;
+    .else -> _Rest#(blocks.subList(0, blocks.size - 2) +> (m#(blocks.get(blocks.size - 2), blocks.getLast)), m) } }
+_Elems: { #[E:*,K](ks: mut List[mut _Keyed[E,K]]): mut List[E] -> ks.seqFlow.map{k -> k.elem}.list }
+_Merges: { #[E:*,K](k: Nat): _TreeMerge[E,K] -> {a, b -> _MergeFrom#(a, 0, b, 0, k, ELists#[mut _Keyed[E,K]])} }
+_MergeFrom: { #[E:*,K](a: mut List[mut _Keyed[E,K]], i: Nat, b: mut List[mut _Keyed[E,K]], j: Nat, k: Nat, res: mut EList[mut _Keyed[E,K]]): mut List[mut _Keyed[E,K]] ->
+  res.size == k ?[mut List[mut _Keyed[E,K]]]{ .then -> res.list; .else ->
+  i == (a.size) ?[mut List[mut _Keyed[E,K]]]{
+    .then -> j == (b.size) ?[mut List[mut _Keyed[E,K]]]{ .then -> res.list; .else -> _MergeFrom#(a, i, b, j + 1, k, res.addAnd(b.get j)) };
+    .else -> j == (b.size) ?[mut List[mut _Keyed[E,K]]]{ .then -> _MergeFrom#(a, i + 1, b, j, k, res.addAnd(a.get i)); .else ->
+      a.get(i).key <= (b.get(j).key.close) ?[mut List[mut _Keyed[E,K]]]{
+        .then -> _MergeFrom#(a, i + 1, b, j, k, res.addAnd(a.get i));
+        .else -> _MergeFrom#(a, i, b, j + 1, k, res.addAnd(b.get j)) } } } } }
+_MaxMerges: { #[E:*,K]: _TreeMerge[E,K] -> {a, b -> _MaxPick#(a.getFirst.key <=> (b.getFirst.key, { .lt -> 0; .eq -> 1; .gt -> 2 }), a, b)} }
+_MaxPick: { #[E:*,K](o: Nat, a: mut List[mut _Keyed[E,K]], b: mut List[mut _Keyed[E,K]]): mut List[mut _Keyed[E,K]] ->
+  o == 0 ?[mut List[mut _Keyed[E,K]]]{ .then -> b; .else -> o == 1 ?[mut List[mut _Keyed[E,K]]]{ .then -> a ++ b; .else -> a } } }
+_HashedKey[K]: { read .hash: Nat; read .key: read OrderHash[K]; }
+_HashedKeys: { #[K](h: Nat, o: read OrderHash[K]): read _HashedKey[K] -> { .hash -> h; .key -> o; } }
+_Distinct: { #[E:*,K](xs: mut List[E], by: OrderHashBy[imm E,K]): mut List[E] -> Block#
+  .var[read List[read _HashedKey[K]]] keys = {{}}
+  .var[mut EList[E]] kept = {ELists#[E]}
+  .var[Nat] i = {0}
+  .loop{ i.get == (xs.size) ?[mut ControlFlow[mut List[E]]]{ .then -> Break#; .else -> Block#(
+    _DistinctStep#(keys, kept, by#(xs.get(i.get)), xs.get(i.get)),
+    i.set(i.get + 1),
+    Continue#) } }
+  .return{ kept.get.list } }
+_DistinctStep: { #[E:*,K](keys: mut Var[read List[read _HashedKey[K]]], kept: mut Var[mut EList[E]], o: read OrderHash[K], e: E): Void ->
+  _KeepNew#(keys, o) ?{ .then -> kept.get.add(e); .else -> Void } }
+_KeepNew: { #[K](keys: mut Var[read List[read _HashedKey[K]]], o: read OrderHash[K]): Bool -> _KeepHashed#(keys, o, o.hash) }
+_KeepHashed: { #[K](keys: mut Var[read List[read _HashedKey[K]]], o: read OrderHash[K], h: Nat): Bool ->
+  keys.get.seqFlow.any{kk -> kk.hash == h ?{ .then -> o == (kk.key.close); .else -> False }} ?{
+    .then -> False;
+    .else -> Block#(keys.set(keys.get +> (_HashedKeys#[K](h, o))), True) } }
+_Append: { #[E:*](xs: mut List[E], b: read ToFlow[E]): mut List[read/imm E] ->
+  Flows#[read ToFlow[E]](xs, b).flatMap{c -> c}.list }

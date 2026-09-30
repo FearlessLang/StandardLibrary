@@ -27,7 +27,7 @@
 ///UStr does not implement DataType: how to turn a UStr in a Str or in an Info is really unclear.
 ///How to compare two Unicode strings is also a highly debated topic.
 ///UStr does offer .equalRepr(other) and .hashRepr so that a user can make an efficient OrderHash[UStr] while reconsidering their life decisions.
-UStr: Sealed,ToUStr,ToImm[UStr],JoinStr[UStr] {
+UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
   + (x: read UStr): UStr;           /// string concatenation; throws on result size > maxInt
   | (x: read UStr): UStr;           /// like + but inserts a newline between the two strings
   ^ (x: read UStr): UStr;           /// like + but inserts a double quote between the two strings
@@ -47,6 +47,8 @@ UStr: Sealed,ToUStr,ToImm[UStr],JoinStr[UStr] {
   //>   .check{"a".u("00E9").tryGetStr .assertInfo{::.isMsg{::.startsWith "UStr.getStr:"}}}
   .tryGetStr: mut Action[Str];
   .flow: mut Flow[Nat];             /// return a flow of scalar values.
+  read .seqFlow: mut Flow[Nat];     /// return a sequential flow of scalar values.
+  mut  .seqFlow: mut Flow[Nat];     /// return a sequential flow of scalar values.
   .equalRepr(other: UStr): Bool;    /// checks if the two unicode strings have the same exact scalar value representation.
   .hashRepr: Nat;                   /// hashes all the scalar values together.
   .u(values: Str): UStr;            /// concatenate those scalar values to the end of this string. Example parameter could be ``FB03 0066 0066 0069``; throws on malformed input.

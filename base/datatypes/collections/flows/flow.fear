@@ -21,91 +21,113 @@ Flows: {
   #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R): mut Flow[R]->_Magic!;
   #[R:*](r1: R, r2: R, r3: R, r4: R, r5: R, r6: R, r7: R, r8: R, r9: R, r10: R, r11: R, r12: R, r13: R, r14: R, r15: R, r16: R): mut Flow[R]->_Magic!;
 
-  .fromMutList[R:*](xs: mut List[R]): mut Flow[R]->_Magic!;//sequential
+  .fromMutList[R:*](xs: mut List[R]): mut Flow[R]->_Magic!;
   .fromReadList[R:*](xs: read List[R]): mut Flow[read/imm R]->_Magic!;
   .fromImmList[R:*](xs: List[R]): mut Flow[imm R]->_Magic!;
-  .fromMutList[R:*](xs: mut List[R],mode: FlowMode[R]): mut Flow[R]->_Magic!;//parallel
+  .fromMutList[R:*](xs: mut List[R], mode: FlowMode[R]): mut Flow[R]->_Magic!;
+  .fromReadList[R:*](xs: read List[R], mode: FlowMode[read/imm R]): mut Flow[read/imm R]->_Magic!;
   }
 
 Flow[E:*]: {
-  /// ``this.forEach(f)`` applies ``f`` to every element of `this`, in flow order, one at a time.
-  /// Since ``f`` is a ``mut MF`` it can write what it captured, so ``forEach`` is a fence:
-  /// every stage before it finishes with every element before ``f`` sees the first one.
-  mut .forEach[R:*](f: mut MF[E,Void]): Void;
-  /// ``this.forEach(a, f)`` is `Flow.forEach` handing ``a`` to every call of ``f``,
-  /// as `Block.loop` hands it to every iteration.
+  //core terminals
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
+  /// ``this.for(a, f)`` applies ``f`` to every element of `this`, in flow order, one at a time,
+  /// handing it ``a``, as `Block.loop` hands it to every iteration.
+  /// ``for`` is a fence: every stage before it finishes with every element before ``f`` sees the first one.
   //>   .check{Block#
   //>     .let acc={ELists#[Nat]}
-  //>     .do{Flows#(1, 2, 3).forEach(acc, {a, e -> a.add(e * 2)})}
+  //>     .do{Flows#(1, 2, 3).for(acc, {a, e -> a.add(e * 2)})}
   //>     .do{acc.list .assertEq({::}, Lists#(2, 4, 6))}
   //>     .done}
+  mut .for[A](a: mutH A, f: mut ForEachBody[A,E]): Void -> this.allToAll{xs -> xs}.forEach(a, f);
   mut .forEach[A](a: mutH A, f: mut ForEachBody[A,E]): Void;
-  mut .map[R:*](f: read F[E, R]): mut Flow[R];
-  mut .flatMap[R:*](f: read F[E, read List[R]]): mut Flow[read/imm R];
-  mut .flatMapMut[R:*](f: read F[E, mut List[R]]): mut Flow[R];
-  mut .filter(f: read F[E, Bool]): mut Flow[E];
-  mut .size: Nat -> this.list.size;
-  mut .isEmpty: Bool -> this.size == 0;
-  mut ++ (b: read List[E]): mut Flow[read/imm E];
-  mut .list: mut List[E];
-  mut .eList: mut EList[E];
-  mut .set[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): Set[E'];
-  mut .eSet[E', K](mut AsImm[E, E'], OrderHashBy[E', K]): mut ESet[E'];
+  //core stages
+  /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
+  /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.
+  /// ``f`` answers `Continue` to be handed the next element, or `Break` to stop:
+  /// the element after the current one is never pulled.
+  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R];
+  /// ``this.actorMut(state, f)`` is `Flow.actor` with the sink and the state handed
+  /// over hygienically, which is what lets the emitted elements be ``mut``.
+  /// See `ActorSink` for how such a sink is pushed to.
+  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R];
+  /// ``this.allToAll(f)`` is the fence every fence desugars to: once every element
+  /// has arrived, ``f`` receives them all as a list, and the elements of the list it
+  /// returns flow on.
+  mut .allToAll[R:*](f: read F[mut List[E], mut List[R]]): mut Flow[R];
+  /// ``this.distinct(by)`` keeps, for each class of elements ``by`` ranks together, the
+  /// one with the smallest index, in flow order, and emits the elements as ``read`` or
+  /// ``imm``: the key it keeps may be the element itself, and nothing after it may
+  /// mutate what a kept key aliases. `Flow.distinctMut` keeps the elements ``mut``.
+  mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[read/imm E];
+  mut .suppressMisuseExceptions: mut Flow[E];
+  //desugared stages
+  mut .flatMapMut[R:*](f: read F[E, mut ToFlow[R]]): mut Flow[R] -> this.actorMut[Void, R](Void, {down, _, e ->
+    Block#(f#e .seqFlow.for(down, {d, x -> d.push#(d, x)}), Continue#)});
+  mut .map[R:*](f: read F[E, R]): mut Flow[R] -> this.flatMapMut{e -> Lists#(f#e)};
+  mut .filter(f: read F[E, Bool]): mut Flow[E] -> this.flatMapMut{e -> f#e ?[mut List[E]]{ .then -> Lists#e; .else -> {} }};
+  mut .flatMap[R:*](f: read F[E, read ToFlow[R]]): mut Flow[read/imm R] -> this.flatMapMut{e -> f#e .seqFlow.list};
+  mut .peek(f: read F[E, Void]): mut Flow[E] ->//Only useful for invarians+debug, wonder if we should have a better name
+    this.map{e -> Block#(f#e, e)};
+  mut .mapFilter[R:*](f: read F[E, mut Opt[R]]): mut Flow[R] -> this.map f .filter{o -> o.isSome}.map{o -> o!};
+  mut .limit(n: Nat): mut Flow[E] -> n == 0 ? {
+    .then -> Error.msg"Flow.limit: .limit 0 asks a whole chain of stages for no elements. When the count can be 0, test it with .if before building the flow.";
+    .else -> this.actorMut[mut Count[Nat], E](Count.nat n, {down, s, e -> Block#(
+        down.push#(down, e),
+        s--,
+        s.get == 0 ? { .then -> Break#; .else -> Continue# })});
+    };
+  mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S] -> this.actor[mut Var[imm S], S](Vars#[imm S](acc), {down, s, e ->
+    Block#(s.set(f#(s.get, e)), down.push#(down, s.get), Continue#)});
+  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R] -> this.actorMut[ToIso[C], R](ctx, {down, s, e ->
+    Block#(down.push#(down, f#(s.iso.close, e)), Continue#)});
+  mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut Flow[E] -> //crucial to do IO side effects while flowing
+    this.map(ctx, {c, e -> Block#(f#(c, e), e)});
+  mut .sort[K](by: OrderBy[imm E,K]): mut Flow[E] -> this.allToAll{xs -> _Sort#(xs, by, xs.size)};
+  mut .max[K](by: OrderBy[imm E,K]): mut Flow[E] -> this.allToAll{xs -> _Max#(xs, by)};
+  mut .min[K](by: OrderBy[imm E,K]): mut Flow[E] -> this.max(Rev#by);
+  mut .sortDistinct[K](by: OrderBy[imm E,K]): mut Flow[E] -> this.sort by .allToAll{xs -> _Collapse#(xs, by)};
+  /// ``this.distinctMut(by)`` is `Flow.distinct` keeping the elements ``mut``, as a fence:
+  /// it emits nothing until every element has arrived and every kept key is decided.
+  mut .distinctMut[K](by: OrderHashBy[imm E,K]): mut Flow[E] -> this.allToAll{xs -> _Distinct#(xs, by)};
+  mut ++ (b: read ToFlow[E]): mut Flow[read/imm E] -> this.allToAll{xs -> _Append#(xs, b)};
+  mut .readOnly: mut Flow[read/imm E] -> this.flatMap{e -> Lists#e};
+  //desugared terminals
+  mut .for(f: mut MF[E,Void]): Void -> this.for(Void, {_, e -> f#e});
+  mut .forEach(f: mut MF[E,Void]): Void -> this.forEach(Void, {_, e -> f#e});
+  mut .eList: mut EList[E] -> this.fold({ELists#[E]}, {acc, e -> Block#(acc.add e, acc)});
+  mut .list: mut List[E] -> this.eList.list;
+  mut .eSet[E', K](asImm: mut AsImm[E, E'], by: OrderHashBy[E', K]): mut ESet[E'] -> this.fold({ESets#[E', K](by)}, {s, e -> s.add(asImm#e)});
+  mut .set[E', K](asImm: mut AsImm[E, E'], by: OrderHashBy[E', K]): Set[E'] -> this.eSet(asImm, by).set;
   /// ``this.mapping(by, kem)`` returns a map holding one entry per element of `this`,
   /// keyed by ``kem.key`` under ``by`` and holding ``kem.elem``, in flow order.
   /// Throws a deterministic error when two elements produce the same key.
   //>   .check{Flows#(1, 2).mapping({::},{.key e->e; .elem e->e}).size .assertEq 2}
   //>   .checkDetErr({::}, {Flows#(1, 1).mapping({::},{.key e->e; .elem e->e})})
-  mut .mapping[K,K0,E0:*](OrderHashBy[K,K0], read KeyElemMapper[E,K,E0]): mut Map[K,E0];
-  mut .join(js: JoinStr[E]): E -> js.joinStr this;
-  mut .sum(sn: SumNumber[E]): E -> sn.sumNumber this;
-  mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;
-  mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R ->
-    this.fold(acc,{a,e->a.acc e}).result;
-  mut .max[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
-  mut .min[K](by: OrderBy[imm E,K]):          mut Flow[E] -> _Magic!;
-  mut .sort[K](by: OrderBy[imm E,K]):         mut Flow[E] -> _Magic!;
-  /// ``this.distinct(by)`` keeps, for each class of elements ``by`` ranks together, the
-  /// one with the smallest index, in flow order, and emits the elements as ``read`` or
-  /// ``imm``: the key it keeps may be the element itself, and nothing after it may
-  /// mutate what a kept key aliases. `Flow.distinctMut` keeps the elements ``mut``.
-  mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[read/imm E] -> _Magic!;
-  mut .sortDistinct[K](by: OrderBy[imm E,K]): mut Flow[E] -> _Magic!;
-  mut .any(f: read F[E, Bool]):  Bool;
-  mut .all(f: read F[E, Bool]):  Bool;
-  mut .none(f: read F[E, Bool]): Bool;
-  mut .get:   E -> this.tryGet!;//get the first element if size==1, throws otherwise
+  mut .mapping[K,K0,E0:*](by: OrderHashBy[K,K0], kem: KeyElemMapper[E,K,E0]): mut Map[K,E0] -> this.fold({Maps#[K,K0,E0](by)}, {m, e -> _MappingStep#(m, kem.key(e), kem.elem(e))});
+  mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R -> this.fold(acc, {a, e -> a.acc e}).result;
+  mut .sum(sn: SumNumber[E]): E -> sn.sumNumber(this);
+  mut .join(js: JoinStr[E]): E -> js.joinStr(this);
+  /// `this.last` returns the last element in the flow, consuming `this`.
+  /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(e))``
+  /// Complexity: O(n)
+  mut .last: mut Opt[E] -> this.fold({{}}, {_, e -> Opts#e});
+  mut .size: Nat -> this.list.size;
+  mut .isEmpty: Bool -> this.size == 0;
   /// `this.tryGet` returns `.ok` of `this.get`, or the error info of `this.get` if the flow does not have exactly one element.
   //>   .check{(Flows#(1).tryGet).ok.assertEq({::}, Opts# 1)}
   //>   .check{(Flows#(1,2).tryGet).assertInfo{::.isMsg{::.startsWith "Flow.get:"}}}
   mut .tryGet: mut Action[E] -> this.list |> {xs -> xs.size == 1 ? {
     .then -> Actions.ok(xs.getFirst);
     .else -> Actions.msg("Flow.get: the flow has "+(xs.size)+" elements, but .get needs exactly one")}};
-  mut .getOpt:   mut Opt[E] -> this.tryGetOpt!;//opt of the first element if size in {0,1} throws otherwise
+  mut .get: E -> this.tryGet!;//get the first element if size==1, throws otherwise
   /// `this.tryGetOpt` returns `.ok` of `this.getOpt`, or the error info of `this.getOpt` if the flow has more than one element.
   //>   .check{(Flows#(1).tryGetOpt).assertOk}
   //>   .check{(Flows#(1,2).tryGetOpt).assertInfo{::.isMsg{::.startsWith "Flow.getOpt:"}}}
   mut .tryGetOpt: mut Action[mut Opt[E]] -> this.list |> {xs -> xs.size <= 1 ? {
     .then -> Actions.ok(xs.first);
     .else -> Actions.msg("Flow.getOpt: the flow has "+(xs.size)+" elements, but .getOpt needs at most one")}};
-  mut .first: mut Opt[E]; //opt of the first element
-  /// `this.last` returns the last element in the flow, consuming `this`.
-  /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(e))``
-  /// Complexity: O(n)
-  mut .last: mut Opt[E];
-  mut .mapFilter[R:*](f: read F[E, mut Opt[R]]): mut Flow[R] ->
-    this.map(f)
-      .filter{r -> r.isSome}
-      .map{r -> r!};
-  mut .findFirst(f: read F[E, Bool]): mut Opt[E] -> this.filter f .first;
-  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R] -> this.mapFilter f .first;
-  mut .peek(f: read F[E, Void]): mut Flow[E] ->//Only useful for invarians+debug, wonder if we should have a better name
-    this.map{e -> Block#(f#e, e)};
-  mut .peek[C](ctx: iso ToIso[C], f: read F[iso C, E, Void]): mut Flow[E] -> //crucial to do IO side effects while flowing
-    this.map(ctx, {c, e -> Block#(f#(c, e), e)});
-  mut .scan[S:imm](acc: imm S, f: read F[S,E,S]): mut Flow[imm S];
-  mut .limit(n: Nat): mut Flow[E];
-  mut .suppressOrderingErrors: mut Flow[E] -> this;
+  mut .getOpt: mut Opt[E] -> this.tryGetOpt!;//opt of the first element if size in {0,1} throws otherwise
   /// ``this.let(x, cont)`` consumes `this` into a list, hands that list to ``x``,
   /// then hands `cont` the result of ``x`` together with the same list, and returns
   /// what `cont` returns. The elements are needed twice, so they are materialised
@@ -113,26 +135,12 @@ Flow[E:*]: {
   /// Both sides pick how to read it back, with ``.seqFlow`` or with ``.flow(mode)``.
   //>   .check{Flows#(1,2,3).let[Nat, mut List[Nat]]({xs -> xs.size}, {n, self ->
   //>     self.seqFlow.map{e -> e + n}.list}) .assertEq({::}, Lists#(4,5,6))}
-  mut .let[DR:*,R:*](
-    x: read F[mut List[E],DR],
-    cont: mut FlowContinuation[E,DR,R]
-  ): R-> this.list|>{xs->cont#(x#xs, xs)};
-  // --Still to implement
-  /// ``this.allToAll(f)`` is the fence every fence desugars to: once every element
-  /// has arrived, ``f`` receives them all as a list, and the elements of the list it
-  /// returns flow on.
-  mut .allToAll[R:*](f: read F[mut List[E], mut List[R]]): mut Flow[R]->Error.msg"TODO";
-  /// ``this.distinctMut(by)`` is `Flow.distinct` keeping the elements ``mut``, as a fence:
-  /// it emits nothing until every element has arrived and every kept key is decided.
-  mut .distinctMut[K](by: OrderHashBy[imm E,K]): mut Flow[E]->Error.msg"TODO";
-  mut .map[C,R:*](ctx: iso ToIso[C], f: read F[iso C,E,R]): mut Flow[R]->Error.msg"TODO";
-  /// ``this.actor(state, f)`` runs ``f`` on every element in flow order, threading
-  /// ``state``, and emits what ``f`` pushes to its sink, zero or more per element.
-  /// ``f`` answers `Continue` to be handed the next element, or `Break` to stop:
-  /// the element after the current one is never pulled.
-  mut .actor[S:*,R](state: iso S, f: read ActorImpl[S,E,R]): mut Flow[imm R]->Error.msg"TODO";
-  /// ``this.actorMut(state, f)`` is `Flow.actor` with the sink and the state handed
-  /// over hygienically, which is what lets the emitted elements be ``mut``.
-  /// See `ActorSink` for how such a sink is pushed to.
-  mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R]->Error.msg"TODO";
+  mut .let[DR:*,R:*](x: read F[mut List[E],DR], cont: mut FlowContinuation[E,DR,R]): R ->
+    this.list |> {xs -> cont#(x#xs, xs)};
+  mut .first: mut Opt[E] -> this.limit 1 .getOpt; //opt of the first element
+  mut .findFirst(f: read F[E, Bool]): mut Opt[E] -> this.filter f .first;
+  mut .findMap[R:*](f: read F[E, mut Opt[R]]): mut Opt[R] -> this.mapFilter f .first;
+  mut .any(f: read F[E, Bool]): Bool -> this.filter f .first .isSome;
+  mut .none(f: read F[E, Bool]): Bool -> this.any f .not;
+  mut .all(f: read F[E, Bool]): Bool -> this.none{e -> f#e .not};
   }
