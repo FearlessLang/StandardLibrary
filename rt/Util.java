@@ -107,6 +107,7 @@ public class Util{
   public static Object callF$1(Object f){ return ((F$3$1)f).read$$hash$0(); }
   public static Object callF$2(Object f, Object x){ return ((F$3$2)f).read$$hash$1(x); }
   public static Object callF$3(Object f,Object x,Object y){ return ((F$3$3)f).read$$hash$2(x,y); }
+  public static Object callF$4(Object f,Object x,Object y,Object z){ return ((F$3$4)f).read$$hash$3(x,y,z); }
 
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }

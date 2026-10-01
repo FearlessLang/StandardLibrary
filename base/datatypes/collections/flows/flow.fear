@@ -105,6 +105,9 @@ Flow[E:*]: {
   //>   .check{Flows#(1, 2).mapping({::},{.key e->e; .elem e->e}).size .assertEq 2}
   //>   .checkDetErr({::}, {Flows#(1, 1).mapping({::},{.key e->e; .elem e->e})})
   mut .mapping[K,K0,E0:*](by: OrderHashBy[K,K0], kem: KeyElemMapper[E,K,E0]): mut Map[K,E0] -> this.fold({Maps#(by)}, {m, e -> _MappingStep#(m, kem.key(e), kem.elem(e))});
+  /// ``this.with(flow)`` consumes `this` and ``flow`` into a `BiFlow` with two channels: the elements of `this` and the elements of ``flow``.
+  //>   .check{Flows#(1, 2).with(Flows#(10, 20)).getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11, 22))}
+  mut .with[B:*](flow: mut Flow[B]): mut BiFlow[E,B] -> _BiFlows#(this.list, flow.list);
   mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R -> this.fold(acc, {a, e -> a.acc e}).result;
   mut .sum(sn: SumNumber[E]): E -> sn.sumNumber(this);
   mut .join(js: JoinStr[E]): E -> js.joinStr(this);
