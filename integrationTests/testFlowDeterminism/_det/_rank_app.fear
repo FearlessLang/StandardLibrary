@@ -38,7 +38,7 @@ DetSlow: { #(e: Nat): Nat -> Block#
 
 FlowOrderIsEncounterOrder: Test {::
   .check{DetNats#.flow.map{e -> e + 1}.list .assertEq({::}, (1 =~~= 200).flow.list)}
-  .check{DetNats#.flow.mapping({::}, {.key k -> k; .elem k -> k}).flow.map{::.key}.list .assertEq({::}, DetNats#)}
+  .check{DetNats#.flow.mapping({::}, {.key k -> k; .elem k -> k}).flow.getMerge{k, _ -> k}.list .assertEq({::}, DetNats#)}
   .check{Block#
     .let acc= {ELists#[Nat]}
     .do{DetNats#.flow.for{e -> acc.add e .void}}

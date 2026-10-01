@@ -91,6 +91,9 @@ TestMultiFlowChannels: Test {::
 TestMultiFlowBuild: Test {::
   .checkDetErr({::.isMsg{:: == "boom"}}, {Boom3#.withBoth(Flows#(1, 2, 3, 4).with(Flows#(1, 2, 3, 4))).getMerge{_, b, _ -> b}.first})
   .checkDetErr({::.isMsg{:: == "boom"}}, {Flows#(1).withAll(Flows#(1).with(Flows#(1)).with(Boom3#)).getMerge{a, _, _, _ -> a}.first})
+  //the BiFlow argument of `withBoth` already ran its flows when it was made, before the receiver runs
+  .checkDetErr({::.isMsg{:: == "argument"}}, {
+    Flows#(0).map{_ -> Error.msg[Nat] "receiver"}.withBoth(Flows#(0).map{_ -> Error.msg[Nat] "argument"}.with(Flows#(0))).getMerge{a, _, _ -> a}.list})
   .checkDetErr({::.isMsg{::.startsWith "BiFlow: this BiFlow is already consumed"}}, {Block#
     .let bf={Flows#(1).with(Flows#(2))}
     .do{Block#(Flows#(1).with(Flows#(2)).withBoth(bf), Void)}
@@ -111,6 +114,10 @@ TestMultiFlowBuild: Test {::
   }
 
 TestMultiFlowFoldsAndMapping: Test {::
+  .check{Flows#(1, 2).with(Flows#(10)).tryGetFold({Error.msg[Nat] "acc ran"}, {acc, a, b -> acc}).assertInfo{::.isMsg{:: == "BiFlow.getFold: the channels have different sizes, 2 and 1"}}}
+  .check{(Flows#(1, 2).with(Flows#(10, 20)).tryGetFold({0}, {acc, a, b -> acc + a + b})).ok .assertEq({::}, Opts# 33)}
+  .check{(Flows#(1).with(Flows#(10)).with(Flows#(100)).tryGetMerge{a, b, c -> a + b + c}).ok!.list .assertEq({::}, Lists#(111))}
+  .check{Flows#(1).with(Flows#(10)).with(Flows#(100)).with(Flows#[Nat]).tryGetFoldUntil({0}, {acc, a, b, c, d -> acc}, {_ -> True}).assertInfo{::.isMsg{::.startsWith "QuadFlow.getFoldUntil:"}}}
   .check{Flows#(1, 2).with(Flows#(10, 20)).getFoldUntil({0}, {acc, a, b -> Error.msg[Nat] "f ran"}, {acc -> acc == 0}) .assertEq 0}
   .check{Flows#(1, 2).with(Flows#(10, 20)).getFoldUntil({0}, {acc, a, b -> acc + a + b}, {_ -> False}) .assertEq 33}
   .checkDetErr({::.isMsg{:: == "BiFlow.getFoldUntil: the channels have different sizes, 2 and 1"}}, {Flows#(1, 2).with(Flows#(10)).getFoldUntil({Error.msg[Nat] "acc ran"}, {acc, a, b -> acc}, {_ -> True})})
@@ -120,11 +127,11 @@ TestMultiFlowFoldsAndMapping: Test {::
   .check{Flows#("a", "b").with(Flows#(1, 2)).mapping({::}, {.key k, _ -> k; .elem _, e -> e}).size .assertEq 2}
   .checkDetErr({::.isMsg{:: == "BiFlow.getFold: the channels have different sizes, 2 and 1"}}, {Flows#("a", "b").with(Flows#(1)).mapping({::}, {.key k, _ -> k; .elem _, e -> e})})
   .checkDetErr({::.isMsg{::.startsWith "boom"}}, {Boom3#.with(Flows#(1, 2, 3, 4)).mapping({::}, {.key _, k -> k; .elem _, e -> e})})
-  .check{Flows#(1, 2, 3).with(Flows#(10, 20)).noMoreThan 5 .merge{a, b -> a + b}.isEmpty .assertTrue}
-  .check{Flows#(1, 2, 3).with(Flows#(10, 20)).with(Flows#(100, 200, 300)).noMoreThan 2 .getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111, 222))}
+  .check{Flows#(1, 2, 3).with(Flows#(10, 20)).limit 5 .merge{a, b -> a + b}.isEmpty .assertTrue}
+  .check{Flows#(1, 2, 3).with(Flows#(10, 20)).with(Flows#(100, 200, 300)).limit 2 .getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111, 222))}
   .checkDetErr({::.isMsg{::.startsWith "BiFlow: this BiFlow is already consumed"}}, {Block#
     .let bf={Flows#(1).with(Flows#(2))}
     .do{Block#(bf.getMerge{a, b -> a + b}, Void)}
-    .return{bf.noMoreThan 1 .getMerge{a, b -> a + b}.size}
+    .return{bf.limit 1 .getMerge{a, b -> a + b}.size}
     })
   }

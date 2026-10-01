@@ -168,34 +168,32 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// ``this.flatFlow mode`` is `ESparseList.flatSeqFlow`, flowing in ``mode``.
   mut .flatFlow(mode: FlowMode[E]): mut Flow[E];
 
-  /// ``this.seqFlow`` returns ``.some`` of `ESparseList.flatSeqFlow` if there are no holes, ``.empty`` otherwise.
-  /// Drains ``this`` only when returning ``.some``.
-  mut .seqFlow: mut Opt[mut Flow[E]] -> this.isFull .toOpt {this.flatSeqFlow};
-
-  /// ``this.flow mode`` returns ``.some`` of ``this.flatFlow mode`` if there are no holes, ``.empty`` otherwise.
-  /// Drains ``this`` only when returning ``.some``.
-  mut .flow(mode: FlowMode[E]): mut Opt[mut Flow[E]] -> this.isFull .toOpt {this.flatFlow(mode)};
-
   /// ``this.getSeqFlow`` returns `ESparseList.flatSeqFlow` if there are no holes, and throws otherwise.
   //> .check{ESparseLists.backedWithArray[Nat] 2 .set(0, 1).set(1, 2).getSeqFlow.list
   //>   .assertEq({::}, Lists#(1,2))}
-  //> .checkDetErr({::.isMsg{::.startsWith "ESparseList.getSeqFlow:"}}, {ESparseLists.backedWithArray[Nat] 2 .set(0, 1).getSeqFlow})
-  mut .getSeqFlow: mut Flow[E] -> this.isFull .if {
-    .then -> this.flatSeqFlow;
-    .else -> Error.msg(
-      "ESparseList.getSeqFlow: this ESparseList has " + (this.numHoles) + " holes."
-      | "Use a flow that skips or shows the holes, or fill the holes first."
-      );
+  //> .checkDetErr({::.isMsg{:: == "ESparseList.getSeqFlow: 1 of the 2 indices are holes; fill the holes first"}}, {ESparseLists.backedWithArray[Nat] 2 .set(0, 1).getSeqFlow})
+  mut .getSeqFlow: mut Flow[E] -> this.tryGetSeqFlow!;
+  /// `this.tryGetSeqFlow` returns `.ok` of `this.getSeqFlow`, or the error info of `this.getSeqFlow` iff there are holes.
+  /// Drains ``this`` only when returning `.ok`.
+  mut .tryGetSeqFlow: mut Action[mut Flow[E]] -> this.isFull .if{
+    .then -> Actions.ok(this.flatSeqFlow);
+    .else -> Actions.msg("ESparseList.getSeqFlow: " + (this.numHoles) + " of the " + (this.capacity) + " indices are holes; fill the holes first");
     };
+  /// ``this.seqFlow`` returns ``.some`` of `ESparseList.flatSeqFlow` if there are no holes, ``.empty`` otherwise.
+  /// Drains ``this`` only when returning ``.some``.
+  mut .seqFlow: mut Opt[mut Flow[E]] -> this.tryGetSeqFlow.ok;
 
   /// ``this.getFlow mode`` returns ``this.flatFlow mode`` if there are no holes, and throws otherwise.
-  mut .getFlow(mode: FlowMode[E]): mut Flow[E] -> this.isFull .if {
-    .then -> this.flatFlow(mode);
-    .else -> Error.msg(
-      "ESparseList.getFlow: this ESparseList has " + (this.numHoles) + " holes."
-      | "Use a flow that skips or shows the holes, or fill the holes first."
-      );
+  mut .getFlow(mode: FlowMode[E]): mut Flow[E] -> this.tryGetFlow(mode)!;
+  /// ``this.tryGetFlow mode`` returns `.ok` of ``this.getFlow mode``, or the error info of ``this.getFlow mode`` iff there are holes.
+  /// Drains ``this`` only when returning `.ok`.
+  mut .tryGetFlow(mode: FlowMode[E]): mut Action[mut Flow[E]] -> this.isFull .if{
+    .then -> Actions.ok(this.flatFlow(mode));
+    .else -> Actions.msg("ESparseList.getFlow: " + (this.numHoles) + " of the " + (this.capacity) + " indices are holes; fill the holes first");
     };
+  /// ``this.flow mode`` returns ``.some`` of ``this.flatFlow mode`` if there are no holes, ``.empty`` otherwise.
+  /// Drains ``this`` only when returning ``.some``.
+  mut .flow(mode: FlowMode[E]): mut Opt[mut Flow[E]] -> this.tryGetFlow(mode).ok;
 
   /// ``this.getEList`` drains ``this`` into an `EList` of its elements, and throws if there are any holes.
   /// ``this`` is left all holes, with the same capacity.
@@ -203,11 +201,16 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   //>   .let slist = {ESparseLists.backedWithArray[Nat] 3 .fillHoles {::}}
   //>   .do{slist.getEList.list.assertEq({::}, Lists#(0,1,2))}
   //>   .do{slist.isEmpty.assertTrue}.done}
-  //> .checkDetErr({::.isMsg{:: == "ESparseList.getEList: this ESparseList has 2 holes; fill the holes first"}}, {ESparseLists.backedWithArray[Nat] 3 .set(0, 1).getEList})
-  mut .getEList: mut EList[E];
-
+  //> .checkDetErr({::.isMsg{:: == "ESparseList.getEList: 2 of the 3 indices are holes; fill the holes first"}}, {ESparseLists.backedWithArray[Nat] 3 .set(0, 1).getEList})
+  mut .getEList: mut EList[E] -> this.tryGetEList!;
+  /// `this.tryGetEList` returns `.ok` of `this.getEList`, or the error info of `this.getEList` iff there are holes.
+  /// Drains ``this`` only when returning `.ok`.
+  mut .tryGetEList: mut Action[mut EList[E]] -> this.isFull .if{
+    .then -> Actions.ok(this.flatSeqFlow.eList);
+    .else -> Actions.msg("ESparseList.getEList: " + (this.numHoles) + " of the " + (this.capacity) + " indices are holes; fill the holes first");
+    };
   /// ``this.eList`` returns ``.some`` of `ESparseList.getEList` if there are no holes, ``.empty`` otherwise.
   /// Drains ``this`` only when returning ``.some``.
   //> .check{ESparseLists.backedWithArray[Nat] 2 .set(0, 1).eList .isEmpty .assertTrue}
-  mut .eList: mut Opt[mut EList[E]] -> this.isFull .toOpt {this.getEList};
+  mut .eList: mut Opt[mut EList[E]] -> this.tryGetEList.ok;
   }

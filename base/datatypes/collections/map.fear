@@ -55,17 +55,14 @@ Map[K,E:*]: Sealed,ToFlow[mut KeyElem[K,E]],BaseContainer[E],DataType[Map[K,E],M
 //  TODO: for the future, but there are big questions about the exact type signature(s)
 //  mut  .merge(merge: mut F[E,E,E], other: mut Map[K,E]): mut Map[K,E];
 
-  mut  .flow: mut Flow[KeyElem[K,E]];              /// entries as a flow (The flow order follows the map insertion order)
-  read .flow: mut Flow[KeyElem[K,read/imm E]];     /// entries as a flow (The flow order follows the map insertion order)
-  imm  .flow: mut Flow[KeyElem[K,imm E]];          /// entries as a flow (The flow order follows the map insertion order)
-
-  mut  .flow[R:*](read F[K,E,R]): mut Flow[R];          /// entries as a flow (The flow order follows the map insertion order)
-  read .flow[R:*](read F[K,read/imm E,R]): mut Flow[R]; /// entries as a flow (The flow order follows the map insertion order)
-  imm  .flow[R:*](read F[K,imm E,R]): mut Flow[R];      /// entries as a flow (The flow order follows the map insertion order)
-
-  // Optional but commonly useful conveniences (still consistent with List style):
-  mut  .seqFlow: mut Flow[mut KeyElem[K,E]];  /// entries as a sequential flow (same iteration order as .flow)
-  read .seqFlow: mut Flow[read KeyElem[K,E]]; /// entries as a sequential flow (same iteration order as .flow)
+  /// ``this.flow`` returns a `BiFlow` of the keys and the elements of `this`, in insertion order.
+  /// The merges of the `BiFlow` of an ``imm`` map are in mode `ParImm`, the others are sequential.
+  //>   .check{Maps#({::}, "a", 1, "b", 2).flow.getMerge{k, e -> k + e}.list .assertEq({::}, Lists#("a1", "b2"))}
+  //>   .check{Maps#({::}, "a", 1, "b", 2).flow.getFold({0}, {acc, _, e -> acc + e}) .assertEq 3}
+  //>   .check{Maps#({::}, "a", "x", "b", "y").flow.getFold({""}, {acc, k, e -> acc + k + e}) .assertEq "axby"}
+  mut  .flow: mut BiFlow[K,E];                 /// keys and elements as a BiFlow, in insertion order; its merges are sequential
+  read .flow: mut BiFlow[K,read/imm E];        /// keys and elements as a BiFlow, in insertion order; its merges are sequential
+  imm  .flow: mut BiFlow[K,imm E];             /// keys and elements as a BiFlow, in insertion order; its merges are in mode ParImm
   read .keys: mut Flow[K];               /// keys as a flow (same iteration order as .flow)
   read .elems: mut Flow[read/imm E];     /// values as a flow (same iteration order as .flow)
 
@@ -86,12 +83,12 @@ Map[K,E:*]: Sealed,ToFlow[mut KeyElem[K,E]],BaseContainer[E],DataType[Map[K,E],M
     }};*/
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let map= {this.flow.fold(
+    .let map= {this.flow.getFold(
       {Maps#[Str,Str,Info]{::}.as{::}},
-      {acc,ke->Block#
-        .let base= {this.keyOh#(ke.key).str}
+      {acc, key, e -> Block#
+        .let base= {this.keyOh#key .str}
         .let k= {_InfoFreshKey#(acc, base, 0)}
-        .return{acc.with(k, by#(ke.elem).info).as{::}}
+        .return{acc.with(k, by#e .info).as{::}}
     })}
   .return{{'i //correct to make the Info object (as for List), calling .info here would go in stack overflow
     .match->::.map map;
