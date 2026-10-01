@@ -1,5 +1,5 @@
-MapStrSizes: { #(m: mut Map[Str,Str]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key ke->ke.key; .elem ke->ke.elem.size}) }
-MapListSizes: { #(m: mut Map[Str,List[Str]]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key ke->ke.key; .elem ke->ke.elem.size}) }
+MapStrSizes: { #(m: mut Map[Str,Str]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key k, _ -> k; .elem _, e -> e.size}) }
+MapListSizes: { #(m: mut Map[Str,List[Str]]): mut Map[Str,Nat] -> m.flow.mapping({::}, {.key k, _ -> k; .elem _, e -> e.size}) }
 
 MapBasicsTests: Test {::
   .check{Maps#[Str,Str,Int] {::} .size .assertEq 0}

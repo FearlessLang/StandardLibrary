@@ -75,18 +75,6 @@ final class EList$1k$1Instance implements EList$1k$1{
     if (Long.compareUnsigned(i, xs.size()) < 0){ return ok(xs.get((int) i)); }
     return fail(outOfRange("get", i));
   }
-  private Object first(){
-    if (xs.isEmpty()){ throw detErr("EList.getFirst: called on an empty EList"); }
-    return xs.getFirst();
-  }
-  private Object last(){
-    if (xs.isEmpty()){ throw detErr("EList.getLast: called on an empty EList"); }
-    return xs.getLast();
-  }
-  @Override public Object mut$getFirst$0(){ return first(); }
-  @Override public Object read$getFirst$0(){ return first(); }
-  @Override public Object mut$getLast$0(){ return last(); }
-  @Override public Object read$getLast$0(){ return last(); }
   @Override public Object mut$add$1(Object p0){ xs.add(p0); return this; }
   @Override public Object mut$addAll$1(Object p0){ xs.addAll(((EList$1k$1Instance) p0).xs); return this; }
   @Override public Object mut$insertBefore$2(Object p0, Object p1){ xs.add(idx("insertBefore", p0, xs.size() + 1), p1); return this; }
@@ -170,22 +158,22 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$fold$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size(); i++){ acc= callMF$4(p1, Nat$c$0Instance.instance(i), acc, xs.get(i)); }
+    for (int i= 0; i < xs.size(); i++){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRight$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0; i--){ acc= callMF$4(p1, Nat$c$0Instance.instance(i), acc, xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0; i--){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size() && !test(p2, acc); i++){ acc= callMF$4(p1, Nat$c$0Instance.instance(i), acc, xs.get(i)); }
+    for (int i= 0; i < xs.size() && !test(p2, acc); i++){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRightUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i--){ acc= callMF$4(p1, Nat$c$0Instance.instance(i), acc, xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i--){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$accumulateInPlace$1(Object p0){

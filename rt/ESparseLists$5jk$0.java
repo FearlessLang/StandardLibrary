@@ -1,6 +1,5 @@
 package _base;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.TreeMap;
@@ -289,9 +288,4 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   @Override public Object mut$flowOpts$1(Object p0){ return opts(drain(), FlowMode.of(p0)); }
   @Override public Object mut$flatSeqFlow$0(){ return flat(drain(), FlowMode.Seq); }
   @Override public Object mut$flatFlow$1(Object p0){ return flat(drain(), FlowMode.of(p0)); }
-  @Override public Object mut$getEList$0(){
-    if (holes() != 0){ throw detErr("ESparseList.getEList: this ESparseList has "+Long.toUnsignedString(holes())+" holes; fill the holes first"); }
-    var d= drain();
-    return new EList$1k$1Instance(new ArrayList<>(Arrays.stream(d.present()).mapToObj(d::at).toList()));
-  }
 }

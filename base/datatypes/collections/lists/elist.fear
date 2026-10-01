@@ -104,34 +104,44 @@ EList[E:*]: _EditableList[E, EList[E]] {
   mut .insertBefore(Nat, E): mut EList[E];
 
   /// ``this.first`` returns ``.some(first)`` if this collection is non-empty, and ``.empty`` otherwise.
-  /// Equivalent to: ``this.notEmpty .toOpt { this.getFirst }``
+  /// Equivalent to: ``this.tryGetFirst.ok``
   //> .check{Flows#(1,2,3).eList.first .assertEq({::}, Opts# 1)}
   //> .check{ELists#[Nat] .first .assertEmpty {::}}
-  read .first: mut Opt[read/imm E] -> this.notEmpty .toOpt { this.getFirst };
-  mut  .first: mut Opt[E] -> this.notEmpty .toOpt { this.getFirst };
+  read .first: mut Opt[read/imm E] -> this.tryGetFirst.ok;
+  mut  .first: mut Opt[E] -> this.tryGetFirst.ok;
 
   /// ``this.last`` returns ``.some(last)`` if this collection is non-empty, and ``.empty`` otherwise.
-  /// Equivalent to: ``this.notEmpty .toOpt { this.getLast }``
+  /// Equivalent to: ``this.tryGetLast.ok``
   //> .check{Flows#(1,2,3).eList.last .assertEq({::}, Opts#(3))}
   //> .check{ELists.withCapacity[Nat] 3 .last .assertEmpty {::}}
-  read .last: mut Opt[read/imm E] -> this.notEmpty .toOpt { this.getLast };
-  mut  .last: mut Opt[E] -> this.notEmpty .toOpt { this.getLast };
+  read .last: mut Opt[read/imm E] -> this.tryGetLast.ok;
+  mut  .last: mut Opt[E] -> this.tryGetLast.ok;
 
   /// ``this.getFirst`` returns the first element of this collection.
   /// Throws if this collection is empty.
   /// Equivalent to: ``this.get(0)``
   //> .check{ELists#(1,2,3).getFirst .assertEq 1}
   //> .checkDetErr({::.isMsg{::.startsWith "EList.getFirst:"}}, {ELists#[Nat] .getFirst})
-  read .getFirst: read/imm E;
-  mut  .getFirst: E;
+  read .getFirst: read/imm E -> this.tryGetFirst!;
+  mut  .getFirst: E -> this.tryGetFirst!;
+
+  /// `this.tryGetFirst` returns `.ok` of `this.getFirst`, or the error info of `this.getFirst` iff `this` is empty.
+  //> .check{ELists#[Nat] .tryGetFirst .assertInfo{::.isMsg{:: == "EList.getFirst: called on an empty EList"}}}
+  read .tryGetFirst: mut Action[read/imm E] -> this.isEmpty .if{ .then -> Actions.msg "EList.getFirst: called on an empty EList"; .else -> Actions.ok(this.get 0) };
+  mut  .tryGetFirst: mut Action[E] -> this.isEmpty .if{ .then -> Actions.msg "EList.getFirst: called on an empty EList"; .else -> Actions.ok(this.get 0) };
 
   /// ``this.getLast`` returns the last element of this collection.
   /// Throws if this collection is empty.
   /// Equivalent to: ``this.get(this.size - 1)``
   //> .check{ELists#(1,2,3).getLast .assertEq 3}
   //> .checkDetErr({::.isMsg{::.startsWith "EList.getLast:"}}, {ELists#[Nat] .getLast})
-  read .getLast: read/imm E;
-  mut  .getLast: E;
+  read .getLast: read/imm E -> this.tryGetLast!;
+  mut  .getLast: E -> this.tryGetLast!;
+
+  /// `this.tryGetLast` returns `.ok` of `this.getLast`, or the error info of `this.getLast` iff `this` is empty.
+  //> .check{(ELists#(1,2,3).tryGetLast).ok .assertEq({::}, Opts# 3)}
+  read .tryGetLast: mut Action[read/imm E] -> this.isEmpty .if{ .then -> Actions.msg "EList.getLast: called on an empty EList"; .else -> Actions.ok(this.get(this.size - 1)) };
+  mut  .tryGetLast: mut Action[E] -> this.isEmpty .if{ .then -> Actions.msg "EList.getLast: called on an empty EList"; .else -> Actions.ok(this.get(this.size - 1)) };
 
   /// ``this.set(i, e)`` replaces the element at index ``i`` with ``e``, returning ``this``.
   /// Throws if ``i >= this.size``.
@@ -227,46 +237,46 @@ EList[E:*]: _EditableList[E, EList[E]] {
   mut .expandCapacity(newCapacity: Nat): mut EList[E];
 
   /// ``this.fold(acc, f)`` folds this collection from left to right,
-  /// starting with the given accumulator and applying ``f`` to the index of each element, the accumulator and the element.
+  /// starting with the given accumulator and applying ``f`` to the accumulator, the index of each element and the element.
   /// Use instead of ``this.flow.fold`` to avoid draining this.
   /// Time Complexity: T(``this``, ``f``) * O(n), where T(l, f) is the maximum time complexity of ``f`` applied to any element of ``this`` and the accumulator.
   //> .check{Block#
   //>   .let l={ELists#(1,2,3,4,5)}
-  //>   .do{l.fold({0}, {_,a,b -> a+b}) .assertEq 15}
-  //>   .do{l.fold({1}, {_,a,b -> a*b}) .assertEq 120}
+  //>   .do{l.fold({0}, {a,_,b -> a+b}) .assertEq 15}
+  //>   .do{l.fold({1}, {a,_,b -> a*b}) .assertEq 120}
   //>   .done}
-  mut .fold[R:*](acc: iso MF[R], f: mut MF[Nat, R, E, R]): R;
+  mut .fold[R:*](acc: iso MF[R], f: mut MF[R, Nat, E, R]): R;
 
   /// ``this.foldRight(acc, f)`` folds this collection from right to left,
-  /// starting with the given accumulator and applying ``f`` to the index of each element, the accumulator and the element.
+  /// starting with the given accumulator and applying ``f`` to the accumulator, the index of each element and the element.
   //> .check{Block#
   //>   .let l={ELists#(1,2,3,4,5)}
-  //>   .do{l.foldRight({List[Nat]}, {_,a,b -> a +> b}) .assertEq({::}, Lists#(5,4,3,2,1))}
-  //>   .do{l.foldRight({1}, {_,a,b -> a*b}) .assertEq 120}
+  //>   .do{l.foldRight({List[Nat]}, {a,_,b -> a +> b}) .assertEq({::}, Lists#(5,4,3,2,1))}
+  //>   .do{l.foldRight({1}, {a,_,b -> a*b}) .assertEq 120}
   //>   .done}
-  mut .foldRight[R:*](acc: iso MF[R], f: mut MF[Nat, R, E, R]): R;
+  mut .foldRight[R:*](acc: iso MF[R], f: mut MF[R, Nat, E, R]): R;
 
   /// ``this.foldUntil(acc, f, pred)`` folds this collection from left to right as `EList.fold` does,
   /// stopping as soon as ``pred`` returns `True` for the accumulator.
   /// Time Complexity: T(``this``, ``f``) * O(n), where T(l, f) is the maximum time complexity of ``f`` applied to any element of ``this`` and the accumulator.
   //> .check{Block#
   //>   .let l={ELists#(1,2,3,4,5)}
-  //>   .do{l.foldUntil({0}, {_,a,b -> a+b}, {a -> a >= 10}) .assertEq 10}
-  //>   .do{l.foldUntil({1}, {_,a,b -> a*b}, {a -> a >= 100}) .assertEq 120}
+  //>   .do{l.foldUntil({0}, {a,_,b -> a+b}, {a -> a >= 10}) .assertEq 10}
+  //>   .do{l.foldUntil({1}, {a,_,b -> a*b}, {a -> a >= 100}) .assertEq 120}
   //>   .done}
   mut .foldUntil[R:*](
     acc: iso MF[R],
-    f: mut MF[Nat, R, E, R],
+    f: mut MF[R, Nat, E, R],
     pred: mut MF[R, Bool]
     ): R;
 
   /// ``this.foldRightUntil(acc, f, pred)`` folds this collection from right to left as `EList.foldRight` does,
   /// stopping as soon as ``pred`` returns `True` for the accumulator.
   /// Time Complexity: T(``this``, ``f``) * O(n), where T(l, f) is the maximum time complexity of ``f`` applied to any element of ``this`` and the accumulator.
-  //> .check{ELists#(1,2,3,4,5).foldRightUntil({0}, {_,a,b -> a+b}, {a -> a >= 9}) .assertEq 9}
+  //> .check{ELists#(1,2,3,4,5).foldRightUntil({0}, {a,_,b -> a+b}, {a -> a >= 9}) .assertEq 9}
   mut .foldRightUntil[R:*](
     acc: iso MF[R],
-    f: mut MF[Nat, R, E, R],
+    f: mut MF[R, Nat, E, R],
     pred: mut MF[R, Bool]
     ): R;
 

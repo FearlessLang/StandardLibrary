@@ -92,10 +92,10 @@ InfoKey: Sealed, ToStr {
   }
 
 _InfoMapPlus: { #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->
-  m2.flow.fold({m1}, {acc,ke->
-    acc.opt(ke.key).match {
-      .empty -> acc.with(ke.key, ke.elem);
-      .some v -> acc.with(ke.key, v+(ke.elem));
+  m2.flow.getFold({m1}, {acc, k, e ->
+    acc.opt(k).match {
+      .empty -> acc.with(k, e);
+      .some v -> acc.with(k, v + e);
     };
   });}
 
@@ -128,7 +128,7 @@ _InfoToStr: InfoMatch[Str] {
   .empty ->"null";
   .msg(msg) -> _JsonEscape#msg;
   .list(list) -> "[" + (list.flow.map{::.str}.join(",")) + "]";
-  .map(map) -> "{" + (map.flow.map{_JsonEscape#(::.key) + ":" + (::.elem.str)}.join(",")) + "}";
+  .map(map) -> "{" + (map.flow.getMerge{k, e -> _JsonEscape#k + ":" + (e.str)}.join(",")) + "}";
   }
 
 /// Fearless Str never carries backslash escapes, so a raw ``"``, ``\`` or newline
@@ -252,6 +252,6 @@ _InfoToPrettyString: {
     .empty -> "null";
     .msg(msg) -> _JsonEscape#msg;
     .list list -> "[" | (list.flow.map{"  ".repeat(depth+1) + (this#(::, depth + 1))}.join(","|)) | + ("  ".repeat(depth)) + "]";
-    .map(map) -> "{" | (map.flow.map{"  ".repeat(depth+1) + (_JsonEscape#(::.key) + ": " + (this#(::.elem, depth + 1)))}.join(","|)) | + ("  ".repeat(depth)) +"}";
+    .map(map) -> "{" | (map.flow.getMerge{k, e -> "  ".repeat(depth+1) + (_JsonEscape#k + ": " + (this#(e, depth + 1)))}.join(","|)) | + ("  ".repeat(depth)) +"}";
   });
 }

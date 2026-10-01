@@ -78,7 +78,7 @@ FlowLimitTests: Test {::
 FlowOverListTests: Test {::
   .check{Sets#({::}, 3, 1, 2).seqFlow.list .assertEq({::}, Lists#(1,2,3))}
   .check{ESets#[Nat,Nat]{::}.add(2).add(1).seqFlow.list .assertEq({::}, Lists#(2,1))}
-  .check{Maps#({::}, "a", 1, "b", 2).seqFlow.map{ke -> ke.key}.list .assertEq({::}, Lists#("a","b"))}
+  .check{Maps#({::}, "a", 1, "b", 2).flow.getMerge{k, _ -> k}.list .assertEq({::}, Lists#("a","b"))}
   .check{(1 =~~= 3).seqFlow.list .assertEq({::}, Lists#(1,2,3))}
   .check{"ab".u.seqFlow.list .assertEq({::}, Lists#(97,98))}
   .check{Flows#(1,2).flatMap{n -> Sets#({::}, n, 10)}.list .assertEq({::}, Lists#(1,10,2,10))}
