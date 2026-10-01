@@ -124,12 +124,14 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.fillHoles f`` returns ``this`` after putting ``f#i`` in every hole ``i``, in ascending order.
   /// Equivalent to: ``this.mapOpts{i, e -> e || {Opts#(f#i)}}``
+  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   //> .check{ESparseLists.backedWithArray[Nat] 3 .set(1, 7).fillHoles{i -> i}.getEList.list
   //>   .assertEq({::}, Lists#(0,7,2))}
   mut .fillHoles(mut MF[Nat, E]): mut ESparseList[E];
 
   /// ``this.mapOpts f`` returns ``this`` after replacing every index ``i``, in ascending order, with ``f#(i, old)``:
   /// ``old`` is ``.some`` of the element at ``i`` or ``.empty`` for a hole; a ``.some`` result puts its element at ``i``, an ``.empty`` result makes ``i`` a hole.
+  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   //> .check{ESparseLists.backedWithArray[Nat] 3 .set(0, 5).set(1, 6)
   //>   .mapOpts{i, e -> (i == 0).if{ .then -> {}; .else -> Opts#(i)}}.flowOpts(ParImm#).map{o -> o.isSome}.list
   //>   .assertEq({::}, Lists#(False, True, True))}
@@ -149,10 +151,12 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// ``this.seqFlowOpts`` drains ``this`` into a sequential flow of one `Opt` per index:
   /// ``.some`` of the element, or ``.empty`` for a hole.
   /// ``this`` is left all holes, with the same capacity.
+  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   //> .check{ESparseLists.backedWithArray[Nat] 2 .set(1, 7).seqFlowOpts.map{o -> o.isSome}.list .assertEq({::}, Lists#(False, True))}
   mut .seqFlowOpts: mut Flow[mut Opt[E]];
 
   /// ``this.flowOpts mode`` is `ESparseList.seqFlowOpts`, flowing in ``mode``.
+  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   mut .flowOpts(mode: FlowMode[E]): mut Flow[mut Opt[E]];
 
   /// ``this.flatSeqFlow`` drains ``this`` into a sequential flow of its elements, skipping the holes.
