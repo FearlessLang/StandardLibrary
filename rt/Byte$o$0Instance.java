@@ -32,23 +32,34 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   private static byte b(Object o){ return ((Byte$o$0Instance)o).val; }
   private static long natBits(Object o){ return ((Nat$c$0Instance)o).val(); }
 
+  private static Error overflow(String op, byte a, byte b){
+    return nonDetErr("Byte"+op+": overflow, "+u8(a)+" "+op+" "+u8(b)+" is greater than Math.maxByte (255)");
+  }
   private static byte addChecked(byte a, byte b){
     int r= u8(a) + u8(b);
-    if (r > 255){ throw nonDetErr("Byte+: overflow"); }
+    if (r > 255){ throw overflow("+", a, b); }
     return (byte)r;
   }
   private static byte subChecked(byte a, byte b){
     if (Byte.compareUnsigned(a, b) < 0) {
-      throw nonDetErr("Byte-: underflow");
+      throw nonDetErr("Byte-: underflow, "+u8(a)+" - "+u8(b)+" is less than 0");
     }
     return (byte) (a - b);
   }
   private static byte mulChecked(byte a, byte b){
     int r= u8(a) * u8(b);
-    if (r > 255){ throw nonDetErr("Byte*: overflow"); }
+    if (r > 255){ throw overflow("*", a, b); }
     return (byte)r;
   }
 
+  @Override public Object imm$succ$0(){
+    if (val == MAX_VALUE){ throw nonDetErr("Byte.succ: cannot take the successor of 255"); }
+    return instance((byte)(val + 1));
+  }
+  @Override public Object imm$pred$0(){
+    if (val == 0){ throw nonDetErr("Byte.pred: cannot take the predecessor of 0"); }
+    return instance((byte)(val - 1));
+  }
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,b(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
@@ -57,15 +68,18 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
     int result = 1, base = u8(val);
-    while (true) {
-      if ((power & 1) != 0){ result = powMul(result, base); }
-      power >>>= 1;
-      if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
-      base = powMul(base, base);
+    try{
+      while (true) {
+        if ((power & 1) != 0){ result = powMul(result, base); }
+        power >>>= 1;
+        if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
+        base = powMul(base, base);
+      }
     }
+    catch(ArithmeticException e){ throw overflow("**", val, b(p0)); }
   }
   private static int powMul(int a, int b){
-    if (a * b > 255){ throw nonDetErr("Byte**: overflow"); }
+    if (a * b > 255){ throw new ArithmeticException(); }
     return a * b;
   }
   @Override public Object imm$$slash$1(Object p0){

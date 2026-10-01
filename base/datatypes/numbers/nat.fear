@@ -1,32 +1,38 @@
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / is not provided; use div/rem (divisor is Nat).
 Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
-  /// `this.succ` returns ``this + 1``. Throws if `this` is `Math.maxNat` (overflow).
+  /// `this.succ` returns ``this + 1``. Overflows if ``this == 18_446_744_073_709_551_615``.
   //>   .check{5 .succ .assertEq 6}
-  //>   .checkNonDetErr({::}, {(Math.maxNat) .succ})
-  .succ: Nat -> this + 1;
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.succ"}}, {(Math.maxNat) .succ})
+  .succ: Nat;
 
-  /// `this.pred` returns ``this - 1``. Throws if `this` is ``0`` (underflow).
+  /// `this.pred` returns ``this - 1``. Underflows if ``this == 0``.
   //>   .check{5 .pred .assertEq 4}
-  //>   .checkNonDetErr({::}, {0 .pred})
-  .pred: Nat -> this - 1;
+  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.pred"}}, {0 .pred})
+  .pred: Nat;
 
-  /// ``this + x`` returns the checked sum of `this` and ``x``. Throws on overflow past `Math.maxNat`.
-  //>   .check{(2 + 3) .assertEq 5}
-  //>   .checkNonDetErr({::}, {(Math.maxNat - 1) + 2})
+  /// ``this + x`` returns the checked sum of `this` and ``x``.
+  /// Overflows if the result would exceed ``18_446_744_073_709_551_615``.
+  //>   .checkEq(5, {2 + 3})
+  //>   .checkNonDetErr(
+  //>     {:: > "msg" .isMsg{::.startsWith "Nat+:" & (::.contains "overflow")}},
+  //>     {(Math.maxNat - 1) + 2}
+  //>     )
   +(x: Nat): Nat;
 
-  /// ``this - x`` returns the checked difference of `this` and ``x``. Throws on underflow below ``0``.
+  /// ``this - x`` returns the checked difference of `this` and ``x``. Underflows if the result would go below ``0``.
   //>   .check{(5 - 3) .assertEq 2}
   //>   .checkNonDetErr({::}, {0 - 1})
   -(x: Nat): Nat;
 
-  /// ``this * x`` returns the checked product of `this` and ``x``. Throws on overflow.
+  /// ``this * x`` returns the checked product of `this` and ``x``.
+  /// Overflows if the result would exceed ``18_446_744_073_709_551_615``.
   //>   .check{(6 * 7) .assertEq 42}
   //>   .checkNonDetErr({::}, {(Math.maxNat) * 2})
   *(x: Nat): Nat;
 
-  /// ``this ** x`` returns the checked power of `this` raised to ``x``. Throws on overflow.
+  /// ``this ** x`` returns the checked power of `this` raised to ``x``.
+  /// Overflows if the result would exceed ``18_446_744_073_709_551_615``.
   //>   .check{(2 ** 6) .assertEq 64}
   //>   .checkNonDetErr({::}, {(Math.maxNat) ** 2})
   **(x: Nat): Nat;
@@ -40,6 +46,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{7 .getTruncDiv 2 .assertEq 3}
   //>   .checkDetErr({::}, {7 .getDiv 0})
   .getTruncDiv(d: Nat): Nat;
+
   /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
   //>   .check{(7 .tryGetTruncDiv 2).ok.assertEq({::}, Opts# 3)}
   //>   .check{7 .tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Nat.getTruncDiv:"}}}
@@ -63,6 +70,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{7 .getRem 2 .assertEq 1}
   //>   .checkDetErr({::}, {7 .getRem 0})
   .getRem(d: Nat): Nat;
+
   /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
   //>   .check{(7 .tryGetRem 2).ok.assertEq({::}, Opts# 1)}
   //>   .check{7 .tryGetRem 0 .assertInfo{::.isMsg{::.startsWith "Nat.getRem:"}}}
@@ -99,6 +107,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5 .getIndexOffset(-3) .assertEq 2}
   //>   .checkDetErr({::}, {5 .getIndexOffset(-10)})
   .getIndexOffset(delta: Int): Nat;
+
   /// ``this.tryGetIndexOffset(delta)`` returns `.ok` of ``this.getIndexOffset(delta)``, or the error info of
   /// ``this.getIndexOffset(delta)`` if the result would underflow below ``0`` or overflow past `Math.maxNat`.
   //>   .check{(5 .tryGetIndexOffset(+3)).ok.assertEq({::}, Opts# 8)}
@@ -141,6 +150,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5 .getInt .assertEq +5}
   //>   .checkDetErr({::}, {Math.maxNat .getInt})
   .getInt: Int;
+
   /// `this.tryGetInt` returns `.ok` of `this.getInt`, or the error info of `this.getInt` if ``this > maxInt``.
   //>   .check{(5 .tryGetInt).ok.assertEq({::}, Opts# +5)}
   //>   .check{(Math.maxNat).tryGetInt .assertInfo{::.isMsg{::.startsWith "Nat.getInt:"}}}
@@ -159,6 +169,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{5 .getFloat .assertEq 5.0}
   //>   .checkDetErr({::}, {Math.maxNat.getFloat})
   .getFloat: Float;
+
   /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not exactly representable.
   //>   .check{(5 .tryGetFloat).ok.assertEq({::}, Opts# 5.0)}
   //>   .check{(Math.maxNat).tryGetFloat .assertInfo{::.isMsg{::.startsWith "Nat.getFloat:"}}}

@@ -37,15 +37,27 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     return (byte)x;
   }
 
+  private static Error outOfRange(String op, long a, String b, boolean over){
+    var bound= over ? "greater than Math.maxInt ("+MAX_VALUE+")" : "less than Math.minInt ("+MIN_VALUE+")";
+    return nonDetErr("Int"+op+": "+(over ? "overflow, " : "underflow, ")+a+" "+op+" "+b+" is "+bound);
+  }
   private static long mulChecked(long a, long b) {
     try{ return Math.multiplyExact(a, b); }
-    catch(ArithmeticException e){ throw nonDetErr("Int*: overflow"); }
+    catch(ArithmeticException e){ throw outOfRange("*", a, ""+b, a < 0 == b < 0); }
   }
   static boolean canSafelyConvertToDouble(long val) {
     return val != Long.MAX_VALUE && val == (long) ((double) val);
   }
 
 
+  @Override public Object imm$succ$0(){
+    if (val == MAX_VALUE){ throw nonDetErr("Int.succ: cannot take the successor of "+MAX_VALUE); }
+    return instance(val + 1);
+  }
+  @Override public Object imm$pred$0(){
+    if (val == MIN_VALUE){ throw nonDetErr("Int.pred: cannot take the predecessor of "+MIN_VALUE); }
+    return instance(val - 1);
+  }
   @Override public Object imm$softNat$0(){ return Nat$c$0Instance.instance(val < 0 ? 0 : val); }
   @Override public Object imm$softByte$0(){ return Byte$o$0Instance.instance(clampByte(val)); }
   @Override public Object imm$softFloat$0(){ return Float$1c$0Instance.instance((double)val); }
@@ -110,11 +122,11 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$$plus$1(Object p0){
     try{ return instance(Math.addExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw nonDetErr("Int+: overflow"); }
+    catch(ArithmeticException e){ throw outOfRange("+", val, ""+unwrap(p0), unwrap(p0) > 0); }
   }
   @Override public Object imm$$dash$1(Object p0){
     try{ return instance(Math.subtractExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw nonDetErr("Int-: overflow"); }
+    catch(ArithmeticException e){ throw outOfRange("-", val, ""+unwrap(p0), unwrap(p0) < 0); }
   }
   @Override public Object imm$$slash$1(Object p0){
     long d=Nat$c$0Instance.unwrap(p0);
@@ -140,7 +152,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
         base = Math.multiplyExact(base, base);
       }
     }
-    catch(ArithmeticException e){ throw nonDetErr("Int**: overflow"); }
+    catch(ArithmeticException e){ throw outOfRange("**", val, Long.toUnsignedString(unsignedLongFromNat(p0)), val > 0 || (unsignedLongFromNat(p0) & 1) == 0); }
   }
 
   @Override public Object imm$abs$0(){
