@@ -78,19 +78,30 @@ FloatNumConversionTests: Test {::
 SuccPredTests: Test {::
   .check{5 .succ .assertEq 6}
   .check{+5 .pred .assertEq +4}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat+: overflow"}}, {(Math.maxNat).succ})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat-: underflow"}}, {0 .pred})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int+`}}, {(Math.maxInt).succ})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int+`}}, {(Math.minInt).pred})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte+`}}, {(Math.maxByte).succ})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Byte-`}}, {(Math.minByte).pred})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.succ: cannot take the successor of 18446744073709551615"}}, {(Math.maxNat).succ})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.pred: cannot take the predecessor of 0"}}, {0 .pred})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int.succ:`}}, {(Math.maxInt).succ})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int.pred:`}}, {(Math.minInt).pred})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Byte.succ:`}}, {(Math.maxByte).succ})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Byte.pred:`}}, {(Math.minByte).pred})
   .checkDetErr({::.isMsg{::.startsWith `Float.getSucc`}}, {Math.nan.getSucc})
   .check{Math.inf.tryGetSucc.assertInfo{::.isMsg{::.startsWith `Float.getSucc`}}}
   .check{(1.0 .tryGetSucc).ok.assertEq({::}, Opts#(1.0 .getSucc))}
   .checkDetErr({::.isMsg{::.startsWith `Float.getPred`}}, {Math.negInf.getPred})
   .check{Math.nan.tryGetPred.assertInfo{::.isMsg{::.startsWith `Float.getPred`}}}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith `Int*`}}, {(Math.maxInt) * +2})
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .startsWith "Nat*: overflow"}}, {(Math.maxNat) * 2})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int*`}}, {(Math.maxInt) * +2})
+  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat*: overflow"}}, {(Math.maxNat) * 2})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Nat+: overflow, 18446744073709551614 + 2 is greater than Math.maxNat (18446744073709551615)"}}, {(Math.maxNat - 1) + 2})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Nat-: underflow, 3 - 5 is less than 0"}}, {3 - 5})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Nat**: overflow, 2 ** 64 is greater than Math.maxNat (18446744073709551615)"}}, {2 ** 64})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Int+: underflow, -9223372036854775808 + -1 is less than Math.minInt (-9223372036854775808)"}}, {(Math.minInt) + -1})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Int-: overflow, 9223372036854775807 - -1 is greater than Math.maxInt (9223372036854775807)"}}, {(Math.maxInt) - -1})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Int*: underflow, 9223372036854775807 * -2 is less than Math.minInt (-9223372036854775808)"}}, {(Math.maxInt) * -2})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Int**: underflow, -2 ** 65 is less than Math.minInt (-9223372036854775808)"}}, {-2 ** 65})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Int**: overflow, -2 ** 64 is greater than Math.maxInt (9223372036854775807)"}}, {-2 ** 64})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Byte+: overflow, 200 + 100 is greater than Math.maxByte (255)"}}, {200.getByte + (100.getByte)})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Byte-: underflow, 0 - 1 is less than 0"}}, {0.getByte - (1.getByte)})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == "Byte**: overflow, 2 ** 8 is greater than Math.maxByte (255)"}}, {2.getByte ** (8.getByte)})
   .checkDetErr({::.isMsg{::.startsWith `Nat.getInt`}}, {(Math.maxNat).getInt})
   }
 
