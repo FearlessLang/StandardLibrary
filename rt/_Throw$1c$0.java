@@ -31,7 +31,7 @@ public interface _Throw$1c$0{
   static StackFrame$174$0 frameData(StackTraceElement e){
     var cn= e.getClassName();
     int dot= cn.indexOf('.');
-    if (dot < 0 || cn.indexOf('.',dot + 1) != -1 || machinery.contains(e.getFileName())){ return null; }
+    if (dot < 0 || cn.indexOf('.',dot + 1) != -1 || e.getFileName() == null || machinery.contains(e.getFileName())){ return null; }
     var ty= cn.substring(dot + 1).split("\\$");
     var meth= fmtMethodName(e.getMethodName());
     if (ty.length < 3 || meth == null){ return null; }
