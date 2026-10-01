@@ -60,11 +60,11 @@ _Merges: { #[E:*,K](k: Nat): _TreeMerge[E,K] -> {a, b -> _MergeFrom#(a, 0, b, 0,
 _MergeFrom: { #[E:*,K](a: mut List[mut _Keyed[E,K]], i: Nat, b: mut List[mut _Keyed[E,K]], j: Nat, k: Nat, res: mut EList[mut _Keyed[E,K]]): mut List[mut _Keyed[E,K]] ->
   res.size == k ?{ .then -> res.list; .else ->
   i == (a.size) ?{
-    .then -> j == (b.size) ?{ .then -> res.list; .else -> _MergeFrom#(a, i, b, j + 1, k, res.addAnd(b.get j)) };
-    .else -> j == (b.size) ?{ .then -> _MergeFrom#(a, i + 1, b, j, k, res.addAnd(a.get i)); .else ->
+    .then -> j == (b.size) ?{ .then -> res.list; .else -> _MergeFrom#(a, i, b, j + 1, k, res.add(b.get j)) };
+    .else -> j == (b.size) ?{ .then -> _MergeFrom#(a, i + 1, b, j, k, res.add(a.get i)); .else ->
       a.get(i).key <= (b.get(j).key.close) ?{
-        .then -> _MergeFrom#(a, i + 1, b, j, k, res.addAnd(a.get i));
-        .else -> _MergeFrom#(a, i, b, j + 1, k, res.addAnd(b.get j)) } } } } }
+        .then -> _MergeFrom#(a, i + 1, b, j, k, res.add(a.get i));
+        .else -> _MergeFrom#(a, i, b, j + 1, k, res.add(b.get j)) } } } } }
 _MaxMerges: { #[E:*,K]: _TreeMerge[E,K] -> {a, b -> _MaxPick#(a.getFirst.key <=> (b.getFirst.key, { .lt -> 0; .eq -> 1; .gt -> 2 }), a, b)} }
 _MaxPick: { #[E:*,K](o: Nat, a: mut List[mut _Keyed[E,K]], b: mut List[mut _Keyed[E,K]]): mut List[mut _Keyed[E,K]] ->
   o == 0 ?{ .then -> b; .else -> o == 1 ?{ .then -> a ++ b; .else -> a } } }
@@ -80,7 +80,7 @@ _Distinct: { #[E:*,K](xs: mut List[E], by: OrderHashBy[imm E,K]): mut List[E] ->
     Continue#) } }
   .return{ kept.get.list } }
 _DistinctStep: { #[E:*,K](keys: mut Var[read List[read _HashedKey[K]]], kept: mut Var[mut EList[E]], o: read OrderHash[K], e: E): Void ->
-  _KeepNew#(keys, o) ?{ .then -> kept.get.add(e); .else -> Void } }
+  _KeepNew#(keys, o) ?{ .then -> kept.get.add(e).void; .else -> Void } }
 _KeepNew: { #[K](keys: mut Var[read List[read _HashedKey[K]]], o: read OrderHash[K]): Bool -> _KeepHashed#(keys, o, o.hash) }
 _KeepHashed: { #[K](keys: mut Var[read List[read _HashedKey[K]]], o: read OrderHash[K], h: Nat): Bool ->
   keys.get.seqFlow.any{kk -> kk.hash == h ?{ .then -> o == (kk.key.close); .else -> False }} ?{

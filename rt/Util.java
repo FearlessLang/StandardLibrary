@@ -103,6 +103,7 @@ public class Util{
   public static Object callMF$1(Object f){ return ((MF$7$1)f).mut$$hash$0(); }
   public static Object callMF$2(Object f, Object x){ return ((MF$7$2)f).mut$$hash$1(x); }
   public static Object callMF$3(Object f,Object x,Object y){ return ((MF$7$3)f).mut$$hash$2(x,y); }
+  public static Object callMF$4(Object f,Object x,Object y,Object z){ return ((MF$7$4)f).mut$$hash$3(x,y,z); }
   public static Object callF$1(Object f){ return ((F$3$1)f).read$$hash$0(); }
   public static Object callF$2(Object f, Object x){ return ((F$3$2)f).read$$hash$1(x); }
   public static Object callF$3(Object f,Object x,Object y){ return ((F$3$3)f).read$$hash$2(x,y); }

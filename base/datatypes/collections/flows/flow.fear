@@ -36,7 +36,7 @@ Flow[E:*]: {
   /// ``for`` is a fence: every stage before it finishes with every element before ``f`` sees the first one.
   //>   .check{Block#
   //>     .let acc={ELists#[Nat]}
-  //>     .do{Flows#(1, 2, 3).for(acc, {a, e -> a.add(e * 2)})}
+  //>     .do{Flows#(1, 2, 3).for(acc, {a, e -> a.add(e * 2).void})}
   //>     .do{acc.list .assertEq({::}, Lists#(2, 4, 6))}
   //>     .done}
   mut .for[A](a: mutH A, f: mut ForEachBody[A,E]): Void -> this.allToAll{xs -> xs}.forEach(a, f);
@@ -95,7 +95,7 @@ Flow[E:*]: {
   //desugared terminals
   mut .for(f: mut MF[E,Void]): Void -> this.for(Void, {_, e -> f#e});
   mut .forEach(f: mut MF[E,Void]): Void -> this.forEach(Void, {_, e -> f#e});
-  mut .eList: mut EList[E] -> this.fold({ELists#}, {acc, e -> Block#(acc.add e, acc)});
+  mut .eList: mut EList[E] -> this.fold({ELists#}, {acc, e -> acc.add e});
   mut .list: mut List[E] -> this.eList.list;
   mut .eSet[E', K](asImm: mut AsImm[E, E'], by: OrderHashBy[E', K]): mut ESet[E'] -> this.fold({ESets#(by)}, {s, e -> s.add(asImm#e)});
   mut .set[E', K](asImm: mut AsImm[E, E'], by: OrderHashBy[E', K]): Set[E'] -> this.eSet(asImm, by).set;

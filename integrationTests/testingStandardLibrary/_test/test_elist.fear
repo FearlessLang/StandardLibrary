@@ -1,0 +1,38 @@
+TestEList: Test {::
+  .check{ELists#(2, 4).all{e -> (e.getRem 2) == 0} .assertTrue}
+  .check{ELists#(2, 3).all{e -> (e.getRem 2) == 0} .assertFalse}
+  .check{ELists#[Nat].all{_ -> False} .assertTrue}
+  .check{ELists#(1, 4).any{e -> (e.getRem 2) == 0} .assertTrue}
+  .check{ELists#(1, 3).any{e -> (e.getRem 2) == 0} .assertFalse}
+  .check{ELists#[Nat].any{_ -> True} .assertFalse}
+  .check{ELists#(1, 3).none{e -> (e.getRem 2) == 0} .assertTrue}
+  .check{ELists#(1, 4).none{e -> (e.getRem 2) == 0} .assertFalse}
+  .check{ELists#(1, 2, 3, 4).firstIndexWhere{e -> (e.getRem 2) == 0} .assertEq({::}, Opts# 1)}
+  .check{ELists#(1, 3).firstIndexWhere{e -> (e.getRem 2) == 0} .assertEmpty{::}}
+  .check{ELists#(1, 2, 3, 4).lastIndexWhere{e -> (e.getRem 2) == 0} .assertEq({::}, Opts# 3)}
+  .check{ELists#(1, 2, 3, 4).indicesWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3))}
+  .check{ELists#(1, 2, 3).set(1, 9).list .assertEq({::}, Lists#(1, 9, 3))}
+  .checkDetErr({::.isMsg{:: == "EList.set: Index 3 out of bounds for EList of length 3"}}, {ELists#(1, 2, 3).set(3, 9)})
+  .check{ELists#(1, 2, 3).clear.isEmpty .assertTrue}
+  .check{ELists#(1, 2, 3, 4).removeIf{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3))}
+  .check{ELists#(1, 2, 3, 4).retainIf{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(2, 4))}
+  .check{ELists#(1, 2, 3).remove(0).list .assertEq({::}, Lists#(2, 3))}
+  .checkDetErr({::.isMsg{:: == "EList.remove: Index 3 out of bounds for EList of length 3"}}, {ELists#(1, 2, 3).remove(3)})
+  .check{ELists#(0, 1, 2, 3, 4).removeAll(ELists#(3, 0)).list .assertEq({::}, Lists#(1, 2, 4))}
+  .checkDetErr({::.isMsg{::.startsWith "EList.removeAll: Index 1 is present twice"}}, {ELists#(0, 1, 2).removeAll(ELists#(1, 1))})
+  .check{ELists#(1, 2, 3, 4).removeFirstWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3, 4))}
+  .check{ELists#(1, 2, 3, 4).removeLastWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 2, 3))}
+  .check{ELists#(1, 3).removeLastWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3))}
+  .check{ELists#(0, 1, 2, 3, 4).trimTo(1, 3).list .assertEq({::}, Lists#(1, 2))}
+  .check{ELists#(0, 1, 2).trimTo(3, 3).list .assertEq({::}, List[Nat])}
+  .checkDetErr({::.isMsg{::.startsWith "EList.trimTo:"}}, {ELists#(0, 1, 2).trimTo(2, 1)})
+  .check{ELists#(1, 2, 3).reverse.list .assertEq({::}, Lists#(3, 2, 1))}
+  .check{ELists#(1, 2, 3).mapInPlace{e -> e * 10}.list .assertEq({::}, Lists#(10, 20, 30))}
+  .check{ELists#(1, 2, 3).swap(0, 2).list .assertEq({::}, Lists#(3, 2, 1))}
+  .checkDetErr({::.isMsg{:: == "EList.swap: Index 5 out of bounds for EList of length 3"}}, {ELists#(1, 2, 3).swap(0, 5)})
+  .check{Block#
+    .let l={ELists#(1, 2)}
+    .let c={l.shallowClone}
+    .do{l.add(3).void}
+    .return{c.list .assertEq({::}, Lists#(1, 2))}}
+  }

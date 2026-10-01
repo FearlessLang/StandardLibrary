@@ -99,6 +99,7 @@ MyTests:UnitTests{::
   .test GuiConnectedTests
   .test GuiKeyTests
   .test TestList
+  .test TestEList
   .test TestFlow
   .test TestMap
   .test TestAs
