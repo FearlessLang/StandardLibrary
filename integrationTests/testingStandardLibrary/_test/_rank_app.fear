@@ -108,6 +108,8 @@ MyTests:UnitTests{::
   .test TestMultiFlowSizes
   .test TestMultiFlowSingleUse
   .test TestMultiFlowChannels
+  .test TestMultiFlowBuild
+  .test TestMultiFlowFoldsAndMapping
   .test TestFlow
   .test TestMap
   .test TestAs
