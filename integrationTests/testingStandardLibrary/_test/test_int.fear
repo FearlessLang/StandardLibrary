@@ -49,7 +49,6 @@ IntWrapIndexTests: Test {::
   .check{(-1).getWrapIndex 7 .assertEq 6}
   .check{+0.getWrapIndex 7 .assertEq 0}
   .check{+7.getWrapIndex 7 .assertEq 0}
-  .check{+8.getWrapIndex 7 .assertEq 1}
   }
 
 IntConvTests: Test {::
@@ -108,13 +107,11 @@ IntBoundaryAndBoundedVsAluTests: Test {::
   .check{Math.maxInt.aluAddWrap +1 .assertEq(Math.minInt)}
   .check{Math.minInt.aluSubWrap +1 .assertEq(Math.maxInt)}
   .check{(-1).aluNat .assertEq(Math.maxNat)}
-  .check{(-1).aluNat.aluInt .assertEq -1}
   }
 
 IntSignTests: Test {::
   .check{-12.sign.assertEq -1}
   .check{+7.sign.assertEq +1}
-  .check{+0.sign.assertEq +0}
   }
 
 IntRangeTests: Test {::

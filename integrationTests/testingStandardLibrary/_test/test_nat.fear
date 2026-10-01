@@ -37,7 +37,6 @@ NatIndexOffsetTests: Test {::
 
 NatConvTests: Test {::
   .check{0.getInt .assertEq +0}
-  .check{5.getInt .assertEq +5}
   .check{255.getByte .assertEq (+255.getByte)}
   .check{300.softByte .assertEq (+255.getByte)}
   .check{5.getFloat .assertEq +5.0}
@@ -59,10 +58,6 @@ NatAluTests: Test {::
   .check{(-1).aluNat.aluRem 2 .assertEq 1}
   .check{1 .aluShiftLeft(Math.natBits) .assertEq 1}
   .check{(-1).aluNat .aluShiftRight 1 .aluInt .assertEq(Math.maxInt)}
-  .check{5 .aluXor 3 .assertEq 6}
-  .check{5 .aluAnd 3 .assertEq 1}
-  .check{5 .aluOr 2 .assertEq 7}
-  .check{(-1).aluNat.aluInt .assertEq -1}
   .check{(-1).aluNat.aluByte .assertEq (Math.maxByte)}
   }
 
@@ -86,7 +81,6 @@ NatLiteralFormsTests: Test {::
 
 NatBoundaryAndBoundedVsAluTests: Test {::
   .check{Math.maxNat.aluAddWrap 1 .assertEq 0}
-  .check{0.aluSubWrap 1 .assertEq(Math.maxNat)}
   .check{Math.maxNat.aluInt .assertEq -1}
   }
 

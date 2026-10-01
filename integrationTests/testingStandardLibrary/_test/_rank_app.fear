@@ -102,7 +102,6 @@ MyTests:UnitTests{::
   .test GuiConnectedTests
   .test GuiKeyTests
   .test TestList
-  .test TestEList
   .test TestESparseList
   .test TestFlow
   .test TestMap
@@ -116,8 +115,6 @@ MyTests:UnitTests{::
   .test InfoTests
   .test InfoValidatorTests
   .test InfoExtractorTests
-  .test TestInfoValidation
-  .test TestInfoExtraction
   .test TestBlock
   .test TestInfoFromStr
   .test TestDungeon

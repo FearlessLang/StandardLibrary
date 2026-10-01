@@ -3,35 +3,53 @@
 _EditableList[E:*, Self]: Pipe[Self] {
   /// ``this.all(f)`` returns `True` if ``f`` returns `True` for every element in this collection.
   /// Returns `True` if the collection is empty.
+  //> .check{ELists#(2, 4).all{e -> (e.getRem 2) == 0} .assertTrue}
+  //> .check{ELists#(2, 3).all{e -> (e.getRem 2) == 0} .assertFalse}
+  //> .check{ELists#[Nat].all{_ -> False} .assertTrue}
   mut .all(f: mut MF[E, Bool]): Bool;
 
   /// ``this.any(f)`` returns `True` if ``f`` returns `True` for at least one element in this collection.
   /// Returns `False` if the collection is empty.
+  //> .check{ELists#(1, 4).any{e -> (e.getRem 2) == 0} .assertTrue}
+  //> .check{ELists#(1, 3).any{e -> (e.getRem 2) == 0} .assertFalse}
+  //> .check{ELists#[Nat].any{_ -> True} .assertFalse}
   mut .any(f: mut MF[E, Bool]): Bool;
 
   /// ``this.none(f)`` returns `True` if ``f`` returns `False` for every element in this collection.
   /// Returns `True` if the collection is empty.
   /// Equivalent to: ``this.any(f).not``
+  //> .check{ELists#(1, 3).none{e -> (e.getRem 2) == 0} .assertTrue}
+  //> .check{ELists#(1, 4).none{e -> (e.getRem 2) == 0} .assertFalse}
   mut .none(f: mut MF[E, Bool]): Bool;
 
   /// ``this.firstIndexWhere(f)`` returns ``.some(i)`` where ``i`` is the index of the first element
   /// for which ``f`` returns `True`, or ``.empty`` if no such element exists.
+  //> .check{ELists#(1, 2, 3, 4).firstIndexWhere{e -> (e.getRem 2) == 0} .assertEq({::}, Opts# 1)}
+  //> .check{ELists#(1, 3).firstIndexWhere{e -> (e.getRem 2) == 0} .assertEmpty{::}}
   mut .firstIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
 
   /// ``this.lastIndexWhere(f)`` returns ``.some(i)`` where ``i`` is the index of the last element
   /// for which ``f`` returns `True`, or ``.empty`` if no such element exists.
+  //> .check{ELists#(1, 2, 3, 4).lastIndexWhere{e -> (e.getRem 2) == 0} .assertEq({::}, Opts# 3)}
   mut .lastIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
 
   /// ``this.indicesWhere(f)`` returns a flow of all indices where ``f`` returns `True`,
   /// in ascending order. ``f`` is called on every element before ``indicesWhere`` returns.
+  //> .check{ELists#(1, 2, 3, 4).indicesWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3))}
   mut .indicesWhere(mut MF[E, Bool]): mut Flow[Nat];
 
   /// ``this.mapInPlace(f)`` applies ``f`` to each element of this, replacing each element with the result,
   /// returning ``this``.
+  //> .check{ELists#(1, 2, 3).mapInPlace{e -> e * 10}.list .assertEq({::}, Lists#(10, 20, 30))}
   mut .mapInPlace(mut MF[E, E]): mut Self;
 
   /// ``this.shallowClone`` returns a shallow clone of this collection.
   /// The main use of this is to allow holding onto an identical editable list after this one has been drained.
   /// Note: elements in the resulting list will still point to the same objects as the ones in this.
+  //> .check{Block#
+  //>   .let l={ELists#(1, 2)}
+  //>   .let c={l.shallowClone}
+  //>   .do{l.add(3).void}
+  //>   .return{c.list .assertEq({::}, Lists#(1, 2))}}
   mut .shallowClone: mut Self;
   }

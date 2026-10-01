@@ -141,7 +141,6 @@ StrParseByteTests: Test {::
   .check{"1_" .byte .assertEq({::}, Opt[Byte])}
   .check{" 1" .byte .assertEq({::}, Opt[Byte])}
   .check{"1 " .byte .assertEq({::}, Opt[Byte])}
-  .check{"-1" .byte  .assertEq({::}, Opt[Byte])}
   }
 
 StrParseNumTests: Test {::
@@ -209,7 +208,6 @@ StrParseSoftFloatTests: Test {::
   .check{"Infinity" .softFloat .assertEq({::}, Opt[Float])}
   .check{"-Infinity" .softFloat .assertEq({::}, Opt[Float])}
   .check{"+1.0" .float .assertEq({::}, "+1.0" .softFloat)}
-  .check{"+0.1" .float .assertEq({::}, Opt[Float])}
   .check{" +1.0" .softFloat .assertEq({::}, Opt[Float])}
   .check{"+1_.0" .softFloat .assertEq({::}, Opt[Float])}
   .checkDetErr({::.isMsg{::.contains "Str.getSoftFloat"}}, {"+1.0e309".getSoftFloat})

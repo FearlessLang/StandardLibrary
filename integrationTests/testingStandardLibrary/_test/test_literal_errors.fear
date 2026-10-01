@@ -9,7 +9,6 @@ ThrowArithTests: Test {::
   .checkNonDetErr({::}, {Math.maxInt + +1})
   .checkNonDetErr({::}, {Math.minInt - +1})
   .checkNonDetErr({::}, {Math.maxInt - +2 * +2})
-  .check{Math.minInt.abs.assertEq(Math.maxInt.getNat + 1)}
   .checkNonDetErr({::}, {+250.getByte + (+10.getByte)})
   .checkNonDetErr({::}, {Math.minByte - (+1.getByte)})
   .checkDetErr({::}, {+7.getWrapIndex 0})

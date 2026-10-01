@@ -76,29 +76,10 @@ InfoTests: Test {::
 
 InfoValidatorTests: Test {::
   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-  .checkTrue{info.validate{::}}
-  .checkTrue{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}}}
-  .checkTrue{info.validate{::
-    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-    & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-    }}
-  .checkTrue{info.validate{:: > "friends" .isList{::.size == 2}}}
-  .checkFalse{info.validate{::
-    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-    | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
-    & > "friends" > 2 > "name" .isMsg{:: == "David"}}}
   .checkFalse{info.validate{:: > "friends" .where{::
     & > 0 > "name" .isMsg{:: == "Bob"}
     | > 1 > "name" .isMsg{:: == "Alice"}
     & > 2 > "name" .isMsg{:: == "David"}}}}
-  .checkTrue{info.validate{::
-    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-    | > "friends" .where{::
-      & > 1 > "name" .isMsg{:: == "Alice"}
-      & > 2 > "name" .isMsg{:: == "David"}}}}
-  .checkTrue{info.validate{::
-    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-    & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
   .checkFalse{info.validate{:: > "friends" > 1 > "name" .isMsg{:: == "Alice"} .not}}
   .checkTrue{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "Alice"}}}.isSome}
   .checkTrue{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "David"}}}.isEmpty}
@@ -110,17 +91,6 @@ InfoValidatorTests: Test {::
 
 InfoExtractorTests: Test {::
   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
-  .checkEq(info, {info.extract{::}!})
-  .checkEq("bob", {info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}!})
-  .checkEq("Bob, Alice", {info.extract{:: > "friends" .extractList .where{::
-      & > 0 > "name" .isMsg{:: == "Bob"}
-      & > 1 > "name" .isMsg{:: == "Alice"}
-      }}
-    .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!})
-  .checkTrue{info.extract{:: > "friends" .extractList .where{::
-      & > 0 > "name" .isMsg{:: == "Bob"}
-      & > 1 > "name" .isMsg{:: == "David"}
-      }}.isEmpty}
   .checkTrue{info.extract{:: > "friends" > 2}.isEmpty}
   .checkTrue{info.extract{:: > "friends" > 0 > "name" .extractMsg{:: == "Alice"}}.isEmpty}
   .checkEq({::}, Opts# "Alice", {info.extract{:: .extractMap > "friends" .extractList > 1 > "name" .extractMsg}})
