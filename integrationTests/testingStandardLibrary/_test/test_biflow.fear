@@ -1,0 +1,18 @@
+TestBiFlow: Test {::
+  .check{Flows#(Vars#[Nat](1), Vars#[Nat](2)).with(Flows#(Vars#[Nat](10), Vars#[Nat](20)))
+    .getMerge{a, b -> Block#(a.set(a.get + (b.get)), a)}.map{v -> v.get}.list .assertEq({::}, Lists#(11, 22))}
+  .check{Flows#(1, 2, 3).with(Flows#(10)).fillA{i -> i}.merge{a, b -> a + b}.isEmpty .assertTrue}
+  .check{Flows#(1).with(Flows#(10, 20, 30)).cutToSmallest.getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11))}
+  .check{Flows#[Nat].with(Flows#[Nat]).getMerge{a, b -> a + b}.list .assertEq({::}, List[Nat])}
+  .check{Flows#(1).with(Flows#(10, 20)).mergeOpts{a, b -> a.isSome}.list .assertEq({::}, Lists#(True, False))}
+  .checkDetErr({::.isMsg{::.startsWith "BiFlow: this BiFlow is already consumed"}}, {Block#
+    .let bf={Flows#(1).with(Flows#(2))}
+    .do{Block#(bf.getMerge{a, b -> a + b}, Void)}
+    .return{bf.getFold({0}, {acc, a, b -> acc + a + b})}
+    })
+  .checkDetErr({::.isMsg{::.startsWith "BiFlow: this BiFlow is already consumed"}}, {Block#
+    .let bf={Flows#(1).with(Flows#(2))}
+    .do{Block#(bf.fold({0}, {acc, a, b -> acc + a + b}), Void)}
+    .return{bf.cutToSmallest.getMerge{a, b -> a + b}.size}
+    })
+  }
