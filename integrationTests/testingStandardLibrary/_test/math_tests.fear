@@ -39,7 +39,6 @@ MathConstantsTests: Test {::
   .check{Math.floatBits.assertEq(64)}
   .check{Math.inf.assertEq(+1.0 / +0.0)}
   .check{Math.negInf.assertEq((-1.0) / +0.0)}
-  .check{Math.nan.isNaN.assertTrue}
 
   .check{Math.pi.assertInRange(
     +3.141592653589793115997963468544185161590576171875

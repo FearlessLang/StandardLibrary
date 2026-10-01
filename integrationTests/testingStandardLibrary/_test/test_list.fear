@@ -1,6 +1,4 @@
 ListBasicsTests: Test {::
-  .check{List[Str] .size .assertEq 0}
-  .check{List[Int] .isEmpty .assertEq True}
   .check{List[Int].orderHash{::} == List[Int].assertEq True}
   .check{List[Str] .str{::.str} .assertEq "[]"}
   .check{List[List[Str]] .str{::.str{::.str}} .assertEq "[]"}

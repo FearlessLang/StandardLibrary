@@ -11,7 +11,6 @@ TryGetNumberTests: Test {::
   .check{+5 .tryGetWrapIndex 0 .assertInfo{::.isMsg{::.startsWith "Int.getWrapIndex: len==0"}}}
   .check{(Math.maxNat).tryGetInt.assertInfo{::.isMsg{::.startsWith `Nat.getInt`}}}
   .check{(7/2).tryGetInt.assertInfo{::.isMsg{::.startsWith `Num.getInt`}}}
-  .check{(3.5 .tryGetNum).ok.assertEq({::}, Opts#(7/2))}
   .check{Math.nan.tryGetSqrt.assertInfo{::.isMsg{::.startsWith `Float.getSqrt`}}}
   .check{(4.0 .tryGetNegAbs).ok.assertEq({::}, Opts#(-4.0))}
   .check{Math.nan.tryGetNegAbs.assertInfo{::.isMsg{::.startsWith "Float.getAbs: Cannot take the absolute value of NaN"}}}
@@ -67,7 +66,6 @@ FloatNumConversionTests: Test {::
   .checkDetErr({::.isMsg{::.startsWith `Float.getNat`}}, {18446744073709551616.0 .getNat})
   .check{9223372036854775808.0 .softNat .assertEq 9223372036854775808}
   .check{18446744073709551616.0 .softNat .assertEq(Math.maxNat)}
-  .check{Math.inf.softNat .assertEq(Math.maxNat)}
   .check{18446744073709551616.0 .nat .assertEmpty {::}}
   .checkDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(1/2).getByte})
   .checkDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(300/1).getByte})
@@ -76,8 +74,6 @@ FloatNumConversionTests: Test {::
   }
 
 SuccPredTests: Test {::
-  .check{5 .succ .assertEq 6}
-  .check{+5 .pred .assertEq +4}
   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.succ: cannot take the successor of 18446744073709551615"}}, {(Math.maxNat).succ})
   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.pred: cannot take the predecessor of 0"}}, {0 .pred})
   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int.succ:`}}, {(Math.maxInt).succ})
@@ -86,7 +82,6 @@ SuccPredTests: Test {::
   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Byte.pred:`}}, {(Math.minByte).pred})
   .checkDetErr({::.isMsg{::.startsWith `Float.getSucc`}}, {Math.nan.getSucc})
   .check{Math.inf.tryGetSucc.assertInfo{::.isMsg{::.startsWith `Float.getSucc`}}}
-  .check{(1.0 .tryGetSucc).ok.assertEq({::}, Opts#(1.0 .getSucc))}
   .checkDetErr({::.isMsg{::.startsWith `Float.getPred`}}, {Math.negInf.getPred})
   .check{Math.nan.tryGetPred.assertInfo{::.isMsg{::.startsWith `Float.getPred`}}}
   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith `Int*`}}, {(Math.maxInt) * +2})

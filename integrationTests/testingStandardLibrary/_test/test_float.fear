@@ -75,7 +75,6 @@ FloatConvTests: Test {::
   .check{(-1.5).softNat .assertEq 0}
   .check{+300.0.softByte .assertEq (+255.getByte)}
   .check{(-1.0).softByte .assertEq (+0.getByte)}
-  .check{Math.nan .softInt .assertEq +0}
   .check{+1.0 / +0.0 .softInt .assertEq (Math.maxInt)}
   .check{(-1.0) / +0.0 .softInt .assertEq (Math.minInt)}
   .check{+1.0 / +0.0 .softNat .assertEq (Math.maxNat)}

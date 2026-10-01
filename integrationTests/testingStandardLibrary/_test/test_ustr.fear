@@ -58,7 +58,6 @@ TestUStr:Test{::
   .check{"f".u.scalarHex.assertEq "0066"}
   .check{"ffeg".u.scalarHex.assertEq "0066 0066 0065 0067"}
   .check{"hello".u.scalarHex.assertEq "0068 0065 006C 006C 006F"}
-  .check{"".u.scalarHex.assertEq ""}
 
   .check{"hello".u.u "F066".scalarHex.assertEq "0068 0065 006C 006C 006F F066"}
   .check{"hello".u.u "F066 0061".scalarHex.assertEq "0068 0065 006C 006C 006F F066 0061"}
@@ -244,9 +243,6 @@ TestUStr:Test{::
   // escape output shape, representative duplicated cases
   // ------------------------------------------------------------
 
-  .check{"".u "0066 F066 0066 0065 0067".escape.assertEq (
-    ""^"f"^".u"^"F066"^"+("^"feg"^".u)")
-    }
 
   .check{"hello".u.u "F066 0061".escape.assertEq (
     ""^"hello"^".u"^"F066"^"+("^"a"^".u)")

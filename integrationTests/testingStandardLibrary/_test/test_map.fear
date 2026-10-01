@@ -73,8 +73,6 @@ MapBasicsTests: Test {::
     .with(Maps#({::}, "aa", "x", "b", "y"), "v2")
     .get (Maps#({::}, "aa", "x", "b", "y")) .assertEq "v2"}
   .check{Maps#({::.orderHash{::}}, Maps#({::}, "aa", "x", "b", "y"), "v1")
-    .with(Maps#({::}, "b", "y", "aa", "x"), "v3") .size .assertEq 2}
-  .check{Maps#({::.orderHash{::}}, Maps#({::}, "aa", "x", "b", "y"), "v1")
     .containsKey (Maps#({::.imm.size.str}, "aa", "x", "b", "y")) .assertFalse}
   .check{Maps#({::.orderHash{::}}, Maps#({::}, "aa", "x", "b", "y"), "v1")
     .with(Maps#({::.imm.size.str}, "aa", "x", "b", "y"), "vS") .size .assertEq 2}

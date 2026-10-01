@@ -1,81 +1,55 @@
 // this exists to make sure I don't miss any methods when implementing editable lists
-/// A private interface which holds the common methods of editable lists
+/// A private interface which holds the methods common to all the editable lists, with the same meaning in each.
 _EditableList[E:*, Self]: Pipe[Self] {
   /// ``this.all(f)`` returns `True` if ``f`` returns `True` for every element in this collection.
   /// Returns `True` if the collection is empty.
+  //> .check{ELists#(2, 4).all{e -> (e.getRem 2) == 0} .assertTrue}
+  //> .check{ELists#(2, 3).all{e -> (e.getRem 2) == 0} .assertFalse}
+  //> .check{ELists#[Nat].all{_ -> False} .assertTrue}
   mut .all(f: mut MF[E, Bool]): Bool;
 
   /// ``this.any(f)`` returns `True` if ``f`` returns `True` for at least one element in this collection.
   /// Returns `False` if the collection is empty.
+  //> .check{ELists#(1, 4).any{e -> (e.getRem 2) == 0} .assertTrue}
+  //> .check{ELists#(1, 3).any{e -> (e.getRem 2) == 0} .assertFalse}
+  //> .check{ELists#[Nat].any{_ -> True} .assertFalse}
   mut .any(f: mut MF[E, Bool]): Bool;
 
   /// ``this.none(f)`` returns `True` if ``f`` returns `False` for every element in this collection.
   /// Returns `True` if the collection is empty.
   /// Equivalent to: ``this.any(f).not``
+  //> .check{ELists#(1, 3).none{e -> (e.getRem 2) == 0} .assertTrue}
+  //> .check{ELists#(1, 4).none{e -> (e.getRem 2) == 0} .assertFalse}
   mut .none(f: mut MF[E, Bool]): Bool;
 
   /// ``this.firstIndexWhere(f)`` returns ``.some(i)`` where ``i`` is the index of the first element
   /// for which ``f`` returns `True`, or ``.empty`` if no such element exists.
+  //> .check{ELists#(1, 2, 3, 4).firstIndexWhere{e -> (e.getRem 2) == 0} .assertEq({::}, Opts# 1)}
+  //> .check{ELists#(1, 3).firstIndexWhere{e -> (e.getRem 2) == 0} .assertEmpty{::}}
   mut .firstIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
 
   /// ``this.lastIndexWhere(f)`` returns ``.some(i)`` where ``i`` is the index of the last element
   /// for which ``f`` returns `True`, or ``.empty`` if no such element exists.
+  //> .check{ELists#(1, 2, 3, 4).lastIndexWhere{e -> (e.getRem 2) == 0} .assertEq({::}, Opts# 3)}
   mut .lastIndexWhere(mut MF[E, Bool]): mut Opt[Nat];
 
   /// ``this.indicesWhere(f)`` returns a flow of all indices where ``f`` returns `True`,
   /// in ascending order. ``f`` is called on every element before ``indicesWhere`` returns.
+  //> .check{ELists#(1, 2, 3, 4).indicesWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3))}
   mut .indicesWhere(mut MF[E, Bool]): mut Flow[Nat];
-
-  /// ``this.set(i, e)`` sets the element at index ``i`` to ``e``, returning ``this``.
-  /// Throws if ``i`` is out of bounds.
-  mut .set(Nat, E): mut Self;
-
-  /// ``this.clear`` removes all elements from this collection, returning ``this``.
-  /// The capacity remains unchanged.
-  mut .clear: mut Self;
-
-  /// ``this.removeIf(f)`` removes all elements for which ``f`` returns `True`, returning ``this``.
-  mut .removeIf(mut MF[E, Bool]): mut Self;
-
-  /// ``this.retainIf(f)`` removes all elements for which ``f`` returns `False`, returning ``this``.
-  /// Equivalent to: ``this.removeIf{e -> f#e .not}``
-  mut .retainIf(f: mut MF[E, Bool]): mut Self -> this.removeIf{f#:: .not};
-
-  /// ``this.remove(i)`` removes the element at index ``i``, returning ``this``.
-  /// In an `ESparseList` index ``i`` becomes a hole, and removing a hole does nothing.
-  /// Throws if ``i`` is out of bounds.
-  mut .remove(Nat): mut Self;
-
-  /// ``this.removeAll indices`` removes the element at each index in ``indices``, returning ``this``.
-  /// Throws if there are any duplicate indices, or if any of the indices are out of bounds.
-  mut .removeAll(read EList[Nat]): mut Self;
-
-  /// ``this.removeFirstWhere(f)`` removes the first element for which ``f`` returns `True`, returning ``this``.
-  /// Does nothing if no such element exists.
-  mut .removeFirstWhere(mut MF[E, Bool]): mut Self;
-
-  /// ``this.removeLastWhere(f)`` removes the last element for which ``f`` returns `True`, returning ``this``.
-  /// Does nothing if no such element exists.
-  mut .removeLastWhere(mut MF[E, Bool]): mut Self;
-
-  /// ``this.trimTo(start, end)`` removes all elements with indices outside of the range ``[start, end)``,
-  /// returning ``this``. Indices are re-based so that the element previously at ``start`` is now at index ``0``.
-  /// Throws if ``start > end`` or ``end > this.size`` (``end > this.capacity`` for an `ESparseList`).
-  mut .trimTo(start: Nat, end: Nat): mut Self;
-
-  /// ``this.reverse`` reverses the order of elements in this collection in place, returning ``this``.
-  mut .reverse: mut Self;
 
   /// ``this.mapInPlace(f)`` applies ``f`` to each element of this, replacing each element with the result,
   /// returning ``this``.
+  //> .check{ELists#(1, 2, 3).mapInPlace{e -> e * 10}.list .assertEq({::}, Lists#(10, 20, 30))}
   mut .mapInPlace(mut MF[E, E]): mut Self;
-
-  /// ``this.swap(i, j)`` swaps the elements at indices ``i`` and ``j``, returning ``this``.
-  /// Throws if either index is out of bounds.
-  mut .swap(Nat, Nat): mut Self;
 
   /// ``this.shallowClone`` returns a shallow clone of this collection.
   /// The main use of this is to allow holding onto an identical editable list after this one has been drained.
   /// Note: elements in the resulting list will still point to the same objects as the ones in this.
+  //> .check{Block#
+  //>   .let l={ELists#(1, 2)}
+  //>   .let c={l.shallowClone}
+  //>   .do{l.add(3).void}
+  //>   .return{c.list .assertEq({::}, Lists#(1, 2))}}
   mut .shallowClone: mut Self;
   }
