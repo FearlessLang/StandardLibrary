@@ -64,7 +64,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///Concrete log types must be non generic.
 ///Creating a reader throw with nondeterministic error if the concrete log type is generic.
 ///
-InMemoryLog[T]:CaptureFree{
+InMemoryLog[T]: CaptureFree{
   .name: Str;
   
   ///Submits s to an in memory log that requires a capability to be read.
@@ -101,7 +101,7 @@ InMemoryLog[T]:CaptureFree{
 ///
 ///See also: base.Log (the single fixed shared log, no declaration needed),
 ///base.InMemoryLog (in memory instead of a file, for unit testing).
-FileLog:CaptureFree{
+FileLog: CaptureFree{
   .name: Str;
   .log(s: read ToStr): Void -> _Magic!;
   }
@@ -109,5 +109,5 @@ LogReader[T]: ToIso[LogReader[T]], WidenTo[LogReader[T]]{
   mut .read: List[T];    ///Returns the values currently stored in the log without removing them
   mut .consume: List[T]; ///Returns the values currently stored in the log and clears the log
   read .logName: Str;   ///The diagnostic name of the corresponding log
-  mut .clear:Void->Block#(this.consume,Void);
+  mut .clear: Void->Block#(this.consume,Void);
   }

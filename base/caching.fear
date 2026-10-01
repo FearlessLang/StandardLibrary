@@ -47,7 +47,7 @@ Cache: {
   .ofMemo[R](f: CacheMemo[R]): Norm[R] -> f._get;
   .ofMemo[A,R](a: Norm[A], f: CacheMemo[A,R]): Norm[R] -> f._get(a);
   .ofMemo[A,B,R](a:Norm[A], b: Norm[B], f: CacheMemo[A,B,R]): Norm[R] -> f._get(a,b);
-  .flush(h:CacheHandler):Void->_CacheFlush.flush h;
+  .flush(h:CacheHandler): Void->_CacheFlush.flush h;
   }
 CacheReprF[A,R]: CacheHandler{
   #(read A): R;
@@ -62,7 +62,7 @@ CacheReprF[A,B,R]: CacheHandler{
   //static java.util.concurrent.ConcurrentHashMap<Repr$1, Cache2> myCache= new java.util.concurrent.ConcurrentHashMap<>();
   }
 
-_ListNorm:{#[T:*,R](List[T],mut MF[T,Norm[R]]): Norm[List[Norm[R]]]->_Magic!}
+_ListNorm:{#[T:*,R](List[T], mut MF[T,Norm[R]]): Norm[List[Norm[R]]] -> _Magic!}
 
-_ReprCacheFlush:{ #[T](mut Repr[T]):Void->_Magic! }
-_CacheFlush:{ .flush(h:CacheHandler):Void->_Magic!; }
+_ReprCacheFlush:{ #[T](mut Repr[T]): Void->_Magic! }
+_CacheFlush:{ .flush(h:CacheHandler): Void->_Magic!; }

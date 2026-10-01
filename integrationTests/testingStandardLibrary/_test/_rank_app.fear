@@ -111,6 +111,8 @@ MyTests:UnitTests{::
   .test InfoTests
   .test InfoValidatorTests
   .test InfoExtractorTests
+  .test TestInfoValidation
+  .test TestInfoExtraction
   .test TestBlock
   .test TestInfoFromStr
   .test TestDungeon
