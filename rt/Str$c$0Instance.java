@@ -108,6 +108,16 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     var res= val.indexOf(text);
     return res==-1? optEmpty(): optSome(Nat$c$0Instance.instance(res));
   }
+  @Override public Object imm$lastIndexOf$1(Object p0){
+    var res= val.lastIndexOf(s(p0));
+    return res==-1? optEmpty(): optSome(Nat$c$0Instance.instance(res));
+  }
+  @Override public Object imm$indicesOf$1(Object p0){
+    var text= s(p0);
+    var res= new ArrayList<Object>();
+    for (int i= val.indexOf(text); i != -1; i= i < val.length() ? val.indexOf(text, i + 1) : -1){ res.add(Nat$c$0Instance.instance(i)); }
+    return Flow$o$1Instance.of(res, FlowMode.ParImm);
+  }
   @Override public Object imm$sub$2(Object p1, Object p2){
     long from= ((Nat$c$0Instance)p1).val();
     long to= ((Nat$c$0Instance)p2).val();
@@ -352,6 +362,27 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$contains$1(Object p0){
     var other= ((Str$c$0Instance)p0).val;
     return bool(val.contains(other));
+  }
+  @Override public Object imm$endsWith$1(Object p0){ return bool(val.endsWith(s(p0))); }
+  @Override public Object imm$count$1(Object p0){
+    var text= s(p0);
+    if (text.isEmpty()){ return Nat$c$0Instance.instance(val.length()); }
+    int count= 0;
+    for (int i= val.indexOf(text); i != -1; i= val.indexOf(text, i + text.length())){ count++; }
+    return Nat$c$0Instance.instance(count);
+  }
+  @Override public Object imm$trim$0(){ return instance(val.trim()); }
+  @Override public Object imm$split$1(Object p0){
+    var sep= s(p0);
+    if (sep.isEmpty()){ throw detErr("Str.split: the separator is the empty string, which occurs between any two characters; use a non empty separator."); }
+    var res= new ArrayList<Object>();
+    int start= 0;
+    for (int i= val.indexOf(sep); i != -1; i= val.indexOf(sep, start)){
+      res.add(instance(val.substring(start, i)));
+      start= i + sep.length();
+    }
+    res.add(instance(val.substring(start)));
+    return List$o$1Instance.wrap(res);
   }
   @Override public Object imm$lower$0(){ return new Str$c$0Instance(val.toLowerCase()); }
   @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase()); }

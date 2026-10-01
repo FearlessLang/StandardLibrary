@@ -55,21 +55,33 @@
 ///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
 ///
 /// Str.bool / Str.getBool:
-/// - rejected: any text other than exactly ``True`` or ``False`` (this includes ``true``, `` True`` and ``True ``)
-/// - accepted: ``True``.getBool  ``False``.getBool
+/// - rejected: any text other than exactly `True` or `False` (this includes ``true``, `` True`` and ``True ``)
+/// - accepted: `True`.getBool  `False`.getBool
 /// - roundtrip: b.str.getBool == b for every Bool b
 Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKey {
   .close->::; .close->this;
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
   |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings
-  ^(x: read ToStr): Str;           /// like + but inserts a double quote between the two strings
+  ^(x: read ToStr): Str;            /// like + but inserts a double quote between the two strings
 
   | : Str;                          /// appends a newline
-  ^ : Str;                         /// appends a double quote
-  .isEmpty: Bool;                   /// true iff size == 0
+  ^ : Str;                          /// appends a double quote
+  .isEmpty: Bool;                   /// true iff ``this.size == 0``
   .size: Nat;                       /// the amount of characters in this string
   .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use ^ and |, not necessarily a single literal)
-  .indexOf(Str): Opt[Nat];          /// index of the first occourence of the parameter. Returns 0 if the parameter is ``
+  .indexOf(Str): Opt[Nat];          /// index of the first occurrence of the parameter. Returns 0 if the parameter is ``
+  /// ``this.lastIndexOf s`` returns the index of the last occurrence of ``s`` in `this`, ``this.size`` if ``s`` is ``""``.
+  //>   .check{"abab".lastIndexOf "ab" .assertEq({::}, Opts# 2)}
+  //>   .check{"abab".lastIndexOf "" .assertEq({::}, Opts# 4)}
+  //>   .check{"abab".lastIndexOf "c" .assertEmpty{::}}
+  .lastIndexOf(Str): Opt[Nat];
+  /// ``this.indicesOf s`` returns a flow of the indices of all the occurrences of ``s`` in `this`, overlapping ones included,
+  /// in ascending order. Returns every index from ``0`` to ``this.size`` if ``s`` is ``""``.
+  //>   .check{"aaa".indicesOf "aa" .list .assertEq({::}, Lists#(0, 1))}
+  //>   .check{"ab".indicesOf "" .list .assertEq({::}, Lists#(0, 1, 2))}
+  //>   .check{"ab".indicesOf "c" .list .assertEq({::}, List[Nat])}
+  .indicesOf(Str): mut Flow[Nat];
+
   .sub(from: Nat, to: Nat): Str;    /// substring [from,to); throws on from/to out of the string boundaries or from > to
   .replaceSimultaneous(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement; throws on empty keys, duplicated keys, odd sized lists, keys with prefixes
   .replaceSimultaneousOrdered(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement where the first matching rule wins; throws on empty keys, duplicated keys, odd sized lists
@@ -86,7 +98,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
   .nat: Opt[Nat];              /// parse a string representing a valid Fearless Nat; .empty on invalid (this includes out of range)
   .byte: Opt[Byte];            /// parse a string representing a valid Fearless Nat in the range [0,255]; .empty on invalid
-  .bool: Opt[Bool] -> (this == "True").toOpt{True} | ((this == "False").toOpt{False}); /// parses exactly ``True``/``False`` as produced by Bool.str; .empty on invalid (this includes out of range)
+  .bool: Opt[Bool] -> (this == "True").toOpt{True} | ((this == "False").toOpt{False}); /// parses exactly `True`/`False` as produced by Bool.str; .empty on invalid (this includes out of range)
 
 
   .getIeeeFloat: Float -> this.tryGetIeeeFloat!;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
@@ -132,12 +144,32 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
 
 
   .startsWith(Str): Bool;           /// this string starts with the other string
+  /// ``this.endsWith s`` returns `True` if `this` ends with ``s``.
+  //>   .check{"abc".endsWith "bc" .assertTrue}
+  //>   .check{"abc".endsWith "ab" .assertFalse}
+  .endsWith(Str): Bool;
   .contains(Str): Bool;             /// ``this.contains s`` returns `True` if ``s`` is a substring of ``this``.
+  /// ``this.count s`` returns the number of non-overlapping occurrences of ``s`` in `this`, scanning left to right.
+  /// Returns ``this.size`` if ``s`` is ``""``.
+  //>   .check{"aaaa".count "aa" .assertEq 2}
+  //>   .check{"abc".count "" .assertEq 3}
+  //>   .check{"abc".count "d" .assertEq 0}
+  .count(Str): Nat;
   .lower: Str;                      /// this string but all lowercase
   .upper: Str;                      /// this string but all uppercase
   .u : UStr;                        /// this string, but as a Unicode string
   .u(values: Str) : UStr;           /// equivalent to this.u.u values
   .norm: Norm[Str];
+
+  /// `this.trim` returns `this` without its leading and trailing characters with code point at most ``32`` (space and control characters).
+  //>   .check{" a b ".trim .assertEq "a b"}
+  .trim: Str;
+  /// ``this.split s`` returns the pieces of `this` between the non-overlapping occurrences of ``s``, scanning left to right;
+  /// ``this.count s + 1`` pieces, empty ones included. Throws if ``s`` is ``""``.
+  //>   .check{"a,b,,c,".split "," .assertEq({::}, Lists#("a", "b", "", "c", ""))}
+  //>   .check{"abc".split "," .assertEq({::}, Lists#"abc")}
+  //>   .checkDetErr({::.isMsg{::.startsWith "Str.split:"}}, {"abc".split ""})
+  .split(Str): List[Str];
 
   .indexInto i -> i.matchWithDefault {
     .map map -> map.opt(this);
