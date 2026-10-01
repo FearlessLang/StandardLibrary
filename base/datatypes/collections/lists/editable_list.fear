@@ -1,5 +1,5 @@
 // this exists to make sure I don't miss any methods when implementing editable lists
-/// A private interface which holds the common methods of editable lists
+/// A private interface which holds the methods common to all the editable lists, with the same meaning in each.
 _EditableList[E:*, Self]: Pipe[Self] {
   /// ``this.all(f)`` returns `True` if ``f`` returns `True` for every element in this collection.
   /// Returns `True` if the collection is empty.
@@ -26,53 +26,9 @@ _EditableList[E:*, Self]: Pipe[Self] {
   /// in ascending order. ``f`` is called on every element before ``indicesWhere`` returns.
   mut .indicesWhere(mut MF[E, Bool]): mut Flow[Nat];
 
-  /// ``this.set(i, e)`` sets the element at index ``i`` to ``e``, returning ``this``.
-  /// Throws if ``i`` is out of bounds.
-  mut .set(Nat, E): mut Self;
-
-  /// ``this.clear`` removes all elements from this collection, returning ``this``.
-  /// The capacity remains unchanged.
-  mut .clear: mut Self;
-
-  /// ``this.removeIf(f)`` removes all elements for which ``f`` returns `True`, returning ``this``.
-  mut .removeIf(mut MF[E, Bool]): mut Self;
-
-  /// ``this.retainIf(f)`` removes all elements for which ``f`` returns `False`, returning ``this``.
-  /// Equivalent to: ``this.removeIf{e -> f#e .not}``
-  mut .retainIf(f: mut MF[E, Bool]): mut Self -> this.removeIf{f#:: .not};
-
-  /// ``this.remove(i)`` removes the element at index ``i``, returning ``this``.
-  /// In an `ESparseList` index ``i`` becomes a hole, and removing a hole does nothing.
-  /// Throws if ``i`` is out of bounds.
-  mut .remove(Nat): mut Self;
-
-  /// ``this.removeAll indices`` removes the element at each index in ``indices``, returning ``this``.
-  /// Throws if there are any duplicate indices, or if any of the indices are out of bounds.
-  mut .removeAll(read EList[Nat]): mut Self;
-
-  /// ``this.removeFirstWhere(f)`` removes the first element for which ``f`` returns `True`, returning ``this``.
-  /// Does nothing if no such element exists.
-  mut .removeFirstWhere(mut MF[E, Bool]): mut Self;
-
-  /// ``this.removeLastWhere(f)`` removes the last element for which ``f`` returns `True`, returning ``this``.
-  /// Does nothing if no such element exists.
-  mut .removeLastWhere(mut MF[E, Bool]): mut Self;
-
-  /// ``this.trimTo(start, end)`` removes all elements with indices outside of the range ``[start, end)``,
-  /// returning ``this``. Indices are re-based so that the element previously at ``start`` is now at index ``0``.
-  /// Throws if ``start > end`` or ``end > this.size`` (``end > this.capacity`` for an `ESparseList`).
-  mut .trimTo(start: Nat, end: Nat): mut Self;
-
-  /// ``this.reverse`` reverses the order of elements in this collection in place, returning ``this``.
-  mut .reverse: mut Self;
-
   /// ``this.mapInPlace(f)`` applies ``f`` to each element of this, replacing each element with the result,
   /// returning ``this``.
   mut .mapInPlace(mut MF[E, E]): mut Self;
-
-  /// ``this.swap(i, j)`` swaps the elements at indices ``i`` and ``j``, returning ``this``.
-  /// Throws if either index is out of bounds.
-  mut .swap(Nat, Nat): mut Self;
 
   /// ``this.shallowClone`` returns a shallow clone of this collection.
   /// The main use of this is to allow holding onto an identical editable list after this one has been drained.

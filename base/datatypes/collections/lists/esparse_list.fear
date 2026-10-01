@@ -13,8 +13,8 @@ ESparseLists: {
 
 /// A list with "holes": every index below `ESparseList.capacity` holds either an element or a hole.
 /// `ESparseList.set` fills a hole; `ESparseList.remove` makes a hole; the indices of the other elements never change,
-/// except by `ESparseList.trimTo` and `ESparseList.reverse`.
-/// The methods taking a predicate or a function skip the holes.
+/// except by `ESparseList.trimTo`, `ESparseList.reverse` and `ESparseList.swap`.
+/// The holes are not elements: the methods taking a function of the elements never call it on a hole.
 ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// ``this.isFull`` returns `True` if there are no holes in this collection.
   //> .checkTrue{ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(1, 2).set(2, 3).isFull}
@@ -64,6 +64,57 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   //> .checkDetErr({::.isMsg{:: == "ESparseList.get: Index 2 out of bounds for ESparseList of capacity 2"}}, {ESparseLists.backedWithArray[Nat] 2 .get 2})
   read .get(Nat): mut Opt[read/imm E];
   mut .get(Nat): mut Opt[E];
+
+  /// ``this.set(i, e)`` puts ``e`` at index ``i``, filling the hole or replacing the element there, and returns ``this``.
+  /// Throws if ``i >= this.capacity``.
+  //> .check{ESparseLists.backedWithArray[Nat] 2 .set(1, 7).set(1, 8) .get 1 .assertEq({::}, Opts# 8)}
+  //> .checkDetErr({::.isMsg{:: == "ESparseList.set: Index 2 out of bounds for ESparseList of capacity 2"}}, {ESparseLists.backedWithArray[Nat] 2 .set(2, 7)})
+  mut .set(Nat, E): mut ESparseList[E];
+
+  /// ``this.clear`` makes every index a hole, returning ``this``. The capacity is unchanged.
+  //> .check{ESparseLists.backedWithArray[Nat] 2 .set(1, 7).clear.numHoles .assertEq 2}
+  mut .clear: mut ESparseList[E];
+
+  /// ``this.remove(i)`` makes index ``i`` a hole, returning ``this``; removing a hole does nothing.
+  /// Throws if ``i >= this.capacity``.
+  //> .check{ESparseLists.backedWithArray[Nat] 2 .set(0, 6).set(1, 7).remove 0 .get 1 .assertEq({::}, Opts# 7)}
+  mut .remove(Nat): mut ESparseList[E];
+
+  /// ``this.removeAll indices`` makes a hole of each index in ``indices``, returning ``this``.
+  /// Throws if an index is present twice, or if any index is ``>= this.capacity``.
+  //> .check{ESparseLists.backedWithArray[Nat] 3 .fillHoles{i -> i}.removeAll(ELists#(2, 0)).numHoles .assertEq 2}
+  mut .removeAll(read EList[Nat]): mut ESparseList[E];
+
+  /// ``this.removeIf(f)`` makes a hole of every index whose element ``f`` returns `True` for, returning ``this``.
+  //> .check{ESparseLists.backedWithArray[Nat] 3 .fillHoles{i -> i}.removeIf{e -> e > 0}.flatSeqFlow.list .assertEq({::}, Lists#(0))}
+  mut .removeIf(mut MF[E, Bool]): mut ESparseList[E];
+
+  /// ``this.retainIf(f)`` makes a hole of every index whose element ``f`` returns `False` for, returning ``this``.
+  /// Equivalent to: ``this.removeIf{e -> f#e .not}``
+  mut .retainIf(f: mut MF[E, Bool]): mut ESparseList[E] -> this.removeIf{f#:: .not};
+
+  /// ``this.removeFirstWhere(f)`` makes a hole of the lowest index whose element ``f`` returns `True` for, returning ``this``.
+  /// Does nothing if no such element exists.
+  mut .removeFirstWhere(mut MF[E, Bool]): mut ESparseList[E];
+
+  /// ``this.removeLastWhere(f)`` makes a hole of the highest index whose element ``f`` returns `True` for, returning ``this``.
+  /// Does nothing if no such element exists.
+  mut .removeLastWhere(mut MF[E, Bool]): mut ESparseList[E];
+
+  /// ``this.trimTo(start, end)`` keeps only the indices ``[start, end)``, elements and holes, returning ``this``;
+  /// index ``start`` moves to index ``0``, and the capacity becomes ``end - start``.
+  /// Throws if ``start > end`` or ``end > this.capacity``.
+  //> .check{ESparseLists.backedWithArray[Nat] 4 .set(2, 7).trimTo(1, 3).get 1 .assertEq({::}, Opts# 7)}
+  mut .trimTo(start: Nat, end: Nat): mut ESparseList[E];
+
+  /// ``this.reverse`` moves the element or hole at each index ``i`` to index ``this.capacity - 1 - i``, returning ``this``.
+  //> .check{ESparseLists.backedWithArray[Nat] 3 .set(0, 7).reverse.get 2 .assertEq({::}, Opts# 7)}
+  mut .reverse: mut ESparseList[E];
+
+  /// ``this.swap(i, j)`` swaps the contents of indices ``i`` and ``j``, elements or holes, returning ``this``.
+  /// Throws if ``i >= this.capacity`` or ``j >= this.capacity``.
+  //> .check{ESparseLists.backedWithArray[Nat] 2 .set(0, 7).swap(0, 1).get 0 .assertEmpty {::}}
+  mut .swap(Nat, Nat): mut ESparseList[E];
 
   /// ``this.fillHoles f`` returns ``this`` after putting ``f#i`` in every hole ``i``, in ascending order.
   /// Equivalent to: ``this.mapOpts{i, e -> e || {Opts#(f#i)}}``
