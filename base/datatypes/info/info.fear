@@ -213,7 +213,7 @@ _InfoFromStr: {
         }
       .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, ",")}}
       .let elem = {this.value(s, start)}
-      .do {acc.add(elem.info)}
+      .do {acc.add(elem.info).void}
       .do {i.set(elem.pos)}
       .return {Continue#}
       }
@@ -233,7 +233,7 @@ _InfoFromStr: {
       .let key = {this.msgValue(s, start)}
       .let afterColon = {this.expect(s, key.pos, ":")}
       .let elem = {this.value(s, afterColon)}
-      .do {acc.add({.key -> key.info.getMsg; .elem -> elem.info})}
+      .do {acc.add({.key -> key.info.getMsg; .elem -> elem.info}).void}
       .do {i.set(elem.pos)}
       .return {Continue#}
       }

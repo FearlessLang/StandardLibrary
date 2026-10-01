@@ -41,7 +41,7 @@ FlowOrderIsEncounterOrder: Test {::
   .check{DetNats#.flow.mapping({::}, {.key k -> k; .elem k -> k}).flow.map{::.key}.list .assertEq({::}, DetNats#)}
   .check{Block#
     .let acc= {ELists#[Nat]}
-    .do{DetNats#.flow.for{e -> acc.add e}}
+    .do{DetNats#.flow.for{e -> acc.add e .void}}
     .return{acc.list .assertEq({::}, DetNats#)}
     }
   .check{DetNats#.flow.eSet({e -> e}, {::}).flow.list .assertEq({::}, DetNats#)}
