@@ -36,6 +36,7 @@ F[A:**,R:**]: { read #(a: A): R }
 F[A:**, B:**, R:**]: { read #(a: A, b: B): R }
 F[A:**, B:**, C:**, R:**]: { read #(a: A, b: B, c: C): R }
 F[A:**, B:**, C:**, D:**, R:**]: { read #(a: A, b: B, c: C, d: D): R }
+F[A:**, B:**, C:**, D:**, E:**, R:**]: { read #(a: A, b: B, c: C, d: D, e: E): R }
 
 MF[R:**]: { mut #: R }
 MF[A:**,R:**]: { mut #(a: A): R }

@@ -1,0 +1,117 @@
+_BiFlows: { #[A:*,B:*](a: mut List[A], b: mut List[B]): mut BiFlow[A,B] -> _Magic! }
+
+/// A pair of channels, made by `Flow.with`: the element at index ``i`` of one channel goes with the element at index ``i`` of the other.
+/// `Flow.with` is a consuming terminal of both flows, so every stage of both has finished with every element
+/// before any method of the `BiFlow` runs; the flows `BiFlow.getMerge`, `BiFlow.merge` and `BiFlow.mergeOpts` return
+/// trickle like a fresh source.
+/// Each method consumes the `BiFlow`, except `BiFlow.fillA`, `BiFlow.fillB` and `BiFlow.cutToSmallest`, which return it.
+/// The channels may differ in size, and each method says how it handles that:
+/// the ``get`` methods throw, the plain ones return an `Opt`, the ``Opts`` ones pad the shorter channel with ``.empty``,
+/// and `BiFlow.fillA`, `BiFlow.fillB` and `BiFlow.cutToSmallest` make the sizes equal.
+BiFlow[A:*,B:*]: {
+  /// ``this.with flow`` consumes `this` and ``flow`` into a `TriFlow` whose third channel is the elements of ``flow``.
+  //>   .check{Flows#(1, 2).with(Flows#(10, 20)).with(Flows#(100, 200)).getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111, 222))}
+  mut .with[C:*](flow: mut Flow[C]): mut TriFlow[A,B,C];
+
+  /// ``this.getMerge f`` returns the flow of ``f#(a, b)`` for each pair of elements, in order.
+  /// Throws if the channels differ in size, before any call of ``f``.
+  //>   .check{Flows#(1, 2).with(Flows#(10, 20)).getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11, 22))}
+  //>   .checkDetErr({::.isMsg{:: == "BiFlow.getMerge: the channels have different sizes, 2 and 1"}}, {Flows#(1, 2).with(Flows#(10)).getMerge{a, b -> a + b}})
+  mut .getMerge[R:*](f: read F[A,B,R]): mut Flow[R];
+
+  /// ``this.merge f`` returns ``.some`` of ``this.getMerge f`` if the channels have the same size, ``.empty`` otherwise.
+  //>   .check{Flows#(1, 2).with(Flows#(10, 20)).merge{a, b -> a + b}!.list .assertEq({::}, Lists#(11, 22))}
+  //>   .check{Flows#(1, 2).with(Flows#(10)).merge{a, b -> a + b}.isEmpty .assertTrue}
+  mut .merge[R:*](f: read F[A,B,R]): mut Opt[mut Flow[R]];
+
+  /// ``this.mergeOpts f`` returns the flow of ``f#(a, b)`` for each index of the longer channel,
+  /// where ``a`` and ``b`` are ``.some`` of the elements at that index, or ``.empty`` past the end of their channel.
+  //>   .check{Flows#(1, 2).with(Flows#(10)).mergeOpts{a, b -> a.orValue 0 + (b.orValue 0)}.list .assertEq({::}, Lists#(11, 2))}
+  mut .mergeOpts[R:*](f: read F[mut Opt[A],mut Opt[B],R]): mut Flow[R];
+
+  /// ``this.getFold(acc, f)`` folds the pairs of elements from left to right, starting from ``acc#``:
+  /// for each pair ``(a, b)`` the accumulator becomes ``f#(acc, a, b)``.
+  /// Throws if the channels differ in size, before any call of ``acc`` or ``f``.
+  //>   .check{Flows#(1, 2).with(Flows#(10, 20)).getFold({0}, {acc, a, b -> acc + a + b}) .assertEq 33}
+  //>   .checkDetErr({::.isMsg{:: == "BiFlow.getFold: the channels have different sizes, 1 and 2"}}, {Flows#(1).with(Flows#(10, 20)).getFold({0}, {acc, a, b -> acc + a + b})})
+  mut .getFold[R:*](acc: iso MF[R], f: read F[R,A,B,R]): R;
+
+  /// ``this.fold(acc, f)`` returns ``.some`` of ``this.getFold(acc, f)`` if the channels have the same size, ``.empty`` otherwise.
+  //>   .check{Flows#(1, 2).with(Flows#(10, 20)).fold({0}, {acc, a, b -> acc + a + b}) .assertEq({::}, Opts# 33)}
+  //>   .check{Flows#(1, 2).with(Flows#(10)).fold({0}, {acc, a, b -> acc + a + b}) .assertEmpty{::}}
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,A,B,R]): mut Opt[R];
+
+  /// ``this.foldOpts(acc, f)`` folds from left to right over each index of the longer channel, starting from ``acc#``,
+  /// handing ``f`` ``.some`` of the elements at that index, or ``.empty`` past the end of their channel.
+  //>   .check{Flows#(1, 2).with(Flows#(10)).foldOpts({0}, {acc, a, b -> acc + (a.orValue 0) + (b.orValue 0)}) .assertEq 13}
+  mut .foldOpts[R:*](acc: iso MF[R], f: read F[R,mut Opt[A],mut Opt[B],R]): R;
+
+  /// ``this.fillA f`` returns `this` after extending the first channel to the size of the longest one,
+  /// with ``f#i`` at each added index ``i``.
+  //>   .check{Flows#(1).with(Flows#(10, 20)).fillA{i -> i * 100}.getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11, 120))}
+  mut .fillA(f: read F[Nat,A]): mut BiFlow[A,B];
+
+  /// ``this.fillB f`` returns `this` after extending the second channel to the size of the longest one,
+  /// with ``f#i`` at each added index ``i``.
+  //>   .check{Flows#(1, 2).with(Flows#(10)).fillB{i -> i * 100}.getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11, 102))}
+  mut .fillB(f: read F[Nat,B]): mut BiFlow[A,B];
+
+  /// ``this.cutToSmallest`` returns `this` after dropping the elements of every channel past the size of the shortest one.
+  //>   .check{Flows#(1, 2, 3).with(Flows#(10)).cutToSmallest.getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11))}
+  mut .cutToSmallest: mut BiFlow[A,B];
+  }
+
+/// Three channels, made by `BiFlow.with`. Every method is the `BiFlow` method of the same name, over three channels.
+TriFlow[A:*,B:*,C:*]: {
+  /// ``this.with flow`` consumes `this` and ``flow`` into a `QuadFlow` whose fourth channel is the elements of ``flow``.
+  mut .with[D:*](flow: mut Flow[D]): mut QuadFlow[A,B,C,D];
+  /// See `BiFlow.getMerge`.
+  //>   .checkDetErr({::.isMsg{:: == "TriFlow.getMerge: the channels have different sizes, 2, 1 and 2"}}, {Flows#(1, 2).with(Flows#(10)).with(Flows#(1, 2)).getMerge{a, b, c -> a + b + c}})
+  mut .getMerge[R:*](f: read F[A,B,C,R]): mut Flow[R];
+  /// See `BiFlow.merge`.
+  mut .merge[R:*](f: read F[A,B,C,R]): mut Opt[mut Flow[R]];
+  /// See `BiFlow.mergeOpts`.
+  mut .mergeOpts[R:*](f: read F[mut Opt[A],mut Opt[B],mut Opt[C],R]): mut Flow[R];
+  /// See `BiFlow.getFold`.
+  //>   .check{Flows#(1, 2).with(Flows#(10, 20)).with(Flows#(100, 200)).getFold({0}, {acc, a, b, c -> acc + a + b + c}) .assertEq 333}
+  mut .getFold[R:*](acc: iso MF[R], f: read F[R,A,B,C,R]): R;
+  /// See `BiFlow.fold`.
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,A,B,C,R]): mut Opt[R];
+  /// See `BiFlow.foldOpts`.
+  mut .foldOpts[R:*](acc: iso MF[R], f: read F[R,mut Opt[A],mut Opt[B],mut Opt[C],R]): R;
+  /// See `BiFlow.fillA`.
+  mut .fillA(f: read F[Nat,A]): mut TriFlow[A,B,C];
+  /// See `BiFlow.fillB`.
+  mut .fillB(f: read F[Nat,B]): mut TriFlow[A,B,C];
+  /// ``this.fillC f`` is `BiFlow.fillA` for the third channel.
+  mut .fillC(f: read F[Nat,C]): mut TriFlow[A,B,C];
+  /// See `BiFlow.cutToSmallest`.
+  mut .cutToSmallest: mut TriFlow[A,B,C];
+  }
+
+/// Four channels, made by `TriFlow.with`. Every method is the `BiFlow` method of the same name, over four channels.
+QuadFlow[A:*,B:*,C:*,D:*]: {
+  /// See `BiFlow.getMerge`.
+  //>   .check{Flows#(1).with(Flows#(10)).with(Flows#(100)).with(Flows#(1000)).getMerge{a, b, c, d -> a + b + c + d}.list .assertEq({::}, Lists#(1111))}
+  mut .getMerge[R:*](f: read F[A,B,C,D,R]): mut Flow[R];
+  /// See `BiFlow.merge`.
+  mut .merge[R:*](f: read F[A,B,C,D,R]): mut Opt[mut Flow[R]];
+  /// See `BiFlow.mergeOpts`.
+  mut .mergeOpts[R:*](f: read F[mut Opt[A],mut Opt[B],mut Opt[C],mut Opt[D],R]): mut Flow[R];
+  /// See `BiFlow.getFold`.
+  mut .getFold[R:*](acc: iso MF[R], f: read F[R,A,B,C,D,R]): R;
+  /// See `BiFlow.fold`.
+  mut .fold[R:*](acc: iso MF[R], f: read F[R,A,B,C,D,R]): mut Opt[R];
+  /// See `BiFlow.foldOpts`.
+  mut .foldOpts[R:*](acc: iso MF[R], f: read F[R,mut Opt[A],mut Opt[B],mut Opt[C],mut Opt[D],R]): R;
+  /// See `BiFlow.fillA`.
+  mut .fillA(f: read F[Nat,A]): mut QuadFlow[A,B,C,D];
+  /// See `BiFlow.fillB`.
+  mut .fillB(f: read F[Nat,B]): mut QuadFlow[A,B,C,D];
+  /// ``this.fillC f`` is `BiFlow.fillA` for the third channel.
+  mut .fillC(f: read F[Nat,C]): mut QuadFlow[A,B,C,D];
+  /// ``this.fillD f`` is `BiFlow.fillA` for the fourth channel.
+  mut .fillD(f: read F[Nat,D]): mut QuadFlow[A,B,C,D];
+  /// See `BiFlow.cutToSmallest`.
+  mut .cutToSmallest: mut QuadFlow[A,B,C,D];
+  }

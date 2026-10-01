@@ -1,0 +1,87 @@
+Boom3: { #: mut Flow[Void] -> Lists#(1, 2, 3, 4).flow.map{x -> (x == 3).thenDo{Error.msg "boom"}} }
+ErrAt: { #(e: Nat, at: Nat, msg: Str): Nat -> (e == at).if{ .then -> Error.msg msg; .else -> e } }
+
+//`with` is a consuming terminal of both flows: every stage of both finishes with every element
+//before anything downstream of the merge runs, so a later short-circuit does not hide an exception.
+TestMultiFlowFence: Test {::
+  .checkDetErr({::.isMsg{:: == "boom"}}, {Boom3#.with(Flows#(1, 2, 3, 4)).getMerge{_, b -> b}.limit 1 .list})
+  .checkDetErr({::.isMsg{:: == "boom"}}, {Flows#(1, 2, 3, 4).with(Boom3#).getMerge{a, _ -> a}.first})
+  .checkDetErr({::.isMsg{:: == "boom"}}, {Boom3#.with(Flows#(1, 2, 3, 4)).merge{_, b -> b}.isEmpty})
+  .checkDetErr({::.isMsg{:: == "boom"}}, {Boom3#.with(Flows#(1, 2, 3, 4)).fold({0}, {acc, _, b -> acc + b}).isEmpty})
+  .checkDetErr({::.isMsg{:: == "boom"}}, {Block#(Boom3#.with(Flows#(1, 2, 3, 4)), Void)})
+  .checkDetErr({::.isMsg{:: == "boom"}}, {Flows#(1).with(Flows#(2)).with(Boom3#).getMerge{a, _, _ -> a}.first})
+  //the flow of the receiver runs to the end before the flow of the argument starts
+  .checkDetErr({::.isMsg{:: == "receiver at 3"}}, {
+    Lists#(0, 1, 2, 3).flow.map{e -> ErrAt#(e, 3, "receiver at 3")}
+      .with(Lists#(0, 1, 2, 3).flow.map{e -> ErrAt#(e, 0, "argument at 0")})
+      .getMerge{a, b -> a + b}.list})
+  //an exception of a channel comes before the check of the sizes
+  .checkDetErr({::.isMsg{:: == "boom"}}, {Boom3#.with(Flows#(1)).getMerge{_, b -> b}.list})
+  }
+
+//after the fence the merged flow trickles like a fresh source: `f` runs on an element
+//only when the stage after it asks for that element.
+TestMultiFlowTrickle: Test {::
+  .check{Flows#(0, 1, 2).with(Flows#(0, 1, 2)).getMerge{a, _ -> ErrAt#(a, 1, "f at 1")}.limit 1 .list .assertEq({::}, Lists#(0))}
+  .check{Flows#(0, 1, 2).with(Flows#(0, 1, 2)).getMerge{a, _ -> ErrAt#(a, 1, "f at 1")}.first .assertEq({::}, Opts# 0)}
+  .check{Flows#(0, 1, 2).with(Flows#(0)).mergeOpts{a, _ -> ErrAt#(a!, 2, "f at 2")}.limit 2 .list .assertEq({::}, Lists#(0, 1))}
+  .check{Flows#(0, 1).with(Flows#(0, 1)).merge{a, _ -> ErrAt#(a, 1, "f at 1")}!.limit 1 .list .assertEq({::}, Lists#(0))}
+  .checkDetErr({::.isMsg{:: == "after at 0"}}, {
+    Flows#(0, 1, 2).with(Flows#(0, 1, 2)).getMerge{a, _ -> ErrAt#(a, 1, "f at 1")}.map{e -> ErrAt#(e, 0, "after at 0")}.list})
+  .checkDetErr({::.isMsg{:: == "f at 1"}}, {
+    Flows#(0, 1, 2).with(Flows#(0, 1, 2)).getMerge{a, _ -> ErrAt#(a, 1, "f at 1")}.map{e -> ErrAt#(e, 2, "after at 2")}.list})
+  .checkDetErr({::.isMsg{:: == "f at 1"}}, {Flows#(0, 1, 2).with(Flows#(0, 1, 2)).getFold({0}, {acc, a, _ -> ErrAt#(a, 1, "f at 1")})})
+  .check{Flows#(1, 2).with(Flows#(10, 20)).getMerge{a, b -> a + b}.with(Flows#(100, 200)).getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(111, 222))}
+  }
+
+//sizes: `get` throws before any call of the lambdas, the plain methods give `.empty` without calling them,
+//even when a short-circuit after the merge would only need the first element.
+TestMultiFlowSizes: Test {::
+  .checkDetErr({::.isMsg{:: == "BiFlow.getMerge: the channels have different sizes, 2 and 1"}}, {Flows#(1, 2).with(Flows#(1)).getMerge{a, b -> a + b}.limit 1 .list})
+  .checkDetErr({::.isMsg{:: == "BiFlow.getMerge: the channels have different sizes, 2 and 1"}}, {Flows#(1, 2).with(Flows#(1)).getMerge{a, b -> Error.msg[Nat] "f ran"}.first})
+  .checkDetErr({::.isMsg{:: == "BiFlow.getFold: the channels have different sizes, 0 and 1"}}, {Flows#[Nat].with(Flows#(1)).getFold({Error.msg[Nat] "acc ran"}, {acc, a, b -> acc})})
+  .check{Flows#(1, 2).with(Flows#(1)).merge{a, b -> Error.msg[Nat] "f ran"}.isEmpty .assertTrue}
+  .check{Flows#(1, 2).with(Flows#(1)).fold({Error.msg[Nat] "acc ran"}, {acc, a, b -> acc}).isEmpty .assertTrue}
+  .checkDetErr({::.isMsg{:: == "QuadFlow.getMerge: the channels have different sizes, 1, 1, 0 and 1"}}, {Flows#(1).with(Flows#(1)).with(Flows#[Nat]).with(Flows#(1)).getMerge{a, b, c, d -> a}.list})
+  .check{Flows#[Nat].with(Flows#[Nat]).getMerge{a, b -> a + b}.list .assertEq({::}, List[Nat])}
+  .check{Flows#[Nat].with(Flows#(1, 2)).mergeOpts{a, b -> a.isSome}.list .assertEq({::}, Lists#(False, False))}
+  .check{Flows#(1, 2, 3).with(Flows#(10)).fillA{i -> i}.merge{a, b -> a + b}.isEmpty .assertTrue}
+  .check{Flows#(1).with(Flows#(10, 20, 30)).cutToSmallest.getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11))}
+  .check{Flows#(1).with(Flows#(10, 20)).with(Flows#(100, 200, 300)).fillA{i -> i}.fillB{i -> i * 10}
+    .getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111, 221, 322))}
+  .check{Flows#(1, 2, 3).with(Flows#(10, 20)).with(Flows#(100)).cutToSmallest.getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111))}
+  }
+
+//every multi flow is single use, as a flow is.
+TestMultiFlowSingleUse: Test {::
+  .checkDetErr({::.isMsg{::.startsWith "Flow: this flow is already consumed"}}, {Block#
+    .let f={Flows#(1, 2)}
+    .return{f.with(f).getMerge{a, b -> a + b}.list}
+    })
+  .checkDetErr({::.isMsg{::.startsWith "BiFlow: this BiFlow is already consumed"}}, {Block#
+    .let bf={Flows#(1).with(Flows#(2))}
+    .do{Block#(bf.getMerge{a, b -> a + b}, Void)}
+    .return{bf.getFold({0}, {acc, a, b -> acc + a + b})}
+    })
+  .checkDetErr({::.isMsg{::.startsWith "BiFlow: this BiFlow is already consumed"}}, {Block#
+    .let bf={Flows#(1).with(Flows#(2))}
+    .do{Block#(bf.with(Flows#(3)), Void)}
+    .return{bf.cutToSmallest.getMerge{a, b -> a + b}.size}
+    })
+  .checkDetErr({::.isMsg{::.startsWith "TriFlow: this TriFlow is already consumed"}}, {Block#
+    .let tf={Flows#(1).with(Flows#(2)).with(Flows#(3))}
+    .do{Block#(tf.fold({0}, {acc, a, b, c -> acc}), Void)}
+    .return{tf.fillC{i -> i}.getMerge{a, b, c -> a}.size}
+    })
+  }
+
+//the channels keep their elements as they are: `mut` elements stay `mut` through the merge.
+TestMultiFlowChannels: Test {::
+  .check{Flows#(Vars#[Nat](1), Vars#[Nat](2)).with(Flows#(Vars#[Nat](10), Vars#[Nat](20)))
+    .getMerge{a, b -> Block#(a.set(a.get + (b.get)), a)}.map{v -> v.get}.list .assertEq({::}, Lists#(11, 22))}
+  .check{Flows#(1, 2).with(Flows#("a", "b")).getMerge{n, s -> s + n}.list .assertEq({::}, Lists#("a1", "b2"))}
+  .check{Flows#(1, 2).with(Flows#(10, 20)).with(Flows#(100, 200)).with(Flows#(1000, 2000))
+    .getFold({0}, {acc, a, b, c, d -> acc + a + b + c + d}) .assertEq 3333}
+  .check{Flows#(1).with(Flows#(10, 20)).with(Flows#(100)).with(Flows#[Nat])
+    .foldOpts({0}, {acc, a, b, c, d -> acc + (a.orValue 0) + (b.orValue 0) + (c.orValue 0) + (d.orValue 0)}) .assertEq 131}
+  }
