@@ -1,45 +1,73 @@
 SparseA: { #: mut ESparseList[Nat] -> ESparseLists.backedWithArray[Nat] 5 .set(0, 1).set(2, 2).set(3, 3).set(4, 4) }
 SparseM: { #: mut ESparseList[Nat] -> ESparseLists.backedWithMap[Nat] 5 .set(0, 1).set(2, 2).set(3, 3).set(4, 4) }
+SparseT: { #: mut ESparseList[Nat] -> ESparseLists.backedWithSparseSegmentTree[Nat] 5 .set(0, 1).set(2, 2).set(3, 3).set(4, 4) }
 SparseStr: { #(l: mut ESparseList[Nat]): Str -> l.seqFlowOpts.map{o -> o.match{ .some e -> e.str; .empty -> "_" }}.join "," }
 
 TestESparseList: Test {::
   .check{SparseStr#(SparseA#) .assertEq "1,_,2,3,4"}
   .check{SparseStr#(SparseM#) .assertEq "1,_,2,3,4"}
+  .check{SparseStr#(SparseT#) .assertEq "1,_,2,3,4"}
   .check{SparseA#.all{e -> e > 0} .assertTrue}
   .check{SparseM#.any{e -> e == 0} .assertFalse}
+  .check{SparseT#.any{e -> e == 0} .assertFalse}
   .check{SparseA#.none{e -> e > 3} .assertFalse}
   .check{SparseM#.firstIndexWhere{e -> e > 1} .assertEq({::}, Opts# 2)}
+  .check{SparseT#.firstIndexWhere{e -> e > 1} .assertEq({::}, Opts# 2)}
   .check{SparseA#.lastIndexWhere{e -> e < 4} .assertEq({::}, Opts# 3)}
   .check{SparseM#.indicesWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(2, 4))}
+  .check{SparseT#.indicesWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(2, 4))}
   .check{SparseStr#(SparseA#.set(1, 9)) .assertEq "1,9,2,3,4"}
   .check{SparseStr#(SparseM#.clear) .assertEq "_,_,_,_,_"}
+  .check{SparseStr#(SparseT#.clear) .assertEq "_,_,_,_,_"}
   .check{SparseStr#(SparseA#.removeIf{e -> (e.getRem 2) == 0}) .assertEq "1,_,_,3,_"}
   .check{SparseStr#(SparseM#.retainIf{e -> (e.getRem 2) == 0}) .assertEq "_,_,2,_,4"}
+  .check{SparseStr#(SparseT#.retainIf{e -> (e.getRem 2) == 0}) .assertEq "_,_,2,_,4"}
   .check{SparseStr#(SparseA#.remove 0 .remove 1) .assertEq "_,_,2,3,4"}
   .check{SparseStr#(SparseM#.removeAll(ELists#(0, 4))) .assertEq "_,_,2,3,_"}
+  .check{SparseStr#(SparseT#.removeAll(ELists#(0, 4))) .assertEq "_,_,2,3,_"}
   .checkDetErr({::.isMsg{:: == "ESparseList.removeAll: Index 4 is present twice in the indices to remove"}}, {SparseA#.removeAll(ELists#(4, 4))})
   .check{SparseStr#(SparseA#.removeFirstWhere{e -> e > 1}) .assertEq "1,_,_,3,4"}
   .check{SparseStr#(SparseM#.removeLastWhere{e -> e < 4}) .assertEq "1,_,2,_,4"}
+  .check{SparseStr#(SparseT#.removeLastWhere{e -> e < 4}) .assertEq "1,_,2,_,4"}
   .check{SparseStr#(SparseA#.trimTo(1, 4)) .assertEq "_,2,3"}
   .check{SparseStr#(SparseM#.trimTo(1, 4)) .assertEq "_,2,3"}
+  .check{SparseStr#(SparseT#.trimTo(1, 4)) .assertEq "_,2,3"}
   .checkDetErr({::.isMsg{:: == "ESparseList.trimTo: Index 6 out of bounds for ESparseList of capacity 5"}}, {SparseA#.trimTo(1, 6)})
   .check{SparseStr#(SparseA#.reverse) .assertEq "4,3,2,_,1"}
   .check{SparseStr#(SparseM#.reverse) .assertEq "4,3,2,_,1"}
+  .check{SparseStr#(SparseT#.reverse) .assertEq "4,3,2,_,1"}
   .check{SparseStr#(SparseA#.mapInPlace{e -> e * 10}) .assertEq "10,_,20,30,40"}
   .check{SparseStr#(SparseM#.swap(0, 1)) .assertEq "_,1,2,3,4"}
+  .check{SparseStr#(SparseT#.swap(0, 1)) .assertEq "_,1,2,3,4"}
   .checkDetErr({::.isMsg{:: == "ESparseList.swap: Index 5 out of bounds for ESparseList of capacity 5"}}, {SparseM#.swap(0, 5)})
+  .checkDetErr({::.isMsg{:: == "ESparseList.swap: Index 5 out of bounds for ESparseList of capacity 5"}}, {SparseT#.swap(0, 5)})
   .check{Block#
     .let l={SparseA#}
     .let c={l.shallowClone}
     .do{l.set(1, 7).void}
     .return{SparseStr#c .assertEq "1,_,2,3,4"}}
   .check{SparseStr#(SparseM#.fillHoles{i -> i * 100}) .assertEq "1,100,2,3,4"}
+  .check{SparseStr#(SparseT#.fillHoles{i -> i * 100}) .assertEq "1,100,2,3,4"}
   .check{SparseStr#(SparseA#.fillAndExpand(ELists#(7, 8, 9))) .assertEq "1,7,2,3,4,8,9"}
   .check{SparseStr#(SparseM#.fillAndExpand(ELists#(7, 8, 9))) .assertEq "1,7,2,3,4,8,9"}
+  .check{SparseStr#(SparseT#.fillAndExpand(ELists#(7, 8, 9))) .assertEq "1,7,2,3,4,8,9"}
   .check{SparseA#.flatFlow(ParImm#).list .assertEq({::}, Lists#(1, 2, 3, 4))}
   .check{SparseM#.seqFlow .isEmpty .assertTrue}
+  .check{SparseT#.seqFlow .isEmpty .assertTrue}
   .check{SparseM#.set(1, 0).seqFlow!.list .assertEq({::}, Lists#(1, 0, 2, 3, 4))}
+  .check{SparseT#.set(1, 0).seqFlow!.list .assertEq({::}, Lists#(1, 0, 2, 3, 4))}
   .check{ESparseLists.backedWithMap[Nat](Math.maxNat).set(Math.maxNat - 1, 5).flatSeqFlow.list .assertEq({::}, Lists#(5))}
   .check{ESparseLists.backedWithMap[Nat](Math.maxNat).set(0, 5).numHoles .assertEq(Math.maxNat - 1)}
   .check{ESparseLists.backedWithMap[Nat](Math.maxNat).set(0, 5).reverse.get(Math.maxNat - 1) .assertEq({::}, Opts# 5)}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat](Math.maxNat).set(Math.maxNat - 1, 5).set(3, 4).flatSeqFlow.list .assertEq({::}, Lists#(4, 5))}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat](Math.maxNat).set(0, 5).reverse.get(Math.maxNat - 1) .assertEq({::}, Opts# 5)}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat](Math.maxNat).set(9223372036854775808, 5).trimTo(9223372036854775807, Math.maxNat).get 1 .assertEq({::}, Opts# 5)}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat] 3 .set(2, 1).increaseCapacity 2000 .set(1999, 2).set(700, 3).flatSeqFlow.list .assertEq({::}, Lists#(1, 3, 2))}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat] 3 .set(2, 1).fillAndExpand(ELists#(7, 8, 9)).getEList.list .assertEq({::}, Lists#(7, 8, 1, 9))}
+  .check{(0 =~~= 1999).flow.fold({ESparseLists.backedWithSparseSegmentTree[Nat] 2000}, {l, i -> l.set(i, i * 2)}).flatSeqFlow.sum 0 .assertEq 3998000}
+  .check{Block#
+    .let l={ESparseLists.backedWithSparseSegmentTree[Nat] 2000 .set(5, 1).set(1500, 2)}
+    .let c={l.shallowClone}
+    .do{l.set(1500, 9).remove 5 .void}
+    .return{c.flatSeqFlow.list .assertEq({::}, Lists#(1, 2))}}
   }

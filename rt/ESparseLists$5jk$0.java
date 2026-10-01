@@ -12,6 +12,7 @@ import static _base.Util.*;
 public interface ESparseLists$5jk$0{
   default Object imm$backedWithArray$1(Object p0){ return new ESparseList$2rs$1Instance(new SparseArrayStore(SparseArrayStore.checkedCap("ESparseLists.backedWithArray", Nat$c$0Instance.unwrap(p0)))); }
   default Object imm$backedWithMap$1(Object p0){ return new ESparseList$2rs$1Instance(new SparseMapStore(Nat$c$0Instance.unwrap(p0))); }
+  default Object imm$backedWithSparseSegmentTree$1(Object p0){ return new ESparseList$2rs$1Instance(new SparseTreeStore(Nat$c$0Instance.unwrap(p0))); }
   ESparseLists$5jk$0 instance= new ESparseLists$5jk$0(){};
 }
 interface SparseStore{
@@ -68,6 +69,83 @@ final class SparseMapStore implements SparseStore{
     return r;
   }
   @Override public void grow(long cap){ this.cap= cap; }
+}
+final class SparseTreeStore implements SparseStore{
+  SparseTreeStore(long cap){ this.cap= cap; bits= bitsFor(cap); }
+  private static final int leafBits= 9;
+  private long cap;
+  private long count= 0;
+  private int bits;
+  private Object[] root;
+  private static int bitsFor(long cap){ return Long.compareUnsigned(cap, 1) <= 0 ? 0 : 64 - Long.numberOfLeadingZeros(cap - 1); }
+  private static Object[] make(int b){ return new Object[b > leafBits ? 2 : 1 << b]; }
+  private static int child(long i, int b){ return (int) ((i >>> (b - 1)) & 1); }
+  @Override public long cap(){ return cap; }
+  @Override public long count(){ return count; }
+  @Override public Object at(long i){
+    var n= root;
+    int b= bits;
+    for (; n != null && b > leafBits; b--){ n= (Object[]) n[child(i, b)]; }
+    return n == null ? null : n[(int) (i & ((1L << b) - 1))];
+  }
+  @Override public void put(long i, Object e){
+    if (root == null){
+      if (e == null){ return; }
+      root= make(bits);
+    }
+    var n= root;
+    for (int b= bits; b > leafBits; b--){
+      int c= child(i, b);
+      if (n[c] == null){
+        if (e == null){ return; }
+        n[c]= make(b - 1);
+      }
+      n= (Object[]) n[c];
+    }
+    int k= (int) (i & ((1L << Math.min(bits, leafBits)) - 1));
+    count+= (e == null ? 0 : 1) - (n[k] == null ? 0 : 1);
+    n[k]= e;
+  }
+  private static void walk(Object[] n, int b, long base, LongStream.Builder out){
+    if (b <= leafBits){
+      for (int k= 0; k < n.length; k++){ if (n[k] != null){ out.add(base + k); } }
+      return;
+    }
+    for (int c= 0; c < 2; c++){ if (n[c] != null){ walk((Object[]) n[c], b - 1, base | ((long) c << (b - 1)), out); } }
+  }
+  @Override public long[] present(){
+    var out= LongStream.builder();
+    if (root != null){ walk(root, bits, 0, out); }
+    return out.build().toArray();
+  }
+  private static Object[] deep(Object[] n, int b){
+    var r= n.clone();
+    if (b > leafBits){
+      for (int c= 0; c < 2; c++){ if (r[c] != null){ r[c]= deep((Object[]) r[c], b - 1); } }
+    }
+    return r;
+  }
+  @Override public SparseStore empty(long cap){ return new SparseTreeStore(cap); }
+  @Override public SparseStore copy(){
+    var r= new SparseTreeStore(cap);
+    r.count= count;
+    r.root= root == null ? null : deep(root, bits);
+    return r;
+  }
+  @Override public void grow(long cap){
+    this.cap= cap;
+    int nb= bitsFor(cap);
+    while (root != null && bits < nb){
+      if (bits < leafBits){
+        bits= Math.min(nb, leafBits);
+        root= Arrays.copyOf(root, 1 << bits);
+        continue;
+      }
+      root= new Object[]{root, null};
+      bits++;
+    }
+    bits= Math.max(bits, nb);
+  }
 }
 final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   ESparseList$2rs$1Instance(SparseStore s){ this.s= s; }

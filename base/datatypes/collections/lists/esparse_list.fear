@@ -9,6 +9,12 @@ ESparseLists: {
   /// each element costs more than in `ESparseLists.backedWithArray`, so it fits very sparse lists.
   //> .check{ESparseLists.backedWithMap[Nat](Math.maxNat).set(1000000000000, 7) .get(1000000000000) .assertEq({::}, Opts# 7)}
   .backedWithMap[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
+  /// ``ESparseLists.backedWithSparseSegmentTree capacity`` returns an ESparseList of ``capacity`` holes, backed by a binary tree
+  /// whose leaves are arrays of 512 indices; a subtree holding no element takes no memory.
+  /// Any `Nat` is a valid capacity. It fits dense islands of elements in seas of holes:
+  /// an element costs about as much as in `ESparseLists.backedWithArray` once its leaf exists.
+  //> .check{ESparseLists.backedWithSparseSegmentTree[Nat](Math.maxNat).set(1000000000000, 7).get(1000000000000) .assertEq({::}, Opts# 7)}
+  .backedWithSparseSegmentTree[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   }
 
 /// A list with "holes": every index below `ESparseList.capacity` holds either an element or a hole.
