@@ -110,6 +110,12 @@ Flow[E:*]: {
   /// so the exception of `this`, if any, is the one that propagates.
   //>   .check{Flows#(1, 2).with(Flows#(10, 20)).getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11, 22))}
   mut .with[B:*](flow: mut Flow[B]): mut BiFlow[E,B] -> _BiFlows#(this.list, flow.list);
+  /// ``this.withBoth(flows)`` consumes `this` and ``flows`` into a `TriFlow` whose first channel is the elements of `this`, as `Flow.with` does.
+  //>   .check{Flows#(1).withBoth(Flows#(10).with(Flows#(100))).getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111))}
+  mut .withBoth[B:*,C:*](flows: mut BiFlow[B,C]): mut TriFlow[E,B,C] -> _BiFlows.tri(this.list, flows);
+  /// ``this.withAll(flows)`` consumes `this` and ``flows`` into a `QuadFlow` whose first channel is the elements of `this`, as `Flow.with` does.
+  //>   .check{Flows#(1).withAll(Flows#(10).with(Flows#(100)).with(Flows#(1000))).getMerge{a, b, c, d -> a + b + c + d}.list .assertEq({::}, Lists#(1111))}
+  mut .withAll[B:*,C:*,D:*](flows: mut TriFlow[B,C,D]): mut QuadFlow[E,B,C,D] -> _BiFlows.quad(this.list, flows);
   mut .foldAcc[R:*](acc: iso MF[mut FoldAcc[E,R]]): R -> this.fold(acc, {a, e -> a.acc e}).result;
   mut .sum(sn: SumNumber[E]): E -> sn.sumNumber(this);
   mut .join(js: JoinStr[E]): E -> js.joinStr(this);
