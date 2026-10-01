@@ -103,7 +103,11 @@ MyTests:UnitTests{::
   .test GuiKeyTests
   .test TestList
   .test TestESparseList
-  .test TestBiFlow
+  .test TestMultiFlowFence
+  .test TestMultiFlowTrickle
+  .test TestMultiFlowSizes
+  .test TestMultiFlowSingleUse
+  .test TestMultiFlowChannels
   .test TestFlow
   .test TestMap
   .test TestAs
