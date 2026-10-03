@@ -17,7 +17,9 @@ OpenWith[I]: {}
 /// double click, also when moved somewhere else: ``Bar: Main, Shortcut[IconsBar,"bar"]{ s -> ... }``
 /// gets the file ``bar.bar``. ``name`` is the simple name of the main turned into a file name:
 /// ``FooBar`` gives ``foo_bar``. ``I`` and ``E`` are as in `OpenWith[_,_]`, and a shortcut claims
-/// its extension exactly as `OpenWith[_,_]` does. The portable Fearless ignores it.
+/// its extension exactly as `OpenWith[_,_]` does. ``E`` is not a well known extension, like
+/// ``"doc"``, ``"zip"`` or ``"fear"``: the shortcut file would look like a file of another program.
+/// The portable Fearless ignores it.
 Shortcut[I,E]: {}
 /// ``Shortcut[I]`` is `Shortcut[_,_]` with an extension chosen by the Fearless manager, like
 /// ``fapp042``: users recognise the shortcut file by the icon ``I``, not by its extension.
