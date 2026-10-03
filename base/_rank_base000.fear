@@ -1,4 +1,29 @@
 Main: { .main(s: mut System): Void }
+/// A `Main` implementing ``OpenWith[I,E]`` asks the Fearless manager to run it on a double click
+/// on any file with the extension ``E``, and to show those files with the icon ``I``:
+/// ``Foo: Main, OpenWith[IconsFoo,"foo"]{ s -> ... }`` opens every ``.foo`` file.
+/// ``I`` is a type generated for an autoloaded image file, like ``IconsFoo`` for
+/// ``_pkg/icons/foo.png``, or `IconsConflict`; the manager accepts only a square PNG image with a
+/// side from 64 to 1024 pixels. ``E`` is a string literal type holding the extension without its
+/// dot: 1 to 16 characters, each a lowercase letter or a digit; ``"fearless"`` is reserved.
+/// Only a `Main` can implement it, and a `Main` claims each extension at most once across all its
+/// `OpenWith[_,_]` and `Shortcut[_,_]`. The portable Fearless ignores it.
+OpenWith[I,E]: {}
+/// ``OpenWith[I]`` is `OpenWith[_,_]` with an extension chosen by the Fearless manager, like
+/// ``ffile042``: users recognise those files by the icon ``I``, not by their extension.
+OpenWith[I]: {}
+/// A `Main` implementing ``Shortcut[I,E]`` asks the Fearless manager to create a file
+/// ``name.E`` in the top level of its project, showing the icon ``I``, that runs the main on a
+/// double click, also when moved somewhere else: ``Bar: Main, Shortcut[IconsBar,"bar"]{ s -> ... }``
+/// gets the file ``bar.bar``. ``name`` is the simple name of the main turned into a file name:
+/// ``FooBar`` gives ``foo_bar``. ``I`` and ``E`` are as in `OpenWith[_,_]`, and a shortcut claims
+/// its extension exactly as `OpenWith[_,_]` does. ``E`` is not a well known extension, like
+/// ``"doc"``, ``"zip"`` or ``"fear"``: the shortcut file would look like a file of another program.
+/// The portable Fearless ignores it.
+Shortcut[I,E]: {}
+/// ``Shortcut[I]`` is `Shortcut[_,_]` with an extension chosen by the Fearless manager, like
+/// ``fapp042``: users recognise the shortcut file by the icon ``I``, not by its extension.
+Shortcut[I]: {}
 Sealed: {}
 Void: Sealed {}
 WidenTo[T]: {}
