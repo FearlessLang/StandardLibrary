@@ -12,7 +12,7 @@ OpenWith[I,E]: {}
 /// ``OpenWith[I]`` is `OpenWith[_,_]` with an extension chosen by the Fearless manager, like
 /// ``ffile042``: users recognise those files by the icon ``I``, not by their extension.
 OpenWith[I]: {}
-/// A `Main` implementing ``Shortcut[I,E]`` asks the Fearless manager to create an empty file
+/// A `Main` implementing ``Shortcut[I,E]`` asks the Fearless manager to create a file
 /// ``name.E`` in the top level of its project, showing the icon ``I``, that runs the main on a
 /// double click, also when moved somewhere else: ``Bar: Main, Shortcut[IconsBar,"bar"]{ s -> ... }``
 /// gets the file ``bar.bar``. ``name`` is the simple name of the main turned into a file name:
