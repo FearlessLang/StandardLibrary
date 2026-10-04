@@ -19,7 +19,7 @@ Maps: Sealed {
 
 /// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,...].
 /// The flow order, .str order etc all respect/follow the map insertion order.
-Map[K,E:*]: Sealed,ToFlow[mut KeyElem[K,E]],BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize {
+Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize {
 
   read .size: Nat;                 /// number of elements
   read .isEmpty: Bool;             /// `True` iff size == 0
