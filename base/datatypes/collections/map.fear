@@ -57,12 +57,30 @@ Map[K,E:*]: Sealed,ToFlow[mut KeyElem[K,E]],BaseContainer[E],DataType[Map[K,E],M
 
   /// ``this.flow`` returns a `BiFlow` of the keys and the elements of `this`, in insertion order.
   /// The merges of the `BiFlow` of an ``imm`` map are in mode `ParImm`, the others are sequential.
-  //>   .check{Maps#({::}, "a", 1, "b", 2).flow.getMerge{k, e -> k + e}.list .assertEq({::}, Lists#("a1", "b2"))}
-  //>   .check{Maps#({::}, "a", 1, "b", 2).flow.getFold({0}, {acc, _, e -> acc + e}) .assertEq 3}
-  //>   .check{Maps#({::}, "a", "x", "b", "y").flow.getFold({""}, {acc, k, e -> acc + k + e}) .assertEq "axby"}
+  /// Its two channels always have the same size: ``this.flow f``, `Map.fold` and `Map.foldUntil` are its ``get`` methods, that never throw for different sizes.
+  //>   .check{Maps#({::}, "a", 1, "b", 2).flow.with(Flows#(10, 20)).getMerge{k, e, x -> k + (e + x)}.list .assertEq({::}, Lists#("a11", "b22"))}
   mut  .flow: mut BiFlow[K,E];                 /// keys and elements as a BiFlow, in insertion order; its merges are sequential
   read .flow: mut BiFlow[K,read/imm E];        /// keys and elements as a BiFlow, in insertion order; its merges are sequential
   imm  .flow: mut BiFlow[K,imm E];             /// keys and elements as a BiFlow, in insertion order; its merges are in mode ParImm
+
+  /// ``this.flow f`` is ``this.flow.getMerge f``: the flow of ``f#(k, e)`` for each key ``k`` and its element ``e``, in insertion order.
+  //>   .check{Maps#({::}, "a", 1, "b", 2).flow{k, e -> k + e}.list .assertEq({::}, Lists#("a1", "b2"))}
+  mut  .flow[R:*](f: read F[K,E,R]): mut Flow[R] -> this.flow.getMerge f;
+  read .flow[R:*](f: read F[K,read/imm E,R]): mut Flow[R] -> this.flow.getMerge f;
+  imm  .flow[R:*](f: read F[K,imm E,R]): mut Flow[R] -> this.flow.getMerge f;
+
+  /// ``this.fold(acc, f)`` is ``this.flow.getFold(acc, f)``: for each key ``k`` and its element ``e``, in insertion order, the accumulator becomes ``f#(acc, k, e)``.
+  //>   .check{Maps#({::}, "a", 1, "b", 2).fold({0}, {acc, _, e -> acc + e}) .assertEq 3}
+  //>   .check{Maps#({::}, "a", "x", "b", "y").fold({""}, {acc, k, e -> acc + k + e}) .assertEq "axby"}
+  mut  .fold[R:*](acc: iso MF[R], f: read F[R,K,E,R]): R -> this.flow.getFold(acc, f);
+  read .fold[R:*](acc: iso MF[R], f: read F[R,K,read/imm E,R]): R -> this.flow.getFold(acc, f);
+  imm  .fold[R:*](acc: iso MF[R], f: read F[R,K,imm E,R]): R -> this.flow.getFold(acc, f);
+
+  /// ``this.foldUntil(acc, f, pred)`` is ``this.flow.getFoldUntil(acc, f, pred)``: `Map.fold` stopping as soon as ``pred`` returns `True` for the accumulator.
+  //>   .check{Maps#({::}, "a", 1, "b", 2, "c", 3).foldUntil({0}, {acc, _, e -> acc + e}, {acc -> acc > 2}) .assertEq 3}
+  mut  .foldUntil[R:*](acc: iso MF[R], f: read F[R,K,E,R], pred: read F[R,Bool]): R -> this.flow.getFoldUntil(acc, f, pred);
+  read .foldUntil[R:*](acc: iso MF[R], f: read F[R,K,read/imm E,R], pred: read F[R,Bool]): R -> this.flow.getFoldUntil(acc, f, pred);
+  imm  .foldUntil[R:*](acc: iso MF[R], f: read F[R,K,imm E,R], pred: read F[R,Bool]): R -> this.flow.getFoldUntil(acc, f, pred);
   read .keys: mut Flow[K];               /// keys as a flow (same iteration order as .flow)
   read .elems: mut Flow[read/imm E];     /// values as a flow (same iteration order as .flow)
 
@@ -83,7 +101,7 @@ Map[K,E:*]: Sealed,ToFlow[mut KeyElem[K,E]],BaseContainer[E],DataType[Map[K,E],M
     }};*/
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let map= {this.flow.getFold(
+    .let map= {this.fold(
       {Maps#[Str,Str,Info]{::}.as{::}},
       {acc, key, e -> Block#
         .let base= {this.keyOh#key .str}
