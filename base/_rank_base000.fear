@@ -7,7 +7,9 @@ Main: { .main(s: mut System): Void }
 /// side from 64 to 1024 pixels. ``E`` is a string literal type holding the extension without its
 /// dot: 1 to 16 characters, each a lowercase letter or a digit; ``"fearless"`` is reserved.
 /// Only a `Main` can implement it, and a `Main` claims each extension at most once across all its
-/// `OpenWith[_,_]` and `Shortcut[_,_]`. The portable Fearless ignores it.
+/// `OpenWith[_,_]` and `Shortcut[_,_]`. Extensions naming one kind of file, like ``"yml"`` and
+/// ``"yaml"``, are claimed together with the same icon, and one naming unrelated kinds, like
+/// ``"ts"``, can not be claimed. The portable Fearless ignores it.
 OpenWith[I,E]: {}
 /// ``OpenWith[I]`` is `OpenWith[_,_]` with an extension chosen by the Fearless manager, like
 /// ``ffile042``: users recognise those files by the icon ``I``, not by their extension.
