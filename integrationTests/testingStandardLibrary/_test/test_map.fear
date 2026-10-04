@@ -82,7 +82,18 @@ MapBasicsTests: Test {::
   .check{Maps#({::}, "a", "x") .orderHash _BySize == (Maps#({::}, "a", "y")) .assertTrue}
   .check{Maps#({::}, "a", "x") .orderHash _BySize < (Maps#({::}, "a", "yy")) .assertTrue}
   .check{Maps#({::}, "a", "x", "b", "zz") .orderHash _BySize < (Maps#({::}, "a", "x", "b", "zzz")) .assertTrue}
+  .check{Maps#({::}, "a", 1, "b", 2).flow{k, e -> k + e}.list .assertEq({::}, Lists#("a1", "b2"))}
+  .check{Maps#({::}, "a", 1, "b", 2).as{::}.flow{k, e -> k + e}.list .assertEq({::}, Lists#("a1", "b2"))}
+  .check{_ReadMapFlow#(Maps#({::}, "a", 1, "b", 2)).list .assertEq({::}, Lists#("a1", "b2"))}
+  .check{Maps#({::}, "a", "x", "b", "y").fold({""}, {acc, k, e -> acc + k + e}) .assertEq "axby"}
+  .check{Maps#({::}, "a", 1, "b", 2).as{::}.fold({0}, {acc, _, e -> acc + e}) .assertEq 3}
+  .check{_ReadMapFold#(Maps#({::}, "a", 1, "b", 2)) .assertEq 3}
+  .check{Maps#[Str,Str,Nat]({::}).fold({7}, {acc, _, e -> acc + e}) .assertEq 7}
+  .check{Maps#({::}, "a", 1, "b", 2, "c", 3).foldUntil({0}, {acc, _, e -> acc + e}, {acc -> acc > 2}) .assertEq 3}
+  .check{Maps#({::}, "a", 1, "b", 2, "c", 3).as{::}.foldUntil({0}, {acc, _, e -> acc + e}, {acc -> acc > 100}) .assertEq 6}
   }
+_ReadMapFlow: { #(m: read Map[Str,Nat]): mut Flow[Str] -> m.flow{k, e -> k + e} }
+_ReadMapFold: { #(m: read Map[Str,Nat]): Nat -> m.fold({0}, {acc, _, e -> acc + e}) }
 
 TestMap: Test {::
   .test MapBasicsTests
