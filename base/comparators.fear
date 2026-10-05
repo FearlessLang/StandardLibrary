@@ -41,6 +41,8 @@ Order[T]: {
 
   read <=>(other: read Order[T]): Order ->  /// compare two closed Orders
     this.cmp(this.close, other.close);
+  read <=>[K](other: read T, by: OrderBy[T,K]): Order ->  /// compare the keys ``by`` gives to this.close and other
+    by#(this.close) <=> (by#other);
   }
 
 
