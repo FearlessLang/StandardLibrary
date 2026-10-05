@@ -52,10 +52,10 @@ public class Util{
   public static Bool$o$0 bool(boolean b){ return b ? True$o$0.instance : False$1c$0.instance; }
   public static boolean isTrue(Object b){ return b == True$o$0.instance; }
   public static boolean isGeneric(Object o){ return !o.getClass().getInterfaces()[0].getSimpleName().endsWith("$0"); }
-  public static Object ord(int i, Object mm){
-    var m= (OrderMatch$174$1)mm;
-    return i<0?m.mut$lt$0() : i==0? m.mut$eq$0() : m.mut$gt$0();
-  }
+  private static final Order$1c$0 ordLt= new Order$1c$0(){ @Override public Object read$$hash$1(Object m){ return ((OrderMatch$174$1)m).mut$lt$0(); } };
+  private static final Order$1c$0 ordEq= new Order$1c$0(){ @Override public Object read$$hash$1(Object m){ return ((OrderMatch$174$1)m).mut$eq$0(); } };
+  private static final Order$1c$0 ordGt= new Order$1c$0(){ @Override public Object read$$hash$1(Object m){ return ((OrderMatch$174$1)m).mut$gt$0(); } };
+  public static Object ord(int i){ return i<0? ordLt : i==0? ordEq : ordGt; }
   public static Opt$c$1 optEmpty(){ return Opt$c$1.instance; }
   public static Opt$c$1 optSome(Object x){ return (Opt$c$1) Opts$o$0.instance.imm$$hash$1(x); }
   public static Opt$c$1 optNullable(Object o) {
@@ -123,7 +123,7 @@ public class Util{
   public static int cmp(OrderBy$5e$2 by,Object a,Object b){//so this is the more general method
     var ohA= (Order$1c$1)by.imm$$hash$1(a);
     var ohB= (Order$1c$1)by.imm$$hash$1(b);
-    return (Integer)ohA.read$cmp$3(ohA.read$close$0(),ohB.read$close$0(),cmpM);
+    return (Integer)((Order$1c$0)ohA.read$cmp$2(ohA.read$close$0(),ohB.read$close$0())).read$$hash$1(cmpM);
   }
   public static Comparator<Object> toComparator(OrderBy$5e$2 ordering) {
     return (a, b) -> cmp(ordering, a, b);

@@ -68,7 +68,7 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
     .return {this.seqFlow.fold({ size },
        { acc, e -> acc.hashWith(by#e.hash)}
        )};
-  .cmp by, a, b, m -> _ListCmp#(by, a, b, m);
+  .cmp by, a, b -> _ListCmp#(by, a, b);
   .norm f ->_ListNorm#(this,f);
   }
 
@@ -173,4 +173,4 @@ Lists: Sealed {//No need of empty, just use {}
 
   .singletonRead[E:*](read E): read List[E]->_Magic!;
   }
-_ListCmp: { #[E:*,K,R:**](by: OrderBy[imm E,K], a: read List[E], b: read List[E], m: mut OrderMatch[R]): R -> _Magic! }
+_ListCmp: { #[E:*,K](by: OrderBy[imm E,K], a: read List[E], b: read List[E]): Order -> _Magic! }

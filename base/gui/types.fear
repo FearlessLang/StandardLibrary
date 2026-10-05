@@ -5,8 +5,8 @@ Wrapper[S,T]: DataType[S,S] {
   .str -> this.name+"["+(this.getDataType.close(this.get).str)+"]";
   read #(t:T): S;
   .hash -> this.getDataType.close(this.get).hash;
-  .cmp(a,b,m) ->
-    this.getDataType.cmp(this.close(a).get, this.close(b).get, m);
+  .cmp(a,b) ->
+    this.getDataType.cmp(this.close(a).get, this.close(b).get);
   read .close(s: read S): read Wrapper[S,T];
   .info -> this.getDataType.close(this.get).info;
   .imm -> this#(this.get);
@@ -166,7 +166,7 @@ Color: DataType[Color,Color] {
     .hashWith (this.green.hash)
     .hashWith (this.blue.hash)
     .hashWith (this.alpha.hash);
-  .cmp(a,b,m) -> a.red<=>(b.red,m &&{a.green<=>(b.green,m &&{a.blue<=>(b.blue,m &&{a.alpha<=>(b.alpha,m)})})});
+  .cmp(a,b) -> a.red <=> (b.red) && {a.green <=> (b.green)} && {a.blue <=> (b.blue)} && {a.alpha <=> (b.alpha)};
   .info->this.str.info;
   .imm->Color#(this.red,this.green,this.blue,this.alpha);
   .transparent:Color->Color#({},{},{},Alpha.transparent);

@@ -297,7 +297,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     var diff= (Num$c$0Instance)((Num$c$0Instance)this.imm$$dash$1(exp)).imm$abs$0();
     return bool(le(diff,d));
   }
-  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(cmp(num(p0),num(p1)),p2); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmp(num(p0),num(p1))); }
   @Override public Object imm$norm$0(){
     if (numerator.abs().bitLength() + denominator.bitLength() <= 512){ return this; }
     return myCache.computeIfAbsent(this,_->new Norm(this));

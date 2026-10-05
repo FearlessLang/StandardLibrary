@@ -92,15 +92,15 @@ Math: Sealed, _MagicMath {
 
   /// Return the maximum of two elements given the ordering.
   /// Will return the first one if the elements are equal.
-  .max[T:*,K](ordering: OrderBy[imm T,K], t0: T, t1: T): T -> ordering#t0 <=> (ordering#t1, {
+  .max[T:*,K](ordering: OrderBy[imm T,K], t0: T, t1: T): T -> (ordering#t0 <=> (ordering#t1))#{
       .lt -> t1; .eq -> t0; .gt -> t0;
-    });
+    };
 
   /// Return the minimum of two elements given the ordering.
   /// Will return the first one if the elements are equal.
-  .min[T,K](ordering: OrderBy[T, K], t0: T, t1: T): T -> ordering#t0 <=> (ordering#t1, {
+  .min[T,K](ordering: OrderBy[T, K], t0: T, t1: T): T -> (ordering#t0 <=> (ordering#t1))#{
       .lt -> t0; .eq -> t0; .gt -> t1;
-    });
+    };
 
   /// ``Math.clamp(by, lo, hi, t)`` returns `t` clamped between upper and lower.
   /// Note: ``Math.clamp(by, lo, hi, t)`` returns `t` in the case where it is equal to lo or hi
@@ -154,7 +154,7 @@ Degree: Angle[Degree] {
   .imm -> this#.getDeg;
   .str -> "Degree["+(this#.str)+"]";
   /// Compare two angles after normalizing them
-  .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
+  .cmp t0, t1 -> t0.normalize# <=> (t1.normalize#);
   .hash -> this.normalize#.hash;
   .close -> ::;
   }
@@ -182,7 +182,7 @@ Radian: Angle[Radian] {
   .imm -> this#.rad!;
   .str -> "Radian["+(this#.str)+"]";
   /// Compare two angles after normalizing them
-  .cmp t0, t1, m -> t0.normalize# <=> (t1.normalize#, m);
+  .cmp t0, t1 -> t0.normalize# <=> (t1.normalize#);
   .hash -> this.normalize#.hash;
   .close -> ::;
   }

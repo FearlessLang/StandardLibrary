@@ -25,7 +25,7 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .info->this.imm;
   .imm->{};
   .hash->this.str.hash;
-  .cmp a,b,m -> a.str <=> (b.str, m);
+  .cmp a,b -> a.str <=> (b.str);
 
   .msg: Opt[Str] -> {};
   .list: Opt[List[Info]] -> {};

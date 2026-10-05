@@ -37,7 +37,7 @@ DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Pipe[T
     .info    -> this.info(by);
     .imm     -> this.imm(by);
     .hash    -> this.hash[K](by);
-    .cmp[R:**] t0,t1,m -> this.cmp[K,R](by,t0,t1,m);
+    .cmp t0,t1 -> this.cmp[K](by,t0,t1);
     };
   }
 
@@ -54,12 +54,7 @@ DataTypeBy[E,K,K0]: ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K] {
   /// Lexicographic composition on keys; you choose how to merge imm reps.
   /// Str merge is by ", " concat; Info merge uses Info+
   .thenData[K1,K10,E0](next: DataTypeBy[E,K1,K10], mergeImm: F[K0,K10,E0]): DataTypeBy[E,E0] -> {
-    .cmp e0,e1,m -> (this#e0) <=> (
-      this#e1, {
-        .lt->m.lt;
-        .gt->m.gt;
-        .eq->(next#e0) <=>(next#e1,m);
-      });
+    .cmp e0,e1 -> (this#e0) <=> (this#e1) && {(next#e0) <=> (next#e1)};
 
     .hash by -> this#by.hash.hashWith(next#by.hash);
     .str  by -> this#by.str + ", " + (next#by.str);
@@ -75,7 +70,7 @@ DataTypeBy[E,K,K0]: ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K] {
 /// Specialized "datatype for T" (no external key type).
 /// This mirrors OrderHashBy[T]: you provide per-value ops, and # closes into a DataType[T,T0].
 DataTypeBy[T,T0]: DataTypeBy[T,T,T0] {
-  .cmp[R:**](t0: read T,t1: read T,m: mut OrderMatch[R]): R;
+  .cmp(t0: read T,t1: read T): Order;
   .hash(t: read T): Nat;
   .str (t: read T): Str;
   .info(t: read T): Info;
@@ -84,7 +79,7 @@ DataTypeBy[T,T0]: DataTypeBy[T,T,T0] {
   # t -> {
     .close -> t;
     .close t2 -> this#t2;
-    .cmp t0,t1,m -> this.cmp(t0,t1,m);
+    .cmp t0,t1 -> this.cmp(t0,t1);
     .hash -> this.hash t;
     .str  -> this.str t;
     .info -> this.info t;

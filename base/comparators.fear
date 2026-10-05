@@ -15,47 +15,48 @@ ToStr[E:*]: {                        /// ToStr that may mention values of E (pri
   read .str(ToStrBy[imm E]): Str
   }
 
-OrderMatch[R:**]: {                  /// compare result carrier: cmp selects exactly one of lt/eq/gt
+OrderMatch[R:**]: {                  /// the three outcomes of a comparison
   mut .lt: R;
   mut .eq: R;
   mut .gt: R;
-  mut &&(onEq: mut MF[R]): mut OrderMatch[R]-> {
-    .lt->this.lt;
-    .eq->onEq#;
-    .gt->this.gt; 
-    }
+  }
+
+Order: {                             /// outcome of a comparison: selects exactly one of lt/eq/gt of the matcher
+  read #[R:**](m: mut OrderMatch[R]): R;
+  read &&(onEq: mut MF[Order]): Order -> /// this outcome, or ``onEq`` when this is eq
+    this#{ .lt -> {::.lt}; .eq -> onEq#; .gt -> {::.gt} };
   }
 
 Order[T]: {
   read .close: read T;              /// close fixpoint: the underlying value being ordered
-  read .cmp[R:**](t0: read T, t1: read T, m: mut OrderMatch[R]): R; /// compare t0 vs t1 in this ordering
+  read .cmp(t0: read T, t1: read T): Order; /// compare t0 vs t1 in this ordering
 
   // Derived relational ops: compare this.close against other (as a raw value).
-  read ==  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->False;.eq ->True; .gt -> False});
-  read <=  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->True;.eq ->True; .gt -> False});
-  read >=  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->False;.eq ->True; .gt -> True});
-  read <   (other: read T): Bool -> this.cmp(this.close, other,{.lt ->True;.eq ->False; .gt -> False});
-  read >   (other: read T): Bool -> this.cmp(this.close, other,{.lt ->False;.eq ->False; .gt -> True});
-  read !=  (other: read T): Bool -> this.cmp(this.close, other,{.lt ->True;.eq ->False; .gt -> True});
+  read ==  (other: read T): Bool -> this.cmp(this.close, other)#{.lt ->False;.eq ->True; .gt -> False};
+  read <=  (other: read T): Bool -> this.cmp(this.close, other)#{.lt ->True;.eq ->True; .gt -> False};
+  read >=  (other: read T): Bool -> this.cmp(this.close, other)#{.lt ->False;.eq ->True; .gt -> True};
+  read <   (other: read T): Bool -> this.cmp(this.close, other)#{.lt ->True;.eq ->False; .gt -> False};
+  read >   (other: read T): Bool -> this.cmp(this.close, other)#{.lt ->False;.eq ->False; .gt -> True};
+  read !=  (other: read T): Bool -> this.cmp(this.close, other)#{.lt ->True;.eq ->False; .gt -> True};
 
-  read <=>[R:**](other: read Order[T], m: mut OrderMatch[R]): R ->  /// compare two closed Orders
-    this.cmp(this.close, other.close, m);
+  read <=>(other: read Order[T]): Order ->  /// compare two closed Orders
+    this.cmp(this.close, other.close);
   }
 
 
 OrderBy[T,K]: {                       /// order values of T by a component/key K
   #(read T): read Order[K];          /// build a closed Order[K] for t's key (key is .close of the result)
 
-  .then[K0](next: OrderBy[T,K0]): OrderBy[T] -> 
-    {t0,t1,m -> this#t0 <=> ( this#t1, m &&{ next#t0<=>(next#t1,m)}) };
+  .then[K0](next: OrderBy[T,K0]): OrderBy[T] ->
+    {t0,t1 -> this#t0 <=> (this#t1) && {next#t0 <=> (next#t1)}};
 
   .view[A](f: F[read A,read T]): OrderBy[A] ->       /// contramap: order A by mapping into T
-    {a0,a1,m-> this#(f#a0)<=>(this#(f#a1),m)};    
+    {a0,a1 -> this#(f#a0) <=> (this#(f#a1))};
   }
 
 OrderBy[T]: OrderBy[T,T] {           /// produces an ordering via .cmp
-  .cmp[R:**](t0: read T,t1: read T,m: mut OrderMatch[R]): R;
-  # t -> { .close -> t; .cmp t0,t1,m -> this.cmp(t0,t1,m) }; /// close->t; compare uses this.cmp
+  .cmp(t0: read T,t1: read T): Order;
+  # t -> { .close -> t; .cmp t0,t1 -> this.cmp(t0,t1) }; /// close->t; compare uses this.cmp
   }
 
 Rev: {
@@ -65,18 +66,18 @@ Rev: {
   //>   .check{Lists#(3,1,2).flow.sort(Rev#{::}).list .assertEq({::}, Lists#(3,2,1))}
   //>   .check{Lists#(3,1,3,2,1).flow.max(Rev#{::}).list .assertEq({::}, Lists#(1,1))}
   #[T,K](by: OrderBy[T,K]): OrderBy[T] ->
-    {t0, t1, m -> by#t0 <=> (by#t1, {.lt -> m.gt; .eq -> m.eq; .gt -> m.lt})}
+    {t0, t1 -> (by#t0 <=> (by#t1))#{.lt -> {::.gt}; .eq -> {::.eq}; .gt -> {::.lt}}}
   }
 
 Order[T,E:*]: {                      /// environment-dependent ordering of T (E supplies per-value orders)
   read .close: read T;
 
-  read .cmp[K,R:**](by: OrderBy[imm E,K], t0: read T, t1: read T, m: mut OrderMatch[R]): R; /// compare using by
+  read .cmp[K](by: OrderBy[imm E,K], t0: read T, t1: read T): Order; /// compare using by
 
   read .order[K](by: OrderBy[imm E,K]): read Order[T] ->  /// freeze by into a plain Order[T]
     {
     .close -> this.close;
-    .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
+    .cmp t0,t1 -> this.cmp(by,t0,t1);
     };
   }
 
@@ -122,7 +123,7 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
     {
     .close -> this.close;
     .close t -> this.close(t).orderHash(by);
-    .cmp t0,t1,m -> this.cmp(by,t0,t1,m);
+    .cmp t0,t1 -> this.cmp(by,t0,t1);
     .hash -> this.hash by;
     .str  -> this.str by;
     };
@@ -150,35 +151,32 @@ OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-va
 
   .thenHash[K0](next: OrderHashBy[T,K0]): OrderHashBy[T] ->  /// lexicographic order; hash mixes both keys
     {
-    .cmp t0,t1,m -> this#t0<=>(this#t1,{
-      .lt ->m.lt;
-      .eq ->next#t0<=>(next#t1,m);
-      .gt ->m.gt});
+    .cmp t0,t1 -> this#t0 <=> (this#t1) && {next#t0 <=> (next#t1)};
     .hash t -> this#t.hash.hashWith(next#t.hash);
     .str t->this#t.str;
     };
 
   .viewHash[A](f: F[read A,read T]): OrderHashBy[A] ->           /// contramap for both cmp and hash
     {
-    .cmp a0,a1,m -> this#(f#a0)<=>(this#(f#a1),m);
+    .cmp a0,a1 -> this#(f#a0) <=> (this#(f#a1));
     .hash a -> this#(f#a).hash;
     .str t->this#(f#t).str;
     };
   .hideKey: OrderHashBy[T] -> {//Just convenience over .viewHash {::}
-    .cmp t0,t1,m -> this#t0 <=> (this#t1,m);
+    .cmp t0,t1 -> this#t0 <=> (this#t1);
     .hash t -> this#t.hash;
     .str t ->this#t.str;
     };
   }
 
 OrderHashBy[T]: OrderHashBy[T,T] {         /// direct order+hash for T
-  .cmp[R:**](t0: read T,t1: read T,m: mut OrderMatch[R]): R;
+  .cmp(t0: read T,t1: read T): Order;
   .hash(t: read T): Nat;
-  .str(t: read T): Str; 
+  .str(t: read T): Str;
   # t ->                                  /// close->t; compare/hash delegate to this.cmp/this.hash
     {
     .close -> t; .close t0 -> this#t0;
-    .cmp t0,t1,m -> this.cmp(t0,t1,m);
+    .cmp t0,t1 -> this.cmp(t0,t1);
     .hash -> this.hash t;
     .str -> this.str t; 
     };

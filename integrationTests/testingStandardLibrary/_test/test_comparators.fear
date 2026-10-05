@@ -5,7 +5,7 @@ Box[E:*]: OrderHash[Box[E],E] {
 
   .close->this;  .close->::;
 
-  .cmp by, t0, t1, m-> by#(t0.get)<=>(by#(t1.get),m);
+  .cmp by, t0, t1 -> by#(t0.get) <=> (by#(t1.get));
   .hash by -> by#(this.get).hash;
   .str by->by#(this.get).str;
 
@@ -14,7 +14,7 @@ Box[E:*]: OrderHash[Box[E],E] {
 
 A1: OrderHash[A1] {
   .close -> this;  .close->::;
-  .cmp t0, t1, m -> m.eq;
+  .cmp t0, t1 -> {::.eq};
   .hash -> 0;
   .str ->"";
   .proofConcrete: A1->A1;
@@ -32,7 +32,7 @@ Persons: {
       read .age: Nat -> age;
       read .cats: List[Cat] -> cats;
 
-      .cmp p1,p2,m -> p1.age<=>(p2.age, m &&{ p1.name<=>(p2.name, m) });
+      .cmp p1,p2 -> p1.age <=> (p2.age) && {p1.name <=> (p2.name)};
 
       .hash: Nat -> age.hash.hashWith(name.hash);
 
@@ -100,7 +100,7 @@ CPoints: {
     CPoint: Order[CPoint] { 'self
       read .x: Nat -> x;
       read .y: Nat -> y;
-      .cmp p0,p1,m -> p0.x<=>(p1.x, m &&{ p0.y<=>(p1.y, m) });
+      .cmp p0,p1 -> p0.x <=> (p1.x) && {p0.y <=> (p1.y)};
       .close -> self;
       }
   }
@@ -110,15 +110,15 @@ Cars: {
   }
 
 StrSizeOrder: OrderHashBy[Str] {
-  t0,t1,m -> t0.imm.size<=>(t1.imm.size, m);
+  t0,t1 -> t0.imm.size <=> (t1.imm.size);
   .hash s -> s.imm.size.hash;
   .str s  -> s.imm;
   }
 
 ThrowOnTwo: OrderBy[Nat] {
-  t0,t1,m -> ((t0 == 2) | (t1 == 2)) ? {
+  t0,t1 -> ((t0 == 2) | (t1 == 2)) ? {
     .then -> Error.msg("cmp "+t0+" "+t1);
-    .else -> t0<=>(t1, m)};
+    .else -> t0 <=> t1};
   }
 
 TestFlowsBasicsTests: Test {::

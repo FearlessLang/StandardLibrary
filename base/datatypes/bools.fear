@@ -31,9 +31,9 @@ Bool: Sealed,DataType[Bool,Bool] {
 
   .close -> this; .close -> ::;
 
-  .cmp a, b, m -> a.imm?{
-    .then->b.imm?{ .then->m.eq; .else->m.gt };
-    .else->b.imm?{ .then->m.lt; .else->m.eq };
+  .cmp a, b -> a.imm?{
+    .then->b.imm?{ .then->{::.eq}; .else->{::.gt} };
+    .else->b.imm?{ .then->{::.lt}; .else->{::.eq} };
     };
 
   .hash -> this.imm?{ .then->1; .else->0 };

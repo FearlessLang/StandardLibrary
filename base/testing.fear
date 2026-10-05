@@ -1,7 +1,7 @@
 StackFrame: DataType[StackFrame,StackFrame] {
   .fileName: Str; .typeName: Str; .methodName: Str; .lineNumber: Nat;
   .close -> this; .close -> ::;
-  .cmp a, b, m -> a.str<=>(b.str,m);
+  .cmp a, b -> a.str <=> (b.str);
   .hash -> this.str.hash;
   .str -> 
     "StackFrame[" + (this.imm.fileName)

@@ -311,7 +311,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   @Override public Object imm$aluInt$0(){ return Int$c$0Instance.instance(val); }
   @Override public Object imm$aluByte$0(){ return Byte$o$0Instance.instance((byte)val); }
 
-  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Long.compareUnsigned(n(p0),n(p1)),p2); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(Long.compareUnsigned(n(p0),n(p1))); }
 
   @Override public Object imm$norm$0(){ return this; }
   @Override public Object imm$get$0(){ return this; }
