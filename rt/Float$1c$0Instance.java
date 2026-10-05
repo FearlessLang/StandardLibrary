@@ -313,7 +313,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   }
 
 
-  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(cmpFearless(f(p0),f(p1)),p2); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmpFearless(f(p0),f(p1))); }
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this.read$str$0());}
 
 }

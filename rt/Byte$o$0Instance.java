@@ -152,7 +152,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$aluXor$1(Object p0){ return instance((byte)(val ^ b(p0))); }
   @Override public Object imm$aluAnd$1(Object p0){ return instance((byte)(val & b(p0))); }
   @Override public Object imm$aluOr$1(Object p0){ return instance((byte)(val | b(p0))); }
-  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(Integer.compare(u8(p0),u8(p1)),p2); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(Integer.compare(u8(p0),u8(p1))); }
   @Override public Object imm$norm$0(){ return this; }
   @Override public Object imm$get$0(){ return this; }
 }

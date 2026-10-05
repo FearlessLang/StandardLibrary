@@ -74,7 +74,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$u$0(){
     return UStr$s$0Instance.instance(val);
   }
-  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){ return ord(s(p0).compareTo(s(p1)),p2); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(s(p0).compareTo(s(p1))); }
   
   static final Pattern signedInt= Pattern.compile("[+-][0-9](?:[0-9_]*[0-9])?");
   static final Pattern unsignedInt= Pattern.compile("[0-9](?:[0-9_]*[0-9])?");

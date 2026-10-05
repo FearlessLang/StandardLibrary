@@ -207,9 +207,9 @@ FlowModeTests: Test {::
   }
 
 ThrowOnThree: OrderBy[Nat] {
-  t0,t1,m -> ((t0 == 3) | (t1 == 3)) ? {
+  t0,t1 -> ((t0 == 3) | (t1 == 3)) ? {
     .then -> Error.msg"by3";
-    .else -> t0<=>(t1, m)};
+    .else -> t0 <=> t1};
   }
 
 FlowMaxFenceTests: Test {::

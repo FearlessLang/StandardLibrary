@@ -36,7 +36,7 @@ TestPipe: Test {::
 
 /// Support code for tests
 IntBy:DataTypeBy[Int,Int] {
-  .cmp t0,t1,m -> t0<=> (t1,m);
+  .cmp t0,t1 -> t0 <=> t1;
   .hash(t)   -> t.hash;
   .str (t)     -> t.str;
   .info(t)     -> t.info;
@@ -44,7 +44,7 @@ IntBy:DataTypeBy[Int,Int] {
 }
 
 StrBy:DataTypeBy[Str,Str] {
-  .cmp t0,t1,m -> t0<=> (t1,m);
+  .cmp t0,t1 -> t0 <=> t1;
   .hash(t)   -> t.hash;
   .str (t)     -> t.str;
   .info(t)     -> t.info;

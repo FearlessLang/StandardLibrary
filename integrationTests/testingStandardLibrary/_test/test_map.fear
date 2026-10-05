@@ -100,5 +100,5 @@ TestMap: Test {::
   }
 
 _BySize: OrderHashBy[Str,Nat] {# s->s.imm.size}
-_BS: DataType[_BS,_BS] {read .s: Str; .str->"Nope"; .info->Todo!; .close->this; .close->::; .imm->Todo!; .hash ->this.s.hash; .cmp a, b, m->a.s<=>(b.s,m);}
+_BS: DataType[_BS,_BS] {read .s: Str; .str->"Nope"; .info->Todo!; .close->this; .close->::; .imm->Todo!; .hash ->this.s.hash; .cmp a, b -> a.s <=> (b.s);}
 _BSs:{#(s: Str): _BS->{s}}

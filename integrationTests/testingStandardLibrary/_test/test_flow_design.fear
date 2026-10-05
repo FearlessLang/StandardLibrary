@@ -4,22 +4,22 @@ Quarter: F[Nat,Nat]{x -> x.getTruncDiv 4}
 Parity: F[Nat,Nat]{x -> x.getRem 2}
 Same: F[Nat,Nat]{_ -> 0}
 By: {
-  #(key: F[Nat,Nat]): OrderBy[Nat] -> {a, b, m -> key#(a.imm) <=> (key#(b.imm), m)};
-  #(key: F[Nat,Nat], bad: Nat): OrderBy[Nat] -> {a, b, m -> ErrIf#(a == bad | (b == bad), "by"+bad, key#(a.imm)) <=> (key#(b.imm), m)};
+  #(key: F[Nat,Nat]): OrderBy[Nat] -> {a, b -> key#(a.imm) <=> (key#(b.imm))};
+  #(key: F[Nat,Nat], bad: Nat): OrderBy[Nat] -> {a, b -> ErrIf#(a == bad | (b == bad), "by"+bad, key#(a.imm)) <=> (key#(b.imm))};
   }
 HashBy: {
   #(key: F[Nat,Nat]): OrderHashBy[Nat] -> {
-    .cmp a, b, m -> key#(a.imm) <=> (key#(b.imm), m);
+    .cmp a, b -> key#(a.imm) <=> (key#(b.imm));
     .hash a -> key#(a.imm) .hash;
     .str a -> a.str;
     };
   #(key: F[Nat,Nat], bad: Nat): OrderHashBy[Nat] -> {
-    .cmp a, b, m -> ErrIf#(a == bad | (b == bad), "by"+bad, key#(a.imm)) <=> (key#(b.imm), m);
+    .cmp a, b -> ErrIf#(a == bad | (b == bad), "by"+bad, key#(a.imm)) <=> (key#(b.imm));
     .hash a -> ErrIf#(a == bad, "by"+bad, key#(a.imm)) .hash;
     .str a -> a.str;
     };
   }
-Apart: OrderHashBy[Nat]{ .cmp _, _, m -> m.lt; .hash _ -> 0; .str a -> a.str; }
+Apart: OrderHashBy[Nat]{ .cmp _, _ -> {::.lt}; .hash _ -> 0; .str a -> a.str; }
 
 FlowDesignSize: Test {::
   .checkDetErr({::.isMsg{:: == "boom"}}, {L#.seqFlow.suppressMisuseExceptions.map[Nat]{_ -> Error.msg"boom"}.size})

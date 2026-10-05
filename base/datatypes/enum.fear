@@ -86,6 +86,6 @@ Enum[E]: DataType[E,E]{
   /// narrows ``DataType[E,E].close`` to ``Enum[E]`` (still given by the family,
   /// not here) so that `.cmp` below can call `.index` on its arguments.
   read .close(t: read E): read Enum[E];
-  .cmp t0,t1,m -> this.close(t0).index<=>(this.close(t1).index,m);
+  .cmp t0,t1 -> this.close(t0).index <=> (this.close(t1).index);
   .hash -> this.index;
   }

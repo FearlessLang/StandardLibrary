@@ -16,10 +16,10 @@ _CollapseStep: {
   #[E:*,K](last: mut Var[mut Opt[read Order[K]]], kept: mut Var[mut EList[E]], o: read Order[K], e: E): Void ->
     last.get.match{
       .empty -> Block#(last.set(Opts#o), kept.get.add(e), Void);
-      .some b -> o <=> (b, {
+      .some b -> (o <=> b)#{
         .lt -> Block#(last.set(Opts#o), kept.get.add(e), Void);
         .eq -> Void;
-        .gt -> Block#(last.set(Opts#o), kept.get.add(e), Void) })
+        .gt -> Block#(last.set(Opts#o), kept.get.add(e), Void) }
       }
   }
 _MappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
@@ -65,7 +65,7 @@ _MergeFrom: { #[E:*,K](a: mut List[mut _Keyed[E,K]], i: Nat, b: mut List[mut _Ke
       a.get(i).key <= (b.get(j).key.close) ?{
         .then -> _MergeFrom#(a, i + 1, b, j, k, res.add(a.get i));
         .else -> _MergeFrom#(a, i, b, j + 1, k, res.add(b.get j)) } } } } }
-_MaxMerges: { #[E:*,K]: _TreeMerge[E,K] -> {a, b -> _MaxPick#(a.getFirst.key <=> (b.getFirst.key, { .lt -> 0; .eq -> 1; .gt -> 2 }), a, b)} }
+_MaxMerges: { #[E:*,K]: _TreeMerge[E,K] -> {a, b -> _MaxPick#((a.getFirst.key <=> (b.getFirst.key))#{ .lt -> 0; .eq -> 1; .gt -> 2 }, a, b)} }
 _MaxPick: { #[E:*,K](o: Nat, a: mut List[mut _Keyed[E,K]], b: mut List[mut _Keyed[E,K]]): mut List[mut _Keyed[E,K]] ->
   o == 0 ?{ .then -> b; .else -> o == 1 ?{ .then -> a ++ b; .else -> a } } }
 _HashedKey[K]: { read .hash: Nat; read .key: read OrderHash[K]; }

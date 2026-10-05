@@ -215,23 +215,23 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     }
     return new Nat$c$0Instance(h);
   }
-  @Override public Object read$cmp$4(Object p0,Object p1,Object p2,Object m){
+  @Override public Object read$cmp$3(Object p0,Object p1,Object p2){
     var byE= (OrderHashBy$2ea$2)p0;
     var a= (Map$c$2Instance)p1;
     var b= (Map$c$2Instance)p2;
     int c= a.elems.size() - b.elems.size();
-    if (c != 0){ return ord(c,m); }
+    if (c != 0){ return ord(c); }
     var ia= a.elems.entrySet().iterator();
     var ib= b.elems.entrySet().iterator();
     while(ia.hasNext()){
       var ea= ia.next();
       var eb= ib.next();
       c= cmp(a.keyOh, ea.getKey().key, eb.getKey().key);
-      if (c != 0){ return ord(c,m); }
+      if (c != 0){ return ord(c); }
       c= cmp(byE, ea.getValue(), eb.getValue());
-      if (c != 0){ return ord(c,m); }
+      if (c != 0){ return ord(c); }
     }
-    return ((OrderMatch$174$1)m).mut$eq$0();
+    return ord(0);
   }
   @Override public Object mut$without$1(Object p0){
     var mk= mapKey(keyOh,p0);

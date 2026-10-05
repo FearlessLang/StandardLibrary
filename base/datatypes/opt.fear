@@ -40,11 +40,11 @@ Opt[E:*]: _Opt[E] {
   .str  f  -> this.match{ .some x -> "Opt["+(f#x)+"]"; .empty -> "Opt[]" };
   .info f  -> this.match{ .some x -> Infos.list(f#x); .empty -> {} };
   
-  .cmp by, a, b, m -> a.match{
-    .empty -> b.match{ .empty -> m.eq; .some _ -> m.lt; };
+  .cmp by, a, b -> a.match{
+    .empty -> b.match{ .empty -> {::.eq}; .some _ -> {::.lt}; };
     .some ea -> b.match{
-      .empty   -> m.gt;
-      .some eb -> by#ea<=>(by#eb, m);
+      .empty   -> {::.gt};
+      .some eb -> by#ea <=> (by#eb);
       }
     };
 

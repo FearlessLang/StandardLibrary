@@ -1,7 +1,7 @@
 /// The maximum found without a flow, by recursion and by a loop, and the plain
 /// functions the fences ``max``, ``sortDistinct`` and ``distinctMut`` desugar through.
 Better: { #[K](a: read base.Order[K], b: read base.Order[K]): read base.Order[K] ->
-  a <=> (b, { .lt -> b; .eq -> a; .gt -> a }) }
+  (a <=> b)#{ .lt -> b; .eq -> a; .gt -> a } }
 MaxRec: { #[E:*,K](xs: read List[E], by: OrderBy[imm E,K], i: Nat, best: read base.Order[K]): read base.Order[K] ->
   i == (xs.size) ?[read base.Order[K]]{ .then -> best; .else -> MaxRec#(xs, by, i + 1, Better#(best, by#(xs.get i))) } }
 MaxByRecursion: { #[E:*,K](xs: read List[E], by: OrderBy[imm E,K]): mut Opt[read base.Order[K]] ->
@@ -29,10 +29,10 @@ Maxes: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K]): mut List[E] -> Block#
 MaxesStep: { #[E:*,K](best: mut base.Var[mut Opt[read base.Order[K]]], run: mut base.Var[mut base.EList[E]], o: read base.Order[K], e: E): Void ->
   best.get.match{
     .empty -> Block#(best.set(Opts#o), run.get.add(e), Void);
-    .some b -> o <=> (b, {
+    .some b -> (o <=> b)#{
       .lt -> Void;
       .eq -> Block#(run.get.add(e), Void);
-      .gt -> Block#(best.set(Opts#o), run.set(ELists#[E]), run.get.add(e), Void) }) } }
+      .gt -> Block#(best.set(Opts#o), run.set(ELists#[E]), run.get.add(e), Void) } } }
 
 Collapse: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K]): mut List[E] -> Block#
   .var[mut Opt[read base.Order[K]]] last = {{}}
@@ -46,10 +46,10 @@ Collapse: { #[E:*,K](xs: mut List[E], by: OrderBy[imm E,K]): mut List[E] -> Bloc
 CollapseStep: { #[E:*,K](last: mut base.Var[mut Opt[read base.Order[K]]], kept: mut base.Var[mut base.EList[E]], o: read base.Order[K], e: E): Void ->
   last.get.match{
     .empty -> Block#(last.set(Opts#o), kept.get.add(e), Void);
-    .some b -> o <=> (b, {
+    .some b -> (o <=> b)#{
       .lt -> Block#(last.set(Opts#o), kept.get.add(e), Void);
       .eq -> Void;
-      .gt -> Block#(last.set(Opts#o), kept.get.add(e), Void) }) } }
+      .gt -> Block#(last.set(Opts#o), kept.get.add(e), Void) } } }
 
 Distinct: { #[E:*,K](xs: mut List[E], by: OrderHashBy[imm E,K]): mut List[E] -> Block#
   .var[read List[read base.Order[K]]] keys = {{}}

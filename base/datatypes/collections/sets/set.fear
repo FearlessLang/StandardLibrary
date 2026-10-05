@@ -250,33 +250,33 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   /// Equivalent to ``this.hash(this.orderHash)``.
   .hash: Nat -> this.hash(this.orderHash);
 
-  /// ``this.cmp(by, a, b, m)`` compares sets `a` and `b` using `by`.
-  /// Returns `m.eq` if `a` and `b` contain the same elements under `by`.
-  /// If unequal, returns `m.gt` if the first non-equal element of `a` is greater than
+  /// ``this.cmp(by, a, b)`` compares sets `a` and `b` using `by`.
+  /// The outcome is eq if `a` and `b` contain the same elements under `by`.
+  /// If unequal, it is gt if the first non-equal element of `a` is greater than
   /// the first non-equal element of `b`, or all elements are equal and `a` is larger.
   /// Note the ordering of the set elements is given by their orderHash, not the given `by`.
-  /// Returns `m.lt` otherwise.
+  /// It is lt otherwise.
   /// if you want two sets ignoring their original order, you should use `this.setCmp`
   //>   .let empty={Sets#[Nat,Nat]({::})}
-  //>   .check{empty.cmp({::}, Sets#({::}, 1, 2, 3), Sets#({::}, 2, 3, 1), {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 0}
-  //>   .check{empty.cmp({::}, Sets#({::}, 3, 1, 2), Sets#({::}, 0, 1, 2, 3),  {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 2}
-  //>   .check{empty.cmp({::}, Sets#({::}, 1, 2, 3), Sets#({::}, 1, 2), {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 2}
-  .cmp by, a, b, m -> List[E].cmp(by, a.imm.list, b.imm.list, m);
+  //>   .check{empty.cmp({::}, Sets#({::}, 1, 2, 3), Sets#({::}, 2, 3, 1))#{.eq -> 0; .lt -> 1; .gt -> 2} .assertEq 0}
+  //>   .check{empty.cmp({::}, Sets#({::}, 3, 1, 2), Sets#({::}, 0, 1, 2, 3))#{.eq -> 0; .lt -> 1; .gt -> 2} .assertEq 2}
+  //>   .check{empty.cmp({::}, Sets#({::}, 1, 2, 3), Sets#({::}, 1, 2))#{.eq -> 0; .lt -> 1; .gt -> 2} .assertEq 2}
+  .cmp by, a, b -> List[E].cmp(by, a.imm.list, b.imm.list);
 
-  /// ``this.cmp(a, b, m)`` compares sets `a` and `b` using this's orderHash.
-  /// Equivalent to ``this.cmp(this.orderHash, a, b, m)``.
+  /// ``this.cmp(a, b)`` compares sets `a` and `b` using this's orderHash.
+  /// Equivalent to ``this.cmp(this.orderHash, a, b)``.
   /// Note the ordering of the set elements is given by their orderHash, not the given ``by``.
   /// if you want two sets ignoring their original order, you should use `this.setCmp`
   //>   .let s1={Sets#({::}, +1, +2, +3)}
   //>   .let s2={Sets#({::}, -2, -3, -1)}
-  //>   .check{Sets#[Int,Int]({::.imm.abs.getInt}).cmp(s1, s2, {.eq -> 0; .lt -> 1; .gt -> 2}) .assertEq 1}
-  .cmp[R:**](a: read Set[E], b: read Set[E], m: mut OrderMatch[R]): R
-    -> this.cmp(this.orderHash, a, b, m);
+  //>   .check{Sets#[Int,Int]({::.imm.abs.getInt}).cmp(s1, s2)#{.eq -> 0; .lt -> 1; .gt -> 2} .assertEq 1}
+  .cmp(a: read Set[E], b: read Set[E]): Order
+    -> this.cmp(this.orderHash, a, b);
 
-  /// ``this.setCmp(by, a, b, m)`` compares the two sets independently of their original ordering.
-  /// Equivalent to: ``this.cmp(by, a.distinctBy(by), b.distinctBy(by), m)``
-  .setCmp[K, R:**](by: OrderHashBy[E, K], a: Set[E], b: Set[E], m: mut OrderMatch[R]): R
-    -> this.cmp(by, a.distinctBy(by), b.distinctBy(by), m);
+  /// ``this.setCmp(by, a, b)`` compares the two sets independently of their original ordering.
+  /// Equivalent to: ``this.cmp(by, a.distinctBy(by), b.distinctBy(by))``
+  .setCmp[K](by: OrderHashBy[E, K], a: Set[E], b: Set[E]): Order
+    -> this.cmp(by, a.distinctBy(by), b.distinctBy(by));
 
   /// `this.list` returns a sorted list of all the elements. The sorted order is the order specified by `this.orderHash`
   /// Note: This list is zero cost as this collection maintains a sorted list.
