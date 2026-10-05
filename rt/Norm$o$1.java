@@ -11,6 +11,7 @@ public interface Norm$o$1 extends _base.Sealed$2o$0 {
     throw new AssertionError("Uncallable method: Norm$o$1.imm$get$0"+this.getClass().getName());
   }
   default Object read$as$1(Object p0){ return this; }
+  default Object imm$as$1(Object p0){ return this; }
 }
 class Norm implements Norm$o$1{
   final Object get;//fearless will guarantee that T is always deeply immutable

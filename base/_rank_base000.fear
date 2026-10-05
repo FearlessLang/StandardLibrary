@@ -53,7 +53,10 @@ Debug: Sealed {
   }
 
 BaseId[T1:*,T2]: CaptureFree{ #(x: T1): T2 }
-BaseContainer[T1:*]: Sealed{ read .as[T2](f: BaseId[read/imm T1,T2]): BaseContainer[T2] }
+BaseContainer[T1:*]: Sealed{
+  read .as[T2](f: BaseId[read/imm T1,T2]): BaseContainer[T2];
+  imm  .as[T2](f: BaseId[imm T1,T2]): BaseContainer[T2];
+  }
 
 Let: { #[A:*,R:**](l: mut Let[A, R]): R -> l.in(l.let); }
 Let[A:*,R:**]: { mut .let: A; mut .in(a: A): R }
