@@ -255,6 +255,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object read$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
 
   @Override public Object read$as$1(Object p0){ return this; }
+  @Override public Object imm$as$1(Object p0){ return this; }
   
   private Object biFlow(FlowMode mode){ return MultiFlow.of(List.of(elems.keySet().stream().map(k->k.key).toList(), List.copyOf(elems.values())), mode); }
   @Override public Object mut$flow$0(){ return biFlow(FlowMode.Seq); }

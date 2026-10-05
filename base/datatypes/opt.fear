@@ -103,6 +103,7 @@ _Opt[E:*]: ToFlow[E],BaseContainer[E],DataType[Opt[E],Opt[imm E],E,imm E] {
   read .assertSome: Void;
   read .assertSome(read LazyInfo): Void;
   read .as[T2](f: BaseId[read/imm E,T2]): Opt[T2];
+  imm  .as[T2](f: BaseId[imm E,T2]): Opt[T2];
   mut .mapSome[R:*](mut MF[E, R]): mut Opt[R];
   read .mapSome[R:*](mut MF[read/imm E, R]): mut Opt[R];
   }
