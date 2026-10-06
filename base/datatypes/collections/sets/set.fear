@@ -2,6 +2,10 @@
 Sets: Sealed {
   #[E,K](OrderHashBy[E,K]): Set[E]->_Magic!;
   #[E,K](OrderHashBy[E,K],E): Set[E]->_Magic!;
+  /// ``Sets#(by, e1, e2, ...)`` returns the set of the given elements.
+  /// Elements equal under ``by`` are kept once: the first one given.
+  //>   .check{Sets#({::.imm.abs}, -1, +1).list .assertEq({::}, Lists#(-1))}
+  //>   .check{Sets#({::.imm.abs}, +2, -1, -2, +1).list .assertEq({::}, Lists#(-1, +2))}
   #[E,K](OrderHashBy[E,K],E,E): Set[E]->_Magic!;
   #[E,K](OrderHashBy[E,K],E,E,E): Set[E]->_Magic!;
   #[E,K](OrderHashBy[E,K],E,E,E,E): Set[E]->_Magic!;

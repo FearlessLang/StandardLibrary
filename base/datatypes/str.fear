@@ -4,7 +4,7 @@
 ///0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\
 ///Plus space `` `` and new line.
 ///There is no concept of escape as in some other languages, so ``\n`` is two characters.
-///The methods ^ and | can be used to obtain a string including new lines or backticks (`).
+///The methods ^ and | can be used to obtain a string including new lines or double quotes (").
 
 /// Relations of parsers and printers.
 /// Methods .getInt/.getFloat/.getNum/.getByte below accept exactly the numeric type names
@@ -18,9 +18,9 @@
 /// - canonicalization: ``+00_12``.getInt.str ==``+12``
 ///
 /// Str.getNat:
-/// - rejected: ``+12``.getNat  ``-1``.getNat  ``1_``.getNat  ``_1``.getNat    ``4_294_967_296``.getNat (range)
-/// - accepted: ``0``.getNat  ``00``.getNat  ``0__10``.getNat  ``4_294_967_295``.getNat
-/// - canonicalization: ``000_255``.nat.str ==``255``  and ``4_294_967_295``.nat.str==``4294967295``
+/// - rejected: ``+12``.getNat  ``-1``.getNat  ``1_``.getNat  ``_1``.getNat    ``18_446_744_073_709_551_616``.getNat (range)
+/// - accepted: ``0``.getNat  ``00``.getNat  ``0__10``.getNat  ``18_446_744_073_709_551_615``.getNat
+/// - canonicalization: ``000_255``.nat.str ==``255``  and ``18_446_744_073_709_551_615``.nat.str==``18446744073709551615``
 ///
 /// Str.getByte:
 /// - rejected: ``+12``.getByte  ``-1``.getByte  ``1_``.getByte  ``_1``.getByte  ``256``.getByte
@@ -62,6 +62,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .close->::; .close->this;
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt
   |(x: read ToStr): Str;            /// like + but inserts a newline between the two strings
+  //>   .check{"a" ^ "b" .assertEq `a"b`}
   ^(x: read ToStr): Str;            /// like + but inserts a double quote between the two strings
 
   | : Str;                          /// appends a newline
@@ -130,6 +131,8 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if `this` is not a valid Fearless Nat.
   //>   .check{("42".tryGetNat).ok.assertEq({::}, Opts# 42)}
   //>   .check{"nope".tryGetNat .assertInfo{::.isMsg{::.startsWith "Str.getNat:"}}}
+  //>   .check{("18_446_744_073_709_551_615".tryGetNat).ok.assertEq({::}, Opts# 18_446_744_073_709_551_615)}
+  //>   .check{"18_446_744_073_709_551_616".tryGetNat .assertInfo{::.isMsg{::.startsWith "Str.getNat:"}}}
   .tryGetNat: mut Action[Nat];
   .getByte: Byte -> this.tryGetByte!;            /// parse a string representing a valid Fearless Nat in the range [0,255]; throws if invalid (this includes out of range)
   /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not a valid Fearless Nat in ``[0,255]``.
