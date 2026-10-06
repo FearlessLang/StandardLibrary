@@ -149,11 +149,12 @@ public class Util{
   
   public static Deterministic deterministic(Info$o$0 i){ return new Deterministic(i); }
   public static NonDeterministic nonDeterministic(Info$o$0 i){ return new NonDeterministic(i); }
-  public static void topLevel(Runnable r){
-    try{ r.run(); endMarker(); }
+  public static boolean topLevel(Runnable r){
+    try{ r.run(); endMarker(); return true; }
     catch(Deterministic d){ printInfo(d.i,d); }
     catch(NonDeterministic d){ printInfo(d.i,d); }
     catch(Throwable t){ t.printStackTrace();}
+    return false;
   }
   private static void endMarker(){
     var m= System.getProperty("fearless.endMarker");
