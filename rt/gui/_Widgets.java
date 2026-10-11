@@ -100,7 +100,7 @@ class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
   @Override public Object mut$chunk$1(Object n){
-    int c = nat(n);
+    int c = extent(n, "chunk");
     return reStyle(() -> chunk = c);
   }
 }
