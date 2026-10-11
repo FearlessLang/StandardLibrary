@@ -263,12 +263,10 @@ interface Sk{
   }
 
   private static int mix(int a, int b, int p){
-    int q = 100 - p;
-    return c8(a >>> 24, b >>> 24, p, q) << 24 | c8(a >> 16 & 255, b >> 16 & 255, p, q) << 16
-      | c8(a >> 8 & 255, b >> 8 & 255, p, q) << 8 | c8(a & 255, b & 255, p, q);
+    int res = 0;
+    for (int s = 0; s < 32; s += 8){ res |= ((a >>> s & 255) * (100 - p) + (b >>> s & 255) * p) / 100 << s; }
+    return res;
   }
-
-  private static int c8(int a, int b, int p, int q){ return (a * q + b * p) / 100; }
 
   static Image scaled(Image src, int w, int h){
     var s = src;

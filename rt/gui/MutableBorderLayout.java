@@ -4,76 +4,22 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.LayoutManager2;
-import java.io.Serializable;
 
-public final class MutableBorderLayout implements LayoutManager2, Serializable{
+public final class MutableBorderLayout extends BorderLayout{
   private static final long serialVersionUID = 1L;
 
   private final AContainer gap;
-  private Component north;
-  private Component south;
-  private Component east;
-  private Component west;
-  private Component center;
 
   public MutableBorderLayout(AContainer gap){ this.gap = gap; }
 
-  // Current occupant of a slot, or null. Used by _Frame.addTo to evict the
-  // old occupant before adding a replacement, which is what keeps the
-  // duplicate-slot check in put() unreachable in practice.
-  Component at(String slot){
-    return switch (slot){
-      case BorderLayout.NORTH -> north;
-      case BorderLayout.SOUTH -> south;
-      case BorderLayout.EAST -> east;
-      case BorderLayout.WEST -> west;
-      case BorderLayout.CENTER -> center;
-      default -> throw new IllegalArgumentException(slot);
-    };
-  }
-
-  @Override public void addLayoutComponent(String name, Component comp){
-    addLayoutComponent(comp, name);
-  }
-
   @Override public void addLayoutComponent(Component comp, Object constraints){
-    var name = constraints == null ? BorderLayout.CENTER : constraints;
-    if (!(name instanceof String s)){ throw new IllegalArgumentException("" + name); }
-    switch (s){
-      case BorderLayout.NORTH -> north = put(north, comp, s);
-      case BorderLayout.SOUTH -> south = put(south, comp, s);
-      case BorderLayout.EAST -> east = put(east, comp, s);
-      case BorderLayout.WEST -> west = put(west, comp, s);
-      case BorderLayout.CENTER -> center = put(center, comp, s);
-      default -> throw new IllegalArgumentException(s);
-    }
-  }
-
-  private Component put(Component old, Component comp, String name){
-    if (old != null && old != comp){ throw new IllegalStateException("duplicate border slot: " + name); }
-    return comp;
-  }
-
-  @Override public void removeLayoutComponent(Component comp){
-    if (comp == north){ north = null; }
-    if (comp == south){ south = null; }
-    if (comp == east){ east = null; }
-    if (comp == west){ west = null; }
-    if (comp == center){ center = null; }
+    assert getLayoutComponent(constraints) == null;
+    super.addLayoutComponent(comp, constraints);
   }
 
   @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
 
   @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
-
-  @Override public Dimension maximumLayoutSize(Container target){
-    return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
-  }
-
-  @Override public float getLayoutAlignmentX(Container target){ return 0.5f; }
-  @Override public float getLayoutAlignmentY(Container target){ return 0.5f; }
-  @Override public void invalidateLayout(Container target){}
 
   @Override public void layoutContainer(Container target){ lay(target, target.getWidth(), target.getHeight(), true); }
 
@@ -86,6 +32,11 @@ public final class MutableBorderLayout implements LayoutManager2, Serializable{
   // with a plain `total == 0` check.
   private Dimension lay(Container target, int width, int height, boolean place){
     synchronized (target.getTreeLock()){
+      var north = getLayoutComponent(NORTH);
+      var south = getLayoutComponent(SOUTH);
+      var west = getLayoutComponent(WEST);
+      var east = getLayoutComponent(EAST);
+      var center = getLayoutComponent(CENTER);
       int left = gap.left;
       int right = width - gap.right;
       int top = gap.top;
