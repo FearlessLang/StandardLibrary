@@ -225,6 +225,46 @@ FlowMaxFenceTests: Test {::
   .checkDetErr({::.isMsg{:: == "by3"}}, {Lists#(0,1,2,3,4,5,6,7).flow.map{x -> x}.min ThrowOnThree .list})
   }
 
+FlowHintTests: Test {::
+  .check{Lists#(1,2,3).flow.hintSequential.map{e -> e + 1}.list .assertEq({::}, Lists#(2,3,4))}
+  .check{Lists#(1,2,3).flow.hintParallel.map{e -> e + 1}.list .assertEq({::}, Lists#(2,3,4))}
+  .check{Lists#(1,2,3).flow.map{e -> e + 1}.hintParallel.limit 2 .list .assertEq({::}, Lists#(2,3))}
+  .check{Lists#(1,2,3).flow(ParRead#).hintParallel.list .assertEq({::}, Lists#(1,2,3))}
+  .check{Lists#(1,2,3).seqFlow.hintSequential.list .assertEq({::}, Lists#(1,2,3))}
+  .check{Flows#(1,2,3).hintParallel.list .assertEq({::}, Lists#(1,2,3))}
+  .check{Flows#(1,2,3).hintSequential.list .assertEq({::}, Lists#(1,2,3))}
+  .check{Opts#(3).flow.hintParallel.list .assertEq({::}, Lists#(3))}
+  .check{(1 =~~= 3).flow.hintParallel.list .assertEq({::}, Lists#(1,2,3))}
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).flow.hintSequential.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).flow.hintParallel.hintSequential.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).flow.hintParallel.map{e -> e}.hintSequential.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).flow(ParRead#).hintSequential.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Flows#(1,2,3).hintParallel.hintSequential.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Flows#(1,2,3).hintParallel.hintSequential.any{e -> e == 2}})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Flows#(1,2,3).hintParallel.hintSequential.fold({0}, {a, e -> a + e})})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Flows#(1,2,3).hintParallel.hintSequential.forEach{_ -> Void}})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Flows#(1,2,3).hintParallel.hintSequential.for{_ -> Void}})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `To keep this shape, call`}}, {Flows#(1,2,3).hintParallel.hintSequential.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).seqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).seqFlow.map{e -> e + 1}.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).seqFlow.hintSequential.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {ReadHinted#(Lists#(1,2,3))})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {ELists#[Nat].add(1).add(2).seqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Sets#({::}, 1, 2).seqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {ESets#[Nat,Nat]{::}.add(2).add(1).seqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Opts#(3).seqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {(1 =~~= 3).seqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {"ab".u.seqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(2, 3).flatSeqFlow.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(2, 3).seqFlowOpts.hintParallel.size})
+  .checkNonDetErr({:: > `msg` .isMsg{::.contains `asks for a parallel strategy`}}, {Lists#(1,2,3).seqFlow.hintParallel.map[Nat]{_ -> Error.msg"stage ran"}.size})
+  .check{Lists#(1,2,3).seqFlow.suppressMisuseExceptions.hintParallel.size .assertEq 3}
+  .check{Lists#(1,2,3).flow.hintSequential.hintParallel.suppressMisuseExceptions.size .assertEq 3}
+  .checkDetErr({::.isMsg{:: == "stage ran"}}, {Lists#(1,2,3).seqFlow.suppressMisuseExceptions.hintParallel.map[Nat]{_ -> Error.msg"stage ran"}.size})
+  }
+
+ReadHinted: { #(xs: read List[Nat]): Nat -> xs.seqFlow.hintParallel.size }
+
 TestFlow: Test {::
   .test FlowForEachTests
   .test FlowBuildOrderTests
@@ -238,6 +278,7 @@ TestFlow: Test {::
   .test FlowPlusPlusTests
   .test FlowModeTests
   .test FlowMaxFenceTests
+  .test FlowHintTests
   }
 
 ReadSources: { #(xs: read List[Nat]): mut List[Nat] -> xs.seqFlow.list ++ (xs.flow(ParRead#).list) }

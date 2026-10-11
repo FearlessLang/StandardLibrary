@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,8 +29,8 @@ public interface Flows$1c$0 extends Sealed$2o$0{
   default Object imm$$hash$15(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14); }
   default Object imm$$hash$16(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15); }
 
-  default Object imm$fromMutList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.Seq); }
-  default Object imm$fromReadList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.Seq); }
+  default Object imm$fromMutList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.Seq).mut$hintSequential$0(); }
+  default Object imm$fromReadList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.Seq).mut$hintSequential$0(); }
   default Object imm$fromImmList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.ParImm); }
   default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.of(p1)); }
   default Object imm$fromReadList$2(Object p0,Object p1){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.of(p1)); }
@@ -57,6 +58,8 @@ final class FlowChain{
   final ArrayList<FlowStep> shape= new ArrayList<>();
   final ArrayList<FlowCore> core= new ArrayList<>();
   boolean suppress= false;
+  boolean hintSequential= false;
+  boolean hintParallel= false;
 }
 
 interface FlowSink{
@@ -98,13 +101,17 @@ final class Flow$o$1Instance implements Flow$o$1{
   @Override public Object mut$distinct$1(Object by){
     return stage(d->new FlowDistinctSink(d, (OrderHashBy$2ea$2)by));
   }
-  @Override public Object mut$suppressMisuseExceptions$0(){
+  private Object record(Consumer<FlowChain> r){
     var ch= take();
-    ch.suppress= true;
+    r.accept(ch);
     return new Flow$o$1Instance(ch);
   }
+  @Override public Object mut$suppressMisuseExceptions$0(){ return record(c->c.suppress= true); }
+  @Override public Object mut$hintSequential$0(){ return record(c->c.hintSequential= true); }
+  @Override public Object mut$hintParallel$0(){ return record(c->c.hintParallel= true); }
   @Override public Object mut$fold$2(Object acc, Object f){
     var ch= take();
+    FlowMisuse.checkHints(ch);
     //if (!ch.suppress){ FlowMisuse.check(ch); }
     var r= new FlowFoldSink(callMF$1(acc), f);
     run(ch, r);
@@ -112,6 +119,7 @@ final class Flow$o$1Instance implements Flow$o$1{
   }
   @Override public Object mut$forEach$2(Object a, Object f){
     var ch= take();
+    FlowMisuse.checkHints(ch);
     //if (!ch.suppress){ FlowMisuse.check(ch); }
     run(ch, new FlowForEachSink(a, (ForEachBody$2h4$2)f));
     return Void$o$0.instance;
@@ -207,6 +215,10 @@ final class FlowMisuse{
     this.c= c;
     stages= c.shape.subList(0, c.shape.size() - 1);
     terminal= c.shape.getLast();
+  }
+  static void checkHints(FlowChain c){
+    if (c.suppress || !(c.hintSequential && c.hintParallel)){ return; }
+    throw misuse("`.hintParallel` asks for a parallel strategy, but the flow also asks for the sequential strategy, with `.hintSequential` or by starting with `.seqFlow`. Remove `.hintParallel`, or the request for the sequential strategy.");
   }
   static void check(FlowChain c){
     var m= new FlowMisuse(c);

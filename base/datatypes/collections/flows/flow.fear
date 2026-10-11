@@ -61,6 +61,8 @@ Flow[E:*]: {
   /// mutate what a kept key aliases. `Flow.distinctMut` keeps the elements ``mut``.
   mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[read/imm E];
   mut .suppressMisuseExceptions: mut Flow[E];
+  mut .hintSequential: mut Flow[E];
+  mut .hintParallel: mut Flow[E];
   //desugared stages
   mut .flatMapMut[R:*](f: read F[E, mut ToFlow[R]]): mut Flow[R] -> this.actorMut[Void, R](Void, {down, _, e ->
     Block#(f#e .seqFlow.for(down, {d, x -> d.push#(d, x)}), Continue#)});

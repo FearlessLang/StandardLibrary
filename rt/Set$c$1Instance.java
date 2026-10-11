@@ -50,7 +50,7 @@ public final class Set$c$1Instance implements Set$c$1 {
   }
 
   static Object extractKey(MapKey mapKey) { return mapKey.key; }
-  @Override public Object read$seqFlow$0(){ return Flow$o$1Instance.of(sortedList, FlowMode.Seq); }
+  @Override public Object read$seqFlow$0(){ return Flow$o$1Instance.of(sortedList, FlowMode.Seq).mut$hintSequential$0(); }
   @Override public Object mut$seqFlow$0(){ return read$seqFlow$0(); }
   static Set$c$1Instance toSet(Object p0) { return (Set$c$1Instance) p0; }
   static OrderHashBy$2ea$2 ordering(Object ordering) { return (OrderHashBy$2ea$2) ordering; }

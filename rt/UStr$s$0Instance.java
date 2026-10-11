@@ -57,7 +57,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   @Override public Object imm$flow$0(){
     return Flow$o$1Instance.of(Arrays.stream(val).mapToObj(e->(Object)Nat$c$0Instance.instance((long)e)), FlowMode.ParImm);
   }
-  @Override public Object read$seqFlow$0(){ return Flow$o$1Instance.of(Arrays.stream(val).mapToObj(e->(Object)Nat$c$0Instance.instance((long)e)), FlowMode.Seq); }
+  @Override public Object read$seqFlow$0(){ return Flow$o$1Instance.of(Arrays.stream(val).mapToObj(e->(Object)Nat$c$0Instance.instance((long)e)), FlowMode.Seq).mut$hintSequential$0(); }
   @Override public Object mut$seqFlow$0(){ return read$seqFlow$0(); }
   @Override public Object imm$equalRepr$1(Object p0){
     return bool(Arrays.equals(val,((UStr$s$0Instance)p0).val));

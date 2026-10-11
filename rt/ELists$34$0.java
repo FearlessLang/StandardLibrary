@@ -184,7 +184,7 @@ final class EList$1k$1Instance implements EList$1k$1{
     for (int i= xs.size() - 2; i >= 0; i--){ xs.set(i, callMF$3(p0, xs.get(i + 1), xs.get(i))); }
     return this;
   }
-  @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain(), FlowMode.Seq); }
+  @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain(), FlowMode.Seq).mut$hintSequential$0(); }
   @Override public Object mut$flow$1(Object p0){ return Flow$o$1Instance.of(drain(), FlowMode.of(p0)); }
   @Override public Object imm$flow$0(){ return Flow$o$1Instance.of(new ArrayList<>(xs), FlowMode.ParImm); }
   @Override public Object mut$list$0(){ return List$o$1Instance.wrap(drain()); }

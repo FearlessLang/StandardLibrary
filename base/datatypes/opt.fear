@@ -25,7 +25,7 @@ Opt[E:*]: _Opt[E] {
 
   .orLazy default -> this.match{.some x -> x; .empty -> default#};
 
-  .seqFlow   -> this.match{.empty -> Flows#; .some x -> Flows#(x)};
+  .seqFlow   -> this.match{.empty -> Flows#; .some x -> Flows#(x)}.hintSequential;
   imm  .flow -> Flows.fromImmList(this.seqFlow.list);
   mut  .flow mode -> Flows.fromMutList(this.seqFlow.list, mode);
   read .flow mode -> Flows.fromReadList(this.seqFlow.list, mode);
