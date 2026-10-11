@@ -78,12 +78,10 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover = List.of();// deepest first
   private Point at = new Point();
   private AWidget pressTarget;
-  private _Button pressedButton;
 
   SkMouse(_Frame frame){ this.frame = frame; }
 
   // A subtree was removed from the live tree: forget every reference into it.
-  // pressedButton is always pressTarget or null, so both clear together.
   void detached(SkComponent root){
     assert SwingUtilities.isEventDispatchThread();
     if (!hover.isEmpty()){
@@ -93,10 +91,7 @@ final class SkMouse extends MouseAdapter{
       }
       if (keep.size() != hover.size()){ hover = List.copyOf(keep); }
     }
-    if (pressTarget != null && SwingUtilities.isDescendingFrom(pressTarget.component, root)){
-      pressTarget = null;
-      pressedButton = null;
-    }
+    if (pressTarget != null && SwingUtilities.isDescendingFrom(pressTarget.component, root)){ pressTarget = null; }
   }
 
   // The whole tree was replaced (content swap): forget everything.
@@ -104,7 +99,6 @@ final class SkMouse extends MouseAdapter{
     assert SwingUtilities.isEventDispatchThread();
     hover = List.of();
     pressTarget = null;
-    pressedButton = null;
   }
 
   void rehover(){
@@ -121,8 +115,7 @@ final class SkMouse extends MouseAdapter{
     var d = deepestAt(p);
     if (SwingUtilities.isLeftMouseButton(e)){
       pressTarget = d;
-      pressedButton = d instanceof _Button b ? b : null;
-      if (pressedButton != null){ pressedButton.down = true; }
+      if (d instanceof _Button b){ b.down = true; }
     }
     dispatch(d, Pressed, p);
   }
@@ -137,10 +130,9 @@ final class SkMouse extends MouseAdapter{
     // released the same way, not against an unrelated left gesture's target.
     dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p);
     if (!left){ return; }
-    if (pressedButton != null){ pressedButton.down = false; }
+    if (pressTarget instanceof _Button b){ b.down = false; }
     click(p);
     pressTarget = null;
-    pressedButton = null;
   }
 
   @Override public void mouseMoved(MouseEvent e){
@@ -151,7 +143,7 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseDragged(MouseEvent e){
     var p = point(e);
-    if (pressedButton != null){ pressedButton.down = inside(pressedButton, p); }
+    if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
     updateHover(p);
     dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);
   }
