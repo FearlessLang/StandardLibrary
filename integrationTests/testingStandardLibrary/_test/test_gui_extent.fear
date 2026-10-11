@@ -41,6 +41,10 @@ GuiExtentTests: Test {::
       .ok _ -> Error.msg "A radius over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "radius 18446744073709551615 is too large; it must be <= 100000"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .label{:: .textHeight 100001 } .paint{g -> Error.msg "A text height over the limit was accepted"} }}}).run{
+      .ok _ -> Error.msg "A text height over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "text height 100001 is too large; it must be <= 100000"}}.assertTrue{i};
+      }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
     .paint{g -> g.rect(Width#3000000000, Height#1)}
     }}}).run{

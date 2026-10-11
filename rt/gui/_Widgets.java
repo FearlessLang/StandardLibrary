@@ -229,7 +229,7 @@ abstract class AWidget implements Widget$2o$1{
     return reStyle(() -> radius = n);
   }
   public Object mut$textHeight$p1$1(Object t){
-    int n = extent((HeightNat$lg$0) t, "text size");
+    int n = extent((HeightNat$lg$0) t, "text height");
     return reText(() -> textSize = n);
   }
   public Object read$textHeight$0(){ return h(textSize); }
