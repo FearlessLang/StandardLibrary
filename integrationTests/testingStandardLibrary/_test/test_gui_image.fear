@@ -7,5 +7,7 @@ GuiImageTests: Test {::
   .checkDetErr({::.isMsg{:: == "image width 0 is too small; it must be >= 1"}}, {base.IconsConflict.consumeImage("toWidth0").scaleToWidth 0})
   .checkDetErr({::.isMsg{:: == "image height 32768 is too large; it must be <= 32767"}}, {base.IconsConflict.consumeImage("toHeightBig").scaleToHeight 32768})
   .checkDetErr({::.isMsg{:: == "image width 32767000 is too large; it must be <= 32767"}}, {base.IconsConflict.consumeImage("toHeightWide").scale(Width#1000, Height#1).scaleToHeight 32767})
+  .checkDetErr({::.isMsg{:: == "image 20000 x 20000 has 400000000 pixels; it must have <= 268435456"}}, {base.IconsConflict.consumeImage("imageAreaBig").scale(Width#20000, Height#20000)})
+  .checkDetErr({::.isMsg{:: == "image 32767 x 16384 has 536854528 pixels; it must have <= 268435456"}}, {base.IconsConflict.consumeImage("toWidthAreaBig").scale(Width#2, Height#1).scaleToWidth 32767})
   .check{base.IconsConflict.consumeImage("imageWidthMax").scale(Width#32767, Height#1).width .assertEq(Width#32767)}
   }

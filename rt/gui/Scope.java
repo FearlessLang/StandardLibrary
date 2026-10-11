@@ -12,6 +12,7 @@ class Scopes{
   static YInt$s$0 y(long n){ return (YInt$s$0) YInt$s$0.instance.read$$hash$1(new Int$c$0Instance(n)); }
   static int byt(Object b){ return Byte.toUnsignedInt(((Byte$o$0Instance) b).val()); }
   static final int maxExtent = 32767;
+  static final long maxImagePixels = 1L << 28;
   static int extent(WidthNat$as$0 w, String what){ return extent(w.read$get$0(), what); }
   static int extent(HeightNat$lg$0 h, String what){ return extent(h.read$get$0(), what); }
   static int extent(Object n, String what){ return extent(Util.natToLong(n), what); }

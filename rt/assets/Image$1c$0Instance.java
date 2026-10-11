@@ -11,17 +11,22 @@ final class Image$1c$0Instance implements Image$1c$0{
   @Override public Object read$height$0(){ return height(image.getHeight()); }
 
   @Override public Object imm$scale$2(Object w,Object h){
-    return new Image$1c$0Instance(Sk.scaled(image,widthVal(w),heightVal(h)));
+    return scaled(image,widthVal(w),heightVal(h));
   }
   @Override public Object imm$scaleToWidth$p1$1(Object w){
     var newW=widthVal(w);
-    return new Image$1c$0Instance(Sk.scaled(image,newW,side(proportional(image.getHeight(),newW,image.getWidth()),"image height")));
+    return scaled(image,newW,side(proportional(image.getHeight(),newW,image.getWidth()),"image height"));
   }
   @Override public Object imm$scaleToHeight$p1$1(Object h){
     var newH=heightVal(h);
-    return new Image$1c$0Instance(Sk.scaled(image,side(proportional(image.getWidth(),newH,image.getHeight()),"image width"),newH));
+    return scaled(image,side(proportional(image.getWidth(),newH,image.getHeight()),"image width"),newH);
   }
 
+  private static Image$1c$0Instance scaled(Image image,int w,int h){
+    long pixels=(long)w*h;
+    if (pixels > Scopes.maxImagePixels){ throw Util.detErr("image "+w+" x "+h+" has "+pixels+" pixels; it must have <= "+Scopes.maxImagePixels); }
+    return new Image$1c$0Instance(Sk.scaled(image,w,h));
+  }
   private static long proportional(int oldOther,int newMain,int oldMain){
     return Math.max(1,((long)oldOther*newMain + oldMain/2L)/oldMain);
   }
