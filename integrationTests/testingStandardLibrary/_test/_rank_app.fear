@@ -60,6 +60,8 @@ use base.Green as Green;
 use base.Blue as Blue;
 use base.Alpha as Alpha;
 use base.Color as Color;
+use base.AllFontsSpacing as AllFontsSpacing;
+use base.UsedFontsSpacing as UsedFontsSpacing;
 use base.Hue as Hue;
 use base.Saturation as Saturation;
 use base.Brightness as Brightness;
@@ -99,6 +101,7 @@ MyTests:UnitTests{::
   .test GuiExtentTests
   .test GuiFrameTests
   .test GuiSetterTests
+  .test GuiLineSpacingTests
   .test GuiConnectedTests
   .test GuiKeyTests
   .test TestList
