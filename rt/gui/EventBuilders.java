@@ -84,13 +84,7 @@ final class SkMouse extends MouseAdapter{
   // A subtree was removed from the live tree: forget every reference into it.
   void detached(SkComponent root){
     assert SwingUtilities.isEventDispatchThread();
-    if (!hover.isEmpty()){
-      var keep = new ArrayList<AWidget>();
-      for (var t : hover){
-        if (!SwingUtilities.isDescendingFrom(t.component, root)){ keep.add(t); }
-      }
-      if (keep.size() != hover.size()){ hover = List.copyOf(keep); }
-    }
+    hover = hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList();
     if (pressTarget != null && SwingUtilities.isDescendingFrom(pressTarget.component, root)){ pressTarget = null; }
   }
 
