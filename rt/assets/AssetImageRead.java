@@ -46,6 +46,7 @@ final class AssetImageRead{
   static void checkSize(String path,int w,int h,long maxPixels){
     if (w <= 0 || h <= 0){ throw badImage(path,"image has invalid size: "+w+"x"+h); }
     var pixels=Math.multiplyExact((long)w,h);
+    if (w > Scopes.maxExtent || h > Scopes.maxExtent || pixels > Scopes.maxImagePixels){ throw badImage(path,"image "+w+" x "+h+" is too large; each side must be <= "+Scopes.maxExtent+" and the pixels <= "+Scopes.maxImagePixels); }
     if (Long.compareUnsigned(maxPixels,pixels) >= 0){ return; }
     throw badImage(
       path,

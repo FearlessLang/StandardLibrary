@@ -11,22 +11,24 @@ final class Image$1c$0Instance implements Image$1c$0{
   @Override public Object read$height$0(){ return height(image.getHeight()); }
 
   @Override public Object imm$scale$2(Object w,Object h){
-    return new Image$1c$0Instance(Sk.scaled(image,widthVal(w),heightVal(h)));
+    return scaled(image,widthVal(w),heightVal(h));
   }
   @Override public Object imm$scaleToWidth$p1$1(Object w){
     var newW=widthVal(w);
-    return new Image$1c$0Instance(Sk.scaled(image,newW,proportional(image.getHeight(),newW,image.getWidth())));
+    return scaled(image,newW,side(proportional(image.getHeight(),newW,image.getWidth()),"image height"));
   }
   @Override public Object imm$scaleToHeight$p1$1(Object h){
     var newH=heightVal(h);
-    return new Image$1c$0Instance(Sk.scaled(image,proportional(image.getWidth(),newH,image.getHeight()),newH));
+    return scaled(image,side(proportional(image.getWidth(),newH,image.getHeight()),"image width"),newH);
   }
 
-  private static int proportional(int oldOther,int newMain,int oldMain){
-    var res=((long)oldOther*newMain + oldMain/2L)/oldMain;
-    if (res < 1){ return 1; }
-    if (res > Integer.MAX_VALUE){ throw new AssertionError(res); }
-    return (int)res;
+  private static Image$1c$0Instance scaled(Image image,int w,int h){
+    long pixels=(long)w*h;
+    if (pixels > Scopes.maxImagePixels){ throw Util.detErr("image "+w+" x "+h+" has "+pixels+" pixels; it must have <= "+Scopes.maxImagePixels); }
+    return new Image$1c$0Instance(Sk.scaled(image,w,h));
+  }
+  private static long proportional(int oldOther,int newMain,int oldMain){
+    return Math.max(1,((long)oldOther*newMain + oldMain/2L)/oldMain);
   }
   private static WidthNat$as$0 width(int n){
     return (WidthNat$as$0)WidthNat$as$0.instance.read$$hash$1(Nat$c$0Instance.instance(n));
@@ -35,15 +37,13 @@ final class Image$1c$0Instance implements Image$1c$0{
     return (HeightNat$lg$0)HeightNat$lg$0.instance.read$$hash$1(Nat$c$0Instance.instance(n));
   }
   private static int widthVal(Object o){
-    return positiveInt(((WidthNat$as$0)o).read$get$0(),"image width");
+    return side(Util.natToLong(((WidthNat$as$0)o).read$get$0()),"image width");
   }
   private static int heightVal(Object o){
-    return positiveInt(((HeightNat$lg$0)o).read$get$0(),"image height");
+    return side(Util.natToLong(((HeightNat$lg$0)o).read$get$0()),"image height");
   }
-  private static int positiveInt(Object nat,String name){
-    var n=((Nat$c$0Instance)nat).val();
-    if (Long.compareUnsigned(n,1L) < 0){ throw new AssertionError(name+": "+Long.toUnsignedString(n)); }
-    if (Long.compareUnsigned(n,Integer.MAX_VALUE) > 0){ throw new AssertionError(name+": "+Long.toUnsignedString(n)); }
-    return (int)n;
+  private static int side(long n,String what){
+    if (n == 0){ throw Util.detErr(what+" 0 is too small; it must be >= 1"); }
+    return Scopes.extent(n,what);
   }
 }

@@ -100,7 +100,7 @@ class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
   @Override public Object mut$chunk$1(Object n){
-    int c = nat(n);
+    int c = extent(n, "chunk");
     return reStyle(() -> chunk = c);
   }
 }
@@ -229,7 +229,7 @@ abstract class AWidget implements Widget$2o$1{
     return reStyle(() -> radius = n);
   }
   public Object mut$textHeight$p1$1(Object t){
-    int n = extent((HeightNat$lg$0) t, "text size");
+    int n = extent((HeightNat$lg$0) t, "text height");
     return reText(() -> textSize = n);
   }
   public Object read$textHeight$0(){ return h(textSize); }
@@ -598,8 +598,8 @@ class _Frame implements Frame$1c$0{
   }
   private Rectangle maximizedBounds(){ return maximized ? new Rectangle(0, 0, screenW, screenH) : null; }
   @Override public Object mut$location$2(Object x, Object y){
-    long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
-    long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
+    long xx = coord(((XInt$s$0) x).read$get$0(), "window x");
+    long yy = coord(((YInt$s$0) y).read$get$0(), "window y");
     if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
     located = true;
     locationX = xx;
@@ -628,9 +628,7 @@ class _Frame implements Frame$1c$0{
     return this;
   }
   @Override public Object mut$fps$1(Object f){
-    long nn = Util.natToLong(f);
-    if (nn < 1 || nn > 500){ throw Util.detErr("FPS must be between 1 and 500"); }
-    fps = (int) nn;
+    fps = (int) fpsOf(f, "fps");
     if (started){
       int delay = Math.round(1000.0f / fps);
       onEdtAndWait(() -> frame.setTickDelay(delay));
@@ -661,8 +659,7 @@ class _Frame implements Frame$1c$0{
     return loc;
   }
   @Override public Object mut$modelFps$2(Object f, Object scope){
-    long nn = Util.natToLong(f);
-    if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
+    long nn = fpsOf(f, "modelFps");
     var actions = new ArrayList<MF$7$1>();
     var b = new ModelFps$as$0(){
       boolean changeable = true;
