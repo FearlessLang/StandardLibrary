@@ -15,10 +15,7 @@ Wrapper[S,T]: DataType[S,S] {
 ExtentNat[S]: Wrapper[S,Nat] {
   +(other: S): S -> this#(this.get + (this.close(other).get));
   -(other: S): S -> this#(this.get - (this.close(other).get));
-  .gap(other: S): S -> Block#
-    .let a = { this.get }
-    .let b = { this.close(other).get }
-    .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
+  .gap(other: S): S -> this.close(other).get |> {b -> (this.get >= b).if{ .then -> this#(this.get - b); .else -> this#(b - (this.get)) }};
   *(k: Nat): S -> this#(this.get * k);
   .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
   /// ``this.tryGetTruncDiv(k)`` returns `.ok` of ``this.getTruncDiv(k)``, or the error info of ``this.get.getTruncDiv(k)`` iff ``k == 0``.
@@ -33,10 +30,7 @@ CoordNat[S,E]: Wrapper[S,Nat] {
   +(d: E): S -> this#(this.get + (this.extent.close(d).get));
   -(d: E): S -> this#(this.get - (this.extent.close(d).get));
   .to(other: S): E -> this.extent#(this.close(other).get - (this.get));
-  .gap(other: S): E -> Block#
-    .let a = { this.get }
-    .let b = { this.close(other).get }
-    .return { (a >= b).if{ .then -> this.extent#(a - b); .else -> this.extent#(b - a) } };
+  .gap(other: S): E -> this.close(other).get |> {b -> (this.get >= b).if{ .then -> this.extent#(this.get - b); .else -> this.extent#(b - (this.get)) }};
   .origin: S -> this#0;
   }
 
@@ -45,12 +39,9 @@ CoordInt[S,E]: Wrapper[S,Int] {
   +(d: E): S -> this#(this.get + (this.extent.close(d).get.getInt));
   -(d: E): S -> this#(this.get - (this.extent.close(d).get.getInt));
   .to(other: S): E -> this.extent#(this.close(other).get - (this.get) .getNat);
-  .gap(other: S): E -> Block#
-    .let a = { this.get }
-    .let b = { this.close(other).get }
-    .return { (a >= b).if{
-      .then -> this.extent#(a - b .getNat);
-      .else -> this.extent#(b - a .getNat) } };
+  .gap(other: S): E -> this.close(other).get |> {b -> (this.get >= b).if{
+    .then -> this.extent#(this.get - b .getNat);
+    .else -> this.extent#(b - (this.get) .getNat) }};
   .origin: S -> this#(+0);
   }
 
@@ -77,10 +68,7 @@ Rects: { #(x: XInt, y: YInt, width: WidthNat, height: HeightNat): Rect ->
 LevelByte[S]: Wrapper[S,Byte] {
   +(other: S): S -> this#(this.get + (this.close(other).get));
   -(other: S): S -> this#(this.get - (this.close(other).get));
-  .gap(other: S): S -> Block#
-    .let a = { this.get }
-    .let b = { this.close(other).get }
-    .return { (a >= b).if{ .then -> this#(a - b); .else -> this#(b - a) } };
+  .gap(other: S): S -> this.close(other).get |> {b -> (this.get >= b).if{ .then -> this#(this.get - b); .else -> this#(b - (this.get)) }};
   .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
   /// ``this.tryGetTruncDiv(k)`` returns `.ok` of ``this.getTruncDiv(k)``, or the error info of ``this.get.getTruncDiv(k)`` iff ``k == 0``.
   //>   .check{((Red#(6.getByte)).tryGetTruncDiv 2).assertOk}
