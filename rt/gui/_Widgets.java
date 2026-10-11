@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -192,6 +193,8 @@ abstract class AWidget implements Widget$2o$1{
     return mut$self$0();
   }
 
+  final Object reStyle(int n, IntConsumer set){ return reStyle(() -> set.accept(n)); }
+
   final Object reText(Runnable r){
     return reStyle(() -> {
       r.run();
@@ -200,34 +203,13 @@ abstract class AWidget implements Widget$2o$1{
     });
   }
 
-  @Override public Object mut$topInset$p1$1(Object v){
-    int n = extent((HeightNat$lg$0) v, "top inset");
-    return reStyle(() -> top = n);
-  }
-  @Override public Object mut$bottomInset$p1$1(Object v){
-    int n = extent((HeightNat$lg$0) v, "bottom inset");
-    return reStyle(() -> bottom = n);
-  }
-  @Override public Object mut$leftInset$p1$1(Object v){
-    int n = extent((WidthNat$as$0) v, "left inset");
-    return reStyle(() -> left = n);
-  }
-  @Override public Object mut$rightInset$p1$1(Object v){
-    int n = extent((WidthNat$as$0) v, "right inset");
-    return reStyle(() -> right = n);
-  }
-  @Override public Object mut$width$p1$1(Object w){
-    int n = extent((WidthNat$as$0) w, "widget width");
-    return reStyle(() -> preferredWidth = n);
-  }
-  @Override public Object mut$height$p1$1(Object h){
-    int n = extent((HeightNat$lg$0) h, "widget height");
-    return reStyle(() -> preferredHeight = n);
-  }
-  @Override public Object mut$radius$1(Object r){
-    int n = extent(r, "radius");
-    return reStyle(() -> radius = n);
-  }
+  @Override public Object mut$topInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "top inset"), n -> top = n); }
+  @Override public Object mut$bottomInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "bottom inset"), n -> bottom = n); }
+  @Override public Object mut$leftInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "left inset"), n -> left = n); }
+  @Override public Object mut$rightInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "right inset"), n -> right = n); }
+  @Override public Object mut$width$p1$1(Object w){ return reStyle(extent((WidthNat$as$0) w, "widget width"), n -> preferredWidth = n); }
+  @Override public Object mut$height$p1$1(Object h){ return reStyle(extent((HeightNat$lg$0) h, "widget height"), n -> preferredHeight = n); }
+  @Override public Object mut$radius$1(Object r){ return reStyle(extent(r, "radius"), n -> radius = n); }
   public Object mut$textHeight$p1$1(Object t){
     int n = extent((HeightNat$lg$0) t, "text height");
     return reText(() -> textSize = n);
@@ -283,14 +265,8 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
     }
   }
 
-  @Override public Object mut$heightGap$p1$1(Object v){
-    int n = extent((HeightNat$lg$0) v, "height gap");
-    return reStyle(() -> heightGap = n);
-  }
-  @Override public Object mut$widthGap$p1$1(Object v){
-    int n = extent((WidthNat$as$0) v, "width gap");
-    return reStyle(() -> widthGap = n);
-  }
+  @Override public Object mut$heightGap$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "height gap"), n -> heightGap = n); }
+  @Override public Object mut$widthGap$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "width gap"), n -> widthGap = n); }
   @Override public Object read$heightGap$0(){ return h(heightGap); }
   @Override public Object read$widthGap$0(){ return w(widthGap); }
   @Override public Object mut$mouse$1(Object s){
