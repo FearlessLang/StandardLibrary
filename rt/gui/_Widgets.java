@@ -598,8 +598,8 @@ class _Frame implements Frame$1c$0{
   }
   private Rectangle maximizedBounds(){ return maximized ? new Rectangle(0, 0, screenW, screenH) : null; }
   @Override public Object mut$location$2(Object x, Object y){
-    long xx = Util.intToLong(((XInt$s$0) x).read$get$0());
-    long yy = Util.intToLong(((YInt$s$0) y).read$get$0());
+    long xx = coord(((XInt$s$0) x).read$get$0(), "window x");
+    long yy = coord(((YInt$s$0) y).read$get$0(), "window y");
     if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
     located = true;
     locationX = xx;

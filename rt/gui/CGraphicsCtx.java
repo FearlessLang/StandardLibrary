@@ -31,30 +31,29 @@ final class CGraphicsCtx implements Graphics$ao$0{
   // Drawing outside the panel silently clips (canvas is clipped to the panel),
   // otherwise user can cause errors by resizing the gui by hand
   @Override public Object mut$position$2(Object x, Object y){
-    this.x = at(((XInt$s$0) x).read$get$0());
-    this.y = at(((YInt$s$0) y).read$get$0());
+    this.x = Scopes.coord(((XInt$s$0) x).read$get$0(), "position x");
+    this.y = Scopes.coord(((YInt$s$0) y).read$get$0(), "position y");
     return this;
   }
   // Correctly does not update the position.
   @Override public Object mut$line$2(Object x, Object y){
     paint.setMode(PaintMode.STROKE).setStrokeWidth(1);
-    cv.drawLine(this.x, this.y, at(((XInt$s$0) x).read$get$0()), at(((YInt$s$0) y).read$get$0()), paint);
+    cv.drawLine(this.x, this.y, Scopes.coord(((XInt$s$0) x).read$get$0(), "line x"), Scopes.coord(((YInt$s$0) y).read$get$0(), "line y"), paint);
     return this;
   }
   @Override public Object mut$rect$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawRect(shapeRect(w, h), paint);
+    cv.drawRect(shapeRect(w, h, "rect"), paint);
     return this;
   }
   @Override public Object mut$oval$2(Object w, Object h){
     paint.setMode(PaintMode.FILL);
-    cv.drawOval(shapeRect(w, h), paint);
+    cv.drawOval(shapeRect(w, h, "oval"), paint);
     return this;
   }
-  private Rect shapeRect(Object w, Object h){
-    return Rect.makeXYWH(x, y, Scopes.w((WidthNat$as$0) w), Scopes.h((HeightNat$lg$0) h));
+  private Rect shapeRect(Object w, Object h, String what){
+    return Rect.makeXYWH(x, y, Scopes.extent((WidthNat$as$0) w, what + " width"), Scopes.extent((HeightNat$lg$0) h, what + " height"));
   }
-  private static float at(Object coord){ return Util.intToLong(coord); }
   @Override public Object mut$image$1(Object image){
     var img = ((Image$1c$0Instance) image).image();
     cv.drawImageRect(
