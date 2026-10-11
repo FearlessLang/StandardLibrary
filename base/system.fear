@@ -1,3 +1,12 @@
+///The object capability to observe the world outside of the program.
+///Code without a System can only compute with its arguments: equal calls give equal results,
+///so the results can be cached, reordered and computed in parallel with no visible difference.
+///Whatever may answer differently to the same question (input, files, downloads, in memory logs,
+///non deterministic errors) is observed through a method of System or of a capability created by it.
+///Acting on the world needs no capability when the program can not observe the action:
+///Debug, Log and FileLog can be used anywhere, and so can InMemoryLog.log,
+///whose content can only be read through System.
+///Output only acts: it makes printing explicit in the code, while the program can not observe what was printed.
 System: ToIso[System],WidenTo[System] {
   //mut .io: mut IO;
   //mut .rng: mut RandomSeed;
