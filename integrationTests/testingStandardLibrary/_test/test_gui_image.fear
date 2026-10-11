@@ -1,0 +1,10 @@
+GuiImageTests: Test {::
+  .check{base.IconsConflict.consumeImage("imageOk").scale(Width#4, Height#2).scaleToWidth(8).height .assertEq(Height#4)}
+  .checkDetErr({::.isMsg{:: == "image width 0 is too small; it must be >= 1"}}, {base.IconsConflict.consumeImage("imageWidth0").scale(Width#0, Height#5)})
+  .checkDetErr({::.isMsg{:: == "image height 0 is too small; it must be >= 1"}}, {base.IconsConflict.consumeImage("imageHeight0").scale(Width#5, Height#0)})
+  .checkDetErr({::.isMsg{:: == "image width 100001 is too large; it must be <= 100000"}}, {base.IconsConflict.consumeImage("imageWidthBig").scale(Width#100001, Height#5)})
+  .checkDetErr({::.isMsg{:: == "image height 100001 is too large; it must be <= 100000"}}, {base.IconsConflict.consumeImage("imageHeightBig").scale(Width#5, Height#100001)})
+  .checkDetErr({::.isMsg{:: == "image width 0 is too small; it must be >= 1"}}, {base.IconsConflict.consumeImage("toWidth0").scaleToWidth 0})
+  .checkDetErr({::.isMsg{:: == "image height 100001 is too large; it must be <= 100000"}}, {base.IconsConflict.consumeImage("toHeightBig").scaleToHeight 100001})
+  .checkDetErr({::.isMsg{:: == "image width 100000000 is too large; it must be <= 100000"}}, {base.IconsConflict.consumeImage("toHeightWide").scale(Width#1000, Height#1).scaleToHeight 100000})
+  }

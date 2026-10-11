@@ -104,6 +104,7 @@ MyTests:UnitTests{::
   .test GuiLineSpacingTests
   .test GuiConnectedTests
   .test GuiKeyTests
+  .test GuiImageTests
   .test TestList
   .test TestESparseList
   .test TestMultiFlowFence

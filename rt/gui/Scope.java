@@ -17,8 +17,8 @@ class Scopes{
   static final int maxExtent = 100_000;
   static int extent(WidthNat$as$0 w, String what){ return extent(w.read$get$0(), what); }
   static int extent(HeightNat$lg$0 h, String what){ return extent(h.read$get$0(), what); }
-  static int extent(Object n, String what){
-    long v = Util.natToLong(n);
+  static int extent(Object n, String what){ return extent(Util.natToLong(n), what); }
+  static int extent(long v, String what){
     if (Long.compareUnsigned(v, maxExtent) > 0){ throw Util.detErr(what + " " + Long.toUnsignedString(v) + " is too large; it must be <= " + maxExtent); }
     return (int) v;
   }
