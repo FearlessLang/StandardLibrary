@@ -192,7 +192,7 @@ interface Sk{
     int ch = c.getHeight() - s.top - s.bottom;
     if (cw <= 0 || ch <= 0){ return; }
     int save = cv.save();
-    cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
+    cv.clipRect(Rect.makeXYWH(x0 + dx, 0, cw, c.getHeight()));
     paint.setColor(s.fg);
     cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, y0 + (ch - fm.getHeight()) / 2 - fm.getAscent() + dy, paint);
     cv.restoreToCount(save);

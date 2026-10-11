@@ -488,7 +488,7 @@ class _Frame implements Frame$1c$0{
 
   void start(){
     assert SwingUtilities.isEventDispatchThread();
-    assert top != null;
+    if (top == null){ throw Util.detErr("This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"); }
 
     frame.setTitle(title);
 

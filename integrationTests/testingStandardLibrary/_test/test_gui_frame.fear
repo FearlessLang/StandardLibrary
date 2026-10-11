@@ -176,4 +176,8 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[0] Height[0]"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#(f.title "no content", Void)}}).run{
+      .ok _ -> Error.msg "A Frame without content always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"}}.assertTrue{i};
+      }}
   }
