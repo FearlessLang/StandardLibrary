@@ -377,7 +377,7 @@ class _Frame implements Frame$1c$0{
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old = where == null ? null : ((MutableBorderLayout) parent.getLayout()).at(where);
+      var old = where == null ? null : ((MutableBorderLayout) parent.getLayout()).getLayoutComponent(where);
       if (old != null){
         mouse.detached((SkComponent) old);
         parent.remove(old);
