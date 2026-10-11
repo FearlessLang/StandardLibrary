@@ -628,9 +628,7 @@ class _Frame implements Frame$1c$0{
     return this;
   }
   @Override public Object mut$fps$1(Object f){
-    long nn = Util.natToLong(f);
-    if (nn < 1 || nn > 500){ throw Util.detErr("FPS must be between 1 and 500"); }
-    fps = (int) nn;
+    fps = (int) fpsOf(f, "fps");
     if (started){
       int delay = Math.round(1000.0f / fps);
       onEdtAndWait(() -> frame.setTickDelay(delay));
@@ -661,8 +659,7 @@ class _Frame implements Frame$1c$0{
     return loc;
   }
   @Override public Object mut$modelFps$2(Object f, Object scope){
-    long nn = Util.natToLong(f);
-    if (nn < 1 || nn > 500){ throw Util.detErr("modelFps must be between 1 and 500"); }
+    long nn = fpsOf(f, "modelFps");
     var actions = new ArrayList<MF$7$1>();
     var b = new ModelFps$as$0(){
       boolean changeable = true;

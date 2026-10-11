@@ -13,4 +13,16 @@ GuiSetterTests: Test {::
       .ok _ -> Error.msg "A window height over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "window height 100001 is too large; it must be <= 100000"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(0).content{:: .paint{g -> Error.msg "An fps below the limit was accepted"} }}}).run{
+      .ok _ -> Error.msg "An fps below the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "fps 0 is out of range; it must be between 1 and 500"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(18446744073709551615).content{:: .paint{g -> Error.msg "An fps over the limit was accepted"} }}}).run{
+      .ok _ -> Error.msg "An fps over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "fps 18446744073709551615 is out of range; it must be between 1 and 500"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.modelFps(501, {::}).content{:: .paint{g -> Error.msg "A modelFps over the limit was accepted"} }}}).run{
+      .ok _ -> Error.msg "A modelFps over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "modelFps 501 is out of range; it must be between 1 and 500"}}.assertTrue{i};
+      }}
   }

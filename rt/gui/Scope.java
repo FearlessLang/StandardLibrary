@@ -22,6 +22,11 @@ class Scopes{
     if (Long.compareUnsigned(v, maxExtent) > 0){ throw Util.detErr(what + " " + Long.toUnsignedString(v) + " is too large; it must be <= " + maxExtent); }
     return (int) v;
   }
+  static long fpsOf(Object n, String what){
+    long v = Util.natToLong(n);
+    if (v < 1 || v > 500){ throw Util.detErr(what + " " + Long.toUnsignedString(v) + " is out of range; it must be between 1 and 500"); }
+    return v;
+  }
 
   static int red(Object r){ return byt(((Red$c$0) r).read$get$0()); }
   static int green(Object g){ return byt(((Green$1c$0) g).read$get$0()); }
