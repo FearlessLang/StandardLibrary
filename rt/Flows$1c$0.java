@@ -58,8 +58,7 @@ final class FlowChain{
   final ArrayList<FlowStep> shape= new ArrayList<>();
   final ArrayList<FlowCore> core= new ArrayList<>();
   boolean suppress= false;
-  boolean hintSequential= false;
-  boolean hintParallel= false;
+  int hints= 0;
 }
 
 interface FlowSink{
@@ -107,8 +106,8 @@ final class Flow$o$1Instance implements Flow$o$1{
     return new Flow$o$1Instance(ch);
   }
   @Override public Object mut$suppressMisuseExceptions$0(){ return record(c->c.suppress= true); }
-  @Override public Object mut$hintSequential$0(){ return record(c->c.hintSequential= true); }
-  @Override public Object mut$hintParallel$0(){ return record(c->c.hintParallel= true); }
+  @Override public Object mut$hintSequential$0(){ return record(c->c.hints++); }
+  @Override public Object mut$hintParallel$0(){ return record(c->c.hints++); }
   @Override public Object mut$fold$2(Object acc, Object f){
     var ch= take();
     FlowMisuse.checkHints(ch);
@@ -217,8 +216,8 @@ final class FlowMisuse{
     terminal= c.shape.getLast();
   }
   static void checkHints(FlowChain c){
-    if (c.suppress || !(c.hintSequential && c.hintParallel)){ return; }
-    throw misuse("`.hintParallel` asks for a parallel strategy, but the flow also asks for the sequential strategy, with `.hintSequential` or by starting with `.seqFlow`. Remove `.hintParallel`, or the request for the sequential strategy.");
+    if (c.suppress || c.hints < 2){ return; }
+    throw misuse("A flow takes at most one hint, but this one has "+c.hints+". A flow started with `.seqFlow` already has `.hintSequential`. Keep only one.");
   }
   static void check(FlowChain c){
     var m= new FlowMisuse(c);
