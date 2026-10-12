@@ -63,6 +63,7 @@ Flow[E:*]: {
   mut .suppressMisuseExceptions: mut Flow[E];
   mut .hintSequential: mut Flow[E];
   mut .hintParallel: mut Flow[E];
+  mut .recoverFlow(mode: FlowMode[E]): mut Flow[E];
   //desugared stages
   mut .flatMapMut[R:*](f: read F[E, mut ToFlow[R]]): mut Flow[R] -> this.actorMut[Void, R](Void, {down, _, e ->
     Block#(f#e .seqFlow.for(down, {d, x -> d.push#(d, x)}), Continue#)});

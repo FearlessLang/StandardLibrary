@@ -59,6 +59,7 @@ final class FlowChain{
   final ArrayList<FlowCore> core= new ArrayList<>();
   boolean suppress= false;
   int hints= 0;
+  int mostHints= 0;
 }
 
 interface FlowSink{
@@ -73,7 +74,7 @@ final class Flow$o$1Instance implements Flow$o$1{
   Flow$o$1Instance(FlowChain chain){ this.chain= chain; }
   private final FlowChain chain;
   private boolean consumed= false;
-  static Flow$o$1Instance seq(Object... args){ return of(List.of(args), FlowMode.Seq); }
+  static Object seq(Object... args){ return of(List.of(args), FlowMode.Seq).mut$hintSequential$0(); }
   static Flow$o$1Instance of(Iterable<Object> source, FlowMode mode){ return new Flow$o$1Instance(new FlowChain(source, mode)); }
   static Flow$o$1Instance of(Stream<Object> source, FlowMode mode){ Iterable<Object> it= source::iterator; return of(it, mode); }
   static Flow$o$1Instance range(Stream<Object> source){ return of(source, FlowMode.ParImm); }
@@ -106,8 +107,9 @@ final class Flow$o$1Instance implements Flow$o$1{
     return new Flow$o$1Instance(ch);
   }
   @Override public Object mut$suppressMisuseExceptions$0(){ return record(c->c.suppress= true); }
-  @Override public Object mut$hintSequential$0(){ return record(c->c.hints++); }
-  @Override public Object mut$hintParallel$0(){ return record(c->c.hints++); }
+  @Override public Object mut$hintSequential$0(){ return record(c->c.mostHints= Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$hintParallel$0(){ return record(c->c.mostHints= Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$recoverFlow$1(Object mode){ return record(c->c.hints= 0); }
   @Override public Object mut$fold$2(Object acc, Object f){
     var ch= take();
     FlowMisuse.checkHints(ch);
@@ -216,8 +218,8 @@ final class FlowMisuse{
     terminal= c.shape.getLast();
   }
   static void checkHints(FlowChain c){
-    if (c.suppress || c.hints < 2){ return; }
-    throw misuse("A flow takes at most one hint, but this one has "+c.hints+". A flow started with `.seqFlow` already has `.hintSequential`. Keep only one.");
+    if (c.suppress || c.mostHints < 2){ return; }
+    throw misuse("A flow takes at most one of `.hintSequential` and `.hintParallel` in each part between `.recoverFlow` calls, but this part has "+c.mostHints+". A flow started with `.seqFlow` or `Flows#` already has `.hintSequential`. Keep only one.");
   }
   static void check(FlowChain c){
     var m= new FlowMisuse(c);
