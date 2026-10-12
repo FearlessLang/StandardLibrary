@@ -56,7 +56,7 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 /// Events:InMemoryLog[Event]{"Events"}
 ///...
 /// .checkWithSys { sys -> Block#
-///   .let log=Events.reader(sys);
+///   .let log=sys.readLog(Events);
 ///   .do { log.clear }
 ///   .do { actionUnderTest# }
 ///   .do { log.consume.assertEq({::},Lists#(
