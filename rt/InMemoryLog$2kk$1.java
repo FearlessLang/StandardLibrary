@@ -12,9 +12,6 @@ public interface InMemoryLog$2kk$1 extends CaptureFree$2dk$0{
     synchronized(log){ log.add(p0); }
     return Void$o$0.instance;
   }
-  default Object imm$reader$1(Object p0){
-    return ((System$2o$0)p0).mut$readLog$1(this);
-  }
   default Object _readCopy(){
     var log= _log();
     if (log.isEmpty()){ return List$o$1.instance; }

@@ -47,7 +47,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///...//usage
 ///PointLog.log(myPoint)
 ///..//later, reading the log and confirming is what we expect
-///PointLog.reader(sys).consume.assertEq({::},Lists#(myPoint))
+///sys.readLog(PointLog).consume.assertEq({::},Lists#(myPoint))
 ///```
 ///
 ///In memory logs are particularly useful for unit testing of immutable computation via mock objects.
@@ -58,7 +58,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///The log is kept in runtime memory. Calling .log appends a value to the
 ///current in-memory contents of this log.
 ///
-///Calling .reader creates a reader for this log through System.
+///System.readLog creates a reader for this log.
 ///The reader can inspect or consume the values currently stored for this log.
 ///
 ///Concrete log types must be non generic.
@@ -69,9 +69,6 @@ InMemoryLog[T]: CaptureFree{
   
   ///Submits s to an in memory log that requires a capability to be read.
   .log(s: T): Void -> _Magic!;
-  
-  ///Convenience over calling ``sys.readLog(this)``
-  .reader(sys: mut System): mut LogReader[T]->_Magic!;
   }
 ///Logs strings to your own text file, instead of the single shared file
 ///base.Log writes to.
