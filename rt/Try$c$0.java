@@ -5,7 +5,7 @@ public interface Try$c$0{
   Try$c$0 instance= new Try$c$0(){};
   static Action$2o$1 actionLazy(java.util.function.Supplier<Object> s){
     return new Action$2o$1(){
-      public Object mut$run$1(Object p0){
+      @Override public Object mut$run$1(Object p0){
         var m= (ActionMatch$2ds$2)p0;
         Object res; try{ res=s.get(); }
         catch(Deterministic d){ return m.mut$info$1(d.i); }

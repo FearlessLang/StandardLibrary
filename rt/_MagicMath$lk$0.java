@@ -35,7 +35,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
     inverseTrigContract("asin", x);
     var theta = Float$1c$0Instance.instance(Math.asin(x));
     return new Radian$2o$0() {
-      public Object read$$hash$0() {
+      @Override public Object read$$hash$0() {
         return theta;
       }
     };
@@ -45,7 +45,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
     inverseTrigContract("acos", x);
     var theta = Float$1c$0Instance.instance(Math.acos(x));
     return new Radian$2o$0() {
-      public Object read$$hash$0() {
+      @Override public Object read$$hash$0() {
         return theta;
       }
     };
@@ -57,7 +57,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
     }
     var theta = Float$1c$0Instance.instance(Math.atan(x));
     return new Radian$2o$0() {
-      public Object read$$hash$0() {
+      @Override public Object read$$hash$0() {
         return theta;
       }
     };
@@ -74,7 +74,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
     }
     var theta = Float$1c$0Instance.instance(Math.atan2(x, y));
     return new Radian$2o$0() {
-      public Object read$$hash$0() {
+      @Override public Object read$$hash$0() {
         return theta;
       }
     };

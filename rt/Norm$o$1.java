@@ -16,7 +16,7 @@ public interface Norm$o$1 extends _base.Sealed$2o$0 {
 final class Norm implements Norm$o$1{
   final Object get;//fearless will guarantee that T is always deeply immutable
   Norm(Object get){ this.get= get; }
-  public Object imm$get$0(){return get; }
+  @Override public Object imm$get$0(){return get; }
 }
 final class Entry{
   final CompletableFuture<Object> ready= new CompletableFuture<>();

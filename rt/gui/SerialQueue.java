@@ -20,7 +20,7 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
   public void submitAll(List<MF$7$1> rs){
     if (rs.isEmpty()){ return; }
     var all = List.copyOf(rs);
-    submit(new MF$7$1(){ public Object mut$$hash$0(){
+    submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       for (var r : all){ r.mut$$hash$0(); }
       return Void$o$0.instance;
     }});
@@ -29,7 +29,7 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
   public void closeThen(Runnable then){//synchronized needed to make sure poison is on top
     synchronized (q){
       q.clear();
-      q.add(new MF$7$1(){ public Object mut$$hash$0(){
+      q.add(new MF$7$1(){ @Override public Object mut$$hash$0(){
         then.run();
         throw new Poison();
       }});//Correctly still accepting tasks, they will be ignored. Explicitly modelling 'ended' status not needed

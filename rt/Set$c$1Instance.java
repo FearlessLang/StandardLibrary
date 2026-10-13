@@ -55,16 +55,11 @@ public final class Set$c$1Instance implements Set$c$1 {
   static Set$c$1Instance toSet(Object p0) { return (Set$c$1Instance) p0; }
   static OrderHashBy$2ea$2 ordering(Object ordering) { return (OrderHashBy$2ea$2) ordering; }
 
-  @Override
-  public Object imm$size$0() { return Nat$c$0Instance.instance(set.size()); }
-  @Override
-  public Object read$imm$0() { return this; }
-  @Override
-  public Object imm$orderHash$0() { return ordering.imm$hideKey$0(); }
-  @Override
-  public Object imm$contains$1(Object p0) { return bool(set.containsKey(mapKey(ordering, p0))); }
-  @Override
-  public Object imm$get$1(Object p0) {
+  @Override public Object imm$size$0() { return Nat$c$0Instance.instance(set.size()); }
+  @Override public Object read$imm$0() { return this; }
+  @Override public Object imm$orderHash$0() { return ordering.imm$hideKey$0(); }
+  @Override public Object imm$contains$1(Object p0) { return bool(set.containsKey(mapKey(ordering, p0))); }
+  @Override public Object imm$get$1(Object p0) {
     Object key = set.get(mapKey(ordering, p0));
     if (key == null) { throw err(
       "Set.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
@@ -72,7 +67,7 @@ public final class Set$c$1Instance implements Set$c$1 {
     );}
     return key;
   }
-  public Object imm$tryGet$1(Object p0) {
+  @Override public Object imm$tryGet$1(Object p0) {
     Object key = set.get(mapKey(ordering, p0));
     if (key == null) { return fail(
       "Set.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
@@ -80,10 +75,8 @@ public final class Set$c$1Instance implements Set$c$1 {
     );}
     return ok(key);
   }
-  @Override
-  public Object imm$opt$1(Object p0) { return optNullable(set.get(mapKey(ordering, p0))); }
-  @Override
-  public Object imm$$plus$1(Object p0) {
+  @Override public Object imm$opt$1(Object p0) { return optNullable(set.get(mapKey(ordering, p0))); }
+  @Override public Object imm$$plus$1(Object p0) {
     var key = mapKey(this.ordering, p0);
     if (this.set.containsKey(key)) {
       return this;
@@ -110,8 +103,7 @@ public final class Set$c$1Instance implements Set$c$1 {
     assert index <= 0 : "Element should be not in the list";
     return -(index+1);
   }
-  @Override
-  public Object imm$$dash$1(Object p0) {
+  @Override public Object imm$$dash$1(Object p0) {
     // Need to figure out if this is actually more efficient
     // Hashes twice 2*O(1) - but doesn't allocate the memory if the set O(n) if the element doesn't exist
     var setElement = mapKey(ordering, p0);
@@ -122,8 +114,7 @@ public final class Set$c$1Instance implements Set$c$1 {
     s.remove(setElement);
     return new Set$c$1Instance(ordering, s);
   }
-  @Override
-  public Object imm$union$2(Object p0, Object p1) {
+  @Override public Object imm$union$2(Object p0, Object p1) {
     var newOrdering = ordering(p0);
     Set$c$1Instance other = toSet(p1);
     // See if we can avoid rehashing some of the elements
@@ -158,8 +149,7 @@ public final class Set$c$1Instance implements Set$c$1 {
     ));
     return new Set$c$1Instance(newOrdering, set);
   }
-  @Override
-  public Object imm$intersection$2(Object p0, Object p1) {
+  @Override public Object imm$intersection$2(Object p0, Object p1) {
     var newOrdering = ordering(p0);
     Set$c$1Instance other = toSet(p1);
     if (this.set.isEmpty() || other.set.isEmpty()) {
@@ -187,22 +177,19 @@ public final class Set$c$1Instance implements Set$c$1 {
     if (set.ordering.equals(ordering)) {return new HashMap<>(set.set);}
     return rehash(set.set, ordering);
   }
-  @Override
-  public Object imm$containsAll$2(Object p0, Object p1) {
+  @Override public Object imm$containsAll$2(Object p0, Object p1) {
     Set$c$1Instance other = toSet(p1);
     var newOrdering = ordering(p0);
     Map<MapKey, Object> rehashedThis = rehashSet(this, newOrdering);
     Map<MapKey, Object> rehashedOther = rehashSet(other, newOrdering);
     return bool(rehashedThis.keySet().containsAll(rehashedOther.keySet()));
   }
-  @Override
-  public Object imm$distinctBy$1(Object p0) {
+  @Override public Object imm$distinctBy$1(Object p0) {
     var newOrdering = ordering(p0);
     if (this.ordering.equals(newOrdering)) {return this;}
     return new Set$c$1Instance(newOrdering, rehash(set, newOrdering));
   }
-  @Override
-  public Object imm$list$0() {
+  @Override public Object imm$list$0() {
     return List$o$1Instance.wrap(sortedList);
   }
 }

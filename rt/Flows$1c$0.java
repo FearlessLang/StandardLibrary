@@ -137,18 +137,18 @@ final class FlowFoldSink implements FlowSink{
   FlowFoldSink(Object r, Object f){ this.r= r; this.f= f; }
   Object r;
   private final Object f;
-  public void accept(Object e){ r= callF$3(f, r, e); }
-  public boolean done(){ return false; }
-  public void finish(){}
+  @Override public void accept(Object e){ r= callF$3(f, r, e); }
+  @Override public boolean done(){ return false; }
+  @Override public void finish(){}
 }
 
 final class FlowForEachSink implements FlowSink{
   FlowForEachSink(Object a, ForEachBody$2h4$2 f){ this.a= a; this.f= f; }
   private final Object a;
   private final ForEachBody$2h4$2 f;
-  public void accept(Object e){ f.mut$$hash$2(a, e); }
-  public boolean done(){ return false; }
-  public void finish(){}
+  @Override public void accept(Object e){ f.mut$$hash$2(a, e); }
+  @Override public boolean done(){ return false; }
+  @Override public void finish(){}
 }
 
 final class FlowActorSink implements FlowSink, ActorSink$lk$1, ControlFlowMatch$2428$1{
@@ -157,12 +157,12 @@ final class FlowActorSink implements FlowSink, ActorSink$lk$1, ControlFlowMatch$
   private final Object state;
   private final Object f;
   private boolean broke= false;
-  public void accept(Object e){
+  @Override public void accept(Object e){
     var r= f instanceof ActorImplMut$4sk$3 m ? m.read$$hash$3(this, state, e) : ((ActorImpl$lk$3)f).read$$hash$3(this, state, e);
     ((ControlFlow$2dk$1)r).mut$match$1(this);
   }
-  public boolean done(){ return broke || down.done(); }
-  public void finish(){ down.finish(); }
+  @Override public boolean done(){ return broke || down.done(); }
+  @Override public void finish(){ down.finish(); }
   @Override public Object mut$$hash$1(Object e){
     if (!down.done()){ down.accept(e); }
     return Void$o$0.instance;
@@ -177,9 +177,9 @@ final class FlowAllToAllSink implements FlowSink{
   private final FlowSink down;
   private final Object f;
   private final ArrayList<Object> xs= new ArrayList<>();
-  public void accept(Object e){ xs.add(e); }
-  public boolean done(){ return down.done(); }
-  public void finish(){
+  @Override public void accept(Object e){ xs.add(e); }
+  @Override public boolean done(){ return down.done(); }
+  @Override public void finish(){
     for (var r: List$o$1Instance.asJava(callF$2(f, List$o$1Instance.wrap(xs)))){
       if (down.done()){ break; }
       down.accept(r);
@@ -193,11 +193,11 @@ final class FlowDistinctSink implements FlowSink{
   private final FlowSink down;
   private final OrderHashBy$2ea$2 by;
   private final Object keys= Vars$o$0.instance.imm$$hash$1(List$o$1.instance);
-  public void accept(Object e){
+  @Override public void accept(Object e){
     if (isTrue(_KeepNew$5g$0.instance.imm$$hash$2(keys, by.imm$$hash$1(e)))){ down.accept(e); }
   }
-  public boolean done(){ return down.done(); }
-  public void finish(){ down.finish(); }
+  @Override public boolean done(){ return down.done(); }
+  @Override public void finish(){ down.finish(); }
 }
 
 final class FlowMisuse{
