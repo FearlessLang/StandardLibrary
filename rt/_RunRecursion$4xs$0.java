@@ -32,14 +32,14 @@ final class RunRecursionThread extends Thread{
   }
   @Override public void run(){
     try{ res = Util.callMF$1(f); }
-    catch(Throwable t){ err = t; }
+    catch (Throwable t){ err = t; }
   }
   Object result(){
     start();
     var interrupted= false;
     while (isAlive()){
       try{ join(); }
-      catch(InterruptedException _){ interrupted = true; }
+      catch (InterruptedException _){ interrupted = true; }
     }
     if (interrupted){ Thread.currentThread().interrupt(); }
     if (err == null){ return res; }

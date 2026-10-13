@@ -233,7 +233,7 @@ final class FlowMisuse{
   private boolean mutReach(int i){ return stages.subList(0, i).stream().noneMatch(s -> toRead.contains(s.name())); }
   static final int shownStrSize= 20;
   private static String show(FlowStep s){
-    var n= switch(s.name()){
+    var n= switch (s.name()){
       case "++" -> "++";
       case "mapCtx" -> ".map";
       case "peekCtx" -> ".peek";
@@ -262,7 +262,7 @@ final class FlowMisuse{
     if (a instanceof OnlyImmCapture){ return true; }
     for (var i: a.getClass().getInterfaces()){
       try{ if (i.getField("instance").get(null) == a){ return true; } }
-      catch(ReflectiveOperationException _){}
+      catch (ReflectiveOperationException _){}
     }
     return false;
   }
@@ -353,7 +353,7 @@ final class FlowMisuse{
   private boolean pointless(int i){
     var n= name(i);
     var r= i + 1;
-    return switch(n){
+    return switch (n){
       case "sort" -> readsEmpty(r) || readsCount(r) || readsElems(r);
       case "map", "scan" -> readsEmpty(r) || readsCount(r);
       case "distinct", "distinctMut" -> readsEmpty(r) || readsFirst(r);

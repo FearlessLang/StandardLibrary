@@ -60,7 +60,7 @@ final class AssetBytesRead{
           StandardCharsets.UTF_8
           );
     }
-    catch(IOException ioe){
+    catch (IOException ioe){
       throw nonDetErr("Files under project root has been altered.\nFile not found in "+path+" "+ioe);
     }
   }
@@ -103,7 +103,7 @@ final class AssetBytesRead{
       for (var row: rows){ res.add(List.of(row)); }
       return List.copyOf(res);
     }
-    catch(ReflectiveOperationException|ClassCastException e){
+    catch (ReflectiveOperationException|ClassCastException e){
       throw invalidAssetDescriptor("Cannot resolve auto-imported assets for package \""+javaPkg+"\": "+e);
     }
   }

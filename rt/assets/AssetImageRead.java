@@ -29,13 +29,13 @@ final class AssetImageRead{
   //machine and JDK. Eager decode: errors surface here, at load; draws later
   //are pure blits.
   static Image decode(String path,byte[] bs,long maxPixels){
-    try(var data= Data.makeFromBytes(bs); var codec= Codec.makeFromData(data); var bm= new Bitmap()){
+    try (var data= Data.makeFromBytes(bs); var codec= Codec.makeFromData(data); var bm= new Bitmap()){
       checkSize(path,codec.getWidth(),codec.getHeight(),maxPixels);
       bm.allocPixels(new ImageInfo(codec.getWidth(),codec.getHeight(),ColorType.BGRA_8888,ColorAlphaType.PREMUL));
       codec.readPixels(bm);
       return Image.makeRasterFromBitmap(bm.setImmutable());//shares pixels, no copy
     }
-    catch(RuntimeException re){
+    catch (RuntimeException re){
       if (re.getClass().getName().startsWith("_base.")){ throw re; }
       throw badImage(path,"image could not be decoded: "+re);
     }

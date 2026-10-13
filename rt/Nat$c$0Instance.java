@@ -239,7 +239,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
         base = powMul(base, base);
       }
     }
-    catch(ArithmeticException e){ throw overflow("**", val, n(p0)); }
+    catch (ArithmeticException e){ throw overflow("**", val, n(p0)); }
   }
   private static long powMul(long a, long b){
     if (Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0){ throw new ArithmeticException(); }

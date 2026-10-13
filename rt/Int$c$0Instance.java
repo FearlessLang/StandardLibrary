@@ -43,7 +43,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   private static long mulChecked(long a, long b) {
     try{ return Math.multiplyExact(a, b); }
-    catch(ArithmeticException e){ throw outOfRange("*", a, ""+b, a < 0 == b < 0); }
+    catch (ArithmeticException e){ throw outOfRange("*", a, ""+b, a < 0 == b < 0); }
   }
   static boolean canSafelyConvertToDouble(long val) {
     return val != Long.MAX_VALUE && val == (long) ((double) val);
@@ -122,11 +122,11 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$$plus$1(Object p0){
     try{ return instance(Math.addExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw outOfRange("+", val, ""+unwrap(p0), unwrap(p0) > 0); }
+    catch (ArithmeticException e){ throw outOfRange("+", val, ""+unwrap(p0), unwrap(p0) > 0); }
   }
   @Override public Object imm$$dash$1(Object p0){
     try{ return instance(Math.subtractExact(val, unwrap(p0))); }
-    catch(ArithmeticException e){ throw outOfRange("-", val, ""+unwrap(p0), unwrap(p0) < 0); }
+    catch (ArithmeticException e){ throw outOfRange("-", val, ""+unwrap(p0), unwrap(p0) < 0); }
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
@@ -152,7 +152,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
         base = Math.multiplyExact(base, base);
       }
     }
-    catch(ArithmeticException e){ throw outOfRange("**", val, Long.toUnsignedString(unsignedLongFromNat(p0)), val > 0 || (unsignedLongFromNat(p0) & 1) == 0); }
+    catch (ArithmeticException e){ throw outOfRange("**", val, Long.toUnsignedString(unsignedLongFromNat(p0)), val > 0 || (unsignedLongFromNat(p0) & 1) == 0); }
   }
 
   @Override public Object imm$abs$0(){

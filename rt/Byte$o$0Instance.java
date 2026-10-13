@@ -76,7 +76,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
         base = powMul(base, base);
       }
     }
-    catch(ArithmeticException e){ throw overflow("**", val, b(p0)); }
+    catch (ArithmeticException e){ throw overflow("**", val, b(p0)); }
   }
   private static int powMul(int a, int b){
     if (a * b > 255){ throw new ArithmeticException(); }

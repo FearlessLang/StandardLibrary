@@ -23,17 +23,17 @@ final class Entry{
   volatile boolean broken= false;
   public Object computeNow(Supplier<Object> s){
     try{ var res= s.get(); ready.complete(res); return res; }
-    catch(Throwable t){ ready.completeExceptionally(t); throw t; }//Compiles in Java 24
+    catch (Throwable t){ ready.completeExceptionally(t); throw t; }//Compiles in Java 24
   }
   public Object joinWait(long time, Supplier<Object> s){
     if (!ready.isDone() && broken){ return sequential(s); }
     try{ return ready.get(time,TimeUnit.SECONDS); }
-    catch(TimeoutException _){
+    catch (TimeoutException _){
       broken = true;
       return sequential(s);
     }
-    catch(ExecutionException ex){ return sneakyThrow(ex.getCause()); }
-    catch(InterruptedException ex){
+    catch (ExecutionException ex){ return sneakyThrow(ex.getCause()); }
+    catch (InterruptedException ex){
       Thread.currentThread().interrupt();
       throw new RuntimeException(ex);
       }
@@ -42,8 +42,8 @@ final class Entry{
     var res= s.get();
     if (!ready.isDone()){ return res; }
     try{ return ready.get(); }
-    catch(ExecutionException ex){ return sneakyThrow(ex.getCause()); }
-    catch(InterruptedException ex){
+    catch (ExecutionException ex){ return sneakyThrow(ex.getCause()); }
+    catch (InterruptedException ex){
       Thread.currentThread().interrupt();
       throw new RuntimeException(ex);
     }//return the more normalized if possible

@@ -49,10 +49,10 @@ public final class AppLog{
     closing.set(true);
     for (var log: all){
       try{ log.closeAndRotateQuiet(); }
-      catch(Throwable t){ err("closing and log rotation crashed: "+log.path, t); }
+      catch (Throwable t){ err("closing and log rotation crashed: "+log.path, t); }
     }
     try{ rotateOnCloseQuiet(errPath, keepErrLogs, true); }
-    catch(Throwable t){
+    catch (Throwable t){
       System.err.print(stampNow()+" rotate err.log crashed: "+errPath+"\n");
       t.printStackTrace(System.err);
     }
@@ -68,17 +68,17 @@ public final class AppLog{
   }
   public void append(String msg){
     var line= raw ? msg : stampNow()+" "+msg+"\n";
-    synchronized(lock){
+    synchronized (lock){
       if (closing.get()){ err("append during shutdown for "+path+": "+msg, null); return; }
       try {
         out.write(line);
         out.flush();
       }
-      catch(IOException e){ throw new UncheckedIOException(e); }
+      catch (IOException e){ throw new UncheckedIOException(e); }
     }
   }
   private void closeAndRotateQuiet(){
-    synchronized(lock){
+    synchronized (lock){
       try { out.close(); }
       catch (IOException e){ err("close failed: "+path, e); return; }
     }
@@ -99,7 +99,7 @@ public final class AppLog{
       moveToStamped(p,false);
       enforceRetention(p, keep);
     }
-    catch(IOException e){
+    catch (IOException e){
       if (!isErrLog){ err("rotate failed: "+p, e); return; }
       System.err.print(stampNow()+" rotate failed: "+p+"\n");
       e.printStackTrace(System.err);
@@ -110,21 +110,21 @@ public final class AppLog{
       createDirsOrThrow(p);
       return Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, TRUNCATE_EXISTING);
     }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static String stampNow(){ return stampFmt.format(Instant.now()); }
 
   private static void createDirsOrThrow(Path p){
     try{ Files.createDirectories(p.getParent()); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static long sizeOrThrow(Path p){
     try{ return Files.size(p); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void deleteOrThrow(Path p){
     try{ Files.deleteIfExists(p); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static Path rotatedPath(Path p,String stamp){
     var fName= p.getFileName().toString().replace(".log","$"+stamp+".log");//note: this is going to be the second $ of the file
@@ -135,25 +135,25 @@ public final class AppLog{
   private static void appendOrThrow(Path p){
     try (var w= Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, APPEND))
     { w.write("\n"+stampNow()+" interrupted here\n"); w.flush(); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void moveToStampedOrThrow(Path src){
     try{ moveToStamped(src,true); }
-    catch(IOException ioe){ throw new UncheckedIOException(ioe); }
+    catch (IOException ioe){ throw new UncheckedIOException(ioe); }
   }
   private static void moveToStamped(Path src, boolean starting) throws IOException{
     for (int i= 0; i < maxStampRetries; i++){
       var dst= rotatedPath(src, stampNow());
       try { Files.move(src, dst); if (starting){ appendOrThrow(dst); } return; }
-      catch(FileAlreadyExistsException e){ 
-        try{ Thread.sleep(100); } catch(InterruptedException _){}//refuse to interrupt during log cleanup
+      catch (FileAlreadyExistsException e){ 
+        try{ Thread.sleep(100); } catch (InterruptedException _){}//refuse to interrupt during log cleanup
       }
     }
     throw new IOException(" OS timestamps unresponsive when renaming "+src);
   }
   private static void enforceRetentionOrThrow(Path p, int keep){
     try { enforceRetention(p,keep); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void enforceRetention(Path p, int keep) throws IOException{
     var files= new ArrayList<Path>();
@@ -180,6 +180,6 @@ public final class AppLog{
         w.flush();
       }
     }
-    catch(Throwable tt){ System.err.println("Loggers failure via "+tt); }// best effort only
+    catch (Throwable tt){ System.err.println("Loggers failure via "+tt); }// best effort only
   }
 }

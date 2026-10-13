@@ -16,7 +16,7 @@ public record ReadZip(
     Function<String,RuntimeException> tooLargeName){
   public interface IoSupplier{ ZipInputStream get() throws IOException; }
   public Map<String,byte[]> readAll(IoSupplier szin){
-    return cleanUp(Fs.of(() -> {try(var zin= szin.get()){ return _readAll(zin); }}));
+    return cleanUp(Fs.of(() -> {try (var zin= szin.get()){ return _readAll(zin); }}));
   }
   private LinkedHashMap<String,byte[]> _readAll(ZipInputStream zin){
     var out= new LinkedHashMap<String,byte[]>();
@@ -27,8 +27,8 @@ public record ReadZip(
         var n= e.getName();
         reqZipNameOk(n);
         var key= keyOf(n);
-        if(out.containsKey(key)){ throw dupNameErr.apply(key); }
-        if(n.endsWith("/")){ out.put(key, null); }
+        if (out.containsKey(key)){ throw dupNameErr.apply(key); }
+        if (n.endsWith("/")){ out.put(key, null); }
         else{ out.put(key, readEntryBytes(key,zin)); }
       }
       finally{ Fs.ofV(zin::closeEntry); }
@@ -37,15 +37,15 @@ public record ReadZip(
   private static String keyOf(String n){ return n.endsWith("/") ? n.substring(0, n.length()-1) : n; }
   private void reqZipNameOk(String n){
     var bad= n.isEmpty() || n.startsWith("/") || n.indexOf('\0') >= 0;
-    if(bad){ throw badNameErr.apply(n); }
+    if (bad){ throw badNameErr.apply(n); }
     var sub= keyOf(n);
-    for(var seg: sub.split("/", -1)){
-      if(seg.isEmpty() || seg.equals(".") || seg.equals("..")){ throw badNameErr.apply(n); }
+    for (var seg: sub.split("/", -1)){
+      if (seg.isEmpty() || seg.equals(".") || seg.equals("..")){ throw badNameErr.apply(n); }
     }
   }
   private byte[] readEntryBytes(String name, ZipInputStream zin){
     try{ return Fs.of(zin::readAllBytes); }
-    catch(OutOfMemoryError oom){ throw tooLargeName.apply(name); }
+    catch (OutOfMemoryError oom){ throw tooLargeName.apply(name); }
   }
   private Map<String,byte[]> cleanUp(LinkedHashMap<String,byte[]> map){
     map.values().removeIf(v -> v == null);

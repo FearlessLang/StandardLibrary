@@ -62,22 +62,22 @@ public interface _Throw$1c$0{
     int n= Integer.parseInt(m.substring(b + 1));
     var rc= m.substring(0,a);
     var mid= m.substring(a + 1,b);
-    if(mid.charAt(0) == '$'){ return rc+" "+decodeOp(mid.substring(1))+holes('(',')',n); }
+    if (mid.charAt(0) == '$'){ return rc+" "+decodeOp(mid.substring(1))+holes('(',')',n); }
     return rc+" ."+mid+holes('(',')',n);
   }
   static String holes(char open,char close,int n){
-    if(n==0){ return ""; }
+    if (n==0){ return ""; }
     var sb= new StringBuilder().append(open);
-    for(int i= 0;i<n;i++){ if(i!=0){ sb.append(','); } sb.append('_'); }
+    for (int i= 0;i<n;i++){ if (i!=0){ sb.append(','); } sb.append('_'); }
     return sb.append(close).toString();
   }
   static String decodeOp(String enc){
     var ps= enc.split("_");
     var sb= new StringBuilder();
-    for(var p:ps){ sb.append(opChar(p)); }
+    for (var p:ps){ sb.append(opChar(p)); }
     return sb.toString();
   }
-  static char opChar(String tok){ return switch(tok){
+  static char opChar(String tok){ return switch (tok){
     case "plus" -> '+';
     case "dash" -> '-';
     case "star" -> '*';

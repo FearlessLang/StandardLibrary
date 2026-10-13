@@ -36,7 +36,7 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
     }
   }
   private static void runLoop(BlockingQueue<MF$7$1> q, AtomicBoolean midTask) {
-    while(true){
+    while (true){
       try { q.take().mut$$hash$0();  } 
       catch (InterruptedException e){ Thread.currentThread().interrupt(); throw new Error(e); }
       finally { midTask.set(false); }

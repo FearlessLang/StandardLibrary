@@ -9,10 +9,10 @@ public final class Fs{
   public interface Run<T>{T run() throws IOException;}
   public static void ofV(RunVoid f) {
     try { f.run(); }
-    catch(IOException io){ throw new UncheckedIOException(io); }
+    catch (IOException io){ throw new UncheckedIOException(io); }
   }
   public static <T> T of(Run<T> f) {
     try { return f.run(); }
-    catch(IOException io){ throw new UncheckedIOException(io); }
+    catch (IOException io){ throw new UncheckedIOException(io); }
   }
 }

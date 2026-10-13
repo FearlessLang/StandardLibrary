@@ -46,17 +46,17 @@ final class DownloadFetch{
         throw httpStatus(url,status);
       }
       checkContentLength(url,resp,maxBytes);
-      try(var in= resp.body()){ return readBounded(url,in,maxBytes); }
-      catch(IOException e){ throw downloadFailed(url,e.toString()); }
+      try (var in= resp.body()){ return readBounded(url,in,maxBytes); }
+      catch (IOException e){ throw downloadFailed(url,e.toString()); }
     }
   }
 
   static HttpResponse<InputStream> send(String url,URI uri){
     var req= HttpRequest.newBuilder(uri).timeout(responseTimeout).GET().build();
     try{ return client.send(req,HttpResponse.BodyHandlers.ofInputStream()); }
-    catch(HttpTimeoutException e){ throw downloadTimedOut(url,responseTimeout.toMillis()); }
-    catch(IOException e){ throw downloadFailed(url,e.toString()); }
-    catch(InterruptedException e){
+    catch (HttpTimeoutException e){ throw downloadTimedOut(url,responseTimeout.toMillis()); }
+    catch (IOException e){ throw downloadFailed(url,e.toString()); }
+    catch (InterruptedException e){
       Thread.currentThread().interrupt();
       throw downloadFailed(url,e.toString());
     }
@@ -64,13 +64,13 @@ final class DownloadFetch{
 
   static void closeQuietly(HttpResponse<InputStream> resp){
     try{ resp.body().close(); }
-    catch(IOException ignored){}
+    catch (IOException ignored){}
   }
 
   static void checkContentLength(String url,HttpResponse<InputStream> resp,long maxBytes){
     long contentLength;
     try{ contentLength= resp.headers().firstValueAsLong("Content-Length").orElse(-1); }
-    catch(NumberFormatException e){ return; }
+    catch (NumberFormatException e){ return; }
     if (contentLength < 0){ return; }
     if (Long.compareUnsigned(contentLength,maxBytes) <= 0){ return; }
     closeQuietly(resp);
@@ -93,7 +93,7 @@ final class DownloadFetch{
   static URI validate(String url){
     URI uri;
     try{ uri= new URI(url); }
-    catch(URISyntaxException e){ throw invalidUrl(url,e.getReason()); }
+    catch (URISyntaxException e){ throw invalidUrl(url,e.getReason()); }
     if (!uri.isAbsolute()){ throw invalidUrl(url,"not an absolute URI (missing scheme)"); }
     var scheme= uri.getScheme().toLowerCase(Locale.ROOT);
     if (!scheme.equals("http") && !scheme.equals("https")){ throw badScheme(url,uri.getScheme()); }

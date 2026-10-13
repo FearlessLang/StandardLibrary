@@ -14,9 +14,9 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
       @Override public Object mut$run$1(Object p0){
         var m= (ActionMatch$2ds$2)p0;
         Object res; try{ res= s.get(); }
-        catch(Deterministic d){ return m.mut$info$1(addStackInfo(d.i,d)); }
-        catch(NonDeterministic d){ return m.mut$info$1(addStackInfo(d.i,d)); }
-        catch(Throwable t){ 
+        catch (Deterministic d){ return m.mut$info$1(addStackInfo(d.i,d)); }
+        catch (NonDeterministic d){ return m.mut$info$1(addStackInfo(d.i,d)); }
+        catch (Throwable t){ 
           var msg= t.getClass().getSimpleName()+"\n"+t.getMessage();
           return m.mut$info$1(addStackInfo(new Str$c$0Instance(msg).read$info$0(),t));
         }
@@ -40,9 +40,9 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
   @Override public Object mut$currentStackTrace$0(){ return stackTraceOf(new Throwable().getStackTrace()); }
   public static List$o$1Instance stackTraceOf(StackTraceElement[] st){
     var al= new ArrayList<>();
-    for(var e : st){
+    for (var e : st){
       var s= _base._Throw$1c$0.frameData(e);
-      if(s == null){ continue; }
+      if (s == null){ continue; }
       al.add(s);
     }
     return new List$o$1Instance(al);

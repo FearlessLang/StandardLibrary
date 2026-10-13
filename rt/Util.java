@@ -17,10 +17,10 @@ public final class Util{
   }
   private static void watchParentLifeline(){
     try{
-      while(System.in.read()!=-1){}
+      while (System.in.read()!=-1){}
       parentGone();
     }
-    catch(java.io.IOException _){ parentGone(); }
+    catch (java.io.IOException _){ parentGone(); }
   }
   private static void parentGone(){
     int code= 121;
@@ -37,14 +37,14 @@ public final class Util{
     boolean interrupted= false;
     try{
       long end= System.nanoTime()+java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(millis);
-      for(;;){
+      for (;;){
         long left= end-System.nanoTime();
         if (left<=0){ return; }
         try{
           Thread.sleep(java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(left));
           return;
         }
-        catch(InterruptedException e){ interrupted = true; }
+        catch (InterruptedException e){ interrupted = true; }
       }
     }
     finally{ if (interrupted){ Thread.currentThread().interrupt(); } }
@@ -151,9 +151,9 @@ public final class Util{
   public static NonDeterministic nonDeterministic(Info$o$0 i){ return new NonDeterministic(i); }
   public static boolean topLevel(Runnable r){
     try{ r.run(); endMarker(); return true; }
-    catch(Deterministic d){ printInfo(d.i,d); }
-    catch(NonDeterministic d){ printInfo(d.i,d); }
-    catch(Throwable t){ t.printStackTrace();}
+    catch (Deterministic d){ printInfo(d.i,d); }
+    catch (NonDeterministic d){ printInfo(d.i,d); }
+    catch (Throwable t){ t.printStackTrace();}
     return false;
   }
   private static void endMarker(){
@@ -167,7 +167,7 @@ public final class Util{
       .filter(e -> is(e.getKey(),"msg")).forEach(e -> printInfoMsg("","",(Info$o$0)e.getValue()));
     //map.entrySet().stream()
     //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
-    for(var e : d.getStackTrace()){
+    for (var e : d.getStackTrace()){
       var f= _Throw$1c$0.frameData(e);
       if (f != null){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
     }
@@ -188,7 +188,7 @@ public final class Util{
     }
     System.err.print("\nStack trace:\n");
     var jList= ((List$o$1Instance)fList).val();
-    for(var e : jList){ printInfoMsg("- ","  ",(Info$o$0)e); }
+    for (var e : jList){ printInfoMsg("- ","  ",(Info$o$0)e); }
   }
   public static RuntimeException asFearlessError(Throwable t){
     for (var c= t; c != null; c = c.getCause()){

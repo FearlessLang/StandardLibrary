@@ -136,12 +136,12 @@ final class EList$1k$1Instance implements EList$1k$1{
     return this;
   }
   @Override public Object mut$sortDistinct$1(Object p0){
-    if(xs.size() < 2){ return this; }
+    if (xs.size() < 2){ return this; }
     var by= (OrderBy$5e$2)p0;
     xs.sort((a,b) -> cmp(by,a,b));
     int w= 1;
-    for(int i= 1; i < xs.size(); i++){
-      if(cmp(by,xs.get(w-1),xs.get(i)) != 0){ xs.set(w++, xs.get(i)); }
+    for (int i= 1; i < xs.size(); i++){
+      if (cmp(by,xs.get(w-1),xs.get(i)) != 0){ xs.set(w++, xs.get(i)); }
     }
     xs.subList(w,xs.size()).clear();
     return this;

@@ -37,9 +37,9 @@ public final class Replacements{
       if (ki.isEmpty()){ throw Util.err("Empty key in position "+i); }
       for (int j= i + 2; j < rules.size(); j += 2){
         var kj= rules.get(j).val();
-        if(ki.equals(kj)){ throw Util.err("Duplicate key in positions "+i+" and "+j); }
+        if (ki.equals(kj)){ throw Util.err("Duplicate key in positions "+i+" and "+j); }
         var prefix= checkPrefixes && (ki.startsWith(kj) || kj.startsWith(ki));
-        if(prefix){ throw Util.err("Prefix clash in positions "+i+" and "+j); }
+        if (prefix){ throw Util.err("Prefix clash in positions "+i+" and "+j); }
       }
     }
   }

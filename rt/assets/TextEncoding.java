@@ -33,7 +33,7 @@ final class TextEncoding{
     return new BadTextReason$9wg$0(){
       @Override public Object imm$match$1(Object p0){
         var m= (BadTextReasonMatch$8suo$1)p0;
-        return switch(id){
+        return switch (id){
           case 0 -> m.mut$malformedEncoding$0();
           case 1 -> m.mut$truncatedEncoding$0();
           case 2 -> m.mut$notScalar$0();
