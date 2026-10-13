@@ -5,11 +5,11 @@ import static _base.Util.*;
 import java.util.ArrayList;
 
 public final class _CapTry$2s$0 implements CapTry$2s$0{
-  @Override public final Object mut$iso$0(){ return this; }
-  @Override public final Object mut$close$0(){ return this; }
-  public final Object mut$$hash$1(Object p0){ return actionLazy(()->callF$1(p0)); }
-  public final Object mut$$hash$2(Object p0, Object p1){ return actionLazy(()->callF$2(p1,p0)); }
-  public final Action$2o$1 actionLazy(java.util.function.Supplier<Object> s){
+  @Override public Object mut$iso$0(){ return this; }
+  @Override public Object mut$close$0(){ return this; }
+  public Object mut$$hash$1(Object p0){ return actionLazy(()->callF$1(p0)); }
+  public Object mut$$hash$2(Object p0, Object p1){ return actionLazy(()->callF$2(p1,p0)); }
+  public Action$2o$1 actionLazy(java.util.function.Supplier<Object> s){
     return new Action$2o$1(){
       public Object mut$run$1(Object p0){
         var m= (ActionMatch$2ds$2)p0;
@@ -37,8 +37,8 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
   private static final DataTypeBy$17m$3 dtId= new DataTypeBy$17m$3(){
     @Override public Object imm$$hash$1(Object p0){ return p0; }
   };
-  public final Object mut$currentStackTrace$0(){ return stackTraceOf(new Throwable().getStackTrace()); }
-  public final static List$o$1Instance stackTraceOf(StackTraceElement[] st){
+  public Object mut$currentStackTrace$0(){ return stackTraceOf(new Throwable().getStackTrace()); }
+  public static List$o$1Instance stackTraceOf(StackTraceElement[] st){
     var al= new ArrayList<>();
     for(var e : st){
       var s= _base._Throw$1c$0.frameData(e);

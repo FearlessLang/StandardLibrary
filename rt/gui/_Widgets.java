@@ -158,7 +158,7 @@ abstract class AWidget implements Widget$2o$1{
     return changeable || this == frame.top || component.getParent() instanceof SkComponent p && p.w.canChange();
   }
 
-  final void change(){
+  void change(){
     if (canChange()){ return; }
     throw Util.detErr("This " + getClass().getSimpleName().substring(1)
       + " is not in the window any more: .clear, a replaced Border slot or a new .content removed it,"
@@ -175,12 +175,12 @@ abstract class AWidget implements Widget$2o$1{
   abstract void sk(Canvas cv);
   abstract Dimension autoSize(int width, int height);
 
-  final Object onEdt(Runnable r){
+  Object onEdt(Runnable r){
     frame.onEdtAndWait(() -> { change(); r.run(); });
     return mut$self$0();
   }
 
-  final Object reStyle(Runnable r){
+  Object reStyle(Runnable r){
     // Invalidate only this component: invalidation propagates upward on its
     // own, and _Frame.tick re-lays-out just the invalid path, so unchanged
     // widgets keep their exact bounds.
@@ -193,9 +193,9 @@ abstract class AWidget implements Widget$2o$1{
     return mut$self$0();
   }
 
-  final Object reStyle(int n, IntConsumer set){ return reStyle(() -> set.accept(n)); }
+  Object reStyle(int n, IntConsumer set){ return reStyle(() -> set.accept(n)); }
 
-  final Object reText(Runnable r){
+  Object reText(Runnable r){
     return reStyle(() -> {
       r.run();
       if (line != null){ line.close(); }
