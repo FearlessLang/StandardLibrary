@@ -29,7 +29,7 @@ final class AssetImageRead{
   //machine and JDK. Eager decode: errors surface here, at load; draws later
   //are pure blits.
   static Image decode(String path,byte[] bs,long maxPixels){
-    try(var data=Data.makeFromBytes(bs); var codec=Codec.makeFromData(data); var bm=new Bitmap()){
+    try(var data= Data.makeFromBytes(bs); var codec= Codec.makeFromData(data); var bm= new Bitmap()){
       checkSize(path,codec.getWidth(),codec.getHeight(),maxPixels);
       bm.allocPixels(new ImageInfo(codec.getWidth(),codec.getHeight(),ColorType.BGRA_8888,ColorAlphaType.PREMUL));
       codec.readPixels(bm);
@@ -43,7 +43,7 @@ final class AssetImageRead{
 
   static void checkSize(String path,int w,int h,long maxPixels){
     if (w <= 0 || h <= 0){ throw badImage(path,"image has invalid size: "+w+"x"+h); }
-    var pixels=Math.multiplyExact((long)w,h);
+    var pixels= Math.multiplyExact((long)w,h);
     if (w > Scopes.maxExtent || h > Scopes.maxExtent || pixels > Scopes.maxImagePixels){ throw badImage(path,"image "+w+" x "+h+" is too large; each side must be <= "+Scopes.maxExtent+" and the pixels <= "+Scopes.maxImagePixels); }
     if (Long.compareUnsigned(maxPixels,pixels) >= 0){ return; }
     throw badImage(

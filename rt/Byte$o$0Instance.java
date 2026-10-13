@@ -6,8 +6,8 @@ import java.util.stream.IntStream;
 import static _base.Util.*;
 
 final class ByteCache {
-  final static int max = 255;
-  final static Byte$o$0Instance[] byteArray = IntStream.rangeClosed(0, max)
+  final static int max= 255;
+  final static Byte$o$0Instance[] byteArray= IntStream.rangeClosed(0, max)
           .mapToObj(b -> new Byte$o$0Instance((byte) b))
           .toArray(Byte$o$0Instance[]::new);
 
@@ -18,8 +18,8 @@ final class ByteCache {
 }
 
 public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
-  private static final byte MAX_VALUE = (byte) 255;
-  private static final long MAX_VALUE_LONG = 255;
+  private static final byte MAX_VALUE= (byte) 255;
+  private static final long MAX_VALUE_LONG= 255;
 
   public static Byte$o$0 instance(byte val){ return ByteCache.getByte(val); }
 
@@ -64,10 +64,10 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
-    int power = u8(p0);
+    int power= u8(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    int result = 1, base = u8(val);
+    int result= 1, base= u8(val);
     try{
       while (true) {
         if ((power & 1) != 0){ result = powMul(result, base); }

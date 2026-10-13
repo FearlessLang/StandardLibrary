@@ -34,10 +34,10 @@ import java.util.HashMap;
 import static _base.Scopes.*;
 
 interface Sk{
-  Paint paint = new Paint().setAntiAlias(true);
+  Paint paint= new Paint().setAntiAlias(true);
   // Lookup order. The script fonts must precede Math: it has isolated Arabic
   // letters, and would win them from the Arabic font, which joins them.
-  String[] fontFiles = {
+  String[] fontFiles= {
     "NotoSans-Regular.ttf",
     "NotoSansArabic-Regular.ttf",
     "NotoSansHebrew-Regular.ttf",
@@ -72,11 +72,11 @@ interface Sk{
     "NotoSansMath-Regular.ttf",
     "NotoSansCJKsc-Regular.otf",
     "Twemoji.Mozilla.ttf"};
-  int emoji = fontFiles.length - 1;
-  Typeface[] typefaces = new Typeface[fontFiles.length];
-  HashMap<Long, Font> fonts = new HashMap<>();
-  HashMap<Integer, Integer> fontByCp = new HashMap<>();
-  Shaper shaper = Shaper.makeShaperDrivenWrapper();
+  int emoji= fontFiles.length - 1;
+  Typeface[] typefaces= new Typeface[fontFiles.length];
+  HashMap<Long, Font> fonts= new HashMap<>();
+  HashMap<Integer, Integer> fontByCp= new HashMap<>();
+  Shaper shaper= Shaper.makeShaperDrivenWrapper();
 
   static Typeface typeface(int i){
     if (typefaces[i] == null){ typefaces[i] = FontMgr.getDefault().makeFromData(Data.makeFromBytes(fontBytes(fontFiles[i]))); }
@@ -84,7 +84,7 @@ interface Sk{
   }
 
   static byte[] fontBytes(String name){
-    try (var in = Sk.class.getResourceAsStream(name)){ return in.readAllBytes(); }
+    try (var in= Sk.class.getResourceAsStream(name)){ return in.readAllBytes(); }
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
 
@@ -101,27 +101,27 @@ interface Sk{
 
   static int search(int cp, boolean emojiFirst){
     if (emojiFirst && typeface(emoji).getUTF32Glyph(cp) != 0){ return emoji; }
-    for (int i = 0; i < fontFiles.length; i++){
+    for (int i= 0; i < fontFiles.length; i++){
       if (typeface(i).getUTF32Glyph(cp) != 0){ return i; }
     }
     return 0;
   }
 
   static boolean sticky(int cp){
-    int t = Character.getType(cp);
+    int t= Character.getType(cp);
     return t == Character.NON_SPACING_MARK || t == Character.ENCLOSING_MARK
       || t == Character.COMBINING_SPACING_MARK || t == Character.FORMAT || Character.isEmojiModifier(cp);
   }
 
   static TextLine shape(String text, int size){
-    var runs = new ArrayList<FontRun>();
-    int font = -1;
-    for (int i = 0, prev = -1; i < text.length();){
-      int cp = text.codePointAt(i);
-      int next = i + Character.charCount(cp);
+    var runs= new ArrayList<FontRun>();
+    int font= -1;
+    for (int i= 0, prev= -1; i < text.length();){
+      int cp= text.codePointAt(i);
+      int next= i + Character.charCount(cp);
       if (font < 0 || !(sticky(cp) || prev == 0x200D)){
-        int nx = next < text.length() ? text.codePointAt(next) : -1;
-        int f = fontOf(cp, nx == 0xFE0F || Character.isEmojiPresentation(cp));
+        int nx= next < text.length() ? text.codePointAt(next) : -1;
+        int f= fontOf(cp, nx == 0xFE0F || Character.isEmojiPresentation(cp));
         if (font >= 0 && f != font){ runs.add(new FontRun(i, font(font, size))); }
         font = f;
       }
@@ -129,7 +129,7 @@ interface Sk{
       i = next;
     }
     if (font >= 0){ runs.add(new FontRun(text.length(), font(font, size))); }
-    try (var handler = new TextLineRunHandler(text); var bidi = new IcuBidiRunIterator(text, 0xFE); var script = new HbIcuScriptRunIterator(text)){
+    try (var handler= new TextLineRunHandler(text); var bidi= new IcuBidiRunIterator(text, 0xFE); var script= new HbIcuScriptRunIterator(text)){
       shaper.shape(text, runs.iterator(), bidi, script, new TrivialLanguageRunIterator(text, "en"), ShapingOptions.DEFAULT, Float.POSITIVE_INFINITY, handler);
       return handler.makeLine();
     }
@@ -140,8 +140,8 @@ interface Sk{
     s.line = shape(s.text, s.textSize);
     s.ascent = s.line.getAscent();
     s.descent = s.line.getDescent();
-    for (int i = 0; i < (s.allFonts ? fontFiles.length : 1); i++){
-      var m = font(i, s.textSize).getMetrics();
+    for (int i= 0; i < (s.allFonts ? fontFiles.length : 1); i++){
+      var m= font(i, s.textSize).getMetrics();
       s.ascent = Math.min(s.ascent, m.getAscent());
       s.descent = Math.max(s.descent, m.getDescent());
     }
@@ -155,9 +155,9 @@ interface Sk{
 
   static void paintNode(SkComponent c, Canvas cv){
     c.w.sk(cv);
-    for (int i = 0; i < c.getComponentCount(); i++){
-      var k = c.getComponent(i);
-      int save = cv.save();
+    for (int i= 0; i < c.getComponentCount(); i++){
+      var k= c.getComponent(i);
+      int save= cv.save();
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
       paintNode((SkComponent) k, cv);
@@ -167,8 +167,8 @@ interface Sk{
 
   static void background(Canvas cv, AWidget s){
     if (s.bg >>> 24 == 0){ return; }
-    float w = s.component.getWidth();
-    float h = s.component.getHeight();
+    float w= s.component.getWidth();
+    float h= s.component.getHeight();
     paint.setColor(s.bg);
     cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2)), paint);
   }
@@ -180,22 +180,22 @@ interface Sk{
   }
 
   static Dimension sizeFor(Component c, int width, int height){
-    var s = ((SkComponent) c).w;
-    int ww = s.preferredWidth == null ? width : s.preferredWidth;
-    int hh = s.preferredHeight == null ? height : s.preferredHeight;
-    var auto = s.autoSize(ww, hh);
+    var s= ((SkComponent) c).w;
+    int ww= s.preferredWidth == null ? width : s.preferredWidth;
+    int hh= s.preferredHeight == null ? height : s.preferredHeight;
+    var auto= s.autoSize(ww, hh);
     return new Dimension(s.preferredWidth == null ? auto.width : ww, s.preferredHeight == null ? auto.height : hh);
   }
 
   static void text(Canvas cv, AWidget s, float dx, float dy){
-    var c = s.component;
-    var line = line(s);
-    int x0 = s.left;
-    int y0 = s.top;
-    int cw = c.getWidth() - s.left - s.right;
-    int ch = c.getHeight() - s.top - s.bottom;
+    var c= s.component;
+    var line= line(s);
+    int x0= s.left;
+    int y0= s.top;
+    int cw= c.getWidth() - s.left - s.right;
+    int ch= c.getHeight() - s.top - s.bottom;
     if (cw <= 0 || ch <= 0){ return; }
-    int save = cv.save();
+    int save= cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
     paint.setColor(s.fg);
     cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, y0 + (ch - s.descent + s.ascent) / 2 - s.ascent + dy, paint);
@@ -203,17 +203,17 @@ interface Sk{
   }
 
   static void button(Canvas cv, _Button s){
-    var b = s.component;
-    int w = b.getWidth(), h = b.getHeight();
+    var b= s.component;
+    int w= b.getWidth(), h= b.getHeight();
     if (w <= 0 || h <= 0){ return; }
-    boolean down = s.down;
-    boolean over = s.over && !down;
-    float r = Math.min(s.radius, Math.min(w, h) / 2f);
-    int d = bevel(w, h, (int) r, s);
-    int center = baseColor(s.bg, over, down);
-    int light = mix(center, 0xFFFFFFFF, 45);
-    int dark = mix(center, 0xFF000000, 45);
-    var outer = RRect.makeXYWH(0, 0, w, h, r);
+    boolean down= s.down;
+    boolean over= s.over && !down;
+    float r= Math.min(s.radius, Math.min(w, h) / 2f);
+    int d= bevel(w, h, (int) r, s);
+    int center= baseColor(s.bg, over, down);
+    int light= mix(center, 0xFFFFFFFF, 45);
+    int dark= mix(center, 0xFF000000, 45);
+    var outer= RRect.makeXYWH(0, 0, w, h, r);
     paint.setColor(center);
     cv.drawRRect(outer, paint);
     if (d > 0){
@@ -221,15 +221,15 @@ interface Sk{
       // the button: a stable button costs zero path allocations per frame.
       if (s.bevelW != w || s.bevelH != h || s.bevelR != s.radius || s.bevelD != d){
         if (s.bevelTl != null){ s.bevelTl.close(); s.bevelBr.close(); }
-        Path o = Path.makeRRect(outer);
-        Path i = Path.makeRRect(RRect.makeXYWH(d, d, w - 2f * d, h - 2f * d, Math.max(0, r - d)));
-        var pb = new PathBuilder();
+        Path o= Path.makeRRect(outer);
+        Path i= Path.makeRRect(RRect.makeXYWH(d, d, w - 2f * d, h - 2f * d, Math.max(0, r - d)));
+        var pb= new PathBuilder();
         pb.moveTo(0, h);
         pb.lineTo(w, 0);
         pb.lineTo(0, 0);
         pb.closePath();
-        Path diag = pb.build();
-        Path ring = Path.makeCombining(o, i, PathOp.DIFFERENCE);
+        Path diag= pb.build();
+        Path ring= Path.makeCombining(o, i, PathOp.DIFFERENCE);
         s.bevelTl = Path.makeCombining(ring, diag, PathOp.INTERSECT);
         s.bevelBr = Path.makeCombining(ring, diag, PathOp.DIFFERENCE);
         assert ring != null && s.bevelTl != null && s.bevelBr != null;
@@ -244,12 +244,12 @@ interface Sk{
       paint.setColor(down ? light : dark);
       cv.drawPath(s.bevelBr, paint);
     }
-    int shift = down && d > 0 ? Math.max(1, d / 2) : 0;
+    int shift= down && d > 0 ? Math.max(1, d / 2) : 0;
     text(cv, s, shift, shift);
   }
 
   private static int bevel(int w, int h, int r, AWidget s){
-    int d = Math.max(3, Math.min(8, Math.min(w, h) / 9));
+    int d= Math.max(3, Math.min(8, Math.min(w, h) / 9));
     d = Math.min(d, Math.min(Math.min(s.left, s.right), Math.min(s.top, s.bottom)));
     d = Math.min(d, Math.min(w, h) / 2);
     return r > 0 ? Math.min(d, r) : d;
@@ -263,25 +263,25 @@ interface Sk{
   }
 
   private static int mix(int a, int b, int p){
-    int res = 0;
-    for (int s = 0; s < 32; s += 8){ res |= ((a >>> s & 255) * (100 - p) + (b >>> s & 255) * p) / 100 << s; }
+    int res= 0;
+    for (int s= 0; s < 32; s += 8){ res |= ((a >>> s & 255) * (100 - p) + (b >>> s & 255) * p) / 100 << s; }
     return res;
   }
 
   static Image scaled(Image src, int w, int h){
-    var s = src;
+    var s= src;
     while (s.getWidth() / 2 >= w && s.getHeight() / 2 >= h){
-      var t = pass(s, s.getWidth() / 2, s.getHeight() / 2, SamplingMode.LINEAR);
+      var t= pass(s, s.getWidth() / 2, s.getHeight() / 2, SamplingMode.LINEAR);
       if (s != src){ s.close(); }
       s = t;
     }
-    var res = pass(s, w, h, SamplingMode.MITCHELL);
+    var res= pass(s, w, h, SamplingMode.MITCHELL);
     if (s != src){ s.close(); }
     return res;
   }
 
   static Image pass(Image src, int w, int h, SamplingMode m){
-    try (var surf = Surface.makeRaster(ImageInfo.makeN32Premul(w, h))){
+    try (var surf= Surface.makeRaster(ImageInfo.makeN32Premul(w, h))){
       surf.getCanvas().drawImageRect(
         src, Rect.makeWH(src.getWidth(), src.getHeight()), Rect.makeWH(w, h), m, null, true);
       return surf.makeImageSnapshot();

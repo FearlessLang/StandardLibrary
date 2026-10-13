@@ -6,10 +6,10 @@ import java.util.stream.LongStream;
 import static _base.Util.*;
 
 final class IntCache {
-  private static final long min = -128;
-  private static final long max = 127;
+  private static final long min= -128;
+  private static final long max= 127;
 
-  private final static Int$c$0Instance[] intCache = LongStream.rangeClosed(min, max)
+  private final static Int$c$0Instance[] intCache= LongStream.rangeClosed(min, max)
           .mapToObj(Int$c$0Instance::new)
           .toArray(Int$c$0Instance[]::new);
 
@@ -18,14 +18,14 @@ final class IntCache {
       return new Int$c$0Instance(i);
     }
     // shift the index so that min is 0
-    int index = (int) (i - min);
+    int index= (int) (i - min);
     return intCache[index];
   }
 }
 
 public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
-  public static final long MAX_VALUE = Long.MAX_VALUE;
-  public static final long MIN_VALUE = Long.MIN_VALUE;
+  public static final long MAX_VALUE= Long.MAX_VALUE;
+  public static final long MIN_VALUE= Long.MIN_VALUE;
   public static Int$c$0 instance(long val){ return IntCache.getInt(val); }
 
   static long unwrap(Object o){ return ((Int$c$0Instance)o).val; }
@@ -129,7 +129,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     catch(ArithmeticException e){ throw outOfRange("-", val, ""+unwrap(p0), unwrap(p0) < 0); }
   }
   @Override public Object imm$$slash$1(Object p0){
-    long d=Nat$c$0Instance.unwrap(p0);
+    long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L) {
       throw err("Int/: Cannot create a Num with denominator 0.");
     }
@@ -140,10 +140,10 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, unwrap(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
-    long power = unsignedLongFromNat(p0);
+    long power= unsignedLongFromNat(p0);
     if (power == 0) { return Int$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    long result = 1, base = val;
+    long result= 1, base= val;
     try{
       while (true) {
         if ((power & 1) != 0){ result = Math.multiplyExact(result, base); }

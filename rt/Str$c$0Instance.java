@@ -78,10 +78,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   
   static final Pattern signedInt= Pattern.compile("[+-][0-9](?:[0-9_]*[0-9])?");
   static final Pattern unsignedInt= Pattern.compile("[0-9](?:[0-9_]*[0-9])?");
-  static final Pattern optionallySignedFloat = Pattern.compile(
+  static final Pattern optionallySignedFloat= Pattern.compile(
     "[+-]?(?:[0-9](?:[0-9_]*[0-9])?)\\.(?:[0-9](?:[0-9_]*[0-9])?)"
     + "(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?");
-  static final Pattern optionallySignedRational = Pattern.compile(
+  static final Pattern optionallySignedRational= Pattern.compile(
     "[+-]?(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)/(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)");
   static final long maxNatU= -1;
   static final long maxByteU= 255L;
@@ -115,7 +115,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$indicesOf$1(Object p0){
     var text= s(p0);
     var res= new ArrayList<Object>();
-    for (int i= val.indexOf(text); i != -1; i= i < val.length() ? val.indexOf(text, i + 1) : -1){ res.add(Nat$c$0Instance.instance(i)); }
+    for (int i= val.indexOf(text); i != -1; i = i < val.length() ? val.indexOf(text, i + 1) : -1){ res.add(Nat$c$0Instance.instance(i)); }
     return Flow$o$1Instance.of(res, FlowMode.ParImm);
   }
   @Override public Object imm$sub$2(Object p1, Object p2){
@@ -217,14 +217,14 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       String t= no_(val);
       boolean neg= t.charAt(0) == '-';
-      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t= t.substring(1); }
+      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t = t.substring(1); }
       int slash= t.indexOf('/');
       Dec a= Dec.parse(t.substring(0,slash));
       Dec b= Dec.parse(t.substring(slash+1));
       if (b.u.signum() == 0){ return optEmpty(); }
       BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
       BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
-      if (neg){ num= num.negate(); }
+      if (neg){ num = num.negate(); }
       return optSome(Num$c$0Instance.instance(num,den));
     }
     catch(NumberFormatException e){ return optEmpty(); }
@@ -240,14 +240,14 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       String t= no_(val);
       boolean neg= t.charAt(0) == '-';
-      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t= t.substring(1); }
+      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t = t.substring(1); }
       int slash= t.indexOf('/');
       Dec a= Dec.parse(t.substring(0,slash));
       Dec b= Dec.parse(t.substring(slash+1));
       if (b.u.signum() == 0){ return fail("Str.getNum: Cannot convert String "+val+" to Num, as the denominator is 0"); }
       BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
       BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
-      if (neg){ num= num.negate(); }
+      if (neg){ num = num.negate(); }
       return ok(Num$c$0Instance.instance(num,den));
     }
     catch(NumberFormatException e){
@@ -272,7 +272,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return optEmpty(); }
       if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return optEmpty(); }
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return optSome(Float$1c$0Instance.instance(d));
     }
     catch(NumberFormatException e){ return optEmpty(); }
@@ -291,7 +291,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return fail("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
               + "If rounded, the nearest representable value is "+floatExactFearlessLit(d)+"."
               + "If this rounding is desired use Str.getSoftFloat");}
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return ok(Float$1c$0Instance.instance(d));
     }
     catch(NumberFormatException e){
@@ -307,7 +307,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       double d= Double.parseDouble(no_(val));
       if (!Double.isFinite(d)){ return optEmpty(); }
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return optSome(Float$1c$0Instance.instance(d));
     }
     catch(NumberFormatException e){ return optEmpty(); }
@@ -322,7 +322,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       String x= no_(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return fail("Str.getSoftFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return ok(Float$1c$0Instance.instance(d));
     }
     catch(NumberFormatException e){
@@ -368,7 +368,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     var text= s(p0);
     if (text.isEmpty()){ return Nat$c$0Instance.instance(val.length()); }
     int count= 0;
-    for (int i= val.indexOf(text); i != -1; i= val.indexOf(text, i + text.length())){ count++; }
+    for (int i= val.indexOf(text); i != -1; i = val.indexOf(text, i + text.length())){ count++; }
     return Nat$c$0Instance.instance(count);
   }
   @Override public Object imm$trim$0(){ return instance(val.trim()); }
@@ -377,9 +377,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     if (sep.isEmpty()){ throw detErr("Str.split: the separator is the empty string, which occurs between any two characters; use a non empty separator."); }
     var res= new ArrayList<Object>();
     int start= 0;
-    for (int i= val.indexOf(sep); i != -1; i= val.indexOf(sep, start)){
+    for (int i= val.indexOf(sep); i != -1; i = val.indexOf(sep, start)){
       res.add(instance(val.substring(start, i)));
-      start= i + sep.length();
+      start = i + sep.length();
     }
     res.add(instance(val.substring(start)));
     return List$o$1Instance.wrap(res);

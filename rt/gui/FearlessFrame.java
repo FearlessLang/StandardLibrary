@@ -24,15 +24,15 @@ final class FearlessFrame extends JFrame{
   // is visible and correct in the meantime: start() renders one frame before
   // setVisible, and expose repaints blit that image. Game time zero
   // (elapsed, model tick deadlines, the t= in warnings) is warmup end.
-  static final int WarmupMillis = 500;
+  static final int WarmupMillis= 500;
   // A model timer firing catches up at most this many overdue ticks. Longer
   // stalls (machine sleep, debugger pause) drop the excess with a warning:
   // replaying unbounded ticks after resume would flood the queue and visibly
   // fast-forward the game.
-  static final int ModelCatchupMax = 100;
+  static final int ModelCatchupMax= 100;
 
   private final CompletableFuture<Void> done;
-  final SerialQueue queue = new SerialQueue(this::high);
+  final SerialQueue queue= new SerialQueue(this::high);
   private Timer timer;
   private Timer modelTimer;
   private Throwable failure;
@@ -45,7 +45,7 @@ final class FearlessFrame extends JFrame{
   private int suppressClosed;
   // Frame-loss / backlog detection state; all EDT confined (all starters and
   // all timer callbacks run on the EDT).
-  private long runtimeStartNs = System.nanoTime();// re-based in startRuntime
+  private long runtimeStartNs= System.nanoTime();// re-based in startRuntime
   private long tickPeriodNs;
   private long tickLast;
   // Model fixed-rate state: tick n is due at modelStartNs + n * modelPeriodNs.
@@ -54,10 +54,10 @@ final class FearlessFrame extends JFrame{
   private long modelPeriodNs;
   private long modelStartNs;
   private long modelTicks;
-  private long modelWarnAt = 1_000;
+  private long modelWarnAt= 1_000;
 
   FearlessFrame(CompletableFuture<Void> done){
-    this.done = done;
+    this.done= done;
     GuiEdtBoundary.install();
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     addWindowListener(new WindowAdapter(){
@@ -72,7 +72,7 @@ final class FearlessFrame extends JFrame{
     tickPeriodNs = delayMillis * 1_000_000L;// period in ns, same unit as nanoTime
     tickLast = runtimeStartNs;
     timer = new Timer(delayMillis, _ -> {
-      long now = System.nanoTime();
+      long now= System.nanoTime();
       warnIfLost("repaint", now, now - tickLast, tickPeriodNs);
       tickLast = now;
       try { tick.run(); }
@@ -109,12 +109,12 @@ final class FearlessFrame extends JFrame{
       if (undecorated){ setOpacity(opacity); }// repeated call may still change alpha
       return;
     }
-    var at = getLocation();
-    var c = getContentPane().getSize();
+    var at= getLocation();
+    var c= getContentPane().getSize();
     if (!undecorated){ setOpacity(1f); }// opacity < 1 is illegal on decorated windows
     suppressClosed++;
     dispose();
-    boolean resizable = isResizable();
+    boolean resizable= isResizable();
     setResizable(true);
     setUndecorated(undecorated);
     if (undecorated){ setOpacity(opacity); }
@@ -147,13 +147,13 @@ final class FearlessFrame extends JFrame{
     modelStartNs = System.nanoTime() + warmupMillis * 1_000_000L;
     modelTicks = 0;
     modelWarnAt = 1_000;
-    int delayMillis = Math.max(1, Math.toIntExact(Math.round(periodNs / 1_000_000.0)));
+    int delayMillis= Math.max(1, Math.toIntExact(Math.round(periodNs / 1_000_000.0)));
     modelTimer = new Timer(delayMillis, _ -> {
-      long now = System.nanoTime();
-      long due = (now - modelStartNs) / modelPeriodNs;// ticks that should have run by now
-      long todo = due - modelTicks;
+      long now= System.nanoTime();
+      long due= (now - modelStartNs) / modelPeriodNs;// ticks that should have run by now
+      long todo= due - modelTicks;
       if (todo > ModelCatchupMax){
-        long dropped = todo - ModelCatchupMax;
+        long dropped= todo - ModelCatchupMax;
         System.err.println("Warning [t=" + (now - runtimeStartNs) / 1_000_000 + "ms]: "
           + dropped + " model tick(s) dropped: stall longer than "
           + ModelCatchupMax + " periods (" + ModelCatchupMax * modelPeriodNs / 1_000_000
@@ -161,14 +161,14 @@ final class FearlessFrame extends JFrame{
         modelTicks += dropped;
         todo = ModelCatchupMax;
       }
-      for (long i = 0; i < todo; i++){
+      for (long i= 0; i < todo; i++){
         queue.submitAll(actions);
         modelTicks++;
       }
       // Backlog: nothing is lost, but the queue thread is slower than the
       // submission rate; latency grows. Escalating threshold: warn at 1000,
       // then 10000, ... and re-arm once the queue fully drains.
-      int backlog = queue.q().size();
+      int backlog= queue.q().size();
       if (backlog >= modelWarnAt){
         System.err.println("Warning [t=" + (now - runtimeStartNs) / 1_000_000
           + "ms]: model queue backlog at " + backlog + " tasks");
@@ -187,7 +187,7 @@ final class FearlessFrame extends JFrame{
   // warning: a late firing is absorbed by fixed-rate catch-up, and true
   // losses (cap exceeded) are reported above.
   private void warnIfLost(String what, long nowNs, long gapNs, long periodNs){
-    long lost = gapNs / periodNs - 1;// integer division: only whole skipped periods count
+    long lost= gapNs / periodNs - 1;// integer division: only whole skipped periods count
     if (lost <= 0){ return; }
     System.err.println("Warning [t=" + (nowNs - runtimeStartNs) / 1_000_000 + "ms]: "
       + lost + " " + what + " frame(s) lost ("
@@ -204,14 +204,14 @@ final class FearlessFrame extends JFrame{
     boolean accepted;
     synchronized (this){
       if (completed || high){
-        discarded = e;
-        accepted = false;
+        discarded= e;
+        accepted= false;
       } else {
-        discarded = failure;
+        discarded= failure;
         failure = e;
         high = true;
         closing = true;
-        accepted = true;
+        accepted= true;
       }
     }
     if (discarded != null){ printDiscarded(discarded); }
@@ -224,7 +224,7 @@ final class FearlessFrame extends JFrame{
     assert SwingUtilities.isEventDispatchThread();
     boolean accepted;
     synchronized (this){
-      accepted = !completed && !closing && failure == null;
+      accepted= !completed && !closing && failure == null;
       if (accepted){
         failure = e;
         closing = true;
@@ -246,7 +246,7 @@ final class FearlessFrame extends JFrame{
     }
     boolean accepted;
     synchronized (this){
-      accepted = !completed && !closing;
+      accepted= !completed && !closing;
       if (accepted){ closing = true; }
     }
     if (!accepted){ return; }
@@ -258,7 +258,7 @@ final class FearlessFrame extends JFrame{
     assert timer == null: "unreachable: runtime timer started before abortBeforeStart";
     boolean accepted;
     synchronized (this){
-      accepted = !completed && !closing;
+      accepted= !completed && !closing;
       if (accepted){
         closing = true;
         completed = true;
@@ -292,7 +292,7 @@ final class FearlessFrame extends JFrame{
     synchronized (this){
       if (completed){ return; }
       completed = true;
-      e = failure;
+      e= failure;
     }
     if (e == null){ done.complete(null); }
     else { done.completeExceptionally(e); }
@@ -305,7 +305,7 @@ final class FearlessFrame extends JFrame{
 }
 
 final class GuiEdtBoundary extends EventQueue{
-  private static final AtomicBoolean installed = new AtomicBoolean();
+  private static final AtomicBoolean installed= new AtomicBoolean();
 
   private GuiEdtBoundary(){}
 
@@ -317,7 +317,7 @@ final class GuiEdtBoundary extends EventQueue{
   @Override protected void dispatchEvent(AWTEvent event){
     try { super.dispatchEvent(event); }
     catch (Throwable e){
-      var frame = frameOf(event);
+      var frame= frameOf(event);
       if (frame == null){
         e.printStackTrace();
         return;
@@ -327,8 +327,8 @@ final class GuiEdtBoundary extends EventQueue{
   }
 
   private static FearlessFrame frameOf(AWTEvent event){
-    var src = event.getSource();
-    var w = src instanceof Window win
+    var src= event.getSource();
+    var w= src instanceof Window win
       ? win
       : src instanceof Component c
         ? SwingUtilities.getWindowAncestor(c)

@@ -37,7 +37,7 @@ final class EList$1k$1Instance implements EList$1k$1{
   EList$1k$1Instance(List<Object> l){ xs= l; }
   private List<Object> xs;
   private ArrayList<Object> drain(){
-    if (xs instanceof ArrayList<Object> a){ xs= new ArrayList<>(); return a; }
+    if (xs instanceof ArrayList<Object> a){ xs = new ArrayList<>(); return a; }
     var r= new ArrayList<>(xs);
     xs.clear();
     return r;
@@ -158,22 +158,22 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$fold$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size(); i++){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size(); i++){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRight$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0; i--){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0; i--){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size() && !test(p2, acc); i++){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size() && !test(p2, acc); i++){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRightUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i--){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i--){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$accumulateInPlace$1(Object p0){

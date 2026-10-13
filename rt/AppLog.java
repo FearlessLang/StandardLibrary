@@ -32,7 +32,7 @@ public final class AppLog{
   public static AppLog open(Path path, boolean raw){
     String rootStr= System.getProperty("fearlessUser.dir");
     var root= Path.of(rootStr);
-    errPath= root.resolve(".out","logs","err.log");
+    errPath = root.resolve(".out","logs","err.log");
     var p= root.resolve(path).normalize();
     startupFor(errPath, keepErrLogs);
     startupFor(p, keepLogs);

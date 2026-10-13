@@ -97,7 +97,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     int size= 0;
     for(int i= 0; i < parts.size(); i++){
       if (i != 0){ size = Math.addExact(size,sep.length); }
-      size= Math.addExact(size,parts.get(i).val.length);
+      size = Math.addExact(size,parts.get(i).val.length);
     }
     var res= new int[size];
     int off= 0;
@@ -146,7 +146,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
       if (cp > 0x10FFFF || (0xD800 <= cp && cp <= 0xDFFF)){
         throw err("Malformed UStr.u input: "+s);
       }
-      res[i]= cp;
+      res[i] = cp;
     }
     return res;
   }
@@ -159,7 +159,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
       var hex= k == j ? "" : "\""+strUCode(Arrays.copyOfRange(cps,j,k))+"\"";
       var term= receiver(strExpr(new String(cps,i,j-i)))+".u"+hex;
       res.append(i == 0 ? term : "+("+term+")");
-      i= k;
+      i = k;
     } while (i < cps.length);
     return res.toString();
   }

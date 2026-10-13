@@ -5,12 +5,12 @@ import javax.swing.SwingUtilities;
 
 public final class _FluentGUI implements Gui$c$0{
   @Override public Object mut$run$1(Object o){
-    var f = (Consumer$ao$1) o;
+    var f= (Consumer$ao$1) o;
     if (SwingUtilities.isEventDispatchThread()){
       throw new IllegalStateException("FluentGUI.run must not be called from the EDT");
     }
-    var done = new CompletableFuture<Void>();
-    var fb = new _Frame(done);
+    var done= new CompletableFuture<Void>();
+    var fb= new _Frame(done);
     try {
       f.mut$accept$1(fb);
       fb.onEdtAndWait(fb::start);

@@ -44,7 +44,7 @@ public final class Util{
           Thread.sleep(java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(left));
           return;
         }
-        catch(InterruptedException e){ interrupted= true; }
+        catch(InterruptedException e){ interrupted = true; }
       }
     }
     finally{ if (interrupted){ Thread.currentThread().interrupt(); } }
@@ -74,7 +74,7 @@ public final class Util{
     return detErr(msg);
     }
   public static Error detErr(String msg) {
-    var info = _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
+    var info= _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
     return (Error) Error$1c$0.instance.imm$$bang$1(info);
   }
   public static BigInteger unsignedLongToBigInteger(long x){
@@ -93,7 +93,7 @@ public final class Util{
     return ((Int$c$0Instance)n).val();
   }
   public static int natToInt(Object n){
-    long nat = ((Nat$c$0Instance)n).val();
+    long nat= ((Nat$c$0Instance)n).val();
     if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {
       throw err("Nat "+Long.toUnsignedString(nat)+" is too large to be represented as an integer");
     }

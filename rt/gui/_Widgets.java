@@ -37,7 +37,7 @@ import static _base.Scopes.*;
 final class SkComponent extends JComponent{
   final AWidget w;
   SkComponent(AWidget w){
-    this.w = w;
+    this.w= w;
     setOpaque(false);
     setFocusable(false);
   }
@@ -55,7 +55,7 @@ final class _Button extends AWidget implements Button$2o$0{
   // button costs zero path allocations per frame. Stale paths of discarded
   // buttons are reclaimed by Skija's cleaner.
   Path bevelTl, bevelBr;
-  int bevelW = -1, bevelH = -1, bevelR = -1, bevelD = -1;
+  int bevelW= -1, bevelH= -1, bevelR= -1, bevelD= -1;
 
   _Button(_Frame frame){ super(frame); }
 
@@ -77,8 +77,8 @@ final class _Label extends AWidget implements Label$1c$0{
 }
 
 final class _Pane extends AContainer implements Pane$o$0{
-  boolean vertical = false;
-  int chunk = 0;
+  boolean vertical= false;
+  int chunk= 0;
 
   _Pane(_Frame frame){
     super(frame);
@@ -101,7 +101,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
   @Override public Object mut$chunk$1(Object n){
-    int c = extent(n, "chunk");
+    int c= extent(n, "chunk");
     return reStyle(() -> chunk = c);
   }
 }
@@ -125,34 +125,34 @@ final class _Border extends AContainer implements Border$2o$0{
 }
 
 abstract class AWidget implements Widget$2o$1{
-  int left = 6;
-  int top = 6;
-  int right = 6;
-  int bottom = 6;
-  int radius = 12;
+  int left= 6;
+  int top= 6;
+  int right= 6;
+  int bottom= 6;
+  int radius= 12;
   Integer preferredWidth;
   Integer preferredHeight;
-  Color$1c$0 foreground = (Color$1c$0) Color$1c$0.instance;
-  Color$1c$0 background = (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
-  int fg = Sk.color(foreground);
-  int bg = Sk.color(background);
-  int textSize = 12;
-  boolean allFonts = true;
+  Color$1c$0 foreground= (Color$1c$0) Color$1c$0.instance;
+  Color$1c$0 background= (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
+  int fg= Sk.color(foreground);
+  int bg= Sk.color(background);
+  int textSize= 12;
+  boolean allFonts= true;
   TextLine line;
   float ascent;
   float descent;
   // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
   // expose Fearless methods to change it, but it lives here alongside the
   // other style fields.
-  String text = "";
+  String text= "";
 
   final _Frame frame;
-  final SkComponent component = new SkComponent(this);
+  final SkComponent component= new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
-  EnumMap<MouseKind, Consumer$ao$1> handlers = new EnumMap<>(MouseKind.class);
-  boolean changeable = true;// EDT confined
+  EnumMap<MouseKind, Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
+  boolean changeable= true;// EDT confined
 
-  AWidget(_Frame frame){ this.frame = frame; }
+  AWidget(_Frame frame){ this.frame= frame; }
 
   boolean canChange(){
     return changeable || this == frame.top || component.getParent() instanceof SkComponent p && p.w.canChange();
@@ -166,7 +166,7 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   @Override public Object mut$changeDetached$1(Object s){
-    boolean was = frame.onEdtAndWait(() -> { var c = changeable; changeable = true; return c; });
+    boolean was= frame.onEdtAndWait(() -> { var c= changeable; changeable = true; return c; });
     ((Scope$1c$1) s).mut$run$1(mut$self$0());
     frame.onEdtAndWait(() -> changeable = was);
     return mut$self$0();
@@ -211,12 +211,12 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$height$p1$1(Object h){ return reStyle(extent((HeightNat$lg$0) h, "widget height"), n -> preferredHeight = n); }
   @Override public Object mut$radius$1(Object r){ return reStyle(extent(r, "radius"), n -> radius = n); }
   public Object mut$textHeight$p1$1(Object t){
-    int n = extent((HeightNat$lg$0) t, "text height");
+    int n= extent((HeightNat$lg$0) t, "text height");
     return reText(() -> textSize = n);
   }
   public Object read$textHeight$0(){ return h(textSize); }
   public Object mut$lineSpacing$1(Object v){
-    boolean a = (Boolean) ((LineSpacing$2f4$0) v).read$match$1(new LineSpacingMatch$25g0$1(){
+    boolean a= (Boolean) ((LineSpacing$2f4$0) v).read$match$1(new LineSpacingMatch$25g0$1(){
       @Override public Object mut$allFonts$0(){ return true; }
       @Override public Object mut$usedFonts$0(){ return false; }
     });
@@ -224,7 +224,7 @@ abstract class AWidget implements Widget$2o$1{
   }
   public Object read$lineSpacing$0(){ return allFonts ? AllFontsSpacing$13k0$0.instance : UsedFontsSpacing$25hc$0.instance; }
   public Object mut$uText$1(Object t){
-    var s = ustr(t);
+    var s= ustr(t);
     return reText(() -> text = s);
   }
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
@@ -244,16 +244,16 @@ abstract class AWidget implements Widget$2o$1{
 }
 
 abstract class AContainer extends AWidget implements _Container$lc$1{
-  int widthGap = 6;
-  int heightGap = 6;
-  Painter$5c$0 paint = Scopes.idP;
+  int widthGap= 6;
+  int heightGap= 6;
+  Painter$5c$0 paint= Scopes.idP;
 
   AContainer(_Frame frame){ super(frame); }
 
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
     if (paint == Scopes.idP){ return; }
-    try (var p = new Paint().setAntiAlias(true).setColor(fg)){
+    try (var p= new Paint().setAntiAlias(true).setColor(fg)){
       paint.imm$run$1(new CGraphicsCtx(
         cv,
         frame,
@@ -270,7 +270,7 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
   @Override public Object read$heightGap$0(){ return h(heightGap); }
   @Override public Object read$widthGap$0(){ return w(widthGap); }
   @Override public Object mut$mouse$1(Object s){
-    var b = new CMouseBuilder(this);
+    var b= new CMouseBuilder(this);
     ((Scope$1c$1) s).mut$run$1(b);
     frame.onEdtAndWait(() -> {
       change();
@@ -285,20 +285,20 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
 
 final class _Frame implements Frame$1c$0{
   final FearlessFrame frame;
-  final SkMouse mouse = new SkMouse(this);
+  final SkMouse mouse= new SkMouse(this);
   // Written by the repaint tick on the EDT, read by painters on the EDT and
   // by the model (read .elapsed) on the queue thread with no ordering between
   // the two: volatile makes the reference handoff safe. The Time object
   // itself is immutable.
-  volatile Instant$5c$0 elapsed = time(0);
+  volatile Instant$5c$0 elapsed= time(0);
   AWidget top;
   final int screenW;
   final int screenH;
-  private long startNanos = System.nanoTime();// re-based in start(): game time zero = warmup end
-  private int fps = 30;
+  private long startNanos= System.nanoTime();// re-based in start(): game time zero = warmup end
+  private int fps= 30;
   private long modelPeriodNs;
-  private ArrayList<MF$7$1> modelTickActions = new ArrayList<>();// live, EDT confined
-  private float opacity = 1f;
+  private ArrayList<MF$7$1> modelTickActions= new ArrayList<>();// live, EDT confined
+  private float opacity= 1f;
   private boolean located;
   private long locationX;
   private long locationY;
@@ -310,7 +310,7 @@ final class _Frame implements Frame$1c$0{
   private boolean sized;
   private int windowW;
   private int windowH;
-  private String title = "";
+  private String title= "";
   private boolean maximized;
   private boolean resizable;
   private boolean undecorated;
@@ -320,7 +320,7 @@ final class _Frame implements Frame$1c$0{
   // EDT) happens after the write, so the queue handoff gives the
   // happens-before. Single mutator at every point in time: no volatile.
   private boolean started;
-  private final AtomicBoolean layoutDirty = new AtomicBoolean();
+  private final AtomicBoolean layoutDirty= new AtomicBoolean();
   private Bitmap bitmap;
   private Canvas canvas;
   private java.awt.image.BufferedImage bimg;
@@ -329,14 +329,14 @@ final class _Frame implements Frame$1c$0{
   private int renderLogicalH;
 
   _Frame(CompletableFuture<Void> done){
-    frame = new FearlessFrame(done);
-    var b = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+    frame= new FearlessFrame(done);
+    var b= java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
       .getDefaultScreenDevice()
       .getDefaultConfiguration()
       .getBounds();
-    screenW = b.width;
-    screenH = b.height;
-    var geometry = new ComponentAdapter(){
+    screenW= b.width;
+    screenH= b.height;
+    var geometry= new ComponentAdapter(){
       @Override public void componentResized(ComponentEvent e){ markLayoutDirty(); keepVisible(); }
       @Override public void componentMoved(ComponentEvent e){ markLayoutDirty(); keepVisible(); }
     };
@@ -345,15 +345,15 @@ final class _Frame implements Frame$1c$0{
   }
 
   void addTo(AWidget into, String where, Object scope, Function<_Frame, ? extends AWidget> make){
-    var parent = into.component;
-    var b = onEdtAndWait(() -> make.apply(this));
+    var parent= into.component;
+    var b= onEdtAndWait(() -> make.apply(this));
     ((Scope$1c$1) scope).mut$run$1(b);
     onEdtAndWait(() -> {
       // Border slots are replaceable: a second .north evicts the first. The
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old = where == null ? null : ((MutableBorderLayout) parent.getLayout()).getLayoutComponent(where);
+      var old= where == null ? null : ((MutableBorderLayout) parent.getLayout()).getLayoutComponent(where);
       if (old != null){
         mouse.detached((SkComponent) old);
         parent.remove(old);
@@ -367,7 +367,7 @@ final class _Frame implements Frame$1c$0{
 
   <T> T onEdtAndWait(Supplier<T> s){
     if (SwingUtilities.isEventDispatchThread()){ return s.get(); }
-    var task = new FutureTask<>(s::get);
+    var task= new FutureTask<>(s::get);
     SwingUtilities.invokeLater(task);
     try { return task.get(); }
     catch (InterruptedException e){
@@ -375,7 +375,7 @@ final class _Frame implements Frame$1c$0{
       throw new Error(e);
     }
     catch (ExecutionException e){
-      var c = e.getCause();
+      var c= e.getCause();
       if (c instanceof Deterministic d){ Error$1c$0.instance.imm$$bang$1(d.i); }
       if (c instanceof RuntimeException re){ throw re; }
       if (c instanceof Error er){ throw er; }
@@ -409,31 +409,31 @@ final class _Frame implements Frame$1c$0{
     render();
     // Paint synchronously: after this tick the pixels on screen and the
     // bounds used for hit testing agree for every subsequent mouse event.
-    var c = top.component;
+    var c= top.component;
     if (c.getWidth() > 0 && c.getHeight() > 0){
       c.paintImmediately(0, 0, c.getWidth(), c.getHeight());
     }
   }
 
   private boolean mouseEventPending(){
-    var q = java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue();
+    var q= java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue();
     return q.peekEvent(java.awt.event.MouseEvent.MOUSE_PRESSED) != null
       || q.peekEvent(java.awt.event.MouseEvent.MOUSE_RELEASED) != null;
   }
 
   private void render(){
-    var c = top.component;
-    int w = c.getWidth();
-    int h = c.getHeight();
+    var c= top.component;
+    int w= c.getWidth();
+    int h= c.getHeight();
     if (w <= 0 || h <= 0){ return; }
 
-    var tx = frame.getGraphicsConfiguration().getDefaultTransform();
-    double sx = tx.getScaleX();
-    double sy = tx.getScaleY();
-    int pw = Math.max(1, (int) Math.ceil(w * sx));
-    int ph = Math.max(1, (int) Math.ceil(h * sy));
+    var tx= frame.getGraphicsConfiguration().getDefaultTransform();
+    double sx= tx.getScaleX();
+    double sy= tx.getScaleY();
+    int pw= Math.max(1, (int) Math.ceil(w * sx));
+    int ph= Math.max(1, (int) Math.ceil(h * sy));
 
-    boolean resized = bimg == null || bimg.getWidth() != pw || bimg.getHeight() != ph;
+    boolean resized= bimg == null || bimg.getWidth() != pw || bimg.getHeight() != ph;
     if (resized){
       if (bimg != null){ canvas.close(); bitmap.close(); }
       bitmap = new Bitmap();
@@ -446,7 +446,7 @@ final class _Frame implements Frame$1c$0{
     renderLogicalH = h;
 
     canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
-    int save = canvas.save();
+    int save= canvas.save();
     canvas.scale((float) sx, (float) sy);
     Sk.paintNode(c, canvas);
     canvas.restoreToCount(save);
@@ -467,7 +467,7 @@ final class _Frame implements Frame$1c$0{
   }
 
   private static int visible(long at, int size, int screen){
-    int v = Math.min(screen / 3, size);
+    int v= Math.min(screen / 3, size);
     return Math.clamp(at, v - size, screen - v);
   }
 
@@ -539,8 +539,8 @@ final class _Frame implements Frame$1c$0{
     return setResizable(false, (WidthNat$as$0) w, (HeightNat$lg$0) h);
   }
   private Object setResizable(boolean r, WidthNat$as$0 w, HeightNat$lg$0 h){
-    int ww = w == null ? 0 : extent(w, "window width");// validate eagerly, deterministic error
-    int hh = h == null ? 0 : extent(h, "window height");
+    int ww= w == null ? 0 : extent(w, "window width");// validate eagerly, deterministic error
+    int hh= h == null ? 0 : extent(h, "window height");
     if (w != null){
       if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
       sized = true;
@@ -574,8 +574,8 @@ final class _Frame implements Frame$1c$0{
   }
   private Rectangle maximizedBounds(){ return maximized ? new Rectangle(0, 0, screenW, screenH) : null; }
   @Override public Object mut$location$2(Object x, Object y){
-    long xx = coord(((XInt$s$0) x).read$get$0(), "window x");
-    long yy = coord(((YInt$s$0) y).read$get$0(), "window y");
+    long xx= coord(((XInt$s$0) x).read$get$0(), "window x");
+    long yy= coord(((YInt$s$0) y).read$get$0(), "window y");
     if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
     located = true;
     locationX = xx;
@@ -584,7 +584,7 @@ final class _Frame implements Frame$1c$0{
     return this;
   }
   @Override public Object mut$onKey$1(Object scope){
-    var keys = new CKeyManager(this);
+    var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
     onEdtAndWait(() -> {
       for (var l : frame.getKeyListeners()){ frame.removeKeyListener(l); }
@@ -606,7 +606,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$fps$1(Object f){
     fps = (int) fpsOf(f, "fps");
     if (started){
-      int delay = Math.round(1000.0f / fps);
+      int delay= Math.round(1000.0f / fps);
       onEdtAndWait(() -> frame.setTickDelay(delay));
     }
     return this;
@@ -635,10 +635,10 @@ final class _Frame implements Frame$1c$0{
     return loc;
   }
   @Override public Object mut$modelFps$2(Object f, Object scope){
-    long nn = fpsOf(f, "modelFps");
-    var actions = new ArrayList<MF$7$1>();
-    var b = new ModelFps$as$0(){
-      boolean changeable = true;
+    long nn= fpsOf(f, "modelFps");
+    var actions= new ArrayList<MF$7$1>();
+    var b= new ModelFps$as$0(){
+      boolean changeable= true;
       @Override public Object mut$action$1(Object r){
         onEdtAndWait(() -> {
           if (!changeable && modelTickActions != actions){
@@ -664,7 +664,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$contentB$1(Object s){ return newContent(s, _Border::new); }
 
   private Object newContent(Object scope, Function<_Frame, ? extends AWidget> make){
-    var t = onEdtAndWait(() -> make.apply(this));
+    var t= onEdtAndWait(() -> make.apply(this));
     if (!started){
       onEdtAndWait(() -> {
         if (top != null){ uninstall(top); }// a later .content replaces an earlier one

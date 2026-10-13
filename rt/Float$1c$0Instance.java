@@ -78,7 +78,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     return Float$1c$0Instance.instance(Math.signum(this.val));
   }
   @Override public Object imm$$star_star$1(Object p0){
-    double power = Float$1c$0Instance.unwrap(p0);
+    double power= Float$1c$0Instance.unwrap(p0);
     if (Double.isNaN(this.val) || Double.isNaN(power)) {
       return Float$1c$0Instance.instance(Double.NaN);
     }
@@ -126,9 +126,9 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
     var n= BigInteger.valueOf(mant);
     var d= BigInteger.ONE;
-    if (e >= 0){ n= n.shiftLeft(e); }
-    else { d= d.shiftLeft(-e); }
-    if (neg){ n= n.negate(); }
+    if (e >= 0){ n = n.shiftLeft(e); }
+    else { d = d.shiftLeft(-e); }
+    if (neg){ n = n.negate(); }
     return Num$c$0Instance.instance(n,d);
   }
   @Override public Object imm$num$0(){
@@ -241,7 +241,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     double x= (val == 0.0d) ? 0.0d : val; // merge -0.0
     String s= new java.math.BigDecimal(x).toPlainString(); // exact decimal of this binary64
     if (s.indexOf('.') == -1){ s += ".0"; }                // satisfy SignedFloat shape
-    if (s.charAt(0) != '-'){ s= "+"+s; }                   // Keep the sign information around
+    if (s.charAt(0) != '-'){ s = "+"+s; }                   // Keep the sign information around
     return Str$c$0Instance.instance(s);
   }
   @Override public Object read$imm$0(){ return this; }
@@ -299,7 +299,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   pow(x, y) signals the invalid operation exception for finite x < 0 and finite non-integer y.
    */
   @Override public Object imm$ieeePow$1(Object p0){
-    double f = unwrap(p0);
+    double f= unwrap(p0);
     if (f == 0.0) { return Float$1c$0Instance.instance(1.0); }
     // I think these are the only differences between ieee and Math
     if (val == 1.0 || val == -1.0 && Double.isInfinite(f)) {

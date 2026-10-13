@@ -29,7 +29,7 @@ abstract class MultiFlow{
   private boolean consumed= false;
   private String name(){ return List.of("BiFlow", "TriFlow", "QuadFlow").get(cs.size() - 2); }
   private void live(){ check(!consumed, name()+": this "+name()+" is already consumed: it is consumed by the call that merges, folds or extends it."); }
-  private void take(){ live(); consumed= true; }
+  private void take(){ live(); consumed = true; }
   private int longest(){ return cs.stream().mapToInt(List::size).max().getAsInt(); }
   private boolean same(){ return cs.stream().mapToInt(List::size).distinct().count() == 1; }
   private String sizesErr(String m){
@@ -54,7 +54,7 @@ abstract class MultiFlow{
   private Object merged(Object f){ return lazy(i->call(f, row(i))); }
   private Object folded(Object acc, Object f, IntFunction<Object[]> row, Predicate<Object> stop){
     var r= callMF$1(acc);
-    for (int i= 0; i < longest() && !stop.test(r); i++){ r= call(f, prepend(r, row.apply(i))); }
+    for (int i= 0; i < longest() && !stop.test(r); i++){ r = call(f, prepend(r, row.apply(i))); }
     return r;
   }
   private static Predicate<Object> until(Object pred){ return r->isTrue(callF$2(pred, r)); }

@@ -191,7 +191,7 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object mut$withAlso$2(Object p0, Object p1){
     long i= natToLong(p0);
     check(0 <= i && i <= val.size(), "List withAlso out of range");
-    int index = (int) i;
+    int index= (int) i;
     var l= new ArrayList<Object>(val.size()+1);
     l.addAll(val.subList(0,index));
     l.add(p1);

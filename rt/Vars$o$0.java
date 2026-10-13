@@ -7,5 +7,5 @@ final class Var$c$1Instance implements Var$c$1{
   private Object o; Var$c$1Instance(Object o){ this.o= o; }
   @Override public Object read$get$0(){ return o; }
   @Override public Object mut$get$0(){ return o; }
-  @Override public Object mut$swap$1(Object p0){ var old=o;  o= p0; return old; }
+  @Override public Object mut$swap$1(Object p0){ var old= o;  o = p0; return old; }
 }

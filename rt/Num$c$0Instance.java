@@ -7,11 +7,11 @@ import java.util.stream.LongStream;
 
 // Cache the integers from -128 to 127, inclusive.
 final class NumCache {
-  private static final int min = -128;
-  private static final int max = 127;
-  private static final BigInteger maxInt = BigInteger.valueOf(Integer.MAX_VALUE);
-  private static final BigInteger minInt = BigInteger.valueOf(Integer.MIN_VALUE);
-  private static final Num$c$0Instance[] intCache = LongStream.rangeClosed(min, max)
+  private static final int min= -128;
+  private static final int max= 127;
+  private static final BigInteger maxInt= BigInteger.valueOf(Integer.MAX_VALUE);
+  private static final BigInteger minInt= BigInteger.valueOf(Integer.MIN_VALUE);
+  private static final Num$c$0Instance[] intCache= LongStream.rangeClosed(min, max)
           .mapToObj(l -> new Num$c$0Instance(BigInteger.valueOf(l), BigInteger.ONE))
           .toArray(Num$c$0Instance[]::new);
 
@@ -20,7 +20,7 @@ final class NumCache {
       return new Num$c$0Instance(BigInteger.valueOf(i), BigInteger.ONE);
     }
     // shift the index so that min is 0
-    int index = (i - min);
+    int index= (i - min);
     return intCache[index];
   }
 
@@ -112,16 +112,16 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     // a^(n+m) = a^n * a^m
     // we break it down into a^MAX_INT_1 * ... * a^MAX_INT_k * a^rem,
     // where MAX_INT_1 + ... + MAX_INT_K + rem = exponent;
-    BigInteger result = BigInteger.ONE;
-    long timesToDecompose = exponent / Integer.MAX_VALUE;
-    int remainder = (int) (exponent % Integer.MAX_VALUE);
-    for (int i = 0; i < timesToDecompose; i++) {
+    BigInteger result= BigInteger.ONE;
+    long timesToDecompose= exponent / Integer.MAX_VALUE;
+    int remainder= (int) (exponent % Integer.MAX_VALUE);
+    for (int i= 0; i < timesToDecompose; i++) {
       result = result.multiply(n.pow(Integer.MAX_VALUE));
     }
     return result.multiply(n.pow(remainder));
   }
   @Override public Object imm$$star_star$1(Object p0) {
-    long exponent = ((Int$c$0Instance) p0).val();
+    long exponent= ((Int$c$0Instance) p0).val();
     if (exponent == 0) {return NumCache.get(1);}
     if (exponent == 1) {return this;}
     if (exponent > 0){
@@ -165,8 +165,8 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     var q= n.divide(denominator);
     var r= n.remainder(denominator);
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
-    if (c >= 0){ q= q.add(one); } // always round up
-    if (numerator.signum() < 0){ q= q.negate(); }
+    if (c >= 0){ q = q.add(one); } // always round up
+    if (numerator.signum() < 0){ q = q.negate(); }
     return instance(q,one);
   }
 
@@ -177,8 +177,8 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
 
     var r= n.remainder(denominator);
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
-    if (c > 0 || (c == 0 && q.testBit(0))){ q= q.add(one); } // tie -> bump if odd
-    if (numerator.signum() < 0){ q= q.negate(); }
+    if (c > 0 || (c == 0 && q.testBit(0))){ q = q.add(one); } // tie -> bump if odd
+    if (numerator.signum() < 0){ q = q.negate(); }
     return instance(q,one);
   }
 

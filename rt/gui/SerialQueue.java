@@ -19,7 +19,7 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
   public void submit(MF$7$1 r){ synchronized (q){q.add(r);} } //synchronized needed to cooperate with the closeThen lock; q.add is synchronizing on another lock internally
   public void submitAll(List<MF$7$1> rs){
     if (rs.isEmpty()){ return; }
-    var all = List.copyOf(rs);
+    var all= List.copyOf(rs);
     submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       for (var r : all){ r.mut$$hash$0(); }
       return Void$o$0.instance;
@@ -42,5 +42,5 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
       finally { midTask.set(false); }
     }
   }
-  private static final class Poison extends RuntimeException{ private static final long serialVersionUID = 1L; }
+  private static final class Poison extends RuntimeException{ private static final long serialVersionUID= 1L; }
 }

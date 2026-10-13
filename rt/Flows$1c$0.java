@@ -81,7 +81,7 @@ final class Flow$o$1Instance implements Flow$o$1{
   static List<Object> toJava(Object flow){ return List$o$1Instance.asJava(((Flow$o$1)flow).mut$list$0()); }
   private FlowChain take(){
     check(!consumed, "Flow: this flow is already consumed: a flow is consumed by the call that adds the next stage or the terminal.");
-    consumed= true;
+    consumed = true;
     return chain;
   }
   private Object stage(FlowCore c){
@@ -106,10 +106,10 @@ final class Flow$o$1Instance implements Flow$o$1{
     r.accept(ch);
     return new Flow$o$1Instance(ch);
   }
-  @Override public Object mut$suppressMisuseExceptions$0(){ return record(c->c.suppress= true); }
-  @Override public Object mut$hintSequential$0(){ return record(c->c.mostHints= Math.max(c.mostHints, ++c.hints)); }
-  @Override public Object mut$hintParallel$0(){ return record(c->c.mostHints= Math.max(c.mostHints, ++c.hints)); }
-  @Override public Object mut$recoverFlow$1(Object mode){ return record(c->c.hints= 0); }
+  @Override public Object mut$suppressMisuseExceptions$0(){ return record(c->c.suppress = true); }
+  @Override public Object mut$hintSequential$0(){ return record(c->c.mostHints = Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$hintParallel$0(){ return record(c->c.mostHints = Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$recoverFlow$1(Object mode){ return record(c->c.hints = 0); }
   @Override public Object mut$fold$2(Object acc, Object f){
     var ch= take();
     FlowMisuse.checkHints(ch);
@@ -126,7 +126,7 @@ final class Flow$o$1Instance implements Flow$o$1{
     return Void$o$0.instance;
   }
   private static void run(FlowChain ch, FlowSink first){
-    for (var c: ch.core.reversed()){ first= c.sink(first); }
+    for (var c: ch.core.reversed()){ first = c.sink(first); }
     var it= ch.source.iterator();
     while (!first.done() && it.hasNext()){ first.accept(it.next()); }
     first.finish();
@@ -137,7 +137,7 @@ final class FlowFoldSink implements FlowSink{
   FlowFoldSink(Object r, Object f){ this.r= r; this.f= f; }
   Object r;
   private final Object f;
-  @Override public void accept(Object e){ r= callF$3(f, r, e); }
+  @Override public void accept(Object e){ r = callF$3(f, r, e); }
   @Override public boolean done(){ return false; }
   @Override public void finish(){}
 }
@@ -168,7 +168,7 @@ final class FlowActorSink implements FlowSink, ActorSink$lk$1, ControlFlowMatch$
     return Void$o$0.instance;
   }
   @Override public Object mut$continue$0(){ return null; }
-  @Override public Object mut$break$0(){ broke= true; return null; }
+  @Override public Object mut$break$0(){ broke = true; return null; }
   @Override public Object mut$return$1(Object v){ throw new AssertionError("An actor answers Continue or Break"); }
 }
 

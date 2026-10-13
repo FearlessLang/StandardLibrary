@@ -67,13 +67,13 @@ public interface _Throw$1c$0{
   }
   static String holes(char open,char close,int n){
     if(n==0){ return ""; }
-    var sb=new StringBuilder().append(open);
-    for(int i=0;i<n;i++){ if(i!=0){ sb.append(','); } sb.append('_'); }
+    var sb= new StringBuilder().append(open);
+    for(int i= 0;i<n;i++){ if(i!=0){ sb.append(','); } sb.append('_'); }
     return sb.append(close).toString();
   }
   static String decodeOp(String enc){
-    var ps=enc.split("_");
-    var sb=new StringBuilder();
+    var ps= enc.split("_");
+    var sb= new StringBuilder();
     for(var p:ps){ sb.append(opChar(p)); }
     return sb.toString();
   }

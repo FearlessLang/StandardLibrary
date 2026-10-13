@@ -25,17 +25,17 @@ final class ESet$s$1Instance implements ESet$s$1 {
         this.ordering= ordering;
     }
     ESet$s$1Instance(LinkedHashMap<MapKey, Object> s, OrderHashBy$2ea$2 ordering){
-        set = s;
+        set= s;
         this.ordering= ordering;
     }
     ESet$s$1Instance(OrderHashBy$2ea$2 ordering) {
-        this.ordering=ordering;
+        this.ordering= ordering;
         set= new LinkedHashMap<>();
     }
 
     private Map<MapKey, Object> drain(){
         var r= set;
-        set= new LinkedHashMap<>();
+        set = new LinkedHashMap<>();
         return r;
     }
 
@@ -52,7 +52,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
     }
     @Override public Object read$contains$1(Object p0){ return bool(set.containsKey(mapKey(ordering, p0))); }
     @Override public Object read$containsAll$1(Object p0) {
-        ESet$s$1Instance eset = (ESet$s$1Instance) p0;
+        ESet$s$1Instance eset= (ESet$s$1Instance) p0;
         if (eset.set.size() > this.set.size()) { return bool(false); }
         if (eset.ordering.equals(this.ordering)) {
             return bool(this.set.keySet().containsAll(eset.set.keySet()));
@@ -72,7 +72,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
         return this;
     }
     @Override public Object mut$addAll$1(Object p0) {
-        ESet$s$1Instance other = (ESet$s$1Instance) p0;
+        ESet$s$1Instance other= (ESet$s$1Instance) p0;
         if (other.ordering.equals(this.ordering)) {
             this.set.putAll(other.set);
             return this;
@@ -90,7 +90,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
     }
     @Override public Object mut$opt$1(Object p0) { return optNullable(this.set.get(mapKey(this.ordering, p0))); }
     @Override public Object mut$get$1(Object p0) {
-        Object key = this.set.get(mapKey(this.ordering, p0));
+        Object key= this.set.get(mapKey(this.ordering, p0));
         if (key != null) { return key; }
          throw err(
            "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
@@ -98,7 +98,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
          );
     }
     @Override public Object mut$tryGet$1(Object p0) {
-        Object key = this.set.get(mapKey(this.ordering, p0));
+        Object key= this.set.get(mapKey(this.ordering, p0));
         if (key != null) { return ok(key); }
          return fail(
            "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
@@ -113,7 +113,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
         return this;
     }
     private void reOrderHash(OrderHashBy$2ea$2 ordering) {
-        LinkedHashMap<MapKey, Object> newSet = new LinkedHashMap<>();
+        LinkedHashMap<MapKey, Object> newSet= new LinkedHashMap<>();
         set.forEach((k, v) -> newSet.put(mapKey(ordering, extractKey(k)), v));
         this.set = newSet;
     }

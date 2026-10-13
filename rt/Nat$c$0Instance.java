@@ -7,8 +7,8 @@ import java.util.stream.LongStream;
 import static _base.Util.*;
 
 final class NatCache {
-  private static final long max = 255L;
-  private static final Nat$c$0Instance[] natCache = LongStream.rangeClosed(0, max)
+  private static final long max= 255L;
+  private static final Nat$c$0Instance[] natCache= LongStream.rangeClosed(0, max)
           .mapToObj(Nat$c$0Instance::new)
           .toArray(Nat$c$0Instance[]::new);
 
@@ -30,8 +30,8 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   /**
    * The maximum unsigned value that can be represented in a long (2^64 - 1)
    */
-  public static final long MAX_UNSIGNED_VALUE = -1;
-  public static final double MAX_UNSIGNED_VALUE_FLOAT = 18446744073709551615.0d;
+  public static final long MAX_UNSIGNED_VALUE= -1;
+  public static final double MAX_UNSIGNED_VALUE_FLOAT= 18446744073709551615.0d;
   public static Nat$c$0 instance(long val){ return NatCache.getNat(val); }
 
   public static boolean overflowsLong(long unsignedLong){
@@ -51,7 +51,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    * (and b > Long.MAX_VALUE - a, but we only need to check one of them)
    */
   private static long addChecked(long a, long b){
-    boolean overflow = Long.compareUnsigned(a, MAX_UNSIGNED_VALUE - b) > 0;
+    boolean overflow= Long.compareUnsigned(a, MAX_UNSIGNED_VALUE - b) > 0;
     if (overflow) { throw overflow("+", a, b); }
     return a + b;
   }
@@ -70,7 +70,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
    */
   private static long mulChecked(long a, long b){
     if (a == 0 || b == 0) {return 0;}
-    boolean overflow = Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0;
+    boolean overflow= Long.compareUnsigned(a, Long.divideUnsigned(MAX_UNSIGNED_VALUE, b)) > 0;
     if (overflow){ throw overflow("*", a, b); }
     return a * b;
   }
@@ -83,7 +83,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   }
 
   public static long getSignedLong(Object p0) {
-    Nat$c$0Instance nat = (Nat$c$0Instance) p0;
+    Nat$c$0Instance nat= (Nat$c$0Instance) p0;
     if (nat.val < 0) {
       throw err("Nat too large to be represented by an Int");
     }
@@ -91,7 +91,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   }
 
   @Override public Object imm$$slash$1(Object p0){
-    long d=n(p0);
+    long d= n(p0);
     if (d == 0L) {
       throw err("Nat/: Cannot create a Num with denominator 0.");
     }
@@ -158,7 +158,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     if (Long.compareUnsigned(val, 1L << 53) <= 0) {
       return true;
     }
-    BigInteger bigInteger = toUnsignedBigInteger(val);
+    BigInteger bigInteger= toUnsignedBigInteger(val);
     return BigDecimal.valueOf(bigInteger.doubleValue()).toBigInteger().equals(bigInteger);
   }
   /**
@@ -171,8 +171,8 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     if (i >= 0L)
       return BigInteger.valueOf(i);
     else {
-      int upper = (int) (i >>> 32);
-      int lower = (int) i;
+      int upper= (int) (i >>> 32);
+      int lower= (int) i;
 
       // return (upper << 32) + lower
       return (BigInteger.valueOf(Integer.toUnsignedLong(upper))).shiftLeft(32).
@@ -227,10 +227,10 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,n(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,n(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
-    long power = n(p0);
+    long power= n(p0);
     if (power == 0) { return Nat$c$0Instance.instance(1); }
     if (power == 1 || this.val == 1 || this.val == 0) { return this; }
-    long result = 1, base = val;
+    long result= 1, base= val;
     try{
       while (true) {
         if ((power & 1) != 0){ result = powMul(result, base); }
@@ -272,7 +272,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   }
   private static String offsetErr(long val, long offset, String why){ return "Nat.getIndexOffset: "+Long.toUnsignedString(val)+" .getIndexOffset("+(offset < 0 ? "" : "+")+offset+") would be "+why; }
   @Override public Object imm$getIndexOffset$1(Object p0){
-    long offset = i(p0);
+    long offset= i(p0);
     if (offset <= 0) {
       // works for Long.MIN_VALUE as well, as Long.MIN_VALUE when read unsigned is LONG.MAX_VALUE + 1
       if (Long.compareUnsigned(val, -offset) < 0){ throw err(offsetErr(val, offset, "less than 0")); }
@@ -282,7 +282,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     return instance(val + offset);
   }
   @Override public Object imm$tryGetIndexOffset$1(Object p0){
-    long offset = i(p0);
+    long offset= i(p0);
     if (offset <= 0) {
       if (Long.compareUnsigned(val, -offset) < 0){ return fail(offsetErr(val, offset, "less than 0")); }
       return ok(instance(val + offset));

@@ -38,7 +38,7 @@ final class DownloadFetch{
         var location= locationOpt.get();
         if (redirectsLeft == 0){ throw tooManyRedirects(url); }
         redirectsLeft--;
-        current= uri.resolve(location).toString();
+        current = uri.resolve(location).toString();
         continue;
       }
       if (status < 200 || status >= 300){
@@ -82,8 +82,8 @@ final class DownloadFetch{
     var chunk= new byte[8192];
     long total= 0;
     int n;
-    while ((n= in.read(chunk)) != -1){
-      total= Math.addExact(total,n);
+    while ((n = in.read(chunk)) != -1){
+      total = Math.addExact(total,n);
       if (Long.compareUnsigned(total,maxBytes) > 0){ throw exceedsMaxBytes(url,"bytesRead",total,maxBytes); }
       buf.write(chunk,0,n);
     }

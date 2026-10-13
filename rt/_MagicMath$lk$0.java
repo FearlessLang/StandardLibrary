@@ -21,19 +21,19 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
   }
 
   default Object imm$ln$1(Object p0) {
-    double x = Float$1c$0Instance.unwrap(p0);
+    double x= Float$1c$0Instance.unwrap(p0);
     logContract("ln:", x);
     return Float$1c$0Instance.instance(Math.log(x));
   }
   default Object imm$log$1(Object p0) {
-    double x = Float$1c$0Instance.unwrap(p0);
+    double x= Float$1c$0Instance.unwrap(p0);
     logContract("log:", x);
     return Float$1c$0Instance.instance(Math.log10(x));
   }
   default Object imm$asin$1(Object p0) {
-    double x = ((Float$1c$0Instance) p0).val();
+    double x= ((Float$1c$0Instance) p0).val();
     inverseTrigContract("asin", x);
-    var theta = Float$1c$0Instance.instance(Math.asin(x));
+    var theta= Float$1c$0Instance.instance(Math.asin(x));
     return new Radian$2o$0() {
       @Override public Object read$$hash$0() {
         return theta;
@@ -41,9 +41,9 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
     };
   }
   default Object imm$acos$1(Object p0) {
-    double x = Float$1c$0Instance.unwrap(p0);
+    double x= Float$1c$0Instance.unwrap(p0);
     inverseTrigContract("acos", x);
-    var theta = Float$1c$0Instance.instance(Math.acos(x));
+    var theta= Float$1c$0Instance.instance(Math.acos(x));
     return new Radian$2o$0() {
       @Override public Object read$$hash$0() {
         return theta;
@@ -51,11 +51,11 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
     };
   }
   default Object imm$atan$1(Object p0) {
-    double x = Float$1c$0Instance.unwrap(p0);
+    double x= Float$1c$0Instance.unwrap(p0);
     if (Double.isNaN(x)) {
       throw err("Math.atan: Input was NaN, cannot take the atan of NaN");
     }
-    var theta = Float$1c$0Instance.instance(Math.atan(x));
+    var theta= Float$1c$0Instance.instance(Math.atan(x));
     return new Radian$2o$0() {
       @Override public Object read$$hash$0() {
         return theta;
@@ -64,15 +64,15 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
   }
 
   default Object imm$atan2$2(Object p0, Object p1) {
-    double x = Float$1c$0Instance.unwrap(p0);
-    double y = Float$1c$0Instance.unwrap(p1);
+    double x= Float$1c$0Instance.unwrap(p0);
+    double y= Float$1c$0Instance.unwrap(p1);
     if (Double.isNaN(x)) {
       throw err("Math.atan2: First argument was NaN, cannot take atan2 of NaN");
     }
     if (Double.isNaN(y)) {
       throw err("Math.atan2: Second argument was NaN, cannot take atan2 of NaN");
     }
-    var theta = Float$1c$0Instance.instance(Math.atan2(x, y));
+    var theta= Float$1c$0Instance.instance(Math.atan2(x, y));
     return new Radian$2o$0() {
       @Override public Object read$$hash$0() {
         return theta;
@@ -81,8 +81,8 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0 {
   }
 
   default Object imm$hypot$2(Object p0, Object p1) {
-    double x = Float$1c$0Instance.unwrap(p0);
-    double y = Float$1c$0Instance.unwrap(p1);
+    double x= Float$1c$0Instance.unwrap(p0);
+    double y= Float$1c$0Instance.unwrap(p1);
     if (Double.isNaN(x)) {
       throw err("Math.hypot: First argument was NaN, cannot take hypot of NaN");
     }

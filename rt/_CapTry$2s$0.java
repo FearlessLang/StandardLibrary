@@ -30,7 +30,7 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
   private static StackTraceElement[] aboveHere(StackTraceElement[] st){
     var here= new Throwable().getStackTrace();
     int n= st.length, m= here.length;
-    while (n > 0 && m > 0 && same(st[n-1], here[m-1])){ n-= 1; m-= 1; }
+    while (n > 0 && m > 0 && same(st[n-1], here[m-1])){ n -= 1; m -= 1; }
     return java.util.Arrays.copyOf(st, n);
   }
   private static boolean same(StackTraceElement a, StackTraceElement b){ return a.getClassName().equals(b.getClassName()) && a.getMethodName().equals(b.getMethodName()); }

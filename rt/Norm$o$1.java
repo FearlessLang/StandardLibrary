@@ -20,7 +20,7 @@ final class Norm implements Norm$o$1{
 }
 final class Entry{
   final CompletableFuture<Object> ready= new CompletableFuture<>();
-  volatile boolean broken=false;
+  volatile boolean broken= false;
   public Object computeNow(Supplier<Object> s){
     try{ var res= s.get(); ready.complete(res); return res; }
     catch(Throwable t){ ready.completeExceptionally(t); throw t; }//Compiles in Java 24
@@ -29,7 +29,7 @@ final class Entry{
     if (!ready.isDone() && broken){ return sequential(s); }
     try{ return ready.get(time,TimeUnit.SECONDS); }
     catch(TimeoutException _){
-      broken=true;
+      broken = true;
       return sequential(s);
     }
     catch(ExecutionException ex){ return sneakyThrow(ex.getCause()); }

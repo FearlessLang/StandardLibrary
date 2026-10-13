@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
 import static _base.Util.*;
 
 final class AssetBytesRead{
-  static final Set<Key> seen=ConcurrentHashMap.newKeySet();
+  static final Set<Key> seen= ConcurrentHashMap.newKeySet();
 
 
   record Key(

@@ -4,7 +4,7 @@ import io.github.humbleui.skija.Image;
 
 final class Image$1c$0Instance implements Image$1c$0{
   private final Image image;
-  Image$1c$0Instance(Image image){ this.image=image; }
+  Image$1c$0Instance(Image image){ this.image= image; }
   Image image(){ return image; }
 
   @Override public Object read$width$0(){ return width(image.getWidth()); }
@@ -14,16 +14,16 @@ final class Image$1c$0Instance implements Image$1c$0{
     return scaled(image,widthVal(w),heightVal(h));
   }
   @Override public Object imm$scaleToWidth$p1$1(Object w){
-    var newW=widthVal(w);
+    var newW= widthVal(w);
     return scaled(image,newW,side(proportional(image.getHeight(),newW,image.getWidth()),"image height"));
   }
   @Override public Object imm$scaleToHeight$p1$1(Object h){
-    var newH=heightVal(h);
+    var newH= heightVal(h);
     return scaled(image,side(proportional(image.getWidth(),newH,image.getHeight()),"image width"),newH);
   }
 
   private static Image$1c$0Instance scaled(Image image,int w,int h){
-    long pixels=(long)w*h;
+    long pixels= (long)w*h;
     if (pixels > Scopes.maxImagePixels){ throw Util.detErr("image "+w+" x "+h+" has "+pixels+" pixels; it must have <= "+Scopes.maxImagePixels); }
     return new Image$1c$0Instance(Sk.scaled(image,w,h));
   }
