@@ -7,8 +7,8 @@ import java.util.ArrayList;
 public final class _CapTry$2s$0 implements CapTry$2s$0{
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
-  @Override public Object mut$$hash$1(Object p0){ return actionLazy(()->callF$1(p0)); }
-  @Override public Object mut$$hash$2(Object p0, Object p1){ return actionLazy(()->callF$2(p1,p0)); }
+  @Override public Object mut$$hash$1(Object p0){ return actionLazy(() -> callF$1(p0)); }
+  @Override public Object mut$$hash$2(Object p0, Object p1){ return actionLazy(() -> callF$2(p1,p0)); }
   public Action$2o$1 actionLazy(java.util.function.Supplier<Object> s){
     return new Action$2o$1(){
       @Override public Object mut$run$1(Object p0){

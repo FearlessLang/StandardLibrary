@@ -164,7 +164,7 @@ public final class Util{
     printInfoMsg("","",i);
     var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
     map.entrySet().stream()
-      .filter(e->is(e.getKey(),"msg")).forEach(e->printInfoMsg("","",(Info$o$0)e.getValue()));
+      .filter(e -> is(e.getKey(),"msg")).forEach(e -> printInfoMsg("","",(Info$o$0)e.getValue()));
     //map.entrySet().stream()
     //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
     for(var e : d.getStackTrace()){

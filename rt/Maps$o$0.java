@@ -164,7 +164,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object read$str$1(Object p0){
     var byE= (ToStrBy$5u$1)p0;
     var byK= (ToStrBy$5u$1)keyOh;
-    String res= elems.entrySet().stream().map(e->
+    String res= elems.entrySet().stream().map(e ->
       toS(byK.imm$$hash$1(e.getKey().key))
       +": "+toS(byE.imm$$hash$1(e.getValue()))
       ).collect(Collectors.joining(", ","{","}"));
@@ -257,11 +257,11 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object read$as$1(Object p0){ return this; }
   @Override public Object imm$as$1(Object p0){ return this; }
   
-  private Object biFlow(FlowMode mode){ return MultiFlow.of(List.of(elems.keySet().stream().map(k->k.key).toList(), List.copyOf(elems.values())), mode); }
+  private Object biFlow(FlowMode mode){ return MultiFlow.of(List.of(elems.keySet().stream().map(k -> k.key).toList(), List.copyOf(elems.values())), mode); }
   @Override public Object mut$flow$0(){ return biFlow(FlowMode.Seq); }
   @Override public Object read$flow$0(){ return biFlow(FlowMode.Seq); }
   @Override public Object imm$flow$0(){ return biFlow(FlowMode.ParImm); }
-  @Override public Object read$keys$0(){ return Flow$o$1Instance.of(elems.keySet().stream().map(k->k.key), FlowMode.ParImm); }
+  @Override public Object read$keys$0(){ return Flow$o$1Instance.of(elems.keySet().stream().map(k -> k.key), FlowMode.ParImm); }
   @Override public Object read$elems$0(){ return Flow$o$1Instance.of(elems.values().stream(), FlowMode.Seq); }
 
   @Override public Object read$close$0(){ return this; }
@@ -270,7 +270,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object read$imm$1(Object p0){
     var by= (ToImmBy$5u$2)p0;
     var m= new LinkedHashMap<MapKey,Object>();
-    elems.entrySet().stream().forEach(e->m.put(e.getKey(), ((ToImm$1g$1)by.imm$$hash$1(e.getValue())).read$imm$0()));
+    elems.entrySet().stream().forEach(e -> m.put(e.getKey(), ((ToImm$1g$1)by.imm$$hash$1(e.getValue())).read$imm$0()));
     return new Map$c$2Instance(keyOh,m);
   }
 }

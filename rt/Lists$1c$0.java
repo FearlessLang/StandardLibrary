@@ -109,7 +109,7 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object read$isEmpty$0(){ return bool(val.isEmpty()); }
   @Override public Object read$str$1(Object p0){
     var by= (ToStrBy$5u$1)p0;
-    String res= val.stream().map(e->toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ","[","]"));
+    String res= val.stream().map(e -> toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ","[","]"));
     return Str$c$0Instance.instance(res);
   }
   @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
@@ -218,6 +218,6 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object imm$as$1(Object p0){ return this; }
   @Override public Object read$imm$1(Object p0){
     var by= (ToImmBy$5u$2)p0;
-    return new List$o$1Instance(val.stream().map(e->((ToImm$1g$1)by.imm$$hash$1(e)).read$imm$0()).toList());
+    return new List$o$1Instance(val.stream().map(e -> ((ToImm$1g$1)by.imm$$hash$1(e)).read$imm$0()).toList());
   }  
 }

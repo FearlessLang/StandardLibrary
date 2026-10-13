@@ -90,26 +90,26 @@ final class Flow$o$1Instance implements Flow$o$1{
     return new Flow$o$1Instance(ch);
   }
   @Override public Object mut$actor$2(Object state, Object f){
-    return stage(d->new FlowActorSink(d, state, f));
+    return stage(d -> new FlowActorSink(d, state, f));
   }
   @Override public Object mut$actorMut$2(Object state, Object f){
-    return stage(d->new FlowActorSink(d, state, f));
+    return stage(d -> new FlowActorSink(d, state, f));
   }
   @Override public Object mut$allToAll$1(Object f){
-    return stage(d->new FlowAllToAllSink(d, f));
+    return stage(d -> new FlowAllToAllSink(d, f));
   }
   @Override public Object mut$distinct$1(Object by){
-    return stage(d->new FlowDistinctSink(d, (OrderHashBy$2ea$2)by));
+    return stage(d -> new FlowDistinctSink(d, (OrderHashBy$2ea$2)by));
   }
   private Object record(Consumer<FlowChain> r){
     var ch= take();
     r.accept(ch);
     return new Flow$o$1Instance(ch);
   }
-  @Override public Object mut$suppressMisuseExceptions$0(){ return record(c->c.suppress = true); }
-  @Override public Object mut$hintSequential$0(){ return record(c->c.mostHints = Math.max(c.mostHints, ++c.hints)); }
-  @Override public Object mut$hintParallel$0(){ return record(c->c.mostHints = Math.max(c.mostHints, ++c.hints)); }
-  @Override public Object mut$recoverFlow$1(Object mode){ return record(c->c.hints = 0); }
+  @Override public Object mut$suppressMisuseExceptions$0(){ return record(c -> c.suppress = true); }
+  @Override public Object mut$hintSequential$0(){ return record(c -> c.mostHints = Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$hintParallel$0(){ return record(c -> c.mostHints = Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$recoverFlow$1(Object mode){ return record(c -> c.hints = 0); }
   @Override public Object mut$fold$2(Object acc, Object f){
     var ch= take();
     FlowMisuse.checkHints(ch);
@@ -230,7 +230,7 @@ final class FlowMisuse{
   private static Error misuse(String msg){ return nonDetErr(msg + suppressHint); }
   private FlowStep step(int i){ return i == stages.size() ? terminal : stages.get(i); }
   private String name(int i){ return step(i).name(); }
-  private boolean mutReach(int i){ return stages.subList(0, i).stream().noneMatch(s->toRead.contains(s.name())); }
+  private boolean mutReach(int i){ return stages.subList(0, i).stream().noneMatch(s -> toRead.contains(s.name())); }
   static final int shownStrSize= 20;
   private static String show(FlowStep s){
     var n= switch(s.name()){
@@ -310,10 +310,10 @@ final class FlowMisuse{
     while (f >= 0 && !fence.contains(name(f))){ f--; }
     if (f == stages.size() - 1){ return; }
     var segment= stages.subList(f + 1, stages.size());
-    var seqOk= c.mode == FlowMode.Seq && segment.stream().noneMatch(s->toRead.contains(s.name()));
+    var seqOk= c.mode == FlowMode.Seq && segment.stream().noneMatch(s -> toRead.contains(s.name()));
     var immOk= c.mode == FlowMode.ParImm
-      && stages.stream().allMatch(s->s.args().stream().allMatch(a->!isLambda(a) || onlyImmCapture(a)))
-      && stages.stream().noneMatch(s->Set.of("flatMapMut", "actorMut", "allToAll", "++").contains(s.name()));
+      && stages.stream().allMatch(s -> s.args().stream().allMatch(a -> !isLambda(a) || onlyImmCapture(a)))
+      && stages.stream().noneMatch(s -> Set.of("flatMapMut", "actorMut", "allToAll", "++").contains(s.name()));
     if (seqOk || immOk){ return; }
     throw misuse("`.forEach` runs its lambda while `"+show(f + 1, stages.size())+"` may still run on the elements after, preventing the parallelism `"
       +c.mode+"` asks for: write `.for`, which runs its lambda once every stage has finished.");
@@ -323,7 +323,7 @@ final class FlowMisuse{
   static final Set<String> elemsStages= Set.of("map", "++", "sort", "max", "min", "filter", "flatMap", "flatMapMut", "mapFilter");
   static final Set<String> elemsToCount= Set.of("filter", "flatMap", "flatMapMut", "mapFilter", "distinct", "distinctMut", "sortDistinct", "max", "min");
   static final Set<String> firstStages= Set.of("map", "++", "scan", "distinct", "distinctMut", "limit");
-  private boolean allIn(int from, int to, Set<String> set){ return java.util.stream.IntStream.range(from, to).allMatch(i->set.contains(name(i))); }
+  private boolean allIn(int from, int to, Set<String> set){ return java.util.stream.IntStream.range(from, to).allMatch(i -> set.contains(name(i))); }
   private boolean readsEmpty(int from){ return allIn(from, stages.size(), emptyStages) && terminal.name().equals("isEmpty"); }
   private boolean readsCount(int from){ return allIn(from, stages.size(), countStages) && terminal.name().equals("size"); }
   private boolean readsFirst(int from){ return allIn(from, stages.size(), firstStages) && terminal.name().equals("first"); }

@@ -352,7 +352,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     return Nat$c$0Instance.instance(val.hashCode());
   }
   @Override public Object imm$joinStr$1(Object p0){
-    String res= Flow$o$1Instance.toJava(p0).stream().map(o->((Str$c$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
+    String res= Flow$o$1Instance.toJava(p0).stream().map(o -> ((Str$c$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
     return new Str$c$0Instance(res);
   }
   @Override public Object imm$startsWith$1(Object p0){
@@ -388,7 +388,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase()); }
   @Override public Object imm$norm$0(){
     if (val.length() < 64){ return this; }
-    return myCache.computeIfAbsent(val,_->new Norm(this));
+    return myCache.computeIfAbsent(val,_ -> new Norm(this));
   }
   @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 

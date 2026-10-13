@@ -30,7 +30,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
     if (held.remove(List.of(e.getKeyCode(),e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(),released)); }
   }
   @Override public void windowLostFocus(java.awt.event.WindowEvent e){
-    frame.frame.queue.submitAll(held.stream().map(k->task(k.getFirst(),released)).toList());
+    frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(),released)).toList());
     held.clear();
   }
   @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
@@ -77,7 +77,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   @Override public Object mut$released$1(Object scope){ return addKeyAction(scope,released); }
 
   private Object addKeyAction(Object scope,List<KeyAction$m8$0> list){
-    frame.onEdtAndWait(()->{
+    frame.onEdtAndWait(() -> {
       if (!changeable && !List.of(frame.frame.getKeyListeners()).contains(this)){
         throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");
       }

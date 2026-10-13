@@ -300,7 +300,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmp(num(p0),num(p1))); }
   @Override public Object imm$norm$0(){
     if (numerator.abs().bitLength() + denominator.bitLength() <= 512){ return this; }
-    return myCache.computeIfAbsent(this,_->new Norm(this));
+    return myCache.computeIfAbsent(this,_ -> new Norm(this));
   }
   @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>();

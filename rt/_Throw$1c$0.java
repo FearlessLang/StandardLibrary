@@ -54,7 +54,7 @@ public interface _Throw$1c$0{
     var meth= mn.substring(0,sp+1)+tn+mn.substring(sp+1);
     return meth+" error line: "+ln+" in file "+fn;
   }
-  static boolean digits(String s){ return !s.isEmpty() && s.chars().allMatch(c->c >= '0' && c <= '9'); }
+  static boolean digits(String s){ return !s.isEmpty() && s.chars().allMatch(c -> c >= '0' && c <= '9'); }
   static String fmtMethodName(String m){
     int a= m.indexOf('$');
     int b= m.lastIndexOf('$');

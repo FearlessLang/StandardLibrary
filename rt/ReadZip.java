@@ -16,7 +16,7 @@ public record ReadZip(
     Function<String,RuntimeException> tooLargeName){
   public interface IoSupplier{ ZipInputStream get() throws IOException; }
   public Map<String,byte[]> readAll(IoSupplier szin){
-    return cleanUp(Fs.of(()->{try(var zin= szin.get()){ return _readAll(zin); }}));
+    return cleanUp(Fs.of(() -> {try(var zin= szin.get()){ return _readAll(zin); }}));
   }
   private LinkedHashMap<String,byte[]> _readAll(ZipInputStream zin){
     var out= new LinkedHashMap<String,byte[]>();
@@ -62,6 +62,6 @@ public record ReadZip(
   private static IoSupplier supplier(IoSupplier szin, byte[] bytes, Charset encoding){
     return bytes == null
       ? szin
-      : ()->new ZipInputStream(new ByteArrayInputStream(bytes), encoding);
+      : () -> new ZipInputStream(new ByteArrayInputStream(bytes), encoding);
   }
 }

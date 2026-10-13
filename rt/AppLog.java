@@ -160,7 +160,7 @@ public final class AppLog{
     try (DirectoryStream<Path> ds= Files.newDirectoryStream(p.getParent(), glob(p))){
       for (var f: ds){ files.add(f); }
     }
-    files.sort(Comparator.comparing(f->f.getFileName().toString()));
+    files.sort(Comparator.comparing(f -> f.getFileName().toString()));
     for (int i= 0, del= files.size() - keep; i < del; i++){ Files.deleteIfExists(files.get(i)); }
   }
   private static String stack(Throwable t){

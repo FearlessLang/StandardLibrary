@@ -50,11 +50,11 @@ final class AssetBytesRead{
     try{
       if (entry.isEmpty()){ return Files.readAllBytes(full); }
       return new ReadZip(
-        n->{ throw nonDetErr("Files under project root has been altered.\nBad zip entry name: "+n); },
-        n->{ throw nonDetErr("Files under project root has been altered.\nDuplicate zip entry name: "+n); },
-        n->{ throw nonDetErr("Files under project root has been altered.\nZip entry too large: "+n); }
+        n -> { throw nonDetErr("Files under project root has been altered.\nBad zip entry name: "+n); },
+        n -> { throw nonDetErr("Files under project root has been altered.\nDuplicate zip entry name: "+n); },
+        n -> { throw nonDetErr("Files under project root has been altered.\nZip entry too large: "+n); }
         ).readEntry(
-          ()->new ZipInputStream(Files.newInputStream(full),StandardCharsets.UTF_8),
+          () -> new ZipInputStream(Files.newInputStream(full),StandardCharsets.UTF_8),
           steps,
           entry,
           StandardCharsets.UTF_8

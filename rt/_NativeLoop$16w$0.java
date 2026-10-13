@@ -5,11 +5,11 @@ public interface _NativeLoop$16w$0 {
 
   default Object imm$$hash$2(Object self, Object body){
     var mf= (MF$7$1) body;
-    return loop(self, ()->mf.mut$$hash$0());
+    return loop(self, () -> mf.mut$$hash$0());
   }
   default Object imm$$hash$3(Object self, Object a, Object body){
     var mf= (LoopBody$aw$2) body;
-    return loop(self, ()->mf.mut$$hash$1(a));
+    return loop(self, () -> mf.mut$$hash$1(a));
   }
   private static Object loop(Object self, java.util.function.Supplier<Object> step){
     var matcher= new _NativeLoopMatcher(self);
