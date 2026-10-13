@@ -32,27 +32,27 @@ public final class AppLog{
   public static AppLog open(Path path, boolean raw){
     String rootStr= System.getProperty("fearlessUser.dir");
     var root= Path.of(rootStr);
-    errPath= root.resolve(".out","logs","err.log");
+    errPath = root.resolve(".out", "logs", "err.log");
     var p= root.resolve(path).normalize();
     startupFor(errPath, keepErrLogs);
     startupFor(p, keepLogs);
     installHook();
-    var log= new AppLog(p,raw);
+    var log= new AppLog(p, raw);
     all.add(log);
     return log;
   }
   private static void installHook(){
-    if (!hookInstalled.compareAndSet(false,true)){ return; }
-    Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown,"AppLog-shutdown"));
+    if (!hookInstalled.compareAndSet(false, true)){ return; }
+    Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown, "AppLog-shutdown"));
   }
   private static void shutdown(){
     closing.set(true);
     for (var log: all){
       try{ log.closeAndRotateQuiet(); }
-      catch(Throwable t){ err("closing and log rotation crashed: "+log.path, t); }
+      catch (Throwable t){ err("closing and log rotation crashed: "+log.path, t); }
     }
     try{ rotateOnCloseQuiet(errPath, keepErrLogs, true); }
-    catch(Throwable t){
+    catch (Throwable t){
       System.err.print(stampNow()+" rotate err.log crashed: "+errPath+"\n");
       t.printStackTrace(System.err);
     }
@@ -68,18 +68,18 @@ public final class AppLog{
   }
   public void append(String msg){
     var line= raw ? msg : stampNow()+" "+msg+"\n";
-    synchronized(lock){
+    synchronized (lock){
       if (closing.get()){ err("append during shutdown for "+path+": "+msg, null); return; }
-      try {
+      try{
         out.write(line);
         out.flush();
       }
-      catch(IOException e){ throw new UncheckedIOException(e); }
+      catch (IOException e){ throw new UncheckedIOException(e); }
     }
   }
   private void closeAndRotateQuiet(){
-    synchronized(lock){
-      try { out.close(); }
+    synchronized (lock){
+      try{ out.close(); }
       catch (IOException e){ err("close failed: "+path, e); return; }
     }
     rotateOnCloseQuiet(path, keepLogs, false);
@@ -96,10 +96,10 @@ public final class AppLog{
     try{
       if (!Files.exists(p)){ return; }
       if (Files.size(p) == 0){ Files.deleteIfExists(p); return; }
-      moveToStamped(p,false);
+      moveToStamped(p, false);
       enforceRetention(p, keep);
     }
-    catch(IOException e){
+    catch (IOException e){
       if (!isErrLog){ err("rotate failed: "+p, e); return; }
       System.err.print(stampNow()+" rotate failed: "+p+"\n");
       e.printStackTrace(System.err);
@@ -110,57 +110,57 @@ public final class AppLog{
       createDirsOrThrow(p);
       return Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, TRUNCATE_EXISTING);
     }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static String stampNow(){ return stampFmt.format(Instant.now()); }
 
   private static void createDirsOrThrow(Path p){
     try{ Files.createDirectories(p.getParent()); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static long sizeOrThrow(Path p){
     try{ return Files.size(p); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void deleteOrThrow(Path p){
     try{ Files.deleteIfExists(p); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
-  private static Path rotatedPath(Path p,String stamp){
-    var fName= p.getFileName().toString().replace(".log","$"+stamp+".log");//note: this is going to be the second $ of the file
+  private static Path rotatedPath(Path p, String stamp){
+    var fName= p.getFileName().toString().replace(".log", "$"+stamp+".log");//note: this is going to be the second $ of the file
     return p.getParent().resolve(fName);
   }
-  private static String glob(Path p){ return p.getFileName().toString().replace(".log","$*.log"); }
+  private static String glob(Path p){ return p.getFileName().toString().replace(".log", "$*.log"); }
 
   private static void appendOrThrow(Path p){
     try (var w= Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, APPEND))
     { w.write("\n"+stampNow()+" interrupted here\n"); w.flush(); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void moveToStampedOrThrow(Path src){
-    try{ moveToStamped(src,true); }
-    catch(IOException ioe){ throw new UncheckedIOException(ioe); }
+    try{ moveToStamped(src, true); }
+    catch (IOException ioe){ throw new UncheckedIOException(ioe); }
   }
   private static void moveToStamped(Path src, boolean starting) throws IOException{
     for (int i= 0; i < maxStampRetries; i++){
       var dst= rotatedPath(src, stampNow());
-      try { Files.move(src, dst); if (starting){ appendOrThrow(dst); } return; }
-      catch(FileAlreadyExistsException e){ 
-        try{ Thread.sleep(100); } catch(InterruptedException _){}//refuse to interrupt during log cleanup
+      try{ Files.move(src, dst); if (starting){ appendOrThrow(dst); } return; }
+      catch (FileAlreadyExistsException e){ 
+        try{ Thread.sleep(100); } catch (InterruptedException _){}//refuse to interrupt during log cleanup
       }
     }
     throw new IOException(" OS timestamps unresponsive when renaming "+src);
   }
   private static void enforceRetentionOrThrow(Path p, int keep){
-    try { enforceRetention(p,keep); }
-    catch(IOException e){ throw new UncheckedIOException(e); }
+    try{ enforceRetention(p, keep); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void enforceRetention(Path p, int keep) throws IOException{
     var files= new ArrayList<Path>();
     try (DirectoryStream<Path> ds= Files.newDirectoryStream(p.getParent(), glob(p))){
       for (var f: ds){ files.add(f); }
     }
-    files.sort(Comparator.comparing(f->f.getFileName().toString()));
+    files.sort(Comparator.comparing(f -> f.getFileName().toString()));
     for (int i= 0, del= files.size() - keep; i < del; i++){ Files.deleteIfExists(files.get(i)); }
   }
   private static String stack(Throwable t){
@@ -180,6 +180,6 @@ public final class AppLog{
         w.flush();
       }
     }
-    catch(Throwable tt){ System.err.println("Loggers failure via "+tt); }// best effort only
+    catch (Throwable tt){ System.err.println("Loggers failure via "+tt); }// best effort only
   }
 }

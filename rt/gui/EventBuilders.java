@@ -33,9 +33,9 @@ record CMouseCtx(
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
 final class CMouseBuilder implements Mouse$1c$0{
   final AWidget owner;
-  final EnumMap<MouseKind, Consumer$ao$1> handlers = new EnumMap<>(MouseKind.class);
-  boolean changeable = true;// EDT confined
-  CMouseBuilder(AWidget owner){ this.owner = owner; }
+  final EnumMap<MouseKind,Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
+  boolean changeable= true;// EDT confined
+  CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
     owner.frame.onEdtAndWait(() -> {
       if (!changeable && (owner.handlers != handlers || !owner.canChange())){
@@ -75,11 +75,11 @@ final class CMouseBuilder implements Mouse$1c$0{
 //   misleading.
 final class SkMouse extends MouseAdapter{
   private final _Frame frame;
-  private List<AWidget> hover = List.of();// deepest first
-  private Point at = new Point();
+  private List<AWidget> hover= List.of();// deepest first
+  private Point at= new Point();
   private AWidget pressTarget;
 
-  SkMouse(_Frame frame){ this.frame = frame; }
+  SkMouse(_Frame frame){ this.frame= frame; }
 
   // A subtree was removed from the live tree: forget every reference into it.
   void detached(SkComponent root){
@@ -98,15 +98,15 @@ final class SkMouse extends MouseAdapter{
   void rehover(){
     assert SwingUtilities.isEventDispatchThread();
     if (java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(MouseEvent.MOUSE_MOVED) != null){ return; }
-    var p = top().getMousePosition();
+    var p= top().getMousePosition();
     if (p == null){ hoverTo(List.of()); return; }
     at = p;
     updateHover(p);
   }
 
   @Override public void mousePressed(MouseEvent e){
-    var p = point(e);
-    var d = deepestAt(p);
+    var p= point(e);
+    var d= deepestAt(p);
     if (SwingUtilities.isLeftMouseButton(e)){
       pressTarget = d;
       if (d instanceof _Button b){ b.down = true; }
@@ -115,8 +115,8 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mouseReleased(MouseEvent e){
-    var p = point(e);
-    boolean left = SwingUtilities.isLeftMouseButton(e);
+    var p= point(e);
+    boolean left= SwingUtilities.isLeftMouseButton(e);
     // mousePressed only ever captures a left press into pressTarget, so only
     // a left release is interpreted against that press chain (AWT delivers
     // it to the pressed component even if the cursor left it); any other
@@ -130,13 +130,13 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mouseMoved(MouseEvent e){
-    var p = point(e);
+    var p= point(e);
     updateHover(p);
     dispatch(deepestAt(p), Moved, p);
   }
 
   @Override public void mouseDragged(MouseEvent e){
-    var p = point(e);
+    var p= point(e);
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
     updateHover(p);
     dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);
@@ -165,7 +165,7 @@ final class SkMouse extends MouseAdapter{
   private void updateHover(Point p){ hoverTo(chainOf(deepestAt(p))); }
 
   private void hoverTo(List<AWidget> now){
-    var tasks = new ArrayList<MF$7$1>();
+    var tasks= new ArrayList<MF$7$1>();
     for (var t : hover){// exits, deepest first
       if (now.contains(t)){ continue; }
       if (t instanceof _Button b){ b.over = false; }
@@ -187,16 +187,16 @@ final class SkMouse extends MouseAdapter{
   }
 
   private boolean fire(AWidget t, MouseKind kind, Point p){
-    var tasks = new ArrayList<MF$7$1>();
+    var tasks= new ArrayList<MF$7$1>();
     handlers(t, kind, p, tasks);
     frame.frame.queue.submitAll(tasks);
     return !tasks.isEmpty();
   }
 
   private void handlers(AWidget t, MouseKind kind, Point p, ArrayList<MF$7$1> tasks){
-    var h = t.handlers.get(kind);
+    var h= t.handlers.get(kind);
     if (h == null){ return; }
-    var ctx = ctx(t, p);
+    var ctx= ctx(t, p);
     tasks.add(whileShown(t, new MF$7$1(){
       @Override public Object mut$$hash$0(){
         h.mut$accept$1(ctx);
@@ -215,7 +215,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   private MouseEvent$174$0 ctx(AWidget t, Point p){
-    var q = SwingUtilities.convertPoint(top(), p, t.component);
+    var q= SwingUtilities.convertPoint(top(), p, t.component);
     return new CMouseCtx(
       frame.elapsed,
       Scopes.x(q.x),
@@ -238,8 +238,8 @@ final class SkMouse extends MouseAdapter{
   }
 
   private static List<AWidget> chainOf(AWidget t){
-    var l = new ArrayList<AWidget>();
-    for (Component c = t == null ? null : t.component; c instanceof SkComponent s; c = c.getParent()){
+    var l= new ArrayList<AWidget>();
+    for (Component c= t == null ? null : t.component; c instanceof SkComponent s; c = c.getParent()){
       l.add(s.w);
     }
     return l;

@@ -6,11 +6,11 @@ import java.awt.Container;
 import java.awt.Dimension;
 
 public final class MutableBorderLayout extends BorderLayout{
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID= 1L;
 
   private final AContainer gap;
 
-  public MutableBorderLayout(AContainer gap){ this.gap = gap; }
+  public MutableBorderLayout(AContainer gap){ this.gap= gap; }
 
   @Override public void addLayoutComponent(Component comp, Object constraints){
     assert getLayoutComponent(constraints) == null;
@@ -32,49 +32,49 @@ public final class MutableBorderLayout extends BorderLayout{
   // with a plain `total == 0` check.
   private Dimension lay(Container target, int width, int height, boolean place){
     synchronized (target.getTreeLock()){
-      var north = getLayoutComponent(NORTH);
-      var south = getLayoutComponent(SOUTH);
-      var west = getLayoutComponent(WEST);
-      var east = getLayoutComponent(EAST);
-      var center = getLayoutComponent(CENTER);
-      int left = gap.left;
-      int right = width - gap.right;
-      int top = gap.top;
-      int bottom = height - gap.bottom;
-      boolean middle = west != null || center != null || east != null;
-      int slotsW = 0;
-      int middleH = 0;
-      int centerW = 0;
+      var north= getLayoutComponent(NORTH);
+      var south= getLayoutComponent(SOUTH);
+      var west= getLayoutComponent(WEST);
+      var east= getLayoutComponent(EAST);
+      var center= getLayoutComponent(CENTER);
+      int left= gap.left;
+      int right= width - gap.right;
+      int top= gap.top;
+      int bottom= height - gap.bottom;
+      boolean middle= west != null || center != null || east != null;
+      int slotsW= 0;
+      int middleH= 0;
+      int centerW= 0;
       if (north != null){
-        var d = Sk.sizeFor(north, span(right - left), Integer.MAX_VALUE);
+        var d= Sk.sizeFor(north, span(right - left), Integer.MAX_VALUE);
         if (place){ north.setBounds(left, top, span(right - left), d.height); }
         slotsW = d.width;
         top += d.height;
         if (middle || south != null){ top += gap.heightGap; }
       }
       if (south != null){
-        var d = Sk.sizeFor(south, span(right - left), Integer.MAX_VALUE);
+        var d= Sk.sizeFor(south, span(right - left), Integer.MAX_VALUE);
         bottom -= d.height;
         if (place){ south.setBounds(left, bottom, span(right - left), d.height); }
         slotsW = Math.max(slotsW, d.width);
         if (middle){ bottom -= gap.heightGap; }
       }
       if (west != null){
-        var d = Sk.sizeFor(west, Integer.MAX_VALUE, span(bottom - top));
+        var d= Sk.sizeFor(west, Integer.MAX_VALUE, span(bottom - top));
         if (place){ west.setBounds(left, top, d.width, span(bottom - top)); }
         middleH = d.height;
         left += d.width;
         if (center != null || east != null){ left += gap.widthGap; }
       }
       if (east != null){
-        var d = Sk.sizeFor(east, Integer.MAX_VALUE, span(bottom - top));
+        var d= Sk.sizeFor(east, Integer.MAX_VALUE, span(bottom - top));
         right -= d.width;
         if (place){ east.setBounds(right, top, d.width, span(bottom - top)); }
         middleH = Math.max(middleH, d.height);
         if (center != null){ right -= gap.widthGap; }
       }
       if (center != null){
-        var d = Sk.sizeFor(center, span(right - left), span(bottom - top));
+        var d= Sk.sizeFor(center, span(right - left), span(bottom - top));
         if (place){ center.setBounds(left, top, span(right - left), span(bottom - top)); }
         middleH = Math.max(middleH, d.height);
         centerW = d.width;

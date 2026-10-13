@@ -27,11 +27,11 @@ import java.util.List;
 // must then come from sizeFor, which every layout queries with the exact
 // size it assigns.
 public final class CenteredFlowLayout implements LayoutManager, Serializable{
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID= 1L;
 
   private final _Pane gap;
 
-  public CenteredFlowLayout(_Pane gap){ this.gap = gap; }
+  public CenteredFlowLayout(_Pane gap){ this.gap= gap; }
 
   @Override public void addLayoutComponent(String name, Component comp){}
   @Override public void removeLayoutComponent(Component comp){}
@@ -48,10 +48,10 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
 
   Dimension sizeFor(Container target, int width, int height){
     synchronized (target.getTreeLock()){
-      boolean vert = gap.vertical;
-      var ls = lines(target, vert ? height - insetsH() : width - insetsW());
-      int cross = crossSum(ls, vert ? gap.widthGap : gap.heightGap);
-      int primary = ls.stream().mapToInt(Line::primary).max().orElse(0);
+      boolean vert= gap.vertical;
+      var ls= lines(target, vert ? height - insetsH() : width - insetsW());
+      int cross= crossSum(ls, vert ? gap.widthGap : gap.heightGap);
+      int primary= ls.stream().mapToInt(Line::primary).max().orElse(0);
       return vert
         ? new Dimension(cross + insetsW(), primary + insetsH())
         : new Dimension(primary + insetsW(), cross + insetsH());
@@ -60,31 +60,31 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
 
   @Override public void layoutContainer(Container target){
     synchronized (target.getTreeLock()){
-      boolean vert = gap.vertical;
-      int availW = target.getWidth() - insetsW();
-      int availH = target.getHeight() - insetsH();
-      int lineGap = vert ? gap.widthGap : gap.heightGap;
-      var ls = lines(target, vert ? availH : availW);
+      boolean vert= gap.vertical;
+      int availW= target.getWidth() - insetsW();
+      int availH= target.getHeight() - insetsH();
+      int lineGap= vert ? gap.widthGap : gap.heightGap;
+      var ls= lines(target, vert ? availH : availW);
 
-      int totalCross = crossSum(ls, lineGap);
+      int totalCross= crossSum(ls, lineGap);
 
-      int crossStart = vert
+      int crossStart= vert
         ? gap.left + Math.max(0, (availW - totalCross) / 2)
         : gap.top + Math.max(0, (availH - totalCross) / 2);
-      int cross = crossStart;
+      int cross= crossStart;
       for (var ln : ls){
-        int primaryStart = vert
+        int primaryStart= vert
           ? gap.top + Math.max(0, (availH - ln.primary()) / 2)
           : gap.left + Math.max(0, (availW - ln.primary()) / 2);
-        int primary = primaryStart;
+        int primary= primaryStart;
         for (var it : ln.items()){
-          var c = it.c();
-          var d = it.d();
-          int pSize = vert ? d.height : d.width;
-          int cSize = vert ? d.width : d.height;
-          int off = cross + (ln.cross() - cSize) / 2;
+          var c= it.c();
+          var d= it.d();
+          int pSize= vert ? d.height : d.width;
+          int cSize= vert ? d.width : d.height;
+          int off= cross + (ln.cross() - cSize) / 2;
           if (vert){ c.setBounds(off, primary, cSize, pSize); }
-          else     { c.setBounds(primary, off, pSize, cSize); }
+          else{ c.setBounds(primary, off, pSize, cSize); }
           primary += pSize + (vert ? gap.heightGap : gap.widthGap);
         }
         cross += ln.cross() + lineGap;
@@ -104,19 +104,19 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // always holds at least one component, so an oversized child gets a line
   // of its own (and clips) instead of looping.
   private List<Line> lines(Container target, int availPrimary){
-    boolean vert = gap.vertical;
-    int chunk = gap.chunk;
-    int pg = vert ? gap.heightGap : gap.widthGap;
-    var res = new ArrayList<Line>();
-    var items = new ArrayList<Item>();
-    int lp = 0;
-    int lc = 0;
+    boolean vert= gap.vertical;
+    int chunk= gap.chunk;
+    int pg= vert ? gap.heightGap : gap.widthGap;
+    var res= new ArrayList<Line>();
+    var items= new ArrayList<Item>();
+    int lp= 0;
+    int lc= 0;
     for (var c : target.getComponents()){
       if (!c.isVisible()){ continue; }
-      var d = vert ? Sk.sizeFor(c, Integer.MAX_VALUE, availPrimary) : Sk.sizeFor(c, availPrimary, Integer.MAX_VALUE);
-      int cp = vert ? d.height : d.width;
-      int cc = vert ? d.width : d.height;
-      boolean breakBefore = chunk > 0
+      var d= vert ? Sk.sizeFor(c, Integer.MAX_VALUE, availPrimary) : Sk.sizeFor(c, availPrimary, Integer.MAX_VALUE);
+      int cp= vert ? d.height : d.width;
+      int cc= vert ? d.width : d.height;
+      boolean breakBefore= chunk > 0
         ? !items.isEmpty() && items.size() >= chunk
         : !items.isEmpty() && (lp + pg + cp) > availPrimary;
       if (breakBefore){

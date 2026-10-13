@@ -13,27 +13,27 @@ import static _base.Util.*;
 public interface Flows$1c$0 extends Sealed$2o$0{
   default Object imm$$hash$0(){ return Flow$o$1Instance.seq(); }
   default Object imm$$hash$1(Object p0){ return Flow$o$1Instance.seq(p0); }
-  default Object imm$$hash$2(Object p0,Object p1){ return Flow$o$1Instance.seq(p0,p1); }
-  default Object imm$$hash$3(Object p0,Object p1,Object p2){ return Flow$o$1Instance.seq(p0,p1,p2); }
-  default Object imm$$hash$4(Object p0,Object p1,Object p2,Object p3){ return Flow$o$1Instance.seq(p0,p1,p2,p3); }
-  default Object imm$$hash$5(Object p0,Object p1,Object p2,Object p3, Object p4){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4); }
-  default Object imm$$hash$6(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5); }
-  default Object imm$$hash$7(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6); }
-  default Object imm$$hash$8(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7); }
-  default Object imm$$hash$9(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8); }
-  default Object imm$$hash$10(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9); }
-  default Object imm$$hash$11(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10); }
-  default Object imm$$hash$12(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11); }
-  default Object imm$$hash$13(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12); }
-  default Object imm$$hash$14(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13); }
-  default Object imm$$hash$15(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14); }
-  default Object imm$$hash$16(Object p0,Object p1,Object p2,Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return Flow$o$1Instance.seq(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15); }
+  default Object imm$$hash$2(Object p0, Object p1){ return Flow$o$1Instance.seq(p0, p1); }
+  default Object imm$$hash$3(Object p0, Object p1, Object p2){ return Flow$o$1Instance.seq(p0, p1, p2); }
+  default Object imm$$hash$4(Object p0, Object p1, Object p2, Object p3){ return Flow$o$1Instance.seq(p0, p1, p2, p3); }
+  default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4); }
+  default Object imm$$hash$6(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5); }
+  default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6); }
+  default Object imm$$hash$8(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7); }
+  default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8); }
+  default Object imm$$hash$10(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9); }
+  default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10); }
+  default Object imm$$hash$12(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11); }
+  default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12); }
+  default Object imm$$hash$14(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13); }
+  default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14); }
+  default Object imm$$hash$16(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return Flow$o$1Instance.seq(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15); }
 
   default Object imm$fromMutList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.Seq).mut$hintSequential$0(); }
   default Object imm$fromReadList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.Seq).mut$hintSequential$0(); }
   default Object imm$fromImmList$1(Object p0){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.ParImm); }
-  default Object imm$fromMutList$2(Object p0,Object p1){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.of(p1)); }
-  default Object imm$fromReadList$2(Object p0,Object p1){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.of(p1)); }
+  default Object imm$fromMutList$2(Object p0, Object p1){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.of(p1)); }
+  default Object imm$fromReadList$2(Object p0, Object p1){ return Flow$o$1Instance.of(List$o$1Instance.asJava(p0), FlowMode.of(p1)); }
 
   Flows$1c$0 instance= new Flows$1c$0(){};
 }
@@ -81,7 +81,7 @@ final class Flow$o$1Instance implements Flow$o$1{
   static List<Object> toJava(Object flow){ return List$o$1Instance.asJava(((Flow$o$1)flow).mut$list$0()); }
   private FlowChain take(){
     check(!consumed, "Flow: this flow is already consumed: a flow is consumed by the call that adds the next stage or the terminal.");
-    consumed= true;
+    consumed = true;
     return chain;
   }
   private Object stage(FlowCore c){
@@ -90,26 +90,26 @@ final class Flow$o$1Instance implements Flow$o$1{
     return new Flow$o$1Instance(ch);
   }
   @Override public Object mut$actor$2(Object state, Object f){
-    return stage(d->new FlowActorSink(d, state, f));
+    return stage(d -> new FlowActorSink(d, state, f));
   }
   @Override public Object mut$actorMut$2(Object state, Object f){
-    return stage(d->new FlowActorSink(d, state, f));
+    return stage(d -> new FlowActorSink(d, state, f));
   }
   @Override public Object mut$allToAll$1(Object f){
-    return stage(d->new FlowAllToAllSink(d, f));
+    return stage(d -> new FlowAllToAllSink(d, f));
   }
   @Override public Object mut$distinct$1(Object by){
-    return stage(d->new FlowDistinctSink(d, (OrderHashBy$2ea$2)by));
+    return stage(d -> new FlowDistinctSink(d, (OrderHashBy$2ea$2)by));
   }
   private Object record(Consumer<FlowChain> r){
     var ch= take();
     r.accept(ch);
     return new Flow$o$1Instance(ch);
   }
-  @Override public Object mut$suppressMisuseExceptions$0(){ return record(c->c.suppress= true); }
-  @Override public Object mut$hintSequential$0(){ return record(c->c.mostHints= Math.max(c.mostHints, ++c.hints)); }
-  @Override public Object mut$hintParallel$0(){ return record(c->c.mostHints= Math.max(c.mostHints, ++c.hints)); }
-  @Override public Object mut$recoverFlow$1(Object mode){ return record(c->c.hints= 0); }
+  @Override public Object mut$suppressMisuseExceptions$0(){ return record(c -> c.suppress = true); }
+  @Override public Object mut$hintSequential$0(){ return record(c -> c.mostHints = Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$hintParallel$0(){ return record(c -> c.mostHints = Math.max(c.mostHints, ++c.hints)); }
+  @Override public Object mut$recoverFlow$1(Object mode){ return record(c -> c.hints = 0); }
   @Override public Object mut$fold$2(Object acc, Object f){
     var ch= take();
     FlowMisuse.checkHints(ch);
@@ -126,7 +126,7 @@ final class Flow$o$1Instance implements Flow$o$1{
     return Void$o$0.instance;
   }
   private static void run(FlowChain ch, FlowSink first){
-    for (var c: ch.core.reversed()){ first= c.sink(first); }
+    for (var c: ch.core.reversed()){ first = c.sink(first); }
     var it= ch.source.iterator();
     while (!first.done() && it.hasNext()){ first.accept(it.next()); }
     first.finish();
@@ -137,18 +137,18 @@ final class FlowFoldSink implements FlowSink{
   FlowFoldSink(Object r, Object f){ this.r= r; this.f= f; }
   Object r;
   private final Object f;
-  public void accept(Object e){ r= callF$3(f, r, e); }
-  public boolean done(){ return false; }
-  public void finish(){}
+  @Override public void accept(Object e){ r = callF$3(f, r, e); }
+  @Override public boolean done(){ return false; }
+  @Override public void finish(){}
 }
 
 final class FlowForEachSink implements FlowSink{
   FlowForEachSink(Object a, ForEachBody$2h4$2 f){ this.a= a; this.f= f; }
   private final Object a;
   private final ForEachBody$2h4$2 f;
-  public void accept(Object e){ f.mut$$hash$2(a, e); }
-  public boolean done(){ return false; }
-  public void finish(){}
+  @Override public void accept(Object e){ f.mut$$hash$2(a, e); }
+  @Override public boolean done(){ return false; }
+  @Override public void finish(){}
 }
 
 final class FlowActorSink implements FlowSink, ActorSink$lk$1, ControlFlowMatch$2428$1{
@@ -157,18 +157,18 @@ final class FlowActorSink implements FlowSink, ActorSink$lk$1, ControlFlowMatch$
   private final Object state;
   private final Object f;
   private boolean broke= false;
-  public void accept(Object e){
+  @Override public void accept(Object e){
     var r= f instanceof ActorImplMut$4sk$3 m ? m.read$$hash$3(this, state, e) : ((ActorImpl$lk$3)f).read$$hash$3(this, state, e);
     ((ControlFlow$2dk$1)r).mut$match$1(this);
   }
-  public boolean done(){ return broke || down.done(); }
-  public void finish(){ down.finish(); }
+  @Override public boolean done(){ return broke || down.done(); }
+  @Override public void finish(){ down.finish(); }
   @Override public Object mut$$hash$1(Object e){
     if (!down.done()){ down.accept(e); }
     return Void$o$0.instance;
   }
   @Override public Object mut$continue$0(){ return null; }
-  @Override public Object mut$break$0(){ broke= true; return null; }
+  @Override public Object mut$break$0(){ broke = true; return null; }
   @Override public Object mut$return$1(Object v){ throw new AssertionError("An actor answers Continue or Break"); }
 }
 
@@ -177,9 +177,9 @@ final class FlowAllToAllSink implements FlowSink{
   private final FlowSink down;
   private final Object f;
   private final ArrayList<Object> xs= new ArrayList<>();
-  public void accept(Object e){ xs.add(e); }
-  public boolean done(){ return down.done(); }
-  public void finish(){
+  @Override public void accept(Object e){ xs.add(e); }
+  @Override public boolean done(){ return down.done(); }
+  @Override public void finish(){
     for (var r: List$o$1Instance.asJava(callF$2(f, List$o$1Instance.wrap(xs)))){
       if (down.done()){ break; }
       down.accept(r);
@@ -193,11 +193,11 @@ final class FlowDistinctSink implements FlowSink{
   private final FlowSink down;
   private final OrderHashBy$2ea$2 by;
   private final Object keys= Vars$o$0.instance.imm$$hash$1(List$o$1.instance);
-  public void accept(Object e){
+  @Override public void accept(Object e){
     if (isTrue(_KeepNew$5g$0.instance.imm$$hash$2(keys, by.imm$$hash$1(e)))){ down.accept(e); }
   }
-  public boolean done(){ return down.done(); }
-  public void finish(){ down.finish(); }
+  @Override public boolean done(){ return down.done(); }
+  @Override public void finish(){ down.finish(); }
 }
 
 final class FlowMisuse{
@@ -230,10 +230,10 @@ final class FlowMisuse{
   private static Error misuse(String msg){ return nonDetErr(msg + suppressHint); }
   private FlowStep step(int i){ return i == stages.size() ? terminal : stages.get(i); }
   private String name(int i){ return step(i).name(); }
-  private boolean mutReach(int i){ return stages.subList(0, i).stream().noneMatch(s->toRead.contains(s.name())); }
+  private boolean mutReach(int i){ return stages.subList(0, i).stream().noneMatch(s -> toRead.contains(s.name())); }
   static final int shownStrSize= 20;
   private static String show(FlowStep s){
-    var n= switch(s.name()){
+    var n= switch (s.name()){
       case "++" -> "++";
       case "mapCtx" -> ".map";
       case "peekCtx" -> ".peek";
@@ -262,7 +262,7 @@ final class FlowMisuse{
     if (a instanceof OnlyImmCapture){ return true; }
     for (var i: a.getClass().getInterfaces()){
       try{ if (i.getField("instance").get(null) == a){ return true; } }
-      catch(ReflectiveOperationException _){}
+      catch (ReflectiveOperationException _){}
     }
     return false;
   }
@@ -310,10 +310,10 @@ final class FlowMisuse{
     while (f >= 0 && !fence.contains(name(f))){ f--; }
     if (f == stages.size() - 1){ return; }
     var segment= stages.subList(f + 1, stages.size());
-    var seqOk= c.mode == FlowMode.Seq && segment.stream().noneMatch(s->toRead.contains(s.name()));
+    var seqOk= c.mode == FlowMode.Seq && segment.stream().noneMatch(s -> toRead.contains(s.name()));
     var immOk= c.mode == FlowMode.ParImm
-      && stages.stream().allMatch(s->s.args().stream().allMatch(a->!isLambda(a) || onlyImmCapture(a)))
-      && stages.stream().noneMatch(s->Set.of("flatMapMut", "actorMut", "allToAll", "++").contains(s.name()));
+      && stages.stream().allMatch(s -> s.args().stream().allMatch(a -> !isLambda(a) || onlyImmCapture(a)))
+      && stages.stream().noneMatch(s -> Set.of("flatMapMut", "actorMut", "allToAll", "++").contains(s.name()));
     if (seqOk || immOk){ return; }
     throw misuse("`.forEach` runs its lambda while `"+show(f + 1, stages.size())+"` may still run on the elements after, preventing the parallelism `"
       +c.mode+"` asks for: write `.for`, which runs its lambda once every stage has finished.");
@@ -323,7 +323,7 @@ final class FlowMisuse{
   static final Set<String> elemsStages= Set.of("map", "++", "sort", "max", "min", "filter", "flatMap", "flatMapMut", "mapFilter");
   static final Set<String> elemsToCount= Set.of("filter", "flatMap", "flatMapMut", "mapFilter", "distinct", "distinctMut", "sortDistinct", "max", "min");
   static final Set<String> firstStages= Set.of("map", "++", "scan", "distinct", "distinctMut", "limit");
-  private boolean allIn(int from, int to, Set<String> set){ return java.util.stream.IntStream.range(from, to).allMatch(i->set.contains(name(i))); }
+  private boolean allIn(int from, int to, Set<String> set){ return java.util.stream.IntStream.range(from, to).allMatch(i -> set.contains(name(i))); }
   private boolean readsEmpty(int from){ return allIn(from, stages.size(), emptyStages) && terminal.name().equals("isEmpty"); }
   private boolean readsCount(int from){ return allIn(from, stages.size(), countStages) && terminal.name().equals("size"); }
   private boolean readsFirst(int from){ return allIn(from, stages.size(), firstStages) && terminal.name().equals("first"); }
@@ -353,7 +353,7 @@ final class FlowMisuse{
   private boolean pointless(int i){
     var n= name(i);
     var r= i + 1;
-    return switch(n){
+    return switch (n){
       case "sort" -> readsEmpty(r) || readsCount(r) || readsElems(r);
       case "map", "scan" -> readsEmpty(r) || readsCount(r);
       case "distinct", "distinctMut" -> readsEmpty(r) || readsFirst(r);

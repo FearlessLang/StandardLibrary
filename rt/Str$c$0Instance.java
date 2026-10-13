@@ -30,7 +30,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   }
 
   private static String strExpr(String s){
-    var parts= s.split("\n",-1);
+    var parts= s.split("\n", -1);
     var res= new StringBuilder(lineExpr(parts[0]));
     for (var i= 1; i < parts.length; i++){
       if (parts[i].isEmpty()){
@@ -60,7 +60,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       if (c != '"' && c != '`'){ continue; }
       if (seen == 0){ seen = c; continue; }
       if (seen == c){ continue; }
-      res.add(s.substring(start,i));
+      res.add(s.substring(start, i));
       start = i;
       seen = c;
     }
@@ -78,17 +78,17 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   
   static final Pattern signedInt= Pattern.compile("[+-][0-9](?:[0-9_]*[0-9])?");
   static final Pattern unsignedInt= Pattern.compile("[0-9](?:[0-9_]*[0-9])?");
-  static final Pattern optionallySignedFloat = Pattern.compile(
+  static final Pattern optionallySignedFloat= Pattern.compile(
     "[+-]?(?:[0-9](?:[0-9_]*[0-9])?)\\.(?:[0-9](?:[0-9_]*[0-9])?)"
     + "(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?");
-  static final Pattern optionallySignedRational = Pattern.compile(
+  static final Pattern optionallySignedRational= Pattern.compile(
     "[+-]?(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)/(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)");
   static final long maxNatU= -1;
   static final long maxByteU= 255L;
   @Override public Object imm$int$0(){
     if (!signedInt.matcher(val).matches()){ return optEmpty(); }
     try{ return optSome(Int$c$0Instance.instance(Long.parseLong(no_(val)))); }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch (NumberFormatException e){ return optEmpty(); }
   }
   @Override public Object imm$tryGetInt$0(){
     if (!signedInt.matcher(val).matches()){
@@ -98,7 +98,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
               + "\n For example -4, +0, -3021\"");
     }
     try{ return ok(Int$c$0Instance.instance(Long.parseLong(no_(val)))); }
-    catch(NumberFormatException e){
+    catch (NumberFormatException e){
       return fail("Str.getInt: Str \""+val+"\" has a magnitude too great to be stored in an int, "
               + " must be in ["+Int$c$0Instance.MIN_VALUE+", "+Int$c$0Instance.MAX_VALUE+"]");
     }
@@ -115,34 +115,34 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$indicesOf$1(Object p0){
     var text= s(p0);
     var res= new ArrayList<Object>();
-    for (int i= val.indexOf(text); i != -1; i= i < val.length() ? val.indexOf(text, i + 1) : -1){ res.add(Nat$c$0Instance.instance(i)); }
+    for (int i= val.indexOf(text); i != -1; i = i < val.length() ? val.indexOf(text, i + 1) : -1){ res.add(Nat$c$0Instance.instance(i)); }
     return Flow$o$1Instance.of(res, FlowMode.ParImm);
   }
   @Override public Object imm$sub$2(Object p1, Object p2){
     long from= ((Nat$c$0Instance)p1).val();
     long to= ((Nat$c$0Instance)p2).val();
     int size= val.length();
-    if (Long.compareUnsigned(from,to) > 0){
+    if (Long.compareUnsigned(from, to) > 0){
       throw Util.err("Str.sub invalid range: from > to; from="+Long.toUnsignedString(from)+" to="+Long.toUnsignedString(to));
     }
-    if (Long.compareUnsigned(from,size) > 0){
+    if (Long.compareUnsigned(from, size) > 0){
       throw Util.err("Str.sub invalid range: from out of bounds; from="+Long.toUnsignedString(from)+" size="+size);
     }
-    if (Long.compareUnsigned(to,size) > 0){
+    if (Long.compareUnsigned(to, size) > 0){
       throw Util.err("Str.sub invalid range: to out of bounds; to="+Long.toUnsignedString(to)+" size="+size);
     }
-    return new Str$c$0Instance(val.substring((int)from,(int)to));
+    return new Str$c$0Instance(val.substring((int)from, (int)to));
   }
   @Override public Object imm$replaceSimultaneousOrdered$1(Object p1){
     if (!(p1 instanceof List$o$1Instance repl)){ return this; }
     @SuppressWarnings("unchecked")
-    String res= Replacements.replaceSimultaneousOrdered((List<Str$c$0Instance>)(Object)repl.val(),val);
+    String res= Replacements.replaceSimultaneousOrdered((List<Str$c$0Instance>)(Object)repl.val(), val);
     return new Str$c$0Instance(res);
   }
   @Override public Object imm$replaceSimultaneous$1(Object p1){
     if (!(p1 instanceof List$o$1Instance repl)){ return this; }
     @SuppressWarnings("unchecked")
-    String res= Replacements.replaceSimultaneous((List<Str$c$0Instance>)(Object)repl.val(),val);
+    String res= Replacements.replaceSimultaneous((List<Str$c$0Instance>)(Object)repl.val(), val);
     return new Str$c$0Instance(res);
   }
   static final Pattern ieeeFloatText= Pattern.compile(
@@ -150,7 +150,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$ieeeFloat$0(){
     if (!ieeeFloatText.matcher(val).matches()){ return optEmpty(); }
     try{ return optSome(Float$1c$0Instance.instance(Double.parseDouble(val))); }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch (NumberFormatException e){ return optEmpty(); }
   }
   @Override public Object imm$tryGetIeeeFloat$0(){
     if (!ieeeFloatText.matcher(val).matches()){
@@ -161,7 +161,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
         + "\n For example: NaN, Infinity, -Infinity, -0.0, +0.0, 1e0, 3000.2");
     }
     try{ return ok(Float$1c$0Instance.instance(Double.parseDouble(val))); }
-    catch(NumberFormatException e){
+    catch (NumberFormatException e){
       return fail("Str.getIeeeFloat: cannot convert String \""+val+"\" to Float. \n"
           + "A Valid IEEE-754 Float is \"NaN\", \"Infinity\", \"-Infinity\", or a decimal number "
           + "optionally preceded by a \"+\" or \"-\" sign, with an optional \".\" followed by digits, "
@@ -174,7 +174,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       return optSome(Nat$c$0Instance.instance(Long.parseUnsignedLong(no_(val))));
     }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch (NumberFormatException e){ return optEmpty(); }
   }
   @Override public Object imm$tryGetNat$0(){
     if (!unsignedInt.matcher(val).matches()){
@@ -183,7 +183,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
               + "\n For example 0, 3_021\"");
     }
     try{ return ok(Nat$c$0Instance.instance(Long.parseUnsignedLong(no_(val)))); }
-    catch(NumberFormatException e){
+    catch (NumberFormatException e){
       return fail("Str.getNat: Str \""+val+"\" has a magnitude too great to be stored in an Nat, "
               + " must be in ["+0+", "+Long.toUnsignedString(Nat$c$0Instance.MAX_UNSIGNED_VALUE)+"].");
     }
@@ -195,7 +195,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       if (x > 255){ return optEmpty(); }
       return optSome(Byte$o$0Instance.instance((byte)x));
     }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch (NumberFormatException e){ return optEmpty(); }
   }
   @Override public Object imm$tryGetByte$0(){
     if (!unsignedInt.matcher(val).matches()){
@@ -208,7 +208,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       if (x > 255){ throw new NumberFormatException(); }
       return ok(Byte$o$0Instance.instance((byte)x));
     }
-    catch(NumberFormatException e){
+    catch (NumberFormatException e){
       return fail("Str.getByte: Str \""+val+"\" has a magnitude too great to be stored in an Nat, must be in ["+0+", "+255+"].");
     }
   }
@@ -217,17 +217,17 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       String t= no_(val);
       boolean neg= t.charAt(0) == '-';
-      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t= t.substring(1); }
+      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t = t.substring(1); }
       int slash= t.indexOf('/');
-      Dec a= Dec.parse(t.substring(0,slash));
+      Dec a= Dec.parse(t.substring(0, slash));
       Dec b= Dec.parse(t.substring(slash+1));
       if (b.u.signum() == 0){ return optEmpty(); }
       BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
       BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
-      if (neg){ num= num.negate(); }
-      return optSome(Num$c$0Instance.instance(num,den));
+      if (neg){ num = num.negate(); }
+      return optSome(Num$c$0Instance.instance(num, den));
     }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch (NumberFormatException e){ return optEmpty(); }
   }
   @Override public Object imm$tryGetNum$0(){
     if (!optionallySignedRational.matcher(val).matches()){
@@ -240,17 +240,17 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       String t= no_(val);
       boolean neg= t.charAt(0) == '-';
-      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t= t.substring(1); }
+      if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t = t.substring(1); }
       int slash= t.indexOf('/');
-      Dec a= Dec.parse(t.substring(0,slash));
+      Dec a= Dec.parse(t.substring(0, slash));
       Dec b= Dec.parse(t.substring(slash+1));
       if (b.u.signum() == 0){ return fail("Str.getNum: Cannot convert String "+val+" to Num, as the denominator is 0"); }
       BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
       BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
-      if (neg){ num= num.negate(); }
-      return ok(Num$c$0Instance.instance(num,den));
+      if (neg){ num = num.negate(); }
+      return ok(Num$c$0Instance.instance(num, den));
     }
-    catch(NumberFormatException e){
+    catch (NumberFormatException e){
       return fail("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
               + "A valid Num is in the form [-]a / b:\n"
               + "Where the numerator is any number of digits, optionally separated by \"_\"s and proceeded by a \"-\".\n"
@@ -261,8 +261,8 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   record Dec(BigInteger u, int scale){
     static Dec parse(String s){
       int dot= s.indexOf('.');
-      if (dot == -1){ return new Dec(new BigInteger(s),0); }
-      return new Dec(new BigInteger(s.substring(0,dot)+s.substring(dot+1)), s.length()-dot-1);
+      if (dot == -1){ return new Dec(new BigInteger(s), 0); }
+      return new Dec(new BigInteger(s.substring(0, dot)+s.substring(dot+1)), s.length()-dot-1);
     }
   }
   @Override public Object imm$float$0(){
@@ -272,10 +272,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return optEmpty(); }
       if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return optEmpty(); }
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return optSome(Float$1c$0Instance.instance(d));
     }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch (NumberFormatException e){ return optEmpty(); }
   }
   @Override public Object imm$tryGetFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){
@@ -291,10 +291,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return fail("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
               + "If rounded, the nearest representable value is "+floatExactFearlessLit(d)+"."
               + "If this rounding is desired use Str.getSoftFloat");}
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return ok(Float$1c$0Instance.instance(d));
     }
-    catch(NumberFormatException e){
+    catch (NumberFormatException e){
       return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
               "A valid Float is at least one digits and must be exactly representable as an IEEE-746 64bit number, " +
               "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
@@ -307,10 +307,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     try{
       double d= Double.parseDouble(no_(val));
       if (!Double.isFinite(d)){ return optEmpty(); }
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return optSome(Float$1c$0Instance.instance(d));
     }
-    catch(NumberFormatException e){ return optEmpty(); }
+    catch (NumberFormatException e){ return optEmpty(); }
   }
   @Override public Object imm$tryGetSoftFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){
@@ -322,10 +322,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       String x= no_(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return fail("Str.getSoftFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
-      if (d == 0.0d){ d= 0.0d; }
+      if (d == 0.0d){ d = 0.0d; }
       return ok(Float$1c$0Instance.instance(d));
     }
-    catch(NumberFormatException e){
+    catch (NumberFormatException e){
       return fail("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
                "A valid Float is at least one digit separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
                "\n For example: -2.4, 3000.2, +24.0");
@@ -339,7 +339,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     String mag= new BigDecimal(d).abs().toString(); // exact decimal for this double, may use E
     int e= mag.indexOf('E');
     if (e != -1){
-      String base= mag.substring(0,e);
+      String base= mag.substring(0, e);
       String exp= mag.substring(e+1);
       if (base.indexOf('.') == -1){ base = base+".0"; }
       mag = base+"e"+exp;
@@ -352,7 +352,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     return Nat$c$0Instance.instance(val.hashCode());
   }
   @Override public Object imm$joinStr$1(Object p0){
-    String res= Flow$o$1Instance.toJava(p0).stream().map(o->((Str$c$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
+    String res= Flow$o$1Instance.toJava(p0).stream().map(o -> ((Str$c$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
     return new Str$c$0Instance(res);
   }
   @Override public Object imm$startsWith$1(Object p0){
@@ -368,7 +368,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     var text= s(p0);
     if (text.isEmpty()){ return Nat$c$0Instance.instance(val.length()); }
     int count= 0;
-    for (int i= val.indexOf(text); i != -1; i= val.indexOf(text, i + text.length())){ count++; }
+    for (int i= val.indexOf(text); i != -1; i = val.indexOf(text, i + text.length())){ count++; }
     return Nat$c$0Instance.instance(count);
   }
   @Override public Object imm$trim$0(){ return instance(val.trim()); }
@@ -377,9 +377,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     if (sep.isEmpty()){ throw detErr("Str.split: the separator is the empty string, which occurs between any two characters; use a non empty separator."); }
     var res= new ArrayList<Object>();
     int start= 0;
-    for (int i= val.indexOf(sep); i != -1; i= val.indexOf(sep, start)){
+    for (int i= val.indexOf(sep); i != -1; i = val.indexOf(sep, start)){
       res.add(instance(val.substring(start, i)));
-      start= i + sep.length();
+      start = i + sep.length();
     }
     res.add(instance(val.substring(start)));
     return List$o$1Instance.wrap(res);
@@ -388,9 +388,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase()); }
   @Override public Object imm$norm$0(){
     if (val.length() < 64){ return this; }
-    return myCache.computeIfAbsent(val,_->new Norm(this));
+    return myCache.computeIfAbsent(val, _ -> new Norm(this));
   }
   @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
-  static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }
+  static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_", ""); }
 }

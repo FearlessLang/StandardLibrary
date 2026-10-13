@@ -36,18 +36,18 @@ final class SparseArrayStore implements SparseStore{
   @Override public long count(){ return count; }
   @Override public Object at(long i){ return xs[(int) i]; }
   @Override public void put(long i, Object e){
-    count+= (e == null ? 0 : 1) - (xs[(int) i] == null ? 0 : 1);
-    xs[(int) i]= e;
+    count += (e == null ? 0 : 1) - (xs[(int) i] == null ? 0 : 1);
+    xs[(int) i] = e;
   }
-  @Override public long[] present(){ return IntStream.range(0, xs.length).filter(i->xs[i] != null).asLongStream().toArray(); }
+  @Override public long[] present(){ return IntStream.range(0, xs.length).filter(i -> xs[i] != null).asLongStream().toArray(); }
   @Override public SparseStore empty(long cap){ return new SparseArrayStore((int) cap); }
   @Override public SparseStore copy(){
     var r= new SparseArrayStore(0);
-    r.xs= xs.clone();
-    r.count= count;
+    r.xs = xs.clone();
+    r.count = count;
     return r;
   }
-  @Override public void grow(long cap){ xs= Arrays.copyOf(xs, checkedCap("ESparseList.softIncreaseCapacity", cap)); }
+  @Override public void grow(long cap){ xs = Arrays.copyOf(xs, checkedCap("ESparseList.softIncreaseCapacity", cap)); }
 }
 final class SparseMapStore implements SparseStore{
   SparseMapStore(long cap){ this.cap= cap; }
@@ -60,14 +60,14 @@ final class SparseMapStore implements SparseStore{
     if (e == null){ m.remove(i); return; }
     m.put(i, e);
   }
-  @Override public long[] present(){ return m.keySet().stream().mapToLong(i->i).toArray(); }
+  @Override public long[] present(){ return m.keySet().stream().mapToLong(i -> i).toArray(); }
   @Override public SparseStore empty(long cap){ return new SparseMapStore(cap); }
   @Override public SparseStore copy(){
     var r= new SparseMapStore(cap);
     r.m.putAll(m);
     return r;
   }
-  @Override public void grow(long cap){ this.cap= cap; }
+  @Override public void grow(long cap){ this.cap = cap; }
 }
 final class SparseTreeStore implements SparseStore{
   SparseTreeStore(long cap){ this.cap= cap; bits= bitsFor(cap); }
@@ -84,26 +84,26 @@ final class SparseTreeStore implements SparseStore{
   @Override public Object at(long i){
     var n= root;
     int b= bits;
-    for (; n != null && b > leafBits; b--){ n= (Object[]) n[child(i, b)]; }
+    for (; n != null && b > leafBits; b--){ n = (Object[]) n[child(i, b)]; }
     return n == null ? null : n[(int) (i & ((1L << b) - 1))];
   }
   @Override public void put(long i, Object e){
     if (root == null){
       if (e == null){ return; }
-      root= make(bits);
+      root = make(bits);
     }
     var n= root;
     for (int b= bits; b > leafBits; b--){
       int c= child(i, b);
       if (n[c] == null){
         if (e == null){ return; }
-        n[c]= make(b - 1);
+        n[c] = make(b - 1);
       }
-      n= (Object[]) n[c];
+      n = (Object[]) n[c];
     }
     int k= (int) (i & ((1L << Math.min(bits, leafBits)) - 1));
-    count+= (e == null ? 0 : 1) - (n[k] == null ? 0 : 1);
-    n[k]= e;
+    count += (e == null ? 0 : 1) - (n[k] == null ? 0 : 1);
+    n[k] = e;
   }
   private static void walk(Object[] n, int b, long base, LongStream.Builder out){
     if (b <= leafBits){
@@ -120,30 +120,30 @@ final class SparseTreeStore implements SparseStore{
   private static Object[] deep(Object[] n, int b){
     var r= n.clone();
     if (b > leafBits){
-      for (int c= 0; c < 2; c++){ if (r[c] != null){ r[c]= deep((Object[]) r[c], b - 1); } }
+      for (int c= 0; c < 2; c++){ if (r[c] != null){ r[c] = deep((Object[]) r[c], b - 1); } }
     }
     return r;
   }
   @Override public SparseStore empty(long cap){ return new SparseTreeStore(cap); }
   @Override public SparseStore copy(){
     var r= new SparseTreeStore(cap);
-    r.count= count;
-    r.root= root == null ? null : deep(root, bits);
+    r.count = count;
+    r.root = root == null ? null : deep(root, bits);
     return r;
   }
   @Override public void grow(long cap){
-    this.cap= cap;
+    this.cap = cap;
     int nb= bitsFor(cap);
     while (root != null && bits < nb){
       if (bits < leafBits){
-        bits= Math.min(nb, leafBits);
-        root= Arrays.copyOf(root, 1 << bits);
+        bits = Math.min(nb, leafBits);
+        root = Arrays.copyOf(root, 1 << bits);
         continue;
       }
-      root= new Object[]{root, null};
+      root = new Object[]{root, null};
       bits++;
     }
-    bits= Math.max(bits, nb);
+    bits = Math.max(bits, nb);
   }
 }
 final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
@@ -151,14 +151,14 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   private SparseStore s;
   private static Object opt(Object e){ return e == null ? optEmpty() : optSome(e); }
   private static Object nat(long i){ return Nat$c$0Instance.instance(i); }
-  private static LongStream upTo(long cap){ return LongStream.iterate(0, i->Long.compareUnsigned(i, cap) < 0, i->i + 1); }
+  private static LongStream upTo(long cap){ return LongStream.iterate(0, i -> Long.compareUnsigned(i, cap) < 0, i -> i + 1); }
   private long idx(String m, Object p0){
     long i= Nat$c$0Instance.unwrap(p0);
     if (Long.compareUnsigned(i, s.cap()) >= 0){ throw detErr("ESparseList."+m+": Index "+Long.toUnsignedString(i)+" out of bounds for ESparseList of capacity "+Long.toUnsignedString(s.cap())); }
     return i;
   }
   private boolean test(Object f, long i){ return isTrue(callMF$2(f, s.at(i))); }
-  private LongStream where(Object f){ return Arrays.stream(s.present()).filter(i->test(f, i)); }
+  private LongStream where(Object f){ return Arrays.stream(s.present()).filter(i -> test(f, i)); }
   private long lastWhere(Object f){
     var is= s.present();
     for (int k= is.length - 1; k >= 0; k--){ if (test(f, is[k])){ return is[k]; } }
@@ -166,7 +166,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   }
   private SparseStore drain(){
     var d= s;
-    s= s.empty(s.cap());
+    s = s.empty(s.cap());
     return d;
   }
   private long holes(){ return s.cap() - s.count(); }
@@ -187,7 +187,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   @Override public Object read$get$1(Object p0){ return opt(s.at(idx("get", p0))); }
   @Override public Object mut$set$2(Object p0, Object p1){ s.put(idx("set", p0), p1); return this; }
   @Override public Object mut$remove$1(Object p0){ s.put(idx("remove", p0), null); return this; }
-  @Override public Object mut$clear$0(){ s= s.empty(s.cap()); return this; }
+  @Override public Object mut$clear$0(){ s = s.empty(s.cap()); return this; }
   @Override public Object mut$swap$2(Object p0, Object p1){
     long i= idx("swap", p0);
     long j= idx("swap", p1);
@@ -196,9 +196,9 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     s.put(j, e);
     return this;
   }
-  @Override public Object mut$all$1(Object p0){ return bool(Arrays.stream(s.present()).allMatch(i->test(p0, i))); }
-  @Override public Object mut$any$1(Object p0){ return bool(Arrays.stream(s.present()).anyMatch(i->test(p0, i))); }
-  @Override public Object mut$none$1(Object p0){ return bool(Arrays.stream(s.present()).noneMatch(i->test(p0, i))); }
+  @Override public Object mut$all$1(Object p0){ return bool(Arrays.stream(s.present()).allMatch(i -> test(p0, i))); }
+  @Override public Object mut$any$1(Object p0){ return bool(Arrays.stream(s.present()).anyMatch(i -> test(p0, i))); }
+  @Override public Object mut$none$1(Object p0){ return bool(Arrays.stream(s.present()).noneMatch(i -> test(p0, i))); }
   @Override public Object mut$firstIndexWhere$1(Object p0){
     var r= where(p0).findFirst();
     return r.isEmpty() ? optEmpty() : optSome(nat(r.getAsLong()));
@@ -208,8 +208,8 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     return i == -1 ? optEmpty() : optSome(nat(i));
   }
   @Override public Object mut$indicesWhere$1(Object p0){ return Flow$o$1Instance.of(where(p0).mapToObj(ESparseList$2rs$1Instance::nat).toList(), FlowMode.ParImm); }
-  @Override public Object mut$removeIf$1(Object p0){ where(p0).forEach(i->s.put(i, null)); return this; }
-  @Override public Object mut$removeFirstWhere$1(Object p0){ where(p0).findFirst().ifPresent(i->s.put(i, null)); return this; }
+  @Override public Object mut$removeIf$1(Object p0){ where(p0).forEach(i -> s.put(i, null)); return this; }
+  @Override public Object mut$removeFirstWhere$1(Object p0){ where(p0).findFirst().ifPresent(i -> s.put(i, null)); return this; }
   @Override public Object mut$removeLastWhere$1(Object p0){
     long i= lastWhere(p0);
     if (i != -1){ s.put(i, null); }
@@ -223,7 +223,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
       long i= idx("removeAll", l.read$get$1(nat(k)));
       if (!seen.add(i)){ throw detErr("ESparseList.removeAll: Index "+Long.toUnsignedString(i)+" is present twice in the indices to remove"); }
     }
-    seen.forEach(i->s.put(i, null));
+    seen.forEach(i -> s.put(i, null));
     return this;
   }
   @Override public Object mut$trimTo$2(Object p0, Object p1){
@@ -235,13 +235,13 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     for (long i: s.present()){
       if (Long.compareUnsigned(i, start) >= 0 && Long.compareUnsigned(i, end) < 0){ r.put(i - start, s.at(i)); }
     }
-    s= r;
+    s = r;
     return this;
   }
   @Override public Object mut$reverse$0(){
     var r= s.empty(s.cap());
     for (long i: s.present()){ r.put(s.cap() - 1 - i, s.at(i)); }
-    s= r;
+    s = r;
     return this;
   }
   @Override public Object mut$mapInPlace$1(Object p0){
@@ -280,7 +280,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     return this;
   }
   private static Flow$o$1Instance opts(SparseStore d, FlowMode mode){
-    Iterable<Object> it= ()->upTo(d.cap()).mapToObj(i->opt(d.at(i))).iterator();
+    Iterable<Object> it= () -> upTo(d.cap()).mapToObj(i -> opt(d.at(i))).iterator();
     return Flow$o$1Instance.of(it, mode);
   }
   private static Flow$o$1Instance flat(SparseStore d, FlowMode mode){ return Flow$o$1Instance.of(Arrays.stream(d.present()).mapToObj(d::at).toList(), mode); }

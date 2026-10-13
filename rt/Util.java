@@ -4,23 +4,23 @@ import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-public class Util{
+public final class Util{
   private static final AtomicBoolean parentLifelineStarted= new AtomicBoolean();
   public static void installParentLifeline(){
     //This allows to 'disable' this check if there is no master process
     if (!"stdin".equals(System.getProperty("fearless.parentLifeline"))){ return; }
     //makes sure this truly happens only one time
-    if (!parentLifelineStarted.compareAndSet(false,true)){ return; }
-    var t= new Thread(Util::watchParentLifeline,"FearlessParentLifeline");
+    if (!parentLifelineStarted.compareAndSet(false, true)){ return; }
+    var t= new Thread(Util::watchParentLifeline, "FearlessParentLifeline");
     t.setDaemon(true);
     t.start();
   }
   private static void watchParentLifeline(){
     try{
-      while(System.in.read()!=-1){}
+      while (System.in.read()!=-1){}
       parentGone();
     }
-    catch(java.io.IOException _){ parentGone(); }
+    catch (java.io.IOException _){ parentGone(); }
   }
   private static void parentGone(){
     int code= 121;
@@ -28,7 +28,7 @@ public class Util{
     var halter= new Thread(() -> {
       sleepUninterruptibly(haltMs);
       Runtime.getRuntime().halt(code);
-    },"FearlessParentLifelineHalt");
+    }, "FearlessParentLifelineHalt");
     halter.setDaemon(true);
     halter.start();
     Runtime.getRuntime().exit(code);
@@ -37,14 +37,14 @@ public class Util{
     boolean interrupted= false;
     try{
       long end= System.nanoTime()+java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(millis);
-      for(;;){
+      for (;;){
         long left= end-System.nanoTime();
         if (left<=0){ return; }
         try{
           Thread.sleep(java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(left));
           return;
         }
-        catch(InterruptedException e){ interrupted= true; }
+        catch (InterruptedException e){ interrupted = true; }
       }
     }
     finally{ if (interrupted){ Thread.currentThread().interrupt(); } }
@@ -58,11 +58,11 @@ public class Util{
   public static Object ord(int i){ return i<0? ordLt : i==0? ordEq : ordGt; }
   public static Opt$c$1 optEmpty(){ return Opt$c$1.instance; }
   public static Opt$c$1 optSome(Object x){ return (Opt$c$1) Opts$o$0.instance.imm$$hash$1(x); }
-  public static Opt$c$1 optNullable(Object o) {
-      if (o == null) {return optEmpty();}
+  public static Opt$c$1 optNullable(Object o){
+      if (o == null){return optEmpty();}
       return optSome(o);
   }
-  public static Opt$c$1 toOpt(Optional<?> opt) {
+  public static Opt$c$1 toOpt(Optional<?> opt){
     return optNullable(opt.orElse(null));
   }
   public static Object ok(Object x){ return Actions$5c$0.instance.imm$ok$1(x); }
@@ -73,8 +73,8 @@ public class Util{
   public static Error err(String msg){//TODO: eventually all calls to .err will need to take a decision det/non det.
     return detErr(msg);
     }
-  public static Error detErr(String msg) {
-    var info = _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
+  public static Error detErr(String msg){
+    var info= _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
     return (Error) Error$1c$0.instance.imm$$bang$1(info);
   }
   public static BigInteger unsignedLongToBigInteger(long x){
@@ -83,7 +83,7 @@ public class Util{
       : BigInteger.valueOf(x & Long.MAX_VALUE).setBit(63);
   }
   public static String toS(Object o){return ((Str$c$0Instance)((ToStr$1g$0)o).read$str$0()).val(); }
-  public static String toStringBy(ToStrBy$5u$1 by, Object p0) {
+  public static String toStringBy(ToStrBy$5u$1 by, Object p0){
     return toS(by.imm$$hash$1(p0));
   }
   public static long natToLong(Object n){
@@ -93,8 +93,8 @@ public class Util{
     return ((Int$c$0Instance)n).val();
   }
   public static int natToInt(Object n){
-    long nat = ((Nat$c$0Instance)n).val();
-    if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {
+    long nat= ((Nat$c$0Instance)n).val();
+    if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0){
       throw err("Nat "+Long.toUnsignedString(nat)+" is too large to be represented as an integer");
     }
     return (int) nat;
@@ -102,14 +102,14 @@ public class Util{
 
   public static Object callMF$1(Object f){ return ((MF$7$1)f).mut$$hash$0(); }
   public static Object callMF$2(Object f, Object x){ return ((MF$7$2)f).mut$$hash$1(x); }
-  public static Object callMF$3(Object f,Object x,Object y){ return ((MF$7$3)f).mut$$hash$2(x,y); }
-  public static Object callMF$4(Object f,Object x,Object y,Object z){ return ((MF$7$4)f).mut$$hash$3(x,y,z); }
+  public static Object callMF$3(Object f, Object x, Object y){ return ((MF$7$3)f).mut$$hash$2(x, y); }
+  public static Object callMF$4(Object f, Object x, Object y, Object z){ return ((MF$7$4)f).mut$$hash$3(x, y, z); }
   public static Object callF$1(Object f){ return ((F$3$1)f).read$$hash$0(); }
   public static Object callF$2(Object f, Object x){ return ((F$3$2)f).read$$hash$1(x); }
-  public static Object callF$3(Object f,Object x,Object y){ return ((F$3$3)f).read$$hash$2(x,y); }
-  public static Object callF$4(Object f,Object x,Object y,Object z){ return ((F$3$4)f).read$$hash$3(x,y,z); }
-  public static Object callF$5(Object f,Object w,Object x,Object y,Object z){ return ((F$3$5)f).read$$hash$4(w,x,y,z); }
-  public static Object callF$6(Object f,Object v,Object w,Object x,Object y,Object z){ return ((F$3$6)f).read$$hash$5(v,w,x,y,z); }
+  public static Object callF$3(Object f, Object x, Object y){ return ((F$3$3)f).read$$hash$2(x, y); }
+  public static Object callF$4(Object f, Object x, Object y, Object z){ return ((F$3$4)f).read$$hash$3(x, y, z); }
+  public static Object callF$5(Object f, Object w, Object x, Object y, Object z){ return ((F$3$5)f).read$$hash$4(w, x, y, z); }
+  public static Object callF$6(Object f, Object v, Object w, Object x, Object y, Object z){ return ((F$3$6)f).read$$hash$5(v, w, x, y, z); }
 
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }
@@ -120,12 +120,12 @@ public class Util{
     @Override public Object mut$eq$0(){ return eq; }
     @Override public Object mut$gt$0(){ return gt; }
   };
-  public static int cmp(OrderBy$5e$2 by,Object a,Object b){//so this is the more general method
+  public static int cmp(OrderBy$5e$2 by, Object a, Object b){//so this is the more general method
     var ohA= (Order$1c$1)by.imm$$hash$1(a);
     var ohB= (Order$1c$1)by.imm$$hash$1(b);
-    return (Integer)((Order$1c$0)ohA.read$cmp$2(ohA.read$close$0(),ohB.read$close$0())).read$$hash$1(cmpM);
+    return (Integer)((Order$1c$0)ohA.read$cmp$2(ohA.read$close$0(), ohB.read$close$0())).read$$hash$1(cmpM);
   }
-  public static Comparator<Object> toComparator(OrderBy$5e$2 ordering) {
+  public static Comparator<Object> toComparator(OrderBy$5e$2 ordering){
     return (a, b) -> cmp(ordering, a, b);
   }
   public static final class MapKey{
@@ -133,7 +133,7 @@ public class Util{
     public final Object key;      // representative K (first inserted)
     public final Object close;    // K0
     public final long hc;
-    public MapKey(OrderHashBy$2ea$2 oh,Object k){
+    public MapKey(OrderHashBy$2ea$2 oh, Object k){
       key= k;
       ord= (OrderHash$lk$1)oh.imm$$hash$1(k);
       close= ((Order$1c$1)ord).read$close$0();
@@ -145,15 +145,15 @@ public class Util{
     return isTrue(((Order$1c$1)ord).read$$eq_eq$1(x.close));
     }
   }
-  public static MapKey mapKey(OrderHashBy$2ea$2 oh,Object k){ return new MapKey(oh,k); }
+  public static MapKey mapKey(OrderHashBy$2ea$2 oh, Object k){ return new MapKey(oh, k); }
   
   public static Deterministic deterministic(Info$o$0 i){ return new Deterministic(i); }
   public static NonDeterministic nonDeterministic(Info$o$0 i){ return new NonDeterministic(i); }
   public static boolean topLevel(Runnable r){
     try{ r.run(); endMarker(); return true; }
-    catch(Deterministic d){ printInfo(d.i,d); }
-    catch(NonDeterministic d){ printInfo(d.i,d); }
-    catch(Throwable t){ t.printStackTrace();}
+    catch (Deterministic d){ printInfo(d.i, d); }
+    catch (NonDeterministic d){ printInfo(d.i, d); }
+    catch (Throwable t){ t.printStackTrace();}
     return false;
   }
   private static void endMarker(){
@@ -161,23 +161,23 @@ public class Util{
     if (m != null){ System.out.print(m+"\n"); }
   }
   public static void printInfo(Info$o$0 i, RuntimeException d){
-    printInfoMsg("","",i);
+    printInfoMsg("", "", i);
     var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
     map.entrySet().stream()
-      .filter(e->is(e.getKey(),"msg")).forEach(e->printInfoMsg("","",(Info$o$0)e.getValue()));
+      .filter(e -> is(e.getKey(), "msg")).forEach(e -> printInfoMsg("", "", (Info$o$0)e.getValue()));
     //map.entrySet().stream()
     //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
-    for(var e : d.getStackTrace()){
+    for (var e : d.getStackTrace()){
       var f= _Throw$1c$0.frameData(e);
       if (f != null){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
     }
   }
-  public static boolean is(MapKey k,String label){
+  public static boolean is(MapKey k, String label){
     return k.key instanceof Str$c$0Instance s && s.val().equals(label);
     }
   public static void printInfoMsg(String prefix, String indent, Info$o$0 i){
     var msg= ((Str$c$0Instance)i.imm$softMsg$0()).val();
-    msg = msg.replace("\n","\n"+indent);
+    msg = msg.replace("\n", "\n"+indent);
     System.err.print(prefix+msg+"\n");
   }
   public static void printInfoList(Info$o$0 i){ 
@@ -188,7 +188,7 @@ public class Util{
     }
     System.err.print("\nStack trace:\n");
     var jList= ((List$o$1Instance)fList).val();
-    for(var e : jList){ printInfoMsg("- ","  ",(Info$o$0)e); }
+    for (var e : jList){ printInfoMsg("- ", "  ", (Info$o$0)e); }
   }
   public static RuntimeException asFearlessError(Throwable t){
     for (var c= t; c != null; c = c.getCause()){
@@ -204,10 +204,10 @@ public class Util{
   }
 }
 @SuppressWarnings("serial")
-class Deterministic extends RuntimeException{
+final class Deterministic extends RuntimeException{
   Info$o$0 i;Deterministic(Info$o$0 i){this.i= i;}
 }
 @SuppressWarnings("serial")
-class NonDeterministic extends RuntimeException{
+final class NonDeterministic extends RuntimeException{
   Info$o$0 i;NonDeterministic(Info$o$0 i){this.i= i;}
 }

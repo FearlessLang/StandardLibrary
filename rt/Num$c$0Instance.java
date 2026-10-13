@@ -6,33 +6,33 @@ import java.math.BigInteger;
 import java.util.stream.LongStream;
 
 // Cache the integers from -128 to 127, inclusive.
-class NumCache {
-  private static final int min = -128;
-  private static final int max = 127;
-  private static final BigInteger maxInt = BigInteger.valueOf(Integer.MAX_VALUE);
-  private static final BigInteger minInt = BigInteger.valueOf(Integer.MIN_VALUE);
-  private static final Num$c$0Instance[] intCache = LongStream.rangeClosed(min, max)
+final class NumCache{
+  private static final int min= -128;
+  private static final int max= 127;
+  private static final BigInteger maxInt= BigInteger.valueOf(Integer.MAX_VALUE);
+  private static final BigInteger minInt= BigInteger.valueOf(Integer.MIN_VALUE);
+  private static final Num$c$0Instance[] intCache= LongStream.rangeClosed(min, max)
           .mapToObj(l -> new Num$c$0Instance(BigInteger.valueOf(l), BigInteger.ONE))
           .toArray(Num$c$0Instance[]::new);
 
-  static Num$c$0Instance get(int i) {
-    if (i < min || i > max) {
+  static Num$c$0Instance get(int i){
+    if (i < min || i > max){
       return new Num$c$0Instance(BigInteger.valueOf(i), BigInteger.ONE);
     }
     // shift the index so that min is 0
-    int index = (i - min);
+    int index= (i - min);
     return intCache[index];
   }
 
-  static boolean inCache(BigInteger numerator, BigInteger denominator) {
-    if (!denominator.equals(BigInteger.ONE)) {
+  static boolean inCache(BigInteger numerator, BigInteger denominator){
+    if (!denominator.equals(BigInteger.ONE)){
       return false;
     }
     return numerator.compareTo(maxInt) < 0 && numerator.compareTo(minInt) > 0;
   }
 }
 
-public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) implements Num$c$0,Norm$o$1 {
+public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) implements Num$c$0,Norm$o$1{
   private static final BigInteger one= BigInteger.ONE;
   private static final BigInteger zero= BigInteger.ZERO;
   private static final BigInteger minInt= BigInteger.valueOf(Int$c$0Instance.MIN_VALUE);
@@ -40,7 +40,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   private static final BigInteger maxNat= one.shiftLeft(64).subtract(one);
   private static final BigInteger maxByte= BigInteger.valueOf(255);
 
-  public Num$c$0Instance {
+  public Num$c$0Instance{
     if (denominator.signum() == 0){ throw err("Num: denom==0"); }
     if (numerator.signum() == 0){ numerator = zero; denominator = one; }
     else{
@@ -50,16 +50,16 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
       if (denominator.signum() < 0){ numerator = numerator.negate(); denominator = denominator.negate(); }
     }
   }
-  public static Num$c$0 instance(BigInteger numerator, BigInteger denominator) {
-    if (NumCache.inCache(numerator, denominator)) { return NumCache.get(numerator.intValue()); }
+  public static Num$c$0 instance(BigInteger numerator, BigInteger denominator){
+    if (NumCache.inCache(numerator, denominator)){ return NumCache.get(numerator.intValue()); }
     return new Num$c$0Instance(numerator, denominator);
   }
   private static Num$c$0Instance num(Object o){ return (Num$c$0Instance)o; }
   static int cmp(Num$c$0Instance a, Num$c$0Instance b){
     return a.numerator.multiply(b.denominator).compareTo(b.numerator.multiply(a.denominator));
   }
-  private static boolean lt(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a,b) < 0; }
-  private static boolean le(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a,b) <= 0; }
+  private static boolean lt(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a, b) < 0; }
+  private static boolean le(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a, b) <= 0; }
   private static BigInteger trunc0Z(BigInteger n, BigInteger d){ return n.divide(d); }
   private static BigInteger floorZ(BigInteger n, BigInteger d){
     var qr= n.divideAndRemainder(d);
@@ -100,11 +100,11 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     var o= num(p0);
     return instance(numerator.multiply(o.numerator), denominator.multiply(o.denominator));
   }
-  public static BigInteger pow(BigInteger n, long exponent) {
+  public static BigInteger pow(BigInteger n, long exponent){
     assert exponent >= 0;
     if (n.signum() == 0 || n.equals(one)){ return exponent == 0 ? one : n; }
     if (n.equals(one.negate())){ return (exponent & 1) == 0 ? one : n; }
-    if (exponent <= Integer.MAX_VALUE) {
+    if (exponent <= Integer.MAX_VALUE){
       // is small enough to safely cast
       return n.pow((int) exponent);
     }
@@ -112,18 +112,18 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     // a^(n+m) = a^n * a^m
     // we break it down into a^MAX_INT_1 * ... * a^MAX_INT_k * a^rem,
     // where MAX_INT_1 + ... + MAX_INT_K + rem = exponent;
-    BigInteger result = BigInteger.ONE;
-    long timesToDecompose = exponent / Integer.MAX_VALUE;
-    int remainder = (int) (exponent % Integer.MAX_VALUE);
-    for (int i = 0; i < timesToDecompose; i++) {
+    BigInteger result= BigInteger.ONE;
+    long timesToDecompose= exponent / Integer.MAX_VALUE;
+    int remainder= (int) (exponent % Integer.MAX_VALUE);
+    for (int i= 0; i < timesToDecompose; i++){
       result = result.multiply(n.pow(Integer.MAX_VALUE));
     }
     return result.multiply(n.pow(remainder));
   }
-  @Override public Object imm$$star_star$1(Object p0) {
-    long exponent = ((Int$c$0Instance) p0).val();
-    if (exponent == 0) {return NumCache.get(1);}
-    if (exponent == 1) {return this;}
+  @Override public Object imm$$star_star$1(Object p0){
+    long exponent= ((Int$c$0Instance) p0).val();
+    if (exponent == 0){return NumCache.get(1);}
+    if (exponent == 1){return this;}
     if (exponent > 0){
       return Num$c$0Instance.instance(
               pow(numerator, exponent), pow(denominator, exponent)
@@ -131,7 +131,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     }
     if (numerator.signum() == 0){ throw err("Num**: cannot raise +0/1 to the negative power "+exponent); }
     // Since negative flip fraction
-    if (exponent == Long.MIN_VALUE) {
+    if (exponent == Long.MIN_VALUE){
       // Since |Long.MIN_VALUE| is too large to fit in long
       return new Num$c$0Instance(
               pow(denominator, Long.MAX_VALUE).multiply(denominator),
@@ -155,7 +155,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   @Override public Object imm$ceil$0(){ return instance(ceilZ(numerator, denominator), one); }
   @Override public Object imm$trunc0$0(){ return instance(trunc0Z(numerator, denominator), one); }
 
-  @Override public Object imm$sign$0() {
+  @Override public Object imm$sign$0(){
     return NumCache.get(numerator.signum() * denominator.signum());
   }
 
@@ -165,9 +165,9 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     var q= n.divide(denominator);
     var r= n.remainder(denominator);
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
-    if (c >= 0){ q= q.add(one); } // always round up
-    if (numerator.signum() < 0){ q= q.negate(); }
-    return instance(q,one);
+    if (c >= 0){ q = q.add(one); } // always round up
+    if (numerator.signum() < 0){ q = q.negate(); }
+    return instance(q, one);
   }
 
   @Override public Object imm$roundTiesEven$0(){
@@ -177,89 +177,89 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
 
     var r= n.remainder(denominator);
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
-    if (c > 0 || (c == 0 && q.testBit(0))){ q= q.add(one); } // tie -> bump if odd
-    if (numerator.signum() < 0){ q= q.negate(); }
-    return instance(q,one);
+    if (c > 0 || (c == 0 && q.testBit(0))){ q = q.add(one); } // tie -> bump if odd
+    if (numerator.signum() < 0){ q = q.negate(); }
+    return instance(q, one);
   }
 
-  public boolean isRepresentableAsDouble() {
+  public boolean isRepresentableAsDouble(){
     // Works as all Num's that are numerically equal are the same fraction
     // i.e. Num(1, 2).equals(Num(2, 4));
     return Float$1c$0Instance.numExactFinite(
             numerator.doubleValue() / denominator.doubleValue()
     ).equals(this);
   }
-  public boolean isInteger() { return this.denominator.equals(one); }
-  public boolean isIntegerInRange(BigInteger min, BigInteger max) {
+  public boolean isInteger(){ return this.denominator.equals(one); }
+  public boolean isIntegerInRange(BigInteger min, BigInteger max){
     return this.isInteger() && this.numerator.compareTo(min) >= 0 && this.numerator.compareTo(max) <= 0;
   }
   @Override public Object imm$isInteger$0(){ return bool(this.isInteger()); }
-  @Override public Object imm$int$0() {
+  @Override public Object imm$int$0(){
     // A num can be converted into an int if it an integer in [minInt, maxInt];
-    if (this.isIntegerInRange(minInt, maxInt)) {return optSome(Int$c$0Instance.instance(this.numerator.longValue()));}
+    if (this.isIntegerInRange(minInt, maxInt)){return optSome(Int$c$0Instance.instance(this.numerator.longValue()));}
     return optEmpty();
   }
-  @Override public Object imm$nat$0() {
-    if (this.isIntegerInRange(zero, maxNat)) {
+  @Override public Object imm$nat$0(){
+    if (this.isIntegerInRange(zero, maxNat)){
       // Numbers larger than Long.MAX_VALUE overflow and thus end up as the correct unsigned value.
       return optSome(Nat$c$0Instance.instance(this.numerator.longValue()));
     }
     return optEmpty();
   }
-  @Override public Object imm$byte$0() {
-    if (this.isIntegerInRange(zero, maxByte)) {return optSome(Byte$o$0Instance.instance(this.numerator.byteValue()));}
+  @Override public Object imm$byte$0(){
+    if (this.isIntegerInRange(zero, maxByte)){return optSome(Byte$o$0Instance.instance(this.numerator.byteValue()));}
     return optEmpty();
   }
   @Override public Object imm$float$0(){
-    if (!isRepresentableAsDouble()) { return optEmpty(); }
+    if (!isRepresentableAsDouble()){ return optEmpty(); }
     return optSome(Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
   }
   private boolean outOfRange(BigInteger min, BigInteger max){ return numerator.compareTo(min) < 0 || numerator.compareTo(max) > 0; }
   private String notInteger(String m, String to){ return "Num."+m+": cannot convert Num " + this.asString() + " to "+to+" as the denominator is not 1."; }
   private String notInRange(String m, String to, BigInteger min, BigInteger max){ return "Num."+m+": cannot convert Num " + this.asString() + " to "+to+" as the numerator is not in the range ["+min+", "+max+"]"; }
-  @Override public Object imm$getInt$0() {
+  @Override public Object imm$getInt$0(){
     if (!isInteger()){ throw err(notInteger("getInt", "Int")); }
     // We know the denominator must be one.
     if (outOfRange(minInt, maxInt)){ throw err(notInRange("getInt", "Int", minInt, maxInt)); }
     return Int$c$0Instance.instance(this.numerator.longValue());
   }
-  @Override public Object imm$tryGetInt$0() {
+  @Override public Object imm$tryGetInt$0(){
     if (!isInteger()){ return fail(notInteger("getInt", "Int")); }
     if (outOfRange(minInt, maxInt)){ return fail(notInRange("getInt", "Int", minInt, maxInt)); }
     return ok(Int$c$0Instance.instance(this.numerator.longValue()));
   }
 
-  @Override public Object imm$getNat$0() {
+  @Override public Object imm$getNat$0(){
     if (!isInteger()){ throw err(notInteger("getNat", "Nat")); }
     if (outOfRange(zero, maxNat)){ throw err(notInRange("getNat", "Nat", zero, maxNat)); }
     return Nat$c$0Instance.instance(this.numerator.longValue());
   }
-  @Override public Object imm$tryGetNat$0() {
+  @Override public Object imm$tryGetNat$0(){
     if (!isInteger()){ return fail(notInteger("getNat", "Nat")); }
     if (outOfRange(zero, maxNat)){ return fail(notInRange("getNat", "Nat", zero, maxNat)); }
     return ok(Nat$c$0Instance.instance(this.numerator.longValue()));
   }
 
 
-  @Override public Object imm$getByte$0() {
+  @Override public Object imm$getByte$0(){
     if (!isInteger()){ throw err(notInteger("getByte", "Byte")); }
     if (outOfRange(zero, maxByte)){ throw err(notInRange("getByte", "Byte", zero, maxByte)); }
     return Byte$o$0Instance.instance(this.numerator.byteValue());
   }
-  @Override public Object imm$tryGetByte$0() {
+  @Override public Object imm$tryGetByte$0(){
     if (!isInteger()){ return fail(notInteger("getByte", "Byte")); }
     if (outOfRange(zero, maxByte)){ return fail(notInRange("getByte", "Byte", zero, maxByte)); }
     return ok(Byte$o$0Instance.instance(this.numerator.byteValue()));
   }
 
   @Override public Object imm$getFloat$0(){
-    if (!isRepresentableAsDouble()) {
+    if (!isRepresentableAsDouble()){
       throw err("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
     return Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
   }
   @Override public Object imm$tryGetFloat$0(){
-    if (!isRepresentableAsDouble()) {
+    if (!isRepresentableAsDouble()){
       return fail("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
     return ok(Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
@@ -280,7 +280,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   @Override public Object imm$softFloat$0(){
     return Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
   }
-  String asString() {
+  String asString(){
     String sn= (numerator.signum() < 0 ? "" : "+")+ numerator;
     return sn+"/"+ denominator;
   }
@@ -295,12 +295,12 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     var d= num(p1);
     if (d.numerator.signum() < 0){ throw err("Num.eqDelta: delta<0"); }
     var diff= (Num$c$0Instance)((Num$c$0Instance)this.imm$$dash$1(exp)).imm$abs$0();
-    return bool(le(diff,d));
+    return bool(le(diff, d));
   }
-  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmp(num(p0),num(p1))); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmp(num(p0), num(p1))); }
   @Override public Object imm$norm$0(){
     if (numerator.abs().bitLength() + denominator.bitLength() <= 512){ return this; }
-    return myCache.computeIfAbsent(this,_->new Norm(this));
+    return myCache.computeIfAbsent(this, _ -> new Norm(this));
   }
   @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>();

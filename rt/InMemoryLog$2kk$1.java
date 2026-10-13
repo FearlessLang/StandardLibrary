@@ -9,18 +9,18 @@ public interface InMemoryLog$2kk$1 extends CaptureFree$2dk$0{
   ArrayList<Object> _log();
   default Object imm$log$1(Object p0){
     var log= _log();
-    synchronized(log){ log.add(p0); }
+    synchronized (log){ log.add(p0); }
     return Void$o$0.instance;
   }
   default Object _readCopy(){
     var log= _log();
     if (log.isEmpty()){ return List$o$1.instance; }
-    synchronized(log){ return new List$o$1Instance(List.copyOf(log)); }
+    synchronized (log){ return new List$o$1Instance(List.copyOf(log)); }
   }
   default Object _consumeCopy(){
     var log= _log();
     if (log.isEmpty()){ return List$o$1.instance; }
-    synchronized(log){
+    synchronized (log){
       var res= new List$o$1Instance(List.copyOf(log));
       log.clear();
       return res;

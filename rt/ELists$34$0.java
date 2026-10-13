@@ -16,28 +16,28 @@ public interface ELists$34$0 extends Sealed$2o$0{
   }
   private static Object of(Object... es){ return new EList$1k$1Instance(new ArrayList<>(List.of(es))); }
   default Object imm$$hash$1(Object p0){ return of(p0); }
-  default Object imm$$hash$2(Object p0,Object p1){ return of(p0,p1); }
-  default Object imm$$hash$3(Object p0,Object p1,Object p2){ return of(p0,p1,p2); }
-  default Object imm$$hash$4(Object p0,Object p1,Object p2,Object p3){ return of(p0,p1,p2,p3); }
-  default Object imm$$hash$5(Object p0,Object p1,Object p2,Object p3,Object p4){ return of(p0,p1,p2,p3,p4); }
-  default Object imm$$hash$6(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5){ return of(p0,p1,p2,p3,p4,p5); }
-  default Object imm$$hash$7(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6){ return of(p0,p1,p2,p3,p4,p5,p6); }
-  default Object imm$$hash$8(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7){ return of(p0,p1,p2,p3,p4,p5,p6,p7); }
-  default Object imm$$hash$9(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8); }
-  default Object imm$$hash$10(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9); }
-  default Object imm$$hash$11(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10); }
-  default Object imm$$hash$12(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11); }
-  default Object imm$$hash$13(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12); }
-  default Object imm$$hash$14(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13); }
-  default Object imm$$hash$15(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14); }
-  default Object imm$$hash$16(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14,Object p15){ return of(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15); }
+  default Object imm$$hash$2(Object p0, Object p1){ return of(p0, p1); }
+  default Object imm$$hash$3(Object p0, Object p1, Object p2){ return of(p0, p1, p2); }
+  default Object imm$$hash$4(Object p0, Object p1, Object p2, Object p3){ return of(p0, p1, p2, p3); }
+  default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){ return of(p0, p1, p2, p3, p4); }
+  default Object imm$$hash$6(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5){ return of(p0, p1, p2, p3, p4, p5); }
+  default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){ return of(p0, p1, p2, p3, p4, p5, p6); }
+  default Object imm$$hash$8(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7){ return of(p0, p1, p2, p3, p4, p5, p6, p7); }
+  default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8); }
+  default Object imm$$hash$10(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9); }
+  default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10); }
+  default Object imm$$hash$12(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11); }
+  default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12); }
+  default Object imm$$hash$14(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13); }
+  default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14); }
+  default Object imm$$hash$16(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15); }
   ELists$34$0 instance= new ELists$34$0(){};
 }
 final class EList$1k$1Instance implements EList$1k$1{
   EList$1k$1Instance(List<Object> l){ xs= l; }
   private List<Object> xs;
   private ArrayList<Object> drain(){
-    if (xs instanceof ArrayList<Object> a){ xs= new ArrayList<>(); return a; }
+    if (xs instanceof ArrayList<Object> a){ xs = new ArrayList<>(); return a; }
     var r= new ArrayList<>(xs);
     xs.clear();
     return r;
@@ -126,24 +126,24 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$sort$1(Object p0){
     var by= (OrderBy$5e$2)p0;
-    xs.sort((a,b)->cmp(by,a,b));
+    xs.sort((a,b) -> cmp(by, a, b));
     return this;
   }
   @Override public Object mut$distinct$1(Object p0){
     var by= (OrderHashBy$2ea$2)p0;
     var seen= new HashSet<MapKey>();
-    xs.removeIf(e -> !seen.add(mapKey(by,e)));
+    xs.removeIf(e -> !seen.add(mapKey(by, e)));
     return this;
   }
   @Override public Object mut$sortDistinct$1(Object p0){
-    if(xs.size() < 2){ return this; }
+    if (xs.size() < 2){ return this; }
     var by= (OrderBy$5e$2)p0;
-    xs.sort((a,b)->cmp(by,a,b));
+    xs.sort((a,b) -> cmp(by, a, b));
     int w= 1;
-    for(int i= 1; i < xs.size(); i++){
-      if(cmp(by,xs.get(w-1),xs.get(i)) != 0){ xs.set(w++, xs.get(i)); }
+    for (int i= 1; i < xs.size(); i++){
+      if (cmp(by, xs.get(w-1), xs.get(i)) != 0){ xs.set(w++, xs.get(i)); }
     }
-    xs.subList(w,xs.size()).clear();
+    xs.subList(w, xs.size()).clear();
     return this;
   }
   @Override public Object mut$trimToSize$0(){
@@ -158,22 +158,22 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$fold$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size(); i++){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size(); i++){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRight$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0; i--){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0; i--){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size() && !test(p2, acc); i++){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size() && !test(p2, acc); i++){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRightUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i--){ acc= callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i--){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$accumulateInPlace$1(Object p0){

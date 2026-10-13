@@ -16,12 +16,12 @@ final class CGraphicsCtx implements Graphics$ao$0{
   float x;
   float y;
   CGraphicsCtx(Canvas cv, _Frame frame, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint){
-    this.cv = cv;
-    this.frame = frame;
-    this.elapsed = elapsed;
-    this.panelWidth = panelWidth;
-    this.panelHeight = panelHeight;
-    this.paint = paint;
+    this.cv= cv;
+    this.frame= frame;
+    this.elapsed= elapsed;
+    this.panelWidth= panelWidth;
+    this.panelHeight= panelHeight;
+    this.paint= paint;
   }
 
   @Override public Object mut$color$1(Object color){
@@ -55,7 +55,7 @@ final class CGraphicsCtx implements Graphics$ao$0{
     return Rect.makeXYWH(x, y, Scopes.extent((WidthNat$as$0) w, what + " width"), Scopes.extent((HeightNat$lg$0) h, what + " height"));
   }
   @Override public Object mut$image$1(Object image){
-    var img = ((Image$1c$0Instance) image).image();
+    var img= ((Image$1c$0Instance) image).image();
     cv.drawImageRect(
       img,
       Rect.makeWH(img.getWidth(), img.getHeight()),
