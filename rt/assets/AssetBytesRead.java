@@ -15,7 +15,6 @@ import static _base.Util.*;
 final class AssetBytesRead{
   static final Set<Key> seen=ConcurrentHashMap.newKeySet();
 
-  private AssetBytesRead(){ throw new AssertionError(); }
 
   record Key(
     String requestId,

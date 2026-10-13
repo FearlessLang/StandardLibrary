@@ -15,8 +15,6 @@ import java.util.Locale;
 import static _base.Util.*;
 
 final class DownloadFetch{
-  private DownloadFetch(){ throw new AssertionError(); }
-
   static final int maxRedirects= 5;
   static final Duration connectTimeout= Duration.ofSeconds(30);
   static final Duration responseTimeout= Duration.ofSeconds(30);

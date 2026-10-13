@@ -11,8 +11,6 @@ import io.github.humbleui.skija.ImageInfo;
 import static _base.Util.*;
 
 final class AssetImageRead{
-  private AssetImageRead(){ throw new AssertionError(); }
-
   static Object readImage(Object path,Object diskPath,Object zipSteps,Object zipEntry,Object maxPixels){
     return readImage(
       AssetBytesRead.str(path),

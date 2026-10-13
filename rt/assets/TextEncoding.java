@@ -8,7 +8,6 @@ final class TextEncoding{
   static final Object notScalar=reason(2);
   static final Object notInStr=reason(3);
 
-  private TextEncoding(){ throw new AssertionError(); }
 
   interface Decoder{ void decode(byte[] bs,Sink out); }
 

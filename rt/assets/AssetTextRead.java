@@ -1,8 +1,6 @@
 package _base;
 
 final class AssetTextRead{
-  private AssetTextRead(){ throw new AssertionError(); }
-
   static void consumeOnce(String requestId,String method,String path,String diskPath,String zipSteps,String zipEntry){
     AssetBytesRead.consumeOnce(requestId,method,path,diskPath,zipSteps,zipEntry);
   }
