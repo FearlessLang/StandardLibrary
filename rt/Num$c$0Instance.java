@@ -6,7 +6,7 @@ import java.math.BigInteger;
 import java.util.stream.LongStream;
 
 // Cache the integers from -128 to 127, inclusive.
-class NumCache {
+final class NumCache {
   private static final int min = -128;
   private static final int max = 127;
   private static final BigInteger maxInt = BigInteger.valueOf(Integer.MAX_VALUE);

@@ -1,6 +1,6 @@
 package _base;
 
-class Scopes{
+final class Scopes{
   static final Painter$5c$0 idP = new Painter$5c$0(){ @Override public Object imm$run$1(Object p0){ return p0; } };
 
   static Nat$c$0 n(long n){ return new Nat$c$0Instance(n); }

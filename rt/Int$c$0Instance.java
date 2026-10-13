@@ -5,7 +5,7 @@ import java.util.stream.LongStream;
 
 import static _base.Util.*;
 
-class IntCache {
+final class IntCache {
   private static final long min = -128;
   private static final long max = 127;
 

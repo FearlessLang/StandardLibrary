@@ -42,5 +42,5 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
       finally { midTask.set(false); }
     }
   }
-  private static class Poison extends RuntimeException{ private static final long serialVersionUID = 1L; }
+  private static final class Poison extends RuntimeException{ private static final long serialVersionUID = 1L; }
 }

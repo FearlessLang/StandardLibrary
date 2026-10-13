@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 
 import static _base.Util.*;
 
-class ByteCache {
+final class ByteCache {
   final static int max = 255;
   final static Byte$o$0Instance[] byteArray = IntStream.rangeClosed(0, max)
           .mapToObj(b -> new Byte$o$0Instance((byte) b))

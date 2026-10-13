@@ -46,7 +46,7 @@ final class SkComponent extends JComponent{
   @Override protected void paintComponent(java.awt.Graphics g){ w.frame.blit(g, this); }
 }
 
-class _Button extends AWidget implements Button$2o$0{
+final class _Button extends AWidget implements Button$2o$0{
   MF$7$1 action;// EDT confined
   boolean down;// visual pressed state, maintained by SkMouse, read by Sk.button
   boolean over;// visual rollover state, maintained by SkMouse, read by Sk.button
@@ -66,7 +66,7 @@ class _Button extends AWidget implements Button$2o$0{
   @Override void sk(Canvas cv){ Sk.button(cv, this); }
 }
 
-class _Label extends AWidget implements Label$1c$0{
+final class _Label extends AWidget implements Label$1c$0{
   _Label(_Frame frame){ super(frame); }
 
   @Override Dimension autoSize(int width, int height){ return Sk.textSizeWithInsets(this); }
@@ -76,7 +76,7 @@ class _Label extends AWidget implements Label$1c$0{
   }
 }
 
-class _Pane extends AContainer implements Pane$o$0{
+final class _Pane extends AContainer implements Pane$o$0{
   boolean vertical = false;
   int chunk = 0;
 
@@ -106,7 +106,7 @@ class _Pane extends AContainer implements Pane$o$0{
   }
 }
 
-class _Border extends AContainer implements Border$2o$0{
+final class _Border extends AContainer implements Border$2o$0{
   _Border(_Frame frame){
     super(frame);
     component.setLayout(new MutableBorderLayout(this));
@@ -283,7 +283,7 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
   @Override public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$5c$0) p); }
 }
 
-class _Frame implements Frame$1c$0{
+final class _Frame implements Frame$1c$0{
   final FearlessFrame frame;
   final SkMouse mouse = new SkMouse(this);
   // Written by the repaint tick on the EDT, read by painters on the EDT and

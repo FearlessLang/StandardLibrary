@@ -13,12 +13,12 @@ public interface Norm$o$1 extends _base.Sealed$2o$0 {
   default Object read$as$1(Object p0){ return this; }
   default Object imm$as$1(Object p0){ return this; }
 }
-class Norm implements Norm$o$1{
+final class Norm implements Norm$o$1{
   final Object get;//fearless will guarantee that T is always deeply immutable
   Norm(Object get){ this.get= get; }
   public Object imm$get$0(){return get; }
 }
-class Entry{
+final class Entry{
   final CompletableFuture<Object> ready= new CompletableFuture<>();
   volatile boolean broken=false;
   public Object computeNow(Supplier<Object> s){

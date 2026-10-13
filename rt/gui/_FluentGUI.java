@@ -3,7 +3,7 @@ package _base;
 import java.util.concurrent.CompletableFuture;
 import javax.swing.SwingUtilities;
 
-public class _FluentGUI implements Gui$c$0{
+public final class _FluentGUI implements Gui$c$0{
   @Override public Object mut$run$1(Object o){
     var f = (Consumer$ao$1) o;
     if (SwingUtilities.isEventDispatchThread()){

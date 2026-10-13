@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-public class Util{
+public final class Util{
   private static final AtomicBoolean parentLifelineStarted= new AtomicBoolean();
   public static void installParentLifeline(){
     //This allows to 'disable' this check if there is no master process
@@ -204,10 +204,10 @@ public class Util{
   }
 }
 @SuppressWarnings("serial")
-class Deterministic extends RuntimeException{
+final class Deterministic extends RuntimeException{
   Info$o$0 i;Deterministic(Info$o$0 i){this.i= i;}
 }
 @SuppressWarnings("serial")
-class NonDeterministic extends RuntimeException{
+final class NonDeterministic extends RuntimeException{
   Info$o$0 i;NonDeterministic(Info$o$0 i){this.i= i;}
 }

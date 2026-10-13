@@ -4,7 +4,7 @@ public interface IsoPods$5k$0{
   default Object imm$$hash$1(Object p0){ return new IsoPod$2s$1Instance(p0); }
   IsoPods$5k$0 instance= new IsoPods$5k$0(){};
   }
-class IsoPod$2s$1Instance implements IsoPod$2s$1{
+final class IsoPod$2s$1Instance implements IsoPod$2s$1{
   private Object v; private boolean closed;
   IsoPod$2s$1Instance(Object v){ this.v= v; closed= true; }
   public Object read$isClosed$0(){ return bool(closed); }

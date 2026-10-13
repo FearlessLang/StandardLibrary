@@ -6,7 +6,7 @@ import java.util.stream.LongStream;
 
 import static _base.Util.*;
 
-class NatCache {
+final class NatCache {
   private static final long max = 255L;
   private static final Nat$c$0Instance[] natCache = LongStream.rangeClosed(0, max)
           .mapToObj(Nat$c$0Instance::new)
