@@ -30,7 +30,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   }
 
   private static String strExpr(String s){
-    var parts= s.split("\n",-1);
+    var parts= s.split("\n", -1);
     var res= new StringBuilder(lineExpr(parts[0]));
     for (var i= 1; i < parts.length; i++){
       if (parts[i].isEmpty()){
@@ -60,7 +60,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       if (c != '"' && c != '`'){ continue; }
       if (seen == 0){ seen = c; continue; }
       if (seen == c){ continue; }
-      res.add(s.substring(start,i));
+      res.add(s.substring(start, i));
       start = i;
       seen = c;
     }
@@ -122,27 +122,27 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     long from= ((Nat$c$0Instance)p1).val();
     long to= ((Nat$c$0Instance)p2).val();
     int size= val.length();
-    if (Long.compareUnsigned(from,to) > 0){
+    if (Long.compareUnsigned(from, to) > 0){
       throw Util.err("Str.sub invalid range: from > to; from="+Long.toUnsignedString(from)+" to="+Long.toUnsignedString(to));
     }
-    if (Long.compareUnsigned(from,size) > 0){
+    if (Long.compareUnsigned(from, size) > 0){
       throw Util.err("Str.sub invalid range: from out of bounds; from="+Long.toUnsignedString(from)+" size="+size);
     }
-    if (Long.compareUnsigned(to,size) > 0){
+    if (Long.compareUnsigned(to, size) > 0){
       throw Util.err("Str.sub invalid range: to out of bounds; to="+Long.toUnsignedString(to)+" size="+size);
     }
-    return new Str$c$0Instance(val.substring((int)from,(int)to));
+    return new Str$c$0Instance(val.substring((int)from, (int)to));
   }
   @Override public Object imm$replaceSimultaneousOrdered$1(Object p1){
     if (!(p1 instanceof List$o$1Instance repl)){ return this; }
     @SuppressWarnings("unchecked")
-    String res= Replacements.replaceSimultaneousOrdered((List<Str$c$0Instance>)(Object)repl.val(),val);
+    String res= Replacements.replaceSimultaneousOrdered((List<Str$c$0Instance>)(Object)repl.val(), val);
     return new Str$c$0Instance(res);
   }
   @Override public Object imm$replaceSimultaneous$1(Object p1){
     if (!(p1 instanceof List$o$1Instance repl)){ return this; }
     @SuppressWarnings("unchecked")
-    String res= Replacements.replaceSimultaneous((List<Str$c$0Instance>)(Object)repl.val(),val);
+    String res= Replacements.replaceSimultaneous((List<Str$c$0Instance>)(Object)repl.val(), val);
     return new Str$c$0Instance(res);
   }
   static final Pattern ieeeFloatText= Pattern.compile(
@@ -219,13 +219,13 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       boolean neg= t.charAt(0) == '-';
       if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t = t.substring(1); }
       int slash= t.indexOf('/');
-      Dec a= Dec.parse(t.substring(0,slash));
+      Dec a= Dec.parse(t.substring(0, slash));
       Dec b= Dec.parse(t.substring(slash+1));
       if (b.u.signum() == 0){ return optEmpty(); }
       BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
       BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
       if (neg){ num = num.negate(); }
-      return optSome(Num$c$0Instance.instance(num,den));
+      return optSome(Num$c$0Instance.instance(num, den));
     }
     catch (NumberFormatException e){ return optEmpty(); }
   }
@@ -242,13 +242,13 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       boolean neg= t.charAt(0) == '-';
       if (t.charAt(0)=='+' || t.charAt(0)=='-'){ t = t.substring(1); }
       int slash= t.indexOf('/');
-      Dec a= Dec.parse(t.substring(0,slash));
+      Dec a= Dec.parse(t.substring(0, slash));
       Dec b= Dec.parse(t.substring(slash+1));
       if (b.u.signum() == 0){ return fail("Str.getNum: Cannot convert String "+val+" to Num, as the denominator is 0"); }
       BigInteger num= a.u.multiply(BigInteger.TEN.pow(b.scale));
       BigInteger den= b.u.multiply(BigInteger.TEN.pow(a.scale));
       if (neg){ num = num.negate(); }
-      return ok(Num$c$0Instance.instance(num,den));
+      return ok(Num$c$0Instance.instance(num, den));
     }
     catch (NumberFormatException e){
       return fail("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
@@ -261,8 +261,8 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   record Dec(BigInteger u, int scale){
     static Dec parse(String s){
       int dot= s.indexOf('.');
-      if (dot == -1){ return new Dec(new BigInteger(s),0); }
-      return new Dec(new BigInteger(s.substring(0,dot)+s.substring(dot+1)), s.length()-dot-1);
+      if (dot == -1){ return new Dec(new BigInteger(s), 0); }
+      return new Dec(new BigInteger(s.substring(0, dot)+s.substring(dot+1)), s.length()-dot-1);
     }
   }
   @Override public Object imm$float$0(){
@@ -339,7 +339,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     String mag= new BigDecimal(d).abs().toString(); // exact decimal for this double, may use E
     int e= mag.indexOf('E');
     if (e != -1){
-      String base= mag.substring(0,e);
+      String base= mag.substring(0, e);
       String exp= mag.substring(e+1);
       if (base.indexOf('.') == -1){ base = base+".0"; }
       mag = base+"e"+exp;
@@ -388,9 +388,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase()); }
   @Override public Object imm$norm$0(){
     if (val.length() < 64){ return this; }
-    return myCache.computeIfAbsent(val,_ -> new Norm(this));
+    return myCache.computeIfAbsent(val, _ -> new Norm(this));
   }
   @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
-  static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_",""); }
+  static String no_(String s){ return s.indexOf('_')==-1 ? s : s.replace("_", ""); }
 }

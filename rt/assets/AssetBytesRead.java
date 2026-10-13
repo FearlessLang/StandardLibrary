@@ -26,9 +26,9 @@ final class AssetBytesRead{
     ){}
 
   static void consumeOnce(
-    String requestId,String method,String path,String diskPath,String zipSteps,String zipEntry
+    String requestId, String method, String path, String diskPath, String zipSteps, String zipEntry
     ){
-    if (seen.add(new Key(requestId,method,path,diskPath,zipSteps,zipEntry))){ return; }
+    if (seen.add(new Key(requestId, method, path, diskPath, zipSteps, zipEntry))){ return; }
     throw nonDetErr(
       "Asset read consumed more than once.\n"
       +"requestId: "+requestId+"\n"
@@ -41,9 +41,9 @@ final class AssetBytesRead{
 
   static long nat(Object o){ return ((Nat$c$0Instance)o).val(); }
 
-  static byte[] bytes(String path,String diskPath,String zipSteps,String zipEntry){
-    checkAutoloaded(path,diskPath,zipSteps,zipEntry);
-    var full= localAssetPath(path,diskPath);
+  static byte[] bytes(String path, String diskPath, String zipSteps, String zipEntry){
+    checkAutoloaded(path, diskPath, zipSteps, zipEntry);
+    var full= localAssetPath(path, diskPath);
     var steps= zipStepList(zipSteps);
     var entry= canonicalZipEntry(zipEntry);
     if (entry.isEmpty() && !steps.isEmpty()){ throw invalidAssetDescriptor("zipSteps without zipEntry: "+zipSteps); }
@@ -54,7 +54,7 @@ final class AssetBytesRead{
         n -> { throw nonDetErr("Files under project root has been altered.\nDuplicate zip entry name: "+n); },
         n -> { throw nonDetErr("Files under project root has been altered.\nZip entry too large: "+n); }
         ).readEntry(
-          () -> new ZipInputStream(Files.newInputStream(full),StandardCharsets.UTF_8),
+          () -> new ZipInputStream(Files.newInputStream(full), StandardCharsets.UTF_8),
           steps,
           entry,
           StandardCharsets.UTF_8
@@ -72,10 +72,10 @@ final class AssetBytesRead{
    * triple against the compiler's own compiled-in record of which files it auto-imported for
    * the package path claims to come from (base.<pkg>.Main.autoloadedAssets), rejecting anything
    * that is not literally one of those files. */
-  static void checkAutoloaded(String path,String diskPath,String zipSteps,String zipEntry){
+  static void checkAutoloaded(String path, String diskPath, String zipSteps, String zipEntry){
     var javaPkg= autoloadJavaPackage(path);
-    var triple= List.of(diskPath,zipSteps,zipEntry);
-    if (autoloadCache.computeIfAbsent(javaPkg,AssetBytesRead::loadAutoloaded).contains(triple)){ return; }
+    var triple= List.of(diskPath, zipSteps, zipEntry);
+    if (autoloadCache.computeIfAbsent(javaPkg, AssetBytesRead::loadAutoloaded).contains(triple)){ return; }
     throw invalidAssetDescriptor(
       "This file was not recognized by the compiler as auto-imported.\n"
       +"package: "+javaPkg+"\ndiskPath: "+diskPath
@@ -87,7 +87,7 @@ final class AssetBytesRead{
     if (!path.startsWith(prefix)){ throw invalidAssetDescriptor("path does not start with "+prefix+": "+path); }
     var rest= path.substring(prefix.length());
     var slash= rest.indexOf('/');
-    var folder= slash < 0 ? rest : rest.substring(0,slash);
+    var folder= slash < 0 ? rest : rest.substring(0, slash);
     if (folder.length() < 2 || folder.charAt(0) != '_'){
       throw invalidAssetDescriptor("path has no valid package folder: "+path);
     }
@@ -96,7 +96,7 @@ final class AssetBytesRead{
 
   static List<List<String>> loadAutoloaded(String javaPkg){
     try{
-      var cls= Class.forName(javaPkg+".Main",true,AssetBytesRead.class.getClassLoader());
+      var cls= Class.forName(javaPkg+".Main", true, AssetBytesRead.class.getClassLoader());
       var field= cls.getField("autoloadedAssets");
       var rows= (String[][])field.get(null);
       var res= new ArrayList<List<String>>();
@@ -108,19 +108,19 @@ final class AssetBytesRead{
     }
   }
 
-  static Path localAssetPath(String path,String diskPath){
+  static Path localAssetPath(String path, String diskPath){
     var dirKey= autoloadJavaPackage(path).equals("_base") ? "fearlessBase.dir" : "fearlessUser.dir";
     var root= Path.of(System.getProperty(dirKey)).toAbsolutePath().normalize();
-    var segments= portableSegments("diskPath",diskPath);
+    var segments= portableSegments("diskPath", diskPath);
     var full= root;
     for (var s: segments){ full = full.resolve(s); }
     full = full.normalize();
     if (!full.startsWith(root)){ throw invalidAssetDescriptor("diskPath escapes root: "+diskPath); }
-    rejectSymlinks(full,root,segments,diskPath);
+    rejectSymlinks(full, root, segments, diskPath);
     return full;
   }
 
-  static void rejectSymlinks(Path full,Path root,List<String> segments,String original){
+  static void rejectSymlinks(Path full, Path root, List<String> segments, String original){
     var p= root;
     for (var s: segments){
       p = p.resolve(s);
@@ -132,30 +132,30 @@ final class AssetBytesRead{
   static List<String> zipStepList(String zipSteps){
     if (zipSteps.isEmpty()){ return List.of(); }
     var res= new ArrayList<String>();
-    for (var step: zipSteps.split(";", -1)){ res.add(canonicalSlashPath("zipSteps",step)); }
+    for (var step: zipSteps.split(";", -1)){ res.add(canonicalSlashPath("zipSteps", step)); }
     return res;
   }
 
   static String canonicalZipEntry(String zipEntry){
     if (zipEntry.isEmpty()){ return ""; }
-    return canonicalSlashPath("zipEntry",zipEntry);
+    return canonicalSlashPath("zipEntry", zipEntry);
   }
 
-  static String canonicalSlashPath(String field,String path){
-    return String.join("/", portableSegments(field,path));
+  static String canonicalSlashPath(String field, String path){
+    return String.join("/", portableSegments(field, path));
   }
 
-  static List<String> portableSegments(String field,String path){
+  static List<String> portableSegments(String field, String path){
     if (path.isEmpty()){ throw invalidAssetDescriptor(field+" is empty"); }
     var res= new ArrayList<String>();
     for (var s: path.split("/", -1)){
-      checkPortableSegment(field,s,path);
+      checkPortableSegment(field, s, path);
       res.add(s);
     }
     return res;
   }
 
-  static void checkPortableSegment(String field,String s,String path){
+  static void checkPortableSegment(String field, String s, String path){
     if (
       s.isEmpty()
       || s.startsWith(".")

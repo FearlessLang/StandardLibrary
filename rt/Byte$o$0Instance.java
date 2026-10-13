@@ -60,9 +60,9 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     if (val == 0){ throw nonDetErr("Byte.pred: cannot take the predecessor of 0"); }
     return instance((byte)(val - 1));
   }
-  @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,b(p0))); }
-  @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,b(p0))); }
-  @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,b(p0))); }
+  @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val, b(p0))); }
+  @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val, b(p0))); }
+  @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, b(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
     int power= u8(p0);
     if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
@@ -125,7 +125,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$nat$0(){ return Nat$c$0Instance.instance(u8(val)); }
   @Override public Object imm$int$0(){ return Int$c$0Instance.instance(u8(val)); }
   @Override public Object imm$float$0(){ return Float$1c$0Instance.instance((double)u8(val)); }
-  @Override public Object imm$num$0(){ return Num$c$0Instance.instance(BigInteger.valueOf(u8(val)),BigInteger.ONE); }
+  @Override public Object imm$num$0(){ return Num$c$0Instance.instance(BigInteger.valueOf(u8(val)), BigInteger.ONE); }
   @Override public Object read$str$0(){ return Str$c$0Instance.instance(Integer.toString(u8(val))); }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance((byte)(val + b(p0))); }
@@ -152,7 +152,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$aluXor$1(Object p0){ return instance((byte)(val ^ b(p0))); }
   @Override public Object imm$aluAnd$1(Object p0){ return instance((byte)(val & b(p0))); }
   @Override public Object imm$aluOr$1(Object p0){ return instance((byte)(val | b(p0))); }
-  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(Integer.compare(u8(p0),u8(p1))); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(Integer.compare(u8(p0), u8(p1))); }
   @Override public Object imm$norm$0(){ return this; }
   @Override public Object imm$get$0(){ return this; }
 }

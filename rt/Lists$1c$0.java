@@ -109,7 +109,7 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object read$isEmpty$0(){ return bool(val.isEmpty()); }
   @Override public Object read$str$1(Object p0){
     var by= (ToStrBy$5u$1)p0;
-    String res= val.stream().map(e -> toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ","[","]"));
+    String res= val.stream().map(e -> toS(by.imm$$hash$1(e))).collect(Collectors.joining(", ", "[", "]"));
     return Str$c$0Instance.instance(res);
   }
   @Override public Object mut$get$1(Object p0){ return val.get(idx(p0)); }
@@ -178,35 +178,35 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
     check(0 <= s && s <= e && e <= val.size(), "List subList out of range");
     return wrap(val.subList((int) s, (int) e));
   }
-  @Override public Object read$subList$2(Object p0, Object p1){ return mut$subList$2(p0,p1); }
+  @Override public Object read$subList$2(Object p0, Object p1){ return mut$subList$2(p0, p1); }
   @Override public Object mut$subList$1(Object p0){ return mut$subList$2(p0, Nat$c$0Instance.instance(val.size())); }
   @Override public Object read$subList$1(Object p0){ return mut$subList$1(p0); }
   @Override public Object mut$with$2(Object p0, Object p1){
     int i= idx(p0);
     var l= new ArrayList<Object>(val);
-    l.set(i,p1);
+    l.set(i, p1);
     return wrap(l);
   }
-  @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0,p1); }
+  @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0, p1); }
   @Override public Object mut$withAlso$2(Object p0, Object p1){
     long i= natToLong(p0);
     check(0 <= i && i <= val.size(), "List withAlso out of range");
     int index= (int) i;
     var l= new ArrayList<Object>(val.size()+1);
-    l.addAll(val.subList(0,index));
+    l.addAll(val.subList(0, index));
     l.add(p1);
-    l.addAll(val.subList(index,val.size()));
+    l.addAll(val.subList(index, val.size()));
     return wrap(l);
   }
-  @Override public Object read$withAlso$2(Object p0, Object p1){ return mut$withAlso$2(p0,p1); }
+  @Override public Object read$withAlso$2(Object p0, Object p1){ return mut$withAlso$2(p0, p1); }
   @Override public Object mut$without$1(Object p0){
     int i= idx(p0);
     if (val.size() == 1 && i == 0){ return List$o$1.instance; }
-    if (i == 0){ return wrap(val.subList(1,val.size())); }
-    if (i == val.size()-1){ return wrap(val.subList(0,val.size()-1)); }
+    if (i == 0){ return wrap(val.subList(1, val.size())); }
+    if (i == val.size()-1){ return wrap(val.subList(0, val.size()-1)); }
     var l= new ArrayList<Object>(val.size()-1);
-    l.addAll(val.subList(0,i));
-    l.addAll(val.subList(i+1,val.size()));
+    l.addAll(val.subList(0, i));
+    l.addAll(val.subList(i+1, val.size()));
     return wrap(l);
   }
   @Override public Object read$without$1(Object p0){ return mut$without$1(p0); }

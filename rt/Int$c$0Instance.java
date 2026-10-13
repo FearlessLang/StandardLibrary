@@ -61,7 +61,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$softNat$0(){ return Nat$c$0Instance.instance(val < 0 ? 0 : val); }
   @Override public Object imm$softByte$0(){ return Byte$o$0Instance.instance(clampByte(val)); }
   @Override public Object imm$softFloat$0(){ return Float$1c$0Instance.instance((double)val); }
-  @Override public Object imm$num$0(){ return Num$c$0Instance.instance(BigInteger.valueOf(val),BigInteger.ONE); }
+  @Override public Object imm$num$0(){ return Num$c$0Instance.instance(BigInteger.valueOf(val), BigInteger.ONE); }
   @Override public Object imm$nat$0(){ return val < 0 ? optEmpty() : optSome(Nat$c$0Instance.instance(val)); }
   @Override public Object imm$byte$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$o$0Instance.instance((byte)val)); }
   @Override public Object imm$float$0(){

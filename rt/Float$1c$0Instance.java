@@ -15,11 +15,11 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     if (an){ return bn ? 0 : 1; }
     if (bn){ return -1; }
     if (a == 0.0d && b == 0.0d){ return 0; } // -0.0 == +0.0
-    return Double.compare(a,b);
+    return Double.compare(a, b);
   }
   private static void checkRangeEnds(double lo, double hi, String where){
     if (Double.isNaN(lo) || Double.isNaN(hi)){ throw err(where+": lo/hi NaN"); }
-    if (Double.compare(lo,hi) > 0){ throw err(where+": lo>hi"); }
+    if (Double.compare(lo, hi) > 0){ throw err(where+": lo>hi"); }
   }
   private static long clampTrunc0ToInt(double x){ return (long)x; }
   private static long natBits(double x){ return x < 0x1p63 ? (long)x : (long)(x - 0x1p63) ^ Long.MIN_VALUE; }
@@ -89,7 +89,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     ) {
       return Float$1c$0Instance.instance(Double.NaN);
     }
-    return instance(Math.pow(val,power));
+    return instance(Math.pow(val, power));
   }
   @Override public Object imm$softInt$0(){
     if (Double.isNaN(val)) {
@@ -115,7 +115,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   }
   @Override public Object imm$softByte$0(){ return Byte$o$0Instance.instance(clampTrunc0ToByteBits(val)); }
   static Num$c$0 numExactFinite(double x){
-    if (x == 0.0d){ return Num$c$0Instance.instance(BigInteger.ZERO,BigInteger.ONE); } // also -0.0
+    if (x == 0.0d){ return Num$c$0Instance.instance(BigInteger.ZERO, BigInteger.ONE); } // also -0.0
     long b= Double.doubleToRawLongBits(x);
     boolean neg= (b >>> 63) != 0;
     int exp= (int)((b >>> 52) & 0x7FFL);
@@ -129,7 +129,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     if (e >= 0){ n = n.shiftLeft(e); }
     else { d = d.shiftLeft(-e); }
     if (neg){ n = n.negate(); }
-    return Num$c$0Instance.instance(n,d);
+    return Num$c$0Instance.instance(n, d);
   }
   @Override public Object imm$num$0(){
     if (Double.isNaN(val) || Double.isInfinite(val)){ return optEmpty(); }
@@ -275,7 +275,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   @Override public Object imm$isPosZero$0(){ return bool(isPosZero(val)); }
   @Override public Object imm$ieeeSameBits$1(Object p0){ return bool(bits(val) == bits(f(p0))); }
   @Override public Object imm$ieeeStr$0(){ return Str$c$0Instance.instance(Double.toString(val)); }
-  @Override public Object imm$ieeeRemainder$1(Object p0){ return instance(Math.IEEEremainder(val,f(p0))); }
+  @Override public Object imm$ieeeRemainder$1(Object p0){ return instance(Math.IEEEremainder(val, f(p0))); }
   /* IEEE standard - note we don't have signalling NaN (I believe all NaN's are quiet NaN's in Java)
   pow (x, ±0) is 1 if x is not a signaling NaN
   pow (±0, y) is ±∞ and signals the divideByZero exception for y an odd integer < 0
@@ -313,7 +313,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   }
 
 
-  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmpFearless(f(p0),f(p1))); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmpFearless(f(p0), f(p1))); }
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this.read$str$0());}
 
 }

@@ -32,18 +32,18 @@ public final class AppLog{
   public static AppLog open(Path path, boolean raw){
     String rootStr= System.getProperty("fearlessUser.dir");
     var root= Path.of(rootStr);
-    errPath = root.resolve(".out","logs","err.log");
+    errPath = root.resolve(".out", "logs", "err.log");
     var p= root.resolve(path).normalize();
     startupFor(errPath, keepErrLogs);
     startupFor(p, keepLogs);
     installHook();
-    var log= new AppLog(p,raw);
+    var log= new AppLog(p, raw);
     all.add(log);
     return log;
   }
   private static void installHook(){
-    if (!hookInstalled.compareAndSet(false,true)){ return; }
-    Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown,"AppLog-shutdown"));
+    if (!hookInstalled.compareAndSet(false, true)){ return; }
+    Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown, "AppLog-shutdown"));
   }
   private static void shutdown(){
     closing.set(true);
@@ -96,7 +96,7 @@ public final class AppLog{
     try{
       if (!Files.exists(p)){ return; }
       if (Files.size(p) == 0){ Files.deleteIfExists(p); return; }
-      moveToStamped(p,false);
+      moveToStamped(p, false);
       enforceRetention(p, keep);
     }
     catch (IOException e){
@@ -126,11 +126,11 @@ public final class AppLog{
     try{ Files.deleteIfExists(p); }
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
-  private static Path rotatedPath(Path p,String stamp){
-    var fName= p.getFileName().toString().replace(".log","$"+stamp+".log");//note: this is going to be the second $ of the file
+  private static Path rotatedPath(Path p, String stamp){
+    var fName= p.getFileName().toString().replace(".log", "$"+stamp+".log");//note: this is going to be the second $ of the file
     return p.getParent().resolve(fName);
   }
-  private static String glob(Path p){ return p.getFileName().toString().replace(".log","$*.log"); }
+  private static String glob(Path p){ return p.getFileName().toString().replace(".log", "$*.log"); }
 
   private static void appendOrThrow(Path p){
     try (var w= Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, APPEND))
@@ -138,7 +138,7 @@ public final class AppLog{
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void moveToStampedOrThrow(Path src){
-    try{ moveToStamped(src,true); }
+    try{ moveToStamped(src, true); }
     catch (IOException ioe){ throw new UncheckedIOException(ioe); }
   }
   private static void moveToStamped(Path src, boolean starting) throws IOException{
@@ -152,7 +152,7 @@ public final class AppLog{
     throw new IOException(" OS timestamps unresponsive when renaming "+src);
   }
   private static void enforceRetentionOrThrow(Path p, int keep){
-    try { enforceRetention(p,keep); }
+    try { enforceRetention(p, keep); }
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void enforceRetention(Path p, int keep) throws IOException{

@@ -33,7 +33,7 @@ record CMouseCtx(
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
 final class CMouseBuilder implements Mouse$1c$0{
   final AWidget owner;
-  final EnumMap<MouseKind, Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
+  final EnumMap<MouseKind,Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
   CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){

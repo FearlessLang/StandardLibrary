@@ -11,10 +11,10 @@ import java.util.Map;
 // by the Java API specification: VK_ENTER -> "ENTER", VK_BACK_SPACE ->
 // "BACK_SPACE", VK_CONTROL -> "CONTROL", VK_A -> "A", VK_0 -> "0".
 public interface _KeyNames$b4$0 extends Sealed$2o$0{
-  Map<String, Integer> codes= load();
+  Map<String,Integer> codes= load();
   default Object imm$isName$1(Object p0){ return Util.bool(codes.containsKey(((Str$c$0Instance) p0).val())); }
-  private static Map<String, Integer> load(){
-    var res= new HashMap<String, Integer>();
+  private static Map<String,Integer> load(){
+    var res= new HashMap<String,Integer>();
     for (Field f : KeyEvent.class.getFields()){
       if (!f.getName().startsWith("VK_")){ continue; }
       try { res.put(f.getName().substring(3), f.getInt(null)); }

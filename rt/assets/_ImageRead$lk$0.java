@@ -1,7 +1,7 @@
 package _base;
 
 public interface _ImageRead$lk$0{
-  default Object imm$consumeImage$6(Object requestId,Object path,Object diskPath,Object zipSteps,Object zipEntry,Object maxPixels){
+  default Object imm$consumeImage$6(Object requestId, Object path, Object diskPath, Object zipSteps, Object zipEntry, Object maxPixels){
     AssetBytesRead.consumeOnce(
       AssetBytesRead.str(requestId),
       "Image",
@@ -10,7 +10,7 @@ public interface _ImageRead$lk$0{
       AssetBytesRead.str(zipSteps),
       AssetBytesRead.str(zipEntry)
       );
-    return AssetImageRead.readImage(path,diskPath,zipSteps,zipEntry,maxPixels);
+    return AssetImageRead.readImage(path, diskPath, zipSteps, zipEntry, maxPixels);
   }
   _ImageRead$lk$0 instance= new _ImageRead$lk$0(){};
 }

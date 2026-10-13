@@ -9,6 +9,6 @@ interface _CacheDispatch2 extends _base.CacheHandler$4sg$0{
   default Object imm$_get$2(Object p0, Object p1){
     var a$= (_base.Norm$o$1)p0;
     var b$= (_base.Norm$o$1)p1;
-    return _cache2().get(a$,b$);
+    return _cache2().get(a$, b$);
   }
 }

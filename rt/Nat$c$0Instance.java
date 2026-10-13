@@ -133,7 +133,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     return Int$c$0Instance.instance(val);
   }
   @Override public Object imm$softByte$0(){
-    long x= Long.compareUnsigned(val,255) > 0 ? 255 : val;
+    long x= Long.compareUnsigned(val, 255) > 0 ? 255 : val;
     return Byte$o$0Instance.instance((byte)x);
   }
   @Override public Object imm$softFloat$0(){
@@ -223,9 +223,9 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
     if (val == 0){ throw nonDetErr("Nat.pred: cannot take the predecessor of 0"); }
     return instance(val - 1);
   }
-  @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val,n(p0))); }
-  @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val,n(p0))); }
-  @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val,n(p0))); }
+  @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val, n(p0))); }
+  @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val, n(p0))); }
+  @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, n(p0))); }
   @Override public Object imm$$star_star$1(Object p0) {
     long power= n(p0);
     if (power == 0) { return Nat$c$0Instance.instance(1); }
@@ -253,22 +253,22 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   @Override public Object imm$getTruncDiv$1(Object p0){
     long d= n(p0);
     if (d == 0){ throw err("Nat.getTruncDiv: d==0"); }
-    return instance(Long.divideUnsigned(val,d));
+    return instance(Long.divideUnsigned(val, d));
   }
   @Override public Object imm$tryGetTruncDiv$1(Object p0){
     long d= n(p0);
     if (d == 0){ return fail("Nat.getTruncDiv: d==0"); }
-    return ok(instance(Long.divideUnsigned(val,d)));
+    return ok(instance(Long.divideUnsigned(val, d)));
   }
   @Override public Object imm$getRem$1(Object p0){
     long d= n(p0);
     if (d == 0){ throw err("Nat.getRem: d==0"); }
-    return instance(Long.remainderUnsigned(val,d));
+    return instance(Long.remainderUnsigned(val, d));
   }
   @Override public Object imm$tryGetRem$1(Object p0){
     long d= n(p0);
     if (d == 0){ return fail("Nat.getRem: d==0"); }
-    return ok(instance(Long.remainderUnsigned(val,d)));
+    return ok(instance(Long.remainderUnsigned(val, d)));
   }
   private static String offsetErr(long val, long offset, String why){ return "Nat.getIndexOffset: "+Long.toUnsignedString(val)+" .getIndexOffset("+(offset < 0 ? "" : "+")+offset+") would be "+why; }
   @Override public Object imm$getIndexOffset$1(Object p0){
@@ -296,12 +296,12 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   @Override public Object imm$aluDiv$1(Object p0){
     long d= n(p0);
     if (d == 0){ throw err("Nat.aluDiv: divByZero"); }
-    return instance(Long.divideUnsigned(val,d));
+    return instance(Long.divideUnsigned(val, d));
   }
   @Override public Object imm$aluRem$1(Object p0){
     long d= n(p0);
     if (d == 0){ throw err("Nat.aluRem: divByZero"); }
-    return instance(Long.remainderUnsigned(val,d));
+    return instance(Long.remainderUnsigned(val, d));
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){ return instance(val << n(p0)); }
   @Override public Object imm$aluShiftRight$1(Object p0){ return instance(val >>> n(p0)); }
@@ -311,7 +311,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1 {
   @Override public Object imm$aluInt$0(){ return Int$c$0Instance.instance(val); }
   @Override public Object imm$aluByte$0(){ return Byte$o$0Instance.instance((byte)val); }
 
-  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(Long.compareUnsigned(n(p0),n(p1))); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(Long.compareUnsigned(n(p0), n(p1))); }
 
   @Override public Object imm$norm$0(){ return this; }
   @Override public Object imm$get$0(){ return this; }

@@ -4,17 +4,17 @@ import java.util.List;
 
 public final class Replacements{
   public static String replaceSimultaneousOrdered(List<Str$c$0Instance> rules, String text){
-    validateRules(rules,false);
-    return applyOrdered(rules,text);
+    validateRules(rules, false);
+    return applyOrdered(rules, text);
   }
   public static String replaceSimultaneous(List<Str$c$0Instance> rules, String text){
-    validateRules(rules,true);
-    return applyOrdered(rules,text);
+    validateRules(rules, true);
+    return applyOrdered(rules, text);
   }
   private static String applyOrdered(List<Str$c$0Instance> rules, String text){
     var out= new StringBuilder(text.length());
     for (int i= 0; i < text.length();){
-      var next= tryRule(rules,text,i,out);
+      var next= tryRule(rules, text, i, out);
       if (next != -1){ i = next; continue; }
       out.append(text.charAt(i));
       i++;
@@ -24,7 +24,7 @@ public final class Replacements{
   private static int tryRule(List<Str$c$0Instance> rules, String text, int i, StringBuilder out){
     for (int r= 0; r < rules.size(); r += 2){
       String from= rules.get(r).val();
-      if (!text.startsWith(from,i)){ continue; }
+      if (!text.startsWith(from, i)){ continue; }
       out.append(rules.get(r + 1).val());
       return i + from.length();
     }

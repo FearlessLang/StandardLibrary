@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
   public SerialQueue(Consumer<Throwable> onError) {
     this(new LinkedBlockingQueue<>(), new AtomicBoolean());
-    var t= new Thread(() -> runLoop(q, midTask),"GuiToMain");
+    var t= new Thread(() -> runLoop(q, midTask), "GuiToMain");
     t.setUncaughtExceptionHandler((_, e) -> {
       if (e instanceof Poison){ return; }
       onError.accept(e);

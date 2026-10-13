@@ -8,17 +8,17 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$$hash$1(Object p0){ return actionLazy(() -> callF$1(p0)); }
-  @Override public Object mut$$hash$2(Object p0, Object p1){ return actionLazy(() -> callF$2(p1,p0)); }
+  @Override public Object mut$$hash$2(Object p0, Object p1){ return actionLazy(() -> callF$2(p1, p0)); }
   public Action$2o$1 actionLazy(java.util.function.Supplier<Object> s){
     return new Action$2o$1(){
       @Override public Object mut$run$1(Object p0){
         var m= (ActionMatch$2ds$2)p0;
         Object res; try{ res= s.get(); }
-        catch (Deterministic d){ return m.mut$info$1(addStackInfo(d.i,d)); }
-        catch (NonDeterministic d){ return m.mut$info$1(addStackInfo(d.i,d)); }
+        catch (Deterministic d){ return m.mut$info$1(addStackInfo(d.i, d)); }
+        catch (NonDeterministic d){ return m.mut$info$1(addStackInfo(d.i, d)); }
         catch (Throwable t){ 
           var msg= t.getClass().getSimpleName()+"\n"+t.getMessage();
-          return m.mut$info$1(addStackInfo(new Str$c$0Instance(msg).read$info$0(),t));
+          return m.mut$info$1(addStackInfo(new Str$c$0Instance(msg).read$info$0(), t));
         }
         return m.mut$ok$1(res);
       }

@@ -9,148 +9,148 @@ import static _base.Util.*;
 public interface Maps$o$0 extends Sealed$2o$0{
   default Object imm$$hash$1(Object p0){ // (oh)
     var k= toKey(p0);
-    return new Map$c$2Instance(k,new LinkedHashMap<>());
+    return new Map$c$2Instance(k, new LinkedHashMap<>());
   }
-  default Object imm$$hash$3(Object p0,Object p1,Object p2){ // (oh,k,e)
+  default Object imm$$hash$3(Object p0, Object p1, Object p2){ // (oh,k,e)
     var m= new LinkedHashMap<MapKey,Object>(2);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$5(Object p0,Object p1,Object p2,Object p3,Object p4){ // (oh,k,e,k,e)
+  default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){ // (oh,k,e,k,e)
     var m= new LinkedHashMap<MapKey,Object>(2);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$7(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6){ // 3 pairs
+  default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){ // 3 pairs
     var m= new LinkedHashMap<MapKey,Object>(3);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$9(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8){ // 4 pairs
+  default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){ // 4 pairs
     var m= new LinkedHashMap<MapKey,Object>(4);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$11(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10){ // 5 pairs
+  default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){ // 5 pairs
     var m= new LinkedHashMap<MapKey,Object>(5);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$13(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12){ // 6 pairs
+  default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){ // 6 pairs
     var m= new LinkedHashMap<MapKey,Object>(6);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    m.put(mapKey(k,p11),p12);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    m.put(mapKey(k, p11), p12);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$15(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14){ // 7 pairs
+  default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){ // 7 pairs
     var m= new LinkedHashMap<MapKey,Object>(7);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    m.put(mapKey(k,p11),p12);
-    m.put(mapKey(k,p13),p14);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    m.put(mapKey(k, p11), p12);
+    m.put(mapKey(k, p13), p14);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$17(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14,Object p15,Object p16){ // 8 pairs
+  default Object imm$$hash$17(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15, Object p16){ // 8 pairs
     var m= new LinkedHashMap<MapKey,Object>(8);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    m.put(mapKey(k,p11),p12);
-    m.put(mapKey(k,p13),p14);
-    m.put(mapKey(k,p15),p16);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    m.put(mapKey(k, p11), p12);
+    m.put(mapKey(k, p13), p14);
+    m.put(mapKey(k, p15), p16);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$19(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14,Object p15,Object p16,Object p17,Object p18){ // 9 pairs
+  default Object imm$$hash$19(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15, Object p16, Object p17, Object p18){ // 9 pairs
     var m= new LinkedHashMap<MapKey,Object>(9);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    m.put(mapKey(k,p11),p12);
-    m.put(mapKey(k,p13),p14);
-    m.put(mapKey(k,p15),p16);
-    m.put(mapKey(k,p17),p18);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    m.put(mapKey(k, p11), p12);
+    m.put(mapKey(k, p13), p14);
+    m.put(mapKey(k, p15), p16);
+    m.put(mapKey(k, p17), p18);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$21(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14,Object p15,Object p16,Object p17,Object p18,Object p19,Object p20){ // 10 pairs
+  default Object imm$$hash$21(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15, Object p16, Object p17, Object p18, Object p19, Object p20){ // 10 pairs
     var m= new LinkedHashMap<MapKey,Object>(10);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    m.put(mapKey(k,p11),p12);
-    m.put(mapKey(k,p13),p14);
-    m.put(mapKey(k,p15),p16);
-    m.put(mapKey(k,p17),p18);
-    m.put(mapKey(k,p19),p20);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    m.put(mapKey(k, p11), p12);
+    m.put(mapKey(k, p13), p14);
+    m.put(mapKey(k, p15), p16);
+    m.put(mapKey(k, p17), p18);
+    m.put(mapKey(k, p19), p20);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$23(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14,Object p15,Object p16,Object p17,Object p18,Object p19,Object p20,Object p21,Object p22){ // 11 pairs
+  default Object imm$$hash$23(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15, Object p16, Object p17, Object p18, Object p19, Object p20, Object p21, Object p22){ // 11 pairs
     var m= new LinkedHashMap<MapKey,Object>(11);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    m.put(mapKey(k,p11),p12);
-    m.put(mapKey(k,p13),p14);
-    m.put(mapKey(k,p15),p16);
-    m.put(mapKey(k,p17),p18);
-    m.put(mapKey(k,p19),p20);
-    m.put(mapKey(k,p21),p22);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    m.put(mapKey(k, p11), p12);
+    m.put(mapKey(k, p13), p14);
+    m.put(mapKey(k, p15), p16);
+    m.put(mapKey(k, p17), p18);
+    m.put(mapKey(k, p19), p20);
+    m.put(mapKey(k, p21), p22);
+    return new Map$c$2Instance(k, m);
   }
-  default Object imm$$hash$25(Object p0,Object p1,Object p2,Object p3,Object p4,Object p5,Object p6,Object p7,Object p8,Object p9,Object p10,Object p11,Object p12,Object p13,Object p14,Object p15,Object p16,Object p17,Object p18,Object p19,Object p20,Object p21,Object p22,Object p23,Object p24){ // 12 pairs
+  default Object imm$$hash$25(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15, Object p16, Object p17, Object p18, Object p19, Object p20, Object p21, Object p22, Object p23, Object p24){ // 12 pairs
     var m= new LinkedHashMap<MapKey,Object>(12);
     var k= toKey(p0);
-    m.put(mapKey(k,p1),p2);
-    m.put(mapKey(k,p3),p4);
-    m.put(mapKey(k,p5),p6);
-    m.put(mapKey(k,p7),p8);
-    m.put(mapKey(k,p9),p10);
-    m.put(mapKey(k,p11),p12);
-    m.put(mapKey(k,p13),p14);
-    m.put(mapKey(k,p15),p16);
-    m.put(mapKey(k,p17),p18);
-    m.put(mapKey(k,p19),p20);
-    m.put(mapKey(k,p21),p22);
-    m.put(mapKey(k,p23),p24);
-    return new Map$c$2Instance(k,m);
+    m.put(mapKey(k, p1), p2);
+    m.put(mapKey(k, p3), p4);
+    m.put(mapKey(k, p5), p6);
+    m.put(mapKey(k, p7), p8);
+    m.put(mapKey(k, p9), p10);
+    m.put(mapKey(k, p11), p12);
+    m.put(mapKey(k, p13), p14);
+    m.put(mapKey(k, p15), p16);
+    m.put(mapKey(k, p17), p18);
+    m.put(mapKey(k, p19), p20);
+    m.put(mapKey(k, p21), p22);
+    m.put(mapKey(k, p23), p24);
+    return new Map$c$2Instance(k, m);
   }
   static OrderHashBy$2ea$1 toKey(Object k){return (OrderHashBy$2ea$1) ((OrderHashBy$2ea$2)k).imm$hideKey$0(); }
-  default Object read$singletonRead$3(Object p0,Object p1,Object p2){ return imm$$hash$3(p0,p1,p2); }
+  default Object read$singletonRead$3(Object p0, Object p1, Object p2){ return imm$$hash$3(p0, p1, p2); }
 
   Maps$o$0 instance= new Maps$o$0(){};
 }
@@ -167,17 +167,17 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     String res= elems.entrySet().stream().map(e ->
       toS(byK.imm$$hash$1(e.getKey().key))
       +": "+toS(byE.imm$$hash$1(e.getValue()))
-      ).collect(Collectors.joining(", ","{","}"));
+      ).collect(Collectors.joining(", ", "{", "}"));
     return Str$c$0Instance.instance(res);
   }
   @Override public Object mut$get$1(Object p0){
-    var mk= mapKey(keyOh,p0);
+    var mk= mapKey(keyOh, p0);
     var e= elems.get(mk);
     if (e == null){ throw err(absent(p0)); }
     return e;
   }
   @Override public Object mut$tryGet$1(Object p0){
-    var mk= mapKey(keyOh,p0);
+    var mk= mapKey(keyOh, p0);
     var e= elems.get(mk);
     if (e == null){ return fail(absent(p0)); }
     return ok(e);
@@ -187,7 +187,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object read$tryGet$1(Object p0){ return mut$tryGet$1(p0); }
 
   @Override public Object mut$opt$1(Object p0){
-    var mk= mapKey(keyOh,p0);
+    var mk= mapKey(keyOh, p0);
     var e= elems.get(mk);
     return e == null ? optEmpty() : optSome(e);
   }
@@ -195,16 +195,16 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object imm$opt$1(Object p0){ return mut$opt$1(p0); }
 
   @Override public Object read$containsKey$1(Object p0){
-    var mk= mapKey(keyOh,p0);
+    var mk= mapKey(keyOh, p0);
     return bool(elems.get(mk) != null);
   }
 
-  @Override public Object mut$with$2(Object p0,Object p1){
+  @Override public Object mut$with$2(Object p0, Object p1){
     var m= new LinkedHashMap<MapKey,Object>(elems);
-    m.put(mapKey(keyOh,p0),p1); // preserves existing representative MapKey if equal
-    return new Map$c$2Instance(keyOh,m);
+    m.put(mapKey(keyOh, p0), p1); // preserves existing representative MapKey if equal
+    return new Map$c$2Instance(keyOh, m);
   }
-  @Override public Object read$with$2(Object p0,Object p1){ return mut$with$2(p0,p1); }
+  @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0, p1); }
   @Override public Object read$hash$1(Object p0){
     var byE= (_base.OrderHashBy$2ea$2)p0;
     long h= 0;
@@ -215,7 +215,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     }
     return new Nat$c$0Instance(h);
   }
-  @Override public Object read$cmp$3(Object p0,Object p1,Object p2){
+  @Override public Object read$cmp$3(Object p0, Object p1, Object p2){
     var byE= (OrderHashBy$2ea$2)p0;
     var a= (Map$c$2Instance)p1;
     var b= (Map$c$2Instance)p2;
@@ -234,10 +234,10 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     return ord(0);
   }
   @Override public Object mut$without$1(Object p0){
-    var mk= mapKey(keyOh,p0);
+    var mk= mapKey(keyOh, p0);
     var m= new LinkedHashMap<MapKey,Object>(elems);
     if (m.remove(mk) == null){ throw err("Map key absent"); }
-    return new Map$c$2Instance(keyOh,m);
+    return new Map$c$2Instance(keyOh, m);
   }
   @Override public Object read$without$1(Object p0){ return mut$without$1(p0); }
 
@@ -247,10 +247,10 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     var m= new LinkedHashMap<MapKey,Object>(elems);
     for (var e: other.elems.entrySet()){
       var k= e.getKey().key;
-      var mk= mapKey(keyOh,k); // reinterpret under LEFT ordering
+      var mk= mapKey(keyOh, k); // reinterpret under LEFT ordering
       m.putIfAbsent(mk, e.getValue());
     }
-    return new Map$c$2Instance(keyOh,m);
+    return new Map$c$2Instance(keyOh, m);
   }
   @Override public Object read$$plus_plus$1(Object p0){ return mut$$plus_plus$1(p0); }
 
@@ -271,6 +271,6 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     var by= (ToImmBy$5u$2)p0;
     var m= new LinkedHashMap<MapKey,Object>();
     elems.entrySet().stream().forEach(e -> m.put(e.getKey(), ((ToImm$1g$1)by.imm$$hash$1(e.getValue())).read$imm$0()));
-    return new Map$c$2Instance(keyOh,m);
+    return new Map$c$2Instance(keyOh, m);
   }
 }

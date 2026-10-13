@@ -149,7 +149,7 @@ abstract class AWidget implements Widget$2o$1{
   final _Frame frame;
   final SkComponent component= new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
-  EnumMap<MouseKind, Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
+  EnumMap<MouseKind,Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
 
   AWidget(_Frame frame){ this.frame= frame; }
@@ -344,7 +344,7 @@ final class _Frame implements Frame$1c$0{
     frame.getRootPane().addComponentListener(geometry);
   }
 
-  void addTo(AWidget into, String where, Object scope, Function<_Frame, ? extends AWidget> make){
+  void addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
     var parent= into.component;
     var b= onEdtAndWait(() -> make.apply(this));
     ((Scope$1c$1) scope).mut$run$1(b);
@@ -663,7 +663,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$content$1(Object s){ return newContent(s, _Pane::new); }
   @Override public Object mut$contentB$1(Object s){ return newContent(s, _Border::new); }
 
-  private Object newContent(Object scope, Function<_Frame, ? extends AWidget> make){
+  private Object newContent(Object scope, Function<_Frame,? extends AWidget> make){
     var t= onEdtAndWait(() -> make.apply(this));
     if (!started){
       onEdtAndWait(() -> {

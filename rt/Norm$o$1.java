@@ -27,7 +27,7 @@ final class Entry{
   }
   public Object joinWait(long time, Supplier<Object> s){
     if (!ready.isDone() && broken){ return sequential(s); }
-    try{ return ready.get(time,TimeUnit.SECONDS); }
+    try{ return ready.get(time, TimeUnit.SECONDS); }
     catch (TimeoutException _){
       broken = true;
       return sequential(s);
@@ -55,8 +55,8 @@ interface Cache{
   Entry former(Object k, Entry candidate);
   default Object get(Object k, Supplier<Object> f, long time){
     var fresh= new Entry();
-    var e= former(k,fresh);
+    var e= former(k, fresh);
     if (e == null){ return fresh.computeNow(f); }
-    return e.joinWait(time,f);
+    return e.joinWait(time, f);
   }
 }

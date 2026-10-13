@@ -22,17 +22,17 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   @Override public Object read$imm$0(){ return this; }
 
   @Override public Object imm$$plus$1(Object p0){
-    return new UStr$s$0Instance(cat(val,((UStr$s$0Instance)p0).val));
+    return new UStr$s$0Instance(cat(val, ((UStr$s$0Instance)p0).val));
   }
   @Override public Object imm$$or$1(Object p0){
-    return new UStr$s$0Instance(cat(val,nl,((UStr$s$0Instance)p0).val));
+    return new UStr$s$0Instance(cat(val, nl, ((UStr$s$0Instance)p0).val));
   }
   @Override public Object imm$$xor$1(Object p0){
-    return new UStr$s$0Instance(cat(val,quote,((UStr$s$0Instance)p0).val));
+    return new UStr$s$0Instance(cat(val, quote, ((UStr$s$0Instance)p0).val));
   }
 
-  @Override public Object imm$$or$0(){ return new UStr$s$0Instance(cat(val,nl)); }
-  @Override public Object imm$$xor$0(){ return new UStr$s$0Instance(cat(val,quote)); }
+  @Override public Object imm$$or$0(){ return new UStr$s$0Instance(cat(val, nl)); }
+  @Override public Object imm$$xor$0(){ return new UStr$s$0Instance(cat(val, quote)); }
 
   @Override public Object imm$isEmpty$0(){ return bool(val.length == 0); }
   @Override public Object imm$size$0(){ return Nat$c$0Instance.instance(val.length); }
@@ -44,14 +44,14 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   @Override public Object imm$isStr$0(){ return bool(isStr(val)); }
 
   @Override public Object imm$tryGetStr$0(){
-    if (isStr(val)) { return ok(Str$c$0Instance.instance(new String(val,0,val.length))); }
+    if (isStr(val)) { return ok(Str$c$0Instance.instance(new String(val, 0, val.length))); }
     return fail("UStr.getStr: cannot convert "+ Arrays.toString(this.val)
             + " into a valid fearless Str as it contains invalid unicode characters: "
             + Arrays.stream(this.val).filter(c -> !isStr(c)).boxed().toList());
   }
   @Override public Object imm$str$0(){
     return isStr(val)
-      ? optSome(Str$c$0Instance.instance(new String(val,0,val.length)))
+      ? optSome(Str$c$0Instance.instance(new String(val, 0, val.length)))
       : optEmpty();
   }
   @Override public Object imm$flow$0(){
@@ -60,54 +60,54 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   @Override public Object read$seqFlow$0(){ return Flow$o$1Instance.of(Arrays.stream(val).mapToObj(e -> (Object)Nat$c$0Instance.instance((long)e)), FlowMode.Seq).mut$hintSequential$0(); }
   @Override public Object mut$seqFlow$0(){ return read$seqFlow$0(); }
   @Override public Object imm$equalRepr$1(Object p0){
-    return bool(Arrays.equals(val,((UStr$s$0Instance)p0).val));
+    return bool(Arrays.equals(val, ((UStr$s$0Instance)p0).val));
   }
   @Override public Object imm$hashRepr$0(){
     return Nat$c$0Instance.instance(Arrays.hashCode(val));
   }
   @Override public Object imm$u$1(Object p0){
-    return new UStr$s$0Instance(cat(val,parseUCode(((Str$c$0Instance)p0).val())));
+    return new UStr$s$0Instance(cat(val, parseUCode(((Str$c$0Instance)p0).val())));
   }
   @Override public Object imm$joinStr$1(Object p0){
     @SuppressWarnings("unchecked")
     List<UStr$s$0Instance> parts= (List<UStr$s$0Instance>)(Object)Flow$o$1Instance.toJava(p0);
-    return new UStr$s$0Instance(join(val,parts));
+    return new UStr$s$0Instance(join(val, parts));
   }
-  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val,_ -> new Norm(this)); }
+  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val, _ -> new Norm(this)); }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
 
-  private static int[] cat(int[] a,int[] b){
-    int size= Math.addExact(a.length,b.length);
+  private static int[] cat(int[] a, int[] b){
+    int size= Math.addExact(a.length, b.length);
     var res= new int[size];
-    System.arraycopy(a,0,res,0,a.length);
-    System.arraycopy(b,0,res,a.length,b.length);
+    System.arraycopy(a, 0, res, 0, a.length);
+    System.arraycopy(b, 0, res, a.length, b.length);
     return res;
   }
-  private static int[] cat(int[] a,int[] b,int[] c){
-    int ab= Math.addExact(a.length,b.length);
-    int size= Math.addExact(ab,c.length);
+  private static int[] cat(int[] a, int[] b, int[] c){
+    int ab= Math.addExact(a.length, b.length);
+    int size= Math.addExact(ab, c.length);
     var res= new int[size];
-    System.arraycopy(a,0,res,0,a.length);
-    System.arraycopy(b,0,res,a.length,b.length);
-    System.arraycopy(c,0,res,ab,c.length);
+    System.arraycopy(a, 0, res, 0, a.length);
+    System.arraycopy(b, 0, res, a.length, b.length);
+    System.arraycopy(c, 0, res, ab, c.length);
     return res;
   }
-  private static int[] join(int[] sep,List<UStr$s$0Instance> parts){
+  private static int[] join(int[] sep, List<UStr$s$0Instance> parts){
     if (parts.isEmpty()){ return empty; }
     int size= 0;
     for (int i= 0; i < parts.size(); i++){
-      if (i != 0){ size = Math.addExact(size,sep.length); }
-      size = Math.addExact(size,parts.get(i).val.length);
+      if (i != 0){ size = Math.addExact(size, sep.length); }
+      size = Math.addExact(size, parts.get(i).val.length);
     }
     var res= new int[size];
     int off= 0;
     for (int i= 0; i<parts.size(); i++){
       if (i!=0){
-        System.arraycopy(sep,0,res,off,sep.length);
+        System.arraycopy(sep, 0, res, off, sep.length);
         off += sep.length;
       }
       var cur= parts.get(i).val;
-      System.arraycopy(cur,0,res,off,cur.length);
+      System.arraycopy(cur, 0, res, off, cur.length);
       off += cur.length;
     }
     return res;
@@ -125,11 +125,11 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     var res= new StringBuilder();
     for (int i= 0; i<cps.length; i++){
       if (i!=0){ res.append(' '); }
-      appendHex(res,cps[i]);
+      appendHex(res, cps[i]);
     }
     return res.toString();
   }
-  private static void appendHex(StringBuilder res,int cp){
+  private static void appendHex(StringBuilder res, int cp){
     String s= Integer.toHexString(cp).toUpperCase();
     for (int i= s.length(); i < 4; i++){ res.append('0'); }
     res.append(s);
@@ -141,7 +141,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     var res= new int[parts.length];
     for (int i= 0; i<parts.length; i++){
       int cp;
-      try{ cp= Integer.parseInt(parts[i],16); }
+      try{ cp= Integer.parseInt(parts[i], 16); }
       catch (NumberFormatException e){ throw err("Malformed UStr.u input: "+s); }
       if (cp > 0x10FFFF || (0xD800 <= cp && cp <= 0xDFFF)){
         throw err("Malformed UStr.u input: "+s);
@@ -154,16 +154,16 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     var res= new StringBuilder();
     int i= 0;
     do{
-      int j= run(cps,i,true);
-      int k= run(cps,j,false);
-      var hex= k == j ? "" : "\""+strUCode(Arrays.copyOfRange(cps,j,k))+"\"";
-      var term= receiver(strExpr(new String(cps,i,j-i)))+".u"+hex;
+      int j= run(cps, i, true);
+      int k= run(cps, j, false);
+      var hex= k == j ? "" : "\""+strUCode(Arrays.copyOfRange(cps, j, k))+"\"";
+      var term= receiver(strExpr(new String(cps, i, j-i)))+".u"+hex;
       res.append(i == 0 ? term : "+("+term+")");
       i = k;
     } while (i < cps.length);
     return res.toString();
   }
-  private static int run(int[] cps,int i,boolean safe){
+  private static int run(int[] cps, int i, boolean safe){
     while (i < cps.length && isStr(cps[i]) == safe){ i++; }
     return i;
   }

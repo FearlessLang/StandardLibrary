@@ -10,8 +10,8 @@ public final class Util{
     //This allows to 'disable' this check if there is no master process
     if (!"stdin".equals(System.getProperty("fearless.parentLifeline"))){ return; }
     //makes sure this truly happens only one time
-    if (!parentLifelineStarted.compareAndSet(false,true)){ return; }
-    var t= new Thread(Util::watchParentLifeline,"FearlessParentLifeline");
+    if (!parentLifelineStarted.compareAndSet(false, true)){ return; }
+    var t= new Thread(Util::watchParentLifeline, "FearlessParentLifeline");
     t.setDaemon(true);
     t.start();
   }
@@ -28,7 +28,7 @@ public final class Util{
     var halter= new Thread(() -> {
       sleepUninterruptibly(haltMs);
       Runtime.getRuntime().halt(code);
-    },"FearlessParentLifelineHalt");
+    }, "FearlessParentLifelineHalt");
     halter.setDaemon(true);
     halter.start();
     Runtime.getRuntime().exit(code);
@@ -102,14 +102,14 @@ public final class Util{
 
   public static Object callMF$1(Object f){ return ((MF$7$1)f).mut$$hash$0(); }
   public static Object callMF$2(Object f, Object x){ return ((MF$7$2)f).mut$$hash$1(x); }
-  public static Object callMF$3(Object f,Object x,Object y){ return ((MF$7$3)f).mut$$hash$2(x,y); }
-  public static Object callMF$4(Object f,Object x,Object y,Object z){ return ((MF$7$4)f).mut$$hash$3(x,y,z); }
+  public static Object callMF$3(Object f, Object x, Object y){ return ((MF$7$3)f).mut$$hash$2(x, y); }
+  public static Object callMF$4(Object f, Object x, Object y, Object z){ return ((MF$7$4)f).mut$$hash$3(x, y, z); }
   public static Object callF$1(Object f){ return ((F$3$1)f).read$$hash$0(); }
   public static Object callF$2(Object f, Object x){ return ((F$3$2)f).read$$hash$1(x); }
-  public static Object callF$3(Object f,Object x,Object y){ return ((F$3$3)f).read$$hash$2(x,y); }
-  public static Object callF$4(Object f,Object x,Object y,Object z){ return ((F$3$4)f).read$$hash$3(x,y,z); }
-  public static Object callF$5(Object f,Object w,Object x,Object y,Object z){ return ((F$3$5)f).read$$hash$4(w,x,y,z); }
-  public static Object callF$6(Object f,Object v,Object w,Object x,Object y,Object z){ return ((F$3$6)f).read$$hash$5(v,w,x,y,z); }
+  public static Object callF$3(Object f, Object x, Object y){ return ((F$3$3)f).read$$hash$2(x, y); }
+  public static Object callF$4(Object f, Object x, Object y, Object z){ return ((F$3$4)f).read$$hash$3(x, y, z); }
+  public static Object callF$5(Object f, Object w, Object x, Object y, Object z){ return ((F$3$5)f).read$$hash$4(w, x, y, z); }
+  public static Object callF$6(Object f, Object v, Object w, Object x, Object y, Object z){ return ((F$3$6)f).read$$hash$5(v, w, x, y, z); }
 
   public static void check(boolean ok, String msg){
     if (!ok){ throw err(msg); }
@@ -120,10 +120,10 @@ public final class Util{
     @Override public Object mut$eq$0(){ return eq; }
     @Override public Object mut$gt$0(){ return gt; }
   };
-  public static int cmp(OrderBy$5e$2 by,Object a,Object b){//so this is the more general method
+  public static int cmp(OrderBy$5e$2 by, Object a, Object b){//so this is the more general method
     var ohA= (Order$1c$1)by.imm$$hash$1(a);
     var ohB= (Order$1c$1)by.imm$$hash$1(b);
-    return (Integer)((Order$1c$0)ohA.read$cmp$2(ohA.read$close$0(),ohB.read$close$0())).read$$hash$1(cmpM);
+    return (Integer)((Order$1c$0)ohA.read$cmp$2(ohA.read$close$0(), ohB.read$close$0())).read$$hash$1(cmpM);
   }
   public static Comparator<Object> toComparator(OrderBy$5e$2 ordering) {
     return (a, b) -> cmp(ordering, a, b);
@@ -133,7 +133,7 @@ public final class Util{
     public final Object key;      // representative K (first inserted)
     public final Object close;    // K0
     public final long hc;
-    public MapKey(OrderHashBy$2ea$2 oh,Object k){
+    public MapKey(OrderHashBy$2ea$2 oh, Object k){
       key= k;
       ord= (OrderHash$lk$1)oh.imm$$hash$1(k);
       close= ((Order$1c$1)ord).read$close$0();
@@ -145,14 +145,14 @@ public final class Util{
     return isTrue(((Order$1c$1)ord).read$$eq_eq$1(x.close));
     }
   }
-  public static MapKey mapKey(OrderHashBy$2ea$2 oh,Object k){ return new MapKey(oh,k); }
+  public static MapKey mapKey(OrderHashBy$2ea$2 oh, Object k){ return new MapKey(oh, k); }
   
   public static Deterministic deterministic(Info$o$0 i){ return new Deterministic(i); }
   public static NonDeterministic nonDeterministic(Info$o$0 i){ return new NonDeterministic(i); }
   public static boolean topLevel(Runnable r){
     try{ r.run(); endMarker(); return true; }
-    catch (Deterministic d){ printInfo(d.i,d); }
-    catch (NonDeterministic d){ printInfo(d.i,d); }
+    catch (Deterministic d){ printInfo(d.i, d); }
+    catch (NonDeterministic d){ printInfo(d.i, d); }
     catch (Throwable t){ t.printStackTrace();}
     return false;
   }
@@ -161,10 +161,10 @@ public final class Util{
     if (m != null){ System.out.print(m+"\n"); }
   }
   public static void printInfo(Info$o$0 i, RuntimeException d){
-    printInfoMsg("","",i);
+    printInfoMsg("", "", i);
     var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
     map.entrySet().stream()
-      .filter(e -> is(e.getKey(),"msg")).forEach(e -> printInfoMsg("","",(Info$o$0)e.getValue()));
+      .filter(e -> is(e.getKey(), "msg")).forEach(e -> printInfoMsg("", "", (Info$o$0)e.getValue()));
     //map.entrySet().stream()
     //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
     for (var e : d.getStackTrace()){
@@ -172,12 +172,12 @@ public final class Util{
       if (f != null){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
     }
   }
-  public static boolean is(MapKey k,String label){
+  public static boolean is(MapKey k, String label){
     return k.key instanceof Str$c$0Instance s && s.val().equals(label);
     }
   public static void printInfoMsg(String prefix, String indent, Info$o$0 i){
     var msg= ((Str$c$0Instance)i.imm$softMsg$0()).val();
-    msg = msg.replace("\n","\n"+indent);
+    msg = msg.replace("\n", "\n"+indent);
     System.err.print(prefix+msg+"\n");
   }
   public static void printInfoList(Info$o$0 i){ 
@@ -188,7 +188,7 @@ public final class Util{
     }
     System.err.print("\nStack trace:\n");
     var jList= ((List$o$1Instance)fList).val();
-    for (var e : jList){ printInfoMsg("- ","  ",(Info$o$0)e); }
+    for (var e : jList){ printInfoMsg("- ", "  ", (Info$o$0)e); }
   }
   public static RuntimeException asFearlessError(Throwable t){
     for (var c= t; c != null; c = c.getCause()){

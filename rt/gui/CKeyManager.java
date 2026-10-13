@@ -24,18 +24,18 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   CKeyManager(_Frame frame){ this.frame= frame; }
 
   @Override public void keyPressed(KeyEvent e){
-    if (held.add(List.of(e.getKeyCode(),e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(),pressed)); }
+    if (held.add(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){
-    if (held.remove(List.of(e.getKeyCode(),e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(),released)); }
+    if (held.remove(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
   }
   @Override public void windowLostFocus(java.awt.event.WindowEvent e){
-    frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(),released)).toList());
+    frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(), released)).toList());
     held.clear();
   }
   @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
 
-  private MF$7$1 task(int eventKey,List<KeyAction$m8$0> keyActions){
+  private MF$7$1 task(int eventKey, List<KeyAction$m8$0> keyActions){
     var elapsed= frame.elapsed;
     var panelWidth= w(frame.top.component.getWidth());
     var panelHeight= h(frame.top.component.getHeight());
@@ -45,19 +45,19 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
         var actions= new ArrayList<Consumer$ao$1>();
         KeyStroke$m8$0 key= null;
         for (var ka:keyActions){
-          var k= matchingKey((EList$1k$1)ka.mut$match$0(),eventKey);
+          var k= matchingKey((EList$1k$1)ka.mut$match$0(), eventKey);
           if (k == null){ continue; }
           if (key == null){ key = k; }
-          copyActions((EList$1k$1)ka.mut$actions$0(),actions);
+          copyActions((EList$1k$1)ka.mut$actions$0(), actions);
         }
-        var ctx= new CKeyCtx(elapsed,frame,panelWidth,panelHeight,key);
+        var ctx= new CKeyCtx(elapsed, frame, panelWidth, panelHeight, key);
         for (var a:actions){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
       }
     };
   }
 
-  private static KeyStroke$m8$0 matchingKey(EList$1k$1 match,int eventKey){
+  private static KeyStroke$m8$0 matchingKey(EList$1k$1 match, int eventKey){
     int size= natToInt(match.read$size$0());
     for (long i= 0;i < size;i++){
       var k= (KeyStroke$m8$0)match.mut$get$1(n(i));
@@ -66,17 +66,17 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
     return null;
   }
 
-  private static void copyActions(EList$1k$1 from,List<Consumer$ao$1> to){
+  private static void copyActions(EList$1k$1 from, List<Consumer$ao$1> to){
     long size= natToLong(from.read$size$0());
     for (long i= 0;i < size;i++){
       to.add((Consumer$ao$1)from.mut$get$1(n(i)));
     }
   }
 
-  @Override public Object mut$pressed$1(Object scope){ return addKeyAction(scope,pressed); }
-  @Override public Object mut$released$1(Object scope){ return addKeyAction(scope,released); }
+  @Override public Object mut$pressed$1(Object scope){ return addKeyAction(scope, pressed); }
+  @Override public Object mut$released$1(Object scope){ return addKeyAction(scope, released); }
 
-  private Object addKeyAction(Object scope,List<KeyAction$m8$0> list){
+  private Object addKeyAction(Object scope, List<KeyAction$m8$0> list){
     frame.onEdtAndWait(() -> {
       if (!changeable && !List.of(frame.frame.getKeyListeners()).contains(this)){
         throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");

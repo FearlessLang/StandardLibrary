@@ -58,8 +58,8 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   static int cmp(Num$c$0Instance a, Num$c$0Instance b){
     return a.numerator.multiply(b.denominator).compareTo(b.numerator.multiply(a.denominator));
   }
-  private static boolean lt(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a,b) < 0; }
-  private static boolean le(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a,b) <= 0; }
+  private static boolean lt(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a, b) < 0; }
+  private static boolean le(Num$c$0Instance a, Num$c$0Instance b){ return cmp(a, b) <= 0; }
   private static BigInteger trunc0Z(BigInteger n, BigInteger d){ return n.divide(d); }
   private static BigInteger floorZ(BigInteger n, BigInteger d){
     var qr= n.divideAndRemainder(d);
@@ -167,7 +167,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
     if (c >= 0){ q = q.add(one); } // always round up
     if (numerator.signum() < 0){ q = q.negate(); }
-    return instance(q,one);
+    return instance(q, one);
   }
 
   @Override public Object imm$roundTiesEven$0(){
@@ -179,7 +179,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     int c= r.shiftLeft(1).compareTo(denominator); // compare 2*r with d
     if (c > 0 || (c == 0 && q.testBit(0))){ q = q.add(one); } // tie -> bump if odd
     if (numerator.signum() < 0){ q = q.negate(); }
-    return instance(q,one);
+    return instance(q, one);
   }
 
   public boolean isRepresentableAsDouble() {
@@ -295,12 +295,12 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     var d= num(p1);
     if (d.numerator.signum() < 0){ throw err("Num.eqDelta: delta<0"); }
     var diff= (Num$c$0Instance)((Num$c$0Instance)this.imm$$dash$1(exp)).imm$abs$0();
-    return bool(le(diff,d));
+    return bool(le(diff, d));
   }
-  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmp(num(p0),num(p1))); }
+  @Override public Object read$cmp$2(Object p0, Object p1){ return ord(cmp(num(p0), num(p1))); }
   @Override public Object imm$norm$0(){
     if (numerator.abs().bitLength() + denominator.bitLength() <= 512){ return this; }
-    return myCache.computeIfAbsent(this,_ -> new Norm(this));
+    return myCache.computeIfAbsent(this, _ -> new Norm(this));
   }
   @Override public Object imm$get$0(){ return this; }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>();

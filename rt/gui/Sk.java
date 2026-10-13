@@ -74,8 +74,8 @@ interface Sk{
     "Twemoji.Mozilla.ttf"};
   int emoji= fontFiles.length - 1;
   Typeface[] typefaces= new Typeface[fontFiles.length];
-  HashMap<Long, Font> fonts= new HashMap<>();
-  HashMap<Integer, Integer> fontByCp= new HashMap<>();
+  HashMap<Long,Font> fonts= new HashMap<>();
+  HashMap<Integer,Integer> fontByCp= new HashMap<>();
   Shaper shaper= Shaper.makeShaperDrivenWrapper();
 
   static Typeface typeface(int i){

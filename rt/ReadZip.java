@@ -29,7 +29,7 @@ public record ReadZip(
         var key= keyOf(n);
         if (out.containsKey(key)){ throw dupNameErr.apply(key); }
         if (n.endsWith("/")){ out.put(key, null); }
-        else{ out.put(key, readEntryBytes(key,zin)); }
+        else{ out.put(key, readEntryBytes(key, zin)); }
       }
       finally{ Fs.ofV(zin::closeEntry); }
     }

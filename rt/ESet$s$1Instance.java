@@ -12,7 +12,7 @@ import static _base.Set$c$1Instance.extractKey;
 
 final class ESet$s$1Instance implements ESet$s$1 {
     /// A map to allow for O(1) get
-    private LinkedHashMap<MapKey, Object> set;
+    private LinkedHashMap<MapKey,Object> set;
     private final OrderHashBy$2ea$2 ordering;
 
     static Object wrap(LinkedHashSet<MapKey> s, OrderHashBy$2ea$2 ordering){ return new ESet$s$1Instance(new LinkedHashSet<>(s), ordering); }
@@ -24,7 +24,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
         )));
         this.ordering= ordering;
     }
-    ESet$s$1Instance(LinkedHashMap<MapKey, Object> s, OrderHashBy$2ea$2 ordering){
+    ESet$s$1Instance(LinkedHashMap<MapKey,Object> s, OrderHashBy$2ea$2 ordering){
         set= s;
         this.ordering= ordering;
     }
@@ -33,7 +33,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
         set= new LinkedHashMap<>();
     }
 
-    private Map<MapKey, Object> drain(){
+    private Map<MapKey,Object> drain(){
         var r= set;
         set = new LinkedHashMap<>();
         return r;
@@ -113,7 +113,7 @@ final class ESet$s$1Instance implements ESet$s$1 {
         return this;
     }
     private void reOrderHash(OrderHashBy$2ea$2 ordering) {
-        LinkedHashMap<MapKey, Object> newSet= new LinkedHashMap<>();
+        LinkedHashMap<MapKey,Object> newSet= new LinkedHashMap<>();
         set.forEach((k, v) -> newSet.put(mapKey(ordering, extractKey(k)), v));
         this.set = newSet;
     }
