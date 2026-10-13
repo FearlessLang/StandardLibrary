@@ -26,8 +26,8 @@ public interface _Throw$1c$0{
     var dtId= new DataTypeBy$17m$3(){ @Override public Object imm$$hash$1(Object p0){ return p0; } };
     return list.read$info$1(dtId);
   }
-  static final Set<String> machinery= Set.of("errors.fear","action.fear","_Throw$1c$0.java","Try$c$0.java","_CapTry$2s$0.java");
-  static final Set<String> rcs= Set.of("imm","mut","read","iso","readH","mutH");
+  static Set<String> machinery= Set.of("errors.fear","action.fear","_Throw$1c$0.java","Try$c$0.java","_CapTry$2s$0.java");
+  static Set<String> rcs= Set.of("imm","mut","read","iso","readH","mutH");
   static StackFrame$174$0 frameData(StackTraceElement e){
     var cn= e.getClassName();
     int dot= cn.indexOf('.');
