@@ -33,82 +33,82 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     return x == Math.rint(x);
   }
 
-  public static double unwrap(Object p0) {
+  public static double unwrap(Object p0){
      return ((Float$1c$0Instance) p0).val;
   }
 
-  @Override public Object imm$getSucc$0() {
-    if (Double.isNaN(val)) {
+  @Override public Object imm$getSucc$0(){
+    if (Double.isNaN(val)){
       throw err("Float.getSucc: NaN does not have a successor");
     }
-    if (val == Double.POSITIVE_INFINITY) {
+    if (val == Double.POSITIVE_INFINITY){
       throw err("Float.getSucc: Math.posInf does not have a successor");
     }
     return Float$1c$0Instance.instance(Math.nextUp(val));
   }
-  @Override public Object imm$tryGetSucc$0() {
-    if (Double.isNaN(val)) {
+  @Override public Object imm$tryGetSucc$0(){
+    if (Double.isNaN(val)){
       return fail("Float.getSucc: NaN does not have a successor");
     }
-    if (val == Double.POSITIVE_INFINITY) {
+    if (val == Double.POSITIVE_INFINITY){
       return fail("Float.getSucc: Math.posInf does not have a successor");
     }
     return ok(Float$1c$0Instance.instance(Math.nextUp(val)));
   }
-  @Override public Object imm$getPred$0() {
-    if (Double.isNaN(val)) {
+  @Override public Object imm$getPred$0(){
+    if (Double.isNaN(val)){
       throw err("Float.getPred: NaN does not have a predecessor");
     }
-    if (val == Double.NEGATIVE_INFINITY) {
+    if (val == Double.NEGATIVE_INFINITY){
       throw err("Float.getPred: Math.negInf does not have a predecessor");
     }
     return Float$1c$0Instance.instance(Math.nextDown(val));
   }
-  @Override public Object imm$tryGetPred$0() {
-    if (Double.isNaN(val)) {
+  @Override public Object imm$tryGetPred$0(){
+    if (Double.isNaN(val)){
       return fail("Float.getPred: NaN does not have a predecessor");
     }
-    if (val == Double.NEGATIVE_INFINITY) {
+    if (val == Double.NEGATIVE_INFINITY){
       return fail("Float.getPred: Math.negInf does not have a predecessor");
     }
     return ok(Float$1c$0Instance.instance(Math.nextDown(val)));
   }
 
-  @Override public Object imm$signOrNaN$0() {
+  @Override public Object imm$signOrNaN$0(){
     return Float$1c$0Instance.instance(Math.signum(this.val));
   }
   @Override public Object imm$$star_star$1(Object p0){
     double power= Float$1c$0Instance.unwrap(p0);
-    if (Double.isNaN(this.val) || Double.isNaN(power)) {
+    if (Double.isNaN(this.val) || Double.isNaN(power)){
       return Float$1c$0Instance.instance(Double.NaN);
     }
 
     if (this.val == 0.0 && power == 0.0
             || (this.val < 0.0 && power == Double.POSITIVE_INFINITY)
             || (this.val == Double.POSITIVE_INFINITY && power == 0.0)
-    ) {
+    ){
       return Float$1c$0Instance.instance(Double.NaN);
     }
     return instance(Math.pow(val, power));
   }
   @Override public Object imm$softInt$0(){
-    if (Double.isNaN(val)) {
+    if (Double.isNaN(val)){
       return Int$c$0Instance.instance(0);
     }
-    if (val <= Long.MIN_VALUE) {
+    if (val <= Long.MIN_VALUE){
       return Int$c$0Instance.instance(Long.MIN_VALUE);
     }
-    if (val >= Long.MAX_VALUE) {
+    if (val >= Long.MAX_VALUE){
       return Int$c$0Instance.instance(Long.MAX_VALUE);
     }
     return Int$c$0Instance.instance((long) val);
   }
   /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
   @Override public Object imm$softNat$0(){
-    if (Double.isNaN(val) || val <= 0.0d) {
+    if (Double.isNaN(val) || val <= 0.0d){
       return Nat$c$0Instance.instance(0);
     }
-    if (val >= 0x1p64) {
+    if (val >= 0x1p64){
       return Nat$c$0Instance.instance(Nat$c$0Instance.MAX_UNSIGNED_VALUE);
     }
     return Nat$c$0Instance.instance(natBits(val));
@@ -127,7 +127,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     var n= BigInteger.valueOf(mant);
     var d= BigInteger.ONE;
     if (e >= 0){ n = n.shiftLeft(e); }
-    else { d = d.shiftLeft(-e); }
+    else{ d = d.shiftLeft(-e); }
     if (neg){ n = n.negate(); }
     return Num$c$0Instance.instance(n, d);
   }
@@ -256,13 +256,13 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     return instance(Math.rint(val));
   }
   @Override public Object imm$softRound$0(){
-    if (val >= 0.0d) { return instance(Math.floor(val + 0.5)); }
+    if (val >= 0.0d){ return instance(Math.floor(val + 0.5)); }
     return instance(Math.ceil(val - 0.5));
   }
   @Override public Object imm$softCeil$0(){ return instance(Math.ceil(val)); }
   @Override public Object imm$softFloor$0(){ return instance(Math.floor(val)); }
   @Override public Object imm$softTrunc0$0(){
-    if (val < 0) {
+    if (val < 0){
       return instance(Math.ceil(val));
     }
     return instance(Math.floor(val));
@@ -300,9 +300,9 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
    */
   @Override public Object imm$ieeePow$1(Object p0){
     double f= unwrap(p0);
-    if (f == 0.0) { return Float$1c$0Instance.instance(1.0); }
+    if (f == 0.0){ return Float$1c$0Instance.instance(1.0); }
     // I think these are the only differences between ieee and Math
-    if (val == 1.0 || val == -1.0 && Double.isInfinite(f)) {
+    if (val == 1.0 || val == -1.0 && Double.isInfinite(f)){
       return Float$1c$0Instance.instance(1.0);
     }
 

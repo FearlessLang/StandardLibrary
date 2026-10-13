@@ -369,7 +369,7 @@ final class _Frame implements Frame$1c$0{
     if (SwingUtilities.isEventDispatchThread()){ return s.get(); }
     var task= new FutureTask<>(s::get);
     SwingUtilities.invokeLater(task);
-    try { return task.get(); }
+    try{ return task.get(); }
     catch (InterruptedException e){
       Thread.currentThread().interrupt();
       throw new Error(e);
@@ -489,7 +489,7 @@ final class _Frame implements Frame$1c$0{
 
     if (maximized){ frame.setBounds(0, 0, screenW, screenH); }
     else if (located){ place(locationX, locationY); }
-    else { frame.setLocationRelativeTo(null); }
+    else{ frame.setLocationRelativeTo(null); }
 
     if (undecorated){ frame.setOpacity(opacity); }
 

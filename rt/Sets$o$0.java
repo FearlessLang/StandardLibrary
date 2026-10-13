@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 
-public interface Sets$o$0 extends Sealed$2o$0 {
+public interface Sets$o$0 extends Sealed$2o$0{
   ArrayList<Object> emptyList= new ArrayList<>(0);
   default Object imm$$hash$1(Object p0){
     var ordering= Set$c$1Instance.ordering(p0);

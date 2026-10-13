@@ -84,7 +84,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
           int cSize= vert ? d.width : d.height;
           int off= cross + (ln.cross() - cSize) / 2;
           if (vert){ c.setBounds(off, primary, cSize, pSize); }
-          else     { c.setBounds(primary, off, pSize, cSize); }
+          else{ c.setBounds(primary, off, pSize, cSize); }
           primary += pSize + (vert ? gap.heightGap : gap.widthGap);
         }
         cross += ln.cross() + lineGap;

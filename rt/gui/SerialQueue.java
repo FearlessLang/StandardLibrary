@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
-  public SerialQueue(Consumer<Throwable> onError) {
+  public SerialQueue(Consumer<Throwable> onError){
     this(new LinkedBlockingQueue<>(), new AtomicBoolean());
     var t= new Thread(() -> runLoop(q, midTask), "GuiToMain");
     t.setUncaughtExceptionHandler((_, e) -> {
@@ -35,11 +35,11 @@ record SerialQueue(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
       }});//Correctly still accepting tasks, they will be ignored. Explicitly modelling 'ended' status not needed
     }
   }
-  private static void runLoop(BlockingQueue<MF$7$1> q, AtomicBoolean midTask) {
+  private static void runLoop(BlockingQueue<MF$7$1> q, AtomicBoolean midTask){
     while (true){
-      try { q.take().mut$$hash$0();  } 
+      try{ q.take().mut$$hash$0();  } 
       catch (InterruptedException e){ Thread.currentThread().interrupt(); throw new Error(e); }
-      finally { midTask.set(false); }
+      finally{ midTask.set(false); }
     }
   }
   private static final class Poison extends RuntimeException{ private static final long serialVersionUID= 1L; }

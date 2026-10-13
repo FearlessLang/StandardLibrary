@@ -70,7 +70,7 @@ public final class AppLog{
     var line= raw ? msg : stampNow()+" "+msg+"\n";
     synchronized (lock){
       if (closing.get()){ err("append during shutdown for "+path+": "+msg, null); return; }
-      try {
+      try{
         out.write(line);
         out.flush();
       }
@@ -79,7 +79,7 @@ public final class AppLog{
   }
   private void closeAndRotateQuiet(){
     synchronized (lock){
-      try { out.close(); }
+      try{ out.close(); }
       catch (IOException e){ err("close failed: "+path, e); return; }
     }
     rotateOnCloseQuiet(path, keepLogs, false);
@@ -144,7 +144,7 @@ public final class AppLog{
   private static void moveToStamped(Path src, boolean starting) throws IOException{
     for (int i= 0; i < maxStampRetries; i++){
       var dst= rotatedPath(src, stampNow());
-      try { Files.move(src, dst); if (starting){ appendOrThrow(dst); } return; }
+      try{ Files.move(src, dst); if (starting){ appendOrThrow(dst); } return; }
       catch (FileAlreadyExistsException e){ 
         try{ Thread.sleep(100); } catch (InterruptedException _){}//refuse to interrupt during log cleanup
       }
@@ -152,7 +152,7 @@ public final class AppLog{
     throw new IOException(" OS timestamps unresponsive when renaming "+src);
   }
   private static void enforceRetentionOrThrow(Path p, int keep){
-    try { enforceRetention(p, keep); }
+    try{ enforceRetention(p, keep); }
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static void enforceRetention(Path p, int keep) throws IOException{

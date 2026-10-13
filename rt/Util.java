@@ -58,11 +58,11 @@ public final class Util{
   public static Object ord(int i){ return i<0? ordLt : i==0? ordEq : ordGt; }
   public static Opt$c$1 optEmpty(){ return Opt$c$1.instance; }
   public static Opt$c$1 optSome(Object x){ return (Opt$c$1) Opts$o$0.instance.imm$$hash$1(x); }
-  public static Opt$c$1 optNullable(Object o) {
-      if (o == null) {return optEmpty();}
+  public static Opt$c$1 optNullable(Object o){
+      if (o == null){return optEmpty();}
       return optSome(o);
   }
-  public static Opt$c$1 toOpt(Optional<?> opt) {
+  public static Opt$c$1 toOpt(Optional<?> opt){
     return optNullable(opt.orElse(null));
   }
   public static Object ok(Object x){ return Actions$5c$0.instance.imm$ok$1(x); }
@@ -73,7 +73,7 @@ public final class Util{
   public static Error err(String msg){//TODO: eventually all calls to .err will need to take a decision det/non det.
     return detErr(msg);
     }
-  public static Error detErr(String msg) {
+  public static Error detErr(String msg){
     var info= _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
     return (Error) Error$1c$0.instance.imm$$bang$1(info);
   }
@@ -83,7 +83,7 @@ public final class Util{
       : BigInteger.valueOf(x & Long.MAX_VALUE).setBit(63);
   }
   public static String toS(Object o){return ((Str$c$0Instance)((ToStr$1g$0)o).read$str$0()).val(); }
-  public static String toStringBy(ToStrBy$5u$1 by, Object p0) {
+  public static String toStringBy(ToStrBy$5u$1 by, Object p0){
     return toS(by.imm$$hash$1(p0));
   }
   public static long natToLong(Object n){
@@ -94,7 +94,7 @@ public final class Util{
   }
   public static int natToInt(Object n){
     long nat= ((Nat$c$0Instance)n).val();
-    if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0) {
+    if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0){
       throw err("Nat "+Long.toUnsignedString(nat)+" is too large to be represented as an integer");
     }
     return (int) nat;
@@ -125,7 +125,7 @@ public final class Util{
     var ohB= (Order$1c$1)by.imm$$hash$1(b);
     return (Integer)((Order$1c$0)ohA.read$cmp$2(ohA.read$close$0(), ohB.read$close$0())).read$$hash$1(cmpM);
   }
-  public static Comparator<Object> toComparator(OrderBy$5e$2 ordering) {
+  public static Comparator<Object> toComparator(OrderBy$5e$2 ordering){
     return (a, b) -> cmp(ordering, a, b);
   }
   public static final class MapKey{

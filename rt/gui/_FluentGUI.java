@@ -11,12 +11,12 @@ public final class _FluentGUI implements Gui$c$0{
     }
     var done= new CompletableFuture<Void>();
     var fb= new _Frame(done);
-    try {
+    try{
       f.mut$accept$1(fb);
       fb.onEdtAndWait(fb::start);
     }
     catch (Throwable e){ fb.frame.abortBeforeStart(e); }// Throwable: sneaky throws exist
-    try { done.join(); }
+    try{ done.join(); }
     catch (Throwable e){ throw Util.asFearlessError(e); }
     return Void$o$0.instance;
   }

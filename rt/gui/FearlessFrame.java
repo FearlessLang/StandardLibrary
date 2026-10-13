@@ -75,7 +75,7 @@ final class FearlessFrame extends JFrame{
       long now= System.nanoTime();
       warnIfLost("repaint", now, now - tickLast, tickPeriodNs);
       tickLast = now;
-      try { tick.run(); }
+      try{ tick.run(); }
       catch (Throwable t){ low(t); }
     });
     timer.setInitialDelay(delayMillis + WarmupMillis);
@@ -206,7 +206,7 @@ final class FearlessFrame extends JFrame{
       if (completed || high){
         discarded= e;
         accepted= false;
-      } else {
+      } else{
         discarded= failure;
         failure = e;
         high = true;
@@ -270,7 +270,7 @@ final class FearlessFrame extends JFrame{
     }
     queue.closeThen(() -> {});
     if (SwingUtilities.isEventDispatchThread()){ dispose(); }
-    else { SwingUtilities.invokeLater(this::dispose); }
+    else{ SwingUtilities.invokeLater(this::dispose); }
     done.completeExceptionally(e);
   }
 
@@ -295,7 +295,7 @@ final class FearlessFrame extends JFrame{
       e= failure;
     }
     if (e == null){ done.complete(null); }
-    else { done.completeExceptionally(e); }
+    else{ done.completeExceptionally(e); }
   }
 
   private static void printDiscarded(Throwable e){
@@ -315,7 +315,7 @@ final class GuiEdtBoundary extends EventQueue{
   }
 
   @Override protected void dispatchEvent(AWTEvent event){
-    try { super.dispatchEvent(event); }
+    try{ super.dispatchEvent(event); }
     catch (Throwable e){
       var frame= frameOf(event);
       if (frame == null){

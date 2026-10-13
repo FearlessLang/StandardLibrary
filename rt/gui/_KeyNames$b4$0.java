@@ -17,7 +17,7 @@ public interface _KeyNames$b4$0 extends Sealed$2o$0{
     var res= new HashMap<String,Integer>();
     for (Field f : KeyEvent.class.getFields()){
       if (!f.getName().startsWith("VK_")){ continue; }
-      try { res.put(f.getName().substring(3), f.getInt(null)); }
+      try{ res.put(f.getName().substring(3), f.getInt(null)); }
       catch (IllegalAccessException e){ throw new Error(e); }
     }
     return Map.copyOf(res);

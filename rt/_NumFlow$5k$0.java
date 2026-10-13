@@ -6,8 +6,8 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public interface _NumFlow$5k$0 extends _base.Sealed$2o$0 {
-_NumFlow$5k$0 instance= new _NumFlow$5k$0() {};
+public interface _NumFlow$5k$0 extends _base.Sealed$2o$0{
+_NumFlow$5k$0 instance= new _NumFlow$5k$0(){};
 
   default Object imm$bytes$2(Object p0, Object p1){
     int start= Byte.toUnsignedInt(Byte$o$0Instance.unwrap(p0));
@@ -51,11 +51,11 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0() {};
     long start= Nat$c$0Instance.unwrap(p0);
     long end= Nat$c$0Instance.unwrap(p1);
     assert Long.compareUnsigned(start, end) <= 0;
-    if (Long.compareUnsigned(end, Long.MAX_VALUE) <= 0) {
+    if (Long.compareUnsigned(end, Long.MAX_VALUE) <= 0){
       return Flow$o$1Instance.range(LongStream.rangeClosed(start, end)
         .mapToObj(Nat$c$0Instance::instance));
     }
-    if (Long.compareUnsigned(start, Long.MAX_VALUE) > 0) {
+    if (Long.compareUnsigned(start, Long.MAX_VALUE) > 0){
       return Flow$o$1Instance.range(LongStream.rangeClosed(start, end)
         .mapToObj(Nat$c$0Instance::instance));
     }
@@ -77,7 +77,7 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0() {};
     );
   }
 
-  default Object imm$floats$2(Object p0, Object p1) {
+  default Object imm$floats$2(Object p0, Object p1){
     double start= Float$1c$0Instance.unwrap(p0);
     double end= Float$1c$0Instance.unwrap(p1);
     assert start <= end;
@@ -87,7 +87,7 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0() {};
     );
   }
 
-  default Object imm$floats$3(Object p0, Object p1, Object p2) {
+  default Object imm$floats$3(Object p0, Object p1, Object p2){
     double start= Float$1c$0Instance.unwrap(p0);
     double end= Float$1c$0Instance.unwrap(p1);
     double step= Float$1c$0Instance.unwrap(p2);
@@ -106,7 +106,7 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0() {};
 
   long smallestNegBits= Double.doubleToRawLongBits(Math.nextDown(-0.0));
 
-  static LongStream streamDoublesBetweenAsBits(double start, double end) {
+  static LongStream streamDoublesBetweenAsBits(double start, double end){
     assert !Double.isNaN(start) && !Double.isNaN(end);
     assert start <= end;
     long startBits= Double.doubleToRawLongBits(start);
@@ -115,7 +115,7 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0() {};
     boolean startNeg= startBits < 0; // true for negatives AND -0.0
     boolean endNeg= endBits < 0;
 
-    if (startNeg && !endNeg) {
+    if (startNeg && !endNeg){
       return LongStream.concat(
         streamDoublesBetweenAsBits(Math.nextDown(-0.0), start)
           .map(doubleBits -> smallestNegBits - doubleBits + startBits), // reverse the stream

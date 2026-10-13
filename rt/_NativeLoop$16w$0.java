@@ -1,6 +1,6 @@
 package _base;
 
-public interface _NativeLoop$16w$0 {
+public interface _NativeLoop$16w$0{
   _NativeLoop$16w$0 instance= new _NativeLoop$16w$0(){};
 
   default Object imm$$hash$2(Object self, Object body){

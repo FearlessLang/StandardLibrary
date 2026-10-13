@@ -5,7 +5,7 @@ import java.util.stream.LongStream;
 
 import static _base.Util.*;
 
-final class IntCache {
+final class IntCache{
   private static final long min= -128;
   private static final long max= 127;
 
@@ -13,8 +13,8 @@ final class IntCache {
           .mapToObj(Int$c$0Instance::new)
           .toArray(Int$c$0Instance[]::new);
 
-  static Int$c$0Instance getInt(long i) {
-    if (i < min || i > max) {
+  static Int$c$0Instance getInt(long i){
+    if (i < min || i > max){
       return new Int$c$0Instance(i);
     }
     // shift the index so that min is 0
@@ -41,11 +41,11 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     var bound= over ? "greater than Math.maxInt ("+MAX_VALUE+")" : "less than Math.minInt ("+MIN_VALUE+")";
     return nonDetErr("Int"+op+": "+(over ? "overflow, " : "underflow, ")+a+" "+op+" "+b+" is "+bound);
   }
-  private static long mulChecked(long a, long b) {
+  private static long mulChecked(long a, long b){
     try{ return Math.multiplyExact(a, b); }
     catch (ArithmeticException e){ throw outOfRange("*", a, ""+b, a < 0 == b < 0); }
   }
-  static boolean canSafelyConvertToDouble(long val) {
+  static boolean canSafelyConvertToDouble(long val){
     return val != Long.MAX_VALUE && val == (long) ((double) val);
   }
 
@@ -65,43 +65,43 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$nat$0(){ return val < 0 ? optEmpty() : optSome(Nat$c$0Instance.instance(val)); }
   @Override public Object imm$byte$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$o$0Instance.instance((byte)val)); }
   @Override public Object imm$float$0(){
-    if (canSafelyConvertToDouble(val)) {
+    if (canSafelyConvertToDouble(val)){
       return optSome(Float$1c$0Instance.instance((double) val));
     }
     return optEmpty();
   }
   @Override public Object imm$getNat$0(){
-    if (val < 0) {
+    if (val < 0){
       throw err("Int.getNat: cannot convert negative Int "+val+" to Nat");
     }
     return Nat$c$0Instance.instance(val);
   }
   @Override public Object imm$tryGetNat$0(){
-    if (val < 0) {
+    if (val < 0){
       return fail("Int.getNat: cannot convert negative Int "+val+" to Nat");
     }
     return ok(Nat$c$0Instance.instance(val));
   }
   @Override public Object imm$getByte$0(){
-    if (val < 0) {
+    if (val < 0){
       throw err("Int.getByte: cannot convert to Byte "+val+" is less than 0");
     }
-    if (val > 255) {
+    if (val > 255){
       throw err("Int.getByte: cannot convert to Byte "+val+" is greater than 255");
     }
     return Byte$o$0Instance.instance((byte)val);
   }
   @Override public Object imm$tryGetByte$0(){
-    if (val < 0) {
+    if (val < 0){
       return fail("Int.getByte: cannot convert to Byte "+val+" is less than 0");
     }
-    if (val > 255) {
+    if (val > 255){
       return fail("Int.getByte: cannot convert to Byte "+val+" is greater than 255");
     }
     return ok(Byte$o$0Instance.instance((byte)val));
   }
   @Override public Object imm$getFloat$0(){
-    if (canSafelyConvertToDouble(val)) {
+    if (canSafelyConvertToDouble(val)){
       return Float$1c$0Instance.instance((double) val);
     }
     throw err(
@@ -111,7 +111,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     );
   }
   @Override public Object imm$tryGetFloat$0(){
-    if (canSafelyConvertToDouble(val)) {
+    if (canSafelyConvertToDouble(val)){
       return ok(Float$1c$0Instance.instance((double) val));
     }
     return fail(
@@ -130,7 +130,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
-    if (d == 0L) {
+    if (d == 0L){
       throw err("Int/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
@@ -139,13 +139,13 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     );
   }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, unwrap(p0))); }
-  @Override public Object imm$$star_star$1(Object p0) {
+  @Override public Object imm$$star_star$1(Object p0){
     long power= unsignedLongFromNat(p0);
-    if (power == 0) { return Int$c$0Instance.instance(1); }
-    if (power == 1 || this.val == 1 || this.val == 0) { return this; }
+    if (power == 0){ return Int$c$0Instance.instance(1); }
+    if (power == 1 || this.val == 1 || this.val == 0){ return this; }
     long result= 1, base= val;
     try{
-      while (true) {
+      while (true){
         if ((power & 1) != 0){ result = Math.multiplyExact(result, base); }
         power >>>= 1;
         if (power == 0){ return Int$c$0Instance.instance(result); }
@@ -162,17 +162,17 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
   @Override public Object imm$negAbs$0(){
     // Long.MIN_VALUE correctly converted to Long.MAX_VALUE + 1
-    if (val < 0) {
+    if (val < 0){
       return this;
     }
     return Int$c$0Instance.instance(-val);
   }
 
-  @Override public Object imm$sign$0() {
-    if (val == 0L) {
+  @Override public Object imm$sign$0(){
+    if (val == 0L){
       return Int$c$0Instance.instance(0L);
     }
-    if (val < 0L) {
+    if (val < 0L){
       return Int$c$0Instance.instance(-1L);
     }
     return Int$c$0Instance.instance(1L);
@@ -190,7 +190,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     // We can't directly compare val and d since val is signed,
     // so Long.compareUnsigned would assume it to be a large negative number.
     // Since this is a signed num if d > Long.MAX_VALUE then it is > val and thus the result is 0.
-    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0) {
+    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0){
       return instance(0L);
     }
 
@@ -200,14 +200,14 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$tryGetTruncDiv$1(Object p0){
     long d= unsignedLongFromNat(p0);
     if (d == 0L){ return fail("Int.getTruncDiv: d==0"); }
-    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0) {
+    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0){
       return ok(instance(0L));
     }
     return ok(instance(val / d));
   }
-  public static long remainderWithUnsignedLong(long signed, long unsignedRemainder) {
+  public static long remainderWithUnsignedLong(long signed, long unsignedRemainder){
     // if a % b = a if b> a,
-    if (Long.compareUnsigned(unsignedRemainder, Long.MAX_VALUE) > 0) {
+    if (Long.compareUnsigned(unsignedRemainder, Long.MAX_VALUE) > 0){
       return signed;
     }
     return signed % unsignedRemainder;
@@ -243,13 +243,13 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ throw err("Int.getWrapIndex: len==0"); }
     // handle case where len cannot be represented as a signed long.
-    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {
+    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0){
       // safe to treat len as signed long
       return Nat$c$0Instance.instance(Math.floorMod(val, len));
     }
 
     // 0 <= val < len, so val % len == val
-    if (val >= 0) {
+    if (val >= 0){
       return Nat$c$0Instance.instance(val);
     }
 
@@ -261,10 +261,10 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$tryGetWrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ return fail("Int.getWrapIndex: len==0"); }
-    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {
+    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0){
       return ok(Nat$c$0Instance.instance(Math.floorMod(val, len)));
     }
-    if (val >= 0) {
+    if (val >= 0){
       return ok(Nat$c$0Instance.instance(val));
     }
     return ok(Nat$c$0Instance.instance(len + val));
@@ -272,8 +272,8 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$wrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ return optEmpty(); }
-    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0) {return optSome(Nat$c$0Instance.instance(Math.floorMod(val, len))); }
-    if (val >= 0) { return optSome(Nat$c$0Instance.instance(val)); }
+    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0){return optSome(Nat$c$0Instance.instance(Math.floorMod(val, len))); }
+    if (val >= 0){ return optSome(Nat$c$0Instance.instance(val)); }
     return optSome(Nat$c$0Instance.instance(len + val));
   }
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance(val + unwrap(p0)); }

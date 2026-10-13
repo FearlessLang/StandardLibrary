@@ -5,13 +5,13 @@ import java.util.stream.IntStream;
 
 import static _base.Util.*;
 
-final class ByteCache {
+final class ByteCache{
   final static int max= 255;
   final static Byte$o$0Instance[] byteArray= IntStream.rangeClosed(0, max)
           .mapToObj(b -> new Byte$o$0Instance((byte) b))
           .toArray(Byte$o$0Instance[]::new);
 
-  static Byte$o$0Instance getByte(byte b) {
+  static Byte$o$0Instance getByte(byte b){
     // All bytes are cached :), we do have to say our bytes are unsigned though
     return byteArray[Byte.toUnsignedInt(b)];
   }
@@ -23,10 +23,10 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
 
   public static Byte$o$0 instance(byte val){ return ByteCache.getByte(val); }
 
-  private static byte clampToByte(Object o) {
+  private static byte clampToByte(Object o){
     return (byte) (((Byte$o$0Instance)o).val & 255);
   }
-  public static byte unwrap(Object p0) {return ((Byte$o$0Instance) p0).val;}
+  public static byte unwrap(Object p0){return ((Byte$o$0Instance) p0).val;}
   private static int u8(byte b){ return Byte.toUnsignedInt(b); }
   private static int u8(Object o){ return u8(((Byte$o$0Instance)o).val); }
   private static byte b(Object o){ return ((Byte$o$0Instance)o).val; }
@@ -41,7 +41,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     return (byte)r;
   }
   private static byte subChecked(byte a, byte b){
-    if (Byte.compareUnsigned(a, b) < 0) {
+    if (Byte.compareUnsigned(a, b) < 0){
       throw nonDetErr("Byte-: underflow, "+u8(a)+" - "+u8(b)+" is less than 0");
     }
     return (byte) (a - b);
@@ -63,13 +63,13 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$$plus$1(Object p0){ return instance(addChecked(val, b(p0))); }
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val, b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, b(p0))); }
-  @Override public Object imm$$star_star$1(Object p0) {
+  @Override public Object imm$$star_star$1(Object p0){
     int power= u8(p0);
-    if (power == 0) { return Byte$o$0Instance.instance((byte) 1); }
-    if (power == 1 || this.val == 1 || this.val == 0) { return this; }
+    if (power == 0){ return Byte$o$0Instance.instance((byte) 1); }
+    if (power == 1 || this.val == 1 || this.val == 0){ return this; }
     int result= 1, base= u8(val);
     try{
-      while (true) {
+      while (true){
         if ((power & 1) != 0){ result = powMul(result, base); }
         power >>>= 1;
         if (power == 0){ return Byte$o$0Instance.instance((byte) result); }
@@ -84,7 +84,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   }
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
-    if (d == 0L) {
+    if (d == 0L){
       throw err("Byte/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(

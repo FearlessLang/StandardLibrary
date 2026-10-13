@@ -23,7 +23,7 @@ public record ReadZip(
     while (true){
       var e= Fs.of(zin::getNextEntry);
       if (e == null){ return out; }
-      try {
+      try{
         var n= e.getName();
         reqZipNameOk(n);
         var key= keyOf(n);

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-public interface Norm$o$1 extends _base.Sealed$2o$0 {
+public interface Norm$o$1 extends _base.Sealed$2o$0{
   default Object imm$get$0(){
     throw new AssertionError("Uncallable method: Norm$o$1.imm$get$0"+this.getClass().getName());
   }
