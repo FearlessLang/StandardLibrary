@@ -115,7 +115,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     BigInteger result= BigInteger.ONE;
     long timesToDecompose= exponent / Integer.MAX_VALUE;
     int remainder= (int) (exponent % Integer.MAX_VALUE);
-    for (int i= 0; i < timesToDecompose; i++){
+    for (int i= 0; i < timesToDecompose; i += 1){
       result = result.multiply(n.pow(Integer.MAX_VALUE));
     }
     return result.multiply(n.pow(remainder));

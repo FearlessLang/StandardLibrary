@@ -7,7 +7,7 @@ public final class _DownloadCapability$8fsw$0 implements DownloadCapability$8fsw
   @Override public Object mut$downloadBytes$2(Object url, Object maxBytes){
     var bs= DownloadFetch.bytes(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes));
     var l= new java.util.ArrayList<Object>(bs.length);
-    for (var b: bs){ l.add(Byte$o$0Instance.instance(b)); }
+    for (var b : bs){ l.add(Byte$o$0Instance.instance(b)); }
     return List$o$1Instance.wrap(l);
   }
 

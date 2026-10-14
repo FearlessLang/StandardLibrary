@@ -95,13 +95,13 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   private static int[] join(int[] sep, List<UStr$s$0Instance> parts){
     if (parts.isEmpty()){ return empty; }
     int size= 0;
-    for (int i= 0; i < parts.size(); i++){
+    for (int i= 0; i < parts.size(); i += 1){
       if (i != 0){ size = Math.addExact(size, sep.length); }
       size = Math.addExact(size, parts.get(i).val.length);
     }
     var res= new int[size];
     int off= 0;
-    for (int i= 0; i<parts.size(); i++){
+    for (int i= 0; i<parts.size(); i += 1){
       if (i!=0){
         System.arraycopy(sep, 0, res, off, sep.length);
         off += sep.length;
@@ -113,7 +113,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     return res;
   }
   private static boolean isStr(int[] cps){
-    for (int cp: cps){ if (!isStr(cp)){ return false; } }
+    for (int cp : cps){ if (!isStr(cp)){ return false; } }
     return true;
   }
 
@@ -123,7 +123,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   private static String strUCode(int[] cps){
     if (cps.length==0){ return ""; }
     var res= new StringBuilder();
-    for (int i= 0; i<cps.length; i++){
+    for (int i= 0; i<cps.length; i += 1){
       if (i!=0){ res.append(' '); }
       appendHex(res, cps[i]);
     }
@@ -131,7 +131,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   }
   private static void appendHex(StringBuilder res, int cp){
     String s= Integer.toHexString(cp).toUpperCase();
-    for (int i= s.length(); i < 4; i++){ res.append('0'); }
+    for (int i= s.length(); i < 4; i += 1){ res.append('0'); }
     res.append(s);
   }
   private static int[] parseUCode(String s){
@@ -139,7 +139,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     if (!uCodeText.matcher(s).matches()){ throw err("Malformed UStr.u input: "+s); }
     String[] parts= s.split(" ");
     var res= new int[parts.length];
-    for (int i= 0; i<parts.length; i++){
+    for (int i= 0; i<parts.length; i += 1){
       int cp;
       try{ cp= Integer.parseInt(parts[i], 16); }
       catch (NumberFormatException e){ throw err("Malformed UStr.u input: "+s); }
@@ -164,7 +164,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     return res.toString();
   }
   private static int run(int[] cps, int i, boolean safe){
-    while (i < cps.length && isStr(cps[i]) == safe){ i++; }
+    while (i < cps.length && isStr(cps[i]) == safe){ i += 1; }
     return i;
   }
   private static String receiver(String e){

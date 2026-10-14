@@ -100,7 +100,7 @@ final class AssetBytesRead{
       var field= cls.getField("autoloadedAssets");
       var rows= (String[][])field.get(null);
       var res= new ArrayList<List<String>>();
-      for (var row: rows){ res.add(List.of(row)); }
+      for (var row : rows){ res.add(List.of(row)); }
       return List.copyOf(res);
     }
     catch (ReflectiveOperationException|ClassCastException e){
@@ -113,7 +113,7 @@ final class AssetBytesRead{
     var root= Path.of(System.getProperty(dirKey)).toAbsolutePath().normalize();
     var segments= portableSegments("diskPath", diskPath);
     var full= root;
-    for (var s: segments){ full = full.resolve(s); }
+    for (var s : segments){ full = full.resolve(s); }
     full = full.normalize();
     if (!full.startsWith(root)){ throw invalidAssetDescriptor("diskPath escapes root: "+diskPath); }
     rejectSymlinks(full, root, segments, diskPath);
@@ -122,7 +122,7 @@ final class AssetBytesRead{
 
   static void rejectSymlinks(Path full, Path root, List<String> segments, String original){
     var p= root;
-    for (var s: segments){
+    for (var s : segments){
       p = p.resolve(s);
       if (Files.isSymbolicLink(p)){ throw invalidAssetDescriptor("asset path contains symbolic link: "+original); }
     }
@@ -132,7 +132,7 @@ final class AssetBytesRead{
   static List<String> zipStepList(String zipSteps){
     if (zipSteps.isEmpty()){ return List.of(); }
     var res= new ArrayList<String>();
-    for (var step: zipSteps.split(";", -1)){ res.add(canonicalSlashPath("zipSteps", step)); }
+    for (var step : zipSteps.split(";", -1)){ res.add(canonicalSlashPath("zipSteps", step)); }
     return res;
   }
 
@@ -148,7 +148,7 @@ final class AssetBytesRead{
   static List<String> portableSegments(String field, String path){
     if (path.isEmpty()){ throw invalidAssetDescriptor(field+" is empty"); }
     var res= new ArrayList<String>();
-    for (var s: path.split("/", -1)){
+    for (var s : path.split("/", -1)){
       checkPortableSegment(field, s, path);
       res.add(s);
     }

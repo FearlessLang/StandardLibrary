@@ -112,7 +112,7 @@ final class FearlessFrame extends JFrame{
     var at= getLocation();
     var c= getContentPane().getSize();
     if (!undecorated){ setOpacity(1f); }// opacity < 1 is illegal on decorated windows
-    suppressClosed++;
+    suppressClosed += 1;
     dispose();
     boolean resizable= isResizable();
     setResizable(true);
@@ -161,9 +161,9 @@ final class FearlessFrame extends JFrame{
         modelTicks += dropped;
         todo = ModelCatchupMax;
       }
-      for (long i= 0; i < todo; i++){
+      for (long i= 0; i < todo; i += 1){
         queue.submitAll(actions);
-        modelTicks++;
+        modelTicks += 1;
       }
       // Backlog: nothing is lost, but the queue thread is slower than the
       // submission rate; latency grows. Escalating threshold: warn at 1000,
@@ -173,7 +173,8 @@ final class FearlessFrame extends JFrame{
         System.err.println("Warning [t=" + (now - runtimeStartNs) / 1_000_000
           + "ms]: model queue backlog at " + backlog + " tasks");
         modelWarnAt *= 10;
-      } else if (backlog == 0){ modelWarnAt = 1_000; }
+      }
+      else if (backlog == 0){ modelWarnAt = 1_000; }
     });
     modelTimer.setInitialDelay(delayMillis + warmupMillis);
     modelTimer.start();
@@ -206,7 +207,8 @@ final class FearlessFrame extends JFrame{
       if (completed || high){
         discarded= e;
         accepted= false;
-      } else{
+      }
+      else{
         discarded= failure;
         failure = e;
         high = true;
@@ -241,7 +243,7 @@ final class FearlessFrame extends JFrame{
   void closed(){
     assert SwingUtilities.isEventDispatchThread();
     if (suppressClosed > 0){// synthetic close from setDecoration, not the user
-      suppressClosed--;
+      suppressClosed -= 1;
       return;
     }
     boolean accepted;

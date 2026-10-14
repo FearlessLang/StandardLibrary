@@ -39,7 +39,7 @@ public record ReadZip(
     var bad= n.isEmpty() || n.startsWith("/") || n.indexOf('\0') >= 0;
     if (bad){ throw badNameErr.apply(n); }
     var sub= keyOf(n);
-    for (var seg: sub.split("/", -1)){
+    for (var seg : sub.split("/", -1)){
       if (seg.isEmpty() || seg.equals(".") || seg.equals("..")){ throw badNameErr.apply(n); }
     }
   }
@@ -53,7 +53,7 @@ public record ReadZip(
   }
   public byte[] readEntry(IoSupplier szin, List<String> steps, String entryName, Charset encoding){
     byte[] bytes= null;
-    for (var step: steps){
+    for (var step : steps){
       bytes = readAll(supplier(szin, bytes, encoding)).get(step);
       if (bytes == null){ return null; }
     }

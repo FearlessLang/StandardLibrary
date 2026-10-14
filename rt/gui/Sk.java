@@ -101,7 +101,7 @@ interface Sk{
 
   static int search(int cp, boolean emojiFirst){
     if (emojiFirst && typeface(emoji).getUTF32Glyph(cp) != 0){ return emoji; }
-    for (int i= 0; i < fontFiles.length; i++){
+    for (int i= 0; i < fontFiles.length; i += 1){
       if (typeface(i).getUTF32Glyph(cp) != 0){ return i; }
     }
     return 0;
@@ -140,7 +140,7 @@ interface Sk{
     s.line = shape(s.text, s.textSize);
     s.ascent = s.line.getAscent();
     s.descent = s.line.getDescent();
-    for (int i= 0; i < (s.allFonts ? fontFiles.length : 1); i++){
+    for (int i= 0; i < (s.allFonts ? fontFiles.length : 1); i += 1){
       var m= font(i, s.textSize).getMetrics();
       s.ascent = Math.min(s.ascent, m.getAscent());
       s.descent = Math.max(s.descent, m.getDescent());
@@ -155,7 +155,7 @@ interface Sk{
 
   static void paintNode(SkComponent c, Canvas cv){
     c.w.sk(cv);
-    for (int i= 0; i < c.getComponentCount(); i++){
+    for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
       int save= cv.save();
       cv.translate(k.getX(), k.getY());

@@ -19,7 +19,7 @@ public final class Set$c$1Instance implements Set$c$1{
   static Set$c$1Instance fromSortedList(OrderHashBy$2ea$2 ordering, List<Object> sortedList){return new Set$c$1Instance(ordering, sortedList);}
   static Set$c$1Instance fromUnsortedList(OrderHashBy$2ea$2 ordering, ArrayList<Object> unsortedList){
     var set= new HashMap<MapKey,Object>();
-    for (var o: unsortedList){ set.putIfAbsent(mapKey(ordering, o), o); }
+    for (var o : unsortedList){ set.putIfAbsent(mapKey(ordering, o), o); }
     return new Set$c$1Instance(ordering, set);
   }
   public Set$c$1Instance(OrderHashBy$2ea$2 ordering, List<Object> sortedList, Map<MapKey,Object> set){

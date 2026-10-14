@@ -126,7 +126,7 @@ final class Flow$o$1Instance implements Flow$o$1{
     return Void$o$0.instance;
   }
   private static void run(FlowChain ch, FlowSink first){
-    for (var c: ch.core.reversed()){ first = c.sink(first); }
+    for (var c : ch.core.reversed()){ first = c.sink(first); }
     var it= ch.source.iterator();
     while (!first.done() && it.hasNext()){ first.accept(it.next()); }
     first.finish();
@@ -180,7 +180,7 @@ final class FlowAllToAllSink implements FlowSink{
   @Override public void accept(Object e){ xs.add(e); }
   @Override public boolean done(){ return down.done(); }
   @Override public void finish(){
-    for (var r: List$o$1Instance.asJava(callF$2(f, List$o$1Instance.wrap(xs)))){
+    for (var r : List$o$1Instance.asJava(callF$2(f, List$o$1Instance.wrap(xs)))){
       if (down.done()){ break; }
       down.accept(r);
     }
@@ -260,7 +260,7 @@ final class FlowMisuse{
   }
   private static boolean onlyImmCapture(Object a){
     if (a instanceof OnlyImmCapture){ return true; }
-    for (var i: a.getClass().getInterfaces()){
+    for (var i : a.getClass().getInterfaces()){
       try{ if (i.getField("instance").get(null) == a){ return true; } }
       catch (ReflectiveOperationException _){}
     }
@@ -269,20 +269,20 @@ final class FlowMisuse{
   private void checkPar(){
     var seen= new IdentityHashMap<Object,Integer>();
     int j= 0;
-    for (var e: c.source){
+    for (var e : c.source){
       var i= seen.putIfAbsent(e, j);
       if (i != null){ throw misuse("The elements at index "+i+" and "+j+" of the source are identity equal: each element of a `"+c.mode+"` flow must be a distinct object."); }
-      j++;
+      j += 1;
     }
-    for (var s: c.shape){
+    for (var s : c.shape){
       if (Set.of("for", "forEach", "let").contains(s.name())){ continue; }
-      for (var a: s.args()){
+      for (var a : s.args()){
         if (isLambda(a) && !onlyImmCapture(a)){
           throw misuse("The lambda of `"+show(s)+"` captures a value that is not `imm`: over `ParRepr` and `ParPod` only the lambdas of `.for`, `.forEach` and `.let` may capture `read` or `mut` values.");
         }
       }
     }
-    for (int i= 0; i < stages.size(); i++){
+    for (int i= 0; i < stages.size(); i += 1){
       if (elemLambda.contains(name(i)) && mutReach(i)){ checkDecisionAfter(i); }
     }
     var t= terminal.name();
@@ -290,7 +290,7 @@ final class FlowMisuse{
   }
   private void checkDecisionAfter(int i){
     boolean allOneToOne= true;
-    for (int j= i + 1; j <= stages.size(); j++){
+    for (int j= i + 1; j <= stages.size(); j += 1){
       allOneToOne &= oneToOne.contains(name(j - 1));
       var d= name(j);
       var isDecision= j < stages.size() ? decision.contains(d) : shortCircuit.contains(d);
@@ -307,7 +307,7 @@ final class FlowMisuse{
   private void checkForEach(){
     if (!terminal.name().equals("forEach")){ return; }
     int f= stages.size() - 1;
-    while (f >= 0 && !fence.contains(name(f))){ f--; }
+    while (f >= 0 && !fence.contains(name(f))){ f -= 1; }
     if (f == stages.size() - 1){ return; }
     var segment= stages.subList(f + 1, stages.size());
     var seqOk= c.mode == FlowMode.Seq && segment.stream().noneMatch(s -> toRead.contains(s.name()));
@@ -335,7 +335,7 @@ final class FlowMisuse{
     return sn instanceof Nat$c$0Instance || sn instanceof Byte$o$0Instance || sn instanceof Num$c$0Instance;
   }
   private boolean readsElems(int from){
-    for (int k= from; k <= stages.size(); k++){
+    for (int k= from; k <= stages.size(); k += 1){
       if (k == stages.size()){ return orderBlindTerminal(); }
       var n= name(k);
       if (elemsToCount.contains(n) && readsCount(k + 1)){ return true; }
@@ -362,12 +362,12 @@ final class FlowMisuse{
     };
   }
   private void checkShape(){
-    for (int i= 0; i < stages.size(); i++){
+    for (int i= 0; i < stages.size(); i += 1){
       if (!pointless(i)){ continue; }
       throw misuse("`"+show(i)+"` is pointless: `"+show(i + 1, stages.size() + 1)+"` reads only "+reads(i + 1)
         +", and `"+show(i)+"` does not change that. Remove `"+show(i)+"`.");
     }
-    for (int i= 0; i < stages.size(); i++){ checkShapeAt(i); }
+    for (int i= 0; i < stages.size(); i += 1){ checkShapeAt(i); }
     checkTerminalShape();
   }
   private void checkShapeAt(int i){
@@ -383,7 +383,7 @@ final class FlowMisuse{
     }
     if (n.equals("limit") && i > 0 && oneToOne.contains(name(i - 1))){
       int from= i - 1;
-      while (from > 0 && oneToOne.contains(name(from - 1))){ from--; }
+      while (from > 0 && oneToOne.contains(name(from - 1))){ from -= 1; }
       var xs= show(from, i);
       throw misuse("`"+xs+" "+show(i)+"` runs `"+xs+"` on the same elements as `"+show(i)+" "+xs+"`. Write `"+show(i)+"` before `"+xs+"`.");
     }
@@ -395,7 +395,7 @@ final class FlowMisuse{
   }
   private void checkDiscardedMut(int i){
     var pass= Set.of("sort", "max", "min", "sortDistinct", "distinctMut", "limit");
-    for (int j= i + 1; j <= stages.size(); j++){
+    for (int j= i + 1; j <= stages.size(); j += 1){
       var t= name(j);
       if (Set.of("distinct", "++", "size", "isEmpty").contains(t)){
         var fix= name(i).equals("flatMapMut") ? "`.flatMap`" : "`.distinct`";
@@ -405,7 +405,7 @@ final class FlowMisuse{
     }
   }
   private void checkSortFilter(int filter){
-    for (int j= filter + 1; j <= stages.size(); j++){
+    for (int j= filter + 1; j <= stages.size(); j += 1){
       var t= name(j);
       if (j == stages.size() && shortCircuit.contains(t)){ return; }
       if (j < stages.size() && decision.contains(t)){ return; }

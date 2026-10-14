@@ -105,7 +105,7 @@ final class TextEncoding{
   }
 
   static void ascii(byte[] bs, Sink out){
-    for (int i= 0;i<bs.length;i++){
+    for (int i= 0;i<bs.length;i += 1){
       int b= u8(bs[i]);
       if (b < 0x80){ out.scalar(i, 1, b); }
       else{ out.bad(malformedEncoding, i, 1, b); }
@@ -113,7 +113,7 @@ final class TextEncoding{
   }
 
   static void latin1(byte[] bs, Sink out){
-    for (int i= 0;i<bs.length;i++){ out.scalar(i, 1, u8(bs[i])); }
+    for (int i= 0;i<bs.length;i += 1){ out.scalar(i, 1, u8(bs[i])); }
   }
 
   static void utf16le(byte[] bs, Sink out){ utf16(bs, out, true); }
@@ -285,7 +285,7 @@ final class TextEncoding{
 
   static int utf8MalformedLength(byte[] bs, int i, int expectedLength){
     int len= 1;
-    while (len < expectedLength && i+len < bs.length && cont(u8(bs[i+len]))){ len++; }
+    while (len < expectedLength && i+len < bs.length && cont(u8(bs[i+len]))){ len += 1; }
     return len;
   }
 
@@ -317,13 +317,13 @@ final class TextEncoding{
 
   static long partial32le(byte[] bs, int i){
     long res= 0;
-    for (int j= 0;i+j<bs.length;j++){ res |= (long)u8(bs[i+j])<<(8*j); }
+    for (int j= 0;i+j<bs.length;j += 1){ res |= (long)u8(bs[i+j])<<(8*j); }
     return res;
   }
 
   static long partial32be(byte[] bs, int i){
     long res= 0;
-    for (int j= 0;i+j<bs.length;j++){ res = (res<<8)|u8(bs[i+j]); }
+    for (int j= 0;i+j<bs.length;j += 1){ res = (res<<8)|u8(bs[i+j]); }
     return res;
   }
 }

@@ -32,7 +32,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   private static String strExpr(String s){
     var parts= s.split("\n", -1);
     var res= new StringBuilder(lineExpr(parts[0]));
-    for (var i= 1; i < parts.length; i++){
+    for (var i= 1; i < parts.length; i += 1){
       if (parts[i].isEmpty()){
         if (res.charAt(res.length()-1) == '|'){ res.append(' '); }
         res.append('|');
@@ -55,7 +55,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     var res= new ArrayList<String>();
     var start= 0;
     char seen= 0;
-    for (var i= 0; i < s.length(); i++){
+    for (var i= 0; i < s.length(); i += 1){
       var c= s.charAt(i);
       if (c != '"' && c != '`'){ continue; }
       if (seen == 0){ seen = c; continue; }
@@ -368,7 +368,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     var text= s(p0);
     if (text.isEmpty()){ return Nat$c$0Instance.instance(val.length()); }
     int count= 0;
-    for (int i= val.indexOf(text); i != -1; i = val.indexOf(text, i + text.length())){ count++; }
+    for (int i= val.indexOf(text); i != -1; i = val.indexOf(text, i + text.length())){ count += 1; }
     return Nat$c$0Instance.instance(count);
   }
   @Override public Object imm$trim$0(){ return instance(val.trim()); }

@@ -26,9 +26,9 @@ final class RunRecursionThread extends Thread{
     return family == fam.getClass() && Long.compareUnsigned(depth, Util.natToLong(fam.imm$depth$0())) < 0;
   }
   Object inline(Object g){
-    depth++;
+    depth += 1;
     try{ return Util.callMF$1(g); }
-    finally{ depth--; }
+    finally{ depth -= 1; }
   }
   @Override public void run(){
     try{ res = Util.callMF$1(f); }

@@ -17,7 +17,7 @@ public final class Replacements{
       var next= tryRule(rules, text, i, out);
       if (next != -1){ i = next; continue; }
       out.append(text.charAt(i));
-      i++;
+      i += 1;
     }
     return out.toString();
   }

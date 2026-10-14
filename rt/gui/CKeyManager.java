@@ -44,14 +44,14 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
       @Override public Object mut$$hash$0(){
         var actions= new ArrayList<Consumer$ao$1>();
         KeyStroke$m8$0 key= null;
-        for (var ka:keyActions){
+        for (var ka : keyActions){
           var k= matchingKey((EList$1k$1)ka.mut$match$0(), eventKey);
           if (k == null){ continue; }
           if (key == null){ key = k; }
           copyActions((EList$1k$1)ka.mut$actions$0(), actions);
         }
         var ctx= new CKeyCtx(elapsed, frame, panelWidth, panelHeight, key);
-        for (var a:actions){ a.mut$accept$1(ctx); }
+        for (var a : actions){ a.mut$accept$1(ctx); }
         return Void$o$0.instance;
       }
     };
@@ -59,7 +59,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
   private static KeyStroke$m8$0 matchingKey(EList$1k$1 match, int eventKey){
     int size= natToInt(match.read$size$0());
-    for (long i= 0;i < size;i++){
+    for (long i= 0;i < size;i += 1){
       var k= (KeyStroke$m8$0)match.mut$get$1(n(i));
       if (_KeyNames$b4$0.codes.get(((Str$c$0Instance)k.read$get$0()).val()) == eventKey){ return k; }
     }
@@ -68,7 +68,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
   private static void copyActions(EList$1k$1 from, List<Consumer$ao$1> to){
     long size= natToLong(from.read$size$0());
-    for (long i= 0;i < size;i++){
+    for (long i= 0;i < size;i += 1){
       to.add((Consumer$ao$1)from.mut$get$1(n(i)));
     }
   }

@@ -17,7 +17,7 @@ public interface _Throw$1c$0{
   default Object imm$stackTrace$0(){
     var st= new Throwable().getStackTrace();
     var al= new ArrayList<>();
-    for (int i= 2; i < st.length; i++){
+    for (int i= 2; i < st.length; i += 1){
       var f= frameData(st[i]);
       if (f == null){ continue; }
       al.add(new Str$c$0Instance(fmtFrame(f)));
@@ -35,7 +35,7 @@ public interface _Throw$1c$0{
     var ty= cn.substring(dot + 1).split("\\$");
     var meth= fmtMethodName(e.getMethodName());
     if (ty.length < 3 || meth == null){ return null; }
-    for (int i= 2; i < ty.length; i++){ if (!digits(ty[i])){ return null; } }
+    for (int i= 2; i < ty.length; i += 1){ if (!digits(ty[i])){ return null; } }
     var type= ty[0] + holes('[', ']', Integer.parseInt(ty[2]));
     return (StackFrame$174$0)StackFrames$2e8$0.instance.read$$hash$4(
       new Str$c$0Instance(e.getFileName()),
@@ -68,13 +68,13 @@ public interface _Throw$1c$0{
   static String holes(char open, char close, int n){
     if (n==0){ return ""; }
     var sb= new StringBuilder().append(open);
-    for (int i= 0;i<n;i++){ if (i!=0){ sb.append(','); } sb.append('_'); }
+    for (int i= 0;i<n;i += 1){ if (i!=0){ sb.append(','); } sb.append('_'); }
     return sb.append(close).toString();
   }
   static String decodeOp(String enc){
     var ps= enc.split("_");
     var sb= new StringBuilder();
-    for (var p:ps){ sb.append(opChar(p)); }
+    for (var p : ps){ sb.append(opChar(p)); }
     return sb.toString();
   }
   static char opChar(String tok){ return switch (tok){
