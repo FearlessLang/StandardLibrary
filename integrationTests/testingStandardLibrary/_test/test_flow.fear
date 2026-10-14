@@ -229,44 +229,32 @@ FlowHintTests: Test {::
   .check{Lists#(1,2,3).flow.map{e -> e + 1}.hintParallel.limit 2 .list .assertEq({::}, Lists#(2,3))}
   .check{Lists#(1,2,3).flow(ParRead#).hintParallel.list .assertEq({::}, Lists#(1,2,3))}
   .check{(1 =~~= 3).flow.hintParallel.list .assertEq({::}, Lists#(1,2,3))}
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).flow.hintSequential.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).flow.hintSequential.hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).flow.hintParallel.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).seqFlow.hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#(1,2,3).hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#(1,2,3).hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `but this part has 3`}}, {Lists#(1,2,3).seqFlow.hintSequential.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).flow.hintParallel.hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).flow.hintParallel.map{e -> e}.hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).flow(ParRead#).hintSequential.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#(1,2,3).hintParallel.hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#(1,2,3).hintParallel.hintSequential.any{e -> e == 2}})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#(1,2,3).hintParallel.hintSequential.fold({0}, {a, e -> a + e})})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#(1,2,3).hintParallel.hintSequential.forEach{_ -> Void}})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Flows#(1,2,3).hintParallel.hintSequential.for{_ -> Void}})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `To keep this shape, call`}}, {Flows#(1,2,3).hintParallel.hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).seqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).seqFlow.map{e -> e + 1}.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).seqFlow.hintSequential.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {ReadHinted#(Lists#(1,2,3))})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {ELists#[Nat].add(1).add(2).seqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Sets#({::}, 1, 2).seqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {ESets#[Nat,Nat]{::}.add(2).add(1).seqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Opts#(3).seqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {(1 =~~= 3).seqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {"ab".u.seqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(2, 3).flatSeqFlow.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(2, 3).seqFlowOpts.hintParallel.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `takes at most one of`}}, {Lists#(1,2,3).seqFlow.hintParallel.map[Nat]{_ -> Error.msg"stage ran"}.size})
+  .check{Lists#(1,2,3).flow.hintSequential.hintParallel.list .assertEq({::}, Lists#(1,2,3))}
+  .check{Lists#(1,2,3).flow.hintParallel.hintParallel.list .assertEq({::}, Lists#(1,2,3))}
+  .check{Lists#(1,2,3).seqFlow.hintSequential.hintParallel.map{e -> e + 1}.list .assertEq({::}, Lists#(2,3,4))}
+  .check{Flows#.hintParallel.size .assertEq 0}
+  .check{Flows#(1,2,3).hintParallel.hintSequential.any{e -> e == 2}.assertTrue}
+  .check{Flows#(1,2,3).hintParallel.hintSequential.fold({0}, {a, e -> a + e}) .assertEq 6}
+  .check{ReadHinted#(Lists#(1,2,3)) .assertEq 3}
+  .check{ELists#[Nat].add(1).add(2).seqFlow.hintParallel.size .assertEq 2}
+  .check{Sets#({::}, 1, 2).seqFlow.hintParallel.size .assertEq 2}
+  .check{ESets#[Nat,Nat]{::}.add(2).add(1).seqFlow.hintParallel.size .assertEq 2}
+  .check{Opts#(3).seqFlow.hintParallel.size .assertEq 1}
+  .check{"ab".u.seqFlow.hintParallel.size .assertEq 2}
+  .check{ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(2, 3).flatSeqFlow.hintParallel.size .assertEq 2}
+  .check{ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(2, 3).seqFlowOpts.hintParallel.size .assertEq 3}
+  .checkDetErr({::.isMsg{:: == "stage ran"}}, {Lists#(1,2,3).seqFlow.hintParallel.hintSequential.map[Nat]{_ -> Error.msg"stage ran"}.size})
   .check{Opts#(3).seqFlow.flatMap{x -> Lists#(x, x)}.recoverFlow(ParRead#).map{e -> e + 1}.list .assertEq({::}, Lists#(4,4))}
   .check{Lists#(1,2,3).seqFlow.recoverFlow(ParImm#).hintParallel.map{e -> e + 1}.list .assertEq({::}, Lists#(2,3,4))}
   .check{Lists#(1,2,3).flow.hintParallel.recoverFlow(ParImm#).hintSequential.list .assertEq({::}, Lists#(1,2,3))}
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `but this part has 2`}}, {Lists#(1,2,3).seqFlow.recoverFlow(ParImm#).hintParallel.hintSequential.size})
-  .checkNonDetErr({:: > `msg` .isMsg{::.contains `but this part has 2`}}, {Lists#(1,2,3).seqFlow.hintParallel.recoverFlow(ParImm#).size})
   .check{Lists#(1,2,3).seqFlow.suppressMisuseExceptions.hintParallel.size .assertEq 3}
   .check{Lists#(1,2,3).flow.hintSequential.hintParallel.suppressMisuseExceptions.size .assertEq 3}
   .checkDetErr({::.isMsg{:: == "stage ran"}}, {Lists#(1,2,3).seqFlow.suppressMisuseExceptions.hintParallel.map[Nat]{_ -> Error.msg"stage ran"}.size})
+  .checkDetErr({::.isMsg{::.startsWith "Flow: this flow is already consumed"}}, {Block#
+    .let f={Lists#(1,2).flow}
+    .do{Block#(f.hintParallel, Void)}
+    .return{f.size}
+    })
   }
 
 ReadHinted: { #(xs: read List[Nat]): Nat -> xs.seqFlow.hintParallel.size }
