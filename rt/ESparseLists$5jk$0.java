@@ -284,8 +284,8 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     return Flow$o$1Instance.of(it, mode);
   }
   private static Flow$o$1Instance flat(SparseStore d, FlowMode mode){ return Flow$o$1Instance.of(Arrays.stream(d.present()).mapToObj(d::at).toList(), mode); }
-  @Override public Object mut$seqFlowOpts$0(){ return opts(drain(), FlowMode.Seq).mut$hintSequential$0(); }
+  @Override public Object mut$seqFlowOpts$0(){ return opts(drain(), FlowMode.Seq); }
   @Override public Object mut$flowOpts$1(Object p0){ return opts(drain(), FlowMode.of(p0)); }
-  @Override public Object mut$flatSeqFlow$0(){ return flat(drain(), FlowMode.Seq).mut$hintSequential$0(); }
+  @Override public Object mut$flatSeqFlow$0(){ return flat(drain(), FlowMode.Seq); }
   @Override public Object mut$flatFlow$1(Object p0){ return flat(drain(), FlowMode.of(p0)); }
 }
