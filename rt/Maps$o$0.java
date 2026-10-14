@@ -208,7 +208,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object read$hash$1(Object p0){
     var byE= (_base.OrderHashBy$2ea$2)p0;
     long h= 0;
-    for (var e: elems.entrySet()){
+    for (var e : elems.entrySet()){
       long kh= e.getKey().hashCode();
       long vh= natToLong(((_base.OrderHash$lk$1)byE.imm$$hash$1(e.getValue())).read$hash$0());
       h += kh ^ vh;
@@ -245,7 +245,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     var other= (Map$c$2Instance)p0;
     if (other.elems.isEmpty()){ return this; }
     var m= new LinkedHashMap<MapKey,Object>(elems);
-    for (var e: other.elems.entrySet()){
+    for (var e : other.elems.entrySet()){
       var k= e.getKey().key;
       var mk= mapKey(keyOh, k); // reinterpret under LEFT ordering
       m.putIfAbsent(mk, e.getValue());

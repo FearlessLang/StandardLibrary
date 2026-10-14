@@ -57,11 +57,11 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   private boolean test(Object f, Object e){ return isTrue(callMF$2(f, e)); }
   private int firstWhere(Object f){
-    for (int i= 0; i < xs.size(); i++){ if (test(f, xs.get(i))){ return i; } }
+    for (int i= 0; i < xs.size(); i += 1){ if (test(f, xs.get(i))){ return i; } }
     return -1;
   }
   private int lastWhere(Object f){
-    for (int i= xs.size() - 1; i >= 0; i--){ if (test(f, xs.get(i))){ return i; } }
+    for (int i= xs.size() - 1; i >= 0; i -= 1){ if (test(f, xs.get(i))){ return i; } }
     return -1;
   }
   private static Object optIndex(int i){ return i == -1 ? optEmpty() : optSome(Nat$c$0Instance.instance(i)); }
@@ -95,10 +95,10 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$removeAll$1(Object p0){
     var is= ((EList$1k$1Instance) p0).xs.stream().map(i -> idx("removeAll", i)).sorted(Collections.reverseOrder()).toList();
-    for (int k= 1; k < is.size(); k++){
+    for (int k= 1; k < is.size(); k += 1){
       if (is.get(k).equals(is.get(k - 1))){ throw detErr("EList.removeAll: Index "+is.get(k)+" is present twice in the indices to remove"); }
     }
-    for (int i: is){ xs.remove(i); }
+    for (int i : is){ xs.remove(i); }
     return this;
   }
   @Override public Object mut$trimTo$2(Object p0, Object p1){
@@ -121,7 +121,7 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$lastIndexWhere$1(Object p0){ return optIndex(lastWhere(p0)); }
   @Override public Object mut$indicesWhere$1(Object p0){
     var res= new ArrayList<Object>();
-    for (int i= 0; i < xs.size(); i++){ if (test(p0, xs.get(i))){ res.add(Nat$c$0Instance.instance(i)); } }
+    for (int i= 0; i < xs.size(); i += 1){ if (test(p0, xs.get(i))){ res.add(Nat$c$0Instance.instance(i)); } }
     return Flow$o$1Instance.of(res, FlowMode.ParImm);
   }
   @Override public Object mut$sort$1(Object p0){
@@ -140,7 +140,7 @@ final class EList$1k$1Instance implements EList$1k$1{
     var by= (OrderBy$5e$2)p0;
     xs.sort((a,b) -> cmp(by, a, b));
     int w= 1;
-    for (int i= 1; i < xs.size(); i++){
+    for (int i= 1; i < xs.size(); i += 1){
       if (cmp(by, xs.get(w-1), xs.get(i)) != 0){ xs.set(w++, xs.get(i)); }
     }
     xs.subList(w, xs.size()).clear();
@@ -158,30 +158,30 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$fold$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size(); i++){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size(); i += 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRight$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0; i--){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0; i -= 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size() && !test(p2, acc); i++){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size() && !test(p2, acc); i += 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRightUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i--){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i -= 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$accumulateInPlace$1(Object p0){
-    for (int i= 1; i < xs.size(); i++){ xs.set(i, callMF$3(p0, xs.get(i - 1), xs.get(i))); }
+    for (int i= 1; i < xs.size(); i += 1){ xs.set(i, callMF$3(p0, xs.get(i - 1), xs.get(i))); }
     return this;
   }
   @Override public Object mut$accumulateRightInPlace$1(Object p0){
-    for (int i= xs.size() - 2; i >= 0; i--){ xs.set(i, callMF$3(p0, xs.get(i + 1), xs.get(i))); }
+    for (int i= xs.size() - 2; i >= 0; i -= 1){ xs.set(i, callMF$3(p0, xs.get(i + 1), xs.get(i))); }
     return this;
   }
   @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain(), FlowMode.Seq).mut$hintSequential$0(); }

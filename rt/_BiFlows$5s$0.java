@@ -54,7 +54,7 @@ abstract class MultiFlow{
   private Object merged(Object f){ return lazy(i -> call(f, row(i))); }
   private Object folded(Object acc, Object f, IntFunction<Object[]> row, Predicate<Object> stop){
     var r= callMF$1(acc);
-    for (int i= 0; i < longest() && !stop.test(r); i++){ r = call(f, prepend(r, row.apply(i))); }
+    for (int i= 0; i < longest() && !stop.test(r); i += 1){ r = call(f, prepend(r, row.apply(i))); }
     return r;
   }
   private static Predicate<Object> until(Object pred){ return r -> isTrue(callF$2(pred, r)); }
@@ -76,7 +76,7 @@ abstract class MultiFlow{
   private Object fill(int k, Object f){
     live();
     var c= cs.get(k);
-    for (int i= c.size(), n= longest(); i < n; i++){ c.add(callF$2(f, Nat$c$0Instance.instance(i))); }
+    for (int i= c.size(), n= longest(); i < n; i += 1){ c.add(callF$2(f, Nat$c$0Instance.instance(i))); }
     return this;
   }
   public Object mut$fillA$1(Object p0){ return fill(0, p0); }

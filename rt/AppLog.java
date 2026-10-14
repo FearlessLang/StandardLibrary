@@ -47,7 +47,7 @@ public final class AppLog{
   }
   private static void shutdown(){
     closing.set(true);
-    for (var log: all){
+    for (var log : all){
       try{ log.closeAndRotateQuiet(); }
       catch (Throwable t){ err("closing and log rotation crashed: "+log.path, t); }
     }
@@ -142,11 +142,12 @@ public final class AppLog{
     catch (IOException ioe){ throw new UncheckedIOException(ioe); }
   }
   private static void moveToStamped(Path src, boolean starting) throws IOException{
-    for (int i= 0; i < maxStampRetries; i++){
+    for (int i= 0; i < maxStampRetries; i += 1){
       var dst= rotatedPath(src, stampNow());
       try{ Files.move(src, dst); if (starting){ appendOrThrow(dst); } return; }
       catch (FileAlreadyExistsException e){ 
-        try{ Thread.sleep(100); } catch (InterruptedException _){}//refuse to interrupt during log cleanup
+        try{ Thread.sleep(100); }
+        catch (InterruptedException _){}//refuse to interrupt during log cleanup
       }
     }
     throw new IOException(" OS timestamps unresponsive when renaming "+src);
@@ -158,10 +159,10 @@ public final class AppLog{
   private static void enforceRetention(Path p, int keep) throws IOException{
     var files= new ArrayList<Path>();
     try (DirectoryStream<Path> ds= Files.newDirectoryStream(p.getParent(), glob(p))){
-      for (var f: ds){ files.add(f); }
+      for (var f : ds){ files.add(f); }
     }
     files.sort(Comparator.comparing(f -> f.getFileName().toString()));
-    for (int i= 0, del= files.size() - keep; i < del; i++){ Files.deleteIfExists(files.get(i)); }
+    for (int i= 0, del= files.size() - keep; i < del; i += 1){ Files.deleteIfExists(files.get(i)); }
   }
   private static String stack(Throwable t){
     var sw= new StringWriter();

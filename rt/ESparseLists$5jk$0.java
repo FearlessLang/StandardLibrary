@@ -84,7 +84,7 @@ final class SparseTreeStore implements SparseStore{
   @Override public Object at(long i){
     var n= root;
     int b= bits;
-    for (; n != null && b > leafBits; b--){ n = (Object[]) n[child(i, b)]; }
+    for (; n != null && b > leafBits; b -= 1){ n = (Object[]) n[child(i, b)]; }
     return n == null ? null : n[(int) (i & ((1L << b) - 1))];
   }
   @Override public void put(long i, Object e){
@@ -93,7 +93,7 @@ final class SparseTreeStore implements SparseStore{
       root = make(bits);
     }
     var n= root;
-    for (int b= bits; b > leafBits; b--){
+    for (int b= bits; b > leafBits; b -= 1){
       int c= child(i, b);
       if (n[c] == null){
         if (e == null){ return; }
@@ -107,10 +107,10 @@ final class SparseTreeStore implements SparseStore{
   }
   private static void walk(Object[] n, int b, long base, LongStream.Builder out){
     if (b <= leafBits){
-      for (int k= 0; k < n.length; k++){ if (n[k] != null){ out.add(base + k); } }
+      for (int k= 0; k < n.length; k += 1){ if (n[k] != null){ out.add(base + k); } }
       return;
     }
-    for (int c= 0; c < 2; c++){ if (n[c] != null){ walk((Object[]) n[c], b - 1, base | ((long) c << (b - 1)), out); } }
+    for (int c= 0; c < 2; c += 1){ if (n[c] != null){ walk((Object[]) n[c], b - 1, base | ((long) c << (b - 1)), out); } }
   }
   @Override public long[] present(){
     var out= LongStream.builder();
@@ -120,7 +120,7 @@ final class SparseTreeStore implements SparseStore{
   private static Object[] deep(Object[] n, int b){
     var r= n.clone();
     if (b > leafBits){
-      for (int c= 0; c < 2; c++){ if (r[c] != null){ r[c] = deep((Object[]) r[c], b - 1); } }
+      for (int c= 0; c < 2; c += 1){ if (r[c] != null){ r[c] = deep((Object[]) r[c], b - 1); } }
     }
     return r;
   }
@@ -141,7 +141,7 @@ final class SparseTreeStore implements SparseStore{
         continue;
       }
       root = new Object[]{root, null};
-      bits++;
+      bits += 1;
     }
     bits = Math.max(bits, nb);
   }
@@ -161,7 +161,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   private LongStream where(Object f){ return Arrays.stream(s.present()).filter(i -> test(f, i)); }
   private long lastWhere(Object f){
     var is= s.present();
-    for (int k= is.length - 1; k >= 0; k--){ if (test(f, is[k])){ return is[k]; } }
+    for (int k= is.length - 1; k >= 0; k -= 1){ if (test(f, is[k])){ return is[k]; } }
     return -1;
   }
   private SparseStore drain(){
@@ -174,7 +174,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     var l= (EList$1k$1)p0;
     long n= Nat$c$0Instance.unwrap(l.read$size$0());
     long next= 0;
-    for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0 && next < n; i++){
+    for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0 && next < n; i += 1){
       if (s.at(i) == null){ s.put(i, l.mut$get$1(nat(next++))); }
     }
     return next;
@@ -219,7 +219,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     var l= (EList$1k$1)p0;
     long n= Nat$c$0Instance.unwrap(l.read$size$0());
     var seen= new HashSet<Long>();
-    for (long k= 0; k < n; k++){
+    for (long k= 0; k < n; k += 1){
       long i= idx("removeAll", l.read$get$1(nat(k)));
       if (!seen.add(i)){ throw detErr("ESparseList.removeAll: Index "+Long.toUnsignedString(i)+" is present twice in the indices to remove"); }
     }
@@ -232,7 +232,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     if (Long.compareUnsigned(end, s.cap()) > 0){ throw detErr("ESparseList.trimTo: Index "+Long.toUnsignedString(end)+" out of bounds for ESparseList of capacity "+Long.toUnsignedString(s.cap())); }
     if (Long.compareUnsigned(start, end) > 0){ throw detErr("ESparseList.trimTo: start "+Long.toUnsignedString(start)+" is greater than end "+Long.toUnsignedString(end)); }
     var r= s.empty(end - start);
-    for (long i: s.present()){
+    for (long i : s.present()){
       if (Long.compareUnsigned(i, start) >= 0 && Long.compareUnsigned(i, end) < 0){ r.put(i - start, s.at(i)); }
     }
     s = r;
@@ -240,12 +240,12 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   }
   @Override public Object mut$reverse$0(){
     var r= s.empty(s.cap());
-    for (long i: s.present()){ r.put(s.cap() - 1 - i, s.at(i)); }
+    for (long i : s.present()){ r.put(s.cap() - 1 - i, s.at(i)); }
     s = r;
     return this;
   }
   @Override public Object mut$mapInPlace$1(Object p0){
-    for (long i: s.present()){ s.put(i, callMF$2(p0, s.at(i))); }
+    for (long i : s.present()){ s.put(i, callMF$2(p0, s.at(i))); }
     return this;
   }
   @Override public Object mut$shallowClone$0(){ return new ESparseList$2rs$1Instance(s.copy()); }
@@ -255,13 +255,13 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     return this;
   }
   @Override public Object mut$fillHoles$1(Object p0){
-    for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0 && holes() != 0; i++){
+    for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0 && holes() != 0; i += 1){
       if (s.at(i) == null){ s.put(i, callMF$2(p0, nat(i))); }
     }
     return this;
   }
   @Override public Object mut$mapOpts$1(Object p0){
-    for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0; i++){
+    for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0; i += 1){
       var o= (Opt$c$1)callMF$3(p0, nat(i), opt(s.at(i)));
       s.put(i, isTrue(o.read$isSome$0()) ? o.mut$$bang$0() : null);
     }
@@ -276,7 +276,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     long cap= s.cap();
     if (Long.compareUnsigned(cap, -1L - (n - next)) > 0){ throw detErr("ESparseList.fillAndExpand: capacity "+Long.toUnsignedString(cap)+" plus "+(n - next)+" elements is greater than Math.maxNat"); }
     s.grow(cap + (n - next));
-    for (long i= cap; next < n; i++){ s.put(i, l.mut$get$1(nat(next++))); }
+    for (long i= cap; next < n; i += 1){ s.put(i, l.mut$get$1(nat(next++))); }
     return this;
   }
   private static Flow$o$1Instance opts(SparseStore d, FlowMode mode){

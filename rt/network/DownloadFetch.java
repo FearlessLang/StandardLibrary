@@ -37,7 +37,7 @@ final class DownloadFetch{
         if (locationOpt.isEmpty()){ throw downloadFailed(current, "redirect with no Location header"); }
         var location= locationOpt.get();
         if (redirectsLeft == 0){ throw tooManyRedirects(url); }
-        redirectsLeft--;
+        redirectsLeft -= 1;
         current = uri.resolve(location).toString();
         continue;
       }
