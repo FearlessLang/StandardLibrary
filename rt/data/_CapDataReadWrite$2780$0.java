@@ -16,9 +16,12 @@ public final class _CapDataReadWrite$2780$0 implements CapDataReadWrite$2780$0{
   private static Object str(Object name, Object path, Object content, Charset cs){ return DataFiles.writeBytes(name, path, AssetBytesRead.str(content).getBytes(cs)); }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
-  @Override public Object mut$paths$2(Object name, Object path){ return DataFiles.paths(name, path); }
-  @Override public Object mut$read$2(Object name, Object path){ return DataFiles.read(name, path); }
-  @Override public Object mut$writeStr$3(Object name, Object path, Object content){ return str(name, path, content, UTF_8); }
+  @Override public Object mut$roots$0(){ return DataFiles.roots(DataFiles.edits); }
+  @Override public Object mut$paths$2(Object name, Object path){ return DataFiles.paths(DataFiles.edits, name, path); }
+  @Override public Object mut$read$2(Object name, Object path){ return DataFiles.read(DataFiles.edits, name, path); }
+  @Override public Object mut$writeStrUtf8$3(Object name, Object path, Object content){ return str(name, path, content, UTF_8); }
+  @Override public Object mut$writeStrAscii$3(Object name, Object path, Object content){ return str(name, path, content, US_ASCII); }
+  @Override public Object mut$writeStrLatin1$3(Object name, Object path, Object content){ return str(name, path, content, ISO_8859_1); }
   @Override public Object mut$writeStrUtf16Le$3(Object name, Object path, Object content){ return str(name, path, content, UTF_16LE); }
   @Override public Object mut$writeStrUtf16Be$3(Object name, Object path, Object content){ return str(name, path, content, UTF_16BE); }
   @Override public Object mut$writeStrUtf32Le$3(Object name, Object path, Object content){ return str(name, path, content, utf32le); }
@@ -28,8 +31,8 @@ public final class _CapDataReadWrite$2780$0 implements CapDataReadWrite$2780$0{
   @Override public Object mut$writeUStrUtf16Be$3(Object name, Object path, Object content){ return DataFiles.writeText(name, path, content, UTF_16BE); }
   @Override public Object mut$writeUStrUtf32Le$3(Object name, Object path, Object content){ return DataFiles.writeText(name, path, content, utf32le); }
   @Override public Object mut$writeUStrUtf32Be$3(Object name, Object path, Object content){ return DataFiles.writeText(name, path, content, utf32be); }
-  @Override public Object mut$writeUStrAscii$3(Object name, Object path, Object content){ return DataFiles.writeText(name, path, content, US_ASCII); }
-  @Override public Object mut$writeUStrLatin1$3(Object name, Object path, Object content){ return DataFiles.writeText(name, path, content, ISO_8859_1); }
+  @Override public Object mut$writeUStrAscii$4(Object name, Object path, Object content, Object recover){ return DataFiles.writeLossy(name, path, content, recover, 0x7F); }
+  @Override public Object mut$writeUStrLatin1$4(Object name, Object path, Object content, Object recover){ return DataFiles.writeLossy(name, path, content, recover, 0xFF); }
   @Override public Object mut$writeBytes$3(Object name, Object path, Object content){
     var bs= List$o$1Instance.asJava(content);
     var res= new byte[bs.size()];

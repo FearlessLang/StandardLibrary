@@ -1,54 +1,67 @@
-///The object capability to read the data projects linked to this program.
+///The object capability to read the data projects linked to this program for reading.
 ///The Fearless manager links data projects to a code project ("reads" and "edits" of the
-///project in projects.info), each under the type names the code uses for it:
-///``name`` is one of those type names, from "reads" or from "edits".
-///``path`` is the list of the folder names, then the file name, from the root folder of the data project.
-///A zip file is a folder named as the zip file without ".zip": a path enters it as it enters any other folder.
-///A file or folder whose name starts with "." is not part of the data project.
-///A ``name`` naming no data project, or a ``path`` naming no file or folder of it, gives an Info.
+///project in projects.info), each under the type names the code uses for it.
+///The roots of this capability are the type names of "reads": ``name`` is one of them.
+///``path`` is the list of the folder names, then the resource name, from the root folder of the data project.
+///A zip is a folder named without ".zip": a path enters it as it enters any other folder.
+///A resource or folder whose name starts with "." is not part of the data project.
+///A ``name`` that is not a root, or a ``path`` naming no resource or folder, gives an Info.
 ///A data project that changed on disk so that the request can not be done is a non deterministic error.
-///A program started by the portable Fearless has no data project.
+///A program started by the portable Fearless has no root.
 CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
-  ///The names of the files and folders in the folder at ``path``, sorted; a zip file is named without ".zip".
+  ///The roots of this capability, sorted.
+  mut .roots: List[Str];
+  ///The names of the resources and folders in the folder at ``path``, sorted; a zip is named without ".zip".
   ///An empty ``path`` is the root folder.
   mut .paths(name: Str, path: List[Str]): mut Action[List[Str]];
-  ///The file at ``path``, read again at every read, as an input file.
+  ///The resource at ``path``, read again at every read.
   mut .read(name: Str, path: List[Str]): mut Action[mut InputCursorNode];
   }
 
-///The object capability to read and write the data projects linked to this program.
-///It reads as `CapDataRead` does, and writes the data projects linked in "edits":
-///a ``name`` from "reads" only reads.
-///A write replaces the file at ``path``, or creates it together with the missing folders of ``path``;
-///a file inside a zip file is written by rewriting that zip file.
+///The object capability to read and write the data projects linked to this program for writing.
+///The roots of this capability are the type names of "edits": ``name`` is one of them.
+///It reads as `CapDataRead` does.
+///A write replaces the resource at ``path``, or creates it together with the missing folders of ``path``;
+///a resource inside a zip is written by rewriting that zip.
 ///A written path keeps the data project valid: each folder name uses only lowercase letters,
 ///digits and underscores, and starts with a letter or an underscore;
-///the file name is such a name, a dot and an extension, other than ".zip";
-///a file with the extension ".fearless" is not written at the top of the data project,
-///where it would be a second marker file.
-///Every text is written with no byte order mark.
+///the resource name is such a name, a dot and an extension, other than ".zip";
+///a resource with the extension ".fearless" is not written at the top of the data project,
+///where it would be a second marker.
+///The write methods mirror the read methods of `InputCursorNode`, and every text is written with no byte order mark.
+///A `Str` holds only ASCII characters, so ``.writeStrUtf8``, ``.writeStrAscii`` and ``.writeStrLatin1`` write the same bytes.
 CapDataReadWrite: ToIso[CapDataReadWrite], WidenTo[CapDataReadWrite]{
+  ///The roots of this capability, sorted.
+  mut .roots: List[Str];
   mut .paths(name: Str, path: List[Str]): mut Action[List[Str]];
   mut .read(name: Str, path: List[Str]): mut Action[mut InputCursorNode];
-  ///Writes ``content`` in UTF-8: for a `Str` it is also ASCII and Latin-1.
-  mut .writeStr(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeStrUtf16Le(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeStrUtf16Be(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeStrUtf32Le(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeStrUtf32Be(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeStrUtf8(name: Str, path: List[Str], content: Str): mut Action[Void];
   mut .writeUStrUtf8(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeStrUtf16Le(name: Str, path: List[Str], content: Str): mut Action[Void];
   mut .writeUStrUtf16Le(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  mut .writeUStrUtf16Be(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeStrUtf32Le(name: Str, path: List[Str], content: Str): mut Action[Void];
   mut .writeUStrUtf32Le(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeStrUtf16Be(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeUStrUtf16Be(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeStrUtf32Be(name: Str, path: List[Str], content: Str): mut Action[Void];
   mut .writeUStrUtf32Be(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  ///An Info when ``content`` holds a character ASCII does not encode: one above U+007F.
-  mut .writeUStrAscii(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  ///An Info when ``content`` holds a character Latin-1 does not encode: one above U+00FF.
-  mut .writeUStrLatin1(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeStrAscii(name: Str, path: List[Str], content: Str): mut Action[Void];
+  ///A character above U+007F is written as the bytes ``recover`` gives for it.
+  mut .writeUStrAscii(name: Str, path: List[Str], content: UStr, recover: mut UnencodableRecover): mut Action[Void];
+  mut .writeStrLatin1(name: Str, path: List[Str], content: Str): mut Action[Void];
+  ///A character above U+00FF is written as the bytes ``recover`` gives for it.
+  mut .writeUStrLatin1(name: Str, path: List[Str], content: UStr, recover: mut UnencodableRecover): mut Action[Void];
   mut .writeBytes(name: Str, path: List[Str], content: List[Byte]): mut Action[Void];
   ///Writes ``content`` as a PNG image.
   mut .writeImagePng(name: Str, path: List[Str], content: Image): mut Action[Void];
-  ///Deletes the file at ``path``, then every folder that deleting it left empty:
-  ///a zip file left with no file is deleted too.
+  ///Deletes the resource at ``path``, then every folder that deleting it left empty:
+  ///a zip left with no resource is deleted too.
   mut .delete(name: Str, path: List[Str]): mut Action[Void];
+  }
+
+///The bytes to write in place of a character that the encoding of a write does not encode.
+///``scalar`` is the character, ``index`` its position in the text.
+///It can throw, to make the write fail.
+UnencodableRecover:{
+  mut #(scalar: Nat, index: Nat): List[Byte]
   }
