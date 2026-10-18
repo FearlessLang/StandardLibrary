@@ -74,7 +74,8 @@ final class Stage extends MouseAdapter{
     owner.surface.addMouseMotionListener(this);
     owner.surface.addKeyListener(new KeyAdapter(){ @Override public void keyPressed(KeyEvent e){ reservedKey(e.getKeyCode()); } });
     if (Desk.managed){ open(); return; }
-    realize(gui.fullScreen ? Mode.fullScreen : gui.fearlessCorner ? Mode.fearless : Mode.decorated);
+    realize(switch (gui.start){ case fullScreen -> Mode.fullScreen; case undecorated -> Mode.fearless; case window, maximised -> Mode.decorated; });
+    if (gui.start == _FluentGUI.Start.maximised){ f.setExtendedState(Frame.MAXIMIZED_BOTH); }
   }
   @SuppressWarnings("serial")
   final class Win extends JFrame{
@@ -124,13 +125,13 @@ final class Stage extends MouseAdapter{
     f.pack();
     place(opening());
     minimum();
-    opensFullScreen = gui.fullScreen;
+    opensFullScreen = gui.start == _FluentGUI.Start.fullScreen;
     f.setVisible(true);
     f.toFront();
   }
   void realize(Mode m){
     var old= f;
-    var r= old != null && mode != Mode.fullScreen ? old.getBounds() : fit(workArea(), old == null ? areaWidth(gui.screenArea) : leavingWidth());
+    var r= old != null && mode != Mode.fullScreen ? old.getBounds() : fit(workArea(), old == null ? openingWidth() : leavingWidth());
     boolean undecorated= m != Mode.decorated;
     if (old == null || old.isUndecorated() != undecorated){ f = makeFrame(undecorated); }
     boolean replaced= old != null && old != f;
@@ -167,7 +168,7 @@ final class Stage extends MouseAdapter{
     if (device.getFullScreenWindow() == f){ device.setFullScreenWindow(null); }
     f.dispose();
   }
-  private Rectangle opening(){ return fit(inset(workArea(), f.getInsets()), areaWidth(gui.screenArea)); }
+  private Rectangle opening(){ return fit(inset(workArea(), f.getInsets()), openingWidth()); }
   private Rectangle workArea(){ return Desk.cosmic ? Desk.cosmicArea : inset(screen, Toolkit.getDefaultToolkit().getScreenInsets(gc)); }
   private static Rectangle inset(Rectangle r, Insets in){ return new Rectangle(r.x+in.left, r.y+in.top, r.width-in.left-in.right, r.height-in.top-in.bottom); }
   private static int within(int v, int low, int high){ return Math.max(low, Math.min(v, high)); }
@@ -213,6 +214,7 @@ final class Stage extends MouseAdapter{
     var d= size(Math.min(w, fitWidth(r.width, r.height)));
     return new Rectangle(r.x+(r.width-d.width)/2, r.y+(r.height-d.height)/2, d.width, d.height);
   }
+  private double openingWidth(){ return gui.start == _FluentGUI.Start.maximised ? leavingWidth() : areaWidth(gui.initialArea); }
   private double leavingWidth(){
     var w= workArea();
     return 0.77*fitWidth(w.width, w.height);

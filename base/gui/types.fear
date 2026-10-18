@@ -314,10 +314,11 @@ Gui:{
   mut .name(s: Str): mut Gui -> this.uName(s.u);
   mut .uName(UStr): mut Gui;
   mut .icon(ImageFile): mut Gui;
-  mut .screenArea(Float): mut Gui;
+  mut .startAsWindow(initialArea: Float): mut Gui;
+  mut .startMaximised: mut Gui;
+  mut .startUndecorated(initialArea: Float): mut Gui;
+  mut .startFullScreen: mut Gui;
   mut .minArea(Float): mut Gui;
-  mut .fearlessCorner: mut Gui;
-  mut .fullScreen: mut Gui;
   mut .opacityFloor(Alpha): mut Gui;
   mut .closeKey(KeyStroke): mut Gui;
   mut .fullScreenKey(KeyStroke): mut Gui;
