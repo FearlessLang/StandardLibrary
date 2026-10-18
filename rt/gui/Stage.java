@@ -26,6 +26,7 @@ import javax.swing.WindowConstants;
 
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.ClipMode;
+import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.PathBuilder;
 import io.github.humbleui.skija.SamplingMode;
@@ -33,6 +34,7 @@ import io.github.humbleui.types.Rect;
 
 final class Stage extends MouseAdapter{
   enum Mode{ decorated, fearless, fullScreen }
+  static final Image cornerIcon= AssetImageRead.decode("icon", _FluentGUI.iconBytes(IconsFearless$9kw$0.instance), Scopes.maxImagePixels);
   final _Frame owner;
   final _FluentGUI gui;
   final GraphicsDevice device= GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -293,7 +295,7 @@ final class Stage extends MouseAdapter{
     var now= Desk.bounds(f);
     if (Desk.maximized(f)){ maxed = now; deskMaximized = true; return; }
     if (!deskMaximized){ seen = now; return; }
-    if (now.equals(maxed)){ return; }
+    if (now.equals(maxed) || Desk.down()){ return; }
     deskMaximized = false;
     if (now.x == seen.x && now.y == seen.y){ realize(Mode.fullScreen); return; }
     compact();
@@ -412,7 +414,7 @@ final class Stage extends MouseAdapter{
       cv.clipPath(tri, ClipMode.INTERSECT, true);
       int side= l/2;
       int at= (int)Math.round(l*(2-Math.sqrt(2))/2)-side/2;
-      var icon= gui.skIcon;
+      var icon= cornerIcon;
       cv.drawImageRect(icon, Rect.makeWH(icon.getWidth(), icon.getHeight()), Rect.makeXYWH(at, at, side, side), SamplingMode.LINEAR, null, true);
       cv.restoreToCount(save);
     }

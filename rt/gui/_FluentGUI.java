@@ -9,8 +9,6 @@ import java.util.concurrent.CompletableFuture;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 
-import io.github.humbleui.skija.Image;
-
 public final class _FluentGUI implements Gui$c$0{
   public static Object mainIcon;
   String name= "Fearless App";
@@ -23,7 +21,6 @@ public final class _FluentGUI implements Gui$c$0{
   String closeKey= "ESCAPE";
   String fullScreenKey= "F11";
   BufferedImage awtIcon;
-  Image skIcon;
   private boolean open;
 
   private _FluentGUI set(Runnable r){
@@ -69,7 +66,6 @@ public final class _FluentGUI implements Gui$c$0{
     if (minArea > screenArea){ throw Util.detErr("Gui.minArea("+minArea+") is more than Gui.screenArea("+screenArea+"): the picture must always cover at least minArea of the screen area, so the window can not open covering only screenArea"); }
     if (closeKey.equals(fullScreenKey)){ throw Util.detErr("The close key and the full screen key of this Gui are both "+closeKey+": one key press can not both ask to close the window and toggle full screen"); }
     var bs= iconBytes(icon != null ? icon : mainIcon != null ? mainIcon : IconsFearless$9kw$0.instance);
-    skIcon = AssetImageRead.decode("icon", bs, Scopes.maxImagePixels);
     try{ awtIcon = ImageIO.read(new ByteArrayInputStream(bs)); }
     catch (IOException e){ throw new UncheckedIOException(e); }
     open = true;
@@ -85,7 +81,7 @@ public final class _FluentGUI implements Gui$c$0{
     finally{ open = false; }
     return Void$o$0.instance;
   }
-  private static byte[] iconBytes(Object i){
+  static byte[] iconBytes(Object i){
     var f= (ImageFile$lk$0) i;
     return AssetBytesRead.bytes(AssetBytesRead.str(f.imm$path$0()), AssetBytesRead.str(f.imm$diskPath$0()), AssetBytesRead.str(f.imm$zipSteps$0()), AssetBytesRead.str(f.imm$zipEntry$0()));
   }
