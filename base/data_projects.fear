@@ -4,7 +4,8 @@
 ///The roots of this capability are the type names of "reads": ``name`` is one of them.
 ///``path`` is the list of the folder names, then the resource name, from the root folder of the data project.
 ///A zip is a folder named without ".zip": a path enters it as it enters any other folder.
-///A resource or folder whose name starts with "." is not part of the data project.
+///A resource or folder whose name starts with "." is not part of the data project, and neither is the marker of the
+///data project, the resource with the extension ".fearless" at its top: a path naming them is not valid.
 ///A ``name`` that is not a root, or a ``path`` naming no resource or folder, gives an Info.
 ///A data project that changed on disk so that the request can not be done is a non deterministic error.
 ///A program started by the portable Fearless has no root.
@@ -25,9 +26,7 @@ CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
 ///a resource inside a zip is written by rewriting that zip.
 ///A written path keeps the data project valid: each folder name uses only lowercase letters,
 ///digits and underscores, and starts with a letter or an underscore;
-///the resource name is such a name, a dot and an extension, other than ".zip";
-///a resource with the extension ".fearless" is not written at the top of the data project,
-///where it would be a second marker.
+///the resource name is such a name, a dot and an extension, other than ".zip".
 ///The write methods mirror the read methods of `InputCursorNode`, and every text is written with no byte order mark.
 ///A `Str` holds only ASCII characters, so ``.writeStrUtf8``, ``.writeStrAscii`` and ``.writeStrLatin1`` write the same bytes.
 CapDataReadWrite: ToIso[CapDataReadWrite], WidenTo[CapDataReadWrite]{
