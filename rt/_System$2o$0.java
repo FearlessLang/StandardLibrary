@@ -11,6 +11,8 @@ public final class _System$2o$0 implements System$2o$0{
     return new _LogReader$m8$1((InMemoryLog$2kk$1)inMemLog); }
   @Override public Object mut$assetRead$0(){ return new _AssetReadCapability$h1j4$0(); }
   @Override public Object mut$download$0(){ return new _DownloadCapability$8fsw$0(); }
+  @Override public Object mut$dataRead$0(){ return new _CapDataRead$2h4$0(); }
+  @Override public Object mut$dataReadWrite$0(){ return new _CapDataReadWrite$2780$0(); }
 
   @Override public Object mut$gui$0(){ return new _FluentGUI(); }
 

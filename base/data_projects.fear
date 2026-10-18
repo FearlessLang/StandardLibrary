@@ -1,0 +1,54 @@
+///The object capability to read the data projects linked to this program.
+///The Fearless manager links data projects to a code project ("reads" and "edits" of the
+///project in projects.info), each under the type names the code uses for it:
+///``name`` is one of those type names, from "reads" or from "edits".
+///``path`` is the list of the folder names, then the file name, from the root folder of the data project.
+///A zip file is a folder named as the zip file without ".zip": a path enters it as it enters any other folder.
+///A file or folder whose name starts with "." is not part of the data project.
+///A ``name`` naming no data project, or a ``path`` naming no file or folder of it, gives an Info.
+///A data project that changed on disk so that the request can not be done is a non deterministic error.
+///A program started by the portable Fearless has no data project.
+CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
+  ///The names of the files and folders in the folder at ``path``, sorted; a zip file is named without ".zip".
+  ///An empty ``path`` is the root folder.
+  mut .paths(name: Str, path: List[Str]): mut Action[List[Str]];
+  ///The file at ``path``, read again at every read, as an input file.
+  mut .read(name: Str, path: List[Str]): mut Action[mut InputCursorNode];
+  }
+
+///The object capability to read and write the data projects linked to this program.
+///It reads as `CapDataRead` does, and writes the data projects linked in "edits":
+///a ``name`` from "reads" only reads.
+///A write replaces the file at ``path``, or creates it together with the missing folders of ``path``;
+///a file inside a zip file is written by rewriting that zip file.
+///A written path keeps the data project valid: each folder name uses only lowercase letters,
+///digits and underscores, and starts with a letter or an underscore;
+///the file name is such a name, a dot and an extension, other than ".zip";
+///a file with the extension ".fearless" is not written at the top of the data project,
+///where it would be a second marker file.
+///Every text is written with no byte order mark.
+CapDataReadWrite: ToIso[CapDataReadWrite], WidenTo[CapDataReadWrite]{
+  mut .paths(name: Str, path: List[Str]): mut Action[List[Str]];
+  mut .read(name: Str, path: List[Str]): mut Action[mut InputCursorNode];
+  ///Writes ``content`` in UTF-8: for a `Str` it is also ASCII and Latin-1.
+  mut .writeStr(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeStrUtf16Le(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeStrUtf16Be(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeStrUtf32Le(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeStrUtf32Be(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeUStrUtf8(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeUStrUtf16Le(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeUStrUtf16Be(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeUStrUtf32Le(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeUStrUtf32Be(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  ///An Info when ``content`` holds a character ASCII does not encode: one above U+007F.
+  mut .writeUStrAscii(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  ///An Info when ``content`` holds a character Latin-1 does not encode: one above U+00FF.
+  mut .writeUStrLatin1(name: Str, path: List[Str], content: UStr): mut Action[Void];
+  mut .writeBytes(name: Str, path: List[Str], content: List[Byte]): mut Action[Void];
+  ///Writes ``content`` as a PNG image.
+  mut .writeImagePng(name: Str, path: List[Str], content: Image): mut Action[Void];
+  ///Deletes the file at ``path``, then every folder that deleting it left empty:
+  ///a zip file left with no file is deleted too.
+  mut .delete(name: Str, path: List[Str]): mut Action[Void];
+  }
