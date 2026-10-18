@@ -1,29 +1,29 @@
 Actions: {
   //.lazy is a bad method, suggests failure causes .info, but of course not.
   //.lazy[T:*](f: mut MF[T]): mut Action[T] -> {::.ok(f#)};
-  .ok[T:*](x: T): mut Action[T] -> {::.ok(x)};
-  .info[T:*](info: Info): mut Action[T] -> {::.info(info)};
-  .msg[T:*](msg: Str): mut Action[T] -> {::.info(Infos.msg msg)};
+  .ok[R:*](x: R): mut Action[R] -> {::.ok(x)};
+  .info[R:*](info: Info): mut Action[R] -> {::.info(info)};
+  .msg[R:*](msg: Str): mut Action[R] -> {::.info(Infos.msg msg)};
   }
 
-Action[T:*]: {
-  mut .run[R:*](m: mut ActionMatch[T,R]): R;
-  mut .map[R:*](f: mut MF[T,R]): mut Action[R] -> {m -> this.run{
+Action[R:*]: {
+  mut .run[RR:*](m: mut ActionMatch[R,RR]): RR;
+  mut .map[RR:*](f: mut MF[R,RR]): mut Action[RR] -> {m -> this.run{
     .ok   x -> m.ok(f#x);
     .info i -> m.info(i);
     }};
-  mut .andThen[R:*](f: mut MF[T,mut Action[R]]): mut Action[R] -> {m -> this.run{
+  mut .andThen[RR:*](f: mut MF[R,mut Action[RR]]): mut Action[RR] -> {m -> this.run{
     .ok   x -> f#x.run(m);
     .info i -> m.info(i);
     }};
-  mut .mapInfo(f: mut MF[Info,Info]): mut Action[T] -> {m -> this.run{
+  mut .mapInfo(f: mut MF[Info,Info]): mut Action[R] -> {m -> this.run{
     .ok   x -> m.ok(x);
     .info i -> m.info(f#i);
     }};
-  mut !: T -> this.run{.ok(x) -> x; .info(i) -> Error!i};
-  mut .ok  : mut Opt[T] -> this.run{.ok x -> Opts#x; .info _ -> {}};
+  mut !: R -> this.run{.ok(x) -> x; .info(i) -> Error!i};
+  mut .ok  : mut Opt[R] -> this.run{.ok x -> Opts#x; .info _ -> {}};
   mut .info: Opt[Info]  -> this.run[Opt[Info]]{.ok _ -> {}; .info i -> Opts#i};
-  mut .context(msg: read LazyInfo): mut Action[T] -> { m -> this.run {
+  mut .context(msg: read LazyInfo): mut Action[R] -> { m -> this.run {
     .ok x -> m.ok(x);
     .info i -> m.info(msg#.info + i)
     }};
@@ -37,7 +37,7 @@ Action[T:*]: {
     .info _->{};
     };
 
-  mut .recover(recoveryMechanism: mut MF[Info, mut Opt[T]]): mut Action[T] -> {m -> this.run {
+  mut .recover(recoveryMechanism: mut MF[Info, mut Opt[R]]): mut Action[R] -> {m -> this.run {
     .ok x -> m.ok(x);
     .info i -> recoveryMechanism#i .match {
        .some x' -> m.ok(x');
@@ -46,7 +46,7 @@ Action[T:*]: {
     }};
 
 
-  mut .catch(fallback: mut MF[Info, T]): T -> this.run {
+  mut .catch(fallback: mut MF[Info, R]): R -> this.run {
     .ok t -> t;
     .info i -> fallback#i;
     };
@@ -64,7 +64,7 @@ Action[T:*]: {
     }; // TODO: Should InfoValidator implement ToStr so it can be used in this error message?
   }
 
-ActionMatch[T:*,R:*]: {
-  mut .ok(x: T): R;
-  mut .info(info: Info): R;
+ActionMatch[R:*,RR:*]: {
+  mut .ok(x: R): RR;
+  mut .info(info: Info): RR;
   }
