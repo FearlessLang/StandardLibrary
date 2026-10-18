@@ -26,6 +26,7 @@ Shortcut[I,E]: {}
 /// ``Shortcut[I]`` is `Shortcut[_,_]` with an extension chosen by the Fearless manager, like
 /// ``fapp042``: users recognise the shortcut file by the icon ``I``, not by its extension.
 Shortcut[I]: {}
+PreLoadIcon[I]: {}
 Sealed: {}
 Void: Sealed {}
 WidenTo[T]: {}

@@ -7,13 +7,18 @@ import java.awt.Toolkit;
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
+import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SymbolLookup;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -49,6 +54,16 @@ final class Desk{
   }
   static void moveResize(Frame f, java.awt.Point at, int direction){ message(f, "_NET_WM_MOVERESIZE", at.x, at.y, direction, 1, 1); }
   static final Field peer= open(reflect(() -> Component.class.getDeclaredField("peer")));
+  static final String deskId= System.getProperty("fearlessDesk.id");
+  static void identify(Frame f, String icon, String name){
+    if (deskId == null || mac){ return; }
+    var windowClass= deskId+"-"+icon;
+    if (!windows){ call(X11.appClass, windowClass); return; }
+    f.addNotify();
+    var ico= Path.of(System.getProperty("fearlessDesk.icons")).resolve(icon+".ico")+",0";
+    Win.identify(hwnd(f), List.of(windowClass, System.getProperty("fearlessDesk.relaunch"), ico, name));
+  }
+  private static MemorySegment hwnd(Frame f){ return MemorySegment.ofAddress((long)reflect(() -> Win.hwnd.invoke(reflect(() -> peer.get(f))))); }
 
   static boolean down(){
     if (windows){ return IntStream.of(1, 2, 4).anyMatch(vk -> (short)call(Win.state, vk) < 0); }
@@ -93,7 +108,7 @@ final class Desk{
     int x= (int)Math.round((r.x-s.x-in.left)*k);
     int y= (int)Math.round((r.y-s.y-in.top)*k);
     var p= Win.placement;
-    var h= MemorySegment.ofAddress((long)reflect(() -> Win.hwnd.invoke(reflect(() -> peer.get(f)))));
+    var h= hwnd(f);
     p.set(ValueLayout.JAVA_INT, 0, 44);
     call(Win.getPlacement, h, p);
     p.set(ValueLayout.JAVA_INT, 8, maximized ? 3 : 1);
@@ -126,6 +141,40 @@ final class Desk{
     static final MethodHandle setPlacement= fn("user32", "SetWindowPlacement", placementCall);
     static final MemorySegment placement= Arena.global().allocate(44);
     static final Method hwnd= open(reflect(() -> Class.forName("sun.awt.windows.WComponentPeer").getMethod("getHWnd")));
+    static final MethodHandle comInit= fn("ole32", "CoInitializeEx", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_INT));
+    static final MethodHandle store= fn("shell32", "SHGetPropertyStoreForWindow", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static void identify(MemorySegment h, List<String> idCommandIconName){
+      try (var a= Arena.ofConfined()){
+        call(comInit, MemorySegment.NULL, 2);
+        var out= a.allocate(ValueLayout.ADDRESS);
+        check(call(store, h, guid(a, "886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), out));
+        var ps= out.get(ValueLayout.ADDRESS, 0);
+        var vtbl= ps.reinterpret(8).get(ValueLayout.ADDRESS, 0).reinterpret(8*8);
+        for (int i= 0; i < 4; i += 1){
+          var key= guid(a, "9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3");
+          key.set(ValueLayout.JAVA_INT, 16, List.of(5, 2, 3, 4).get(i));
+          var v= a.allocate(24);
+          v.set(ValueLayout.JAVA_SHORT, 0, (short)31);
+          v.set(ValueLayout.ADDRESS, 8, a.allocateFrom(idCommandIconName.get(i), StandardCharsets.UTF_16LE));
+          check(call(method(vtbl, 6, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS), ps, key, v));
+        }
+        check(call(method(vtbl, 7, ValueLayout.ADDRESS), ps));
+        call(method(vtbl, 2, ValueLayout.ADDRESS), ps);
+      }
+    }
+    private static MethodHandle method(MemorySegment vtbl, int index, MemoryLayout... args){
+      return Linker.nativeLinker().downcallHandle(vtbl.getAtIndex(ValueLayout.ADDRESS, index), FunctionDescriptor.of(ValueLayout.JAVA_INT, args));
+    }
+    private static void check(Object hresult){ assert (int)hresult >= 0; }
+    private static MemorySegment guid(Arena a, String text){
+      var p= text.split("-");
+      var g= a.allocate(20);
+      g.set(ValueLayout.JAVA_INT, 0, Integer.parseUnsignedInt(p[0], 16));
+      g.set(ValueLayout.JAVA_SHORT, 4, (short)Integer.parseInt(p[1], 16));
+      g.set(ValueLayout.JAVA_SHORT, 6, (short)Integer.parseInt(p[2], 16));
+      MemorySegment.copy(HexFormat.of().parseHex(p[3]+p[4]), 0, g, ValueLayout.JAVA_BYTE, 8, 8);
+      return g;
+    }
   }
   private static final class Mac{
     static final MethodHandle state= fn("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics", "CGEventSourceButtonState",
@@ -151,6 +200,7 @@ final class Desk{
     static final MethodHandle ungrab= fn(lib, "XUngrabPointer", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
     static final MethodHandle flush= fn(lib, "XFlush", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS));
     static final Method window= reflect(() -> Class.forName("sun.awt.X11.XBaseWindow").getMethod("getWindow"));
+    static final MethodHandle appClass= reflect(() -> MethodHandles.lookup().unreflectSetter(open(Class.forName("sun.awt.X11.XToolkit").getDeclaredField("awtAppClassName"))));
     static long window(Frame f){ return (long)reflect(() -> window.invoke(reflect(() -> peer.get(f)))); }
     static long atom(String name){
       try (var a= Arena.ofConfined()){ return (long)call(internAtom, display, a.allocateFrom(name), 0); }

@@ -109,6 +109,7 @@ final class Stage extends MouseAdapter{
     new DropTarget(frame, DnDConstants.ACTION_COPY, new DropTargetAdapter(){
       @Override public void drop(DropTargetDropEvent e){ FearlessFrame.dropped(e); }
     });
+    Desk.identify(frame, gui.iconName, gui.name);
     return frame;
   }
   private void reservedKey(int code){
