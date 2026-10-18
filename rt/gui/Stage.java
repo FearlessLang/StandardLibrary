@@ -246,31 +246,33 @@ final class Stage extends MouseAdapter{
     var now= owner.surface.getSize();
     boolean deskWindow= mode == Mode.decorated && !maximized() && !Desk.managed;
     deskResized &= deskWindow;
-    if (Desk.cosmic){ cosmicTick(deskWindow); }
-    else if (deskWindow && !unmaximized && (Desk.resizeUnseen || sameSize(f.getBounds(), restore))){ restore = f.getBounds(); }
+    boolean fitted= Desk.cosmic && cosmicTick(deskWindow);
+    if (!Desk.cosmic && deskWindow && !unmaximized && (Desk.resizeUnseen || sameSize(f.getBounds(), restore))){ restore = f.getBounds(); }
     boolean deskChose= !near(now.width, chosen.width) || !near(now.height, chosen.height);
-    if (!now.equals(lastSize) && deskChose){ deskResized|= deskWindow && !Desk.resizeUnseen; request(now); }
+    if (!now.equals(lastSize) && deskChose && !fitted){ deskResized |= deskWindow && !Desk.resizeUnseen; request(now); }
+    if (Desk.managed && deskChose && now.width > 0){ chosen = new Dimension(); }
     lastSize = now;
     if (unmaximized && (Desk.cosmic ? sameSize(f.getBounds(), restore) : !Desk.down())){ unmaximized(); return; }
     if (deskResized && !Desk.down()){ compact(); }
   }
-  private void cosmicTick(boolean deskWindow){
+  private boolean cosmicTick(boolean deskWindow){
     if (maximized()){
       var m= Desk.bounds(f);
       int top= Desk.cosmicArea.y;
       Desk.cosmicArea = new Rectangle(m.x, top, m.width, m.y+m.height-top);
     }
     if (deskWindow && !unmaximized && pending == null){ restore = f.getBounds(); }
-    if (pending == null || !Desk.managing(f) || Desk.fullScreen(f)){ return; }
+    if (pending == null || !Desk.managing(f) || Desk.fullScreen(f)){ return false; }
     var real= Desk.bounds(f);
-    if (real.equals(screen)){ return; }
+    if (real.equals(screen)){ return false; }
     var in= f.getInsets();
     var room= inset(workArea(), in);
     var d= clamped(pending.width-in.left-in.right, room.x+room.width-real.x, room.y+room.height-real.y);
     pending = null;
-    if (real.getSize().equals(d)){ return; }
+    if (real.getSize().equals(d)){ return false; }
     chosen = d;
     Desk.resize(f, d);
+    return true;
   }
   private Rectangle bounds(){ return Desk.cosmic ? outset(Desk.bounds(f)) : f.getBounds(); }
   private static boolean sameSize(Rectangle a, Rectangle b){ return near(a.width, b.width) && near(a.height, b.height); }

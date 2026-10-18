@@ -52,7 +52,7 @@ final class CMouseBuilder implements Mouse$1c$0{
   @Override public Object mut$exited$1(Object a){ return add(Exited, a); }
 }
 
-// The single mouse dispatcher, installed on the top component. All state is
+// The single mouse dispatcher, fed by Stage in virtual pixels. All state is
 // EDT confined.
 // - Click = left press + release inside (Win32/Cocoa/Qt/DOM semantics); AWT's
 //   MOUSE_CLICKED (which requires a perfectly still pointer) is never used.
