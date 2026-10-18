@@ -6,8 +6,18 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JFrame;
@@ -63,6 +73,21 @@ final class FearlessFrame extends JFrame{
     addWindowListener(new WindowAdapter(){
       @Override public void windowClosed(WindowEvent e){ closed(); }
     });
+    new DropTarget(this, DnDConstants.ACTION_COPY, new DropTargetAdapter(){
+      @Override public void drop(DropTargetDropEvent e){ dropped(e); }
+    });
+  }
+
+  private static void dropped(DropTargetDropEvent e){
+    if (!e.isDataFlavorSupported(DataFlavor.javaFileListFlavor)){ e.rejectDrop(); return; }
+    e.acceptDrop(DnDConstants.ACTION_COPY);
+    List<?> dropped;
+    try{ dropped= (List<?>) e.getTransferable().getTransferData(DataFlavor.javaFileListFlavor); }
+    catch (UnsupportedFlavorException|IOException ex){ throw new Error("Broken Environment", ex); }
+    var files= dropped.stream().map(f -> ((File) f).toPath()).toList();
+    var ok= files.stream().allMatch(Files::isRegularFile);
+    if (ok){ _InputCursor$2e8$0.files.addAll(files); }
+    e.dropComplete(ok);
   }
 
   void startRuntime(int delayMillis, Runnable tick){
