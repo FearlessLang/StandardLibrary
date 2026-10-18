@@ -26,6 +26,14 @@ Shortcut[I,E]: {}
 /// ``Shortcut[I]`` is `Shortcut[_,_]` with an extension chosen by the Fearless manager, like
 /// ``fapp042``: users recognise the shortcut file by the icon ``I``, not by its extension.
 Shortcut[I]: {}
+/// A `Main` implementing ``PreLoadIcon[I]`` can show the icon ``I`` on the windows of its Guis:
+/// ``s.gui.icon(IconsFoo)`` is a deterministic error unless the running main preloads ``IconsFoo``.
+/// A main preloads the ``I`` of each `Shortcut[_]`, `OpenWith[_]` and `PreLoadIcon[_]` it implements,
+/// and ``base.IconsFearless``. ``I`` is as in `OpenWith[_,_]`. Only a `Main` can implement it.
+/// The Fearless manager installs the preloaded icons of every main, so that the desk shows the icon of
+/// each window also where it shows only the icon of an installed program (the GNOME and COSMIC dock, the
+/// Windows taskbar). The portable Fearless installs nothing: there the icon shows only where the desk
+/// shows the icon of the window.
 PreLoadIcon[I]: {}
 Sealed: {}
 Void: Sealed {}
