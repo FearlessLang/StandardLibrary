@@ -8,7 +8,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.WindowFocusListener{
+final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.FocusListener{
   final _Frame frame;
   final ArrayList<KeyAction$m8$0> pressed= new ArrayList<>();
   final ArrayList<KeyAction$m8$0> released= new ArrayList<>();
@@ -24,16 +24,18 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
   CKeyManager(_Frame frame){ this.frame= frame; }
 
   @Override public void keyPressed(KeyEvent e){
+    if (frame.reserved(e.getKeyCode())){ return; }
     if (held.add(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){
+    if (frame.reserved(e.getKeyCode())){ return; }
     if (held.remove(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
   }
-  @Override public void windowLostFocus(java.awt.event.WindowEvent e){
+  @Override public void focusLost(java.awt.event.FocusEvent e){
     frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(), released)).toList());
     held.clear();
   }
-  @Override public void windowGainedFocus(java.awt.event.WindowEvent e){}
+  @Override public void focusGained(java.awt.event.FocusEvent e){}
 
   private MF$7$1 task(int eventKey, List<KeyAction$m8$0> keyActions){
     var elapsed= frame.elapsed;
@@ -78,7 +80,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.W
 
   private Object addKeyAction(Object scope, List<KeyAction$m8$0> list){
     frame.onEdtAndWait(() -> {
-      if (!changeable && !List.of(frame.frame.getKeyListeners()).contains(this)){
+      if (!changeable && !List.of(frame.surface.getKeyListeners()).contains(this)){
         throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");
       }
     });
@@ -97,8 +99,6 @@ record CKeyCtx(
   KeyStroke$m8$0 keyStroke
   ) implements KeyEvent$b4$0{
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object read$screenWidth$0(){ return w(frame.screenW); }
-  @Override public Object read$screenHeight$0(){ return h(frame.screenH); }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
   @Override public Object imm$keyStroke$0(){ return keyStroke; }

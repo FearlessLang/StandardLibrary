@@ -66,8 +66,6 @@ final class CGraphicsCtx implements Graphics$ao$0{
     return this;
   }
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object read$screenWidth$0(){ return Scopes.w(frame.screenW); }
-  @Override public Object read$screenHeight$0(){ return Scopes.h(frame.screenH); }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
 }

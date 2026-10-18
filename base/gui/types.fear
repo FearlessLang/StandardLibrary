@@ -275,40 +275,25 @@ Frame:_Styled[Frame]{ .self->this;
   mut .uTitle(UStr): mut Frame;
   read .title: Str -> this.uTitle.getStr; ///throws if the title was set with .uTitle and is not a valid Str
   read .uTitle: UStr;
+  mut .virtualPixelSpace(w: WidthNat, h: HeightNat): mut Frame;
+  read .virtualWidth: WidthNat;
+  read .virtualHeight: HeightNat;
+  mut .bands(Color): mut Frame;
+  mut .opacity(Alpha): mut Frame;
+  mut .onResize(mut Consumer[ResizeRequest]): mut Frame;
+  mut .onClose(mut MF[Void]): mut Frame;
+  mut .close: Void;
   mut .fps(fps: Nat): mut Frame;
   read .fps: Nat;
   read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
-  read .screenWidth: WidthNat;
-  read .screenHeight: HeightNat;
-  read .locationX: XInt;
-  read .locationY: YInt;
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
   mut .content(s: mut Scope[Pane]): Void;
   mut .contentB(s: mut Scope[Border]): Void;
-  mut .location(XInt, YInt): mut Frame;
   mut .onKey(mut Scope[Keys]): mut Frame;
-  mut .maximized: mut Frame;
-  //The user may resize by dragging the window edges; without arguments the
-  //initial size is computed from the content, with arguments it is as given.
-  //The arguments are the content size, in the same unit as panelWidth and
-  //panelHeight; the title bar and borders of a decorated window come on top.
-  //Note: an undecorated window can be technically resizable, but there is no
-  //border to drag, so the user cannot actually resize it.
-  mut .resizable: mut Frame;
-  mut .resizable(w: WidthNat, h: HeightNat): mut Frame;
-  //The window size cannot be changed by the user; without arguments the size
-  //is computed from the content, with arguments it is exactly as given.
-  //The arguments are the content size, in the same unit as panelWidth and
-  //panelHeight; the title bar and borders of a decorated window come on top.
-  mut .fixedSize: mut Frame;
-  mut .fixedSize(w: WidthNat, h: HeightNat): mut Frame;
-  mut .undecorated(a: Alpha): mut Frame;
-  mut .decorated: mut Frame;
   }
+ResizeRequest:ScreenContext{ .aspectRatio: Float; }
 ScreenContext:{
   read .elapsed: Instant;
-  read .screenWidth: WidthNat;
-  read .screenHeight: HeightNat;
   read .panelWidth: WidthNat;
   read .panelHeight: HeightNat;
   }
@@ -323,7 +308,21 @@ Graphics:ScreenContext{
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
 ///the same text looks the same on every OS, and a character outside those fonts is drawn as a box everywhere.
-Gui:{ mut .run(mut Consumer[mut Frame]): Void }//public interface TopF{ void run(Frame f); }
+Gui:{
+  read .screenWidth: WidthNat;
+  read .screenHeight: HeightNat;
+  mut .name(s: Str): mut Gui -> this.uName(s.u);
+  mut .uName(UStr): mut Gui;
+  mut .icon(ImageFile): mut Gui;
+  mut .screenArea(Float): mut Gui;
+  mut .minArea(Float): mut Gui;
+  mut .fearlessCorner: mut Gui;
+  mut .fullScreen: mut Gui;
+  mut .opacityFloor(Alpha): mut Gui;
+  mut .closeKey(KeyStroke): mut Gui;
+  mut .fullScreenKey(KeyStroke): mut Gui;
+  mut .run(mut Consumer[mut Frame]): Void;//public interface TopF{ void run(Frame f); }
+  }
 Label:_TextWidget[Label]{
   .self->this;
 }

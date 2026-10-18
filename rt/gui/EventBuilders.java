@@ -24,8 +24,6 @@ record CMouseCtx(
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object imm$mouseX$0(){ return mouseX; }
   @Override public Object imm$mouseY$0(){ return mouseY; }
-  @Override public Object read$screenWidth$0(){ return Scopes.w(frame.screenW); }
-  @Override public Object read$screenHeight$0(){ return Scopes.h(frame.screenH); }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
 }
@@ -98,8 +96,9 @@ final class SkMouse extends MouseAdapter{
   void rehover(){
     assert SwingUtilities.isEventDispatchThread();
     if (java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(MouseEvent.MOUSE_MOVED) != null){ return; }
-    var p= top().getMousePosition();
-    if (p == null){ hoverTo(List.of()); return; }
+    var s= frame.surface.getMousePosition();
+    if (s == null){ hoverTo(List.of()); return; }
+    var p= frame.stage.canvasPoint(s);
     at = p;
     updateHover(p);
   }

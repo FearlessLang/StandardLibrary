@@ -2,37 +2,29 @@ package _base;
 
 import java.awt.AWTEvent;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-@SuppressWarnings("serial")
-final class FearlessFrame extends JFrame{
+final class FearlessFrame{
   // The first ~second of a Swing app is the worst-case EDT: native window
   // creation, first window-manager events, first Skia rasterization, glyph
   // cache warming, first JIT of the paint path. Both timers therefore fire
   // their first event only after this delay (Timer.setInitialDelay), so the
   // first tick runs under the same conditions as every later one. The window
   // is visible and correct in the meantime: start() renders one frame before
-  // setVisible, and expose repaints blit that image. Game time zero
+  // the window is first painted, and expose repaints blit that image. Game time zero
   // (elapsed, model tick deadlines, the t= in warnings) is warmup end.
   static final int WarmupMillis= 500;
   // A model timer firing catches up at most this many overdue ticks. Longer
@@ -42,6 +34,7 @@ final class FearlessFrame extends JFrame{
   static final int ModelCatchupMax= 100;
 
   private final CompletableFuture<Void> done;
+  private final _Frame owner;
   final SerialQueue queue= new SerialQueue(this::high);
   private Timer timer;
   private Timer modelTimer;
@@ -49,10 +42,6 @@ final class FearlessFrame extends JFrame{
   private boolean high;
   private boolean closing;
   private boolean completed;
-  // Number of upcoming WINDOW_CLOSED events to ignore; EDT confined. Used by
-  // setDecoration: its dispose() posts a WINDOW_CLOSED that must not be
-  // treated as the user quitting.
-  private int suppressClosed;
   // Frame-loss / backlog detection state; all EDT confined (all starters and
   // all timer callbacks run on the EDT).
   private long runtimeStartNs= System.nanoTime();// re-based in startRuntime
@@ -66,19 +55,13 @@ final class FearlessFrame extends JFrame{
   private long modelTicks;
   private long modelWarnAt= 1_000;
 
-  FearlessFrame(CompletableFuture<Void> done){
+  FearlessFrame(CompletableFuture<Void> done, _Frame owner){
     this.done= done;
+    this.owner= owner;
     GuiEdtBoundary.install();
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    addWindowListener(new WindowAdapter(){
-      @Override public void windowClosed(WindowEvent e){ closed(); }
-    });
-    new DropTarget(this, DnDConstants.ACTION_COPY, new DropTargetAdapter(){
-      @Override public void drop(DropTargetDropEvent e){ dropped(e); }
-    });
   }
 
-  private static void dropped(DropTargetDropEvent e){
+  static void dropped(DropTargetDropEvent e){
     if (!e.isDataFlavorSupported(DataFlavor.javaFileListFlavor)){ e.rejectDrop(); return; }
     e.acceptDrop(DnDConstants.ACTION_COPY);
     List<?> dropped;
@@ -117,43 +100,6 @@ final class FearlessFrame extends JFrame{
     timer.restart();
     tickPeriodNs = delayMillis * 1_000_000L;
     tickLast = System.nanoTime();// no spurious loss warning across the change
-  }
-
-  // Swaps window decoration live. AWT forbids setUndecorated on a displayable
-  // window, so: dispose, flip, show again at the same location with the same
-  // content size (or with the given maximized bounds) — the standard
-  // workaround. Runs entirely inside one EDT dispatch, so no repaint tick can
-  // interleave while the frame is momentarily non-displayable. The dispose
-  // posts one WINDOW_CLOSED event, suppressed via suppressClosed so it is not
-  // taken as the user quitting. Expect a brief native flicker: the OS window
-  // really is recreated.
-  void setDecoration(boolean undecorated, float opacity, Rectangle maximized){
-    assert SwingUtilities.isEventDispatchThread();
-    if (!active()){ return; }
-    if (isUndecorated() == undecorated){
-      if (undecorated){ setOpacity(opacity); }// repeated call may still change alpha
-      return;
-    }
-    var at= getLocation();
-    var c= getContentPane().getSize();
-    if (!undecorated){ setOpacity(1f); }// opacity < 1 is illegal on decorated windows
-    suppressClosed += 1;
-    dispose();
-    boolean resizable= isResizable();
-    setResizable(true);
-    setUndecorated(undecorated);
-    if (undecorated){ setOpacity(opacity); }
-    setLocation(at);
-    setContentSize(c.width, c.height);
-    if (maximized != null){ setBounds(maximized); }
-    setVisible(true);
-    setResizable(resizable);
-    toFront();
-  }
-
-  void setContentSize(int w, int h){
-    getRootPane().setPreferredSize(new Dimension(w, h));
-    pack();
   }
 
   // Starts or replaces the model timer, fixed-rate semantics. warmupMillis
@@ -267,17 +213,13 @@ final class FearlessFrame extends JFrame{
 
   void closed(){
     assert SwingUtilities.isEventDispatchThread();
-    if (suppressClosed > 0){// synthetic close from setDecoration, not the user
-      suppressClosed -= 1;
-      return;
-    }
     boolean accepted;
     synchronized (this){
       accepted= !completed && !closing;
       if (accepted){ closing = true; }
     }
     if (!accepted){ return; }
-    stopTimers();
+    stopSwingOnEdt();
     queue.closeThen(this::finish);
   }
 
@@ -296,8 +238,7 @@ final class FearlessFrame extends JFrame{
       return;
     }
     queue.closeThen(() -> {});
-    if (SwingUtilities.isEventDispatchThread()){ dispose(); }
-    else{ SwingUtilities.invokeLater(this::dispose); }
+    SwingUtilities.invokeLater(this::dispose);
     done.completeExceptionally(e);
   }
 
@@ -307,6 +248,10 @@ final class FearlessFrame extends JFrame{
     assert SwingUtilities.isEventDispatchThread();
     stopTimers();
     dispose();
+  }
+
+  private void dispose(){
+    if (owner.stage != null){ owner.stage.dispose(); }
   }
 
   private void stopTimers(){
@@ -360,6 +305,6 @@ final class GuiEdtBoundary extends EventQueue{
       : src instanceof Component c
         ? SwingUtilities.getWindowAncestor(c)
         : null;
-    return w instanceof FearlessFrame f ? f : null;
+    return w instanceof Stage.Win f ? f.stage().owner.frame : null;
   }
 }

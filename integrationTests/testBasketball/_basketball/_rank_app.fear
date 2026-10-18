@@ -52,7 +52,7 @@ Presentation2: base.Main { sys -> Block#
   .let canvas = { Slots#[mut Pane] }
   .let gui    = { Guis#(model, canvas, width, height) }
   .do { model.fill(Models#(gui, width, height)) }
-  .do { sys.gui.run gui }
+  .do { sys.gui.name "Basketball" .fearlessCorner .run gui }
   .done
   }
 
