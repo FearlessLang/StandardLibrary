@@ -2,15 +2,13 @@ package _base;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
@@ -29,8 +27,8 @@ import io.github.humbleui.skija.TextLine;
 import static _base.Scopes.*;
 
 // The single Swing component class behind every widget. It never paints its
-// own pixels (only the top component blits the frame image) and never has
-// AWT mouse listeners: all mouse input is received by the top component and
+// own pixels (only the surface of the frame blits the frame image) and never has
+// AWT mouse listeners: all mouse input is received by the surface and
 // routed by SkMouse. No listeners on children means AWT never synthesizes
 // enter/exit/disarm noise for them.
 @SuppressWarnings("serial")
@@ -43,7 +41,6 @@ final class SkComponent extends JComponent{
   }
   @Override public Dimension getPreferredSize(){ return Sk.sizeFor(this, Integer.MAX_VALUE, Integer.MAX_VALUE); }
   @Override public Dimension getMinimumSize(){ return getPreferredSize(); }
-  @Override protected void paintComponent(java.awt.Graphics g){ w.frame.blit(g, this); }
 }
 
 final class _Button extends AWidget implements Button$2o$0{
@@ -285,35 +282,29 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
 
 final class _Frame implements Frame$1c$0{
   final FearlessFrame frame;
+  final _FluentGUI gui;
   final SkMouse mouse= new SkMouse(this);
+  @SuppressWarnings("serial")
+  final JComponent surface= new JComponent(){ @Override protected void paintComponent(java.awt.Graphics g){ blit(g); } };
   // Written by the repaint tick on the EDT, read by painters on the EDT and
   // by the model (read .elapsed) on the queue thread with no ordering between
   // the two: volatile makes the reference handoff safe. The Time object
   // itself is immutable.
   volatile Instant$5c$0 elapsed= time(0);
   AWidget top;
-  final int screenW;
-  final int screenH;
+  Stage stage;
   private long startNanos= System.nanoTime();// re-based in start(): game time zero = warmup end
   private int fps= 30;
   private long modelPeriodNs;
   private ArrayList<MF$7$1> modelTickActions= new ArrayList<>();// live, EDT confined
   private float opacity= 1f;
-  private boolean located;
-  private long locationX;
-  private long locationY;
-  // Explicit content size windowW x windowH when sized, otherwise sized from
-  // the content (pack). Set by .resizable(w,h) and .fixedSize(w,h);
-  // resizability is orthogonal and kept in `resizable`. Note an undecorated
-  // window can be technically resizable, but there is no border to drag, so
-  // the user cannot actually resize it.
-  private boolean sized;
-  private int windowW;
-  private int windowH;
   private String title= "";
-  private boolean maximized;
-  private boolean resizable;
-  private boolean undecorated;
+  private int canvasW;
+  private int canvasH;
+  private int bands= 0xFF000000;
+  private Consumer$ao$1 onResize;
+  private MF$7$1 onClose;
+  private final AtomicReference<ResizeRequest$9j4$0> pendingRequest= new AtomicReference<>();
   // True once start() completed. Written on the EDT at the end of start().
   // Pre-start readers run on the launcher thread strictly before start() is
   // scheduled; post-start readers are queue tasks whose submission (from the
@@ -328,20 +319,12 @@ final class _Frame implements Frame$1c$0{
   private int renderLogicalW;
   private int renderLogicalH;
 
-  _Frame(CompletableFuture<Void> done){
-    frame= new FearlessFrame(done);
-    var b= java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-      .getDefaultScreenDevice()
-      .getDefaultConfiguration()
-      .getBounds();
-    screenW= b.width;
-    screenH= b.height;
-    var geometry= new ComponentAdapter(){
-      @Override public void componentResized(ComponentEvent e){ markLayoutDirty(); keepVisible(); }
-      @Override public void componentMoved(ComponentEvent e){ markLayoutDirty(); keepVisible(); }
-    };
-    frame.addComponentListener(geometry);
-    frame.getRootPane().addComponentListener(geometry);
+  _Frame(CompletableFuture<Void> done, _FluentGUI gui){
+    frame= new FearlessFrame(done, this);
+    this.gui= gui;
+    surface.setLayout(null);
+    surface.setOpaque(true);
+    surface.setFocusable(true);
   }
 
   void addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
@@ -395,6 +378,7 @@ final class _Frame implements Frame$1c$0{
 
   void tick(Instant$5c$0 elapsed){
     this.elapsed = elapsed;
+    stage.tick();
     if (frame.queue.midTask().get()){ return; }
     // Never relayout while a press/release is already queued behind this
     // tick: the user made it on the pixels on screen, so it is interpreted
@@ -409,9 +393,8 @@ final class _Frame implements Frame$1c$0{
     render();
     // Paint synchronously: after this tick the pixels on screen and the
     // bounds used for hit testing agree for every subsequent mouse event.
-    var c= top.component;
-    if (c.getWidth() > 0 && c.getHeight() > 0){
-      c.paintImmediately(0, 0, c.getWidth(), c.getHeight());
+    if (surface.getWidth() > 0 && surface.getHeight() > 0){
+      surface.paintImmediately(0, 0, surface.getWidth(), surface.getHeight());
     }
   }
 
@@ -422,12 +405,11 @@ final class _Frame implements Frame$1c$0{
   }
 
   private void render(){
-    var c= top.component;
-    int w= c.getWidth();
-    int h= c.getHeight();
+    int w= surface.getWidth();
+    int h= surface.getHeight();
     if (w <= 0 || h <= 0){ return; }
 
-    var tx= frame.getGraphicsConfiguration().getDefaultTransform();
+    var tx= stage.f.getGraphicsConfiguration().getDefaultTransform();
     double sx= tx.getScaleX();
     double sy= tx.getScaleY();
     int pw= Math.max(1, (int) Math.ceil(w * sx));
@@ -445,59 +427,40 @@ final class _Frame implements Frame$1c$0{
     renderLogicalW = w;
     renderLogicalH = h;
 
-    canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
+    canvas.clear(bands);
     int save= canvas.save();
     canvas.scale((float) sx, (float) sy);
+    int picture= canvas.save();
+    double s= stage.scale();
+    var o= stage.offset(s);
+    canvas.translate(o.x, o.y);
+    canvas.scale((float) s, (float) s);
+    var c= top.component;
+    canvas.clipRect(io.github.humbleui.types.Rect.makeWH(c.getWidth(), c.getHeight()));
+    canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
     Sk.paintNode(c, canvas);
+    canvas.restoreToCount(picture);
+    stage.paintCorner(canvas);
     canvas.restoreToCount(save);
 
     pixels.get(0, ((java.awt.image.DataBufferInt) bimg.getRaster().getDataBuffer()).getData());
   }
 
-  void blit(java.awt.Graphics g, SkComponent c){
-    if (top == null || top.component != c || bimg == null){ return; }
+  void blit(java.awt.Graphics g){
+    if (bimg == null){ return; }
     g.drawImage(bimg, 0, 0, renderLogicalW, renderLogicalH, null);
-  }
-
-  private void keepVisible(){ place(frame.getX(), frame.getY()); }
-
-  private void place(long x, long y){
-    assert SwingUtilities.isEventDispatchThread();
-    frame.setLocation(visible(x, frame.getWidth(), screenW), visible(y, frame.getHeight(), screenH));
-  }
-
-  private static int visible(long at, int size, int screen){
-    int v= Math.min(screen / 3, size);
-    return Math.clamp(at, v - size, screen - v);
   }
 
   void start(){
     assert SwingUtilities.isEventDispatchThread();
-    if (top == null){ throw Util.detErr("This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"); }
-
-    frame.setTitle(title);
-
-    frame.setContentPane(top.component);
-    frame.setUndecorated(undecorated);
-    frame.setResizable(resizable);
-    frame.pack();
-    if (!sized){
-      windowW = top.component.getWidth();
-      windowH = top.component.getHeight();
-    }
-    frame.setContentSize(windowW, windowH);
-
-    if (maximized){ frame.setBounds(0, 0, screenW, screenH); }
-    else if (located){ place(locationX, locationY); }
-    else{ frame.setLocationRelativeTo(null); }
-
-    if (undecorated){ frame.setOpacity(opacity); }
-
-    frame.validate();
+    var d= packed();
+    if (canvasW == 0){ canvasW= Math.max(1, d.width); canvasH= Math.max(1, d.height); }
+    top.component.setBounds(0, 0, canvasW, canvasH);
+    top.component.validate();
     layoutDirty.set(false);
+    stage= new Stage(this, canvasW, canvasH, opacity);
+    stage.f.validate();
     render();
-    frame.setFocusable(true);
-    frame.setVisible(true);
     // Nothing after startRuntime may throw: abortBeforeStart asserts the
     // runtime timer never started. Both timers begin firing WarmupMillis
     // from now (Timer.setInitialDelay), skipping the worst-case first EDT
@@ -515,92 +478,80 @@ final class _Frame implements Frame$1c$0{
     }
     started = true;
   }
+  private Dimension packed(){
+    if (top == null){ throw Util.detErr("This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"); }
+    return top.component.getPreferredSize();
+  }
 
-  @Override public Object mut$maximized$0(){
-    if (located){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
-    if (sized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
-    maximized = true;
-    if (started){
-      onEdtAndWait(() -> frame.setBounds(0, 0, screenW, screenH));
-    }
+  String windowTitle(){ return title.isEmpty() ? gui.name : gui.name + "    " + title; }
+  boolean reserved(int key){ return key == _FluentGUI.code(gui.closeKey) || key == _FluentGUI.code(gui.fullScreenKey); }
+  void closeRequest(){
+    frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+      if (onClose == null){ return mut$close$0(); }
+      return onClose.mut$$hash$0();
+    }});
+  }
+  void resizeRequest(double aspect){
+    var r= new CResizeRequest(elapsed, Float$1c$0Instance.instance(aspect), w(canvasW), h(canvasH));
+    if (pendingRequest.getAndSet(r) != null){ return; }
+    frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+      var q= pendingRequest.getAndSet(null);
+      if (onResize != null){ onResize.mut$accept$1(q); }
+      return Void$o$0.instance;
+    }});
+  }
+  @Override public Object mut$virtualPixelSpace$2(Object w, Object h){
+    int ww= extent((WidthNat$as$0) w, "virtual pixel space width");
+    int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
+    if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
+    canvasW = ww;
+    canvasH = hh;
+    if (!started){ return this; }
+    onEdtAndWait(() -> {
+      stage.canvas(ww, hh);
+      top.component.setBounds(0, 0, ww, hh);
+    });
+    markLayoutDirty();
     return this;
   }
-  // resizable / fixedSize: resizability and explicit size are orthogonal;
-  // the no-arg forms only flip resizability (size stays as it is: packed
-  // pre-start, current post-start), the two-arg forms also set the size.
-  // Note: an undecorated window can be technically resizable, but there is
-  // no border to drag, so the user cannot actually resize it.
-  @Override public Object mut$resizable$0(){ return setResizable(true, null, null); }
-  @Override public Object mut$resizable$2(Object w, Object h){
-    return setResizable(true, (WidthNat$as$0) w, (HeightNat$lg$0) h);
-  }
-  @Override public Object mut$fixedSize$0(){ return setResizable(false, null, null); }
-  @Override public Object mut$fixedSize$2(Object w, Object h){
-    return setResizable(false, (WidthNat$as$0) w, (HeightNat$lg$0) h);
-  }
-  private Object setResizable(boolean r, WidthNat$as$0 w, HeightNat$lg$0 h){
-    int ww= w == null ? 0 : extent(w, "window width");// validate eagerly, deterministic error
-    int hh= h == null ? 0 : extent(h, "window height");
-    if (w != null){
-      if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit size"); }
-      sized = true;
-      windowW = ww;
-      windowH = hh;
-    }
-    resizable = r;
-    if (started){
-      onEdtAndWait(() -> {
-        frame.setResizable(r);
-        if (w != null){ frame.setContentSize(ww, hh); }
-        keepVisible();
-      });
-    }
+  private Dimension virtual(){ return canvasW != 0 ? new Dimension(canvasW, canvasH) : onEdtAndWait(this::packed); }
+  @Override public Object read$virtualWidth$0(){ return w(virtual().width); }
+  @Override public Object read$virtualHeight$0(){ return h(virtual().height); }
+  @Override public Object mut$bands$1(Object c){
+    int b= Sk.color((Color$1c$0) c) | 0xFF000000;
+    onEdtAndWait(() -> bands = b);
     return this;
   }
-  @Override public Object mut$undecorated$1(Object a){
-    undecorated = true;
-    opacity = alpha(a) / 255f;
-    if (started){
-      // Live decoration swap: dispose + re-show inside one EDT block; the
-      // synthetic WINDOW_CLOSED is suppressed in FearlessFrame.
-      onEdtAndWait(() -> { frame.setDecoration(true, opacity, maximizedBounds()); keepVisible(); });
-    }
+  @Override public Object mut$opacity$1(Object a){
+    int v= alpha(a);
+    if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this Gui: the window can not be more transparent than Gui.opacityFloor allows"); }
+    opacity = v / 255f;
+    if (started){ onEdtAndWait(() -> stage.opacity(opacity)); }
     return this;
   }
-  @Override public Object mut$decorated$0(){
-    undecorated = false;
-    if (started){ onEdtAndWait(() -> { frame.setDecoration(false, 1f, maximizedBounds()); keepVisible(); }); }
-    return this;
-  }
-  private Rectangle maximizedBounds(){ return maximized ? new Rectangle(0, 0, screenW, screenH) : null; }
-  @Override public Object mut$location$2(Object x, Object y){
-    long xx= coord(((XInt$s$0) x).read$get$0(), "window x");
-    long yy= coord(((YInt$s$0) y).read$get$0(), "window y");
-    if (maximized){ throw Util.detErr("A maximized window cannot also have an explicit location"); }
-    located = true;
-    locationX = xx;
-    locationY = yy;
-    if (started){ onEdtAndWait(() -> place(xx, yy)); }
-    return this;
+  @Override public Object mut$onResize$1(Object c){ onResize = (Consumer$ao$1) c; return this; }
+  @Override public Object mut$onClose$1(Object a){ onClose = (MF$7$1) a; return this; }
+  @Override public Object mut$close$0(){
+    if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to Gui.run has not returned"); }
+    onEdtAndWait(frame::closed);
+    return Void$o$0.instance;
   }
   @Override public Object mut$onKey$1(Object scope){
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
     onEdtAndWait(() -> {
-      for (var l : frame.getKeyListeners()){ frame.removeKeyListener(l); }
-      frame.addKeyListener(keys);
-      for (var l : frame.getWindowFocusListeners()){
-        ((CKeyManager) l).windowLostFocus(null);
-        frame.removeWindowFocusListener(l);
+      for (var l : surface.getKeyListeners()){
+        if (l instanceof CKeyManager k){ k.focusLost(null); surface.removeKeyListener(k); surface.removeFocusListener(k); }
       }
-      frame.addWindowFocusListener(keys);
+      surface.addKeyListener(keys);
+      surface.addFocusListener(keys);
       keys.changeable = false;
     });
     return this;
   }
   @Override public Object mut$uTitle$1(Object t){
     title = ustr(t);
-    if (started){ onEdtAndWait(() -> frame.setTitle(title)); }
+    if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }
     return this;
   }
   @Override public Object mut$fps$1(Object f){
@@ -612,28 +563,10 @@ final class _Frame implements Frame$1c$0{
     return this;
   }
   // Getters. All safe from the queue thread: title/fps are read under the
-  // single-mutator model, elapsed is volatile, the location getters hop to
-  // the EDT for the real, current window position (including user drags).
+  // single-mutator model, elapsed is volatile.
   @Override public Object read$uTitle$0(){ return UStr$s$0Instance.instance(title); }
   @Override public Object read$fps$0(){ return n(fps); }
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object read$screenWidth$0(){ return w(screenW); }
-  @Override public Object read$screenHeight$0(){ return h(screenH); }
-  @Override public Object read$locationX$0(){
-    if (!started){ return x(locationOrErr(locationX)); }
-    return x(onEdtAndWait(frame::getX));
-  }
-  @Override public Object read$locationY$0(){
-    if (!started){ return y(locationOrErr(locationY)); }
-    return y(onEdtAndWait(frame::getY));
-  }
-  private long locationOrErr(long loc){
-    if (!located){
-      throw Util.detErr("The window location is not known before the window is"
-        + " visible, unless .location was called");
-    }
-    return loc;
-  }
   @Override public Object mut$modelFps$2(Object f, Object scope){
     long nn= fpsOf(f, "modelFps");
     var actions= new ArrayList<MF$7$1>();
@@ -676,33 +609,36 @@ final class _Frame implements Frame$1c$0{
     }
     // Post start: configure the new tree while detached (ticks keep painting
     // the old tree), then swap in one EDT block so no tick or mouse event
-    // ever sees a half-built tree. The window keeps its current size.
+    // ever sees a half-built tree. The new tree takes the current virtual pixel space.
     ((Scope$1c$1) scope).mut$run$1(t);
     onEdtAndWait(() -> {
       uninstall(top);
       install(t);
-      frame.setContentPane(t.component);
+      t.component.setBounds(0, 0, stage.canvasW, stage.canvasH);
       // The old tree is gone: no Exited events for it, and a gesture in
       // progress is forgotten (an in-flight release finds no press target,
       // like a release over empty space).
       mouse.reset();
-      frame.validate();
     });
     markLayoutDirty();
     return Void$o$0.instance;
   }
 
-  // Only the top component listens for mouse events: children have no AWT
-  // listeners, so AWT routes everything here and SkMouse dispatches.
+  // Only the surface listens for mouse events: the widgets have no AWT
+  // listeners, so AWT routes everything to the surface, and Stage hands the
+  // events in virtual pixels to SkMouse.
   private void install(AWidget t){
     top = t;
     t.changeable = false;
-    t.component.addMouseListener(mouse);
-    t.component.addMouseMotionListener(mouse);
+    surface.add(t.component);
   }
 
-  private void uninstall(AWidget t){
-    t.component.removeMouseListener(mouse);
-    t.component.removeMouseMotionListener(mouse);
-  }
+  private void uninstall(AWidget t){ surface.remove(t.component); }
+}
+
+record CResizeRequest(Instant$5c$0 elapsed, Float$1c$0 aspectRatio, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight) implements ResizeRequest$9j4$0{
+  @Override public Object read$elapsed$0(){ return elapsed; }
+  @Override public Object imm$aspectRatio$0(){ return aspectRatio; }
+  @Override public Object read$panelWidth$0(){ return panelWidth; }
+  @Override public Object read$panelHeight$0(){ return panelHeight; }
 }

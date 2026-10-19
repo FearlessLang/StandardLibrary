@@ -1,5 +1,5 @@
 GuiExtentTests: Test {::
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .paint{g -> Error.msg(g
       .color(Color.goblinGreen)
       .position(X#(-32768), Y#(-32768))
@@ -13,7 +13,7 @@ GuiExtentTests: Test {::
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .pane{::
       .width 32767
       .height 32767
@@ -49,25 +49,25 @@ GuiExtentTests: Test {::
       .ok _ -> Error.msg "A chunk over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "chunk 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .paint{g -> g.rect(Width#3000000000, Height#1)}
     }}}).run{
       .ok _ -> Error.msg "A rect width over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "rect width 3000000000 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .paint{g -> Error.msg(g.oval(Width#10, Height#32768).panelWidth.str + " An oval height over the limit was accepted")}
     }}}).run{
       .ok _ -> Error.msg "An oval height over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "oval height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .paint{g -> Error.msg(g.position(X#(+32768), Y#(+0)).panelWidth.str + " A position over the limit was accepted")}
     }}}).run{
       .ok _ -> Error.msg "A position over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "position x 32768 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.undecorated(Alpha.opaque).fixedSize(Width#300, Height#80).content{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .paint{g -> Error.msg(g.line(X#(+0), Y#(-32769)).panelWidth.str + " A line end under the limit was accepted")}
     }}}).run{
       .ok _ -> Error.msg "A line end under the limit always stops the Gui";

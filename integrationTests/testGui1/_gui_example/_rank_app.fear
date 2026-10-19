@@ -203,7 +203,7 @@ Gui09:Consumer[mut Frame]{::
 
 Gui10:Consumer[mut Frame]{::
   .title "Gui10: nested pane wraps"
-  .fixedSize(Width#200, Height#150)
+  .virtualPixelSpace(Width#200, Height#150)
   .content{::
     .pane{::
       .background (Color.rubberDuck)
@@ -215,9 +215,10 @@ Gui10:Consumer[mut Frame]{::
     }
   }
 
-Gui11:Consumer[mut Frame]{::
+Gui11:Consumer[mut Frame]{f -> f
   .title "Gui11: north border wraps when narrowed"
-  .resizable
+  .virtualPixelSpace(Width#400, Height#300)
+  .onResize{r -> Block#(f.virtualPixelSpace(Width#((+300.0 * (r.aspectRatio)).softRound.getNat), Height#300), Void)}
   .contentB{::
     .background (Color.ghostWhite)
     .northB{::
@@ -238,7 +239,7 @@ Gui11:Consumer[mut Frame]{::
 
 Gui12:Consumer[mut Frame]{::
   .title "Gui12: sizes and drawing beyond any screen"
-  .resizable(Width#400, Height#300)
+  .virtualPixelSpace(Width#400, Height#300)
   .content{::
     .paint{g -> g
       .color(Color.sleepyBlue)

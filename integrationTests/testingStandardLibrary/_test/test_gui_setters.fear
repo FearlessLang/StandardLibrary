@@ -1,25 +1,25 @@
 GuiSetterTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f ->
-    Error.msg(f.location(X#(+3), Y#(+4)).locationX.str + " " + (f.locationY.str))
+    Error.msg(f.virtualPixelSpace(Width#3, Height#4).virtualWidth.str + " " + (f.virtualHeight.str))
     }}).run{
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "X[+3] Y[+4]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[3] Height[4]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.resizable(Width#32768, Height#80).content{::}}}).run{
-      .ok _ -> Error.msg "A window width over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "window width 32768 is too large; it must be <= 32767"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#32768, Height#80).content{::}}}).run{
+      .ok _ -> Error.msg "A virtual pixel space width over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "virtual pixel space width 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fixedSize(Width#300, Height#32768).content{::}}}).run{
-      .ok _ -> Error.msg "A window height over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "window height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#32768).content{::}}}).run{
+      .ok _ -> Error.msg "A virtual pixel space height over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "virtual pixel space height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.location(X#(+32768), Y#(+0)).content{:: .paint{g -> Error.msg "A window location over the limit was accepted"} }}}).run{
-      .ok _ -> Error.msg "A window location over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "window x 32768 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#0, Height#80).content{::}}}).run{
+      .ok _ -> Error.msg "An empty virtual pixel space always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The virtual pixel space 0x80 is empty: a virtual pixel space has at least one virtual pixel in each direction"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.location(X#(+0), Y#(-32769)).content{:: .paint{g -> Error.msg "A window location under the limit was accepted"} }}}).run{
-      .ok _ -> Error.msg "A window location under the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "window y -32769 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.icon(base.IconsConflict).run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "An icon the main does not preload always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{::.contains `", but the main running this Gui preloads only the icons base.IconsFearless.`}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(0).content{:: .paint{g -> Error.msg "An fps below the limit was accepted"} }}}).run{
       .ok _ -> Error.msg "An fps below the limit always stops the Gui";

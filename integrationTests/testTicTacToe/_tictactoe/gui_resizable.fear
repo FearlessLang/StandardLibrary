@@ -128,8 +128,7 @@ BoardPainters: { #(model: mut Model): Painter -> Block#
 ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[mut Frame] -> Block#
   .var dirty = { False }
   .return { mut ResizableGui: Consumer[mut Frame] {::
-    .title "Tic-Tac-Toe: resizable square"
-    .resizable
+    .virtualPixelSpace(Width#480, Height#480)
     .modelFps(30, {:: .action{ dirty.get.thenDo{Block#(
         canvas!.paint(BoardPainters#(model)),
         dirty.set(False),
@@ -139,7 +138,6 @@ ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[m
       .background (Color.ghostWhite)
       .north{:: .label{:: .text(model.status) .save(model.statusSlot) } }
       .center{::
-        .width 480 .height 480
         .save canvas
         .paint(BoardPainters#(model))
         .mouse{:: .clicked{ e -> Block#

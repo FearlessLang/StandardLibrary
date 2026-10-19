@@ -10,7 +10,6 @@ use base.WidenTo as WidenTo;
 use base.Block as Block;
 use base.Pipe as Pipe;
 use base.Consumer as Consumer;
-use base.Gui as GuiC;
 use base.Frame as Frame;
 use base.Color as Color;
 use base.Label as Label;
@@ -31,4 +30,4 @@ use base.HeightNat as Height;
 use base.XInt as X;
 use base.YInt as Y;
 
-Presentation:Main{sys-> sys.gui.run(mut ChooserGui{.gui->sys.gui}) }
+Presentation:Main{sys-> sys.gui.name "Tic-Tac-Toe" .run(ResizableGuis#(Models#, Slots#[mut Pane])) }

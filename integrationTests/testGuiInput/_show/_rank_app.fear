@@ -16,7 +16,7 @@ ShowInput: Main { sys -> sys.gui.run{f -> Block#
   .var[mut InputCursor] at= {sys.inputCursor}
   .return{f
     .title "Show input: drop more files here"
-    .resizable(WidthNat#600, HeightNat#400)
+    .virtualPixelSpace(WidthNat#600, HeightNat#400)
     .modelFps(10, {:: .action{ShowFiles#(at, lines!)}})
     .content{::
       .background (Color.ghostWhite)
