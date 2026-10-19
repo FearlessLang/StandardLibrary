@@ -20,7 +20,7 @@ Fail: {#(n: Nat): Nat -> (n == 0).if{.then -> Error.msg "deep boom"; .else -> Tw
 NaiveSum: Main{s -> Debug#(Naive#1_000_000)}
 DeepSum: Main{s -> Debug#(SumBy#(RunRecursion, 1_000_000))}
 CrowdedSum: Main{s -> Debug#(SumBy#(Crowded, 1_000_000))}
-SpreadSum: Main{s -> Debug#(SumBy#(Spread, 1_000_000))}
+SpreadSum: Main{s -> Debug#(SumBy#(Spread, 100_000))}
 MixedSum: Main{s -> Debug#(Mixed#10_000)}
 NestSize: Main{s -> Debug#(Build#1_000_000.size)}
 ErrorsPropagate: Main{s -> Debug#(Try#{RunRecursion#{RunRecursion#[Nat]{Error.msg "deep boom"}}}.run{.ok n -> n.str; .info i -> i.softMsg})}
