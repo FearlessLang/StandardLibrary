@@ -10,6 +10,8 @@ final class Scopes{
   static HeightNat$lg$0 h(long n){ return (HeightNat$lg$0) HeightNat$lg$0.instance.read$$hash$1(new Nat$c$0Instance(n)); }
   static XInt$s$0 x(long n){ return (XInt$s$0) XInt$s$0.instance.read$$hash$1(new Int$c$0Instance(n)); }
   static YInt$s$0 y(long n){ return (YInt$s$0) YInt$s$0.instance.read$$hash$1(new Int$c$0Instance(n)); }
+  static TextRatio$ls$0 ratio(double d){ return (TextRatio$ls$0) TextRatio$ls$0.instance.read$$hash$1(new Float$1c$0Instance(d)); }
+  static double ratio(Object r){ return ((Float$1c$0Instance) ((TextRatio$ls$0) r).read$get$0()).val(); }
   static int byt(Object b){ return Byte.toUnsignedInt(((Byte$o$0Instance) b).val()); }
   static final int maxExtent= 32767;
   static final long maxImagePixels= 1L << 28;

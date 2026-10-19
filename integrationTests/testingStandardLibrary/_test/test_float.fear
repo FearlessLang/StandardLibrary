@@ -151,6 +151,15 @@ FloatRangeTests: Test {::
   .check{+1.0=~~= +2.0.clamp +1.5.assertEq(+1.5)}
   .check{+1.0=~~= +2.0.clamp +3.0.assertEq+2.0}
 
+  .check{(+1.0 =~~= +4.0).str .assertEq "[+1.0, +4.0]"}
+  .check{(+1.0 ~~ +4.0).str .assertEq "(+1.0, +4.0)"}
+  .check{(+1.0 ~~= +4.0).str .assertEq "(+1.0, +4.0]"}
+  .check{(+1.0 =~~ +4.0).str .assertEq "[+1.0, +4.0)"}
+  .check{((0.0 .getSucc) =~~= (+1024.0 .getPred)).str .assertEq "(+0.0, +1024.0)"}
+  .check{(+0.25 =~~= +0.5).str .assertEq "[+0.25, +0.5]"}
+  .check{(Math.negInf =~~= (Math.inf)).str .assertEq "[(-1.0 / +0.0), (+1.0 / +0.0)]"}
+  .check{(Math.negInf ~~ (Math.inf)).str .assertEq "((-1.0 / +0.0), (+1.0 / +0.0))"}
+
   // Invalid ranges
   .checkDetErr({::}, {+2.0=~~= +1.0})
   .checkDetErr({::}, {+2.0~~= +1.0})

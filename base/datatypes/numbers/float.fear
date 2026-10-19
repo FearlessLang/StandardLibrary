@@ -561,7 +561,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .if {startInclusive > endInclusive } .error {
       "Float~~: Tried to produce empty range, start ("+this+") .getSucc must be <= end (" + end + ") .getPred"
       }
-    .return {_FloatRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
+    .return {_FloatRanges#(startInclusive, endInclusive)};
 
   /// ``this~~=endInclusive`` returns the range ``(this, endInclusive]``: from `this.getSucc` to `endInclusive`.
   /// Throws if either endpoint is NaN, `this` is `Math.inf`, or the range would be empty
@@ -575,7 +575,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .if {this >= endInclusive } .error {
       "Float~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
-    .return {_FloatRanges#(this.getSucc, endInclusive, "("+this+", "+endInclusive+"]")};
+    .return {_FloatRanges#(this.getSucc, endInclusive)};
 
   /// ``this=~~end`` returns the range ``[this, end)``: from `this` to `end.getPred`.
   /// Throws if either endpoint is NaN, `end` is `Math.negInf`, or the range would be empty
@@ -591,7 +591,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .if {this >= end } .error {
       "Float=~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
       }
-    .return {_FloatRanges#(this, end.getPred, "["+this+", "+end+")")};
+    .return {_FloatRanges#(this, end.getPred)};
 
   /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
   /// Throws if either endpoint is NaN, or the range would be empty (``this > endInclusive``).
@@ -603,7 +603,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .if {this > endInclusive } .error {
       "Float=~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
       }
-    .return {_FloatRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
+    .return {_FloatRanges#(this, endInclusive)};
 
   /// ``this.inRange(range)`` returns `True` iff ``range.start <= this <= range.end``.
   /// Note: since NaN is greater than everything, ``this.inRange(range)`` is `False` when `this` is NaN.
@@ -635,7 +635,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   }
 
 _FloatRanges: Sealed {
-    #(startInclusive: Float, endInclusive: Float, str: Str): Range[Float] -> {'self
+    #(startInclusive: Float, endInclusive: Float): Range[Float] -> {'self
         /// Magic method that counts all floats in a given range.
         /// Counts -0.0 and +0.0 as the same float i.e. -0.0 =~~= +0.0 .size == 1;
         .size -> _FloatsBetween#(startInclusive, endInclusive);
@@ -646,8 +646,10 @@ _FloatRanges: Sealed {
         .flow step -> _NumFlow.floats(startInclusive, endInclusive, step);
         .contains n -> n.inRange(self);
         .clamp n -> n.clampTo(self);
-        .str -> str;
+        .str -> _FloatRanges.lower(startInclusive) + ", " + (_FloatRanges.upper(endInclusive));
       };
+    .lower(s: Float): Str -> (s.isNegInfinity.not && {s.getPred.str.size < (s.str.size)}).if{ .then -> "(" + (s.getPred.str); .else -> "[" + (s.str) };
+    .upper(e: Float): Str -> (e.isPosInfinity.not && {e.getSucc.str.size < (e.str.size)}).if{ .then -> e.getSucc.str + ")"; .else -> e.str + "]" };
   }
 
 _FloatsBetween: Sealed {
