@@ -38,10 +38,6 @@ PreLoadIcon[I]: {}
 Sealed: {}
 Void: Sealed {}
 WidenTo[T]: {}
-InferUnknown: Sealed {}
-InferErr[A,B]: Sealed {}
-InferErr[A,B,C]: Sealed {}
-InferErr[A,B,C,D]: Sealed {}
 
 ToIso[R]: {mut .iso: iso ToIso[R]; mut .close: mut R;}
 
