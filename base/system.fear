@@ -15,6 +15,8 @@ System: ToIso[System],WidenTo[System] {
   mut .inputCursor: mut InputCursor;
   mut .assetRead: mut AssetReadCapability;//TODO: rename as CapAssetRead? and complete real system and the inherited metods returning 'this'
   mut .download: mut DownloadCapability;
+  mut .dataRead: mut CapDataRead;
+  mut .dataReadWrite: mut CapDataReadWrite;
   ///Creates a reader for this in memory log.
   ///Concrete log types must be non generic.
   ///Creating a reader throw with nondeterministic error if the concrete log type is generic.
@@ -74,5 +76,6 @@ InputCursorNode: ToIso[InputCursorNode],WidenTo[InputCursorNode] {
   mut .readUStrAscii(recover: mut BadUStrUnitRecover): UStr;
   mut .readStrLatin1(recover: mut BadStrUnitRecover): Str;
   mut .readUStrLatin1(recover: mut BadUStrUnitRecover): UStr;
+  mut .readBytes: List[Byte];
   mut .readImage(maxPixels: Nat): Image;
   }
