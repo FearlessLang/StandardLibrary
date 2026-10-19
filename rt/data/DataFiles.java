@@ -33,6 +33,7 @@ import java.util.zip.ZipOutputStream;
 final class DataFiles{
   static final Map<String,Path> reads= linked("fearlessDataRead.");
   static final Map<String,Path> edits= linked("fearlessDataWrite.");
+  static final Map<String,Path> readable= readable();
   private static final Object lock= new Object();
   private static final Set<String> reserved= Set.of("con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
   private static final Set<String> noExt= Set.of("readme", "license", "copying", "notice", "authors", "contributors", "changelog", "changes", "news", "todo", "thanks", "security", "contributing", "code_of_conduct");
@@ -49,6 +50,11 @@ final class DataFiles{
     for (var k : System.getProperties().stringPropertyNames()){
       if (k.startsWith(prefix)){ res.put(k.substring(prefix.length()), Path.of(System.getProperty(k))); }
     }
+    return Collections.unmodifiableMap(res);
+  }
+  private static Map<String,Path> readable(){
+    var res= new TreeMap<>(reads);
+    res.putAll(edits);
     return Collections.unmodifiableMap(res);
   }
   static Object roots(Map<String,Path> view){ return List$o$1Instance.wrap(view.keySet().stream().<Object>map(Str$c$0Instance::instance).toList()); }
