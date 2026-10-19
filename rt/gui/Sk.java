@@ -136,17 +136,11 @@ interface Sk{
   }
 
   static TextLine line(AWidget s){
-    if (s.line != null){ return s.line; }
-    s.line = shape(s.text, s.textSize);
-    s.ascent = s.line.getAscent();
-    s.descent = s.line.getDescent();
-    for (int i= 0; i < (s.allFonts ? fontFiles.length : 1); i += 1){
-      var m= font(i, s.textSize).getMetrics();
-      s.ascent = Math.min(s.ascent, m.getAscent());
-      s.descent = Math.max(s.descent, m.getDescent());
-    }
+    if (s.line == null){ s.line = shape(s.text, s.textSize); }
     return s.line;
   }
+
+  static long lineHeight(AWidget s){ return Math.round(s.textSize * (s.above + s.below)); }
 
   static int color(Color$1c$0 c){
     return alpha(c.read$alpha$0()) << 24 | red(c.read$red$0()) << 16
@@ -176,7 +170,7 @@ interface Sk{
   static Dimension textSizeWithInsets(AWidget s){
     return new Dimension(
       (int) Math.ceil(line(s).getWidth()) + s.left + s.right,
-      (int) Math.ceil(s.descent - s.ascent) + s.top + s.bottom);
+      (int) lineHeight(s) + s.top + s.bottom);
   }
 
   static Dimension sizeFor(Component c, int width, int height){
@@ -198,7 +192,7 @@ interface Sk{
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
     paint.setColor(s.fg);
-    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, y0 + (ch - s.descent + s.ascent) / 2 - s.ascent + dy, paint);
+    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, (float) (y0 + (ch - lineHeight(s)) / 2d + s.textSize * s.above + dy), paint);
     cv.restoreToCount(save);
   }
 

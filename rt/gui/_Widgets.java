@@ -137,10 +137,9 @@ abstract class AWidget implements Widget$2o$1{
   int fg= Sk.color(foreground);
   int bg= Sk.color(background);
   int textSize= 12;
-  boolean allFonts= true;
+  double above= 1;
+  double below= 0.5;
   TextLine line;
-  float ascent;
-  float descent;
   // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
   // expose Fearless methods to change it, but it lives here alongside the
   // other style fields.
@@ -215,14 +214,10 @@ abstract class AWidget implements Widget$2o$1{
     return reText(() -> textSize = n);
   }
   public Object read$textHeight$0(){ return h(textSize); }
-  public Object mut$lineSpacing$1(Object v){
-    boolean a= (Boolean) ((LineSpacing$2f4$0) v).read$match$1(new LineSpacingMatch$25g0$1(){
-      @Override public Object mut$allFonts$0(){ return true; }
-      @Override public Object mut$usedFonts$0(){ return false; }
-    });
-    return reText(() -> allFonts = a);
-  }
-  public Object read$lineSpacing$0(){ return allFonts ? AllFontsSpacing$13k0$0.instance : UsedFontsSpacing$25hc$0.instance; }
+  public Object mut$aboveBaseline$p1$1(Object r){ return reStyle(() -> above = ratio(r)); }
+  public Object mut$belowBaseline$p1$1(Object r){ return reStyle(() -> below = ratio(r)); }
+  public Object read$aboveBaseline$0(){ return ratio(above); }
+  public Object read$belowBaseline$0(){ return ratio(below); }
   public Object mut$uText$1(Object t){
     var s= ustr(t);
     return reText(() -> text = s);

@@ -96,6 +96,20 @@ LevelFloatTests: Test {::
   .checkNonDetErr({::}, {Saturation.min - (Saturation#(0.5))})
   }
 
+TextRatioTests: Test {::
+  .check{TextRatio.min .get .assertEq(0.0 .getSucc)}
+  .check{TextRatio.max .get .assertEq(+1024.0 .getPred)}
+  .check{(TextRatio#(0.0 .getSucc)) .get .assertEq(0.0 .getSucc)}
+  .check{(TextRatio#(+1024.0 .getPred)) .get .assertEq(+1024.0 .getPred)}
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "TextRatio must be between "}}, {TextRatio#(0.0)})
+  .checkNonDetErr({::}, {TextRatio#(-0.0)})
+  .checkNonDetErr({::}, {TextRatio#(-1.0)})
+  .checkNonDetErr({::}, {TextRatio#(+1024.0)})
+  .checkNonDetErr({::}, {TextRatio#(Math.inf)})
+  .checkNonDetErr({::}, {TextRatio#(Math.negInf)})
+  .checkNonDetErr({::}, {TextRatio#(Math.nan)})
+  }
+
 CyclicFloatTests: Test {::
   .check{(Hue#(0.25)) + (Hue#(0.5)) .assertEq(Hue#(0.75))}
   .check{(Hue#(0.75)) + (Hue#(0.5)) .assertEq(Hue#(0.25))}
@@ -173,6 +187,7 @@ TestWrappers: Test {::
   .test LevelByteTests
   .test ColorCmpTests
   .test LevelFloatTests
+  .test TextRatioTests
   .test CyclicFloatTests
   .test DurationTests
   .test InstantTests
