@@ -86,7 +86,7 @@ LevelFloatTests: Test {::
   .check{(Saturation#(0.25)) + (Saturation#(0.5)) .assertEq(Saturation#(0.75))}
   .check{(Brightness#(0.75)) - (Brightness#(0.25)) .assertEq(Brightness#(0.5))}
   .check{(Saturation#(0.25)) .gap(Saturation#(0.75)) .assertEq(Saturation#(0.5))}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Saturation must be between +0.0 and +1.0"}}, {Saturation#(+1.5)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Saturation +1.5 is out of range; it must be in [+0.0, +1.0]"}}, {Saturation#(+1.5)})
   .check{(Saturation#(0.75)) .gap(Saturation#(0.25)) .assertEq(Saturation#(0.5))}
   .check{Saturation.min .assertEq(Saturation#(0.0))}
   .check{Saturation.max .assertEq(Saturation#(+1.0))}
@@ -101,7 +101,7 @@ TextRatioTests: Test {::
   .check{TextRatio.max .get .assertEq(+1024.0 .getPred)}
   .check{(TextRatio#(0.0 .getSucc)) .get .assertEq(0.0 .getSucc)}
   .check{(TextRatio#(+1024.0 .getPred)) .get .assertEq(+1024.0 .getPred)}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "TextRatio must be between "}}, {TextRatio#(0.0)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "TextRatio +0.0 is out of range; it must be in (+0.0, +1024.0)"}}, {TextRatio#(0.0)})
   .checkNonDetErr({::}, {TextRatio#(-0.0)})
   .checkNonDetErr({::}, {TextRatio#(-1.0)})
   .checkNonDetErr({::}, {TextRatio#(+1024.0)})
@@ -116,7 +116,7 @@ CyclicFloatTests: Test {::
   .check{(Hue#(0.25)) - (Hue#(0.5)) .assertEq(Hue#(0.75))}
   .check{(Hue#(0.5)) - (Hue#(0.25)) .assertEq(Hue#(0.25))}
   .check{(Hue#(0.5)) + (Hue#(0.5)) .assertEq(Hue#(0.0))}
-  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Hue must be at least 0 and less than +1.0"}}, {Hue#(+1.0)})
+  .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "Hue +1.0 is out of range; it must be in [+0.0, +1.0)"}}, {Hue#(+1.0)})
   .check{((Hue#(0.0)) - (Hue#(0.00000000000000001soft))).get .assertEq(1.0.getPred)}
   .check{Hue.period .assertEq(+1.0)}
   .check{(Hue#(0.5)) + (Hue#(0.25)) + (Hue#(0.5)) .assertEq((Hue#(0.25)) + (Hue#(0.5)) + (Hue#(0.5)))}
