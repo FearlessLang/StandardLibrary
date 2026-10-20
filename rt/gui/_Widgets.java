@@ -20,10 +20,13 @@ import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.ColorAlphaType;
 import io.github.humbleui.skija.ColorType;
+import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
+import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.TextLine;
+import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
 
@@ -74,6 +77,45 @@ final class _Label extends AWidget implements Label$1c$0{
   }
 }
 
+final class _Picture extends AWidget implements Picture$5c$0{
+  Image image;
+  boolean keepAspect= true;
+  boolean byHeight;
+
+  _Picture(_Frame frame){ super(frame); }
+
+  @Override Dimension need(){
+    if (image == null){ return new Dimension(edgeW(), edgeH()); }
+    return new Dimension(image.getWidth() + edgeW(), image.getHeight() + edgeH());
+  }
+  @Override void fit(){
+    if (!keepAspect || image == null){ return; }
+    if (byHeight){ width = extent(edgeW() + Math.round((double) (height - edgeH()) * image.getWidth() / image.getHeight()), "keepAspect width"); return; }
+    height = extent(edgeH() + Math.round((double) (width - edgeW()) * image.getHeight() / image.getWidth()), "keepAspect height");
+  }
+  @Override void sk(Canvas cv){
+    Sk.background(cv, this);
+    if (image == null){ return; }
+    int cw= component.getWidth() - edgeW();
+    int ch= component.getHeight() - edgeH();
+    float s= Math.max((float) cw / image.getWidth(), (float) ch / image.getHeight());
+    float iw= keepAspect ? image.getWidth() * s : cw;
+    float ih= keepAspect ? image.getHeight() * s : ch;
+    int save= cv.save();
+    cv.clipRect(Rect.makeXYWH(left, top, cw, ch));
+    cv.drawImageRect(image, Rect.makeWH(image.getWidth(), image.getHeight()), Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), SamplingMode.LINEAR, null, true);
+    cv.restoreToCount(save);
+  }
+  @Override public Object mut$image$1(Object i){
+    var img= ((Image$1c$0Instance) i).image();
+    return reStyle(() -> { image = img; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
+  }
+  @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
+  @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }
+  @Override public Object mut$width$p1$1(Object w){ byHeight = false; return super.mut$width$p1$1(w); }
+  @Override public Object mut$height$p1$1(Object h){ byHeight = true; return super.mut$height$p1$1(h); }
+}
+
 final class _Pane extends AContainer implements Pane$o$0{
   boolean vertical= false;
   long minPerLine= 1;
@@ -93,6 +135,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override Dimension need(){ return ((CenteredFlowLayout) component.getLayout()).natural(component); }
   @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(this, null, s, _Button::new); return this; }
   @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(this, null, s, _Label::new); return this; }
+  @Override public Pane$o$0 mut$picture$1(Object s){ frame.addTo(this, null, s, _Picture::new); return this; }
   @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(this, null, s, _Pane::new); return this; }
   @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(this, null, s, _Border::new); return this; }
   @Override public Object mut$clear$0(){
@@ -255,6 +298,7 @@ abstract class AWidget implements Widget$2o$1{
     return now;
   }
   abstract Dimension need();
+  void fit(){}
   void clipChildren(Canvas cv){}
   int edgeW(){ return left + right; }
   int edgeH(){ return top + bottom; }
@@ -281,6 +325,7 @@ abstract class AWidget implements Widget$2o$1{
     frame.onEdtAndWait(() -> {
       change();
       r.run();
+      fit();
       component.invalidate();
     });
     frame.markLayoutDirty();

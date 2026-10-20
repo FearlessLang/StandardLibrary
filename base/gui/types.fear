@@ -330,6 +330,17 @@ Gui:{
 Label:_TextWidget[Label]{
   .self->this;
 }
+//The image always covers the whole widget, insets excluded.
+//With .keepAspect(False) the image stretches to the widget.
+//With .keepAspect(True) (the default) the last of .width and .height decides
+//the other one, so the widget has the proportions of the image; a widget drawn
+//larger by .fill shows the image scaled to cover it, centered, clipped on one axis.
+Picture:Widget[Picture]{
+  .self->this;
+  mut .image(Image):mut Picture;
+  mut .keepAspect(Bool):mut Picture;
+  read .keepAspect:Bool;
+}
 Mouse:_Styled[Mouse]{ .self->this;
   mut .clicked(mut Consumer[MouseEvent]):mut Mouse;
   mut .pressed(mut Consumer[MouseEvent]):mut Mouse;
@@ -349,6 +360,7 @@ Pane:_Container[Pane]{
   mut .border(mut Scope[Border]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
+  mut .picture(mut Scope[Picture]):mut Pane;
   mut .clear:mut Pane;
   //Flow axis: .horizontal (default) lays children left-to-right, wrapping
   //into new rows; .vertical lays them top-to-bottom, wrapping into new
