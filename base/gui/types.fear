@@ -349,7 +349,7 @@ Pane:_Container[Pane]{
   mut .horizontal: mut Pane;
   mut .vertical: mut Pane;
   //A line holds at least .minPerLine children (default 1) and at most
-  //.maxPerLine children (default: no limit). Between the two, a child
+  //.maxPerLine children (default Math.maxNat). Between the two, a child
   //that would overflow the available size starts a new line.
   //A line holding .minPerLine children too long for the available size
   //overflows it.

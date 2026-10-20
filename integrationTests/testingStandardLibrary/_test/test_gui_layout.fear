@@ -140,4 +140,16 @@ GuiLayoutTests: Test {::
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[100]"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .pane{::
+      .width 100 .maxPerLine 2 .maxPerLine(Math.maxNat) .widthGap 0 .heightGap 0 .leftInset 0 .rightInset 0 .topInset 0 .bottomInset 0
+      .button{:: .width 10 .height 10 }
+      .button{:: .width 10 .height 20 }
+      .button{:: .width 10 .height 40 }
+      .paint{g -> Error.msg(g.panelHeight.str)}
+      }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[40]"}}.assertTrue{i};
+      }}
   }
