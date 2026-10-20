@@ -148,9 +148,12 @@ interface Sk{
   }
 
   static void paintNode(SkComponent c, Canvas cv){
+    c.w.textWarning = c.w.warned(c.w.textWarning, textClip(c.w));
     c.w.sk(cv);
     for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
+      var kw= ((SkComponent) k).w;
+      kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k));
       int save= cv.save();
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
@@ -165,6 +168,20 @@ interface Sk{
     float h= s.component.getHeight();
     paint.setColor(s.bg);
     cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2)), paint);
+  }
+
+  static String textClip(AWidget s){
+    if (s.text.isEmpty()){ return null; }
+    var need= textSizeWithInsets(s);
+    var c= s.component;
+    if (need.width <= c.getWidth() && need.height <= c.getHeight()){ return null; }
+    return "the text of " + s.describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + c.getWidth() + "x" + c.getHeight() + ": the text is clipped";
+  }
+
+  static String boundsClip(SkComponent c, Component k){
+    boolean inside= k.getX() >= 0 && k.getY() >= 0 && k.getX() + k.getWidth() <= c.getWidth() && k.getY() + k.getHeight() <= c.getHeight();
+    if (inside){ return null; }
+    return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped";
   }
 
   static Dimension textSizeWithInsets(AWidget s){

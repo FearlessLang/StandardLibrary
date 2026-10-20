@@ -147,6 +147,9 @@ abstract class AWidget implements Widget$2o$1{
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
   EnumMap<MouseKind,Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
+  String boundsWarning;
+  String textWarning;
+  String paintWarning;
 
   AWidget(_Frame frame){ this.frame= frame; }
 
@@ -169,6 +172,11 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   abstract void sk(Canvas cv);
+  String describe(){ return "a " + getClass().getSimpleName().substring(1) + (text.isEmpty() ? "" : " \"" + text + "\""); }
+  String warned(String was, String now){
+    if (now != null && !now.equals(was)){ frame.frame.warn(now); }
+    return now;
+  }
   abstract Dimension autoSize(int width, int height);
 
   Object onEdt(Runnable r){
@@ -246,14 +254,16 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
     Sk.background(cv, this);
     if (paint == Scopes.idP){ return; }
     try (var p= new Paint().setAntiAlias(true).setColor(fg)){
-      paint.imm$run$1(new CGraphicsCtx(
+      var g= new CGraphicsCtx(
         cv,
         frame,
         frame.elapsed,
         Scopes.w(component.getWidth()),
         Scopes.h(component.getHeight()),
         p
-      ));
+      );
+      paint.imm$run$1(g);
+      paintWarning = warned(paintWarning, g.outside(this));
     }
   }
 
