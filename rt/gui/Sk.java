@@ -154,6 +154,7 @@ interface Sk{
       var k= c.getComponent(i);
       var kw= ((SkComponent) k).w;
       kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k));
+      kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i));
       int save= cv.save();
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
@@ -182,6 +183,17 @@ interface Sk{
     boolean inside= k.getX() >= 0 && k.getY() >= 0 && k.getX() + k.getWidth() <= c.getWidth() && k.getY() + k.getHeight() <= c.getHeight();
     if (inside){ return null; }
     return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped";
+  }
+
+  static String overlap(SkComponent c, int i){
+    if (!(c.w instanceof _Border)){ return null; }
+    var k= c.getComponent(i);
+    for (int j= 0; j < i; j += 1){
+      var o= c.getComponent(j);
+      if (!k.getBounds().intersects(o.getBounds())){ continue; }
+      return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") overlaps " + ((SkComponent) o).w.describe() + " of " + o.getWidth() + "x" + o.getHeight() + " at (" + o.getX() + ", " + o.getY() + ") in their parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the first one covers the second";
+    }
+    return null;
   }
 
   static Dimension textSizeWithInsets(AWidget s){

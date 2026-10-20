@@ -148,6 +148,7 @@ abstract class AWidget implements Widget$2o$1{
   EnumMap<MouseKind,Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
   String boundsWarning;
+  String overlapWarning;
   String textWarning;
   String paintWarning;
 
