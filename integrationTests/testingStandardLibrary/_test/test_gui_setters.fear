@@ -1,5 +1,11 @@
 GuiSetterTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f ->
+    Error.msg(f.virtualWidth.str + " " + (f.virtualHeight.str))
+    }}).run{
+      .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[1000] Height[1000]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f ->
     Error.msg(f.virtualPixelSpace(Width#3, Height#4).virtualWidth.str + " " + (f.virtualHeight.str))
     }}).run{
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";

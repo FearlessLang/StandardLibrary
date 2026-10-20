@@ -202,14 +202,6 @@ interface Sk{
       (int) lineHeight(s) + s.top + s.bottom);
   }
 
-  static Dimension sizeFor(Component c, int width, int height){
-    var s= ((SkComponent) c).w;
-    int ww= s.preferredWidth == null ? width : s.preferredWidth;
-    int hh= s.preferredHeight == null ? height : s.preferredHeight;
-    var auto= s.autoSize(ww, hh);
-    return new Dimension(s.preferredWidth == null ? auto.width : ww, s.preferredHeight == null ? auto.height : hh);
-  }
-
   static void text(Canvas cv, AWidget s, float dx, float dy){
     var c= s.component;
     var line= line(s);

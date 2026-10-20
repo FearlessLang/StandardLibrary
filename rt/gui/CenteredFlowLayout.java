@@ -17,12 +17,9 @@ import java.util.List;
 //    left-to-right.
 //  - gap.minPerLine, gap.maxPerLine: line length. A line breaks after
 //    maxPerLine children, and after at least minPerLine children when the
-//    next child would overflow the available size along the flow axis.
-// preferredLayoutSize is the natural layout, unwrapped by size: lines break
-// only at maxPerLine (what pack() uses to compute the natural window size).
-// When the container is later given less size than that, layoutContainer
-// wraps into more lines; the container's cross-axis size must then come
-// from sizeFor, which every layout queries with the exact size it assigns.
+//    next child would overflow the size of the container along the flow axis.
+// Every child keeps its own size; a child with fill takes the whole flow
+// axis of the container. The container never grows from its children.
 public final class CenteredFlowLayout implements LayoutManager, Serializable{
   private static final long serialVersionUID= 1L;
 
@@ -33,25 +30,11 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   @Override public void addLayoutComponent(String name, Component comp){}
   @Override public void removeLayoutComponent(Component comp){}
 
-  // The size pack() uses for the natural window size: lines broken only at
-  // maxPerLine, so a later resize below this can wrap them.
   @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
 
   // Below-preferred minimums are deliberately not supported: content wraps
   // or clips instead of shrinking.
   @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
-
-  Dimension sizeFor(Container target, int width, int height){
-    synchronized (target.getTreeLock()){
-      boolean vert= gap.vertical;
-      var ls= lines(target, vert ? height - insetsH() : width - insetsW());
-      int cross= crossSum(ls, vert ? gap.widthGap : gap.heightGap);
-      int primary= ls.stream().mapToInt(Line::primary).max().orElse(0);
-      return vert
-        ? new Dimension(cross + insetsW(), primary + insetsH())
-        : new Dimension(primary + insetsW(), cross + insetsH());
-    }
-  }
 
   @Override public void layoutContainer(Container target){
     synchronized (target.getTreeLock()){
@@ -105,7 +88,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     int lc= 0;
     for (var c : target.getComponents()){
       if (!c.isVisible()){ continue; }
-      var d= vert ? Sk.sizeFor(c, Integer.MAX_VALUE, availPrimary) : Sk.sizeFor(c, availPrimary, Integer.MAX_VALUE);
+      var d= size(((SkComponent) c).w, vert, availPrimary);
       int cp= vert ? d.height : d.width;
       int cc= vert ? d.width : d.height;
       boolean full= Long.compareUnsigned(items.size(), gap.maxPerLine) >= 0;
@@ -123,6 +106,12 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     }
     if (!items.isEmpty()){ res.add(new Line(items, lp, lc)); }
     return res;
+  }
+
+  private static Dimension size(AWidget s, boolean vert, int availPrimary){
+    var o= s.own();
+    if (!s.fill){ return o; }
+    return vert ? new Dimension(o.width, Math.max(o.height, availPrimary)) : new Dimension(Math.max(o.width, availPrimary), o.height);
   }
 
   private static int crossSum(List<Line> ls, int lineGap){

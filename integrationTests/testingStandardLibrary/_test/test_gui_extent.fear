@@ -15,12 +15,12 @@ GuiExtentTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .pane{::
-      .width 32767
-      .height 32767
-      .topInset 32767
-      .bottomInset 32767
-      .leftInset 32767
-      .rightInset 32767
+      .minWidth 32767
+      .minHeight 32767
+      .topInset 16383
+      .bottomInset 16383
+      .leftInset 16383
+      .rightInset 16383
       .widthGap 32767
       .heightGap 32767
       .radius 32767
@@ -28,14 +28,22 @@ GuiExtentTests: Test {::
       .label{:: .text "big" .textHeight 32767 .radius 32767 .background(Color.rubberDuck) }
       .button{:: .text "big" .textHeight 32767 .radius 32767 }
       }
-    .pane{:: .width 1 .height 1 .paint{g -> Error.msg "painted after the big widgets"} }
+    .pane{:: .minWidth 12 .minHeight 12 .paint{g -> Error.msg "painted after the big widgets"} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "painted after the big widgets"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .pane{:: .width 32768 }}}}).run{
-      .ok _ -> Error.msg "A widget width over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "widget width 32768 is too large; it must be <= 32767"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .pane{:: .minWidth 32768 }}}}).run{
+      .ok _ -> Error.msg "A minWidth over the limit always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "minWidth 32768 is too large; it must be <= 32767"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .pane{:: .minWidth 10 }}}}).run{
+      .ok _ -> Error.msg "A minWidth smaller than the insets always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "minWidth 10 would make the insets of this Pane larger than its min size: leftInset 6 + rightInset 6 is more than minWidth 10"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .label{:: .bottomInset 20 }}}}).run{
+      .ok _ -> Error.msg "Insets larger than the min size always stop the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "bottomInset 20 would make the insets of this Label larger than its min size: topInset 6 + bottomInset 20 is more than minHeight 24"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .pane{:: .radius 18446744073709551615 } .paint{g -> Error.msg "A radius over the limit was accepted"} }}}).run{
       .ok _ -> Error.msg "A radius over the limit always stops the Gui";

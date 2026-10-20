@@ -39,7 +39,7 @@ final class SkComponent extends JComponent{
     setOpaque(false);
     setFocusable(false);
   }
-  @Override public Dimension getPreferredSize(){ return Sk.sizeFor(this, Integer.MAX_VALUE, Integer.MAX_VALUE); }
+  @Override public Dimension getPreferredSize(){ return w.own(); }
   @Override public Dimension getMinimumSize(){ return getPreferredSize(); }
 }
 
@@ -59,14 +59,14 @@ final class _Button extends AWidget implements Button$2o$0{
   @Override public Object mut$action$1(Object r){
     return onEdt(() -> action = (MF$7$1) r);
   }
-  @Override Dimension autoSize(int width, int height){ return Sk.textSizeWithInsets(this); }
+  @Override Dimension need(){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){ Sk.button(cv, this); }
 }
 
 final class _Label extends AWidget implements Label$1c$0{
   _Label(_Frame frame){ super(frame); }
 
-  @Override Dimension autoSize(int width, int height){ return Sk.textSizeWithInsets(this); }
+  @Override Dimension need(){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
     Sk.text(cv, this, 0, 0);
@@ -82,7 +82,6 @@ final class _Pane extends AContainer implements Pane$o$0{
     super(frame);
     component.setLayout(new CenteredFlowLayout(this));
   }
-  @Override Dimension autoSize(int width, int height){ return ((CenteredFlowLayout) component.getLayout()).sizeFor(component, width, height); }
   @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(this, null, s, _Button::new); return this; }
   @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(this, null, s, _Label::new); return this; }
   @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(this, null, s, _Pane::new); return this; }
@@ -124,7 +123,6 @@ final class _Border extends AContainer implements Border$2o$0{
     super(frame);
     component.setLayout(new MutableBorderLayout(this));
   }
-  @Override Dimension autoSize(int width, int height){ return ((MutableBorderLayout) component.getLayout()).sizeFor(component, width, height); }
   @Override public Border$2o$0 mut$north$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Pane::new); return this; }
   @Override public Border$2o$0 mut$south$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Pane::new); return this; }
   @Override public Border$2o$0 mut$east$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Pane::new); return this; }
@@ -143,8 +141,9 @@ abstract class AWidget implements Widget$2o$1{
   int right= 6;
   int bottom= 6;
   int radius= 12;
-  Integer preferredWidth;
-  Integer preferredHeight;
+  int minWidth= 24;
+  int minHeight= 24;
+  boolean fill;
   Color$1c$0 foreground= (Color$1c$0) Color$1c$0.instance;
   Color$1c$0 background= (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
   int fg= Sk.color(foreground);
@@ -189,12 +188,21 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   abstract void sk(Canvas cv);
-  String describe(){ return "a " + getClass().getSimpleName().substring(1) + (text.isEmpty() ? "" : " \"" + text + "\""); }
+  String kind(){ return getClass().getSimpleName().substring(1); }
+  String describe(){ return "a " + kind() + (text.isEmpty() ? "" : " \"" + text + "\""); }
   String warned(String was, String now){
     if (was == null && now != null){ frame.frame.warn(now); }
     return now;
   }
-  abstract Dimension autoSize(int width, int height);
+  Dimension need(){ return new Dimension(0, 0); }
+  Dimension own(){
+    var n= need();
+    return new Dimension(Math.max(minWidth, n.width), Math.max(minHeight, n.height));
+  }
+  void insetsFit(String setter, int l, int r, int t, int b, int w, int h){
+    if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than its min size: leftInset " + l + " + rightInset " + r + " is more than minWidth " + w); }
+    if (t + b > h){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than its min size: topInset " + t + " + bottomInset " + b + " is more than minHeight " + h); }
+  }
 
   Object onEdt(Runnable r){
     frame.onEdtAndWait(() -> { change(); r.run(); });
@@ -224,12 +232,14 @@ abstract class AWidget implements Widget$2o$1{
     });
   }
 
-  @Override public Object mut$topInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "top inset"), n -> top = n); }
-  @Override public Object mut$bottomInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "bottom inset"), n -> bottom = n); }
-  @Override public Object mut$leftInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "left inset"), n -> left = n); }
-  @Override public Object mut$rightInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "right inset"), n -> right = n); }
-  @Override public Object mut$width$p1$1(Object w){ return reStyle(extent((WidthNat$as$0) w, "widget width"), n -> preferredWidth = n); }
-  @Override public Object mut$height$p1$1(Object h){ return reStyle(extent((HeightNat$lg$0) h, "widget height"), n -> preferredHeight = n); }
+  @Override public Object mut$topInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "top inset"), n -> { insetsFit("topInset " + n, left, right, n, bottom, minWidth, minHeight); top = n; }); }
+  @Override public Object mut$bottomInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "bottom inset"), n -> { insetsFit("bottomInset " + n, left, right, top, n, minWidth, minHeight); bottom = n; }); }
+  @Override public Object mut$leftInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "left inset"), n -> { insetsFit("leftInset " + n, n, right, top, bottom, minWidth, minHeight); left = n; }); }
+  @Override public Object mut$rightInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "right inset"), n -> { insetsFit("rightInset " + n, left, n, top, bottom, minWidth, minHeight); right = n; }); }
+  @Override public Object mut$minWidth$p1$1(Object w){ return reStyle(extent((WidthNat$as$0) w, "minWidth"), n -> { insetsFit("minWidth " + n, left, right, top, bottom, n, minHeight); minWidth = n; }); }
+  @Override public Object mut$minHeight$p1$1(Object h){ return reStyle(extent((HeightNat$lg$0) h, "minHeight"), n -> { insetsFit("minHeight " + n, left, right, top, bottom, minWidth, n); minHeight = n; }); }
+  @Override public Object mut$fill$0(){ return reStyle(() -> fill = true); }
+  @Override public Object mut$noFill$0(){ return reStyle(() -> fill = false); }
   @Override public Object mut$radius$1(Object r){ return reStyle(extent(r, "radius"), n -> radius = n); }
   public Object mut$textHeight$p1$1(Object t){
     int n= extent((HeightNat$lg$0) t, "text height");
@@ -245,16 +255,15 @@ abstract class AWidget implements Widget$2o$1{
     return reText(() -> text = s);
   }
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
-  @Override public Object mut$autoWidth$0(){ return reStyle(() -> preferredWidth = null); }
-  @Override public Object mut$autoHeight$0(){ return reStyle(() -> preferredHeight = null); }
   @Override public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
   @Override public Object read$topInset$0(){ return h(top); }
   @Override public Object read$bottomInset$0(){ return h(bottom); }
   @Override public Object read$leftInset$0(){ return w(left); }
   @Override public Object read$rightInset$0(){ return w(right); }
-  @Override public Object read$width$0(){ return preferredWidth == null ? Util.optEmpty() : Util.optSome(w(preferredWidth)); }
-  @Override public Object read$height$0(){ return preferredHeight == null ? Util.optEmpty() : Util.optSome(h(preferredHeight)); }
+  @Override public Object read$minWidth$0(){ return w(minWidth); }
+  @Override public Object read$minHeight$0(){ return h(minHeight); }
+  @Override public Object read$fill$0(){ return Util.bool(fill); }
   @Override public Object read$radius$0(){ return n(radius); }
   @Override public Object read$foreground$0(){ return foreground; }
   @Override public Object read$background$0(){ return background; }
@@ -321,8 +330,8 @@ final class _Frame implements Frame$1c$0{
   private ArrayList<MF$7$1> modelTickActions= new ArrayList<>();// live, EDT confined
   private float opacity= 1f;
   private String title= "";
-  private int canvasW;
-  private int canvasH;
+  private int canvasW= 1000;
+  private int canvasH= 1000;
   private int bands= 0xFF000000;
   private Consumer$ao$1 onResize;
   private MF$7$1 onClose;
@@ -475,8 +484,7 @@ final class _Frame implements Frame$1c$0{
 
   void start(){
     assert SwingUtilities.isEventDispatchThread();
-    var d= packed();
-    if (canvasW == 0){ canvasW= Math.max(1, d.width); canvasH= Math.max(1, d.height); }
+    if (top == null){ throw Util.detErr("This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"); }
     top.component.setBounds(0, 0, canvasW, canvasH);
     top.component.validate();
     layoutDirty.set(false);
@@ -499,10 +507,6 @@ final class _Frame implements Frame$1c$0{
       frame.restartModelTimer(modelPeriodNs, FearlessFrame.WarmupMillis, modelTickActions);
     }
     started = true;
-  }
-  private Dimension packed(){
-    if (top == null){ throw Util.detErr("This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"); }
-    return top.component.getPreferredSize();
   }
 
   String windowTitle(){ return title.isEmpty() ? gui.name : gui.name + "    " + title; }
@@ -536,9 +540,8 @@ final class _Frame implements Frame$1c$0{
     markLayoutDirty();
     return this;
   }
-  private Dimension virtual(){ return canvasW != 0 ? new Dimension(canvasW, canvasH) : onEdtAndWait(this::packed); }
-  @Override public Object read$virtualWidth$0(){ return w(virtual().width); }
-  @Override public Object read$virtualHeight$0(){ return h(virtual().height); }
+  @Override public Object read$virtualWidth$0(){ return w(canvasW); }
+  @Override public Object read$virtualHeight$0(){ return h(canvasH); }
   @Override public Object mut$bands$1(Object c){
     int b= Sk.color((Color$1c$0) c) | 0xFF000000;
     onEdtAndWait(() -> bands = b);

@@ -196,22 +196,26 @@ Widget[S]:_Styled[S]{
   mut .leftInset'(WidthNat):mut S;
   mut .rightInset(n:Nat):mut S->this.rightInset'(WidthNat#n);
   mut .rightInset'(WidthNat):mut S;
-  mut .width(n:Nat):mut S->this.width'(WidthNat#n);
-  mut .width'(WidthNat):mut S;
-  mut .height(n:Nat):mut S->this.height'(HeightNat#n);
-  mut .height'(HeightNat):mut S;
-  mut .autoWidth:mut S;
-  mut .autoHeight:mut S;
+  //On each axis the size of a widget is the largest of: its min size (insets
+  //included, default 24); for a Button or a Label, what its text needs;
+  //with .fill, the space its parent gives on that axis.
+  //A Border gives its whole region; a Pane gives its whole line.
+  mut .minWidth(n:Nat):mut S->this.minWidth'(WidthNat#n);
+  mut .minWidth'(WidthNat):mut S;
+  mut .minHeight(n:Nat):mut S->this.minHeight'(HeightNat#n);
+  mut .minHeight'(HeightNat):mut S;
+  mut .fill:mut S;
+  mut .noFill:mut S;
   mut .radius(Nat):mut S;
   mut .foreground(Color):mut S;
   mut .background(Color):mut S;
-  mut .autoSize:mut S->Block#(this.autoWidth,this.autoHeight);
   read .topInset: HeightNat;
   read .bottomInset: HeightNat;
   read .leftInset:WidthNat;
   read .rightInset:WidthNat;
-  read .width:Opt[WidthNat];
-  read .height:Opt[HeightNat];
+  read .minWidth:WidthNat;
+  read .minHeight:HeightNat;
+  read .fill:Bool;
   read .radius:Nat;
   read .foreground:Color;
   read .background:Color;
@@ -350,9 +354,8 @@ Pane:_Container[Pane]{
   mut .vertical: mut Pane;
   //A line holds at least .minPerLine children (default 1) and at most
   //.maxPerLine children (default Math.maxNat). Between the two, a child
-  //that would overflow the available size starts a new line.
-  //A line holding .minPerLine children too long for the available size
-  //overflows it.
+  //that would overflow the Pane starts a new line.
+  //A line holding .minPerLine children too long for the Pane overflows it.
   mut .minPerLine(Nat): mut Pane;
   mut .maxPerLine(Nat): mut Pane;
   }
