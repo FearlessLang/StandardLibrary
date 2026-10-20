@@ -10,6 +10,8 @@ use base.KeyStroke as Key;
 use base.Label as Label;
 use base.Slot as Slot;
 use base.Slots as Slots;
+use base.Pane as Pane;
+use base.True as True;
 use base.WidthNat as Width;
 use base.HeightNat as Height;
 use base.XInt as X;
@@ -31,6 +33,12 @@ Foo:base.Main{s->Block#
   .do{ g.run Gui10 }
   .do{ g.run Gui11 }
   .do{ g.run Gui12 }
+  .do{ g.run Gui13 }
+  .let log={Slots#[mut Pane]}
+  .do{ g.run mut Gui14{log} }
+  .do{ g.run Gui15 }
+  .do{ g.run Gui16 }
+  .do{ g.run Gui17 }
   .done
   }
 Gui01:Consumer[mut Frame]{::
@@ -257,5 +265,327 @@ Gui12:Consumer[mut Frame]{::
       }
     .label{:: .text "Blue fills the window at any size" .foreground(Color.ghostWhite) }
     .pane{:: .width 5000 .height 30 .background(Color.dangerTomato) }
+    }
+  }
+
+Gui13:Consumer[mut Frame]{f -> f
+  .title "Gui13: a grid of tiles wraps and scrolls down"
+  .virtualPixelSpace(Width#400, Height#300)
+  .onResize{r -> Block#(f.virtualPixelSpace(Width#((+300.0 * (r.aspectRatio)).softRound.getNat), Height#300), Void)}
+  .content{::
+    .background (Color.ghostWhite)
+    .stackScroll(True)
+    .button{:: .text "Tile 1" }
+    .button{:: .text "Tile 2" }
+    .button{:: .text "Tile 3" }
+    .button{:: .text "Tile 4" }
+    .button{:: .text "Tile 5" }
+    .button{:: .text "Tile 6" }
+    .button{:: .text "Tile 7" }
+    .button{:: .text "Tile 8" }
+    .button{:: .text "Tile 9" }
+    .button{:: .text "Tile 10" }
+    .button{:: .text "Tile 11" }
+    .button{:: .text "Tile 12" }
+    .button{:: .text "Tile 13" }
+    .button{:: .text "Tile 14" }
+    .button{:: .text "Tile 15" }
+    .button{:: .text "Tile 16" }
+    .button{:: .text "Tile 17" }
+    .button{:: .text "Tile 18" }
+    .button{:: .text "Tile 19" }
+    .button{:: .text "Tile 20" }
+    .button{:: .text "Tile 21" }
+    .button{:: .text "Tile 22" }
+    .button{:: .text "Tile 23" }
+    .button{:: .text "Tile 24" }
+    .button{:: .text "Tile 25" }
+    .button{:: .text "Tile 26" }
+    .button{:: .text "Tile 27" }
+    .button{:: .text "Tile 28" }
+    .button{:: .text "Tile 29" }
+    .button{:: .text "Tile 30" }
+    .button{:: .text "Tile 31" }
+    .button{:: .text "Tile 32" }
+    .button{:: .text "Tile 33" }
+    .button{:: .text "Tile 34" }
+    .button{:: .text "Tile 35" }
+    .button{:: .text "Tile 36" }
+    .button{:: .text "Tile 37" }
+    .button{:: .text "Tile 38" }
+    .button{:: .text "Tile 39" }
+    .button{:: .text "Tile 40" }
+    .button{:: .text "Tile 41" }
+    .button{:: .text "Tile 42" }
+    .button{:: .text "Tile 43" }
+    .button{:: .text "Tile 44" }
+    .button{:: .text "Tile 45" }
+    .button{:: .text "Tile 46" }
+    .button{:: .text "Tile 47" }
+    .button{:: .text "Tile 48" }
+    .button{:: .text "Tile 49" }
+    .button{:: .text "Tile 50" }
+    .button{:: .text "Tile 51" }
+    .button{:: .text "Tile 52" }
+    .button{:: .text "Tile 53" }
+    .button{:: .text "Tile 54" }
+    .button{:: .text "Tile 55" }
+    .button{:: .text "Tile 56" }
+    .button{:: .text "Tile 57" }
+    .button{:: .text "Tile 58" }
+    .button{:: .text "Tile 59" }
+    .button{:: .text "Tile 60" }
+    }
+  }
+
+Gui14:Consumer[mut Frame]{
+  mut .log: mut Slot[mut Pane];
+  ::
+  .title "Gui14: a log in the center of a Border"
+  .virtualPixelSpace(Width#400, Height#300)
+  .contentB{::
+    .background (Color.ghostWhite)
+    .north{:: .fill .background (Color.rubberDuck) .label{:: .text "The button adds a line at the end" } }
+    .center{:: .fill .maxPerLine 1 .lineScroll(True) .stackScroll(True) .background (Color.alienMint) .save (this.log)
+      .label{:: .text "line 1: short" }
+      .label{:: .text "line 2: short" }
+      .label{:: .text "line 3: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 4: short" }
+      .label{:: .text "line 5: short" }
+      .label{:: .text "line 6: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 7: short" }
+      .label{:: .text "line 8: short" }
+      .label{:: .text "line 9: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 10: short" }
+      .label{:: .text "line 11: short" }
+      .label{:: .text "line 12: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 13: short" }
+      .label{:: .text "line 14: short" }
+      .label{:: .text "line 15: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 16: short" }
+      .label{:: .text "line 17: short" }
+      .label{:: .text "line 18: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 19: short" }
+      .label{:: .text "line 20: short" }
+      .label{:: .text "line 21: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 22: short" }
+      .label{:: .text "line 23: short" }
+      .label{:: .text "line 24: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 25: short" }
+      .label{:: .text "line 26: short" }
+      .label{:: .text "line 27: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 28: short" }
+      .label{:: .text "line 29: short" }
+      .label{:: .text "line 30: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 31: short" }
+      .label{:: .text "line 32: short" }
+      .label{:: .text "line 33: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 34: short" }
+      .label{:: .text "line 35: short" }
+      .label{:: .text "line 36: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 37: short" }
+      .label{:: .text "line 38: short" }
+      .label{:: .text "line 39: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 40: short" }
+      }
+    .south{:: .fill .button{:: .text "Add a line" .action{Block#(this.log!.label{:: .text "a new line" }, Void)} } }
+    }
+  }
+
+Gui15:Consumer[mut Frame]{::
+  .title "Gui15: a strip of chips scrolls sideways"
+  .virtualPixelSpace(Width#400, Height#300)
+  .contentB{::
+    .background (Color.ghostWhite)
+    .north{:: .fill .minPerLine 1000 .lineScroll(True) .background (Color.rubberDuck)
+      .button{:: .text "chip 1" }
+      .button{:: .text "chip 2" }
+      .button{:: .text "chip 3" }
+      .button{:: .text "chip 4" }
+      .button{:: .text "chip 5" }
+      .button{:: .text "chip 6" }
+      .button{:: .text "chip 7" }
+      .button{:: .text "chip 8" }
+      .button{:: .text "chip 9" }
+      .button{:: .text "chip 10" }
+      .button{:: .text "chip 11" }
+      .button{:: .text "chip 12" }
+      .button{:: .text "chip 13" }
+      .button{:: .text "chip 14" }
+      .button{:: .text "chip 15" }
+      .button{:: .text "chip 16" }
+      .button{:: .text "chip 17" }
+      .button{:: .text "chip 18" }
+      .button{:: .text "chip 19" }
+      .button{:: .text "chip 20" }
+      .button{:: .text "chip 21" }
+      .button{:: .text "chip 22" }
+      .button{:: .text "chip 23" }
+      .button{:: .text "chip 24" }
+      .button{:: .text "chip 25" }
+      }
+    .center{:: .fill .label{:: .text "Scroll the strip with shift and the wheel, or drag its bar" } }
+    }
+  }
+
+Gui16:Consumer[mut Frame]{::
+  .title "Gui16: a big canvas scrolls both ways"
+  .virtualPixelSpace(Width#400, Height#300)
+  .content{::
+    .lineScroll(True) .stackScroll(True)
+    .pane{:: .width 1460 .height 1220 .background (Color.deepNapBlue) .paint{g -> g
+      .color (Color.rubberDuck)
+      .position(X#(+40), Y#(+40))
+      .oval(Width#120, Height#120)
+      .color (Color.dangerTomato)
+      .position(X#(+40), Y#(+280))
+      .oval(Width#120, Height#120)
+      .color (Color.goblinGreen)
+      .position(X#(+40), Y#(+520))
+      .oval(Width#120, Height#120)
+      .color (Color.sleepyBlue)
+      .position(X#(+40), Y#(+760))
+      .oval(Width#120, Height#120)
+      .color (Color.wizardPurple)
+      .position(X#(+40), Y#(+1000))
+      .oval(Width#120, Height#120)
+      .color (Color.dangerTomato)
+      .position(X#(+280), Y#(+40))
+      .oval(Width#120, Height#120)
+      .color (Color.goblinGreen)
+      .position(X#(+280), Y#(+280))
+      .oval(Width#120, Height#120)
+      .color (Color.sleepyBlue)
+      .position(X#(+280), Y#(+520))
+      .oval(Width#120, Height#120)
+      .color (Color.wizardPurple)
+      .position(X#(+280), Y#(+760))
+      .oval(Width#120, Height#120)
+      .color (Color.rubberDuck)
+      .position(X#(+280), Y#(+1000))
+      .oval(Width#120, Height#120)
+      .color (Color.goblinGreen)
+      .position(X#(+520), Y#(+40))
+      .oval(Width#120, Height#120)
+      .color (Color.sleepyBlue)
+      .position(X#(+520), Y#(+280))
+      .oval(Width#120, Height#120)
+      .color (Color.wizardPurple)
+      .position(X#(+520), Y#(+520))
+      .oval(Width#120, Height#120)
+      .color (Color.rubberDuck)
+      .position(X#(+520), Y#(+760))
+      .oval(Width#120, Height#120)
+      .color (Color.dangerTomato)
+      .position(X#(+520), Y#(+1000))
+      .oval(Width#120, Height#120)
+      .color (Color.sleepyBlue)
+      .position(X#(+760), Y#(+40))
+      .oval(Width#120, Height#120)
+      .color (Color.wizardPurple)
+      .position(X#(+760), Y#(+280))
+      .oval(Width#120, Height#120)
+      .color (Color.rubberDuck)
+      .position(X#(+760), Y#(+520))
+      .oval(Width#120, Height#120)
+      .color (Color.dangerTomato)
+      .position(X#(+760), Y#(+760))
+      .oval(Width#120, Height#120)
+      .color (Color.goblinGreen)
+      .position(X#(+760), Y#(+1000))
+      .oval(Width#120, Height#120)
+      .color (Color.wizardPurple)
+      .position(X#(+1000), Y#(+40))
+      .oval(Width#120, Height#120)
+      .color (Color.rubberDuck)
+      .position(X#(+1000), Y#(+280))
+      .oval(Width#120, Height#120)
+      .color (Color.dangerTomato)
+      .position(X#(+1000), Y#(+520))
+      .oval(Width#120, Height#120)
+      .color (Color.goblinGreen)
+      .position(X#(+1000), Y#(+760))
+      .oval(Width#120, Height#120)
+      .color (Color.sleepyBlue)
+      .position(X#(+1000), Y#(+1000))
+      .oval(Width#120, Height#120)
+      .color (Color.rubberDuck)
+      .position(X#(+1240), Y#(+40))
+      .oval(Width#120, Height#120)
+      .color (Color.dangerTomato)
+      .position(X#(+1240), Y#(+280))
+      .oval(Width#120, Height#120)
+      .color (Color.goblinGreen)
+      .position(X#(+1240), Y#(+520))
+      .oval(Width#120, Height#120)
+      .color (Color.sleepyBlue)
+      .position(X#(+1240), Y#(+760))
+      .oval(Width#120, Height#120)
+      .color (Color.wizardPurple)
+      .position(X#(+1240), Y#(+1000))
+      .oval(Width#120, Height#120)
+      }}
+    }
+  }
+
+Gui17:Consumer[mut Frame]{::
+  .title "Gui17: lists inside a list"
+  .virtualPixelSpace(Width#400, Height#300)
+  .content{::
+    .background (Color.ghostWhite)
+    .maxPerLine 1 .stackScroll(True)
+    .label{:: .text "outer line 1" }
+    .label{:: .text "outer line 2" }
+    .label{:: .text "outer line 3" }
+    .label{:: .text "outer line 4" }
+    .label{:: .text "outer line 5" }
+    .pane{:: .width 360 .height 150 .maxPerLine 1 .stackScroll(True) .background (Color.alienMint)
+      .label{:: .text "inner A 1" }
+      .label{:: .text "inner A 2" }
+      .label{:: .text "inner A 3" }
+      .label{:: .text "inner A 4" }
+      .label{:: .text "inner A 5" }
+      .label{:: .text "inner A 6" }
+      .label{:: .text "inner A 7" }
+      .label{:: .text "inner A 8" }
+      .label{:: .text "inner A 9" }
+      .label{:: .text "inner A 10" }
+      .label{:: .text "inner A 11" }
+      .label{:: .text "inner A 12" }
+      .label{:: .text "inner A 13" }
+      .label{:: .text "inner A 14" }
+      .label{:: .text "inner A 15" }
+      }
+    .label{:: .text "outer line 6" }
+    .label{:: .text "outer line 7" }
+    .label{:: .text "outer line 8" }
+    .label{:: .text "outer line 9" }
+    .label{:: .text "outer line 10" }
+    .label{:: .text "outer line 11" }
+    .pane{:: .width 360 .height 150 .maxPerLine 1 .stackScroll(True) .background (Color.moonCheese)
+      .label{:: .text "inner B 1" }
+      .label{:: .text "inner B 2" }
+      .label{:: .text "inner B 3" }
+      .label{:: .text "inner B 4" }
+      .label{:: .text "inner B 5" }
+      .label{:: .text "inner B 6" }
+      .label{:: .text "inner B 7" }
+      .label{:: .text "inner B 8" }
+      .label{:: .text "inner B 9" }
+      .label{:: .text "inner B 10" }
+      .label{:: .text "inner B 11" }
+      .label{:: .text "inner B 12" }
+      .label{:: .text "inner B 13" }
+      .label{:: .text "inner B 14" }
+      .label{:: .text "inner B 15" }
+      }
+    .label{:: .text "outer line 12" }
+    .label{:: .text "outer line 13" }
+    .label{:: .text "outer line 14" }
+    .label{:: .text "outer line 15" }
+    .label{:: .text "outer line 16" }
+    .label{:: .text "outer line 17" }
+    .label{:: .text "outer line 18" }
+    .label{:: .text "outer line 19" }
     }
   }

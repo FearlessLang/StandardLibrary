@@ -2,6 +2,7 @@ package _base;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.concurrent.CompletableFuture;
@@ -77,6 +78,13 @@ final class _Pane extends AContainer implements Pane$o$0{
   boolean vertical= false;
   long minPerLine= 1;
   long maxPerLine= 0xFFFF_FFFF_FFFF_FFFFL;
+  boolean lineScroll;
+  boolean stackScroll;
+  int scrollX;
+  int scrollY;
+  int contentW;
+  int contentH;
+  static final int bar= 10;
 
   _Pane(_Frame frame){
     super(frame);
@@ -95,6 +103,57 @@ final class _Pane extends AContainer implements Pane$o$0{
       for (var c : component.getComponents()){ frame.mouse.detached((SkComponent) c); }
       component.removeAll();
     });
+  }
+  @Override public Object mut$lineScroll$1(Object b){ return reStyle(() -> lineScroll = Util.isTrue(b)); }
+  @Override public Object mut$stackScroll$1(Object b){ return reStyle(() -> stackScroll = Util.isTrue(b)); }
+  boolean barRight(){ return vertical ? lineScroll : stackScroll; }
+  boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
+  @Override void grow(int w, int h){ super.grow(barBottom() ? width : w, barRight() ? height : h); }
+  @Override int edgeW(){ return left + right + (barRight() ? bar : 0); }
+  @Override int edgeH(){ return top + bottom + (barBottom() ? bar : 0); }
+  int viewW(){ return component.getWidth() - edgeW(); }
+  int viewH(){ return component.getHeight() - edgeH(); }
+  Rectangle view(){ return new Rectangle(left, top, viewW(), viewH()); }
+  int maxScrollX(){ return barBottom() ? Math.max(0, contentW - viewW()) : 0; }
+  int maxScrollY(){ return barRight() ? Math.max(0, contentH - viewH()) : 0; }
+  boolean scrollTo(int x, int y){
+    x = Math.clamp(x, 0, maxScrollX());
+    y = Math.clamp(y, 0, maxScrollY());
+    if (x == scrollX && y == scrollY){ return false; }
+    scrollX = x;
+    scrollY = y;
+    component.invalidate();
+    frame.markLayoutDirty();
+    return true;
+  }
+  Rectangle track(boolean vert){
+    return vert
+      ? new Rectangle(component.getWidth() - right - bar, top, bar, viewH())
+      : new Rectangle(left, component.getHeight() - bottom - bar, viewW(), bar);
+  }
+  Rectangle thumb(boolean vert){
+    var t= track(vert);
+    int length= vert ? t.height : t.width;
+    int view= vert ? viewH() : viewW();
+    int content= Math.max(view, vert ? contentH : contentW);
+    int size= Math.min(length, Math.max(2 * bar, (int) ((long) length * view / Math.max(1, content))));
+    int at= (int) ((long) (length - size) * (vert ? scrollY : scrollX) / Math.max(1, content - view));
+    return vert ? new Rectangle(t.x, t.y + at, bar, size) : new Rectangle(t.x + at, t.y, size, bar);
+  }
+  int scrollFor(boolean vert, int thumbAt){
+    var t= track(vert);
+    int size= vert ? thumb(vert).height : thumb(vert).width;
+    int length= (vert ? t.height : t.width) - size;
+    int max= vert ? maxScrollY() : maxScrollX();
+    return (int) ((long) thumbAt * max / Math.max(1, length));
+  }
+  @Override void clipChildren(Canvas cv){
+    if (!barRight() && !barBottom()){ return; }
+    cv.clipRect(io.github.humbleui.types.Rect.makeXYWH(left, top, viewW(), viewH()));
+  }
+  @Override void skOver(Canvas cv){
+    if (barRight()){ Sk.bar(cv, this, true); }
+    if (barBottom()){ Sk.bar(cv, this, false); }
   }
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
@@ -197,6 +256,10 @@ abstract class AWidget implements Widget$2o$1{
     return now;
   }
   abstract Dimension need();
+  void clipChildren(Canvas cv){}
+  int edgeW(){ return left + right; }
+  int edgeH(){ return top + bottom; }
+  void skOver(Canvas cv){}
   Dimension own(){ return new Dimension(width, height); }
   void grow(int w, int h){
     width = Math.max(width, w);
@@ -386,7 +449,7 @@ final class _Frame implements Frame$1c$0{
       }
       into.change();
       parent.add(b.component, where);
-      into.grow(b.width + into.left + into.right, b.height + into.top + into.bottom);
+      into.grow(b.width + into.edgeW(), b.height + into.edgeH());
       b.changeable = false;
     });
     markLayoutDirty();

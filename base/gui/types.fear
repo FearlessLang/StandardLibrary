@@ -361,6 +361,12 @@ Pane:_Container[Pane]{
   //A line holding .minPerLine children too long for the Pane overflows it.
   mut .minPerLine(Nat): mut Pane;
   mut .maxPerLine(Nat): mut Pane;
+  //.lineScroll(True) scrolls along the lines, .stackScroll(True) across them;
+  //with False (the default) what does not fit is clipped. A scroll bar is
+  //shown whenever its setting is True, and the lines break against the
+  //space left beside the bars. A Pane does not grow along an axis it scrolls.
+  mut .lineScroll(Bool): mut Pane;
+  mut .stackScroll(Bool): mut Pane;
   }
 
 Scope[T]: { mut .run(mut T): mut T; }

@@ -19,6 +19,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
@@ -72,6 +73,7 @@ final class Stage extends MouseAdapter{
     this.opacity = opacity;
     owner.surface.addMouseListener(this);
     owner.surface.addMouseMotionListener(this);
+    owner.surface.addMouseWheelListener(this);
     owner.surface.addKeyListener(new KeyAdapter(){ @Override public void keyPressed(KeyEvent e){ reservedKey(e.getKeyCode()); } });
     if (Desk.managed){ open(); return; }
     realize(switch (gui.start){ case fullScreen -> Mode.fullScreen; case undecorated -> Mode.fearless; case window, maximised -> Mode.decorated; });
@@ -341,6 +343,10 @@ final class Stage extends MouseAdapter{
     }
   }
 
+  @Override public void mouseWheelMoved(MouseWheelEvent e){
+    if (inCorner(e.getPoint())){ return; }
+    owner.mouse.wheel(canvasPoint(e.getPoint()), e.getPreciseWheelRotation(), e.isShiftDown());
+  }
   @Override public void mouseEntered(MouseEvent e){ forward(e); }
   @Override public void mouseExited(MouseEvent e){ forward(e); }
   @Override public void mouseMoved(MouseEvent e){

@@ -150,6 +150,8 @@ interface Sk{
   static void paintNode(SkComponent c, Canvas cv){
     c.w.textWarning = c.w.warned(c.w.textWarning, textClip(c.w));
     c.w.sk(cv);
+    int outer= cv.save();
+    c.w.clipChildren(cv);
     for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
       var kw= ((SkComponent) k).w;
@@ -161,6 +163,17 @@ interface Sk{
       paintNode((SkComponent) k, cv);
       cv.restoreToCount(save);
     }
+    cv.restoreToCount(outer);
+    c.w.skOver(cv);
+  }
+
+  static void bar(Canvas cv, _Pane p, boolean vert){
+    var t= p.track(vert);
+    var m= p.thumb(vert);
+    paint.setColor(p.fg & 0xFFFFFF | 0x30000000);
+    cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, _Pane.bar / 2f), paint);
+    paint.setColor(p.fg & 0xFFFFFF | 0xA0000000);
+    cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, _Pane.bar / 2f), paint);
   }
 
   static void background(Canvas cv, AWidget s){
@@ -180,7 +193,11 @@ interface Sk{
   }
 
   static String boundsClip(SkComponent c, Component k){
-    boolean inside= k.getX() >= 0 && k.getY() >= 0 && k.getX() + k.getWidth() <= c.getWidth() && k.getY() + k.getHeight() <= c.getHeight();
+    boolean scrollsX= c.w instanceof _Pane p && p.barBottom();
+    boolean scrollsY= c.w instanceof _Pane p && p.barRight();
+    boolean insideX= scrollsX || k.getX() >= 0 && k.getX() + k.getWidth() <= c.getWidth();
+    boolean insideY= scrollsY || k.getY() >= 0 && k.getY() + k.getHeight() <= c.getHeight();
+    boolean inside= insideX && insideY;
     if (inside){ return null; }
     return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped";
   }

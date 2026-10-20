@@ -40,12 +40,17 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   @Override public void layoutContainer(Container target){
     synchronized (target.getTreeLock()){
       boolean vert= gap.vertical;
-      int availW= target.getWidth() - insetsW();
-      int availH= target.getHeight() - insetsH();
+      int availW= gap.viewW();
+      int availH= gap.viewH();
       int lineGap= vert ? gap.widthGap : gap.heightGap;
       var ls= lines(target, vert ? availH : availW, true);
 
       int totalCross= crossSum(ls, lineGap);
+      int longest= ls.stream().mapToInt(Line::primary).max().orElse(0);
+      gap.contentW = vert ? totalCross : longest;
+      gap.contentH = vert ? longest : totalCross;
+      gap.scrollX = Math.clamp(gap.scrollX, 0, gap.maxScrollX());
+      gap.scrollY = Math.clamp(gap.scrollY, 0, gap.maxScrollY());
 
       int crossStart= vert
         ? gap.left + Math.max(0, (availW - totalCross) / 2)
@@ -62,8 +67,8 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
           int pSize= vert ? d.height : d.width;
           int cSize= vert ? d.width : d.height;
           int off= cross + (ln.cross() - cSize) / 2;
-          if (vert){ c.setBounds(off, primary, cSize, pSize); }
-          else{ c.setBounds(primary, off, pSize, cSize); }
+          if (vert){ c.setBounds(off - gap.scrollX, primary - gap.scrollY, cSize, pSize); }
+          else{ c.setBounds(primary - gap.scrollX, off - gap.scrollY, pSize, cSize); }
           primary += pSize + (vert ? gap.heightGap : gap.widthGap);
         }
         cross += ln.cross() + lineGap;
@@ -87,8 +92,8 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
       int cross= crossSum(ls, vert ? gap.widthGap : gap.heightGap);
       int primary= ls.stream().mapToInt(Line::primary).max().orElse(0);
       return vert
-        ? new Dimension(cross + insetsW(), primary + insetsH())
-        : new Dimension(primary + insetsW(), cross + insetsH());
+        ? new Dimension(cross + gap.edgeW(), primary + gap.edgeH())
+        : new Dimension(primary + gap.edgeW(), cross + gap.edgeH());
     }
   }
 
@@ -130,8 +135,4 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   private static int crossSum(List<Line> ls, int lineGap){
     return ls.stream().mapToInt(Line::cross).sum() + lineGap * Math.max(0, ls.size() - 1);
   }
-
-  private int insetsW(){ return gap.left + gap.right; }
-
-  private int insetsH(){ return gap.top + gap.bottom; }
 }
