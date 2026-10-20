@@ -19,7 +19,8 @@ import java.util.List;
 //    maxPerLine children, and after at least minPerLine children when the
 //    next child would overflow the size of the container along the flow axis.
 // Every child keeps its own size; a child with fill takes the whole flow
-// axis of the container. The container never grows from its children.
+// axis of the container. Laying out never changes the size of the container;
+// natural is the size .pack gives it: lines broken only at maxPerLine.
 public final class CenteredFlowLayout implements LayoutManager, Serializable{
   private static final long serialVersionUID= 1L;
 
@@ -42,7 +43,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
       int availW= target.getWidth() - insetsW();
       int availH= target.getHeight() - insetsH();
       int lineGap= vert ? gap.widthGap : gap.heightGap;
-      var ls= lines(target, vert ? availH : availW);
+      var ls= lines(target, vert ? availH : availW, true);
 
       int totalCross= crossSum(ls, lineGap);
 
@@ -79,7 +80,19 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // least minPerLine children and the next child would make it longer than
   // availPrimary along the flow axis. A line holding minPerLine children
   // longer than availPrimary clips.
-  private List<Line> lines(Container target, int availPrimary){
+  Dimension natural(Container target){
+    synchronized (target.getTreeLock()){
+      boolean vert= gap.vertical;
+      var ls= lines(target, Integer.MAX_VALUE, false);
+      int cross= crossSum(ls, vert ? gap.widthGap : gap.heightGap);
+      int primary= ls.stream().mapToInt(Line::primary).max().orElse(0);
+      return vert
+        ? new Dimension(cross + insetsW(), primary + insetsH())
+        : new Dimension(primary + insetsW(), cross + insetsH());
+    }
+  }
+
+  private List<Line> lines(Container target, int availPrimary, boolean fills){
     boolean vert= gap.vertical;
     int pg= vert ? gap.heightGap : gap.widthGap;
     var res= new ArrayList<Line>();
@@ -88,7 +101,7 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     int lc= 0;
     for (var c : target.getComponents()){
       if (!c.isVisible()){ continue; }
-      var d= size(((SkComponent) c).w, vert, availPrimary);
+      var d= size(((SkComponent) c).w, vert, availPrimary, fills);
       int cp= vert ? d.height : d.width;
       int cc= vert ? d.width : d.height;
       boolean full= Long.compareUnsigned(items.size(), gap.maxPerLine) >= 0;
@@ -108,9 +121,9 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     return res;
   }
 
-  private static Dimension size(AWidget s, boolean vert, int availPrimary){
+  private static Dimension size(AWidget s, boolean vert, int availPrimary, boolean fills){
     var o= s.own();
-    if (!s.fill){ return o; }
+    if (!s.fill || !fills){ return o; }
     return vert ? new Dimension(o.width, Math.max(o.height, availPrimary)) : new Dimension(Math.max(o.width, availPrimary), o.height);
   }
 

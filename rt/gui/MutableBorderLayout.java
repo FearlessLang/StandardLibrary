@@ -68,6 +68,45 @@ public final class MutableBorderLayout extends BorderLayout{
 
   private static Dimension own(Component c){ return ((SkComponent) c).w.own(); }
 
+  private Dimension own(String where){
+    var c= getLayoutComponent(where);
+    return c == null ? null : own(c);
+  }
+
+  Dimension natural(Container target){
+    synchronized (target.getTreeLock()){
+      var n= own(NORTH);
+      var s= own(SOUTH);
+      var w= own(WEST);
+      var e= own(EAST);
+      var c= own(CENTER);
+      boolean middle= w != null || c != null || e != null;
+      int width= 0;
+      int height= 0;
+      if (w != null){
+        width += w.width + (c != null || e != null ? gap.widthGap : 0);
+        height = w.height;
+      }
+      if (c != null){
+        width += c.width + (e != null ? gap.widthGap : 0);
+        height = Math.max(height, c.height);
+      }
+      if (e != null){
+        width += e.width;
+        height = Math.max(height, e.height);
+      }
+      if (n != null){
+        height += n.height + (middle || s != null ? gap.heightGap : 0);
+        width = Math.max(width, n.width);
+      }
+      if (s != null){
+        height += s.height + (middle ? gap.heightGap : 0);
+        width = Math.max(width, s.width);
+      }
+      return new Dimension(width + gap.left + gap.right, height + gap.top + gap.bottom);
+    }
+  }
+
   private static void place(Component c, int x, int y, int w, int h, boolean fillsWidth, boolean fillsHeight){
     var s= ((SkComponent) c).w;
     var o= s.own();

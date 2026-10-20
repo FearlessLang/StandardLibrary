@@ -82,6 +82,7 @@ final class _Pane extends AContainer implements Pane$o$0{
     super(frame);
     component.setLayout(new CenteredFlowLayout(this));
   }
+  @Override Dimension need(){ return ((CenteredFlowLayout) component.getLayout()).natural(component); }
   @Override public Pane$o$0 mut$button$1(Object s){ frame.addTo(this, null, s, _Button::new); return this; }
   @Override public Pane$o$0 mut$label$1(Object s){ frame.addTo(this, null, s, _Label::new); return this; }
   @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(this, null, s, _Pane::new); return this; }
@@ -123,6 +124,7 @@ final class _Border extends AContainer implements Border$2o$0{
     super(frame);
     component.setLayout(new MutableBorderLayout(this));
   }
+  @Override Dimension need(){ return ((MutableBorderLayout) component.getLayout()).natural(component); }
   @Override public Border$2o$0 mut$north$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Pane::new); return this; }
   @Override public Border$2o$0 mut$south$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Pane::new); return this; }
   @Override public Border$2o$0 mut$east$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Pane::new); return this; }
@@ -141,8 +143,8 @@ abstract class AWidget implements Widget$2o$1{
   int right= 6;
   int bottom= 6;
   int radius= 12;
-  int minWidth= 24;
-  int minHeight= 24;
+  int width= 24;
+  int height= 24;
   boolean fill;
   Color$1c$0 foreground= (Color$1c$0) Color$1c$0.instance;
   Color$1c$0 background= (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
@@ -194,14 +196,15 @@ abstract class AWidget implements Widget$2o$1{
     if (was == null && now != null){ frame.frame.warn(now); }
     return now;
   }
-  Dimension need(){ return new Dimension(0, 0); }
-  Dimension own(){
-    var n= need();
-    return new Dimension(Math.max(minWidth, n.width), Math.max(minHeight, n.height));
+  abstract Dimension need();
+  Dimension own(){ return new Dimension(width, height); }
+  void grow(int w, int h){
+    width = Math.max(width, w);
+    height = Math.max(height, h);
   }
   void insetsFit(String setter, int l, int r, int t, int b, int w, int h){
-    if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than its min size: leftInset " + l + " + rightInset " + r + " is more than minWidth " + w); }
-    if (t + b > h){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than its min size: topInset " + t + " + bottomInset " + b + " is more than minHeight " + h); }
+    if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": leftInset " + l + " + rightInset " + r + " is more than width " + w); }
+    if (t + b > h){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": topInset " + t + " + bottomInset " + b + " is more than height " + h); }
   }
 
   Object onEdt(Runnable r){
@@ -229,15 +232,24 @@ abstract class AWidget implements Widget$2o$1{
       r.run();
       if (line != null){ line.close(); }
       line = null;
+      var n= need();
+      grow(n.width, n.height);
     });
   }
 
-  @Override public Object mut$topInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "top inset"), n -> { insetsFit("topInset " + n, left, right, n, bottom, minWidth, minHeight); top = n; }); }
-  @Override public Object mut$bottomInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "bottom inset"), n -> { insetsFit("bottomInset " + n, left, right, top, n, minWidth, minHeight); bottom = n; }); }
-  @Override public Object mut$leftInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "left inset"), n -> { insetsFit("leftInset " + n, n, right, top, bottom, minWidth, minHeight); left = n; }); }
-  @Override public Object mut$rightInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "right inset"), n -> { insetsFit("rightInset " + n, left, n, top, bottom, minWidth, minHeight); right = n; }); }
-  @Override public Object mut$minWidth$p1$1(Object w){ return reStyle(extent((WidthNat$as$0) w, "minWidth"), n -> { insetsFit("minWidth " + n, left, right, top, bottom, n, minHeight); minWidth = n; }); }
-  @Override public Object mut$minHeight$p1$1(Object h){ return reStyle(extent((HeightNat$lg$0) h, "minHeight"), n -> { insetsFit("minHeight " + n, left, right, top, bottom, minWidth, n); minHeight = n; }); }
+  @Override public Object mut$topInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "top inset"), n -> { insetsFit("topInset " + n, left, right, n, bottom, width, height); top = n; }); }
+  @Override public Object mut$bottomInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "bottom inset"), n -> { insetsFit("bottomInset " + n, left, right, top, n, width, height); bottom = n; }); }
+  @Override public Object mut$leftInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "left inset"), n -> { insetsFit("leftInset " + n, n, right, top, bottom, width, height); left = n; }); }
+  @Override public Object mut$rightInset$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "right inset"), n -> { insetsFit("rightInset " + n, left, n, top, bottom, width, height); right = n; }); }
+  @Override public Object mut$width$p1$1(Object w){ return reStyle(extent((WidthNat$as$0) w, "width"), n -> { insetsFit("width " + n, left, right, top, bottom, n, height); width = n; }); }
+  @Override public Object mut$height$p1$1(Object h){ return reStyle(extent((HeightNat$lg$0) h, "height"), n -> { insetsFit("height " + n, left, right, top, bottom, width, n); height = n; }); }
+  @Override public Object mut$pack$0(){
+    return reStyle(() -> {
+      var n= need();
+      width = n.width;
+      height = n.height;
+    });
+  }
   @Override public Object mut$fill$0(){ return reStyle(() -> fill = true); }
   @Override public Object mut$noFill$0(){ return reStyle(() -> fill = false); }
   @Override public Object mut$radius$1(Object r){ return reStyle(extent(r, "radius"), n -> radius = n); }
@@ -246,8 +258,8 @@ abstract class AWidget implements Widget$2o$1{
     return reText(() -> textSize = n);
   }
   public Object read$textHeight$0(){ return h(textSize); }
-  public Object mut$aboveBaseline$p1$1(Object r){ return reStyle(() -> above = ratio(r)); }
-  public Object mut$belowBaseline$p1$1(Object r){ return reStyle(() -> below = ratio(r)); }
+  public Object mut$aboveBaseline$p1$1(Object r){ return reText(() -> above = ratio(r)); }
+  public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> below = ratio(r)); }
   public Object read$aboveBaseline$0(){ return ratio(above); }
   public Object read$belowBaseline$0(){ return ratio(below); }
   public Object mut$uText$1(Object t){
@@ -261,8 +273,8 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object read$bottomInset$0(){ return h(bottom); }
   @Override public Object read$leftInset$0(){ return w(left); }
   @Override public Object read$rightInset$0(){ return w(right); }
-  @Override public Object read$minWidth$0(){ return w(minWidth); }
-  @Override public Object read$minHeight$0(){ return h(minHeight); }
+  @Override public Object read$width$0(){ return w(width); }
+  @Override public Object read$height$0(){ return h(height); }
   @Override public Object read$fill$0(){ return Util.bool(fill); }
   @Override public Object read$radius$0(){ return n(radius); }
   @Override public Object read$foreground$0(){ return foreground; }
@@ -374,6 +386,7 @@ final class _Frame implements Frame$1c$0{
       }
       into.change();
       parent.add(b.component, where);
+      into.grow(b.width + into.left + into.right, b.height + into.top + into.bottom);
       b.changeable = false;
     });
     markLayoutDirty();

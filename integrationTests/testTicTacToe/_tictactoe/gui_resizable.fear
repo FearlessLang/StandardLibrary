@@ -136,7 +136,7 @@ ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[m
         )} } })
     .contentB{::
       .background (Color.ghostWhite)
-      .north{:: .fill .minHeight 42 .label{:: .text(model.status) .save(model.statusSlot) } }
+      .north{:: .fill .label{:: .text(model.status) .save(model.statusSlot) } }
       .center{:: .fill
         .save canvas
         .paint(BoardPainters#(model))
@@ -154,7 +154,7 @@ ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[m
           .done
           }}
         }
-      .south{:: .fill .minHeight 42 .button{:: .text "New Game" .action{Block#(
+      .south{:: .fill .button{:: .text "New Game" .action{Block#(
           model.reset,
           dirty.set(True),
           Void

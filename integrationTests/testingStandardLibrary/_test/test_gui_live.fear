@@ -73,13 +73,13 @@ GuiLiveTests: Test {::
     .do{Block#(f.modelFps(100, {:: .action{Block#
       .if{started.get} .return{Void}
       .do{started.set True}
-      .do{Block#(root!.minWidth 200, Void)}
+      .do{Block#(root!.width 200, Void)}
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(root!.paint{g -> Error.msg("Painted at "+(g.panelWidth.str))}, Void)}
       }}), Void)}
     .return{f.content{:: .pane{::
       .save root
-      .minWidth 100 .minHeight 30
+      .width 100 .height 30
       .paint{g -> (g.panelWidth.get == 100).if{.then -> g; .else -> Error.msg "A pane was painted with its new width and its old painter"}}
       }}}
     }}).run{

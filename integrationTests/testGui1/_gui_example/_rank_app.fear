@@ -61,17 +61,17 @@ Gui03:Consumer[mut Frame]{::
   .content{::
     .background (Color.ghostWhite)
     .pane{::
-      .minWidth 173 .minHeight 42
       .background (Color.rubberDuck)
       .label{:: .text "row 1 / left" }
       .label{:: .text "row 1 / right" }
+      .pack
       }
     .pane{::
-      .minWidth 272 .minHeight 42
       .background (Color.sleepyBlue)
       .label{:: .text "row 2 / left".foreground (Color.ghostWhite) }
       .label{:: .text "row 2 / middle".foreground (Color.ghostWhite) }
       .label{:: .text "row 2 / right".foreground (Color.ghostWhite) }
+      .pack
       }
     }
   }
@@ -81,19 +81,19 @@ Gui04:Consumer[mut Frame]{::
   .virtualPixelSpace(Width#184, Height#150)
   .contentB{::
     .background (Color.ghostWhite)
-    .north{:: .fill .minHeight 42
+    .north{:: .fill
       .background (Color.rubberDuck)
       .label{:: .text "north" } }
-    .west{:: .fill .minWidth 51
+    .west{:: .fill
       .background (Color.goblinGreen)
       .label{:: .text "west" } }
     .center{:: .fill
       .background (Color.sleepyBlue)
       .label{:: .text "center".foreground (Color.ghostWhite) } }
-    .east{:: .fill .minWidth 48
+    .east{:: .fill
       .background (Color.lavaOrange)
       .label{:: .text "east" } }
-    .south{:: .fill .minHeight 42
+    .south{:: .fill
       .background (Color.wizardPurple)
       .label{:: .text "south".foreground (Color.ghostWhite) } }
     }
@@ -115,8 +115,8 @@ Gui06:Consumer[mut Frame]{::
     .background (Color.ghostWhite)
     .label{:: .text "Move/click inside the window, then close" }
     .pane{::
-      .minWidth 360
-      .minHeight 180
+      .width 360
+      .height 180
       .background (Color.alienMint)
       .mouse{::
         .clicked{ e-> Debug#"mouse clicked" }
@@ -175,8 +175,8 @@ Gui08:Consumer[mut Frame]{
     .background (Color.ghostWhite)
    .label{::
       .text "Hello"
-      .minWidth 500
-      .minHeight 80
+      .width 500
+      .height 80
       .textHeight 24
       .background (Color.rubberDuck)
       .save (this.slot)
@@ -209,7 +209,7 @@ Gui10:Consumer[mut Frame]{::
   .virtualPixelSpace(Width#200, Height#150)
   .content{::
     .pane{::
-      .fill .minHeight 78
+      .fill .height 78
       .background (Color.rubberDuck)
       .button{:: .text "Open file".action{Debug#"Open file pressed"} }
       .button{:: .text "Save file".action{Debug#"Save file pressed"} }
@@ -225,7 +225,7 @@ Gui11:Consumer[mut Frame]{f -> f
   .onResize{r -> Block#(f.virtualPixelSpace(Width#((+300.0 * (r.aspectRatio)).softRound.getNat), Height#300), Void)}
   .contentB{::
     .background (Color.ghostWhite)
-    .northB{:: .fill .minHeight 54
+    .northB{:: .fill
       .background (Color.rubberDuck)
       .center{:: .fill
         .button{:: .text "Open file".action{Debug#"Open file pressed"} }
@@ -256,6 +256,6 @@ Gui12:Consumer[mut Frame]{::
       .line(X#(+5000), Y#(+5000))
       }
     .label{:: .text "Blue fills the window at any size" .foreground(Color.ghostWhite) }
-    .pane{:: .minWidth 5000 .minHeight 30 .background(Color.dangerTomato) }
+    .pane{:: .width 5000 .height 30 .background(Color.dangerTomato) }
     }
   }
