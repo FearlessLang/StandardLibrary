@@ -148,15 +148,32 @@ interface Sk{
   }
 
   static void paintNode(SkComponent c, Canvas cv){
+    c.w.textWarning = c.w.warned(c.w.textWarning, textClip(c.w));
     c.w.sk(cv);
+    int outer= cv.save();
+    c.w.clipChildren(cv);
     for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
+      var kw= ((SkComponent) k).w;
+      kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k));
+      kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i));
       int save= cv.save();
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
       paintNode((SkComponent) k, cv);
       cv.restoreToCount(save);
     }
+    cv.restoreToCount(outer);
+    c.w.skOver(cv);
+  }
+
+  static void bar(Canvas cv, _Pane p, boolean vert){
+    var t= p.track(vert);
+    var m= p.thumb(vert);
+    paint.setColor(p.fg & 0xFFFFFF | 0x30000000);
+    cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, _Pane.bar / 2f), paint);
+    paint.setColor(p.fg & 0xFFFFFF | 0xA0000000);
+    cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, _Pane.bar / 2f), paint);
   }
 
   static void background(Canvas cv, AWidget s){
@@ -167,18 +184,39 @@ interface Sk{
     cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2)), paint);
   }
 
+  static String textClip(AWidget s){
+    if (s.text.isEmpty()){ return null; }
+    var need= textSizeWithInsets(s);
+    var c= s.component;
+    if (need.width <= c.getWidth() && need.height <= c.getHeight()){ return null; }
+    return "the text of " + s.describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + c.getWidth() + "x" + c.getHeight() + ": the text is clipped";
+  }
+
+  static String boundsClip(SkComponent c, Component k){
+    boolean scrollsX= c.w instanceof _Pane p && p.barBottom();
+    boolean scrollsY= c.w instanceof _Pane p && p.barRight();
+    boolean insideX= scrollsX || k.getX() >= 0 && k.getX() + k.getWidth() <= c.getWidth();
+    boolean insideY= scrollsY || k.getY() >= 0 && k.getY() + k.getHeight() <= c.getHeight();
+    boolean inside= insideX && insideY;
+    if (inside){ return null; }
+    return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped";
+  }
+
+  static String overlap(SkComponent c, int i){
+    if (!(c.w instanceof _Border)){ return null; }
+    var k= c.getComponent(i);
+    for (int j= 0; j < i; j += 1){
+      var o= c.getComponent(j);
+      if (!k.getBounds().intersects(o.getBounds())){ continue; }
+      return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") overlaps " + ((SkComponent) o).w.describe() + " of " + o.getWidth() + "x" + o.getHeight() + " at (" + o.getX() + ", " + o.getY() + ") in their parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the first one covers the second";
+    }
+    return null;
+  }
+
   static Dimension textSizeWithInsets(AWidget s){
     return new Dimension(
       (int) Math.ceil(line(s).getWidth()) + s.left + s.right,
       (int) lineHeight(s) + s.top + s.bottom);
-  }
-
-  static Dimension sizeFor(Component c, int width, int height){
-    var s= ((SkComponent) c).w;
-    int ww= s.preferredWidth == null ? width : s.preferredWidth;
-    int hh= s.preferredHeight == null ? height : s.preferredHeight;
-    var auto= s.autoSize(ww, hh);
-    return new Dimension(s.preferredWidth == null ? auto.width : ww, s.preferredHeight == null ? auto.height : hh);
   }
 
   static void text(Canvas cv, AWidget s, float dx, float dy){

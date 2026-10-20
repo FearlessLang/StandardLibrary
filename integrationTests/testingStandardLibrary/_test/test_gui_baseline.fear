@@ -30,7 +30,7 @@ GuiBaselineTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[44]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
-    .pane{:: .label{:: .text "Latin" .aboveBaseline(+2.0) .belowBaseline(0.25) } .paint{g -> Error.msg(g.panelHeight.str)} }
+    .pane{:: .label{:: .text "Latin" .aboveBaseline(+2.0) .belowBaseline(0.25) .pack } .paint{g -> Error.msg(g.panelHeight.str)} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[51]"}}.assertTrue{i};
@@ -42,10 +42,16 @@ GuiBaselineTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[84]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
-    .pane{:: .label{:: .text "Latin" .aboveBaseline(0.0 .getSucc) .belowBaseline(0.0 .getSucc) } .paint{g -> Error.msg(g.panelHeight.str)} }
+    .pane{:: .label{:: .text "Latin" .aboveBaseline(0.0 .getSucc) .belowBaseline(0.0 .getSucc) .pack } .paint{g -> Error.msg(g.panelHeight.str)} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[24]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .pane{:: .label{:: .text "Latin" .aboveBaseline(0.0 .getSucc) .belowBaseline(0.0 .getSucc) } .paint{g -> Error.msg(g.panelHeight.str)} }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[42]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
     .label{l -> Error.msg(l.aboveBaseline.str + " " + (l.belowBaseline.str) + " " + (l.belowBaseline(0.75).belowBaseline.str))}

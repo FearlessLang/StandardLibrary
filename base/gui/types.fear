@@ -196,22 +196,29 @@ Widget[S]:_Styled[S]{
   mut .leftInset'(WidthNat):mut S;
   mut .rightInset(n:Nat):mut S->this.rightInset'(WidthNat#n);
   mut .rightInset'(WidthNat):mut S;
+  //The size of a widget (insets included, default 24x24) is the last of:
+  //  the size set by .width and .height;
+  //  the size grown by a new text or a new child, to fit it;
+  //  the size set by .pack, to fit the current content.
+  //With .fill, the widget is drawn larger: a Border gives its whole region,
+  //a Pane its whole line.
   mut .width(n:Nat):mut S->this.width'(WidthNat#n);
   mut .width'(WidthNat):mut S;
   mut .height(n:Nat):mut S->this.height'(HeightNat#n);
   mut .height'(HeightNat):mut S;
-  mut .autoWidth:mut S;
-  mut .autoHeight:mut S;
+  mut .pack:mut S;
+  mut .fill:mut S;
+  mut .noFill:mut S;
   mut .radius(Nat):mut S;
   mut .foreground(Color):mut S;
   mut .background(Color):mut S;
-  mut .autoSize:mut S->Block#(this.autoWidth,this.autoHeight);
   read .topInset: HeightNat;
   read .bottomInset: HeightNat;
   read .leftInset:WidthNat;
   read .rightInset:WidthNat;
-  read .width:Opt[WidthNat];
-  read .height:Opt[HeightNat];
+  read .width:WidthNat;
+  read .height:HeightNat;
+  read .fill:Bool;
   read .radius:Nat;
   read .foreground:Color;
   read .background:Color;
@@ -348,12 +355,18 @@ Pane:_Container[Pane]{
   //columns.
   mut .horizontal: mut Pane;
   mut .vertical: mut Pane;
-  //Breaks the flow into fixed-size lines of exactly n children each,
-  //regardless of the container's available size along the flow axis (so,
-  //unlike the default wrap, it neither depends on nor changes with a
-  //resize). 0 (the default) means "no chunking": wrap by available size,
-  //as before.
-  mut .chunk(Nat): mut Pane;
+  //A line holds at least .minPerLine children (default 1) and at most
+  //.maxPerLine children (default Math.maxNat). Between the two, a child
+  //that would overflow the Pane starts a new line.
+  //A line holding .minPerLine children too long for the Pane overflows it.
+  mut .minPerLine(Nat): mut Pane;
+  mut .maxPerLine(Nat): mut Pane;
+  //.lineScroll(True) scrolls along the lines, .stackScroll(True) across them;
+  //with False (the default) what does not fit is clipped. A scroll bar is
+  //shown whenever its setting is True, and the lines break against the
+  //space left beside the bars.
+  mut .lineScroll(Bool): mut Pane;
+  mut .stackScroll(Bool): mut Pane;
   }
 
 Scope[T]: { mut .run(mut T): mut T; }

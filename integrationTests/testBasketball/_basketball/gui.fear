@@ -9,9 +9,8 @@ Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  h
       .released {:: .matchOnly(Key#"D") .doOnly { e -> model!.player.right False } }
       }
     .modelFps(30, {:: .action { model!.tick } })
+    .virtualPixelSpace(Width#width, Height#height)
     .content {::
-      .width width
-      .height height
       .save canvas 
       .paint Menu
       .mouse {:: .clicked { e -> Block# 

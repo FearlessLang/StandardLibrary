@@ -20,7 +20,7 @@ ShowInput: Main { sys -> sys.gui.run{f -> Block#
     .modelFps(10, {:: .action{ShowFiles#(at, lines!)}})
     .content{::
       .background (Color.ghostWhite)
-      .vertical .chunk 1000 .heightGap 0
+      .vertical .minPerLine 1000000 .heightGap 0
       .save lines
       }
     }

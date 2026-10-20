@@ -151,6 +151,8 @@ final class FearlessFrame{
     modelTimer.start();
   }
 
+  void warn(String msg){ System.err.println("Warning [t=" + (System.nanoTime() - runtimeStartNs) / 1_000_000 + "ms]: " + msg); }
+
   // Repaint only: one line per occurrence, no aggregation; the t= timestamp
   // (ms since game time zero) makes the frequency readable. Coarse by
   // design: OS timer granularity (~16ms on Windows) makes gaps of ~1.5x the

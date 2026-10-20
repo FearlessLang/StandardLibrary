@@ -1,6 +1,7 @@
 
 Gui:Consumer[mut Frame]{::
   .title "Gui buttons replace canvas painter"
+  .virtualPixelSpace(Width#532, Height#424)
   .fps 30
 //.modelFps(100)//behaves like a button.
   .contentB{::
@@ -21,6 +22,7 @@ ShapeCanvas:Scope[Pane]{::
     .paint PaintBox
   }
 ShapeButtons:Scope[Pane]{::
+    .fill
     .background (Color.cardboard)
     .heightGap 12
     .widthGap 12
@@ -99,7 +101,9 @@ PaintWarning:Painter{::
   .rect(Width#60, Height#50)
   }
 ShapeHeader:Scope[Pane]{::
+    .fill .maxPerLine 1
     .background (Color.ghostWhite)
     .label{:: .text "Press buttons to change the image" }
     .label{:: .text "Buttons below replace the whole Painter of the canvas" }
+    .pack
   }

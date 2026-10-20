@@ -21,16 +21,12 @@ public final class MutableBorderLayout extends BorderLayout{
 
   @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
 
-  @Override public void layoutContainer(Container target){ lay(target, target.getWidth(), target.getHeight(), true); }
-
-  Dimension sizeFor(Container target, int width, int height){ return lay(target, width, height, false); }
-
   // Whether a gap is owed before the next slot depends on whether a slot was
   // already placed, never on whether its measured size happens to be 0: a
   // widget can legitimately have width or height 0 (Nat includes 0), and
   // that must not be mistaken for "nothing here yet" the way it would be
   // with a plain `total == 0` check.
-  private Dimension lay(Container target, int width, int height, boolean place){
+  @Override public void layoutContainer(Container target){
     synchronized (target.getTreeLock()){
       var north= getLayoutComponent(NORTH);
       var south= getLayoutComponent(SOUTH);
@@ -38,52 +34,84 @@ public final class MutableBorderLayout extends BorderLayout{
       var east= getLayoutComponent(EAST);
       var center= getLayoutComponent(CENTER);
       int left= gap.left;
-      int right= width - gap.right;
+      int right= target.getWidth() - gap.right;
       int top= gap.top;
-      int bottom= height - gap.bottom;
+      int bottom= target.getHeight() - gap.bottom;
       boolean middle= west != null || center != null || east != null;
-      int slotsW= 0;
-      int middleH= 0;
-      int centerW= 0;
       if (north != null){
-        var d= Sk.sizeFor(north, span(right - left), Integer.MAX_VALUE);
-        if (place){ north.setBounds(left, top, span(right - left), d.height); }
-        slotsW = d.width;
-        top += d.height;
+        int h= own(north).height;
+        place(north, left, top, right - left, h, true, false);
+        top += h;
         if (middle || south != null){ top += gap.heightGap; }
       }
       if (south != null){
-        var d= Sk.sizeFor(south, span(right - left), Integer.MAX_VALUE);
-        bottom -= d.height;
-        if (place){ south.setBounds(left, bottom, span(right - left), d.height); }
-        slotsW = Math.max(slotsW, d.width);
+        int h= own(south).height;
+        bottom -= h;
+        place(south, left, bottom, right - left, h, true, false);
         if (middle){ bottom -= gap.heightGap; }
       }
       if (west != null){
-        var d= Sk.sizeFor(west, Integer.MAX_VALUE, span(bottom - top));
-        if (place){ west.setBounds(left, top, d.width, span(bottom - top)); }
-        middleH = d.height;
-        left += d.width;
+        int w= own(west).width;
+        place(west, left, top, w, bottom - top, false, true);
+        left += w;
         if (center != null || east != null){ left += gap.widthGap; }
       }
       if (east != null){
-        var d= Sk.sizeFor(east, Integer.MAX_VALUE, span(bottom - top));
-        right -= d.width;
-        if (place){ east.setBounds(right, top, d.width, span(bottom - top)); }
-        middleH = Math.max(middleH, d.height);
+        int w= own(east).width;
+        right -= w;
+        place(east, right, top, w, bottom - top, false, true);
         if (center != null){ right -= gap.widthGap; }
       }
-      if (center != null){
-        var d= Sk.sizeFor(center, span(right - left), span(bottom - top));
-        if (place){ center.setBounds(left, top, span(right - left), span(bottom - top)); }
-        middleH = Math.max(middleH, d.height);
-        centerW = d.width;
-      }
-      return new Dimension(
-        Math.max(slotsW + gap.left + gap.right, left + centerW + (width - right)),
-        top + middleH + (height - bottom));
+      if (center != null){ place(center, left, top, right - left, bottom - top, true, true); }
     }
   }
 
-  private int span(int n){ return Math.max(0, n); }
+  private static Dimension own(Component c){ return ((SkComponent) c).w.own(); }
+
+  private Dimension own(String where){
+    var c= getLayoutComponent(where);
+    return c == null ? null : own(c);
+  }
+
+  Dimension natural(Container target){
+    synchronized (target.getTreeLock()){
+      var n= own(NORTH);
+      var s= own(SOUTH);
+      var w= own(WEST);
+      var e= own(EAST);
+      var c= own(CENTER);
+      boolean middle= w != null || c != null || e != null;
+      int width= 0;
+      int height= 0;
+      if (w != null){
+        width += w.width + (c != null || e != null ? gap.widthGap : 0);
+        height = w.height;
+      }
+      if (c != null){
+        width += c.width + (e != null ? gap.widthGap : 0);
+        height = Math.max(height, c.height);
+      }
+      if (e != null){
+        width += e.width;
+        height = Math.max(height, e.height);
+      }
+      if (n != null){
+        height += n.height + (middle || s != null ? gap.heightGap : 0);
+        width = Math.max(width, n.width);
+      }
+      if (s != null){
+        height += s.height + (middle ? gap.heightGap : 0);
+        width = Math.max(width, s.width);
+      }
+      return new Dimension(width + gap.left + gap.right, height + gap.top + gap.bottom);
+    }
+  }
+
+  private static void place(Component c, int x, int y, int w, int h, boolean fillsWidth, boolean fillsHeight){
+    var s= ((SkComponent) c).w;
+    var o= s.own();
+    int cw= s.fill && fillsWidth ? Math.max(o.width, w) : o.width;
+    int ch= s.fill && fillsHeight ? Math.max(o.height, h) : o.height;
+    c.setBounds(x + (w - cw) / 2, y + (h - ch) / 2, cw, ch);
+  }
 }

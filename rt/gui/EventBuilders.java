@@ -76,6 +76,9 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
   private AWidget pressTarget;
+  private _Pane dragged;
+  private boolean draggedVert;
+  private int grab;
 
   SkMouse(_Frame frame){ this.frame= frame; }
 
@@ -106,6 +109,7 @@ final class SkMouse extends MouseAdapter{
   @Override public void mousePressed(MouseEvent e){
     var p= point(e);
     var d= deepestAt(p);
+    if (SwingUtilities.isLeftMouseButton(e) && d instanceof _Pane q && (onBar(q, p, true) || onBar(q, p, false))){ return; }
     if (SwingUtilities.isLeftMouseButton(e)){
       pressTarget = d;
       if (d instanceof _Button b){ b.down = true; }
@@ -115,6 +119,7 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseReleased(MouseEvent e){
     var p= point(e);
+    if (dragged != null && SwingUtilities.isLeftMouseButton(e)){ dragged = null; return; }
     boolean left= SwingUtilities.isLeftMouseButton(e);
     // mousePressed only ever captures a left press into pressTarget, so only
     // a left release is interpreted against that press chain (AWT delivers
@@ -136,6 +141,7 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseDragged(MouseEvent e){
     var p= point(e);
+    if (dragged != null){ dragThumb(p); return; }
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
     updateHover(p);
     dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);
@@ -143,6 +149,40 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseEntered(MouseEvent e){ updateHover(point(e)); }
   @Override public void mouseExited(MouseEvent e){ hoverTo(List.of()); }
+
+  private boolean onBar(_Pane q, Point p, boolean vert){
+    if (!(vert ? q.barRight() : q.barBottom())){ return false; }
+    var at= SwingUtilities.convertPoint(top(), p, q.component);
+    if (!q.track(vert).contains(at)){ return false; }
+    var m= q.thumb(vert);
+    if (m.contains(at)){
+      dragged = q;
+      draggedVert = vert;
+      grab = vert ? at.y - m.y : at.x - m.x;
+      return true;
+    }
+    int page= (vert ? at.y < m.y : at.x < m.x) ? -1 : 1;
+    if (vert){ q.scrollTo(q.scrollX, q.scrollY + page * q.viewH()); }
+    else{ q.scrollTo(q.scrollX + page * q.viewW(), q.scrollY); }
+    return true;
+  }
+
+  private void dragThumb(Point p){
+    var at= SwingUtilities.convertPoint(top(), p, dragged.component);
+    var t= dragged.track(draggedVert);
+    int s= dragged.scrollFor(draggedVert, draggedVert ? at.y - grab - t.y : at.x - grab - t.x);
+    if (draggedVert){ dragged.scrollTo(dragged.scrollX, s); }
+    else{ dragged.scrollTo(s, dragged.scrollY); }
+  }
+
+  void wheel(Point p, double rotation, boolean horizontal){
+    int d= (int) Math.round(rotation * 40);
+    for (var t : chainOf(deepestAt(p))){
+      if (!(t instanceof _Pane q) || !(horizontal ? q.barBottom() : q.barRight())){ continue; }
+      boolean moved= horizontal ? q.scrollTo(q.scrollX + d, q.scrollY) : q.scrollTo(q.scrollX, q.scrollY + d);
+      if (moved){ return; }
+    }
+  }
 
   private Point point(MouseEvent e){
     at = e.getPoint();
@@ -227,9 +267,14 @@ final class SkMouse extends MouseAdapter{
   private SkComponent top(){ return frame.top.component; }
 
   private AWidget deepestAt(Point p){
-    return SwingUtilities.getDeepestComponentAt(top(), p.x, p.y) instanceof SkComponent s
+    AWidget res= SwingUtilities.getDeepestComponentAt(top(), p.x, p.y) instanceof SkComponent s
       ? s.w
       : null;
+    for (var t : chainOf(res)){
+      boolean hides= t instanceof _Pane q && (q.barRight() || q.barBottom()) && !q.view().contains(SwingUtilities.convertPoint(top(), p, q.component));
+      if (hides){ res = t; }
+    }
+    return res;
   }
 
   private boolean inside(AWidget t, Point p){
