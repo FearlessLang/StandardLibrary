@@ -174,7 +174,7 @@ abstract class AWidget implements Widget$2o$1{
   abstract void sk(Canvas cv);
   String describe(){ return "a " + getClass().getSimpleName().substring(1) + (text.isEmpty() ? "" : " \"" + text + "\""); }
   String warned(String was, String now){
-    if (now != null && !now.equals(was)){ frame.frame.warn(now); }
+    if (was == null && now != null){ frame.frame.warn(now); }
     return now;
   }
   abstract Dimension autoSize(int width, int height);
