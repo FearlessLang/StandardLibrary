@@ -346,46 +346,46 @@ Gui14:Consumer[mut Frame]{
   .contentB{::
     .background (Color.ghostWhite)
     .north{:: .fill .background (Color.rubberDuck) .label{:: .text "The button adds a line at the end" } }
-    .center{:: .fill .maxPerLine 1 .lineScroll(True) .stackScroll(True) .background (Color.alienMint) .save (this.log)
+    .center{:: .fill .maxPerLine 1 .stackScroll(True) .background (Color.alienMint) .save (this.log)
       .label{:: .text "line 1: short" }
       .label{:: .text "line 2: short" }
-      .label{:: .text "line 3: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 3: a longer line of the log" }
       .label{:: .text "line 4: short" }
       .label{:: .text "line 5: short" }
-      .label{:: .text "line 6: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 6: a longer line of the log" }
       .label{:: .text "line 7: short" }
       .label{:: .text "line 8: short" }
-      .label{:: .text "line 9: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 9: a longer line of the log" }
       .label{:: .text "line 10: short" }
       .label{:: .text "line 11: short" }
-      .label{:: .text "line 12: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 12: a longer line of the log" }
       .label{:: .text "line 13: short" }
       .label{:: .text "line 14: short" }
-      .label{:: .text "line 15: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 15: a longer line of the log" }
       .label{:: .text "line 16: short" }
       .label{:: .text "line 17: short" }
-      .label{:: .text "line 18: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 18: a longer line of the log" }
       .label{:: .text "line 19: short" }
       .label{:: .text "line 20: short" }
-      .label{:: .text "line 21: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 21: a longer line of the log" }
       .label{:: .text "line 22: short" }
       .label{:: .text "line 23: short" }
-      .label{:: .text "line 24: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 24: a longer line of the log" }
       .label{:: .text "line 25: short" }
       .label{:: .text "line 26: short" }
-      .label{:: .text "line 27: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 27: a longer line of the log" }
       .label{:: .text "line 28: short" }
       .label{:: .text "line 29: short" }
-      .label{:: .text "line 30: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 30: a longer line of the log" }
       .label{:: .text "line 31: short" }
       .label{:: .text "line 32: short" }
-      .label{:: .text "line 33: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 33: a longer line of the log" }
       .label{:: .text "line 34: short" }
       .label{:: .text "line 35: short" }
-      .label{:: .text "line 36: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 36: a longer line of the log" }
       .label{:: .text "line 37: short" }
       .label{:: .text "line 38: short" }
-      .label{:: .text "line 39: a longer line of the log, to see the rows of different widths" }
+      .label{:: .text "line 39: a longer line of the log" }
       .label{:: .text "line 40: short" }
       }
     .south{:: .fill .button{:: .text "Add a line" .action{Block#(this.log!.label{:: .text "a new line" }, Void)} } }

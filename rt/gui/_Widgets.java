@@ -108,7 +108,6 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$stackScroll$1(Object b){ return reStyle(() -> stackScroll = Util.isTrue(b)); }
   boolean barRight(){ return vertical ? lineScroll : stackScroll; }
   boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
-  @Override void grow(int w, int h){ super.grow(barBottom() ? width : w, barRight() ? height : h); }
   @Override int edgeW(){ return left + right + (barRight() ? bar : 0); }
   @Override int edgeH(){ return top + bottom + (barBottom() ? bar : 0); }
   int viewW(){ return component.getWidth() - edgeW(); }

@@ -364,7 +364,7 @@ Pane:_Container[Pane]{
   //.lineScroll(True) scrolls along the lines, .stackScroll(True) across them;
   //with False (the default) what does not fit is clipped. A scroll bar is
   //shown whenever its setting is True, and the lines break against the
-  //space left beside the bars. A Pane does not grow along an axis it scrolls.
+  //space left beside the bars.
   mut .lineScroll(Bool): mut Pane;
   mut .stackScroll(Bool): mut Pane;
   }
