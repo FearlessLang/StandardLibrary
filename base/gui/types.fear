@@ -348,12 +348,13 @@ Pane:_Container[Pane]{
   //columns.
   mut .horizontal: mut Pane;
   mut .vertical: mut Pane;
-  //Breaks the flow into fixed-size lines of exactly n children each,
-  //regardless of the container's available size along the flow axis (so,
-  //unlike the default wrap, it neither depends on nor changes with a
-  //resize). 0 (the default) means "no chunking": wrap by available size,
-  //as before.
-  mut .chunk(Nat): mut Pane;
+  //A line holds at least .minPerLine children (default 1) and at most
+  //.maxPerLine children (default: no limit). Between the two, a child
+  //that would overflow the available size starts a new line.
+  //A line holding .minPerLine children too long for the available size
+  //overflows it.
+  mut .minPerLine(Nat): mut Pane;
+  mut .maxPerLine(Nat): mut Pane;
   }
 
 Scope[T]: { mut .run(mut T): mut T; }

@@ -75,7 +75,8 @@ final class _Label extends AWidget implements Label$1c$0{
 
 final class _Pane extends AContainer implements Pane$o$0{
   boolean vertical= false;
-  int chunk= 0;
+  long minPerLine= 1;
+  long maxPerLine= 0xFFFF_FFFF_FFFF_FFFFL;
 
   _Pane(_Frame frame){
     super(frame);
@@ -97,9 +98,24 @@ final class _Pane extends AContainer implements Pane$o$0{
   }
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
-  @Override public Object mut$chunk$1(Object n){
-    int c= extent(n, "chunk");
-    return reStyle(() -> chunk = c);
+  @Override public Object mut$minPerLine$1(Object n){
+    long v= perLine(n, "minPerLine");
+    return reStyle(() -> {
+      if (Long.compareUnsigned(v, maxPerLine) > 0){ throw Util.detErr("minPerLine " + Long.toUnsignedString(v) + " is more than maxPerLine " + Long.toUnsignedString(maxPerLine) + " of this Pane: no line can hold at least " + Long.toUnsignedString(v) + " children and at most " + Long.toUnsignedString(maxPerLine)); }
+      minPerLine = v;
+    });
+  }
+  @Override public Object mut$maxPerLine$1(Object n){
+    long v= perLine(n, "maxPerLine");
+    return reStyle(() -> {
+      if (Long.compareUnsigned(v, minPerLine) < 0){ throw Util.detErr("maxPerLine " + Long.toUnsignedString(v) + " is less than minPerLine " + Long.toUnsignedString(minPerLine) + " of this Pane: no line can hold at least " + Long.toUnsignedString(minPerLine) + " children and at most " + Long.toUnsignedString(v)); }
+      maxPerLine = v;
+    });
+  }
+  private static long perLine(Object n, String what){
+    long v= Util.natToLong(n);
+    if (v == 0){ throw Util.detErr(what + " 0 is too small; it must be >= 1: every line holds at least one child"); }
+    return v;
   }
 }
 

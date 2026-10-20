@@ -15,17 +15,14 @@ import java.util.List;
 //  - gap.vertical: flow axis. false (default) flows left-to-right and
 //    stacks rows top-to-bottom; true flows top-to-bottom and stacks columns
 //    left-to-right.
-//  - gap.chunk: line length. 0 (default) wraps by available size along the
-//    flow axis, as before. >0 wraps every `chunk` children regardless of
-//    available size, so the grouping is stable across resizes.
-// preferredLayoutSize is the natural, unwrapped-by-size layout: with chunk
-// unset that is a single line (what pack() uses to compute the natural
-// window size); with chunk set it is the chunked grouping, which does not
-// depend on any given size, so it already is the final layout. When the
-// container is later given less size than that (chunk unset only),
-// layoutContainer wraps into more lines; the container's cross-axis size
-// must then come from sizeFor, which every layout queries with the exact
-// size it assigns.
+//  - gap.minPerLine, gap.maxPerLine: line length. A line breaks after
+//    maxPerLine children, and after at least minPerLine children when the
+//    next child would overflow the available size along the flow axis.
+// preferredLayoutSize is the natural layout, unwrapped by size: lines break
+// only at maxPerLine (what pack() uses to compute the natural window size).
+// When the container is later given less size than that, layoutContainer
+// wraps into more lines; the container's cross-axis size must then come
+// from sizeFor, which every layout queries with the exact size it assigns.
 public final class CenteredFlowLayout implements LayoutManager, Serializable{
   private static final long serialVersionUID= 1L;
 
@@ -36,10 +33,8 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   @Override public void addLayoutComponent(String name, Component comp){}
   @Override public void removeLayoutComponent(Component comp){}
 
-  // The size pack() uses for the natural window size: one unwrapped line
-  // when chunk is unset (so a later resize below this can wrap it), or the
-  // full chunked grouping when chunk is set (already final, since it does
-  // not depend on any given size).
+  // The size pack() uses for the natural window size: lines broken only at
+  // maxPerLine, so a later resize below this can wrap them.
   @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
 
   // Below-preferred minimums are deliberately not supported: content wraps
@@ -96,16 +91,13 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
 
   private record Line(List<Item> items, int primary, int cross){}
 
-  // Groups the visible children into lines. If gap.chunk > 0, every line is
-  // exactly that many children (the last one may be shorter), and
-  // availPrimary is ignored entirely — the grouping is then a pure function
-  // of the children, independent of any container size. Otherwise, greedily
-  // wraps into lines of at most availPrimary along the flow axis; a line
-  // always holds at least one component, so an oversized child gets a line
-  // of its own (and clips) instead of looping.
+  // Groups the visible children into lines, greedily: a line breaks before
+  // the next child when it holds maxPerLine children, or when it holds at
+  // least minPerLine children and the next child would make it longer than
+  // availPrimary along the flow axis. A line holding minPerLine children
+  // longer than availPrimary clips.
   private List<Line> lines(Container target, int availPrimary){
     boolean vert= gap.vertical;
-    int chunk= gap.chunk;
     int pg= vert ? gap.heightGap : gap.widthGap;
     var res= new ArrayList<Line>();
     var items= new ArrayList<Item>();
@@ -116,9 +108,9 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
       var d= vert ? Sk.sizeFor(c, Integer.MAX_VALUE, availPrimary) : Sk.sizeFor(c, availPrimary, Integer.MAX_VALUE);
       int cp= vert ? d.height : d.width;
       int cc= vert ? d.width : d.height;
-      boolean breakBefore= chunk > 0
-        ? !items.isEmpty() && items.size() >= chunk
-        : !items.isEmpty() && (lp + pg + cp) > availPrimary;
+      boolean full= Long.compareUnsigned(items.size(), gap.maxPerLine) >= 0;
+      boolean noRoom= Long.compareUnsigned(items.size(), gap.minPerLine) >= 0 && (lp + pg + cp) > availPrimary;
+      boolean breakBefore= !items.isEmpty() && (full || noRoom);
       if (breakBefore){
         res.add(new Line(items, lp, lc));
         items = new ArrayList<>();
