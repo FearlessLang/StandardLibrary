@@ -14,6 +14,7 @@ class CGraphicsCtx implements Graphics$ao$0{
   final Paint paint;// owned by AContainer.sk
   float x;
   float y;
+  int textSize= 12;
   float left= Float.MAX_VALUE;
   float top= Float.MAX_VALUE;
   float right= -Float.MAX_VALUE;
@@ -68,6 +69,18 @@ class CGraphicsCtx implements Graphics$ao$0{
       SamplingMode.LINEAR,
       null,
       true);
+    return this;
+  }
+  @Override public Object mut$textHeight$p1$1(Object h){
+    textSize = Scopes.extent((HeightNat$lg$0) h, "text height");
+    return this;
+  }
+  @Override public Object mut$uText$1(Object text){
+    paint.setMode(PaintMode.FILL);
+    try (var line= Sk.shape(Scopes.ustr(text), textSize)){
+      cv.drawTextLine(line, x, y + textSize, paint);
+      reach(Rect.makeXYWH(x, y, line.getWidth(), textSize * 1.5f));
+    }
     return this;
   }
   private Rect reach(Rect r){

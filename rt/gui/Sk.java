@@ -114,24 +114,26 @@ interface Sk{
   }
 
   static TextLine shape(String text, int size){
-    var runs= new ArrayList<FontRun>();
-    int font= -1;
-    for (int i= 0, prev= -1; i < text.length();){
-      int cp= text.codePointAt(i);
-      int next= i + Character.charCount(cp);
-      if (font < 0 || !(sticky(cp) || prev == 0x200D)){
-        int nx= next < text.length() ? text.codePointAt(next) : -1;
-        int f= fontOf(cp, nx == 0xFE0F || Character.isEmojiPresentation(cp));
-        if (font >= 0 && f != font){ runs.add(new FontRun(i, font(font, size))); }
-        font = f;
+    synchronized (shaper){
+      var runs= new ArrayList<FontRun>();
+      int font= -1;
+      for (int i= 0, prev= -1; i < text.length();){
+        int cp= text.codePointAt(i);
+        int next= i + Character.charCount(cp);
+        if (font < 0 || !(sticky(cp) || prev == 0x200D)){
+          int nx= next < text.length() ? text.codePointAt(next) : -1;
+          int f= fontOf(cp, nx == 0xFE0F || Character.isEmojiPresentation(cp));
+          if (font >= 0 && f != font){ runs.add(new FontRun(i, font(font, size))); }
+          font = f;
+        }
+        prev = cp;
+        i = next;
       }
-      prev = cp;
-      i = next;
-    }
-    if (font >= 0){ runs.add(new FontRun(text.length(), font(font, size))); }
-    try (var handler= new TextLineRunHandler(text); var bidi= new IcuBidiRunIterator(text, 0xFE); var script= new HbIcuScriptRunIterator(text)){
-      shaper.shape(text, runs.iterator(), bidi, script, new TrivialLanguageRunIterator(text, "en"), ShapingOptions.DEFAULT, Float.POSITIVE_INFINITY, handler);
-      return handler.makeLine();
+      if (font >= 0){ runs.add(new FontRun(text.length(), font(font, size))); }
+      try (var handler= new TextLineRunHandler(text); var bidi= new IcuBidiRunIterator(text, 0xFE); var script= new HbIcuScriptRunIterator(text)){
+        shaper.shape(text, runs.iterator(), bidi, script, new TrivialLanguageRunIterator(text, "en"), ShapingOptions.DEFAULT, Float.POSITIVE_INFINITY, handler);
+        return handler.makeLine();
+      }
     }
   }
 

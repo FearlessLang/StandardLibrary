@@ -1,0 +1,159 @@
+use base.Main as Main;
+use base.Void as Void;
+use base.Str as Str;
+use base.Nat as Nat;
+use base.Int as Int;
+use base.Bool as Bool;
+use base.True as True;
+use base.Block as Block;
+use base.Color as Color;
+use base.Red as Red;
+use base.Green as Green;
+use base.Blue as Blue;
+use base.Alpha as Alpha;
+use base.WidthNat as Width;
+use base.HeightNat as Height;
+use base.XInt as X;
+use base.YInt as Y;
+use base.Instant as Instant;
+use base.Duration as Duration;
+use base.Image as Image;
+use base.Images as Images;
+use base.Painter as Painter;
+use base.Graphics as Graphics;
+use base.TextWidth as TextWidth;
+use base.MouseEvent as MouseEvent;
+use base.Label as Label;
+use base.Pane as Pane;
+use base.Slot as Slot;
+use base.Slots as Slots;
+use base.List as List;
+use base.Lists as Lists;
+use base.Opt as Opt;
+use base.Opts as Opts;
+
+TileGrid:Main{sys -> Block#
+  .let grid= {Slots#[mut Pane]}
+  .let status= {Slots#[mut Label]}
+  .let m= {GridModels#(grid, status)}
+  .return{sys.gui.name "Tiles" .run{f -> Block#(f
+    .virtualPixelSpace(Width#660, Height#420)
+    .contentB{::
+      .background(Color.ghostWhite)
+      .north{:: .fill
+        .button{:: .text "Add project" .action{m.add}}
+        .button{:: .text "Change flag" .action{m.cycle}}
+        .label{:: .text "Click a tile to select it, double click to run it" .save status}
+        }
+      .center{:: .fill .stackScroll(True) .widthGap 0 .heightGap 0 .save grid}
+      },
+    m.render)}}
+  }
+
+Tile:{ .name: Str; .image: Image; .flag: Painter; }
+Tiles:{ #(name: Str, flag: Painter): Tile -> Block#
+  .let fit= {Fit#name}
+  .let image= {GeneratedIcon#name}
+  .return{{ .name -> fit; .image -> image; .flag -> flag; }}
+  }
+Names:{ #(i: Nat): Str -> Lists#("alpha", "beta", "gamma", "delta", "basketball", "a project with a very long name", "tour", "hello world").get(i.getRem 8) }
+
+GridModels:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label]): mut GridModel -> Block#
+  .var[List[Tile]] tiles= {Lists#(Tiles#(Names#0, Flags#0), Tiles#(Names#1, Flags#1), Tiles#(Names#2, Flags#2), Tiles#(Names#3, Flags#3), Tiles#(Names#4, Flags#4), Tiles#(Names#5, Flags#5))}
+  .var[Nat] selected= {0}
+  .var[Nat] cycle= {0}
+  .return{mut GridModel:{'self
+    mut .render: Void -> TileGrids#(grid!, tiles.get, Opts#(selected.get), {i, e -> self.click(i, e)});
+    mut .add: Void -> Block#
+      .do{tiles.set(tiles.get ++ (Lists#(Tiles#(Names#(tiles.get.size), Flags#(tiles.get.size)))))}
+      .return{self.render};
+    mut .cycle: Void -> Block#
+      .do{cycle.set(cycle.get + 1)}
+      .do{tiles.set(tiles.get.with(selected.get, Retile#(tiles.get.get(selected.get), Flags#(cycle.get))))}
+      .return{self.render};
+    mut .click(i: Nat, e: MouseEvent): Void -> Block#
+      .do{selected.set i}
+      .if{e.clicks >= 2} .do{tiles.set(tiles.get.with(i, Retile#(tiles.get.get i, Flags.busyUntil(e.elapsed + (Duration.seconds 3), Flags#5))))}
+      .do{Block#(status!.text("Selected: "+(tiles.get.get(i).name)+", clicks: "+(e.clicks.str)), Void)}
+      .return{self.render};
+    }}
+  }
+TileClicked:{ mut #(index: Nat, e: MouseEvent): Void; }
+TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked): Void -> Block#
+  .do{Block#(grid.clear, Void)}
+  .return{AddTiles#(grid, tiles, selected, clicked, 0)}
+  }
+AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, i: Nat): Void -> Block#
+  .if{i >= (tiles.size)} .return{Void}
+  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .mouse{:: .clicked{e -> clicked#(i, e)}}}, Void)}
+  .return{AddTiles#(grid, tiles, selected, clicked, i + 1)}
+  }
+Retile:{ #(t: Tile, flag: Painter): Tile -> { .name -> t.name; .image -> t.image; .flag -> flag; } }
+
+Fit:{ #(s: Str): Str -> (TextWidth#(s.u, Height#12).get <= 120) ? { .then -> s; .else -> Dots#s } }
+Dots:{ #(s: Str): Str -> Block#
+  .let d= {s+"..."}
+  .if{s.isEmpty || {TextWidth#(d.u, Height#12).get <= 120}} .return{d}
+  .return{Dots#(s.sub(0, s.size - 1))}
+  }
+Palette:{ #(i: Nat): Color -> Lists#(Color.sleepyBlue, Color.goblinGreen, Color.dangerTomato, Color.wizardPurple, Color.lavaOrange, Color.swampTea, Color.rustyRobot, Color.blueberrySoup).get(i.getRem 8) }
+GeneratedIcon:{ #(name: Str): Image -> Block#
+  .let[Nat] h= {name.hash.getRem 8}
+  .let[Str] initials= {name.sub(0, (name.size < 2) ? { .then -> name.size; .else -> 2 }).upper}
+  .return{Images#(Width#48, Height#48, Palette#h).paint{g -> g
+    .color(Palette#(h + 1)).position(X#(+24), Y#(+0)).rect(Width#24, Height#24)
+    .color(Palette#(h + 2)).position(X#(+0), Y#(+24)).rect(Width#24, Height#24)
+    .color(Palette#(h + 3)).position(X#(+24), Y#(+24)).rect(Width#24, Height#24)
+    .color(Color.ghostWhite).textHeight 24
+    .position(X#(((48 - (TextWidth#(initials.u, Height#24).get)).getTruncDiv 2).getInt), Y#(+8))
+    .text initials
+    }}
+  }
+TilePainter:{ #(t: Tile, selected: Bool): Painter -> {g -> Block#
+  .do{selected ? { .then -> SelectionBox#g; .else -> Void }}
+  .do{Block#(g.position(X#(+40), Y#(+6)).image(t.image), Void)}
+  .do{Block#(t.flag.run g, Void)}
+  .return{g.color(Color.voidBlack).textHeight 12
+    .position(X#(((128 - (TextWidth#(t.name.u, Height#12).get)).getTruncDiv 2).getInt), Y#(+58))
+    .text(t.name)}
+  }}
+SelectionBox:{ #(g: mut Graphics): Void -> Block#(g
+  .color(Color.rgb(0, 120, 215)).position(X#(+0), Y#(+0)).rect(Width#128, Height#88)
+  .color(Color.rgb(204, 228, 247)).position(X#(+2), Y#(+2)).rect(Width#124, Height#84), Void) }
+
+Flags:{
+  #(i: Nat): Painter -> Lists#(
+    Dot#(Color.rgb(117, 117, 117), ""),
+    Dot#(Color.rgb(21, 101, 192), "R"),
+    Dot#(Color.rgb(106, 27, 154), "W"),
+    Dot#(Color.rgb(239, 108, 0), "!"),
+    Dot#(Color.rgb(198, 40, 40), "X"),
+    Dot#(Color.rgb(46, 125, 50), ">")).get(i.getRem 6);
+  .busyUntil(end: Instant, then: Painter): Painter -> {g -> (g.elapsed < end) ? { .then -> Spinner.run g; .else -> then.run g }};
+  }
+Dot:{ #(c: Color, glyph: Str): Painter -> {g -> g
+  .color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20)
+  .color c .position(X#(+72), Y#(+38)).oval(Width#16, Height#16)
+  .color(Color.ghostWhite).textHeight 11
+  .position(X#((72 + ((16 - (TextWidth#(glyph.u, Height#11).get)).getTruncDiv 2)).getInt), Y#(+38))
+  .text glyph
+  }}
+Spinner:Painter{g -> Block#
+  .let[Nat] head= {g.elapsed.get.getTruncDiv(100000).getRem 8}
+  .do{Block#(g.color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20), Void)}
+  .do{SpinDot#(g, head, 0, +6, +0)}
+  .do{SpinDot#(g, head, 1, +4, +4)}
+  .do{SpinDot#(g, head, 2, +0, +6)}
+  .do{SpinDot#(g, head, 3, -4, +4)}
+  .do{SpinDot#(g, head, 4, -6, +0)}
+  .do{SpinDot#(g, head, 5, -4, -4)}
+  .do{SpinDot#(g, head, 6, +0, -6)}
+  .do{SpinDot#(g, head, 7, +4, -4)}
+  .return{g}
+  }
+SpinDot:{ #(g: mut Graphics, head: Nat, k: Nat, dx: Int, dy: Int): Void -> Block#
+  .let[Nat] age= {(head + 8 - k).getRem 8}
+  .return{Block#(g
+    .color(Color#(Red#(46.getByte), Green#(125.getByte), Blue#(50.getByte), Alpha#((255 - (age * 30)).getByte)))
+    .position(X#(+78 + dx), Y#(+44 + dy)).oval(Width#4, Height#4), Void)}
+  }

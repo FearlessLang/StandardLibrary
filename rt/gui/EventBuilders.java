@@ -19,13 +19,15 @@ record CMouseCtx(
   YInt$s$0 mouseY,
   _Frame frame,
   WidthNat$as$0 panelWidth,
-  HeightNat$lg$0 panelHeight
+  HeightNat$lg$0 panelHeight,
+  Nat$c$0 clicks
 ) implements MouseEvent$174$0{
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object imm$mouseX$0(){ return mouseX; }
   @Override public Object imm$mouseY$0(){ return mouseY; }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
+  @Override public Object imm$clicks$0(){ return clicks; }
 }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
@@ -120,7 +122,7 @@ final class SkMouse extends MouseAdapter{
       if (d instanceof _Button b){ b.down = true; }
       if (d instanceof AEditText t){ t.press(content(t, p), e.isShiftDown()); }
     }
-    dispatch(d, Pressed, p);
+    dispatch(d, Pressed, p, e.getClickCount());
   }
 
   @Override public void mouseReleased(MouseEvent e){
@@ -132,17 +134,17 @@ final class SkMouse extends MouseAdapter{
     // it to the pressed component even if the cursor left it); any other
     // button was dispatched at its own current location on press and is
     // released the same way, not against an unrelated left gesture's target.
-    dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p);
+    dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p, e.getClickCount());
     if (!left){ return; }
     if (pressTarget instanceof _Button b){ b.down = false; }
-    click(p);
+    click(p, e.getClickCount());
     pressTarget = null;
   }
 
   @Override public void mouseMoved(MouseEvent e){
     var p= point(e);
     updateHover(p);
-    dispatch(deepestAt(p), Moved, p);
+    dispatch(deepestAt(p), Moved, p, 0);
   }
 
   @Override public void mouseDragged(MouseEvent e){
@@ -151,7 +153,7 @@ final class SkMouse extends MouseAdapter{
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
     if (pressTarget instanceof AEditText t){ t.drag(content(t, p)); }
     updateHover(p);
-    dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);
+    dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p, 0);
   }
 
   @Override public void mouseEntered(MouseEvent e){ updateHover(point(e)); }
@@ -205,7 +207,7 @@ final class SkMouse extends MouseAdapter{
     return at;
   }
 
-  private void click(Point p){
+  private void click(Point p, int clicks){
     for (var t : chainOf(pressTarget)){
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
@@ -213,7 +215,7 @@ final class SkMouse extends MouseAdapter{
         frame.frame.queue.submit(whileShown(b, b.action));
         return;
       }
-      if (fire(t, Clicked, p)){ return; }
+      if (fire(t, Clicked, p, clicks)){ return; }
     }
   }
 
@@ -224,34 +226,34 @@ final class SkMouse extends MouseAdapter{
     for (var t : hover){// exits, deepest first
       if (now.contains(t)){ continue; }
       if (t instanceof _Button b){ b.over = false; }
-      handlers(t, Exited, at, tasks);
+      handlers(t, Exited, at, 0, tasks);
     }
     for (var t : now.reversed()){// enters, outermost first
       if (hover.contains(t)){ continue; }
       if (t instanceof _Button b){ b.over = true; }
-      handlers(t, Entered, at, tasks);
+      handlers(t, Entered, at, 0, tasks);
     }
     hover = now;
     frame.frame.queue.submitAll(tasks);
   }
 
-  private void dispatch(AWidget start, MouseKind kind, Point p){
+  private void dispatch(AWidget start, MouseKind kind, Point p, int clicks){
     for (var t : chainOf(start)){
-      if (fire(t, kind, p)){ return; }
+      if (fire(t, kind, p, clicks)){ return; }
     }
   }
 
-  private boolean fire(AWidget t, MouseKind kind, Point p){
+  private boolean fire(AWidget t, MouseKind kind, Point p, int clicks){
     var tasks= new ArrayList<MF$7$1>();
-    handlers(t, kind, p, tasks);
+    handlers(t, kind, p, clicks, tasks);
     frame.frame.queue.submitAll(tasks);
     return !tasks.isEmpty();
   }
 
-  private void handlers(AWidget t, MouseKind kind, Point p, ArrayList<MF$7$1> tasks){
+  private void handlers(AWidget t, MouseKind kind, Point p, int clicks, ArrayList<MF$7$1> tasks){
     var h= t.handlers.get(kind);
     if (h == null){ return; }
-    var ctx= ctx(t, p);
+    var ctx= ctx(t, p, clicks);
     tasks.add(whileShown(t, new MF$7$1(){
       @Override public Object mut$$hash$0(){
         h.mut$accept$1(ctx);
@@ -269,7 +271,7 @@ final class SkMouse extends MouseAdapter{
     };
   }
 
-  private MouseEvent$174$0 ctx(AWidget t, Point p){
+  private MouseEvent$174$0 ctx(AWidget t, Point p, int clicks){
     var q= SwingUtilities.convertPoint(top(), p, t.component);
     return new CMouseCtx(
       frame.elapsed,
@@ -277,7 +279,8 @@ final class SkMouse extends MouseAdapter{
       Scopes.y(q.y),
       frame,
       Scopes.w(t.component.getWidth()),
-      Scopes.h(t.component.getHeight()));
+      Scopes.h(t.component.getHeight()),
+      Scopes.n(clicks));
   }
 
   private SkComponent top(){ return frame.top.component; }
