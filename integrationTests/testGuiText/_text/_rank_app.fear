@@ -1,0 +1,54 @@
+use base.Main as Main;
+use base.Block as Block;
+use base.Void as Void;
+use base.Color as Color;
+use base.TextArea as TextArea;
+use base.TextField as TextField;
+use base.KeyStroke as KeyStroke;
+use base.TextEvent as TextEvent;
+use base.Slot as Slot;
+use base.Slots as Slots;
+use base.Str as Str;
+use base.False as False;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+TextDemo: Main { sys -> sys.gui.run{f -> Block#
+  .let[mut Slot[mut TextArea]] log= {Slots#[mut TextArea]}
+  .let[mut Slot[mut TextField]] field= {Slots#[mut TextField]}
+  .return{f
+    .title "Text editing"
+    .virtualPixelSpace(WidthNat#800, HeightNat#640)
+    .onKey{:: .pressed{:: .matchOnly(KeyStroke#"F1") .matchAlso(KeyStroke#"S") .matchAlso(KeyStroke#"UP")
+      .doOnly{e -> Block#(log!.append("key " + (e.keyStroke.get) | ""), Void)}
+      }}
+    .content{::
+      .background(Color.ghostWhite)
+      .horizontal .maxPerLine 1
+      .textField{:: .width 760 .height 34 .text "a field" .save field
+        .onEdit{e -> Log#(log!, "field edit", e)}
+        .onCommit{e -> Log#(log!, "field commit", e)}
+        }
+      .textField{:: .width 760 .height 34 .text "any unicode, red caret"
+        .onInput{u -> u}
+        .caret{g -> g.color(Color.dangerTomato).rect(WidthNat#4, g.lineHeight)}
+        .onEdit{e -> Log#(log!, "unicode edit", e)}
+        .onCommit{e -> Log#(log!, "unicode commit", e)}
+        }
+      .textArea{:: .width 760 .height 150 .text("an area that wraps its long lines, so this line goes on over more displayed lines once the area is narrow enough" | "second line")
+        .onEdit{e -> Log#(log!, "area edit", e)}
+        .onCommit{e -> Log#(log!, "area commit", e)}
+        }
+      .pane{:: .horizontal .heightGap 0 .topInset 0 .bottomInset 0
+        .button{:: .text "Append to the log" .action{Block#(log!.append("appended by the program" | ""), Void)}}
+        .button{:: .text "Clear the log" .action{Block#(log!.text "", Void)}}
+        .button{:: .text "Set the field" .action{Block#(field!.text "set by the program", Void)}}
+        .pack
+        }
+      .textArea{:: .width 760 .height 220 .wrap False .editable False .save log}
+      }
+    }
+  }}
+Log: {#(log: mut TextArea, kind: Str, e: TextEvent): Void ->
+  Block#(log.uAppend((kind + " caret=" + (e.caret.str) + " anchor=" + (e.anchor.str) + " text=").u + (e.text) | ("".u)), Void)
+  }

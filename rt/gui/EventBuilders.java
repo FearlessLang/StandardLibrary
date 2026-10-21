@@ -76,7 +76,7 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
   private AWidget pressTarget;
-  private _Pane dragged;
+  private AWidget dragged;
   private boolean draggedVert;
   private int grab;
 
@@ -87,6 +87,7 @@ final class SkMouse extends MouseAdapter{
     assert SwingUtilities.isEventDispatchThread();
     hover = hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList();
     if (pressTarget != null && SwingUtilities.isDescendingFrom(pressTarget.component, root)){ pressTarget = null; }
+    if (frame.focus != null && SwingUtilities.isDescendingFrom(frame.focus.component, root)){ frame.focus = null; }
   }
 
   // The whole tree was replaced (content swap): forget everything.
@@ -94,6 +95,7 @@ final class SkMouse extends MouseAdapter{
     assert SwingUtilities.isEventDispatchThread();
     hover = List.of();
     pressTarget = null;
+    frame.focus = null;
   }
 
   void rehover(){
@@ -109,10 +111,14 @@ final class SkMouse extends MouseAdapter{
   @Override public void mousePressed(MouseEvent e){
     var p= point(e);
     var d= deepestAt(p);
-    if (SwingUtilities.isLeftMouseButton(e) && d instanceof _Pane q && (onBar(q, p, true) || onBar(q, p, false))){ return; }
-    if (SwingUtilities.isLeftMouseButton(e)){
+    boolean left= SwingUtilities.isLeftMouseButton(e);
+    frame.pressed(d);
+    if (left && d instanceof AEditText t){ frame.focus = t; }
+    if (left && d != null && (onBar(d, p, true) || onBar(d, p, false))){ return; }
+    if (left){
       pressTarget = d;
       if (d instanceof _Button b){ b.down = true; }
+      if (d instanceof AEditText t){ t.press(content(t, p), e.isShiftDown()); }
     }
     dispatch(d, Pressed, p);
   }
@@ -143,6 +149,7 @@ final class SkMouse extends MouseAdapter{
     var p= point(e);
     if (dragged != null){ dragThumb(p); return; }
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
+    if (pressTarget instanceof AEditText t){ t.drag(content(t, p)); }
     updateHover(p);
     dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);
   }
@@ -150,7 +157,16 @@ final class SkMouse extends MouseAdapter{
   @Override public void mouseEntered(MouseEvent e){ updateHover(point(e)); }
   @Override public void mouseExited(MouseEvent e){ hoverTo(List.of()); }
 
-  private boolean onBar(_Pane q, Point p, boolean vert){
+  boolean overText(Point p){
+    return deepestAt(p) instanceof AEditText t && t.view().contains(SwingUtilities.convertPoint(top(), p, t.component));
+  }
+
+  private Point content(AEditText t, Point p){
+    var q= SwingUtilities.convertPoint(top(), p, t.component);
+    return new Point(q.x - t.left + t.scrollX, q.y - t.top + t.scrollY);
+  }
+
+  private boolean onBar(AWidget q, Point p, boolean vert){
     if (!(vert ? q.barRight() : q.barBottom())){ return false; }
     var at= SwingUtilities.convertPoint(top(), p, q.component);
     if (!q.track(vert).contains(at)){ return false; }
@@ -178,8 +194,8 @@ final class SkMouse extends MouseAdapter{
   void wheel(Point p, double rotation, boolean horizontal){
     int d= (int) Math.round(rotation * 40);
     for (var t : chainOf(deepestAt(p))){
-      if (!(t instanceof _Pane q) || !(horizontal ? q.barBottom() : q.barRight())){ continue; }
-      boolean moved= horizontal ? q.scrollTo(q.scrollX + d, q.scrollY) : q.scrollTo(q.scrollX, q.scrollY + d);
+      if (!(horizontal ? t.barBottom() : t.barRight())){ continue; }
+      boolean moved= horizontal ? t.scrollTo(t.scrollX + d, t.scrollY) : t.scrollTo(t.scrollX, t.scrollY + d);
       if (moved){ return; }
     }
   }
@@ -271,7 +287,7 @@ final class SkMouse extends MouseAdapter{
       ? s.w
       : null;
     for (var t : chainOf(res)){
-      boolean hides= t instanceof _Pane q && (q.barRight() || q.barBottom()) && !q.view().contains(SwingUtilities.convertPoint(top(), p, q.component));
+      boolean hides= (t.barRight() || t.barBottom()) && !t.view().contains(SwingUtilities.convertPoint(top(), p, t.component));
       if (hides){ res = t; }
     }
     return res;

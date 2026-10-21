@@ -246,7 +246,7 @@ Border:_Container[Border]{
   mut .westB(mut Scope[Border]):mut Border;
   mut .centerB(mut Scope[Border]):mut Border;
   }
-_TextWidget[S]: Widget[S]{
+_Caption[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
   mut .uText(UStr):mut S;
   mut .textHeight(n:Nat): mut S->this.textHeight'(HeightNat#n);
@@ -265,7 +265,7 @@ TextRatio:LevelFloat[TextRatio]{.name->"TextRatio"; .getDataType -> +1.0;
   .lowest -> 0.0 .getSucc; .highest -> +1024.0 .getPred;
   ._unchecked t -> { .getDataType->t };
   .close->this; .close->::; }
-Button: _TextWidget[Button]{
+Button: _Caption[Button]{
   .self-> this;
   mut .action(mut MF[Void]):mut Button;
   }
@@ -327,9 +327,43 @@ Gui:{
   mut .fullScreenKey(KeyStroke): mut Gui;
   mut .run(mut Consumer[mut Frame]): Void;//public interface TopF{ void run(Frame f); }
   }
-Label:_TextWidget[Label]{
+Label:_Caption[Label]{
   .self->this;
 }
+_EditText[S]: Widget[S]{
+  mut .text(s:Str):mut S->this.uText(s.u);
+  mut .uText(UStr):mut S;
+  read .text:Str->this.uText.getStr;
+  read .uText:UStr;
+  mut .textHeight(n:Nat): mut S->this.textHeight'(HeightNat#n);
+  mut .textHeight'(HeightNat):mut S;
+  mut .aboveBaseline(f:Float):mut S->this.aboveBaseline'(TextRatio#f);
+  mut .aboveBaseline'(TextRatio):mut S;
+  mut .belowBaseline(f:Float):mut S->this.belowBaseline'(TextRatio#f);
+  mut .belowBaseline'(TextRatio):mut S;
+  read .textHeight:HeightNat;
+  read .aboveBaseline:TextRatio;
+  read .belowBaseline:TextRatio;
+  mut .editable(Bool):mut S;
+  read .editable:Bool;
+  mut .textClearsUndo(Bool):mut S;
+  read .textClearsUndo:Bool;
+  mut .onInput(mut MF[UStr,UStr]):mut S;
+  mut .onEdit(mut Consumer[TextEvent]):mut S;
+  mut .onCommit(mut Consumer[TextEvent]):mut S;
+  mut .caret(CaretPainter):mut S;
+  }
+TextField:_EditText[TextField]{ .self->this; }
+TextArea:_EditText[TextArea]{
+  .self->this;
+  mut .append(s:Str):mut TextArea->this.uAppend(s.u);
+  mut .uAppend(UStr):mut TextArea;
+  mut .wrap(Bool):mut TextArea;
+  read .wrap:Bool;
+  }
+TextEvent:ScreenContext{ .text:UStr; .caret:Nat; .anchor:Nat; }
+CaretPainter:{ .run(mut CaretGraphics):mut Graphics; }
+CaretGraphics:Graphics{ read .sinceMove:Duration; read .lineHeight:HeightNat; }
 //The image always covers the whole widget, insets excluded.
 //With .keepAspect(False) the image stretches to the widget.
 //With .keepAspect(True) (the default) the last of .width and .height decides
@@ -361,6 +395,8 @@ Pane:_Container[Pane]{
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
   mut .picture(mut Scope[Picture]):mut Pane;
+  mut .textField(mut Scope[TextField]):mut Pane;
+  mut .textArea(mut Scope[TextArea]):mut Pane;
   mut .clear:mut Pane;
   //Flow axis: .horizontal (default) lays children left-to-right, wrapping
   //into new rows; .vertical lays them top-to-bottom, wrapping into new

@@ -24,7 +24,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
   CKeyManager(_Frame frame){ this.frame= frame; }
 
   @Override public void keyPressed(KeyEvent e){
-    if (frame.reserved(e.getKeyCode())){ return; }
+    if (frame.reserved(e.getKeyCode()) || frame.textKeys.uses(e)){ return; }
     if (held.add(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){

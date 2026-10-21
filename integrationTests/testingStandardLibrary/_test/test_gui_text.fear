@@ -1,0 +1,34 @@
+GuiTextTests: Test {::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textField{t -> t.text("a" | "b")}}}}).run{
+      .ok _ -> Error.msg "A newline in the text of a TextField always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new text of this TextField has a newline at offset 1: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textField{t -> Error.msg("["+(t.text)+"]")}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "[]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textField{t -> Error.msg(t.text "a b" .text)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "a b"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textArea{a -> Error.msg(a.text("ab" | "c").append "d" .append("" | "e") .text)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == ("ab" | "cd" | "e")}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textField{t -> Error.msg(t.editable.str + " " + (t.textClearsUndo.str))}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "True True"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textArea{a -> Error.msg(a.editable(False).textClearsUndo(False).wrap.str + " " + (a.editable.str) + " " + (a.textClearsUndo.str) + " " + (a.wrap(False).wrap.str))}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "True False False False"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textField{t -> Error.msg(t.width 50 .height 30 .text "a text longer than fifty virtual pixels" .width.str + " " + (t.height.str))}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[50] Height[30]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .textField{t -> Error.msg(t.uText("a".u("00E9")).uText.size.str)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "2"}}.assertTrue{i};
+      }}
+  }
