@@ -1,5 +1,5 @@
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
-// Note: / is not provided; use div/rem (divisor is Nat).
+// Note: / returns the exact quotient as a Num; the div and rem methods stay in Nat (divisor is Nat).
 Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// `this.succ` returns ``this + 1``. Overflows if ``this == 18_446_744_073_709_551_615``.
   //>   .check{5 .succ .assertEq 6}
@@ -66,7 +66,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
     .if {rem != 0} .return {Actions.msg("Nat.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
     .return {this.tryGetTruncDiv d};
 
-  /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
+  /// ``this.getRem(d)`` returns the remainder ``this - (this.getTruncDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7 .getRem 2 .assertEq 1}
   //>   .checkDetErr({::}, {7 .getRem 0})
   .getRem(d: Nat): Nat;
@@ -323,7 +323,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   .hash -> this.str.hash;                 /// hash via str
 
 
-  /// ``this.indexInfo info`` returns `.empty` if `info` is not the `.list` variant,
+  /// ``this.indexInto info`` returns `.empty` if `info` is not the `.list` variant,
   /// otherwise returns .some the `this`-th element of the list if it exists, `.empty` otherwise.
   .indexInto info -> info.matchWithDefault {
     .list list -> list.opt(this);

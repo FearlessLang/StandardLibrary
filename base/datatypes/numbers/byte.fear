@@ -46,13 +46,13 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{7.getByte .tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Byte.getTruncDiv:"}}}
   .tryGetTruncDiv(d: Nat): mut Action[Byte];
 
-  /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
+  /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``rem != 0``.
   //>   .check{(6.getByte) .getDiv 2 .assertEq(3.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getDiv 3})
   //>   .checkDetErr({::}, {7.getByte .getDiv 0})
   .getDiv(d: Nat): Byte -> this.tryGetDiv(d)!;
 
-  /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``this.rem == 1``.
+  /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``rem != 0``.
   //>   .check{(6.getByte .tryGetDiv 2).ok.assertEq({::}, Opts#(3.getByte))}
   //>   .check{7.getByte .tryGetDiv 3 .assertInfo{::.isMsg{::.startsWith "Byte.getDiv:"}}}
   .tryGetDiv(d: Nat): mut Action[Byte] -> Block#
@@ -61,7 +61,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
     .if {rem != (0.getByte)} .return {Actions.msg("Byte.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
     .return {this.tryGetTruncDiv d};
 
-  /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
+  /// ``this.getRem(d)`` returns the remainder ``this - (this.getTruncDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7.getByte .getRem 2 .assertEq(1.getByte)}
   //>   .checkDetErr({::}, {7.getByte .getRem 0})
   .getRem(d: Nat): Byte;
@@ -76,7 +76,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{7.getByte .rem 0 .assertEmpty {::}}
   .rem(d: Nat): Opt[Byte];
 
-  /// ``this.truncDiv(d)`` returns `.some` of ``this.getDiv(d)`` if ``d != 0``, `.empty` otherwise.
+  /// ``this.truncDiv(d)`` returns `.some` of ``this.getTruncDiv(d)`` if ``d != 0``, `.empty` otherwise.
   //>   .check{7.getByte .truncDiv 2 .assertEq({::}, Opts# (3.getByte))}
   //>   .check{7.getByte .truncDiv 0 .assertEmpty {::}}
   .truncDiv(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getTruncDiv(d)};

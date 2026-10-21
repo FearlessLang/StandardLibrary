@@ -44,11 +44,11 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
   }
 
   /**
-   * For a long to overflow a + b has to be greater than Long.MAX_VALUE
+   * For a Nat to overflow a + b has to be greater than MAX_UNSIGNED_VALUE
    * We don't need to worry about underflow
-   * if a + b > Long.MAX_VALUE
-   * then a > Long.MAX_VALUE - b
-   * (and b > Long.MAX_VALUE - a, but we only need to check one of them)
+   * if a + b > MAX_UNSIGNED_VALUE
+   * then a > MAX_UNSIGNED_VALUE - b
+   * (and b > MAX_UNSIGNED_VALUE - a, but we only need to check one of them)
    */
   private static long addChecked(long a, long b){
     boolean overflow= Long.compareUnsigned(a, MAX_UNSIGNED_VALUE - b) > 0;
@@ -65,8 +65,8 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
   }
 
   /**
-   * Overflow if a * b > Long.MAX_VALUE
-   * => a > Long.MAX_VALUE / b
+   * Overflow if a * b > MAX_UNSIGNED_VALUE
+   * => a > MAX_UNSIGNED_VALUE / b
    */
   private static long mulChecked(long a, long b){
     if (a == 0 || b == 0){return 0;}
@@ -112,7 +112,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
     if (Long.compareUnsigned(val, 255L) > 0){
       return optEmpty();
     }
-    // We are in the long normal range, so we can safely interpret the unsigned long as a signed long
+    // We are in the byte range, so the cast keeps all the bits of the unsigned byte
     return optSome(Byte$o$0Instance.instance((byte) val));
   }
   @Override public Object imm$float$0(){

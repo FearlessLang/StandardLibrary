@@ -79,7 +79,7 @@ IsoPod[T]: {
   mut .mutate[R:iso,imm,mut,read](f: mut IsoMutator[T, R]): R;
   mut .blindMutate(f: F[mut T, Void]): Void-> ///NO operation on open
     this.mutate{
-      mhT->f#mhT;//by useMutH1 promotion
+      mhT->f#mhT;//by promotion "Allow mutH argument 1"
       Void;
       };
   }
