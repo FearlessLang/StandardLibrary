@@ -10,6 +10,13 @@ GuiImageTests: Test {::
   .checkDetErr({::.isMsg{:: == "image 20000 x 20000 has 400000000 pixels; it must have <= 268435456"}}, {base.IconsConflict.consumeImage("imageAreaBig").scale(Width#20000, Height#20000)})
   .checkDetErr({::.isMsg{:: == "image 32767 x 16384 has 536854528 pixels; it must have <= 268435456"}}, {base.IconsConflict.consumeImage("toWidthAreaBig").scale(Width#2, Height#1).scaleToWidth 32767})
   .check{base.IconsConflict.consumeImage("imageWidthMax").scale(Width#32767, Height#1).width .assertEq(Width#32767)}
+  .check{base.Images#(Width#30, Height#20, Color.transparent).width .assertEq(Width#30)}
+  .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.color(Color.dangerTomato).position(X#(+20), Y#(-10)).oval(Width#40, Height#40)}.height .assertEq(Height#20)}
+  .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.image(base.IconsConflict.consumeImage("paintImage").scale(Width#10, Height#10)).position(X#(+5), Y#(+5)).line(X#(+25), Y#(+15))}.scale(Width#60, Height#40).width .assertEq(Width#60)}
+  .checkDetErr({::.isMsg{:: == "Width[30] Height[20] Instant[0]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str) + " " + (g.elapsed.str))}})
+  .checkDetErr({::.isMsg{:: == "image width 0 is too small; it must be >= 1"}}, {base.Images#(Width#0, Height#5, Color.transparent)})
+  .checkDetErr({::.isMsg{:: == "image height 32768 is too large; it must be <= 32767"}}, {base.Images#(Width#5, Height#32768, Color.transparent)})
+  .checkDetErr({::.isMsg{:: == "image 20000 x 20000 has 400000000 pixels; it must have <= 268435456"}}, {base.Images#(Width#20000, Height#20000, Color.transparent)})
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureGrow")))}}}}).run{
       .ok _ -> Error.msg "The picture always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[52] Height[32]"}}.assertTrue{i};

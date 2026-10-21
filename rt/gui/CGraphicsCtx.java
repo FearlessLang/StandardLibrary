@@ -8,7 +8,6 @@ import io.github.humbleui.types.Rect;
 
 class CGraphicsCtx implements Graphics$ao$0{
   final Canvas cv;
-  final _Frame frame;
   final Instant$5c$0 elapsed;
   final WidthNat$as$0 panelWidth;
   final HeightNat$lg$0 panelHeight;
@@ -19,9 +18,8 @@ class CGraphicsCtx implements Graphics$ao$0{
   float top= Float.MAX_VALUE;
   float right= -Float.MAX_VALUE;
   float bottom= -Float.MAX_VALUE;
-  CGraphicsCtx(Canvas cv, _Frame frame, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint){
+  CGraphicsCtx(Canvas cv, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint){
     this.cv= cv;
-    this.frame= frame;
     this.elapsed= elapsed;
     this.panelWidth= panelWidth;
     this.panelHeight= panelHeight;
