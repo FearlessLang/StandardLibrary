@@ -251,24 +251,16 @@ Border:_Container[Border]{
   mut .westS(mut Scope[Split]):mut Border;
   mut .centerS(mut Scope[Split]):mut Border;
   }
-//A Split has two regions: .horizontal (the default) puts the first left of the second,
-//.vertical puts the first above the second.
-//Between them is the divider: the gap of the Split, widthGap wide for .horizontal,
-//heightGap high for .vertical. The user drags the divider to move it.
-//.divider is where the Split asks the divider to stand: that many virtual pixels after
-//the start of the Split, insets excluded. The divider stands there unless
-//the first region would be shorter than the first child, or the second region
-//shorter than the second child: then it moves as little as needed,
-//and the first child wins when both do not fit.
-//A drag of the divider sets .divider; a press on the divider reaches no handler.
-//A child smaller than its region is centered in it; with .fill it fills its region.
-//A new child grows the Split to fit both children and the divider.
-Split:_Container[Split]{
+Split:Widget[Split]{
   .self->this;
   mut .horizontal: mut Split;
   mut .vertical: mut Split;
-  mut .divider(n:Nat): mut Split;
-  read .divider: Nat;
+  mut .dividerPosition(n:Nat): mut Split;
+  read .dividerPosition: Nat;
+  mut .draggable(b:Bool): mut Split;
+  read .draggable: Bool;
+  mut .mouse(mut Scope[Mouse]):mut Split;
+  mut .paint(Painter):mut Split;
   mut .first(mut Scope[Pane]):mut Split;
   mut .firstB(mut Scope[Border]):mut Split;
   mut .firstS(mut Scope[Split]):mut Split;

@@ -208,46 +208,35 @@ final class _Border extends AContainer implements Border$2o$0{
 @SuppressWarnings("serial")
 final class _Split extends AContainer implements Split$1c$0{
   boolean vertical;
-  int divider;
+  boolean draggable= true;
+  int position;
 
   _Split(_Frame frame){
     super(frame);
     component.setLayout(new BorderLayout(){ @Override public void layoutContainer(Container target){ layout(); } });
   }
   Component side(String where){ return ((BorderLayout) component.getLayout()).getLayoutComponent(where); }
-  int along(Dimension d){ return vertical ? d.height : d.width; }
-  int length(String where){
-    var c= side(where);
-    return c == null ? 0 : along(((SkComponent) c).w.own());
-  }
-  int gap(){ return vertical ? heightGap : widthGap; }
   int span(){ return vertical ? viewH() : viewW(); }
-  int at(int want){ return Math.max(length(BorderLayout.LINE_START), Math.min(want, span() - gap() - length(BorderLayout.LINE_END))); }
+  Rectangle region(Component k){
+    boolean first= k == side(BorderLayout.LINE_START);
+    int from= first ? 0 : position + bar;
+    int length= Math.max(0, first ? Math.min(position, span()) : span() - from);
+    return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH());
+  }
   Rectangle grip(){
-    int at= at(divider);
-    return vertical ? new Rectangle(left, top + at, viewW(), gap()) : new Rectangle(left + at, top, gap(), viewH());
+    var g= vertical ? new Rectangle(left, top + position, viewW(), bar) : new Rectangle(left + position, top, bar, viewH());
+    return g.intersection(view());
   }
   void drag(int want){
-    divider = at(want);
+    position = Math.clamp(want, 0, Math.max(0, span() - bar));
     component.invalidate();
     frame.markLayoutDirty();
   }
   void layout(){
-    int at= at(divider);
-    place(side(BorderLayout.LINE_START), 0, at);
-    place(side(BorderLayout.LINE_END), at + gap(), span() - at - gap());
-  }
-  void place(Component c, int from, int length){
-    if (c == null){ return; }
-    var s= ((SkComponent) c).w;
-    var o= s.own();
-    int w= vertical ? viewW() : length;
-    int h= vertical ? length : viewH();
-    int cw= s.fill ? Math.max(o.width, w) : o.width;
-    int ch= s.fill ? Math.max(o.height, h) : o.height;
-    int x= left + (vertical ? 0 : from) + Math.max(0, (w - cw) / 2);
-    int y= top + (vertical ? from : 0) + Math.max(0, (h - ch) / 2);
-    c.setBounds(x, y, cw, ch);
+    for (var k : component.getComponents()){
+      var r= region(k);
+      MutableBorderLayout.place(k, r.x, r.y, r.width, r.height, true, true);
+    }
   }
   @Override Dimension need(){
     var a= new Dimension(0, 0);
@@ -255,17 +244,23 @@ final class _Split extends AContainer implements Split$1c$0{
       var o= ((SkComponent) c).w.own();
       a = vertical ? new Dimension(Math.max(a.width, o.width), a.height + o.height) : new Dimension(a.width + o.width, Math.max(a.height, o.height));
     }
-    return vertical ? new Dimension(a.width + edgeW(), a.height + gap() + edgeH()) : new Dimension(a.width + gap() + edgeW(), a.height + edgeH());
+    return vertical ? new Dimension(a.width + edgeW(), a.height + bar + edgeH()) : new Dimension(a.width + bar + edgeW(), a.height + edgeH());
   }
-  @Override void grow(int w, int h){
-    var n= need();
-    super.grow(n.width, n.height);
+  @Override public Object mut$pack$0(){
+    reStyle(() -> {
+      var c= side(BorderLayout.LINE_START);
+      var o= c == null ? new Dimension(0, 0) : ((SkComponent) c).w.own();
+      position = vertical ? o.height : o.width;
+    });
+    return super.mut$pack$0();
   }
   @Override void skOver(Canvas cv){ Sk.divider(cv, this); }
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
-  @Override public Object mut$divider$1(Object n){ return reStyle(extent(n, "divider"), v -> divider = v); }
-  @Override public Object read$divider$0(){ return n(frame.onEdtAndWait(() -> divider)); }
+  @Override public Object mut$dividerPosition$1(Object n){ return reStyle(extent(n, "dividerPosition"), v -> position = v); }
+  @Override public Object read$dividerPosition$0(){ return n(frame.onEdtAndWait(() -> position)); }
+  @Override public Object mut$draggable$1(Object b){ return reStyle(() -> draggable = Util.isTrue(b)); }
+  @Override public Object read$draggable$0(){ return Util.bool(draggable); }
   @Override public Split$1c$0 mut$first$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Pane::new); return this; }
   @Override public Split$1c$0 mut$firstB$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Border::new); return this; }
   @Override public Split$1c$0 mut$firstS$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Split::new); return this; }

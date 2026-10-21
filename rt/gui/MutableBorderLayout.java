@@ -107,7 +107,7 @@ public final class MutableBorderLayout extends BorderLayout{
     }
   }
 
-  private static void place(Component c, int x, int y, int w, int h, boolean fillsWidth, boolean fillsHeight){
+  static void place(Component c, int x, int y, int w, int h, boolean fillsWidth, boolean fillsHeight){
     var s= ((SkComponent) c).w;
     var o= s.own();
     int cw= s.fill && fillsWidth ? Math.max(o.width, w) : o.width;

@@ -596,8 +596,8 @@ Gui18:Consumer[mut Frame]{::
   .virtualPixelSpace(Width#600, Height#400)
   .contentB{::
     .background (Color.ghostWhite)
-    .north{:: .fill .background (Color.rubberDuck) .label{:: .text "Drag the dividers; each region keeps room for its child" } }
-    .centerS{:: .fill .divider 200
+    .north{:: .fill .background (Color.rubberDuck) .label{:: .text "Drag the dividers" } }
+    .centerS{:: .fill .dividerPosition 200
       .first{:: .fill .width 120 .maxPerLine 1 .stackScroll(True) .background (Color.alienMint)
         .button{:: .text "Tile 1" }
         .button{:: .text "Tile 2" }
@@ -610,7 +610,7 @@ Gui18:Consumer[mut Frame]{::
         .button{:: .text "Tile 9" }
         .button{:: .text "Tile 10" }
         }
-      .secondS{:: .fill .vertical .divider 150
+      .secondS{:: .fill .vertical .dividerPosition 150
         .first{:: .fill .width 200 .background (Color.moonCheese) .label{:: .text "The data of the selected tile" } }
         .second{:: .fill .width 200 .background (Color.dustyRose) .label{:: .text "The output of the selected tile" } }
         }

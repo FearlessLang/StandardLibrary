@@ -1,6 +1,7 @@
 package _base;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -179,7 +180,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   private boolean onDivider(AWidget d, Point p){
-    return d instanceof _Split s && s.grip().contains(SwingUtilities.convertPoint(top(), p, s.component));
+    return d instanceof _Split s && s.draggable && s.grip().contains(SwingUtilities.convertPoint(top(), p, s.component));
   }
 
   private Point content(AEditText t, Point p){
@@ -304,14 +305,23 @@ final class SkMouse extends MouseAdapter{
   private SkComponent top(){ return frame.top.component; }
 
   private AWidget deepestAt(Point p){
-    AWidget res= SwingUtilities.getDeepestComponentAt(top(), p.x, p.y) instanceof SkComponent s
-      ? s.w
-      : null;
+    AWidget res= deepest(top(), p.x, p.y);
     for (var t : chainOf(res)){
       boolean hides= (t.barRight() || t.barBottom()) && !t.view().contains(SwingUtilities.convertPoint(top(), p, t.component));
       if (hides){ res = t; }
     }
     return res;
+  }
+
+  private static AWidget deepest(Component c, int x, int y){
+    if (!c.contains(x, y)){ return null; }
+    var w= ((SkComponent) c).w;
+    for (var k : ((Container) c).getComponents()){
+      if (w instanceof _Split s && !s.region(k).contains(x, y)){ continue; }
+      var d= deepest(k, x - k.getX(), y - k.getY());
+      if (d != null){ return d; }
+    }
+    return w;
   }
 
   private boolean inside(AWidget t, Point p){
