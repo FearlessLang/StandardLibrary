@@ -25,6 +25,7 @@ import io.github.humbleui.skija.shaper.TextLineRunHandler;
 import io.github.humbleui.skija.shaper.TrivialLanguageRunIterator;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
@@ -158,6 +159,10 @@ interface Sk{
       kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k));
       kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i));
       int save= cv.save();
+      if (c.w instanceof _Split s){
+        var r= s.region(k);
+        cv.clipRect(Rect.makeXYWH(r.x, r.y, r.width, r.height));
+      }
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
       paintNode((SkComponent) k, cv);
@@ -177,6 +182,22 @@ interface Sk{
     cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), paint);
   }
 
+  static void divider(Canvas cv, _Split s){
+    var d= s.grip();
+    if (d.isEmpty()){ return; }
+    paint.setColor(s.fg & 0xFFFFFF | 0x30000000);
+    cv.drawRect(Rect.makeXYWH(d.x, d.y, d.width, d.height), paint);
+    if (!s.draggable){ return; }
+    int t= Math.max(1, (s.vertical ? d.height : d.width) / 3);
+    float l= Math.min(s.vertical ? d.width : d.height, 30);
+    paint.setColor(s.fg & 0xFFFFFF | 0xA0000000);
+    float cx= d.x + d.width / 2f;
+    float cy= d.y + d.height / 2f;
+    float gw= s.vertical ? l : t;
+    float gh= s.vertical ? t : l;
+    cv.drawRRect(RRect.makeXYWH(cx - gw / 2, cy - gh / 2, gw, gh, t / 2f), paint);
+  }
+
   static void background(Canvas cv, AWidget s){
     if (s.bg >>> 24 == 0){ return; }
     float w= s.component.getWidth();
@@ -194,6 +215,7 @@ interface Sk{
   }
 
   static String boundsClip(SkComponent c, Component k){
+    if (c.w instanceof _Split s){ return regionClip(s, k); }
     boolean scrollsX= c.w.barBottom();
     boolean scrollsY= c.w.barRight();
     boolean insideX= scrollsX || k.getX() >= 0 && k.getX() + k.getWidth() <= c.getWidth();
@@ -201,6 +223,14 @@ interface Sk{
     boolean inside= insideX && insideY;
     if (inside){ return null; }
     return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped";
+  }
+
+  static String regionClip(_Split s, Component k){
+    var r= s.region(k);
+    boolean inside= k.getX() >= r.x && k.getY() >= r.y && k.getX() + k.getWidth() <= r.x + r.width && k.getY() + k.getHeight() <= r.y + r.height;
+    if (inside){ return null; }
+    var which= k == s.side(BorderLayout.LINE_START) ? "first" : "second";
+    return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in the " + which + " region of its parent, " + s.describe() + ": that region is " + r.width + "x" + r.height + " at (" + r.x + ", " + r.y + "), and the part outside it is clipped";
   }
 
   static String overlap(SkComponent c, int i){

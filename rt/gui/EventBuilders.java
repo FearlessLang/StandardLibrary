@@ -1,6 +1,8 @@
 package _base;
 
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -78,6 +80,7 @@ final class SkMouse extends MouseAdapter{
   private AWidget pressTarget;
   private AWidget dragged;
   private boolean draggedVert;
+  private _Split dividing;
   private int grab;
 
   SkMouse(_Frame frame){ this.frame= frame; }
@@ -115,6 +118,13 @@ final class SkMouse extends MouseAdapter{
     frame.pressed(d);
     if (left && d instanceof AEditText t){ frame.focus = t; }
     if (left && d != null && (onBar(d, p, true) || onBar(d, p, false))){ return; }
+    if (left && onDivider(d, p)){
+      dividing = (_Split) d;
+      var at= SwingUtilities.convertPoint(top(), p, d.component);
+      var g= dividing.grip();
+      grab = dividing.vertical ? at.y - g.y : at.x - g.x;
+      return;
+    }
     if (left){
       pressTarget = d;
       if (d instanceof _Button b){ b.down = true; }
@@ -125,7 +135,7 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseReleased(MouseEvent e){
     var p= point(e);
-    if (dragged != null && SwingUtilities.isLeftMouseButton(e)){ dragged = null; return; }
+    if ((dragged != null || dividing != null) && SwingUtilities.isLeftMouseButton(e)){ dragged = null; dividing = null; return; }
     boolean left= SwingUtilities.isLeftMouseButton(e);
     // mousePressed only ever captures a left press into pressTarget, so only
     // a left release is interpreted against that press chain (AWT delivers
@@ -148,6 +158,11 @@ final class SkMouse extends MouseAdapter{
   @Override public void mouseDragged(MouseEvent e){
     var p= point(e);
     if (dragged != null){ dragThumb(p); return; }
+    if (dividing != null){
+      var at= SwingUtilities.convertPoint(top(), p, dividing.component);
+      dividing.drag(dividing.vertical ? at.y - dividing.top - grab : at.x - dividing.left - grab);
+      return;
+    }
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
     if (pressTarget instanceof AEditText t){ t.drag(content(t, p)); }
     updateHover(p);
@@ -157,8 +172,15 @@ final class SkMouse extends MouseAdapter{
   @Override public void mouseEntered(MouseEvent e){ updateHover(point(e)); }
   @Override public void mouseExited(MouseEvent e){ hoverTo(List.of()); }
 
-  boolean overText(Point p){
-    return deepestAt(p) instanceof AEditText t && t.view().contains(SwingUtilities.convertPoint(top(), p, t.component));
+  int cursor(Point p){
+    var d= deepestAt(p);
+    if (d instanceof AEditText t && t.view().contains(SwingUtilities.convertPoint(top(), p, t.component))){ return Cursor.TEXT_CURSOR; }
+    if (onDivider(d, p)){ return ((_Split) d).vertical ? Cursor.N_RESIZE_CURSOR : Cursor.E_RESIZE_CURSOR; }
+    return Cursor.DEFAULT_CURSOR;
+  }
+
+  private boolean onDivider(AWidget d, Point p){
+    return d instanceof _Split s && s.draggable && s.grip().contains(SwingUtilities.convertPoint(top(), p, s.component));
   }
 
   private Point content(AEditText t, Point p){
@@ -283,14 +305,23 @@ final class SkMouse extends MouseAdapter{
   private SkComponent top(){ return frame.top.component; }
 
   private AWidget deepestAt(Point p){
-    AWidget res= SwingUtilities.getDeepestComponentAt(top(), p.x, p.y) instanceof SkComponent s
-      ? s.w
-      : null;
+    AWidget res= deepest(top(), p.x, p.y);
     for (var t : chainOf(res)){
       boolean hides= (t.barRight() || t.barBottom()) && !t.view().contains(SwingUtilities.convertPoint(top(), p, t.component));
       if (hides){ res = t; }
     }
     return res;
+  }
+
+  private static AWidget deepest(Component c, int x, int y){
+    if (!c.contains(x, y)){ return null; }
+    var w= ((SkComponent) c).w;
+    for (var k : ((Container) c).getComponents()){
+      if (w instanceof _Split s && !s.region(k).contains(x, y)){ continue; }
+      var d= deepest(k, x - k.getX(), y - k.getY());
+      if (d != null){ return d; }
+    }
+    return w;
   }
 
   private boolean inside(AWidget t, Point p){

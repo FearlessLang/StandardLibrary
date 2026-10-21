@@ -39,6 +39,7 @@ Foo:base.Main{s->Block#
   .do{ g.run Gui15 }
   .do{ g.run Gui16 }
   .do{ g.run Gui17 }
+  .do{ g.run Gui18 }
   .done
   }
 Gui01:Consumer[mut Frame]{::
@@ -587,5 +588,32 @@ Gui17:Consumer[mut Frame]{::
     .label{:: .text "outer line 17" }
     .label{:: .text "outer line 18" }
     .label{:: .text "outer line 19" }
+    }
+  }
+
+Gui18:Consumer[mut Frame]{::
+  .title "Gui18: drag the dividers"
+  .virtualPixelSpace(Width#600, Height#400)
+  .contentB{::
+    .background (Color.ghostWhite)
+    .north{:: .fill .background (Color.rubberDuck) .label{:: .text "Drag the dividers" } }
+    .centerS{:: .fill .dividerPosition 200
+      .first{:: .fill .width 120 .maxPerLine 1 .stackScroll(True) .background (Color.alienMint)
+        .button{:: .text "Tile 1" }
+        .button{:: .text "Tile 2" }
+        .button{:: .text "Tile 3" }
+        .button{:: .text "Tile 4" }
+        .button{:: .text "Tile 5" }
+        .button{:: .text "Tile 6" }
+        .button{:: .text "Tile 7" }
+        .button{:: .text "Tile 8" }
+        .button{:: .text "Tile 9" }
+        .button{:: .text "Tile 10" }
+        }
+      .secondS{:: .fill .vertical .dividerPosition 150
+        .first{:: .fill .width 200 .background (Color.moonCheese) .label{:: .text "The data of the selected tile" } }
+        .second{:: .fill .width 200 .background (Color.dustyRose) .label{:: .text "The output of the selected tile" } }
+        }
+      }
     }
   }

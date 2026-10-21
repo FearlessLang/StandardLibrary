@@ -351,7 +351,7 @@ final class Stage extends MouseAdapter{
   @Override public void mouseExited(MouseEvent e){ forward(e); }
   @Override public void mouseMoved(MouseEvent e){
     var p= e.getPoint();
-    int cursor= !inCorner(p) ? owner.mouse.overText(canvasPoint(p)) ? Cursor.TEXT_CURSOR : Cursor.DEFAULT_CURSOR : inTip(p) ? Cursor.NW_RESIZE_CURSOR : Cursor.MOVE_CURSOR;
+    int cursor= !inCorner(p) ? owner.mouse.cursor(canvasPoint(p)) : inTip(p) ? Cursor.NW_RESIZE_CURSOR : Cursor.MOVE_CURSOR;
     owner.surface.setCursor(Cursor.getPredefinedCursor(cursor));
     forward(e);
   }

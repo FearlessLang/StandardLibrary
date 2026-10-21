@@ -245,6 +245,28 @@ Border:_Container[Border]{
   mut .eastB(mut Scope[Border]):mut Border;
   mut .westB(mut Scope[Border]):mut Border;
   mut .centerB(mut Scope[Border]):mut Border;
+  mut .northS(mut Scope[Split]):mut Border;
+  mut .southS(mut Scope[Split]):mut Border;
+  mut .eastS(mut Scope[Split]):mut Border;
+  mut .westS(mut Scope[Split]):mut Border;
+  mut .centerS(mut Scope[Split]):mut Border;
+  }
+Split:Widget[Split]{
+  .self->this;
+  mut .horizontal: mut Split;
+  mut .vertical: mut Split;
+  mut .dividerPosition(n:Nat): mut Split;
+  read .dividerPosition: Nat;
+  mut .draggable(b:Bool): mut Split;
+  read .draggable: Bool;
+  mut .mouse(mut Scope[Mouse]):mut Split;
+  mut .paint(Painter):mut Split;
+  mut .first(mut Scope[Pane]):mut Split;
+  mut .firstB(mut Scope[Border]):mut Split;
+  mut .firstS(mut Scope[Split]):mut Split;
+  mut .second(mut Scope[Pane]):mut Split;
+  mut .secondB(mut Scope[Border]):mut Split;
+  mut .secondS(mut Scope[Split]):mut Split;
   }
 _Caption[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
@@ -392,6 +414,7 @@ Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
+  mut .split(mut Scope[Split]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
   mut .picture(mut Scope[Picture]):mut Pane;
