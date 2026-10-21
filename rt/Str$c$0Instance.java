@@ -332,7 +332,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
   }
 
-  // Stolen from WellFormedErrors.java
+  // Stolen from LiteralDeclarations.java
   public static String floatExactFearlessLit(double d){
     assert Double.isFinite(d);
     boolean neg= (Double.doubleToRawLongBits(d) & (1L<<63)) != 0;

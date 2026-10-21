@@ -80,7 +80,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   }
   private static long clampNatBitsZ(BigInteger z){
     if (z.signum() <= 0){ return 0; }
-    if (z.compareTo(maxNat) >= 0){ return -1; } // 0xFFFF_FFFF
+    if (z.compareTo(maxNat) >= 0){ return -1; } // 0xFFFF_FFFF_FFFF_FFFF
     return z.longValue();
   }
   private static byte clampByteBitsZ(BigInteger z){

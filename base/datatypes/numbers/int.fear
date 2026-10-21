@@ -1,5 +1,5 @@
 /// Int: signed 64-bit.
-/// Note: / is not provided; use div/rem (divisor is Nat).
+/// Note: / returns the exact quotient as a Num; the div and rem methods stay in Int (divisor is Nat).
 Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.succ` returns ``this + +1``. Overflows if ``this == 9_223_372_036_854_775_807``.
   //>   .check{+5 .succ .assertEq +6}
@@ -56,13 +56,13 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+7 .tryGetTruncDiv 0 .assertInfo{::.isMsg{::.startsWith "Int.getTruncDiv:"}}}
   .tryGetTruncDiv(d: Nat): mut Action[Int];
 
-  /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``this.rem == 1``.
+  /// ``this.getDiv(d)`` returns `this` exactly divided by `d`. Throws iff ``d == 0`` or ``rem != 0``.
   //>   .check{(+6) .getDiv 2 .assertEq(+3)}
   //>   .checkDetErr({::}, {+7 .getDiv 3})
   //>   .checkDetErr({::}, {+7 .getDiv 0})
   .getDiv(d: Nat): Int -> this.tryGetDiv(d)!;
 
-  /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``this.rem == 1``.
+  /// ``this.tryGetDiv(d)`` returns `.ok` of ``this.getDiv(d)``, or the error info of ``this.getDiv(d)`` iff ``d == 0`` or ``rem != 0``.
   //>   .check{(+6 .tryGetDiv 2).ok.assertEq({::}, Opts# +3)}
   //>   .check{+7 .tryGetDiv 3 .assertInfo{::.isMsg{::.startsWith "Int.getDiv:"}}}
   .tryGetDiv(d: Nat): mut Action[Int] -> Block#
@@ -71,7 +71,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
     .if {rem != +0} .return {Actions.msg("Int.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
     .return {this.tryGetTruncDiv d};
 
-  /// ``this.getRem(d)`` returns the remainder ``this - (this.getDiv(d)) * d``. Throws iff ``d == 0``.
+  /// ``this.getRem(d)`` returns the remainder ``this - (this.getTruncDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{+7 .getRem 2 .assertEq +1}
   //>   .checkDetErr({::}, {+7 .getRem 0})
   .getRem(d: Nat): Int;
@@ -86,7 +86,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+7 .rem 0 .assertEmpty {::}}
   .rem(d: Nat): Opt[Int] -> d != 0 .toOpt {this.getRem(d)};
 
-  /// ``this.truncDiv(d)`` returns `.some` of ``this.getDiv(d)`` if ``d != 0``, rounding towards 0.
+  /// ``this.truncDiv(d)`` returns `.some` of ``this.getTruncDiv(d)`` if ``d != 0``, rounding towards 0.
   //>   .check{+6 .truncDiv(2) .assertEq({::}, Opts# +3)}
   //>   .check{+7 .truncDiv(2) .assertEq({::}, Opts# +3)}
   //>   .check{+7 .truncDiv(0) .assertEmpty {::}}
