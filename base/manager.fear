@@ -1,9 +1,9 @@
 ///The object capability to send messages to the Fearless manager running this program.
-///Each method sends one message, as the manager program does when started with the arguments ``FearlessCommand<Verb>``,
-///and gives `.ok` once the manager holds the message.
-///The manager applies its messages one at a time, in the order they arrive.
-///The manager shows in its window why it refuses a message; this program is not told.
-///A program started by the portable Fearless has no manager: every message gives an Info.
+///Each method gives an action sending one message, as the manager program does when started with the arguments ``FearlessCommand<Verb>``.
+///The `.run` of that action ends once the manager has applied the message; for `.run` and `.compile`, once their job ends.
+///A message the manager refuses gives an Info saying why, as the manager window shows it.
+///`.quit`, `.reset` and `.terminate` of the project of this program end this program before the `.run` of their action ends.
+///A program started by the portable Fearless has no manager: every action gives an Info.
 ///``name`` is the name of a registered project.
 ///``path`` is the bytes naming an absolute path on this system:
 ///on Windows the UTF-16 code units of the path, little endian (`UStr.utf16Le`);
@@ -30,9 +30,11 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Opens the file at ``path`` with the main ``main`` of the project ``name``, one of the mains claiming its extension.
   mut .openWithOrShortcut(path: List[Byte], name: Str, main: Str): mut Action[Void];
   ///Selects the project ``name`` and runs ``mains``, in the order of the mains of the project.
-  mut .run(name: Str, mains: List[Str]): mut Action[Void];
+  ///Gives the Output of that job, empty when no job starts.
+  mut .run(name: Str, mains: List[Str]): mut Action[UStr];
   ///Selects the project ``name`` and compiles it if it needs compiling.
-  mut .compile(name: Str): mut Action[Void];
+  ///Gives the Output of that job, empty when no job starts.
+  mut .compile(name: Str): mut Action[UStr];
   ///Selects the project ``name`` and reports in its Output why it is invalid or out of date, or that it is neither.
   mut .check(name: Str): mut Action[Void];
   ///Selects the project ``name`` and ends its job, if any.

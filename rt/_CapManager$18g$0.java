@@ -2,27 +2,44 @@ package _base;
 
 import static _base.Util.*;
 import static java.nio.charset.StandardCharsets.UTF_16LE;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.HexFormat;
+import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static final String launcher= System.getProperty("fearlessManager.launcher");
+  private static final String refused= "Refused\n";
   private static final Charset pathCharset= System.getProperty("os.name").startsWith("Windows") ? UTF_16LE : Charset.forName(System.getProperty("sun.jnu.encoding"));
-  private static Object send(String verb, Stream<String> args){
-    if (launcher == null){ return fail("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }
-    var cmd= Stream.concat(Stream.of(launcher, "FearlessCommand"+verb), args).toList();
-    int exit;
-    try{ exit= new ProcessBuilder(cmd).redirectOutput(Redirect.DISCARD).redirectError(Redirect.DISCARD).start().waitFor(); }
+  private static String message(String verb, List<String> args){
+    try (var server= new ServerSocket(0, 1, InetAddress.getLoopbackAddress())){
+      var cmd= Stream.of(List.of(launcher, "FearlessCommand"+verb), args, List.of("Port:"+server.getLocalPort())).flatMap(List::stream).toList();
+      var exit= new ProcessBuilder(cmd).redirectOutput(Redirect.DISCARD).redirectError(Redirect.DISCARD).start().waitFor();
+      if (exit != 0){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: the manager program ended with "+exit+"."); }
+      try (var s= server.accept()){ return new String(s.getInputStream().readAllBytes(), UTF_8); }
+    }
     catch (IOException|InterruptedException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: "+e.getClass().getSimpleName()); }
-    if (exit != 0){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: the manager program ended with "+exit+"."); }
-    return ok(Void$o$0.instance);
   }
+  private static Object send(String verb, Stream<String> args, Function<String,Object> result){
+    if (launcher == null){ return fail("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }
+    var as= args.toList();
+    return Try$c$0.actionLazy(() -> result.apply(applied(message(verb, as))));
+  }
+  private static String applied(String text){
+    if (!text.startsWith(refused)){ return text; }
+    throw deterministic((Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(InputFile.portable(text.substring(refused.length())))));
+  }
+  private static Object send(String verb, Stream<String> args){ return send(verb, args, _ -> Void$o$0.instance); }
+  private static Object output(String verb, Stream<String> args){ return send(verb, args, o -> new UStr$s$0Instance(o.codePoints().toArray())); }
   private static Object send(String verb, String... args){ return send(verb, Stream.of(args)); }
   private static Object sendPath(String verb, Object path, String... args){
     var bs= List$o$1Instance.asJava(path);
@@ -51,8 +68,8 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$editMetadata$1(Object path){ return sendPath("EditMetadata", path); }
   @Override public Object mut$openWithOrShortcut$1(Object path){ return sendPath("OpenWithOrShortcut", path); }
   @Override public Object mut$openWithOrShortcut$3(Object path, Object name, Object main){ return sendPath("OpenWithOrShortcut", path, AssetBytesRead.str(name), AssetBytesRead.str(main)); }
-  @Override public Object mut$run$2(Object name, Object mains){ return send("Run", Stream.concat(Stream.of(AssetBytesRead.str(name)), strs(mains))); }
-  @Override public Object mut$compile$1(Object name){ return send("Compile", AssetBytesRead.str(name)); }
+  @Override public Object mut$run$2(Object name, Object mains){ return output("Run", Stream.concat(Stream.of(AssetBytesRead.str(name)), strs(mains))); }
+  @Override public Object mut$compile$1(Object name){ return output("Compile", Stream.of(AssetBytesRead.str(name))); }
   @Override public Object mut$check$1(Object name){ return send("Check", AssetBytesRead.str(name)); }
   @Override public Object mut$terminate$1(Object name){ return send("Terminate", AssetBytesRead.str(name)); }
   @Override public Object mut$deleteCache$1(Object name){ return send("DeleteCache", AssetBytesRead.str(name)); }
