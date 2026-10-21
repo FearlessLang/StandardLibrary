@@ -1,6 +1,11 @@
 package _base;
 
 import static _base.Util.*;
+import static java.nio.charset.StandardCharsets.UTF_16BE;
+import static java.nio.charset.StandardCharsets.UTF_16LE;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -72,6 +77,17 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     @SuppressWarnings("unchecked")
     List<UStr$s$0Instance> parts= (List<UStr$s$0Instance>)(Object)Flow$o$1Instance.toJava(p0);
     return new UStr$s$0Instance(join(val, parts));
+  }
+  @Override public Object imm$utf8$0(){ return bytes(UTF_8); }
+  @Override public Object imm$utf16Le$0(){ return bytes(UTF_16LE); }
+  @Override public Object imm$utf16Be$0(){ return bytes(UTF_16BE); }
+  @Override public Object imm$utf32Le$0(){ return bytes(Charset.forName("UTF-32LE")); }
+  @Override public Object imm$utf32Be$0(){ return bytes(Charset.forName("UTF-32BE")); }
+  private Object bytes(Charset cs){
+    var bs= new String(val, 0, val.length).getBytes(cs);
+    var res= new ArrayList<Object>(bs.length);
+    for (var b : bs){ res.add(Byte$o$0Instance.instance(b)); }
+    return List$o$1Instance.wrap(res);
   }
   @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val, _ -> new Norm(this)); }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 

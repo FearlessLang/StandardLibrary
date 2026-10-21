@@ -1,0 +1,58 @@
+///The object capability to send messages to the Fearless manager running this program.
+///Each method sends one message, as the manager program does when started with the arguments ``FearlessCommand<Verb>``,
+///and gives `.ok` once the manager holds the message.
+///The manager applies its messages one at a time, in the order they arrive.
+///The manager shows in its window why it refuses a message; this program is not told.
+///A program started by the portable Fearless has no manager: every message gives an Info.
+///``name`` is the name of a registered project.
+///``path`` is the bytes naming an absolute path on this system:
+///on Windows the UTF-16 code units of the path, little endian (`UStr.utf16Le`);
+///on the other systems the bytes of the path, most often its UTF-8 encoding (`UStr.utf8`).
+///A ``path`` that is not absolute gives an Info.
+CapManager: ToIso[CapManager], WidenTo[CapManager]{
+  ///Shows the manager window.
+  mut .show: mut Action[Void];
+  ///Shows the manager window and selects the project ``name``.
+  mut .show(name: Str): mut Action[Void];
+  ///Registers the folder at ``path``, or the folder holding the file at ``path``, then selects it.
+  mut .register(path: List[Byte]): mut Action[Void];
+  ///Ends the manager and every job it runs, this program included.
+  mut .quit: mut Action[Void];
+  ///Ends the manager and every job it runs, this program included,
+  ///removes every file association of the manager and deletes the manager folder.
+  mut .reset: mut Action[Void];
+  ///Connects the Eclipse found from ``path``.
+  mut .connectEclipse(path: List[Byte]): mut Action[Void];
+  ///Replaces the record of the registered projects with the content of the file at ``path``.
+  mut .editMetadata(path: List[Byte]): mut Action[Void];
+  ///Opens the file at ``path`` with the main claiming its extension, as a double click on the file does.
+  mut .openWithOrShortcut(path: List[Byte]): mut Action[Void];
+  ///Opens the file at ``path`` with the main ``main`` of the project ``name``, one of the mains claiming its extension.
+  mut .openWithOrShortcut(path: List[Byte], name: Str, main: Str): mut Action[Void];
+  ///Selects the project ``name`` and runs ``mains``, in the order of the mains of the project.
+  mut .run(name: Str, mains: List[Str]): mut Action[Void];
+  ///Selects the project ``name`` and compiles it if it needs compiling.
+  mut .compile(name: Str): mut Action[Void];
+  ///Selects the project ``name`` and reports in its Output why it is invalid or out of date, or that it is neither.
+  mut .check(name: Str): mut Action[Void];
+  ///Selects the project ``name`` and ends its job, if any.
+  mut .terminate(name: Str): mut Action[Void];
+  ///Selects the project ``name`` and deletes its compiled cache.
+  mut .deleteCache(name: Str): mut Action[Void];
+  ///Sets the kind of the project ``name`` to idle.
+  mut .kindIdle(name: Str): mut Action[Void];
+  ///Sets the kind of the project ``name`` to code; the kind changes only from idle.
+  mut .kindCode(name: Str): mut Action[Void];
+  ///Sets the kind of the project ``name`` to read only data; the kind changes only from idle.
+  mut .kindDataReadOnly(name: Str): mut Action[Void];
+  ///Sets the kind of the project ``name`` to read write data; the kind changes only from idle.
+  mut .kindDataReadWrite(name: Str): mut Action[Void];
+  ///Forgets the project ``name``.
+  mut .forget(name: Str): mut Action[Void];
+  ///Links the code project ``name`` to the data project ``data`` for reading, under the type names ``types``.
+  ///No type names removes that link.
+  mut .linkRead(name: Str, data: Str, types: List[Str]): mut Action[Void];
+  ///Links the code project ``name`` to the data project ``data`` for reading and writing, under the type names ``types``.
+  ///No type names removes that link.
+  mut .linkWrite(name: Str, data: Str, types: List[Str]): mut Action[Void];
+  }

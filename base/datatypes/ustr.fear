@@ -52,6 +52,21 @@ UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
   .equalRepr(other: UStr): Bool;    /// checks if the two unicode strings have the same exact scalar value representation.
   .hashRepr: Nat;                   /// hashes all the scalar values together.
   .u(values: Str): UStr;            /// concatenate those scalar values to the end of this string. Example parameter could be ``FB03 0066 0066 0069``; throws on malformed input.
+  ///The bytes of this string in UTF-8, with no byte order mark.
+  //>   .check{"a".u("00E9").utf8 .assertEq({::}, Lists#(97.getByte, 195.getByte, 169.getByte))}
+  .utf8: List[Byte];
+  ///The bytes of this string in UTF-16 little endian, with no byte order mark.
+  //>   .check{"a".u("1F600").utf16Le .assertEq({::}, Lists#(97.getByte, 0.getByte, 61.getByte, 216.getByte, 0.getByte, 222.getByte))}
+  .utf16Le: List[Byte];
+  ///The bytes of this string in UTF-16 big endian, with no byte order mark.
+  //>   .check{"a".u("00E9").utf16Be .assertEq({::}, Lists#(0.getByte, 97.getByte, 0.getByte, 233.getByte))}
+  .utf16Be: List[Byte];
+  ///The bytes of this string in UTF-32 little endian, with no byte order mark.
+  //>   .check{"a".u.utf32Le .assertEq({::}, Lists#(97.getByte, 0.getByte, 0.getByte, 0.getByte))}
+  .utf32Le: List[Byte];
+  ///The bytes of this string in UTF-32 big endian, with no byte order mark.
+  //>   .check{"a".u.utf32Be .assertEq({::}, Lists#(0.getByte, 0.getByte, 0.getByte, 97.getByte))}
+  .utf32Be: List[Byte];
   .norm: Norm[UStr];
   }
 
