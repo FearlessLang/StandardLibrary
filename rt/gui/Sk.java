@@ -177,6 +177,22 @@ interface Sk{
     cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), paint);
   }
 
+  static void divider(Canvas cv, _Split s){
+    var d= s.grip();
+    int thin= s.vertical ? d.height : d.width;
+    if (thin == 0){ return; }
+    paint.setColor(s.fg & 0xFFFFFF | 0x30000000);
+    cv.drawRect(Rect.makeXYWH(d.x, d.y, d.width, d.height), paint);
+    int t= Math.max(1, thin / 3);
+    float l= Math.min(s.vertical ? d.width : d.height, 30);
+    paint.setColor(s.fg & 0xFFFFFF | 0xA0000000);
+    float cx= d.x + d.width / 2f;
+    float cy= d.y + d.height / 2f;
+    float gw= s.vertical ? l : t;
+    float gh= s.vertical ? t : l;
+    cv.drawRRect(RRect.makeXYWH(cx - gw / 2, cy - gh / 2, gw, gh, t / 2f), paint);
+  }
+
   static void background(Canvas cv, AWidget s){
     if (s.bg >>> 24 == 0){ return; }
     float w= s.component.getWidth();

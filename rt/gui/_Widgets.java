@@ -1,6 +1,8 @@
 package _base;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -133,6 +135,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Pane$o$0 mut$picture$1(Object s){ frame.addTo(this, null, s, _Picture::new); return this; }
   @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(this, null, s, _Pane::new); return this; }
   @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(this, null, s, _Border::new); return this; }
+  @Override public Pane$o$0 mut$split$1(Object s){ frame.addTo(this, null, s, _Split::new); return this; }
   @Override public Pane$o$0 mut$textField$1(Object s){ frame.addTo(this, null, s, _TextField::new); return this; }
   @Override public Pane$o$0 mut$textArea$1(Object s){ frame.addTo(this, null, s, _TextArea::new); return this; }
   @Override public Object mut$clear$0(){
@@ -195,6 +198,80 @@ final class _Border extends AContainer implements Border$2o$0{
   @Override public Border$2o$0 mut$eastB$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Border::new); return this; }
   @Override public Border$2o$0 mut$westB$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Border::new); return this; }
   @Override public Border$2o$0 mut$centerB$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Border::new); return this; }
+  @Override public Border$2o$0 mut$northS$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Split::new); return this; }
+  @Override public Border$2o$0 mut$southS$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Split::new); return this; }
+  @Override public Border$2o$0 mut$eastS$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Split::new); return this; }
+  @Override public Border$2o$0 mut$westS$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Split::new); return this; }
+  @Override public Border$2o$0 mut$centerS$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Split::new); return this; }
+}
+
+@SuppressWarnings("serial")
+final class _Split extends AContainer implements Split$1c$0{
+  boolean vertical;
+  int divider;
+
+  _Split(_Frame frame){
+    super(frame);
+    component.setLayout(new BorderLayout(){ @Override public void layoutContainer(Container target){ layout(); } });
+  }
+  Component side(String where){ return ((BorderLayout) component.getLayout()).getLayoutComponent(where); }
+  int along(Dimension d){ return vertical ? d.height : d.width; }
+  int length(String where){
+    var c= side(where);
+    return c == null ? 0 : along(((SkComponent) c).w.own());
+  }
+  int gap(){ return vertical ? heightGap : widthGap; }
+  int span(){ return vertical ? viewH() : viewW(); }
+  int at(int want){ return Math.max(length(BorderLayout.LINE_START), Math.min(want, span() - gap() - length(BorderLayout.LINE_END))); }
+  Rectangle grip(){
+    int at= at(divider);
+    return vertical ? new Rectangle(left, top + at, viewW(), gap()) : new Rectangle(left + at, top, gap(), viewH());
+  }
+  void drag(int want){
+    divider = at(want);
+    component.invalidate();
+    frame.markLayoutDirty();
+  }
+  void layout(){
+    int at= at(divider);
+    place(side(BorderLayout.LINE_START), 0, at);
+    place(side(BorderLayout.LINE_END), at + gap(), span() - at - gap());
+  }
+  void place(Component c, int from, int length){
+    if (c == null){ return; }
+    var s= ((SkComponent) c).w;
+    var o= s.own();
+    int w= vertical ? viewW() : length;
+    int h= vertical ? length : viewH();
+    int cw= s.fill ? Math.max(o.width, w) : o.width;
+    int ch= s.fill ? Math.max(o.height, h) : o.height;
+    int x= left + (vertical ? 0 : from) + Math.max(0, (w - cw) / 2);
+    int y= top + (vertical ? from : 0) + Math.max(0, (h - ch) / 2);
+    c.setBounds(x, y, cw, ch);
+  }
+  @Override Dimension need(){
+    var a= new Dimension(0, 0);
+    for (var c : component.getComponents()){
+      var o= ((SkComponent) c).w.own();
+      a = vertical ? new Dimension(Math.max(a.width, o.width), a.height + o.height) : new Dimension(a.width + o.width, Math.max(a.height, o.height));
+    }
+    return vertical ? new Dimension(a.width + edgeW(), a.height + gap() + edgeH()) : new Dimension(a.width + gap() + edgeW(), a.height + edgeH());
+  }
+  @Override void grow(int w, int h){
+    var n= need();
+    super.grow(n.width, n.height);
+  }
+  @Override void skOver(Canvas cv){ Sk.divider(cv, this); }
+  @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
+  @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
+  @Override public Object mut$divider$1(Object n){ return reStyle(extent(n, "divider"), v -> divider = v); }
+  @Override public Object read$divider$0(){ return n(frame.onEdtAndWait(() -> divider)); }
+  @Override public Split$1c$0 mut$first$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Pane::new); return this; }
+  @Override public Split$1c$0 mut$firstB$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Border::new); return this; }
+  @Override public Split$1c$0 mut$firstS$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Split::new); return this; }
+  @Override public Split$1c$0 mut$second$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Pane::new); return this; }
+  @Override public Split$1c$0 mut$secondB$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Border::new); return this; }
+  @Override public Split$1c$0 mut$secondS$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Split::new); return this; }
 }
 
 abstract class AWidget implements Widget$2o$1{
@@ -521,7 +598,7 @@ final class _Frame implements Frame$1c$0{
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old= where == null ? null : ((MutableBorderLayout) parent.getLayout()).getLayoutComponent(where);
+      var old= where == null ? null : ((BorderLayout) parent.getLayout()).getLayoutComponent(where);
       if (old != null){
         mouse.detached((SkComponent) old);
         parent.remove(old);
