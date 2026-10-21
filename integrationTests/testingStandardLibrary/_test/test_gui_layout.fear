@@ -135,12 +135,12 @@ GuiLayoutTests: Test {::
     .pane{:: .stackScroll(True) .button{:: .width 60 .height 30 } .button{:: .width 60 .height 30 } .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[82] Height[42]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[77] Height[42]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::
     .pane{:: .stackScroll(True) .button{:: .width 60 .height 30 } .button{:: .width 60 .height 30 } .pack .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[148] Height[42]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[143] Height[42]"}}.assertTrue{i};
       }}
   }

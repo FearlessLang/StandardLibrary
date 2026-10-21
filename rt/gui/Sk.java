@@ -167,13 +167,14 @@ interface Sk{
     c.w.skOver(cv);
   }
 
-  static void bar(Canvas cv, _Pane p, boolean vert){
+  static void bar(Canvas cv, AWidget p, boolean vert){
     var t= p.track(vert);
     var m= p.thumb(vert);
     paint.setColor(p.fg & 0xFFFFFF | 0x30000000);
-    cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, _Pane.bar / 2f), paint);
-    paint.setColor(p.fg & 0xFFFFFF | 0xA0000000);
-    cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, _Pane.bar / 2f), paint);
+    cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, AWidget.bar / 2f), paint);
+    boolean fits= vert ? m.height == t.height : m.width == t.width;
+    paint.setColor(p.fg & 0xFFFFFF | (fits ? 0x30000000 : 0xA0000000));
+    cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), paint);
   }
 
   static void background(Canvas cv, AWidget s){
@@ -193,8 +194,8 @@ interface Sk{
   }
 
   static String boundsClip(SkComponent c, Component k){
-    boolean scrollsX= c.w instanceof _Pane p && p.barBottom();
-    boolean scrollsY= c.w instanceof _Pane p && p.barRight();
+    boolean scrollsX= c.w.barBottom();
+    boolean scrollsY= c.w.barRight();
     boolean insideX= scrollsX || k.getX() >= 0 && k.getX() + k.getWidth() <= c.getWidth();
     boolean insideY= scrollsY || k.getY() >= 0 && k.getY() + k.getHeight() <= c.getHeight();
     boolean inside= insideX && insideY;

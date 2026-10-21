@@ -122,11 +122,6 @@ final class _Pane extends AContainer implements Pane$o$0{
   long maxPerLine= 0xFFFF_FFFF_FFFF_FFFFL;
   boolean lineScroll;
   boolean stackScroll;
-  int scrollX;
-  int scrollY;
-  int contentW;
-  int contentH;
-  static final int bar= 10;
 
   _Pane(_Frame frame){
     super(frame);
@@ -138,6 +133,8 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Pane$o$0 mut$picture$1(Object s){ frame.addTo(this, null, s, _Picture::new); return this; }
   @Override public Pane$o$0 mut$pane$1(Object s){ frame.addTo(this, null, s, _Pane::new); return this; }
   @Override public Pane$o$0 mut$border$1(Object s){ frame.addTo(this, null, s, _Border::new); return this; }
+  @Override public Pane$o$0 mut$textField$1(Object s){ frame.addTo(this, null, s, _TextField::new); return this; }
+  @Override public Pane$o$0 mut$textArea$1(Object s){ frame.addTo(this, null, s, _TextArea::new); return this; }
   @Override public Object mut$clear$0(){
     return reStyle(() -> {
       // Removed widgets get no Exited events (DOM semantics: removal is not
@@ -149,46 +146,8 @@ final class _Pane extends AContainer implements Pane$o$0{
   }
   @Override public Object mut$lineScroll$1(Object b){ return reStyle(() -> lineScroll = Util.isTrue(b)); }
   @Override public Object mut$stackScroll$1(Object b){ return reStyle(() -> stackScroll = Util.isTrue(b)); }
-  boolean barRight(){ return vertical ? lineScroll : stackScroll; }
-  boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
-  @Override int edgeW(){ return left + right + (barRight() ? bar : 0); }
-  @Override int edgeH(){ return top + bottom + (barBottom() ? bar : 0); }
-  int viewW(){ return component.getWidth() - edgeW(); }
-  int viewH(){ return component.getHeight() - edgeH(); }
-  Rectangle view(){ return new Rectangle(left, top, viewW(), viewH()); }
-  int maxScrollX(){ return barBottom() ? Math.max(0, contentW - viewW()) : 0; }
-  int maxScrollY(){ return barRight() ? Math.max(0, contentH - viewH()) : 0; }
-  boolean scrollTo(int x, int y){
-    x = Math.clamp(x, 0, maxScrollX());
-    y = Math.clamp(y, 0, maxScrollY());
-    if (x == scrollX && y == scrollY){ return false; }
-    scrollX = x;
-    scrollY = y;
-    component.invalidate();
-    frame.markLayoutDirty();
-    return true;
-  }
-  Rectangle track(boolean vert){
-    return vert
-      ? new Rectangle(component.getWidth() - right - bar, top, bar, viewH())
-      : new Rectangle(left, component.getHeight() - bottom - bar, viewW(), bar);
-  }
-  Rectangle thumb(boolean vert){
-    var t= track(vert);
-    int length= vert ? t.height : t.width;
-    int view= vert ? viewH() : viewW();
-    int content= Math.max(view, vert ? contentH : contentW);
-    int size= Math.min(length, Math.max(2 * bar, (int) ((long) length * view / Math.max(1, content))));
-    int at= (int) ((long) (length - size) * (vert ? scrollY : scrollX) / Math.max(1, content - view));
-    return vert ? new Rectangle(t.x, t.y + at, bar, size) : new Rectangle(t.x + at, t.y, size, bar);
-  }
-  int scrollFor(boolean vert, int thumbAt){
-    var t= track(vert);
-    int size= vert ? thumb(vert).height : thumb(vert).width;
-    int length= (vert ? t.height : t.width) - size;
-    int max= vert ? maxScrollY() : maxScrollX();
-    return (int) ((long) thumbAt * max / Math.max(1, length));
-  }
+  @Override boolean barRight(){ return vertical ? lineScroll : stackScroll; }
+  @Override boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
   @Override void clipChildren(Canvas cv){
     if (!barRight() && !barBottom()){ return; }
     cv.clipRect(io.github.humbleui.types.Rect.makeXYWH(left, top, viewW(), viewH()));
@@ -255,6 +214,11 @@ abstract class AWidget implements Widget$2o$1{
   double above= 1;
   double below= 0.5;
   TextLine line;
+  static final int bar= 5;
+  int scrollX;
+  int scrollY;
+  int contentW;
+  int contentH;
   // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
   // expose Fearless methods to change it, but it lives here alongside the
   // other style fields.
@@ -300,8 +264,46 @@ abstract class AWidget implements Widget$2o$1{
   abstract Dimension need();
   void fit(){}
   void clipChildren(Canvas cv){}
-  int edgeW(){ return left + right; }
-  int edgeH(){ return top + bottom; }
+  boolean barRight(){ return false; }
+  boolean barBottom(){ return false; }
+  int edgeW(){ return left + right + (barRight() ? bar : 0); }
+  int edgeH(){ return top + bottom + (barBottom() ? bar : 0); }
+  int viewW(){ return component.getWidth() - edgeW(); }
+  int viewH(){ return component.getHeight() - edgeH(); }
+  Rectangle view(){ return new Rectangle(left, top, viewW(), viewH()); }
+  int maxScrollX(){ return barBottom() ? Math.max(0, contentW - viewW()) : 0; }
+  int maxScrollY(){ return barRight() ? Math.max(0, contentH - viewH()) : 0; }
+  boolean scrollTo(int x, int y){
+    x = Math.clamp(x, 0, maxScrollX());
+    y = Math.clamp(y, 0, maxScrollY());
+    if (x == scrollX && y == scrollY){ return false; }
+    scrollX = x;
+    scrollY = y;
+    component.invalidate();
+    frame.markLayoutDirty();
+    return true;
+  }
+  Rectangle track(boolean vert){
+    return vert
+      ? new Rectangle(component.getWidth() - right - bar, top, bar, viewH())
+      : new Rectangle(left, component.getHeight() - bottom - bar, viewW(), bar);
+  }
+  Rectangle thumb(boolean vert){
+    var t= track(vert);
+    int length= vert ? t.height : t.width;
+    int view= vert ? viewH() : viewW();
+    int content= Math.max(view, vert ? contentH : contentW);
+    int size= Math.min(length, Math.max(4 * bar, (int) ((long) length * view / Math.max(1, content))));
+    int at= (int) ((long) (length - size) * (vert ? scrollY : scrollX) / Math.max(1, content - view));
+    return vert ? new Rectangle(t.x, t.y + at, bar, size) : new Rectangle(t.x + at, t.y, size, bar);
+  }
+  int scrollFor(boolean vert, int thumbAt){
+    var t= track(vert);
+    int size= vert ? thumb(vert).height : thumb(vert).width;
+    int length= (vert ? t.height : t.width) - size;
+    int max= vert ? maxScrollY() : maxScrollX();
+    return (int) ((long) thumbAt * max / Math.max(1, length));
+  }
   void skOver(Canvas cv){}
   Dimension own(){ return new Dimension(width, height); }
   void grow(int w, int h){
@@ -434,8 +436,14 @@ final class _Frame implements Frame$1c$0{
   final FearlessFrame frame;
   final _FluentGUI gui;
   final SkMouse mouse= new SkMouse(this);
+  final CTextKeys textKeys= new CTextKeys(this);
   @SuppressWarnings("serial")
-  final JComponent surface= new JComponent(){ @Override protected void paintComponent(java.awt.Graphics g){ blit(g); } };
+  final JComponent surface= new JComponent(){
+    @Override protected void paintComponent(java.awt.Graphics g){ blit(g); }
+    @Override public java.awt.im.InputMethodRequests getInputMethodRequests(){ return textKeys; }
+  };
+  AEditText focus;// EDT confined
+  boolean keyboard;// EDT confined
   // Written by the repaint tick on the EDT, read by painters on the EDT and
   // by the model (read .elapsed) on the queue thread with no ordering between
   // the two: volatile makes the reference handoff safe. The Time object
@@ -475,6 +483,33 @@ final class _Frame implements Frame$1c$0{
     surface.setLayout(null);
     surface.setOpaque(true);
     surface.setFocusable(true);
+    surface.setFocusTraversalKeysEnabled(false);
+    surface.addKeyListener(textKeys);
+    surface.addFocusListener(textKeys);
+    surface.addInputMethodListener(textKeys);
+    surface.enableInputMethods(true);
+  }
+
+  void pressed(AWidget d){
+    if (focus == null || focus == d){ return; }
+    focus.commit();
+    focus = null;
+  }
+
+  void tab(boolean back){
+    var all= new ArrayList<AEditText>();
+    edits(top.component, all);
+    int i= all.indexOf(focus);
+    assert i >= 0;
+    var next= all.get(Math.floorMod(i + (back ? -1 : 1), all.size()));
+    if (next == focus){ return; }
+    focus.commit();
+    focus = next;
+  }
+
+  private static void edits(java.awt.Container c, ArrayList<AEditText> all){
+    if (c instanceof SkComponent s && s.w instanceof AEditText t){ all.add(t); }
+    for (var k : c.getComponents()){ edits((java.awt.Container) k, all); }
   }
 
   void addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){

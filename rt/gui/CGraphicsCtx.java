@@ -6,7 +6,7 @@ import io.github.humbleui.skija.PaintMode;
 import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.types.Rect;
 
-final class CGraphicsCtx implements Graphics$ao$0{
+class CGraphicsCtx implements Graphics$ao$0{
   final Canvas cv;
   final _Frame frame;
   final Instant$5c$0 elapsed;
