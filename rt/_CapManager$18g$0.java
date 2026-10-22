@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static final String launcher= System.getProperty("fearlessManager.launcher");
+  private static final String applied= "Applied\n";
   private static final String refused= "Refused\n";
   private static final Charset pathCharset= System.getProperty("os.name").startsWith("Windows") ? UTF_16LE : Charset.forName(System.getProperty("sun.jnu.encoding"));
   private static String message(String verb, List<String> args){
@@ -32,10 +33,11 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static Object send(String verb, Stream<String> args, Function<String,Object> result){
     if (launcher == null){ return fail("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }
     var as= args.toList();
-    return Try$c$0.actionLazy(() -> result.apply(applied(message(verb, as))));
+    return Try$c$0.actionLazy(() -> result.apply(applied(verb, message(verb, as))));
   }
-  private static String applied(String text){
-    if (!text.startsWith(refused)){ return text; }
+  private static String applied(String verb, String text){
+    if (text.startsWith(applied)){ return text.substring(applied.length()); }
+    if (!text.startsWith(refused)){ throw nonDetErr("The Fearless manager ended the connection of the message \""+verb+"\" without saying whether it applied it."); }
     throw deterministic((Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(InputFile.portable(text.substring(refused.length())))));
   }
   private static Object send(String verb, Stream<String> args){ return send(verb, args, _ -> Void$o$0.instance); }
