@@ -78,7 +78,7 @@ final class Stage extends MouseAdapter{
     owner.surface.addMouseListener(this);
     owner.surface.addMouseMotionListener(this);
     owner.surface.addMouseWheelListener(this);
-    owner.surface.addKeyListener(new KeyAdapter(){ @Override public void keyPressed(KeyEvent e){ reservedKey(e.getKeyCode()); } });
+    owner.surface.addKeyListener(new KeyAdapter(){ @Override public void keyPressed(KeyEvent e){ if (!e.isConsumed()){ reservedKey(e.getKeyCode()); } } });
     if (Desk.managed){ open(); return; }
     realize(switch (gui.start){ case fullScreen -> Mode.fullScreen; case undecorated -> Mode.fearless; case window, maximised -> Mode.decorated; });
     if (gui.start == _FluentGUI.Start.maximised){ f.setExtendedState(Frame.MAXIMIZED_BOTH); }

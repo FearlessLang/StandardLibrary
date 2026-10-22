@@ -71,6 +71,8 @@ use base.Frame as Frame;
 use base.Pane as Pane;
 use base.Label as Label;
 use base.Mouse as Mouse;
+use base.Menu as Menu;
+use base.MenuItem as MenuItem;
 use base.Keys as Keys;
 use base.ModelFps as ModelFps;
 use base.Slot as Slot;
@@ -97,6 +99,7 @@ MyTests:UnitTests{::
   .test GuiLayoutTests
   .test GuiBuilderTests
   .test GuiLiveTests
+  .test GuiMenuTests
   .test GuiExtentTests
   .test GuiFrameTests
   .test GuiSetterTests

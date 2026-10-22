@@ -216,6 +216,13 @@ Widget[S]:_Styled[S]{
   ///The text shown in a box over the window when the pointer rests on this widget for 500 milliseconds; empty, the default, shows nothing.
   ///Each line of the text is a line of the box.
   mut .uTooltip(UStr):mut S;
+  ///The menu that a click of the secondary mouse button on this widget opens at the pointer; by default, none.
+  ///The scope builds the menu at each of those clicks, as a task of the model queue; see ``Menu``.
+  ///The click goes to the deepest widget with a context menu under its press that contains its release.
+  mut .contextMenu(mut Scope[Menu]):mut S;
+  ///Builds a menu with the scope, at once, and opens it below this widget; see ``Menu``.
+  ///This widget must be in the open window.
+  mut .openMenu(mut Scope[Menu]):Void;
   read .topInset: HeightNat;
   read .bottomInset: HeightNat;
   read .leftInset:WidthNat;
@@ -434,6 +441,37 @@ Mouse:_Styled[Mouse]{ .self->this;
 ///``x`` and ``y`` are where the pointer is, in virtual pixels from the top left corner of the widget.
 ///``elapsed``, ``panelWidth`` and ``panelHeight`` are as in ``ScreenContext``.
 MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, panelHeight: HeightNat): Void; }
+///A column of items and separators, drawn by the library over every widget of the window, with the look of the library on every desk.
+///A menu exists only while it is open: its scope builds it each time it opens, so it shows the state of the program when it opened.
+///A menu with no item does not open.
+///The items of a menu are fixed once its scope returns.
+///A frame has at most one open menu, and the submenus opened from it: opening a menu closes the open one.
+///A menu opens after its anchor or, when it does not fit there and fits before it, before it: below or above a widget or the pointer; right or left of the menu of its item.
+///Then it moves back by the least amount that keeps it inside the virtual pixel space.
+///While a menu is open, the mouse and the keys reach only the menus:
+///  a click of the primary mouse button on an enabled item chooses it; a press and a release on two different items choose nothing;
+///  a press outside the menus closes them all, and neither the press nor the rest of its gesture reaches anything else;
+///  the second click of a double click reaches nothing when a menu took its first click or opened after it;
+///  Up and Down highlight the previous and the next enabled item of the last open menu, Enter chooses the highlighted one;
+///  the close key of the Gui closes the last open menu; the full screen key keeps its meaning; every other key reaches nothing.
+///Choosing an item with a submenu opens the submenu, or closes it when it is open; choosing an item without a submenu closes every menu and queues its action.
+///Nothing opens a menu on its own: no hover, no delay, no key binding.
+Menu:_Styled[Menu]{ .self->this;
+  mut .item(mut Scope[MenuItem]):mut Menu;
+  mut .separator:mut Menu;
+  }
+///An item of a ``Menu``: one line of text, enabled by default, with no mark, no action and no submenu.
+///An item shows the mark it is given, a check box or a radio button, ticked or not; choosing it changes no mark: the scope of the next opening shows the new state.
+///An item has an action or a submenu, never both; it shows a check box or a radio button, never both: the second setter is an error.
+MenuItem:_Styled[MenuItem]{ .self->this;
+  mut .text(s:Str):mut MenuItem->this.uText(s.u);
+  mut .uText(UStr):mut MenuItem;
+  mut .enabled(Bool):mut MenuItem;
+  mut .check(Bool):mut MenuItem;
+  mut .radio(Bool):mut MenuItem;
+  mut .action(mut MF[Void]):mut MenuItem;
+  mut .submenu(mut Scope[Menu]):mut MenuItem;
+  }
 Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;

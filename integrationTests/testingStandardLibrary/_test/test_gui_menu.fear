@@ -1,0 +1,102 @@
+GuiMenuTests: Test {::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .button{b -> Block#(b.openMenu{:: .item{:: .text "Open"}}, b)}
+    }}}).run{
+      .ok _ -> Error.msg "Opening a menu before the window is open always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == ".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to Gui.run has not returned"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .button{b -> Block#(b.openMenu{:: .item{:: .text "Open" .action{Void} .submenu{::}}}, b)}
+    }}}).run{
+      .ok _ -> Error.msg "An item with an action and a submenu always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The MenuItem "Open" already has an action, so it can not also have a submenu: choosing an item either opens its submenu or runs its action`}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .button{b -> Block#(b.openMenu{:: .item{:: .submenu{::} .action{Void}}}, b)}
+    }}}).run{
+      .ok _ -> Error.msg "An item with a submenu and an action always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This MenuItem already has a submenu, so it can not also have an action: choosing an item either opens its submenu or runs its action"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .button{b -> Block#(b.openMenu{:: .item{:: .text "Wrap" .check True .check False .radio False}}, b)}
+    }}}).run{
+      .ok _ -> Error.msg "An item with a check box and a radio button always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The MenuItem "Wrap" already shows a check box, so it can not also show a radio button: an item shows at most one mark`}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .button{b -> Block#(b.openMenu{:: .item{:: .text("Open" | "Close")}}, b)}
+    }}}).run{
+      .ok _ -> Error.msg "An item text with a newline always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new text of this MenuItem has a line break (U+000A) at offset 4: the text of a MenuItem is one line"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .button{b -> Block#(b.openMenu{m -> Block#
+      .let[mut Slot[mut MenuItem]] item = {Slots#[mut MenuItem]}
+      .do{Block#(m.item{:: .text "Open" .save item}, Void)}
+      .do{Block#(item!.text "Close", Void)}
+      .return{m}
+      }, b)}
+    }}}).run{
+      .ok _ -> Error.msg "Changing an item after its scope always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This MenuItem is already built: an item is fixed once the scope of its .item returns, so a change now would never show"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+    .let[mut Slot[mut Menu]] menu = {Slots#[mut Menu]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .do{root!.openMenu{:: .item{:: .text "Open"} .save menu}}
+      .return{Block#(menu!.separator, Void)}
+      }}), Void)}
+    .return{f.content{:: .save root}}
+    }}).run{
+      .ok _ -> Error.msg "Changing a menu after its scope always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Menu is already built: a menu is fixed once the scope that builds it returns, so a change now would never show"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+    .let[mut Slot[mut Pane]] inner = {Slots#[mut Pane]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .do{Block#(root!.clear, Void)}
+      .return{inner!.openMenu{:: .item{:: .text "Open"}}}
+      }}), Void)}
+    .return{f.content{:: .save root .pane{:: .save inner}}}
+    }}).run{
+      .ok _ -> Error.msg "Opening a menu below a removed widget always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Pane is not in the window, so .openMenu has no place below it to open a menu: .clear, a replaced Border slot or a new .content removed it, or the scope that adds it has not returned"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .do{root!.openMenu{m -> m}}
+      .do{root!.openMenu{:: .separator}}
+      .do{root!.openMenu{:: .item{:: .text "Open" .enabled False .radio True} .separator .item{:: .text "More" .submenu{::}}}}
+      .do{root!.openMenu{:: .item{:: .text "Again" .check False .action{Void}}}}
+      .return{Error.msg "Opened four menus"}
+      }}), Void)}
+    .return{f.content{:: .save root .contextMenu{:: .item{:: .text "Context"}}}}
+    }}).run{
+      .ok _ -> Error.msg "A model action always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Opened four menus"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedMenu#(s.gui)}).run{
+      .ok _ -> Error.msg "Opening a menu in a closed window always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Pane is in a closed window: the Gui.run that showed the window has returned, so .openMenu has no window to open a menu in"}}.assertTrue{i};
+      }}
+  }
+ClosedMenu: {#(gui: mut base.Gui): Void -> Block#
+  .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+  .do{gui.run{f -> Block#
+    .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
+    .return{f.content{:: .save root}}
+    }}
+  .return{root!.openMenu{:: .item{:: .text "Open"}}}
+  }
