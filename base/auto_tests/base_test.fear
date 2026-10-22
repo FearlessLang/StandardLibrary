@@ -2066,6 +2066,21 @@ _UStr_Examples: base.Test {::
   .check{("hi".u.tryGetStr).ok.assertEq({::}, Opts# "hi")}
   .check{"a".u("00E9").tryGetStr .assertInfo{::.isMsg{::.startsWith "UStr.getStr:"}}}
   }
+  .test base.Test{::
+  .check{"a".u("00E9").utf16Be .assertEq({::}, Lists#(0.getByte, 97.getByte, 0.getByte, 233.getByte))}
+  }
+  .test base.Test{::
+  .check{"a".u("1F600").utf16Le .assertEq({::}, Lists#(97.getByte, 0.getByte, 61.getByte, 216.getByte, 0.getByte, 222.getByte))}
+  }
+  .test base.Test{::
+  .check{"a".u.utf32Be .assertEq({::}, Lists#(0.getByte, 0.getByte, 0.getByte, 97.getByte))}
+  }
+  .test base.Test{::
+  .check{"a".u.utf32Le .assertEq({::}, Lists#(97.getByte, 0.getByte, 0.getByte, 0.getByte))}
+  }
+  .test base.Test{::
+  .check{"a".u("00E9").utf8 .assertEq({::}, Lists#(97.getByte, 195.getByte, 169.getByte))}
+  }
   }
 
 __EditableList_Examples_2: base.Test {::
