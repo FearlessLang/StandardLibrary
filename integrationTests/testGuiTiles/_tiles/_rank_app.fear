@@ -21,7 +21,6 @@ use base.Image as Image;
 use base.Images as Images;
 use base.Painter as Painter;
 use base.Graphics as Graphics;
-use base.TextWidth as TextWidth;
 use base.MouseEvent as MouseEvent;
 use base.Label as Label;
 use base.Pane as Pane;
@@ -52,9 +51,8 @@ TileGrid:Main{sys -> Block#
 
 Tile:{ .name: Str; .image: Image; .flag: Painter; }
 Tiles:{ #(name: Str, flag: Painter): Tile -> Block#
-  .let fit= {Fit#name}
   .let image= {GeneratedIcon#name}
-  .return{{ .name -> fit; .image -> image; .flag -> flag; }}
+  .return{{ .name -> name; .image -> image; .flag -> flag; }}
   }
 Names:{ #(i: Nat): Str -> Lists#("alpha", "beta", "gamma", "delta", "basketball", "a project with a very long name", "tour", "hello world").get(i.getRem 8) }
 
@@ -90,11 +88,11 @@ AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut
   }
 Retile:{ #(t: Tile, flag: Painter): Tile -> { .name -> t.name; .image -> t.image; .flag -> flag; } }
 
-Fit:{ #(s: Str): Str -> (TextWidth#(s.u, Height#12).get <= 120) ? { .then -> s; .else -> Dots#s } }
-Dots:{ #(s: Str): Str -> Block#
+Fit:{ #(g: read Graphics, s: Str): Str -> ((g.textWidth s).get <= 120) ? { .then -> s; .else -> Dots#(g, s) } }
+Dots:{ #(g: read Graphics, s: Str): Str -> Block#
   .let d= {s+"..."}
-  .if{s.isEmpty || {TextWidth#(d.u, Height#12).get <= 120}} .return{d}
-  .return{Dots#(s.sub(0, s.size - 1))}
+  .if{s.isEmpty || {(g.textWidth d).get <= 120}} .return{d}
+  .return{Dots#(g, s.sub(0, s.size - 1))}
   }
 Palette:{ #(i: Nat): Color -> Lists#(Color.sleepyBlue, Color.goblinGreen, Color.dangerTomato, Color.wizardPurple, Color.lavaOrange, Color.swampTea, Color.rustyRobot, Color.blueberrySoup).get(i.getRem 8) }
 GeneratedIcon:{ #(name: Str): Image -> Block#
@@ -105,7 +103,7 @@ GeneratedIcon:{ #(name: Str): Image -> Block#
     .color(Palette#(h + 2)).position(X#(+0), Y#(+24)).rect(Width#24, Height#24)
     .color(Palette#(h + 3)).position(X#(+24), Y#(+24)).rect(Width#24, Height#24)
     .color(Color.ghostWhite).textHeight 24
-    .position(X#(((48 - (TextWidth#(initials.u, Height#24).get)).getTruncDiv 2).getInt), Y#(+8))
+    .position(X#(((48 - ((g.textWidth initials).get)).getTruncDiv 2).getInt), Y#(+8))
     .text initials
     }}
   }
@@ -113,9 +111,9 @@ TilePainter:{ #(t: Tile, selected: Bool): Painter -> {g -> Block#
   .do{selected ? { .then -> SelectionBox#g; .else -> Void }}
   .do{Block#(g.position(X#(+40), Y#(+6)).image(t.image), Void)}
   .do{Block#(t.flag.run g, Void)}
-  .return{g.color(Color.voidBlack).textHeight 12
-    .position(X#(((128 - (TextWidth#(t.name.u, Height#12).get)).getTruncDiv 2).getInt), Y#(+58))
-    .text(t.name)}
+  .do{Block#(g.color(Color.voidBlack).textHeight 12, Void)}
+  .let[Str] name= {Fit#(g, t.name)}
+  .return{g.position(X#(((128 - ((g.textWidth name).get)).getTruncDiv 2).getInt), Y#(+58)).text name}
   }}
 SelectionBox:{ #(g: mut Graphics): Void -> Block#(g
   .color(Color.rgb(0, 120, 215)).position(X#(+0), Y#(+0)).rect(Width#128, Height#88)
@@ -135,7 +133,7 @@ Dot:{ #(c: Color, glyph: Str): Painter -> {g -> g
   .color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20)
   .color c .position(X#(+72), Y#(+38)).oval(Width#16, Height#16)
   .color(Color.ghostWhite).textHeight 11
-  .position(X#((72 + ((16 - (TextWidth#(glyph.u, Height#11).get)).getTruncDiv 2)).getInt), Y#(+38))
+  .position(X#((72 + ((16 - ((g.textWidth glyph).get)).getTruncDiv 2)).getInt), Y#(+38))
   .text glyph
   }}
 Spinner:Painter{g -> Block#

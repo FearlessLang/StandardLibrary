@@ -314,9 +314,15 @@ Graphics:ScreenContext{
   ///The baseline is ``textHeight`` below the position, and the line is one and a half ``textHeight`` high, as the line of a ``Label`` with the default ``.aboveBaseline`` and ``.belowBaseline``.
   ///The position does not change. The text height starts at 12.
   mut .uText(text: UStr): mut Graphics;
+  ///The color of the next drawing: the foreground of the widget, or opaque black for an image, until ``.color`` changes it.
+  read .color: Color;
+  read .positionX: XInt;
+  read .positionY: YInt;
+  read .textHeight: HeightNat;
+  read .textWidth(text: Str): WidthNat -> this.uTextWidth(text.u);
+  ///The width of ``text`` drawn by ``.uText`` at the current ``.textHeight``, rounded up to a whole virtual pixel.
+  read .uTextWidth(text: UStr): WidthNat;
   }
-///``TextWidth#(text, textHeight)`` is the width of ``text`` drawn by ``Graphics.uText`` at ``textHeight``, rounded up.
-TextWidth:{ #(text: UStr, textHeight: HeightNat): WidthNat -> _Magic!; }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
 ///the same text looks the same on every OS, and a character outside those fonts is drawn as a box everywhere.
@@ -396,7 +402,9 @@ Mouse:_Styled[Mouse]{ .self->this;
 MouseEvent:ScreenContext{
   .mouseX:XInt;
   .mouseY:YInt;
-  .clicks:Nat; ///1 for the press, the release and the click of a single click; 2 for those of the second click of a double click, and so on; 0 for .moved, .dragged, .entered and .exited.
+  ///1 for the press, the release and the click of a single click; 2 for those of the second click of a double click, and so on; 0 for .moved, .dragged, .entered and .exited.
+  ///A press is the next click after the previous press when it is of the same mouse button, at most 500 milliseconds later, and at most 4 pixels of the screen away.
+  .clicks:Nat;
 }
 Pane:_Container[Pane]{
   .self->this;

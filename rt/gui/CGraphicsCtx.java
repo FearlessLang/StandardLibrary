@@ -12,6 +12,7 @@ class CGraphicsCtx implements Graphics$ao$0{
   final WidthNat$as$0 panelWidth;
   final HeightNat$lg$0 panelHeight;
   final Paint paint;// owned by AContainer.sk
+  Color$1c$0 color;
   float x;
   float y;
   int textSize= 12;
@@ -19,17 +20,26 @@ class CGraphicsCtx implements Graphics$ao$0{
   float top= Float.MAX_VALUE;
   float right= -Float.MAX_VALUE;
   float bottom= -Float.MAX_VALUE;
-  CGraphicsCtx(Canvas cv, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint){
+  CGraphicsCtx(Canvas cv, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint, Color$1c$0 color){
     this.cv= cv;
     this.elapsed= elapsed;
     this.panelWidth= panelWidth;
     this.panelHeight= panelHeight;
     this.paint= paint;
+    mut$color$1(color);
   }
 
   @Override public Object mut$color$1(Object color){
-    paint.setColor(Sk.color((Color$1c$0) color));
+    this.color = (Color$1c$0) color;
+    paint.setColor(Sk.color(this.color));
     return this;
+  }
+  @Override public Object read$color$0(){ return color; }
+  @Override public Object read$positionX$0(){ return Scopes.x((long) x); }
+  @Override public Object read$positionY$0(){ return Scopes.y((long) y); }
+  @Override public Object read$textHeight$0(){ return Scopes.h(textSize); }
+  @Override public Object read$uTextWidth$1(Object text){
+    try (var line= Sk.shape(Scopes.ustr(text), textSize)){ return Scopes.w((long) Math.ceil(line.getWidth())); }
   }
   // Drawing outside the panel clips with a warning (canvas is clipped to the panel),
   // otherwise user can cause errors by resizing the gui by hand

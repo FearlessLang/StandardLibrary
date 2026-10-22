@@ -400,13 +400,14 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
     if (paint == Scopes.idP){ return; }
-    try (var p= new Paint().setAntiAlias(true).setColor(fg)){
+    try (var p= new Paint().setAntiAlias(true)){
       var g= new CGraphicsCtx(
         cv,
         frame.elapsed,
         Scopes.w(component.getWidth()),
         Scopes.h(component.getHeight()),
-        p
+        p,
+        foreground
       );
       paint.imm$run$1(g);
       paintWarning = warned(paintWarning, g.outside(describe(), "widget", component.getWidth(), component.getHeight()));
