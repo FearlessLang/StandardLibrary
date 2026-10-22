@@ -3,7 +3,7 @@ package _base;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-// Trimmed from a near-full copy of Commons/tools/Fs.java down to what's actually called (ReadZip.java).
+// The part of Commons/tools/Fs.java that ReadZip.java calls.
 public final class Fs{
   public interface RunVoid{void run() throws IOException;}
   public interface Run<T>{T run() throws IOException;}
