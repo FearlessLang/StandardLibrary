@@ -21,7 +21,6 @@ use base.Image as Image;
 use base.Images as Images;
 use base.Painter as Painter;
 use base.Graphics as Graphics;
-use base.MouseEvent as MouseEvent;
 use base.Label as Label;
 use base.Pane as Pane;
 use base.Slot as Slot;
@@ -61,7 +60,7 @@ GridModels:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label]): mut GridM
   .var[Nat] selected= {0}
   .var[Nat] cycle= {0}
   .return{mut GridModel:{'self
-    mut .render: Void -> TileGrids#(grid!, tiles.get, Opts#(selected.get), {i, e -> self.click(i, e)});
+    mut .render: Void -> TileGrids#(grid!, tiles.get, Opts#(selected.get), {i, _ -> self.click i}, {i, t -> self.run(i, t)});
     mut .add: Void -> Block#
       .do{tiles.set(tiles.get ++ (Lists#(Tiles#(Names#(tiles.get.size), Flags#(tiles.get.size)))))}
       .return{self.render};
@@ -69,22 +68,26 @@ GridModels:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label]): mut GridM
       .do{cycle.set(cycle.get + 1)}
       .do{tiles.set(tiles.get.with(selected.get, Retile#(tiles.get.get(selected.get), Flags#(cycle.get))))}
       .return{self.render};
-    mut .click(i: Nat, e: MouseEvent): Void -> Block#
+    mut .click(i: Nat): Void -> Block#
       .do{selected.set i}
-      .if{e.clicks >= 2} .do{tiles.set(tiles.get.with(i, Retile#(tiles.get.get i, Flags.busyUntil(e.elapsed + (Duration.seconds 3), Flags#5))))}
-      .do{Block#(status!.text("Selected: "+(tiles.get.get(i).name)+", clicks: "+(e.clicks.str)), Void)}
+      .do{Block#(status!.text("Selected: "+(tiles.get.get(i).name)), Void)}
+      .return{self.render};
+    mut .run(i: Nat, now: Instant): Void -> Block#
+      .do{selected.set i}
+      .do{tiles.set(tiles.get.with(i, Retile#(tiles.get.get i, Flags.busyUntil(now + (Duration.seconds 3), Flags#5))))}
+      .do{Block#(status!.text("Running: "+(tiles.get.get(i).name)), Void)}
       .return{self.render};
     }}
   }
-TileClicked:{ mut #(index: Nat, e: MouseEvent): Void; }
-TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked): Void -> Block#
+TileClicked:{ mut #(index: Nat, elapsed: Instant): Void; }
+TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked): Void -> Block#
   .do{Block#(grid.clear, Void)}
-  .return{AddTiles#(grid, tiles, selected, clicked, 0)}
+  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, 0)}
   }
-AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, i: Nat): Void -> Block#
+AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, i: Nat): Void -> Block#
   .if{i >= (tiles.size)} .return{Void}
-  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .mouse{:: .clicked{e -> clicked#(i, e)}}}, Void)}
-  .return{AddTiles#(grid, tiles, selected, clicked, i + 1)}
+  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .mouse{:: .clicked{_, _, t, _, _ -> clicked#(i, t)} .doubleClicked{_, _, t, _, _ -> doubleClicked#(i, t)}}}, Void)}
+  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, i + 1)}
   }
 Retile:{ #(t: Tile, flag: Painter): Tile -> { .name -> t.name; .image -> t.image; .flag -> flag; } }
 

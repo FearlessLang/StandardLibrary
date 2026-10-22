@@ -391,21 +391,21 @@ Picture:Widget[Picture]{
   read .keepAspect:Bool;
 }
 Mouse:_Styled[Mouse]{ .self->this;
-  mut .clicked(mut Consumer[MouseEvent]):mut Mouse;
-  mut .pressed(mut Consumer[MouseEvent]):mut Mouse;
-  mut .released(mut Consumer[MouseEvent]):mut Mouse;
-  mut .moved(mut Consumer[MouseEvent]):mut Mouse;
-  mut .dragged(mut Consumer[MouseEvent]):mut Mouse;
-  mut .entered(mut Consumer[MouseEvent]):mut Mouse;
-  mut .exited(mut Consumer[MouseEvent]):mut Mouse;
+  mut .clicked(mut MouseHandler):mut Mouse;
+  ///On a widget with a ``.doubleClicked``, the second click of a double click runs ``.doubleClicked`` instead of ``.clicked``; a click after a double click is a single click again.
+  ///A click is the second click of a double click when it is of the same mouse button as the click before, pressed at most 500 milliseconds after it, and at most 4 pixels of the screen away from it.
+  mut .doubleClicked(mut MouseHandler):mut Mouse;
+  mut .pressed(mut MouseHandler):mut Mouse;
+  mut .released(mut MouseHandler):mut Mouse;
+  mut .moved(mut MouseHandler):mut Mouse;
+  mut .dragged(mut MouseHandler):mut Mouse;
+  mut .entered(mut MouseHandler):mut Mouse;
+  mut .exited(mut MouseHandler):mut Mouse;
 }
-MouseEvent:ScreenContext{
-  .mouseX:XInt;
-  .mouseY:YInt;
-  ///1 for the press, the release and the click of a single click; 2 for those of the second click of a double click, and so on; 0 for .moved, .dragged, .entered and .exited.
-  ///A press is the next click after the previous press when it is of the same mouse button, at most 500 milliseconds later, and at most 4 pixels of the screen away.
-  .clicks:Nat;
-}
+///Runs for one mouse event of a widget.
+///``x`` and ``y`` are where the pointer is, in virtual pixels from the top left corner of the widget.
+///``elapsed``, ``panelWidth`` and ``panelHeight`` are as in ``ScreenContext``.
+MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, panelHeight: HeightNat): Void; }
 Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;

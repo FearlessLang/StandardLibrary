@@ -39,7 +39,7 @@ Live:Main{sys -> sys.gui.run{f -> Block#
       .pane{::
         .width 520 .height 50
         .background(Color.alienMint)
-        .mouse{:: .clicked{e -> Block#(status!.text "status: green area clicked", Void)}}
+        .mouse{:: .clicked{_, _, _, _, _ -> Block#(status!.text "status: green area clicked", Void)}}
         .save areaA
         }
       .button{:: .text "Add" .action{Block#(areaA!.button{b -> Block#
@@ -54,11 +54,11 @@ Live:Main{sys -> sys.gui.run{f -> Block#
         .width 520 .height 50
         .background(Color.sleepyBlue)
         .mouse{::
-          .pressed{e -> Block#
+          .pressed{_, _, _, _, _ -> Block#
             .do{pressedB.set(pressedB.get + 1)}
             .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
             }
-          .released{e -> Block#
+          .released{_, _, _, _, _ -> Block#
             .do{releasedB.set(releasedB.get + 1)}
             .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
             }
@@ -66,12 +66,12 @@ Live:Main{sys -> sys.gui.run{f -> Block#
         .save areaB
         }
       .button{:: .text "Rebind" .action{Block#(areaB!.mouse{m -> Block#
-        .do{Block#(m.pressed{e -> Block#
+        .do{Block#(m.pressed{_, _, _, _, _ -> Block#
           .do{pressedB.set(pressedB.get + 1)}
           .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
           }, Void)}
         .do{LiveWait#(f, Duration.seconds 3)}
-        .return{m.released{e -> Block#
+        .return{m.released{_, _, _, _, _ -> Block#
           .do{releasedB.set(releasedB.get + 1)}
           .return{Block#(countB!.text("pressed "+(pressedB.get.str)+", released "+(releasedB.get.str)), Void)}
           }}
@@ -79,9 +79,9 @@ Live:Main{sys -> sys.gui.run{f -> Block#
       .label{:: .text "C: click the purple area: the status must be: second .mouse ran"}
       .pane{p -> Block#
         .do{Block#(p.width 520 .height 50 .background(Color.wizardPurple), Void)}
-        .do{Block#(p.mouse{:: .save oldC .clicked{e -> Block#(status!.text "status: first .mouse ran", Void)}}, Void)}
-        .do{Block#(p.mouse{:: .clicked{e -> Block#(status!.text "status: second .mouse ran", Void)}}, Void)}
-        .do{Block#(oldC!.clicked{e -> Block#(status!.text "status: a builder saved from the replaced .mouse added a handler", Void)}, Void)}
+        .do{Block#(p.mouse{:: .save oldC .clicked{_, _, _, _, _ -> Block#(status!.text "status: first .mouse ran", Void)}}, Void)}
+        .do{Block#(p.mouse{:: .clicked{_, _, _, _, _ -> Block#(status!.text "status: second .mouse ran", Void)}}, Void)}
+        .do{Block#(oldC!.clicked{_, _, _, _, _ -> Block#(status!.text "status: a builder saved from the replaced .mouse added a handler", Void)}, Void)}
         .return{p}
         }
       .label{:: .text "D: press Gray: the whole window turns gray (160,160,160) up to its corners; then Red: it turns opaque red (230,64,48)."}

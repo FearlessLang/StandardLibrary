@@ -361,7 +361,7 @@ final class Stage extends MouseAdapter{
   }
   private void count(MouseEvent e){
     var again= e.getButton() == clickButton && e.getWhen() - clickWhen <= 500 && e.getLocationOnScreen().distance(clickAt) <= 4;
-    clicks = again ? clicks + 1 : 1;
+    clicks = again && clicks == 1 ? 2 : 1;
     clickWhen = e.getWhen();
     clickAt = e.getLocationOnScreen();
     clickButton = e.getButton();

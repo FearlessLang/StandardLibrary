@@ -227,7 +227,7 @@ abstract class AWidget implements Widget$2o$1{
   final _Frame frame;
   final SkComponent component= new SkComponent(this);
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
-  EnumMap<MouseKind,Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
+  EnumMap<MouseKind,MouseHandler$4sg$0> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
   String boundsWarning;
   String overlapWarning;
