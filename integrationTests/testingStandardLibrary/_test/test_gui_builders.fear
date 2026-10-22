@@ -11,4 +11,10 @@ GuiBuilderTests: Test {::
       .ok _ -> Error.msg "The saved Keys always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Keys styled and saved"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::
+    .label{l -> Error.msg("[" + (l.tooltip) + "] [" + (l.tooltip "Project hello" .tooltip) + "] [" + (l.uTooltip("caf".u "00E9").uTooltip.equalRepr("caf".u "00E9").str) + "]")}
+    }}}).run{
+      .ok _ -> Error.msg "The label always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "[] [Project hello] [True]"}}.assertTrue{i};
+      }}
   }

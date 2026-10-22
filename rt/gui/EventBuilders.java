@@ -11,6 +11,8 @@ import java.util.EnumMap;
 import java.util.List;
 import javax.swing.SwingUtilities;
 
+import io.github.humbleui.skija.Canvas;
+
 import static _base.MouseKind.*;
 
 enum MouseKind{ Clicked, DoubleClicked, Pressed, Released, Moved, Dragged, Entered, Exited }
@@ -64,6 +66,10 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
   private AWidget pressTarget;
+  private AWidget tip;
+  private long tipSince;
+  private Point tipAt;
+  private boolean tipOff;
   private AWidget dragged;
   private boolean draggedVert;
   private _Split dividing;
@@ -97,7 +103,16 @@ final class SkMouse extends MouseAdapter{
     updateHover(p);
   }
 
+  void paintTip(Canvas cv){
+    var owner= hover.stream().filter(t -> !t.tooltip.isEmpty()).findFirst().orElse(null);
+    if (owner != tip){ tip = owner; tipSince = System.nanoTime(); tipAt = null; }
+    if (tip == null || tipOff || System.nanoTime() - tipSince < 500_000_000L){ return; }
+    if (tipAt == null){ tipAt = at; }
+    Sk.tooltip(cv, tip.tooltip, tipAt, top().getWidth(), top().getHeight());
+  }
+
   @Override public void mousePressed(MouseEvent e){
+    tipOff = true;
     var p= point(e);
     var d= deepestAt(p);
     boolean left= SwingUtilities.isLeftMouseButton(e);
@@ -136,6 +151,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mouseMoved(MouseEvent e){
+    if (tipOff){ tipOff = false; tipSince = System.nanoTime(); tipAt = null; }
     var p= point(e);
     updateHover(p);
     dispatch(deepestAt(p), Moved, p);

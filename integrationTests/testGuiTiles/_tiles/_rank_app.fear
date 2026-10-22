@@ -86,7 +86,7 @@ TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mu
   }
 AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, i: Nat): Void -> Block#
   .if{i >= (tiles.size)} .return{Void}
-  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .mouse{:: .clicked{_, _, t, _, _ -> clicked#(i, t)} .doubleClicked{_, _, t, _, _ -> doubleClicked#(i, t)}}}, Void)}
+  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .tooltip((tiles.get i).name | "Double click to run it") .mouse{:: .clicked{_, _, t, _, _ -> clicked#(i, t)} .doubleClicked{_, _, t, _, _ -> doubleClicked#(i, t)}}}, Void)}
   .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, i + 1)}
   }
 Retile:{ #(t: Tile, flag: Painter): Tile -> { .name -> t.name; .image -> t.image; .flag -> flag; } }
