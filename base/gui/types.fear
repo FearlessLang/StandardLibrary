@@ -256,6 +256,11 @@ Border:_Container[Border]{
   mut .eastS(mut Scope[Split]):mut Border;
   mut .westS(mut Scope[Split]):mut Border;
   mut .centerS(mut Scope[Split]):mut Border;
+  mut .northSections(mut Scope[Sections]):mut Border;
+  mut .southSections(mut Scope[Sections]):mut Border;
+  mut .eastSections(mut Scope[Sections]):mut Border;
+  mut .westSections(mut Scope[Sections]):mut Border;
+  mut .centerSections(mut Scope[Sections]):mut Border;
   }
 Split:Widget[Split]{
   .self->this;
@@ -273,7 +278,49 @@ Split:Widget[Split]{
   mut .second(mut Scope[Pane]):mut Split;
   mut .secondB(mut Scope[Border]):mut Split;
   mut .secondS(mut Scope[Split]):mut Split;
+  mut .firstSections(mut Scope[Sections]):mut Split;
+  mut .secondSections(mut Scope[Sections]):mut Split;
   }
+///A list of sections. A section has a name, a title and a content.
+///The name identifies the section: every section of a Sections has its own name.
+///The title is a Pane, always shown; a click on the title expands or collapses the section.
+///The content shows only while the section is expanded. A collapsed content keeps its widgets and their state, and the program can change them.
+///A new section starts collapsed. Calls of the program never run ``.onToggle`` or ``.onClose``: those run only for clicks of the user.
+///``.column`` (the default) shows each title above its content, one section under the other.
+///``.tabs`` shows the titles in one row, and the content of the expanded section in the space below the row.
+Sections:_Container[Sections]{
+  .self->this;
+  ///Adds a section at the end, with this name and title; the result adds the content: ``.section("logs", {:: .label{:: .text "Logs"}}).content{:: ...}``.
+  mut .section(name: Str, title: mut Scope[Pane]): mut NewSection;
+  mut .column: mut Sections;
+  ///A deterministic error when ``.autoCollapse`` is False: a row of tabs shows one content at a time.
+  mut .tabs: mut Sections;
+  ///True (the default): expanding a section collapses the expanded one, so at most one section is expanded.
+  ///Setting it to True keeps expanded only the first expanded section.
+  ///False with ``.tabs`` is a deterministic error.
+  mut .autoCollapse(Bool): mut Sections;
+  ///True shows a vertical scroll bar, as ``Pane.stackScroll``: the column of titles and expanded contents scrolls when it is taller than the Sections.
+  mut .scroll(Bool): mut Sections;
+  mut .expand(name: Str): mut Sections;
+  mut .collapse(name: Str): mut Sections;
+  ///Moves the section to the position ``index``, counted after the move: then ``.index(name) == index``.
+  mut .index(name: Str, index: Nat): mut Sections;
+  mut .remove(name: Str): mut Sections;
+  ///Runs after a click of the user on a title expanded or collapsed its section, with the name of that section.
+  mut .onToggle(mut SectionHandler): mut Sections;
+  ///Shows an x at the end of every title: a click on the x runs the handler with the name of the section, and the section stays until the program removes it.
+  mut .onClose(mut SectionHandler): mut Sections;
+  ///The names of the sections, in order: the name of the section at index ``i`` is ``.names.get(i)``.
+  read .names: List[Str];
+  read .index(name: Str): Nat;
+  read .isExpanded(name: Str): Bool;
+  }
+NewSection:{
+  mut .content(mut Scope[Pane]): mut Sections;
+  mut .contentB(mut Scope[Border]): mut Sections;
+  mut .contentS(mut Scope[Split]): mut Sections;
+  }
+SectionHandler:{ mut #(sections: mut Sections, name: Str): Void; }
 _Caption[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
   mut .uText(UStr):mut S;
@@ -439,6 +486,7 @@ Pane:_Container[Pane]{
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
   mut .split(mut Scope[Split]):mut Pane;
+  mut .sections(mut Scope[Sections]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
   mut .picture(mut Scope[Picture]):mut Pane;

@@ -66,6 +66,7 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
   private AWidget pressTarget;
+  private Point pressAt;
   private AWidget tip;
   private long tipSince;
   private Point tipAt;
@@ -128,6 +129,7 @@ final class SkMouse extends MouseAdapter{
     }
     if (left){
       pressTarget = d;
+      pressAt = p;
       if (d instanceof _Button b){ b.down = true; }
       if (d instanceof AEditText t){ t.press(content(t, p), e.isShiftDown()); }
     }
@@ -237,6 +239,7 @@ final class SkMouse extends MouseAdapter{
         frame.frame.queue.submit(whileShown(b, b.action));
         return;
       }
+      if (t instanceof _Sections s && s.click(local(s, pressAt), local(s, p))){ return; }
       if (clicks == 2 && fire(t, DoubleClicked, p)){ return; }
       if (fire(t, Clicked, p)){ return; }
     }
@@ -290,7 +293,7 @@ final class SkMouse extends MouseAdapter{
     }));
   }
 
-  private static MF$7$1 whileShown(AWidget t, MF$7$1 r){
+  static MF$7$1 whileShown(AWidget t, MF$7$1 r){
     return new MF$7$1(){
       @Override public Object mut$$hash$0(){
         if (!t.frame.onEdtAndWait(t::canChange)){ return Void$o$0.instance; }
@@ -314,16 +317,17 @@ final class SkMouse extends MouseAdapter{
     if (!c.contains(x, y)){ return null; }
     var w= ((SkComponent) c).w;
     for (var k : ((Container) c).getComponents()){
-      if (w instanceof _Split s && !s.region(k).contains(x, y)){ continue; }
+      var r= w.region(k);
+      if (w.hides(k) || r != null && !r.contains(x, y)){ continue; }
       var d= deepest(k, x - k.getX(), y - k.getY());
       if (d != null){ return d; }
     }
     return w;
   }
 
-  private boolean inside(AWidget t, Point p){
-    return t.component.contains(SwingUtilities.convertPoint(top(), p, t.component));
-  }
+  private boolean inside(AWidget t, Point p){ return t.component.contains(local(t, p)); }
+
+  private Point local(AWidget t, Point p){ return SwingUtilities.convertPoint(top(), p, t.component); }
 
   private static List<AWidget> chainOf(AWidget t){
     var l= new ArrayList<AWidget>();
