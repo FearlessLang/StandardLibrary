@@ -123,6 +123,7 @@ MyTests:UnitTests{::
   .test TestPipe
   .test TestComparators
   .test TestUStr
+  .test TestNumStrBugs
   .test MathUnitTests
   .test InfoTests
   .test InfoValidatorTests

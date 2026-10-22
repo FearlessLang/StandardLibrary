@@ -1,0 +1,65 @@
+BugByteDivTests: Test {::
+  .check{200.getByte / 1 .assertEq(200 / 1)}
+  .check{200.getByte / 2 .getFloat .assertEq +100.0}
+  .check{200.getByte .getTruncDiv(Math.maxNat) .assertEq(0.getByte)}
+  .check{200.getByte .truncDiv(Math.maxNat) .assertEq({::}, Opts#(0.getByte))}
+  }
+
+BugIntDivTests: Test {::
+  .check{Math.minInt .getTruncDiv 9_223_372_036_854_775_808 .assertEq -1}
+  .check{Math.minInt .getRem 9_223_372_036_854_775_808 .assertEq +0}
+  .check{Math.minInt .getDiv 9_223_372_036_854_775_808 .assertEq -1}
+  .check{Math.minInt .div 9_223_372_036_854_775_808 .assertEq({::}, Opts#(-1))}
+  }
+
+BugIntRangeTests: Test {::
+  .check{(-1=~~=(Math.maxInt)).size .assertEq(Math.maxInt.getNat + 2)}
+  .check{(-1=~~=(Math.maxInt)).isEmpty .assertFalse}
+  }
+
+BugNatFloatTests: Test {::
+  .check{13_835_058_055_282_164_737 .softFloat .assertEq +13_835_058_055_282_165_760.0}
+  }
+
+BugFloatRoundTests: Test {::
+  .check{0.5 .getPred .softRound .assertEq +0.0}
+  .check{0.5 .getPred .round .assertEq({::}, Opts#(+0.0))}
+  .check{+4_503_599_627_370_497.0 .softRound .assertEq +4_503_599_627_370_497.0}
+  .check{-4_503_599_627_370_497.0 .softRound .assertEq -4_503_599_627_370_497.0}
+  }
+
+BugFloatRangeTests: Test {::
+  .check{(-0.0=~~= +0.0).size .assertEq 1}
+  .check{(+0.0=~~= -0.0).size .assertEq 1}
+  .check{(+0.0=~~= -0.0).list .assertEq({::}, Lists# +0.0)}
+  .check{(-1.0=~~= +0.0).size .assertEq((-1.0=~~= -0.0).size)}
+  .check{((-1.0 .getPred)=~~= -1.0).list .assertEq({::}, Lists#(-1.0 .getPred, -1.0))}
+  .check{((0.0 .getPred .getPred)=~~=(0.0 .getSucc)).list
+    .assertEq({::}, Lists#(0.0 .getPred .getPred, 0.0 .getPred, +0.0, 0.0 .getSucc))}
+  }
+
+BugNumFloatTests: Test {::
+  .check{(2/1 ** +1024) .float .assertEmpty {::}}
+  .checkDetErr({::}, {(2/1 ** +1024) .getFloat})
+  .check{0.0 .getSucc .getNum .float .assertEq({::}, Opts#(0.0 .getSucc))}
+  .check{0.0 .getSucc .getNum .softFloat .assertEq(0.0 .getSucc)}
+  .check{(2/1 ** +1100) + (1/1) / (2/1 ** +1100) .softFloat .assertEq +1.0}
+  }
+
+BugMathTests: Test {::
+  .check{Math.atan2(+1.0, +0.0)# .assertEq +0.0}
+  .check{Math.atan2(+0.0, +1.0)# .assertEq(Math.pi / +2.0)}
+  .checkDetErr({::.isMsg{::.startsWith "Math.ln: Cannot"}}, {Math.ln(-1.0)})
+  .checkDetErr({::.isMsg{::.startsWith "Math.ln: "}}, {Math.ln(Math.nan)})
+  }
+
+TestNumStrBugs: Test {::
+  .test BugByteDivTests
+  .test BugIntDivTests
+  .test BugIntRangeTests
+  .test BugNatFloatTests
+  .test BugFloatRoundTests
+  .test BugFloatRangeTests
+  .test BugNumFloatTests
+  .test BugMathTests
+  }
