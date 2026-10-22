@@ -3,7 +3,7 @@
 /// This allows for function piping from functional languages, is similar to extension methods from OOP languages
 /// Examples:
 //>   .check{Math.ln(Math.asin(Math.clamp({::}, -1.0, +1.0, 12.0))#)
-//>     .assertEq(12.0 |> {Math.clamp({::}, -1.0, +1.0, ::)} |> {Math.asin :: #} |> Math.ln)}
+//>     .assertEq(12.0 |> {Math.clamp({::}, -1.0, +1.0, ::)} |> {Math.asin :: #} |> {Math.ln ::})}
 Operation[S:**, R:**]: Pipe[Operation[S, R]] {
   .close -> this;
   mut #(source: S): R

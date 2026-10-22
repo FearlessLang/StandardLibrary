@@ -1120,6 +1120,50 @@ _Info_Examples: base.Test {::
   }
   }
 
+_InfoExtractor_Examples: base.Test {::
+  .test base.Test{::
+  // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .checkEq(info, {info.extract{::}!})
+  .checkEq("bob", {info.extract{:: > "friends" > 0 > "name" .extractMsg}.mapSome{::.lower}!})
+  .checkEq("Bob, Alice", {info.extract{:: > "friends" .extractList .where{::
+      & > 0 > "name" .isMsg{:: == "Bob"}
+      & > 1 > "name" .isMsg{:: == "Alice"}
+      }}
+    .mapSome{::.flow.map{::.extract{:: > "name" .extractMsg}!}.join ", "}!})
+  .checkTrue{info.extract{:: > "friends" .extractList .where{::
+      & > 0 > "name" .isMsg{:: == "Bob"}
+      & > 1 > "name" .isMsg{:: == "David"}
+      }}.isEmpty}
+  }
+  }
+
+_InfoValidator_Examples: base.Test {::
+  .test base.Test{::
+  // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
+  .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
+  .checkTrue{info.validate{::}}
+  .checkTrue{info.validate{:: > "friends" > 0 > "name" .isMsg{:: == "Bob"}}}
+  .checkTrue{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    & > "friends" > 1 > "name" .isMsg{:: == "Alice"}
+    }}
+  .checkTrue{info.validate{:: > "friends" .isList{::.size == 2}}}
+  .checkFalse{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    | > "friends" > 1 > "name" .isMsg{:: == "Alice"}
+    & > "friends" > 2 > "name" .isMsg{:: == "David"}}}
+  .checkTrue{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    | > "friends" .where{::
+      & > 1 > "name" .isMsg{:: == "Alice"}
+      & > 2 > "name" .isMsg{:: == "David"}}}}
+  .checkTrue{info.validate{::
+    & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
+    & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
+  }
+  }
+
 _Int_Examples: base.Test {::
   .test base.Test{::
   .check{(+2 ** 6) .assertEq +64}
@@ -1751,6 +1795,13 @@ _Num_Examples: base.Test {::
   }
   }
 
+_Operation_Examples_2: base.Test {::
+  .test base.Test{::
+  .check{Math.ln(Math.asin(Math.clamp({::}, -1.0, +1.0, 12.0))#)
+    .assertEq(12.0 |> {Math.clamp({::}, -1.0, +1.0, ::)} |> {Math.asin :: #} |> {Math.ln ::})}
+  }
+  }
+
 _QuadFlow_Examples_4: base.Test {::
   .test base.Test{::
   .check{Flows#(1).with(Flows#(10)).with(Flows#(100)).with(Flows#(1000)).getMerge{a, b, c, d -> a + b + c + d}.list .assertEq({::}, Lists#(1111))}
@@ -1770,6 +1821,13 @@ _Rev_Examples: base.Test {::
   .test base.Test{::
   .check{Lists#(3,1,2).flow.sort(Rev#{::}).list .assertEq({::}, Lists#(3,2,1))}
   .check{Lists#(3,1,3,2,1).flow.max(Rev#{::}).list .assertEq({::}, Lists#(1,1))}
+  }
+  }
+
+_RunRecursion_Examples: base.Test {::
+  .test base.Test{::
+  .check{RunRecursion#{5}.assertEq 5}
+  .check{RunRecursion{.depth->1}#{RunRecursion{.depth->1}#{7}}.assertEq 7}
   }
   }
 
@@ -2077,15 +2135,19 @@ AllAutoTests_base: base.UnitTests {::
   .test _Float_Examples
   .test _Flow_Examples_1
   .test _Info_Examples
+  .test _InfoExtractor_Examples
+  .test _InfoValidator_Examples
   .test _Int_Examples
   .test _IsoPods_Examples
   .test _LevelByte_Examples_1
   .test _Map_Examples_2
   .test _Nat_Examples
   .test _Num_Examples
+  .test _Operation_Examples_2
   .test _QuadFlow_Examples_4
   .test _Range_Examples_1
   .test _Rev_Examples
+  .test _RunRecursion_Examples
   .test _Set_Examples_1
   .test _Sets_Examples
   .test _Str_Examples
