@@ -31,6 +31,7 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import static _base.Scopes.*;
 
@@ -198,6 +199,22 @@ interface Sk{
     float gw= s.vertical ? l : t;
     float gh= s.vertical ? t : l;
     cv.drawRRect(RRect.makeXYWH(cx - gw / 2, cy - gh / 2, gw, gh, t / 2f), paint);
+  }
+
+  static void tooltip(Canvas cv, String text, java.awt.Point at, int w, int h){
+    var lines= Arrays.stream(text.split("\n", -1)).map(l -> shape(l, 12)).toList();
+    float bw= (float) lines.stream().mapToDouble(TextLine::getWidth).max().orElseThrow() + 10;
+    float bh= lines.size() * 18 + 6;
+    float x= Math.clamp(at.x, 0, Math.max(0, w - bw));
+    float y= at.y + 20 + bh <= h ? at.y + 20 : Math.max(0, at.y - 4 - bh);
+    paint.setColor(0xFF767676);
+    cv.drawRect(Rect.makeXYWH(x, y, bw, bh), paint);
+    paint.setColor(0xFFFAFAFA);
+    cv.drawRect(Rect.makeXYWH(x + 1, y + 1, bw - 2, bh - 2), paint);
+    paint.setColor(0xFF000000);
+    for (int i= 0; i < lines.size(); i += 1){
+      try (var l= lines.get(i)){ cv.drawTextLine(l, x + 5, y + 3 + i * 18 + 12, paint); }
+    }
   }
 
   static void background(Canvas cv, AWidget s){

@@ -295,6 +295,7 @@ abstract class AWidget implements Widget$2o$1{
   // expose Fearless methods to change it, but it lives here alongside the
   // other style fields.
   String text= "";
+  String tooltip= "";
 
   final _Frame frame;
   final SkComponent component= new SkComponent(this);
@@ -450,6 +451,11 @@ abstract class AWidget implements Widget$2o$1{
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   @Override public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
+  @Override public Object mut$uTooltip$1(Object t){
+    var s= ustr(t);
+    return onEdt(() -> tooltip = s);
+  }
+  @Override public Object read$uTooltip$0(){ return UStr$s$0Instance.instance(tooltip); }
   @Override public Object read$topInset$0(){ return h(top); }
   @Override public Object read$bottomInset$0(){ return h(bottom); }
   @Override public Object read$leftInset$0(){ return w(left); }
@@ -697,6 +703,7 @@ final class _Frame implements Frame$1c$0{
     canvas.clipRect(io.github.humbleui.types.Rect.makeWH(c.getWidth(), c.getHeight()));
     canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
     Sk.paintNode(c, canvas);
+    mouse.paintTip(canvas);
     canvas.restoreToCount(picture);
     stage.paintCorner(canvas);
     canvas.restoreToCount(save);

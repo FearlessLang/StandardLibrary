@@ -212,6 +212,10 @@ Widget[S]:_Styled[S]{
   mut .radius(Nat):mut S;
   mut .foreground(Color):mut S;
   mut .background(Color):mut S;
+  mut .tooltip(s:Str):mut S->this.uTooltip(s.u);
+  ///The text shown in a box over the window when the pointer rests on this widget for 500 milliseconds; empty, the default, shows nothing.
+  ///Each line of the text is a line of the box.
+  mut .uTooltip(UStr):mut S;
   read .topInset: HeightNat;
   read .bottomInset: HeightNat;
   read .leftInset:WidthNat;
@@ -222,6 +226,8 @@ Widget[S]:_Styled[S]{
   read .radius:Nat;
   read .foreground:Color;
   read .background:Color;
+  read .tooltip:Str->this.uTooltip.getStr; ///throws if the tooltip was set with .uTooltip and is not a valid Str
+  read .uTooltip:UStr;
   }
 _Container[S]:Widget[S]{
   mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
