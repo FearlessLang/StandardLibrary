@@ -274,19 +274,18 @@ TestMapsAndSetsTests: Test {::
       Persons#(34,"Alice",List[Cat]), "Wellington 134 Kelburn Parade"
       ).opt(Persons#(38,"Neil Armstrong",List[Cat])).orValue("Moon").assertEq "Moon"
     }
-// Coming with multiflows
-//  .check{
-//    Maps#({::},
-//      Persons#(25,`Bob`,List[Cat]), `A`,
-//      Persons#(34,`Alice`,List[Cat]), `B`
-//      ).flow.zipExact{k, v -> k.name + v}.list.get(0).assertEq `BobA`
-//    }
-//  .check{
-//    Maps#({::},
-//      Persons#(25,`Bob`,List[Cat]), `A`,
-//      Persons#(34,`Alice`,List[Cat]), `B`
-//      ).flow.zipExact{k, v -> k.name + v}.list.get(1).assertEq `AliceB`
-//    }
+  .check{
+    Maps#({::},
+      Persons#(25,"Bob",List[Cat]), "A",
+      Persons#(34,"Alice",List[Cat]), "B"
+      ).flow{k, v -> k.name + v}.list.get(0).assertEq "BobA"
+    }
+  .check{
+    Maps#({::},
+      Persons#(25,"Bob",List[Cat]), "A",
+      Persons#(34,"Alice",List[Cat]), "B"
+      ).flow{k, v -> k.name + v}.list.get(1).assertEq "AliceB"
+    }
   .check{
     Data.ps.flow.mapping({::},{
       .key  p -> p.name;
