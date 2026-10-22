@@ -10,7 +10,7 @@ import java.util.List;
 
 // Flow layout with lines centered on the cross axis and the block of lines
 // centered on the flow axis. Insets and gaps are read live from the owning
-// widget, like MutableBorderLayout. Two independent knobs, both read live
+// widget, like MutableBorderLayout. Three independent knobs, all read live
 // from `gap` (the _Pane):
 //  - gap.vertical: flow axis. false (default) flows left-to-right and
 //    stacks rows top-to-bottom; true flows top-to-bottom and stacks columns
@@ -18,6 +18,8 @@ import java.util.List;
 //  - gap.minPerLine, gap.maxPerLine: line length. A line breaks after
 //    maxPerLine children, and after at least minPerLine children when the
 //    next child would overflow the size of the container along the flow axis.
+//  - gap.centered: false places the lines, the block of lines and each child
+//    in its line at the start (left, top) instead of centering them.
 // Every child keeps its own size; a child with fill takes the whole flow
 // axis of the container. Laying out never changes the size of the container;
 // natural is the size .pack gives it: lines broken only at maxPerLine.
@@ -53,20 +55,20 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
       gap.scrollY = Math.clamp(gap.scrollY, 0, gap.maxScrollY());
 
       int crossStart= vert
-        ? gap.left + Math.max(0, (availW - totalCross) / 2)
-        : gap.top + Math.max(0, (availH - totalCross) / 2);
+        ? gap.left + half(availW - totalCross)
+        : gap.top + half(availH - totalCross);
       int cross= crossStart;
       for (var ln : ls){
         int primaryStart= vert
-          ? gap.top + Math.max(0, (availH - ln.primary()) / 2)
-          : gap.left + Math.max(0, (availW - ln.primary()) / 2);
+          ? gap.top + half(availH - ln.primary())
+          : gap.left + half(availW - ln.primary());
         int primary= primaryStart;
         for (var it : ln.items()){
           var c= it.c();
           var d= it.d();
           int pSize= vert ? d.height : d.width;
           int cSize= vert ? d.width : d.height;
-          int off= cross + (ln.cross() - cSize) / 2;
+          int off= cross + half(ln.cross() - cSize);
           if (vert){ c.setBounds(off - gap.scrollX, primary - gap.scrollY, cSize, pSize); }
           else{ c.setBounds(primary - gap.scrollX, off - gap.scrollY, pSize, cSize); }
           primary += pSize + (vert ? gap.heightGap : gap.widthGap);
@@ -75,6 +77,8 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
       }
     }
   }
+
+  private int half(int space){ return gap.centered ? Math.max(0, space) / 2 : 0; }
 
   private record Item(Component c, Dimension d){}
 

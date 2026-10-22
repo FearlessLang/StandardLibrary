@@ -341,7 +341,10 @@ Graphics:ScreenContext{
   mut .line(XInt, YInt): mut Graphics;
   mut .rect(WidthNat, HeightNat): mut Graphics;
   mut .oval(WidthNat, HeightNat): mut Graphics;
-  mut .image(Image): mut Graphics;
+  mut .image(image: Image): mut Graphics -> this.image(image, image.width, image.height);
+  ///Draws ``image`` scaled to ``width`` x ``height``, with its top left corner at the position.
+  ///The image goes to the screen in one scaling step: an image with more pixels than the virtual pixels it covers stays sharp on a window scaled up.
+  mut .image(image: Image, width: WidthNat, height: HeightNat): mut Graphics;
   mut .textHeight(n: Nat): mut Graphics -> this.textHeight'(HeightNat#n);
   mut .textHeight'(HeightNat): mut Graphics;
   mut .text(s: Str): mut Graphics -> this.uText(s.u);
@@ -504,6 +507,10 @@ Pane:_Container[Pane]{
   //space left beside the bars.
   mut .lineScroll(Bool): mut Pane;
   mut .stackScroll(Bool): mut Pane;
+  //.centered(True) (the default) centers each line along the flow axis,
+  //the stack of lines across it, and each child across its line.
+  //.centered(False) places them all at the start: the left and the top.
+  mut .centered(Bool): mut Pane;
   }
 
 Scope[T]: { mut .run(mut T): mut T; }

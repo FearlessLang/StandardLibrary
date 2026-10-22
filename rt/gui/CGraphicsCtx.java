@@ -1,9 +1,11 @@
 package _base;
 
 import io.github.humbleui.skija.Canvas;
+import io.github.humbleui.skija.FilterMipmap;
+import io.github.humbleui.skija.FilterMode;
+import io.github.humbleui.skija.MipmapMode;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.types.Rect;
 
 class CGraphicsCtx implements Graphics$ao$0{
@@ -76,13 +78,13 @@ class CGraphicsCtx implements Graphics$ao$0{
   private Rect shapeRect(Object w, Object h, String what){
     return Rect.makeXYWH(x, y, Scopes.extent((WidthNat$as$0) w, what + " width"), Scopes.extent((HeightNat$lg$0) h, what + " height"));
   }
-  @Override public Object mut$image$1(Object image){
+  @Override public Object mut$image$3(Object image, Object w, Object h){
     var img= ((Image$1c$0Instance) image).image();
     cv.drawImageRect(
       img,
       Rect.makeWH(img.getWidth(), img.getHeight()),
-      reach(Rect.makeXYWH(x, y, img.getWidth(), img.getHeight())),
-      SamplingMode.LINEAR,
+      reach(shapeRect(w, h, "image")),
+      new FilterMipmap(FilterMode.LINEAR, MipmapMode.LINEAR),
       null,
       true);
     return this;
