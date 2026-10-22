@@ -1,0 +1,35 @@
+GuiBugTests: Test {::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0").run{f -> Error.msg "A name made only of a no-break space reached the consumer of Gui.run"}}).run{
+      .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{::.contains "is blank"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(Key#"SEPARATOR").closeKey(Key#"SEPARATER").run{f -> Error.msg "A close key naming the same key as the full screen key reached the consumer of Gui.run"}}).run{
+      .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{::.startsWith "Gui.closeKey(SEPARATER) is the full screen key of this Gui"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedWindowLabel#(s.gui)}).run{
+      .ok _ -> Error.msg "A Label of a closed window accepted a new text";
+      .info i -> i.validate{:: > "msg" .isMsg{::.startsWith "This Label is not in the window"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedWindowFrame#(s.gui)}).run{
+      .ok _ -> Error.msg "The Frame of a closed window accepted a new content";
+      .info i -> i.validate{:: > "msg" .isMsg{::.contains "window"}}.assertTrue{i};
+      }}
+  }
+ClosedWindowLabel: {#(gui: mut base.Gui): Void -> Block#
+  .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+  .do{gui.run{f -> Block#
+    .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
+    .return{f.content{:: .label{:: .text "a" .save l}}}
+    }}
+  .return{Block#(l!.text "b", Void)}
+  }
+ClosedWindowFrame: {#(gui: mut base.Gui): Void -> Block#
+  .let[mut Slot[mut Frame]] kept = {Slots#[mut Frame]}
+  .do{gui.run{f -> Block#
+    .do{kept.fill f}
+    .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
+    .return{f.content{::}}
+    }}
+  .return{kept!.content{:: .label{:: .text "b"}}}
+  }
