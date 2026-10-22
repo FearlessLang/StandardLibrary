@@ -409,7 +409,7 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
         p
       );
       paint.imm$run$1(g);
-      paintWarning = warned(paintWarning, g.outside(this));
+      paintWarning = warned(paintWarning, g.outside(describe(), "widget", component.getWidth(), component.getHeight()));
     }
   }
 
