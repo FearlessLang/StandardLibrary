@@ -41,5 +41,5 @@ ThrowMapTests: Test {::
 TestLiteralErrors: Test {::
   .test ThrowArithTests
   .test ThrowListTests
-  //.test ThrowMapTests
+  .test ThrowMapTests
   }
