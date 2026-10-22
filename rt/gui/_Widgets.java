@@ -475,14 +475,13 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
     try (var p= new Paint().setAntiAlias(true).setColor(fg)){
       var g= new CGraphicsCtx(
         cv,
-        frame,
         frame.elapsed,
         Scopes.w(component.getWidth()),
         Scopes.h(component.getHeight()),
         p
       );
       paint.imm$run$1(g);
-      paintWarning = warned(paintWarning, g.outside(this));
+      paintWarning = warned(paintWarning, g.outside(describe(), "widget", component.getWidth(), component.getHeight()));
     }
   }
 

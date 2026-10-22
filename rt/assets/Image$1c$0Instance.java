@@ -1,31 +1,75 @@
 package _base;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Image;
+import io.github.humbleui.skija.ImageInfo;
+import io.github.humbleui.skija.Paint;
+import io.github.humbleui.skija.Surface;
 
 final class Image$1c$0Instance implements Image$1c$0{
-  private final Image image;
-  Image$1c$0Instance(Image image){ this.image= image; }
-  Image image(){ return image; }
+  private final int w;
+  private final int h;
+  private final Optional<Image> image;
+  private final int background;
+  Image$1c$0Instance(Image image){ this(image.getWidth(), image.getHeight(), Optional.of(image), 0); }
+  private Image$1c$0Instance(int w, int h, Optional<Image> image, int background){
+    this.w= w;
+    this.h= h;
+    this.image= image;
+    this.background= background;
+  }
+  Image image(){ return image.orElseGet(() -> drawn(_ -> {})); }
 
-  @Override public Object read$width$0(){ return width(image.getWidth()); }
-  @Override public Object read$height$0(){ return height(image.getHeight()); }
+  @Override public Object read$width$0(){ return width(w); }
+  @Override public Object read$height$0(){ return height(h); }
 
   @Override public Object imm$scale$2(Object w, Object h){
-    return scaled(image, widthVal(w), heightVal(h));
+    return scaled(widthVal(w), heightVal(h));
   }
   @Override public Object imm$scaleToWidth$p1$1(Object w){
     var newW= widthVal(w);
-    return scaled(image, newW, side(proportional(image.getHeight(), newW, image.getWidth()), "image height"));
+    return scaled(newW, side(proportional(h, newW, this.w), "image height"));
   }
   @Override public Object imm$scaleToHeight$p1$1(Object h){
     var newH= heightVal(h);
-    return scaled(image, side(proportional(image.getWidth(), newH, image.getHeight()), "image width"), newH);
+    return scaled(side(proportional(w, newH, this.h), "image width"), newH);
+  }
+  @Override public Object imm$paint$1(Object p){
+    try (var paint= new Paint().setAntiAlias(true)){
+      return new Image$1c$0Instance(drawn(cv -> painted(cv, (Painter$5c$0) p, paint)));
+    }
+  }
+  private void painted(Canvas cv, Painter$5c$0 p, Paint paint){
+    var g= new CGraphicsCtx(cv, Scopes.time(0), width(w), height(h), paint);
+    p.imm$run$1(g);
+    var outside= g.outside("an image", "image", w, h);
+    if (outside != null){ System.err.print("Warning: "+outside+"\n"); }
+  }
+  private Image drawn(Consumer<Canvas> more){
+    try (var surf= Surface.makeRaster(ImageInfo.makeN32Premul(w, h))){
+      var cv= surf.getCanvas();
+      image.ifPresentOrElse(i -> cv.drawImage(i, 0, 0), () -> cv.clear(background));
+      more.accept(cv);
+      return surf.makeImageSnapshot();
+    }
+  }
+  static Image$1c$0Instance blank(Object w, Object h, Object background){
+    var iw= widthVal(w);
+    var ih= heightVal(h);
+    checkPixels(iw, ih);
+    return new Image$1c$0Instance(iw, ih, Optional.empty(), Sk.color((Color$1c$0) background));
   }
 
-  private static Image$1c$0Instance scaled(Image image, int w, int h){
+  private Image$1c$0Instance scaled(int w, int h){
+    checkPixels(w, h);
+    return image.map(i -> new Image$1c$0Instance(Sk.scaled(i, w, h))).orElseGet(() -> new Image$1c$0Instance(w, h, image, background));
+  }
+  private static void checkPixels(int w, int h){
     long pixels= (long)w*h;
     if (pixels > Scopes.maxImagePixels){ throw Util.detErr("image "+w+" x "+h+" has "+pixels+" pixels; it must have <= "+Scopes.maxImagePixels); }
-    return new Image$1c$0Instance(Sk.scaled(image, w, h));
   }
   private static long proportional(int oldOther, int newMain, int oldMain){
     return Math.max(1, ((long)oldOther*newMain + oldMain/2L)/oldMain);

@@ -150,4 +150,12 @@ Image:{
   .scaleToHeight'(height: HeightNat): Image;
   .scaleToWidth(width: Nat): Image -> this.scaleToWidth'(WidthNat#width);
   .scaleToHeight(height: Nat): Image -> this.scaleToHeight'(HeightNat#height);
+  ///A copy of this image with ``painter`` drawn over it, by the `Graphics` that paints a widget.
+  ///Here ``.panelWidth`` and ``.panelHeight`` are the size of this image, and ``.elapsed`` is ``Instant.origin``.
+  ///The color starts as opaque black, and the position at (0, 0).
+  ///What ``painter`` draws past the edges of this image is clipped, with a warning, as for the painter of a widget.
+  .paint(painter: Painter): Image;
   }
+///``Images#(width, height, background)`` is an image of ``width`` x ``height`` pixels, each of the color ``background``.
+///Each side is between 1 and 32767, and the image has at most 268435456 pixels.
+Images:{ #(width: WidthNat, height: HeightNat, background: Color): Image -> _Magic!; }

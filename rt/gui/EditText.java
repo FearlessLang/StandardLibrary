@@ -532,7 +532,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
       return;
     }
     try (var p= new Paint().setAntiAlias(true).setColor(fg)){
-      caretPainter.imm$run$1(new CCaretCtx(cv, frame, frame.elapsed, w(component.getWidth()), h(component.getHeight()), p,
+      caretPainter.imm$run$1(new CCaretCtx(cv, frame.elapsed, w(component.getWidth()), h(component.getHeight()), p,
         (Duration$ao$0) Duration$ao$0.instance.read$$hash$1(n(since)), h(lh)));
     }
   }
@@ -541,8 +541,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
 final class CCaretCtx extends CGraphicsCtx implements CaretGraphics$9kw$0{
   final Duration$ao$0 sinceMove;
   final HeightNat$lg$0 lineHeight;
-  CCaretCtx(Canvas cv, _Frame frame, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint, Duration$ao$0 sinceMove, HeightNat$lg$0 lineHeight){
-    super(cv, frame, elapsed, panelWidth, panelHeight, paint);
+  CCaretCtx(Canvas cv, Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Paint paint, Duration$ao$0 sinceMove, HeightNat$lg$0 lineHeight){
+    super(cv, elapsed, panelWidth, panelHeight, paint);
     this.sinceMove= sinceMove;
     this.lineHeight= lineHeight;
   }
