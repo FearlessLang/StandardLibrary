@@ -81,12 +81,20 @@ InMemoryLog[T]: CaptureFree{
 ///```
 ///
 ///The name is only diagnostic, exactly like InMemoryLog's -- it never picks
-///the file. The file lives at .out/logs/<package>/<TypeName>.log instead:
-///one folder per package (exactly where base.Log and base.UnitTestLog
-///both write, sharing base's own folder under their own filenames), one
-///file per declared type within it. Since no two types share a name within
-///one package, two different FileLog declarations can never write to the
-///same file, regardless of what name they're given.
+///the file. The file is named after the type, the way an asset file names its
+///type, read backwards: PkgLog writes to .out/logs/_<package>/pkg_log.log.
+///There is one folder per package, named like the folder of that package
+///(base.Log and base.UnitTestLog write in _base, as log.log and
+///unit_test_log.log), and one file per declared type within it.
+///Two different types always get two different file names, also on a file
+///system that ignores case: AppLog writes to app_log.log, Applog to applog.log.
+///
+///A type implementing FileLog must have a name that turns into a file name
+///allowed in a Fearless project, or it is a compile time error: only letters,
+///digits and underscores, an underscore never followed by a lowercase letter,
+///not a Windows reserved device name (Con, Aux, Nul, Prn, Com1, Lpt1, ...),
+///not turning into a file name starting with _rank_ (as _RankX does), and a
+///log path of at most 200 characters.
 ///
 ///Otherwise this behaves exactly like base.Log: each call appends the
 ///string representation of s as one timestamped line, and the file is
