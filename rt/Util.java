@@ -150,10 +150,10 @@ public final class Util{
   public static Deterministic deterministic(Info$o$0 i){ return new Deterministic(i); }
   public static NonDeterministic nonDeterministic(Info$o$0 i){ return new NonDeterministic(i); }
   public static boolean topLevel(Runnable r){
-    try{ r.run(); endMarker(); return true; }
-    catch (Deterministic d){ printInfo(d.i, d); }
-    catch (NonDeterministic d){ printInfo(d.i, d); }
-    catch (Throwable t){ t.printStackTrace();}
+    try{ r.run(); endMarker(); _CapProcess$18g$0.report(null); return true; }
+    catch (Deterministic d){ printInfo(d.i, d); _CapProcess$18g$0.report(d.i); }
+    catch (NonDeterministic d){ printInfo(d.i, d); _CapProcess$18g$0.report(d.i); }
+    catch (Throwable t){ t.printStackTrace(); _CapProcess$18g$0.report((Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t)))); }
     return false;
   }
   private static void endMarker(){

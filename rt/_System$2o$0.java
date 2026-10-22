@@ -14,6 +14,7 @@ public final class _System$2o$0 implements System$2o$0{
   @Override public Object mut$dataRead$0(){ return new _CapDataRead$2h4$0(); }
   @Override public Object mut$dataReadWrite$0(){ return new _CapDataReadWrite$2780$0(); }
   @Override public Object mut$manager$0(){ return new _CapManager$18g$0(); }
+  @Override public Object mut$process$0(){ return new _CapProcess$18g$0(); }
 
   @Override public Object mut$gui$0(){ return new _FluentGUI(); }
 

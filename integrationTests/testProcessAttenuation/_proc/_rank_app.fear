@@ -1,0 +1,58 @@
+use base.Main as Main;
+use base.Attenuator as Attenuator;
+use base.Error as Error;
+use base.Block as Block;
+use base.Void as Void;
+use base.Str as Str;
+
+///Every method reaches the received System, but the download capability is revoked.
+NoDownload: Attenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
+  .download -> Error.nonDeterministic "NoDownload: the download capability is revoked.";
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
+  .readLog l -> u.readLog l; .gui -> u.gui;
+  .iso -> NoDownload#(u.iso.close); .close -> s;
+  }}
+///Every method reaches the received System, but the manager capability is revoked.
+NoManager: Attenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
+  .manager -> Error.nonDeterministic "NoManager: the manager capability is revoked.";
+  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui;
+  .iso -> NoManager#(u.iso.close); .close -> s;
+  }}
+///Prints which of the download and manager capabilities it can reach.
+Child: Main { sys -> Block#
+  .do{ sys.out.println "child starts" }
+  .do{ sys.try#(sys.iso.close, {s -> s.download}).run{
+    .ok _ -> sys.out.println "child: download ok";
+    .info _ -> sys.out.println "child: download revoked";
+    }}
+  .do{ sys.try#(sys.iso.close, {s -> s.manager}).run{
+    .ok _ -> sys.out.println "child: manager ok";
+    .info _ -> sys.out.println "child: manager revoked";
+    }}
+  .return{ sys.out.println "child ends" }
+  }
+Failing: Main { sys -> Error.msg "the failing main throws" }
+///Runs Child with no attenuator and with NoDownload, then Failing: the output shows that every new process keeps the attenuators of this one.
+Parent: Main { sys -> Block#
+  .do{ sys.out.println "parent starts" }
+  .do{ sys.try#(sys.iso.close, {s -> s.manager}).run{
+    .ok _ -> sys.out.println "parent: manager ok";
+    .info _ -> sys.out.println "parent: manager revoked";
+    }}
+  .do{ sys.process.run(Child).run{
+    .ok _ -> sys.out.println "parent: child ok";
+    .info i -> sys.out.println("parent: child failed: "+(i.getMsg));
+    }}
+  .do{ sys.process.run(Child, NoDownload).run{
+    .ok _ -> sys.out.println "parent: child ok";
+    .info i -> sys.out.println("parent: child failed: "+(i.getMsg));
+    }}
+  .do{ sys.process.run(Failing).run{
+    .ok _ -> sys.out.println "parent: failing ok";
+    .info i -> sys.out.println("parent: failing failed: "+(i.getMsg));
+    }}
+  .return{ sys.out.println "parent ends" }
+  }

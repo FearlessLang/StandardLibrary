@@ -1,0 +1,61 @@
+///An attenuator derives from a System a System with less authority: the System it gives reaches the world only
+///through the System it receives.
+///An attenuator captures nothing, so its type name identifies it: the Fearless manager and `CapProcess` apply
+///attenuators by name, in the process they start, where every attenuator receives a forwarder (`Caretakers`) whose
+///gate holds `Systems.revoked`; the real System enters the gate only after every attenuator has run.
+///Thus an attenuator can only build the System it gives: a call on the received System while the attenuator runs is
+///a non deterministic error, in every process, and the System it gives calls the received System only from its own methods.
+///In this way the attenuated System built in a new process is structurally equivalent to the one its parent built.
+///```
+///NoDownload: Attenuator { u -> {'s
+///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
+///  .download -> Error.nonDeterministic "NoDownload: the download capability is revoked.";
+///  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
+///  .readLog l -> u.readLog l; .gui -> u.gui;
+///  .iso -> NoDownload#(u.iso.close); .close -> s;
+///  }}
+///```
+Attenuator: CaptureFree, F[mut System, mut System]{}
+
+Systems: {
+  ///A System with no authority: every method throws a non deterministic error.
+  ///It is what the gate of a forwarder holds before a capability is granted through it, and after that capability is revoked.
+  .revoked: mut System -> {'s
+    .try -> _Revoked#".try";
+    .out -> _Revoked#".out";
+    .inputCursor -> _Revoked#".inputCursor";
+    .assetRead -> _Revoked#".assetRead";
+    .download -> _Revoked#".download";
+    .dataRead -> _Revoked#".dataRead";
+    .dataReadWrite -> _Revoked#".dataReadWrite";
+    .manager -> _Revoked#".manager";
+    .process -> _Revoked#".process";
+    .readLog _ -> _Revoked#".readLog";
+    .gui -> _Revoked#".gui";
+    .iso -> Systems.revoked;
+    .close -> s;
+    };
+  }
+_Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("This System is revoked: System"+m+" can not be called.") }
+
+///The caretaker pattern: ``Caretakers#(gate)`` is a forwarder, an object of type ``T`` delegating every call to the
+///content of ``gate`` at the time of the call. Setting ``gate`` changes what every later call reaches: setting it to
+///a real capability grants that capability through the forwarder, setting it to `Systems.revoked` revokes it.
+///The forwarder is its own `ToIso` image, as every capability is.
+///The forwarder only forwards: a capability obtained through a method of the forwarder belongs to the content of the
+///gate at that time, and stays usable after the gate changes.
+Caretakers: Sealed { #[T](gate: mut Var[mut T]): mut T -> _Magic! }
+
+///The object capability to run another main of this program in a new process.
+///The new process starts as this program started: with the same input file, the same data projects and the same manager.
+///Its main receives a System with the authority of this program or less: the attenuators of this program, in their order,
+///then ``attenuator``, build that System in the new process, as described in `Attenuator`; no object of this program
+///reaches the new process.
+///The `.run` of the action starts the new process and ends with its end: `.ok` when ``main`` completes, `.info` with the
+///Info ``main`` threw.
+///A ``main`` declared inside a method that does not implement `CaptureFree` gives an Info: only a capture free main is named by its type.
+///A new process that can not start, or that ends before its main ends, is a non deterministic error.
+CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
+  mut .run(main: Main): mut Action[Void];
+  mut .run(main: Main, attenuator: Attenuator): mut Action[Void];
+  }

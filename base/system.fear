@@ -18,6 +18,7 @@ System: ToIso[System],WidenTo[System] {
   mut .dataRead: mut CapDataRead;
   mut .dataReadWrite: mut CapDataReadWrite;
   mut .manager: mut CapManager;
+  mut .process: mut CapProcess;
   ///Creates a reader for this in memory log.
   ///Concrete log types must be non generic.
   ///Creating a reader throw with nondeterministic error if the concrete log type is generic.

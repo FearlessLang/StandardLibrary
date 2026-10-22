@@ -1,0 +1,47 @@
+///Every method reaches the received System, but the download capability is revoked.
+NoDownload: Attenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
+  .download -> Error.nonDeterministic "NoDownload: the download capability is revoked.";
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
+  .readLog l -> u.readLog l; .gui -> u.gui;
+  .iso -> NoDownload#(u.iso.close); .close -> s;
+  }}
+///Every method reaches the received System, but the manager capability is revoked.
+NoManager: Attenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
+  .manager -> Error.nonDeterministic "NoManager: the manager capability is revoked.";
+  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui;
+  .iso -> NoManager#(u.iso.close); .close -> s;
+  }}
+///Calls the received System while running: not an attenuator the runtime can apply.
+Probe: Attenuator { u -> Block#(u.out, u) }
+
+TestAttenuation: Test {::
+  .checkWithSys{sys -> sys.try#(NoDownload#(sys).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
+  .checkWithSys{sys -> sys.try#(NoDownload#(sys).iso.close, {s -> s.manager}).assertOk}
+  .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
+  .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.manager}).assertInfo{:: > "msg" .isMsg{::.contains "NoManager"}}}
+  .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.out}).assertOk}
+  .checkWithSys{sys -> sys.try#(Systems.revoked.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "revoked: System.out"}}}
+  .checkWithSys{sys -> Block#
+    .var[mut System] gate= {Systems.revoked}
+    .let[mut System] fwd= {Caretakers#(gate)}
+    .do{ sys.try#(fwd.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "revoked"}} }
+    .do{ gate.set(sys) }
+    .do{ sys.try#(fwd.iso.close, {s -> s.out}).assertOk }
+    .do{ gate.set(Systems.revoked) }
+    .return{ sys.try#(fwd.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "revoked"}} }
+    }
+  .checkWithSys{sys -> Block#
+    .var[mut System] gate= {Systems.revoked}
+    .let[mut System] attenuated= {NoDownload#(Caretakers#(gate))}
+    .do{ gate.set(sys) }
+    .do{ sys.try#(attenuated.iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}} }
+    .return{ sys.try#(attenuated.iso.close, {s -> s.manager}).assertOk }
+    }
+  .checkWithSys{sys -> Block#
+    .var[mut System] gate= {Systems.revoked}
+    .return{ sys.try#[System, mut System](Caretakers#(gate).iso.close, {s -> Probe#(s)}).assertInfo{:: > "msg" .isMsg{::.contains "revoked: System.out"}} }
+    }
+  }
