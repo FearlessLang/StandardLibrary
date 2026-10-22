@@ -57,6 +57,10 @@ final class Stage extends MouseAdapter{
   Rectangle pressBounds;
   boolean resizing;
   boolean dragged;
+  int clicks;
+  long clickWhen;
+  Point clickAt= new Point();
+  int clickButton;
   boolean opensFullScreen;
   boolean activating;
   boolean handed;
@@ -332,7 +336,7 @@ final class Stage extends MouseAdapter{
   private boolean inTip(Point p){ return mode == Mode.fearless && p.x < tip() && p.y < tip(); }
   private void forward(MouseEvent e){
     var p= canvasPoint(e.getPoint());
-    var v= new MouseEvent(owner.top.component, e.getID(), e.getWhen(), e.getModifiersEx(), p.x, p.y, e.getClickCount(), false, e.getButton());
+    var v= new MouseEvent(owner.top.component, e.getID(), e.getWhen(), e.getModifiersEx(), p.x, p.y, clicks, false, e.getButton());
     switch (e.getID()){
       case MouseEvent.MOUSE_PRESSED -> owner.mouse.mousePressed(v);
       case MouseEvent.MOUSE_RELEASED -> owner.mouse.mouseReleased(v);
@@ -355,10 +359,18 @@ final class Stage extends MouseAdapter{
     owner.surface.setCursor(Cursor.getPredefinedCursor(cursor));
     forward(e);
   }
+  private void count(MouseEvent e){
+    var again= e.getButton() == clickButton && e.getWhen() - clickWhen <= 500 && e.getLocationOnScreen().distance(clickAt) <= 4;
+    clicks = again && clicks == 1 ? 2 : 1;
+    clickWhen = e.getWhen();
+    clickAt = e.getLocationOnScreen();
+    clickButton = e.getButton();
+  }
   @Override public void mousePressed(MouseEvent e){
+    count(e);
     if (e.getButton() != MouseEvent.BUTTON1 || !inCorner(e.getPoint())){ forward(e); return; }
     owner.pressed(null);
-    if (e.getClickCount() == 2 || Desk.managed){ return; }
+    if (clicks == 2 || Desk.managed){ return; }
     pressAt = e.getLocationOnScreen();
     pressBounds = f.getBounds();
     resizing = inTip(e.getPoint());
@@ -375,7 +387,7 @@ final class Stage extends MouseAdapter{
     place(resizing ? resized(at) : moved(at));
   }
   @Override public void mouseReleased(MouseEvent e){
-    boolean corner= e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && inCorner(e.getPoint());
+    boolean corner= e.getButton() == MouseEvent.BUTTON1 && clicks == 2 && inCorner(e.getPoint());
     if (corner && Desk.managed){ Desk.fullScreen(f, mode != Mode.fullScreen); return; }
     if (corner){ realize(Mode.decorated); return; }
     if (e.getButton() != MouseEvent.BUTTON1 || pressAt == null){ forward(e); return; }

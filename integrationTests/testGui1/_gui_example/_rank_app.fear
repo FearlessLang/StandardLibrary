@@ -128,13 +128,13 @@ Gui06:Consumer[mut Frame]{::
       .height 180
       .background (Color.alienMint)
       .mouse{::
-        .clicked{ e-> Debug#"mouse clicked" }
-        .pressed{ e-> Debug#"mouse pressed" }
-        .released{ e-> Debug#"mouse released" }
-        .moved{ e-> Debug#"mouse moved" }
-        .dragged{ e-> Debug#"mouse dragged" }
-        .entered{ e-> Debug#"mouse entered" }
-        .exited{ e-> Debug#"mouse exited" }
+        .clicked{ _, _, _, _, _ -> Debug#"mouse clicked" }
+        .pressed{ _, _, _, _, _ -> Debug#"mouse pressed" }
+        .released{ _, _, _, _, _ -> Debug#"mouse released" }
+        .moved{ _, _, _, _, _ -> Debug#"mouse moved" }
+        .dragged{ _, _, _, _, _ -> Debug#"mouse dragged" }
+        .entered{ _, _, _, _, _ -> Debug#"mouse entered" }
+        .exited{ _, _, _, _, _ -> Debug#"mouse exited" }
         }
       }
     }

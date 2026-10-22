@@ -13,8 +13,8 @@ Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  h
     .content {::
       .save canvas 
       .paint Menu
-      .mouse {:: .clicked { e -> Block# 
-        .if { MenuBounds#(e.panelWidth, e.panelHeight).contains(e.mouseX, e.mouseY) }
+      .mouse {:: .clicked { x, y, _, w, h -> Block# 
+        .if { MenuBounds#(w, h).contains(x, y) }
           .do { model!.play }
         .done
         }}};

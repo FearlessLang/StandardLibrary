@@ -55,7 +55,7 @@ GuiConnectedTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Mouse]] m = {Slots#[mut Mouse]}
     .do{f.content{:: .mouse{:: .save m} .mouse{::}}}
-    .return{Block#(m!.clicked{e -> Void}, Void)}
+    .return{Block#(m!.clicked{_, _, _, _, _ -> Void}, Void)}
     }}).run{
       .ok _ -> Error.msg "Changing a replaced Mouse always fails";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run"}}.assertTrue{i};

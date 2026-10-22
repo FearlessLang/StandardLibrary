@@ -43,7 +43,7 @@ final class Image$1c$0Instance implements Image$1c$0{
     }
   }
   private void painted(Canvas cv, Painter$5c$0 p, Paint paint){
-    var g= new CGraphicsCtx(cv, Scopes.time(0), width(w), height(h), paint);
+    var g= new CGraphicsCtx(cv, Scopes.time(0), width(w), height(h), paint, (Color$1c$0) Color$1c$0.instance);
     p.imm$run$1(g);
     var outside= g.outside("an image", "image", w, h);
     if (outside != null){ System.err.print("Warning: "+outside+"\n"); }

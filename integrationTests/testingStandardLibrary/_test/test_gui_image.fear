@@ -14,6 +14,18 @@ GuiImageTests: Test {::
   .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.color(Color.dangerTomato).position(X#(+20), Y#(-10)).oval(Width#40, Height#40)}.height .assertEq(Height#20)}
   .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.image(base.IconsConflict.consumeImage("paintImage").scale(Width#10, Height#10)).position(X#(+5), Y#(+5)).line(X#(+25), Y#(+15))}.scale(Width#60, Height#40).width .assertEq(Width#60)}
   .checkDetErr({::.isMsg{:: == "Width[30] Height[20] Instant[0]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str) + " " + (g.elapsed.str))}})
+  .checkDetErr({::.isMsg{:: == "Width[0] Width[47] Width[93] Width[93]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg((g.textWidth("")).str + " " + ((g.textWidth("Fearless")).str) + " " + ((g.textHeight(24).textWidth("Fearless")).str) + " " + ((g.uTextWidth("Fearless".u)).str))}})
+  .checkDetErr({::.isMsg{:: == "Color[Red[0], Green[0], Blue[0], Alpha[255]] Color[Red[230], Green[64], Blue[48], Alpha[255]] X[+0] Y[+0] X[+7] Y[-3] Height[12] Height[24]"}},{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg((g.color).str + " " + ((g.color(Color.dangerTomato).color).str) + " " + ((g.positionX).str) + " " + ((g.positionY).str) + " " + ((g.position(X#(+7), Y#(-3)).positionX).str) + " " + ((g.positionY).str) + " " + ((g.textHeight).str) + " " + ((g.textHeight(24).textHeight).str))}})
+  .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.textHeight 16 .position(X#(+2), Y#(+2)).text "Fearless" .position(X#(-5), Y#(+15)).uText("ab".u)}.width .assertEq(Width#30)}
+  .checkDetErr({::.isMsg{:: == "text height 32768 is too large; it must be <= 32767"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.textHeight 32768}})
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .label{l -> Error.msg(l.text "Fearless" .pack .width.str)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[59]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{:: .pane{:: .width 20 .height 20 .foreground(Color.sleepyBlue) .paint{g -> Error.msg((g.color).str)}}}}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Color[Red[72], Green[120], Blue[210], Alpha[255]]"}}.assertTrue{i};
+      }}
   .checkDetErr({::.isMsg{:: == "image width 0 is too small; it must be >= 1"}}, {base.Images#(Width#0, Height#5, Color.transparent)})
   .checkDetErr({::.isMsg{:: == "image height 32768 is too large; it must be <= 32767"}}, {base.Images#(Width#5, Height#32768, Color.transparent)})
   .checkDetErr({::.isMsg{:: == "image 20000 x 20000 has 400000000 pixels; it must have <= 268435456"}}, {base.Images#(Width#20000, Height#20000, Color.transparent)})

@@ -329,6 +329,21 @@ Graphics:ScreenContext{
   mut .rect(WidthNat, HeightNat): mut Graphics;
   mut .oval(WidthNat, HeightNat): mut Graphics;
   mut .image(Image): mut Graphics;
+  mut .textHeight(n: Nat): mut Graphics -> this.textHeight'(HeightNat#n);
+  mut .textHeight'(HeightNat): mut Graphics;
+  mut .text(s: Str): mut Graphics -> this.uText(s.u);
+  ///Draws ``text`` in the color, on one line whose top left corner is the position.
+  ///The baseline is ``textHeight`` below the position, and the line is one and a half ``textHeight`` high, as the line of a ``Label`` with the default ``.aboveBaseline`` and ``.belowBaseline``.
+  ///The position does not change. The text height starts at 12.
+  mut .uText(text: UStr): mut Graphics;
+  ///The color of the next drawing: the foreground of the widget, or opaque black for an image, until ``.color`` changes it.
+  read .color: Color;
+  read .positionX: XInt;
+  read .positionY: YInt;
+  read .textHeight: HeightNat;
+  read .textWidth(text: Str): WidthNat -> this.uTextWidth(text.u);
+  ///The width of ``text`` drawn by ``.uText`` at the current ``.textHeight``, rounded up to a whole virtual pixel.
+  read .uTextWidth(text: UStr): WidthNat;
   }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
@@ -398,18 +413,21 @@ Picture:Widget[Picture]{
   read .keepAspect:Bool;
 }
 Mouse:_Styled[Mouse]{ .self->this;
-  mut .clicked(mut Consumer[MouseEvent]):mut Mouse;
-  mut .pressed(mut Consumer[MouseEvent]):mut Mouse;
-  mut .released(mut Consumer[MouseEvent]):mut Mouse;
-  mut .moved(mut Consumer[MouseEvent]):mut Mouse;
-  mut .dragged(mut Consumer[MouseEvent]):mut Mouse;
-  mut .entered(mut Consumer[MouseEvent]):mut Mouse;
-  mut .exited(mut Consumer[MouseEvent]):mut Mouse;
+  mut .clicked(mut MouseHandler):mut Mouse;
+  ///On a widget with a ``.doubleClicked``, the second click of a double click runs ``.doubleClicked`` instead of ``.clicked``; a click after a double click is a single click again.
+  ///A click is the second click of a double click when it is of the same mouse button as the click before, pressed at most 500 milliseconds after it, and at most 4 pixels of the screen away from it.
+  mut .doubleClicked(mut MouseHandler):mut Mouse;
+  mut .pressed(mut MouseHandler):mut Mouse;
+  mut .released(mut MouseHandler):mut Mouse;
+  mut .moved(mut MouseHandler):mut Mouse;
+  mut .dragged(mut MouseHandler):mut Mouse;
+  mut .entered(mut MouseHandler):mut Mouse;
+  mut .exited(mut MouseHandler):mut Mouse;
 }
-MouseEvent:ScreenContext{
-  .mouseX:XInt;
-  .mouseY:YInt;
-}
+///Runs for one mouse event of a widget.
+///``x`` and ``y`` are where the pointer is, in virtual pixels from the top left corner of the widget.
+///``elapsed``, ``panelWidth`` and ``panelHeight`` are as in ``ScreenContext``.
+MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, panelHeight: HeightNat): Void; }
 Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;

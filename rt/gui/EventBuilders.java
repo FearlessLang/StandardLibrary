@@ -13,27 +13,12 @@ import javax.swing.SwingUtilities;
 
 import static _base.MouseKind.*;
 
-enum MouseKind{ Clicked, Pressed, Released, Moved, Dragged, Entered, Exited }
-
-record CMouseCtx(
-  Instant$5c$0 elapsed,
-  XInt$s$0 mouseX,
-  YInt$s$0 mouseY,
-  _Frame frame,
-  WidthNat$as$0 panelWidth,
-  HeightNat$lg$0 panelHeight
-) implements MouseEvent$174$0{
-  @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object imm$mouseX$0(){ return mouseX; }
-  @Override public Object imm$mouseY$0(){ return mouseY; }
-  @Override public Object read$panelWidth$0(){ return panelWidth; }
-  @Override public Object read$panelHeight$0(){ return panelHeight; }
-}
+enum MouseKind{ Clicked, DoubleClicked, Pressed, Released, Moved, Dragged, Entered, Exited }
 
 // Registers Fearless handlers on the widget; SkMouse does all dispatching.
 final class CMouseBuilder implements Mouse$1c$0{
   final AWidget owner;
-  final EnumMap<MouseKind,Consumer$ao$1> handlers= new EnumMap<>(MouseKind.class);
+  final EnumMap<MouseKind,MouseHandler$4sg$0> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
   CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
@@ -41,11 +26,12 @@ final class CMouseBuilder implements Mouse$1c$0{
       if (!changeable && (owner.handlers != handlers || !owner.canChange())){
         throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
       }
-      handlers.put(k, (Consumer$ao$1) a);
+      handlers.put(k, (MouseHandler$4sg$0) a);
     });
     return this;
   }
   @Override public Object mut$clicked$1(Object a){ return add(Clicked, a); }
+  @Override public Object mut$doubleClicked$1(Object a){ return add(DoubleClicked, a); }
   @Override public Object mut$pressed$1(Object a){ return add(Pressed, a); }
   @Override public Object mut$released$1(Object a){ return add(Released, a); }
   @Override public Object mut$moved$1(Object a){ return add(Moved, a); }
@@ -145,7 +131,7 @@ final class SkMouse extends MouseAdapter{
     dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p);
     if (!left){ return; }
     if (pressTarget instanceof _Button b){ b.down = false; }
-    click(p);
+    click(p, e.getClickCount());
     pressTarget = null;
   }
 
@@ -227,7 +213,7 @@ final class SkMouse extends MouseAdapter{
     return at;
   }
 
-  private void click(Point p){
+  private void click(Point p, int clicks){
     for (var t : chainOf(pressTarget)){
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
@@ -235,6 +221,7 @@ final class SkMouse extends MouseAdapter{
         frame.frame.queue.submit(whileShown(b, b.action));
         return;
       }
+      if (clicks == 2 && fire(t, DoubleClicked, p)){ return; }
       if (fire(t, Clicked, p)){ return; }
     }
   }
@@ -273,10 +260,15 @@ final class SkMouse extends MouseAdapter{
   private void handlers(AWidget t, MouseKind kind, Point p, ArrayList<MF$7$1> tasks){
     var h= t.handlers.get(kind);
     if (h == null){ return; }
-    var ctx= ctx(t, p);
+    var q= SwingUtilities.convertPoint(top(), p, t.component);
+    var x= Scopes.x(q.x);
+    var y= Scopes.y(q.y);
+    var elapsed= frame.elapsed;
+    var w= Scopes.w(t.component.getWidth());
+    var ht= Scopes.h(t.component.getHeight());
     tasks.add(whileShown(t, new MF$7$1(){
       @Override public Object mut$$hash$0(){
-        h.mut$accept$1(ctx);
+        h.mut$$hash$5(x, y, elapsed, w, ht);
         return Void$o$0.instance;
       }
     }));
@@ -289,17 +281,6 @@ final class SkMouse extends MouseAdapter{
         return r.mut$$hash$0();
       }
     };
-  }
-
-  private MouseEvent$174$0 ctx(AWidget t, Point p){
-    var q= SwingUtilities.convertPoint(top(), p, t.component);
-    return new CMouseCtx(
-      frame.elapsed,
-      Scopes.x(q.x),
-      Scopes.y(q.y),
-      frame,
-      Scopes.w(t.component.getWidth()),
-      Scopes.h(t.component.getHeight()));
   }
 
   private SkComponent top(){ return frame.top.component; }
