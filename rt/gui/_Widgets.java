@@ -314,6 +314,7 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   void change(){
+    if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the Gui.run that showed the window has returned, so changing it would have no visible effect"); }
     if (canChange()){ return; }
     throw Util.detErr("This " + getClass().getSimpleName().substring(1)
       + " is not in the window any more: .clear, a replaced Border slot or a new .content removed it,"
@@ -833,6 +834,7 @@ final class _Frame implements Frame$1c$0{
       boolean changeable= true;
       @Override public Object mut$action$1(Object r){
         onEdtAndWait(() -> {
+          if (frame.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the Gui.run that showed the window has returned, so an action set now would never run"); }
           if (!changeable && modelTickActions != actions){
             throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
           }

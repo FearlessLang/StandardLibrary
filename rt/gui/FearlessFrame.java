@@ -245,6 +245,7 @@ final class FearlessFrame{
   }
 
   private synchronized boolean active(){ return !closing && !completed; }
+  synchronized boolean completed(){ return completed; }
 
   private void stopSwingOnEdt(){
     assert SwingUtilities.isEventDispatchThread();
