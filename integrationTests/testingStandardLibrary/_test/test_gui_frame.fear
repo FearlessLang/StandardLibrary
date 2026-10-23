@@ -119,6 +119,14 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "A close key equal to the full screen key always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(F11) is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(Key#"SEPARATOR").closeKey(Key#"SEPARATER").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A close key naming the key of the full screen key always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(SEPARATER) is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"SEPARATER").fullScreenKey(Key#"SEPARATOR").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A full screen key naming the key of the close key always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.fullScreenKey(SEPARATOR) is the close key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.closeKey first"}}.assertTrue{i};
+      }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.opacityFloor(Alpha#(100.getByte)).run{f -> f.opacity(Alpha#(50.getByte)).content{::}}}).run{
       .ok _ -> Error.msg "An opacity below the floor always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Frame.opacity(Alpha[50]) is below the opacity floor Alpha[100] of this Gui: the window can not be more transparent than Gui.opacityFloor allows"}}.assertTrue{i};
