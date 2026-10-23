@@ -10,13 +10,13 @@ use base.Blue as Blue;
 use base.Alpha as Alpha;
 use base.Label as Label;
 use base.Pane as Pane;
-use base.Mouse as Mouse;
 use base.Slot as Slot;
 use base.Slots as Slots;
 use base.Duration as Duration;
 use base.Instant as Instant;
 use base.Break as Break;
 use base.Continue as Continue;
+use base.True as True;
 
 Live:Main{sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Label]] status = {Slots#[mut Label]}
@@ -24,9 +24,12 @@ Live:Main{sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Pane]] areaA = {Slots#[mut Pane]}
   .let[mut Slot[mut Pane]] areaB = {Slots#[mut Pane]}
   .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
-  .let[mut Slot[mut Mouse]] oldC = {Slots#[mut Mouse]}
   .var[Nat] pressedB = {0}
   .var[Nat] releasedB = {0}
+  .let[mut Slot[mut Label]] countE = {Slots#[mut Label]}
+  .var[Nat] pressedE = {0}
+  .var[Nat] releasedE = {0}
+  .var[Nat] draggedE = {0}
   .return{f
     .title "GuiLive: live changes are atomic"
     .content{::
@@ -79,9 +82,8 @@ Live:Main{sys -> sys.gui.run{f -> Block#
       .label{:: .text "C: click the purple area: the status must be: second .mouse ran"}
       .pane{p -> Block#
         .do{Block#(p.width 520 .height 50 .background(Color.wizardPurple), Void)}
-        .do{Block#(p.mouse{:: .save oldC .clicked{_, _, _, _, _ -> Block#(status!.text "status: first .mouse ran", Void)}}, Void)}
+        .do{Block#(p.mouse{:: .clicked{_, _, _, _, _ -> Block#(status!.text "status: first .mouse ran", Void)}}, Void)}
         .do{Block#(p.mouse{:: .clicked{_, _, _, _, _ -> Block#(status!.text "status: second .mouse ran", Void)}}, Void)}
-        .do{Block#(oldC!.clicked{_, _, _, _, _ -> Block#(status!.text "status: a builder saved from the replaced .mouse added a handler", Void)}, Void)}
         .return{p}
         }
       .label{:: .text "D: press Gray: the whole window turns gray (160,160,160) up to its corners; then Red: it turns opaque red (230,64,48)."}
@@ -90,9 +92,24 @@ Live:Main{sys -> sys.gui.run{f -> Block#
         .button{:: .text "Red" .action{Block#(root!.background(Color#(Red#(230.getByte), Green#(64.getByte), Blue#(48.getByte), Alpha#(128.getByte))), Void)}}
         .pack
         }
+      .label{:: .text "E: press the track of the scroll bar below its thumb, drag to the left and let go: the yellow area pages down and the counts stay 0."}
+      .label{:: .text "pressed 0, released 0, dragged 0" .save countE}
+      .pane{::
+        .width 520 .height 90
+        .vertical .minPerLine 1000 .lineScroll(True)
+        .background(Color.rubberDuck)
+        .mouse{::
+          .pressed{_, _, _, _, _ -> Block#(pressedE.set(pressedE.get + 1), CountE#(countE!, pressedE.get, releasedE.get, draggedE.get))}
+          .released{_, _, _, _, _ -> Block#(releasedE.set(releasedE.get + 1), CountE#(countE!, pressedE.get, releasedE.get, draggedE.get))}
+          .dragged{_, _, _, _, _ -> Block#(draggedE.set(draggedE.get + 1), CountE#(countE!, pressedE.get, releasedE.get, draggedE.get))}
+          }
+        .label{:: .text "line 1"} .label{:: .text "line 2"} .label{:: .text "line 3"} .label{:: .text "line 4"}
+        .label{:: .text "line 5"} .label{:: .text "line 6"} .label{:: .text "line 7"} .label{:: .text "line 8"}
+        }
       }
     }
   }}
+CountE: {#(l: mut Label, p: Nat, r: Nat, d: Nat): Void -> Block#(l.text("pressed "+(p.str)+", released "+(r.str)+", dragged "+(d.str)), Void)}
 LiveWait: {#(f: read Frame, d: Duration): Void -> Block#
   .let[Instant] end = {f.elapsed + d}
   .loop{Block#

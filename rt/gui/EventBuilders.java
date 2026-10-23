@@ -73,6 +73,7 @@ final class SkMouse extends MouseAdapter{
   private boolean tipOff;
   private AWidget dragged;
   private boolean draggedVert;
+  private boolean paging;
   private _Split dividing;
   private int grab;
 
@@ -137,7 +138,7 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseReleased(MouseEvent e){
     var p= point(e);
-    if ((dragged != null || dividing != null) && SwingUtilities.isLeftMouseButton(e)){ dragged = null; dividing = null; return; }
+    if ((dragged != null || dividing != null || paging) && SwingUtilities.isLeftMouseButton(e)){ dragged = null; dividing = null; paging = false; return; }
     boolean left= SwingUtilities.isLeftMouseButton(e);
     // mousePressed only ever captures a left press into pressTarget, so only
     // a left release is interpreted against that press chain (AWT delivers
@@ -160,6 +161,7 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseDragged(MouseEvent e){
     var p= point(e);
+    if (paging){ return; }
     if (dragged != null){ dragThumb(p); return; }
     if (dividing != null){
       var at= SwingUtilities.convertPoint(top(), p, dividing.component);
@@ -202,6 +204,7 @@ final class SkMouse extends MouseAdapter{
       grab = vert ? at.y - m.y : at.x - m.x;
       return true;
     }
+    paging = true;
     int page= (vert ? at.y < m.y : at.x < m.x) ? -1 : 1;
     if (vert){ q.scrollTo(q.scrollX, q.scrollY + page * q.viewH()); }
     else{ q.scrollTo(q.scrollX + page * q.viewW(), q.scrollY); }
