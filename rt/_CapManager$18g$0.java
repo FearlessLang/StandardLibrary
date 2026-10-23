@@ -31,14 +31,13 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     catch (IOException|InterruptedException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: "+e.getClass().getSimpleName()); }
   }
   private static Object send(String verb, Stream<String> args, Function<String,Object> result){
-    if (launcher == null){ return fail("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }
-    var as= args.toList();
-    return Try$c$0.actionLazy(() -> result.apply(applied(verb, message(verb, as))));
+    if (launcher == null){ throw nonDetErr("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }
+    return result.apply(applied(verb, message(verb, args.toList())));
   }
   private static String applied(String verb, String text){
     if (text.startsWith(applied)){ return text.substring(applied.length()); }
     if (!text.startsWith(refused)){ throw nonDetErr("The Fearless manager ended the connection of the message \""+verb+"\" without saying whether it applied it."); }
-    throw deterministic((Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(InputFile.portable(text.substring(refused.length())))));
+    throw nonDetErr(InputFile.portable(text.substring(refused.length())));
   }
   private static Object send(String verb, Stream<String> args){ return send(verb, args, _ -> Void$o$0.instance); }
   private static Object output(String verb, Stream<String> args){ return send(verb, args, o -> new UStr$s$0Instance(o.codePoints().toArray())); }
@@ -48,7 +47,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     var bytes= new byte[bs.size()];
     for (var i= 0; i < bytes.length; i += 1){ bytes[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
     var text= new String(bytes, pathCharset);
-    if (!absolute(text)){ return fail("The path \""+InputFile.portable(text)+"\" of the message \""+verb+"\" is not an absolute path of this system."); }
+    if (!absolute(text)){ throw detErr("The path \""+InputFile.portable(text)+"\" of the message \""+verb+"\" is not an absolute path of this system."); }
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)));
   }
   private static boolean absolute(String path){
