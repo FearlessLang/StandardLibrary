@@ -95,11 +95,12 @@ final class FearlessFrame{
     assert SwingUtilities.isEventDispatchThread();
     assert timer != null;// only reachable post start
     if (!active()){ return; }// never (re)start a timer during shutdown: it would keep the EDT alive
-    timer.setInitialDelay(delayMillis);
+    long now= System.nanoTime();
+    timer.setInitialDelay(Math.max(delayMillis, (int) Math.ceilDiv(runtimeStartNs - now, 1_000_000L)));
     timer.setDelay(delayMillis);
     timer.restart();
     tickPeriodNs = delayMillis * 1_000_000L;
-    tickLast = System.nanoTime();// no spurious loss warning across the change
+    tickLast = Math.max(now, runtimeStartNs);// no spurious loss warning across the change
   }
 
   // Starts or replaces the model timer, fixed-rate semantics. warmupMillis
