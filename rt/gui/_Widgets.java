@@ -762,6 +762,7 @@ final class _Frame implements Frame$1c$0{
     }});
   }
   @Override public Object mut$virtualPixelSpace$2(Object w, Object h){
+    requireOpen();
     int ww= extent((WidthNat$as$0) w, "virtual pixel space width");
     int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
     if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
@@ -778,25 +779,30 @@ final class _Frame implements Frame$1c$0{
   @Override public Object read$virtualWidth$0(){ return w(canvasW); }
   @Override public Object read$virtualHeight$0(){ return h(canvasH); }
   @Override public Object mut$bands$1(Object c){
+    requireOpen();
     int b= Sk.color((Color$1c$0) c) | 0xFF000000;
     onEdtAndWait(() -> bands = b);
     return this;
   }
   @Override public Object mut$opacity$1(Object a){
+    requireOpen();
     int v= alpha(a);
     if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this Gui: the window can not be more transparent than Gui.opacityFloor allows"); }
     opacity = v / 255f;
     if (started){ onEdtAndWait(() -> stage.opacity(opacity)); }
     return this;
   }
-  @Override public Object mut$onResize$1(Object c){ onResize = (Consumer$ao$1) c; return this; }
-  @Override public Object mut$onClose$1(Object a){ onClose = (MF$7$1) a; return this; }
+  private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"); } }
+  @Override public Object mut$onResize$1(Object c){ requireOpen(); onResize = (Consumer$ao$1) c; return this; }
+  @Override public Object mut$onClose$1(Object a){ requireOpen(); onClose = (MF$7$1) a; return this; }
   @Override public Object mut$close$0(){
+    requireOpen();
     if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to Gui.run has not returned"); }
     onEdtAndWait(frame::closed);
     return Void$o$0.instance;
   }
   @Override public Object mut$onKey$1(Object scope){
+    requireOpen();
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
     onEdtAndWait(() -> {
@@ -810,11 +816,13 @@ final class _Frame implements Frame$1c$0{
     return this;
   }
   @Override public Object mut$uTitle$1(Object t){
+    requireOpen();
     title = ustr(t);
     if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }
     return this;
   }
   @Override public Object mut$fps$1(Object f){
+    requireOpen();
     fps = (int) fpsOf(f, "fps");
     if (started){
       int delay= Math.round(1000.0f / fps);
@@ -828,6 +836,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object read$fps$0(){ return n(fps); }
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object mut$modelFps$2(Object f, Object scope){
+    requireOpen();
     long nn= fpsOf(f, "modelFps");
     var actions= new ArrayList<MF$7$1>();
     var b= new ModelFps$as$0(){
@@ -858,6 +867,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$contentB$1(Object s){ return newContent(s, _Border::new); }
 
   private Object newContent(Object scope, Function<_Frame,? extends AWidget> make){
+    requireOpen();
     var t= onEdtAndWait(() -> make.apply(this));
     if (!started){
       onEdtAndWait(() -> {
