@@ -819,7 +819,10 @@ final class _Frame implements Frame$1c$0{
   }
   @Override public Object mut$uTitle$1(Object t){
     requireOpen();
-    title = ustr(t);
+    var s= ustr(t);
+    var b= lineBreak(s);
+    if (b != null){ throw Util.detErr("The new title of this Frame has " + b + ": the title bar shows the title on one line"); }
+    title = s;
     if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }
     return this;
   }
