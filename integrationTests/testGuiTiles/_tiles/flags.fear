@@ -1,0 +1,27 @@
+Dot:{ #(c: Color, glyph: Str): Painter -> {g -> g
+  .color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20)
+  .color c .position(X#(+72), Y#(+38)).oval(Width#16, Height#16)
+  .color(Color.ghostWhite).textHeight 11
+  .position(X#((72 + ((16 - ((g.textWidth glyph).get)).getTruncDiv 2)).getInt), Y#(+38))
+  .text glyph
+  }}
+Busy:{ #(end: Instant, then: Painter): Painter -> {g -> (g.elapsed < end) ? { .then -> Spinner.run g; .else -> then.run g }} }
+Spinner:Painter{g -> Block#
+  .let[Nat] head= {g.elapsed.get.getTruncDiv(100000).getRem 8}
+  .do{Block#(g.color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20), Void)}
+  .do{SpinDot#(g, head, 0, +6, +0)}
+  .do{SpinDot#(g, head, 1, +4, +4)}
+  .do{SpinDot#(g, head, 2, +0, +6)}
+  .do{SpinDot#(g, head, 3, -4, +4)}
+  .do{SpinDot#(g, head, 4, -6, +0)}
+  .do{SpinDot#(g, head, 5, -4, -4)}
+  .do{SpinDot#(g, head, 6, +0, -6)}
+  .do{SpinDot#(g, head, 7, +4, -4)}
+  .return{g}
+  }
+SpinDot:{ #(g: mut Graphics, head: Nat, k: Nat, dx: Int, dy: Int): Void -> Block#
+  .let[Nat] age= {(head + 8 - k).getRem 8}
+  .return{Block#(g
+    .color(Color#(Red#(46.getByte), Green#(125.getByte), Blue#(50.getByte), Alpha#((255 - (age * 30)).getByte)))
+    .position(X#(+78 + dx), Y#(+44 + dy)).oval(Width#4, Height#4), Void)}
+  }

@@ -5,6 +5,7 @@ use base.Nat as Nat;
 use base.Int as Int;
 use base.Bool as Bool;
 use base.True as True;
+use base.False as False;
 use base.Block as Block;
 use base.Color as Color;
 use base.Red as Red;
@@ -24,7 +25,6 @@ use base.Graphics as Graphics;
 use base.Label as Label;
 use base.Menu as Menu;
 use base.Frame as Frame;
-use base.False as False;
 use base.Pane as Pane;
 use base.Slot as Slot;
 use base.Slots as Slots;
@@ -37,7 +37,7 @@ TileGrid:Main{sys -> Block#
   .let grid= {Slots#[mut Pane]}
   .let status= {Slots#[mut Label]}
   .let frame= {Slots#[mut Frame]}
-  .let m= {GridModels#(grid, status, frame)}
+  .let m= {Managers#(grid, status, frame, base.IconsFearless.consumeImage "tour")}
   .return{sys.gui.name "Tiles" .run{f -> Block#(f
     .save frame
     .virtualPixelSpace(Width#660, Height#420)
@@ -46,153 +46,123 @@ TileGrid:Main{sys -> Block#
       .north{:: .fill
         .button{b -> b .text "Manager" .action{b.openMenu{mm -> m.managerMenu mm}}}
         .button{b -> b .text "Run" .action{b.openMenu{mm -> m.runMenu mm}}}
-        .label{:: .text "Click a tile to select it, double click to run it, right click it for its menu" .save status}
+        .label{:: .text "Click a tile to select it, double click a compiled one to run it, right click it for its menu" .save status}
         }
-      .center{:: .fill .stackScroll(True) .widthGap 0 .heightGap 0 .save grid}
+      .center{:: .fill .centered(False) .stackScroll(True) .widthGap 0 .heightGap 0 .save grid}
       },
     m.render)}}
   }
 
-Tile:{ .name: Str; .image: Image; .flag: Painter; }
-Tiles:{ #(name: Str, flag: Painter): Tile -> Block#
-  .let image= {GeneratedIcon#name}
-  .return{{ .name -> name; .image -> image; .flag -> flag; }}
+State:{ .text: Str; .flag: Painter; .runs: Bool -> False; .at(now: Instant): State -> this; }
+States:{
+  .idle: State -> { .text -> "idle"; .flag -> Dot#(Color.rgb(117, 117, 117), ""); };
+  .dataReadOnly: State -> { .text -> "data: read only"; .flag -> Dot#(Color.rgb(21, 101, 192), "R"); };
+  .dataReadWrite: State -> { .text -> "data: read write"; .flag -> Dot#(Color.rgb(106, 27, 154), "W"); };
+  .codeNoCache: State -> { .text -> "code: not compiled (no cache)"; .flag -> Dot#(Color.rgb(239, 108, 0), "!"); };
+  .codeOutdated: State -> { .text -> "code: not compiled (cache out of date)"; .flag -> Dot#(Color.rgb(239, 108, 0), "!"); };
+  .codeInvalid: State -> { .text -> "code: invalid content"; .flag -> Dot#(Color.rgb(198, 40, 40), "X"); };
+  .dataInvalid: State -> { .text -> "data: invalid content"; .flag -> Dot#(Color.rgb(198, 40, 40), "X"); };
+  .codeCompiled: State -> { .text -> "code: compiled"; .flag -> Dot#(Color.rgb(46, 125, 50), ">"); .runs -> True; };
+  .busy(end: Instant): State -> { 'self
+    .text -> "code: busy";
+    .flag -> Busy#(end, States.codeCompiled.flag);
+    .at(now) -> (now < end) ? { .then -> self; .else -> States.codeCompiled };
+    };
+  .all: List[State] -> Lists#(this.idle, this.dataReadOnly, this.dataReadWrite, this.codeNoCache, this.codeOutdated, this.codeInvalid, this.dataInvalid, this.codeCompiled);
   }
-Names:{ #(i: Nat): Str -> Lists#("alpha", "beta", "gamma", "delta", "basketball", "a project with a very long name", "tour", "hello world").get(i.getRem 8) }
 
-GridModels:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label], frame: mut Slot[mut Frame]): mut GridModel -> Block#
-  .var[List[Tile]] tiles= {Lists#(Tiles#(Names#0, Flags#0), Tiles#(Names#1, Flags#1), Tiles#(Names#2, Flags#2), Tiles#(Names#3, Flags#3), Tiles#(Names#4, Flags#4), Tiles#(Names#5, Flags#5))}
-  .var[Nat] selected= {0}
+Project:{ read .name: Str; .state: State; .image: Image;
+  .folder: Str -> "/projects/"+(this.name);
+  .with(s: State): Project -> Projects#(this.name, s, this.image);
+  }
+ProjectTiles:{ #(p: Project): Tile -> { .name -> p.name; .tooltip -> p.folder+" - "+(p.state.text); .image -> p.image; .flag -> p.state.flag; } }
+Projects:{
+  #(name: Str, state: State, image: Image): Project -> { .name -> name; .state -> state; .image -> image; };
+  #(name: Str, state: State): Project -> this#(name, state, GeneratedIcons#name);
+  }
+Names:{ #(i: Nat): Str -> Block#
+  .let[Str] name= {Lists#("alpha", "beta", "gamma", "delta", "basketball", "a project with a very long name", "zero to hero", "hello world").get(i.getRem 8)}
+  .if{i < 8} .return{name}
+  .return{name+" "+((i.getTruncDiv 8) + 1)}
+  }
+Sorted:{ #(ps: List[Project]): List[Project] -> ps.flow.sort{::.name}.list }
+IndexOf:{ #(ps: List[Project], name: Str, i: Nat): Opt[Nat] -> Block#[Opt[Nat]]
+  .if{i >= (ps.size)} .return{{}}
+  .if{(ps.get i).name == name} .return{Opts#i}
+  .return{IndexOf#(ps, name, i + 1)}
+  }
+
+Managers:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label], frame: mut Slot[mut Frame], fearless: Image): mut Manager -> Block#
+  .var[List[Project]] projects= {Sorted#(Lists#(
+    Projects#(Names#0, States.idle), Projects#(Names#1, States.dataReadOnly), Projects#(Names#2, States.dataReadWrite),
+    Projects#(Names#3, States.codeOutdated), Projects#(Names#4, States.codeInvalid), Projects#(Names#5, States.codeCompiled),
+    Projects#(Names#6, States.codeCompiled), Projects#(Names#7, States.codeNoCache), Projects#("tour", States.codeCompiled, fearless)))}
+  .var[Str] selected= {Names#0}
+  .var[Nat] count= {8}
   .var[Nat] cycle= {0}
   .var[List[Bool]] ticks= {Lists#(True, False, False)}
-  .return{mut GridModel:{'self
-    mut .render: Void -> TileGrids#(grid!, tiles.get, Opts#(selected.get), {i, _ -> self.click i}, {i, t -> self.run(i, t)}, {mm, i -> self.tileMenu(mm, i)});
+  .return{mut Manager:{'self
+    mut .render: Void -> TileGrids#(grid!, projects.get.flow.map{p -> ProjectTiles#p}.list, IndexOf#(projects.get, selected.get, 0), {i -> self.click i}, {i -> self.open i}, {mm, i -> self.tileMenu(mm, i)});
     mut .managerMenu(mm: mut Menu): mut Menu -> mm
       .item{:: .text "Add project" .action{self.add}}
-      .item{:: .text "Change flag" .action{self.cycle}}
-      .item{:: .text "Select" .submenu{s -> SelectItems#(s, tiles.get, selected.get, self, 0)}}
+      .item{:: .text "Next state" .action{self.next}}
+      .item{:: .text "Select" .submenu{s -> SelectItems#(s, projects.get, selected.get, self, 0)}}
       .separator
       .item{:: .text "Close the window" .action{frame!.close}};
     mut .runMenu(mm: mut Menu): mut Menu -> RunItems#(mm, ticks.get, self, 0)
       .separator
-      .item{:: .text "Run the ticked mains" .enabled(Ticked#(ticks.get, 0)) .action{self.run(selected.get, frame!.elapsed)}};
+      .item{:: .text "Run the ticked mains" .enabled(Ticked#(ticks.get, 0) && {self.runs(self.current)}) .action{self.open(self.current)}};
     mut .tileMenu(mm: mut Menu, i: Nat): mut Menu -> mm
-      .item{:: .text("Run " + (tiles.get.get(i).name)) .action{self.run(i, frame!.elapsed)}}
-      .item{:: .text "Select" .enabled(selected.get != i) .action{self.click i}}
+      .item{:: .text("Run " + ((projects.get.get i).name)) .enabled(self.runs i) .action{self.open i}}
+      .item{:: .text "Select" .enabled((projects.get.get i).name != (selected.get)) .action{self.click i}}
       .separator
-      .item{:: .text "Forget" .enabled(tiles.get.size > 1) .action{self.forget i}};
+      .item{:: .text "Forget" .enabled(projects.get.size > 1) .action{self.forget i}};
+    mut .current: Nat -> IndexOf#(projects.get, selected.get, 0)!;
+    mut .runs(i: Nat): Bool -> (projects.get.get i).state.at(frame!.elapsed).runs;
+    mut .say(text: Str): Void -> Block#(status!.text text, Void);
+    mut .set(i: Nat, s: State): Void -> projects.set(projects.get.with(i, (projects.get.get i).with s));
     mut .tick(i: Nat): Void -> Block#
       .do{ticks.set(ticks.get.with(i, ticks.get.get(i).not))}
-      .return{Block#(status!.text("Ticked: "+(Mains#i)), Void)};
+      .return{self.say("Ticked: "+(Mains#i))};
     mut .forget(i: Nat): Void -> Block#
-      .do{tiles.set(tiles.get.without i)}
-      .do{selected.set 0}
+      .let[Str] name= {(projects.get.get i).name}
+      .do{projects.set(projects.get.without i)}
+      .if{name == (selected.get)} .do{selected.set((projects.get.get 0).name)}
       .return{self.render};
     mut .add: Void -> Block#
-      .do{tiles.set(tiles.get ++ (Lists#(Tiles#(Names#(tiles.get.size), Flags#(tiles.get.size)))))}
+      .let[Str] name= {Names#(count.get)}
+      .do{count.set(count.get + 1)}
+      .do{projects.set(Sorted#(projects.get ++ (Lists#(Projects#(name, States.idle)))))}
+      .do{selected.set name}
+      .do{self.say("Added: "+name)}
       .return{self.render};
-    mut .cycle: Void -> Block#
+    mut .next: Void -> Block#
+      .let[Nat] i= {self.current}
       .do{cycle.set(cycle.get + 1)}
-      .do{tiles.set(tiles.get.with(selected.get, Retile#(tiles.get.get(selected.get), Flags#(cycle.get))))}
+      .do{self.set(i, States.all.get(cycle.get.getRem 8))}
+      .do{self.say((projects.get.get i).name+": "+((projects.get.get i).state.text))}
       .return{self.render};
     mut .click(i: Nat): Void -> Block#
-      .do{selected.set i}
-      .do{Block#(status!.text("Selected: "+(tiles.get.get(i).name)), Void)}
+      .let[Instant] now= {frame!.elapsed}
+      .do{projects.set(projects.get.flow.map{p -> p.with(p.state.at now)}.list)}
+      .do{selected.set((projects.get.get i).name)}
+      .do{self.say((projects.get.get i).name+": "+((projects.get.get i).state.text))}
       .return{self.render};
-    mut .run(i: Nat, now: Instant): Void -> Block#
-      .do{selected.set i}
-      .do{tiles.set(tiles.get.with(i, Retile#(tiles.get.get i, Flags.busyUntil(now + (Duration.seconds 3), Flags#5))))}
-      .do{Block#(status!.text("Running: "+(tiles.get.get(i).name)), Void)}
+    mut .open(i: Nat): Void -> Block#
+      .do{self.click i}
+      .if{(projects.get.get i).state.runs.not} .return{Void}
+      .do{self.set(i, States.busy(frame!.elapsed + (Duration.seconds 3)))}
+      .do{self.say("Running: "+((projects.get.get i).name))}
       .return{self.render};
     }}
   }
-TileClicked:{ mut #(index: Nat, elapsed: Instant): Void; }
-TileMenu:{ mut #(menu: mut Menu, index: Nat): mut Menu; }
-TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, menu: mut TileMenu): Void -> Block#
-  .do{Block#(grid.clear, Void)}
-  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, menu, 0)}
-  }
-AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, menu: mut TileMenu, i: Nat): Void -> Block#
-  .if{i >= (tiles.size)} .return{Void}
-  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .tooltip((tiles.get i).name | "Double click to run it") .mouse{:: .clicked{_, _, t, _, _ -> clicked#(i, t)} .doubleClicked{_, _, t, _, _ -> doubleClicked#(i, t)}} .contextMenu{mm -> menu#(mm, i)}}, Void)}
-  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, menu, i + 1)}
-  }
 Mains:{ #(i: Nat): Str -> Lists#("main", "test", "bench").get i }
-RunItems:{ #(menu: mut Menu, ticks: List[Bool], m: mut GridModel, i: Nat): mut Menu -> Block#
+RunItems:{ #(menu: mut Menu, ticks: List[Bool], m: mut Manager, i: Nat): mut Menu -> Block#
   .if{i >= (ticks.size)} .return{menu}
   .return{RunItems#(menu.item{:: .text(Mains#i) .check(ticks.get i) .action{m.tick i}}, ticks, m, i + 1)}
   }
 Ticked:{ #(ticks: List[Bool], i: Nat): Bool -> (i >= (ticks.size)) ? { .then -> False; .else -> ticks.get i || {Ticked#(ticks, i + 1)} } }
-SelectItems:{ #(menu: mut Menu, tiles: List[Tile], selected: Nat, m: mut GridModel, i: Nat): mut Menu -> Block#
-  .if{i >= (tiles.size)} .return{menu}
-  .return{SelectItems#(menu.item{:: .text((tiles.get i).name) .radio(i == selected) .action{m.click i}}, tiles, selected, m, i + 1)}
-  }
-Retile:{ #(t: Tile, flag: Painter): Tile -> { .name -> t.name; .image -> t.image; .flag -> flag; } }
-
-Fit:{ #(g: read Graphics, s: Str): Str -> ((g.textWidth s).get <= 120) ? { .then -> s; .else -> Dots#(g, s) } }
-Dots:{ #(g: read Graphics, s: Str): Str -> Block#
-  .let d= {s+"..."}
-  .if{s.isEmpty || {(g.textWidth d).get <= 120}} .return{d}
-  .return{Dots#(g, s.sub(0, s.size - 1))}
-  }
-Palette:{ #(i: Nat): Color -> Lists#(Color.sleepyBlue, Color.goblinGreen, Color.dangerTomato, Color.wizardPurple, Color.lavaOrange, Color.swampTea, Color.rustyRobot, Color.blueberrySoup).get(i.getRem 8) }
-GeneratedIcon:{ #(name: Str): Image -> Block#
-  .let[Nat] h= {name.hash.getRem 8}
-  .let[Str] initials= {name.sub(0, (name.size < 2) ? { .then -> name.size; .else -> 2 }).upper}
-  .return{Images#(Width#48, Height#48, Palette#h).paint{g -> g
-    .color(Palette#(h + 1)).position(X#(+24), Y#(+0)).rect(Width#24, Height#24)
-    .color(Palette#(h + 2)).position(X#(+0), Y#(+24)).rect(Width#24, Height#24)
-    .color(Palette#(h + 3)).position(X#(+24), Y#(+24)).rect(Width#24, Height#24)
-    .color(Color.ghostWhite).textHeight 24
-    .position(X#(((48 - ((g.textWidth initials).get)).getTruncDiv 2).getInt), Y#(+8))
-    .text initials
-    }}
-  }
-TilePainter:{ #(t: Tile, selected: Bool): Painter -> {g -> Block#
-  .do{selected ? { .then -> SelectionBox#g; .else -> Void }}
-  .do{Block#(g.position(X#(+40), Y#(+6)).image(t.image), Void)}
-  .do{Block#(t.flag.run g, Void)}
-  .do{Block#(g.color(Color.voidBlack).textHeight 12, Void)}
-  .let[Str] name= {Fit#(g, t.name)}
-  .return{g.position(X#(((128 - ((g.textWidth name).get)).getTruncDiv 2).getInt), Y#(+58)).text name}
-  }}
-SelectionBox:{ #(g: mut Graphics): Void -> Block#(g
-  .color(Color.rgb(0, 120, 215)).position(X#(+0), Y#(+0)).rect(Width#128, Height#88)
-  .color(Color.rgb(204, 228, 247)).position(X#(+2), Y#(+2)).rect(Width#124, Height#84), Void) }
-
-Flags:{
-  #(i: Nat): Painter -> Lists#(
-    Dot#(Color.rgb(117, 117, 117), ""),
-    Dot#(Color.rgb(21, 101, 192), "R"),
-    Dot#(Color.rgb(106, 27, 154), "W"),
-    Dot#(Color.rgb(239, 108, 0), "!"),
-    Dot#(Color.rgb(198, 40, 40), "X"),
-    Dot#(Color.rgb(46, 125, 50), ">")).get(i.getRem 6);
-  .busyUntil(end: Instant, then: Painter): Painter -> {g -> (g.elapsed < end) ? { .then -> Spinner.run g; .else -> then.run g }};
-  }
-Dot:{ #(c: Color, glyph: Str): Painter -> {g -> g
-  .color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20)
-  .color c .position(X#(+72), Y#(+38)).oval(Width#16, Height#16)
-  .color(Color.ghostWhite).textHeight 11
-  .position(X#((72 + ((16 - ((g.textWidth glyph).get)).getTruncDiv 2)).getInt), Y#(+38))
-  .text glyph
-  }}
-Spinner:Painter{g -> Block#
-  .let[Nat] head= {g.elapsed.get.getTruncDiv(100000).getRem 8}
-  .do{Block#(g.color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20), Void)}
-  .do{SpinDot#(g, head, 0, +6, +0)}
-  .do{SpinDot#(g, head, 1, +4, +4)}
-  .do{SpinDot#(g, head, 2, +0, +6)}
-  .do{SpinDot#(g, head, 3, -4, +4)}
-  .do{SpinDot#(g, head, 4, -6, +0)}
-  .do{SpinDot#(g, head, 5, -4, -4)}
-  .do{SpinDot#(g, head, 6, +0, -6)}
-  .do{SpinDot#(g, head, 7, +4, -4)}
-  .return{g}
-  }
-SpinDot:{ #(g: mut Graphics, head: Nat, k: Nat, dx: Int, dy: Int): Void -> Block#
-  .let[Nat] age= {(head + 8 - k).getRem 8}
-  .return{Block#(g
-    .color(Color#(Red#(46.getByte), Green#(125.getByte), Blue#(50.getByte), Alpha#((255 - (age * 30)).getByte)))
-    .position(X#(+78 + dx), Y#(+44 + dy)).oval(Width#4, Height#4), Void)}
+SelectItems:{ #(menu: mut Menu, ps: List[Project], selected: Str, m: mut Manager, i: Nat): mut Menu -> Block#
+  .if{i >= (ps.size)} .return{menu}
+  .return{SelectItems#(menu.item{:: .text((ps.get i).name) .radio((ps.get i).name == selected) .action{m.click i}}, ps, selected, m, i + 1)}
   }

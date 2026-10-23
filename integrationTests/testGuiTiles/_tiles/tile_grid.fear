@@ -1,0 +1,29 @@
+Tile:{ .name: Str; .tooltip: Str; .image: Image; .flag: Painter; }
+TileClicked:{ mut #(index: Nat): Void; }
+TileMenu:{ mut #(menu: mut Menu, index: Nat): mut Menu; }
+TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, menu: mut TileMenu): Void -> Block#
+  .do{Block#(grid.clear, Void)}
+  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, menu, 0)}
+  }
+AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, menu: mut TileMenu, i: Nat): Void -> Block#
+  .if{i >= (tiles.size)} .return{Void}
+  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .tooltip((tiles.get i).tooltip) .mouse{:: .clicked{_, _, _, _, _ -> clicked#i} .doubleClicked{_, _, _, _, _ -> doubleClicked#i}} .contextMenu{mm -> menu#(mm, i)}}, Void)}
+  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, menu, i + 1)}
+  }
+TilePainter:{ #(t: Tile, selected: Bool): Painter -> {g -> Block#
+  .do{selected ? { .then -> SelectionBox#g; .else -> Void }}
+  .do{Block#(g.position(X#(+40), Y#(+6)).image(t.image, Width#48, Height#48), Void)}
+  .do{Block#(t.flag.run g, Void)}
+  .do{Block#(g.color(Color.voidBlack).textHeight 12, Void)}
+  .let[Str] name= {Fit#(g, t.name)}
+  .return{g.position(X#(((128 - ((g.textWidth name).get)).getTruncDiv 2).getInt), Y#(+58)).text name}
+  }}
+SelectionBox:{ #(g: mut Graphics): Void -> Block#(g
+  .color(Color.rgb(0, 120, 215)).position(X#(+0), Y#(+0)).rect(Width#128, Height#88)
+  .color(Color.rgb(204, 228, 247)).position(X#(+2), Y#(+2)).rect(Width#124, Height#84), Void) }
+Fit:{ #(g: read Graphics, s: Str): Str -> ((g.textWidth s).get <= 120) ? { .then -> s; .else -> Dots#(g, s) } }
+Dots:{ #(g: read Graphics, s: Str): Str -> Block#
+  .let d= {s+"..."}
+  .if{s.isEmpty || {(g.textWidth d).get <= 120}} .return{d}
+  .return{Dots#(g, s.sub(0, s.size - 1))}
+  }

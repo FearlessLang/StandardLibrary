@@ -1,0 +1,61 @@
+GeneratedIcons:{ #(name: Str): Image -> Block#
+  .let[Nat] seed= {name.hash}
+  .let[Nat] hue= {Mix#(seed, 0).getRem 1536}
+  .return{Images#(Width#192, Height#192, Color.transparent).paint{g -> Block#
+    .do{Block#(RoundRect#(g.color(Shade#90), 0, 0, 192, 36), Void)}
+    .do{Block#(Quarter#(g, seed, hue, 0), Void)}
+    .do{Block#(Quarter#(g, seed, hue, 1), Void)}
+    .do{Block#(Quarter#(g, seed, hue, 2), Void)}
+    .do{Block#(Quarter#(g, seed, hue, 3), Void)}
+    .return{Initials#(g, name)}
+    }}
+  }
+Quarter:{ #(g: mut Graphics, seed: Nat, hue: Nat, i: Nat): mut Graphics -> Block#
+  .let[Nat] qx= {i.getRem 2}
+  .let[Nat] qy= {i.getTruncDiv 2}
+  .let[Nat] x= {4 + (qx * 92)}
+  .let[Nat] y= {4 + (qy * 92)}
+  .let[Nat] h= {(hue + (i * 384) + (Mix#(seed, (i * 3) + 1).getRem 154) + 1459).getRem 1536}
+  .let[Nat] s= {128 + (Mix#(seed, (i * 3) + 2).getRem 115)}
+  .let[Nat] v= {115 + (Mix#(seed, (i * 3) + 3).getRem 116)}
+  .return{RoundRect#(g.color(Hsv#(h, s, v)), x, y, 92, 32)
+    .position(Xn#(x + (60 * (1 - qx))), Yn#y).rect(Width#32, Height#92)
+    .position(Xn#x, Yn#(y + (60 * (1 - qy)))).rect(Width#92, Height#32)}
+  }
+RoundRect:{ #(g: mut Graphics, x: Nat, y: Nat, side: Nat, r: Nat): mut Graphics -> Block#
+  .let[Nat] far= {side - (r * 2)}
+  .return{g
+    .position(Xn#x, Yn#y).oval(Width#(r * 2), Height#(r * 2))
+    .position(Xn#(x + far), Yn#y).oval(Width#(r * 2), Height#(r * 2))
+    .position(Xn#x, Yn#(y + far)).oval(Width#(r * 2), Height#(r * 2))
+    .position(Xn#(x + far), Yn#(y + far)).oval(Width#(r * 2), Height#(r * 2))
+    .position(Xn#(x + r), Yn#y).rect(Width#far, Height#side)
+    .position(Xn#x, Yn#(y + r)).rect(Width#side, Height#far)}
+  }
+Initials:{ #(g: mut Graphics, name: Str): mut Graphics -> Block#
+  .let[Str] s= {name.sub(0, (name.size < 2) ? { .then -> name.size; .else -> 2 }).upper}
+  .let[Nat] x= {(186 - (g.textHeight(88).textWidth(s).get)).getTruncDiv 2}
+  .do{Block#(Bold#(g.color(Shade#150), x + 5, 45, s), Void)}
+  .return{Bold#(g.color(Color.rgb(255, 255, 255)), x, 40, s)}
+  }
+Bold:{ #(g: mut Graphics, x: Nat, y: Nat, s: Str): mut Graphics -> g
+  .position(Xn#x, Yn#y).text s
+  .position(Xn#(x + 3), Yn#y).text s
+  .position(Xn#(x + 6), Yn#y).text s
+  }
+Shade:{ #(alpha: Nat): Color -> Color#(Red#(0.getByte), Green#(0.getByte), Blue#(0.getByte), Alpha#(alpha.getByte)) }
+Xn:{ #(n: Nat): X -> X#(n.getInt) }
+Yn:{ #(n: Nat): Y -> Y#(n.getInt) }
+Hsv:{ #(h: Nat, s: Nat, v: Nat): Color -> Block#
+  .let[Nat] f= {h.getRem 256}
+  .let[Nat] p= {(v * (255 - s)).getTruncDiv 255}
+  .let[Nat] q= {(v * (65280 - (s * f))).getTruncDiv 65280}
+  .let[Nat] t= {(v * (65280 - (s * (256 - f)))).getTruncDiv 65280}
+  .return{Lists#(Color.rgb(v, t, p), Color.rgb(q, v, p), Color.rgb(p, v, t), Color.rgb(p, q, v), Color.rgb(t, p, v), Color.rgb(v, p, q)).get(h.getTruncDiv 256)}
+  }
+Mix:{ #(seed: Nat, k: Nat): Nat -> Block#
+  .let[Nat] z0= {seed.aluAddWrap(k.aluMulWrap 11400714819323198485)}
+  .let[Nat] z1= {z0.aluXor(z0.aluShiftRight 30).aluMulWrap 13787848793156543929}
+  .let[Nat] z2= {z1.aluXor(z1.aluShiftRight 27).aluMulWrap 10723151780598845931}
+  .return{z2.aluXor(z2.aluShiftRight 31)}
+  }

@@ -124,6 +124,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   long maxPerLine= 0xFFFF_FFFF_FFFF_FFFFL;
   boolean lineScroll;
   boolean stackScroll;
+  boolean centered= true;
 
   _Pane(_Frame frame){
     super(frame);
@@ -149,6 +150,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   }
   @Override public Object mut$lineScroll$1(Object b){ return reStyle(() -> lineScroll = Util.isTrue(b)); }
   @Override public Object mut$stackScroll$1(Object b){ return reStyle(() -> stackScroll = Util.isTrue(b)); }
+  @Override public Object mut$centered$1(Object b){ return reStyle(() -> centered = Util.isTrue(b)); }
   @Override boolean barRight(){ return vertical ? lineScroll : stackScroll; }
   @Override boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
   @Override void clipChildren(Canvas cv){
