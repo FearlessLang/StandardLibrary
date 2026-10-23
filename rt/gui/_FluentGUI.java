@@ -47,6 +47,8 @@ public final class _FluentGUI implements Gui$c$0, Cloneable{
   private static java.awt.Rectangle screen(){ return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds(); }
   @Override public Object mut$uName$1(Object u){
     var s= Scopes.ustr(u);
+    var b= Scopes.lineBreak(s);
+    if (b != null){ throw Util.detErr("The new name of this Gui has "+b+": the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"); }
     if (!s.codePoints().allMatch(_FluentGUI::invisible)){ return set(g -> g.name = s); }
     var shown= ((Str$c$0Instance)((UStr$s$0Instance) u).imm$escape$0()).val();
     throw Util.detErr("The name "+shown+" is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character");
