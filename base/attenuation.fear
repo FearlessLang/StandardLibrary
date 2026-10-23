@@ -19,7 +19,7 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///  }}
 ///OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
 ///```
-SystemAttenuator: Attenuator[System]{}
+SystemAttenuator: CaptureFree, Attenuator[System]{}
 
 ///A System with no authority: every method throws the non deterministic error ``System.<method> is revoked.``.
 ///It is the System of a test that must not touch the world, and the base of an attenuator keeping a few capabilities,
