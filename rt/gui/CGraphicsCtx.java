@@ -39,7 +39,13 @@ class CGraphicsCtx implements Graphics$ao$0{
   @Override public Object read$positionY$0(){ return Scopes.y((long) y); }
   @Override public Object read$textHeight$0(){ return Scopes.h(textSize); }
   @Override public Object read$uTextWidth$1(Object text){
-    try (var line= Sk.shape(Scopes.ustr(text), textSize)){ return Scopes.w((long) Math.ceil(line.getWidth())); }
+    try (var line= Sk.shape(oneLine(text, "Graphics.textWidth", "measures"), textSize)){ return Scopes.w((long) Math.ceil(line.getWidth())); }
+  }
+  private static String oneLine(Object text, String method, String does){
+    var s= Scopes.ustr(text);
+    var b= Scopes.lineBreak(s);
+    if (b != null){ throw Util.detErr("The text given to " + method + " has " + b + ": " + method + " " + does + " one line"); }
+    return s;
   }
   // Drawing outside the panel clips with a warning (canvas is clipped to the panel),
   // otherwise user can cause errors by resizing the gui by hand
@@ -87,7 +93,7 @@ class CGraphicsCtx implements Graphics$ao$0{
   }
   @Override public Object mut$uText$1(Object text){
     paint.setMode(PaintMode.FILL);
-    try (var line= Sk.shape(Scopes.ustr(text), textSize)){
+    try (var line= Sk.shape(oneLine(text, "Graphics.text", "draws"), textSize)){
       cv.drawTextLine(line, x, y + textSize, paint);
       reach(Rect.makeXYWH(x, y, line.getWidth(), textSize * 1.5f));
     }
