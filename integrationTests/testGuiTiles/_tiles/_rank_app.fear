@@ -22,6 +22,9 @@ use base.Images as Images;
 use base.Painter as Painter;
 use base.Graphics as Graphics;
 use base.Label as Label;
+use base.Menu as Menu;
+use base.Frame as Frame;
+use base.False as False;
 use base.Pane as Pane;
 use base.Slot as Slot;
 use base.Slots as Slots;
@@ -33,15 +36,17 @@ use base.Opts as Opts;
 TileGrid:Main{sys -> Block#
   .let grid= {Slots#[mut Pane]}
   .let status= {Slots#[mut Label]}
-  .let m= {GridModels#(grid, status)}
+  .let frame= {Slots#[mut Frame]}
+  .let m= {GridModels#(grid, status, frame)}
   .return{sys.gui.name "Tiles" .run{f -> Block#(f
+    .save frame
     .virtualPixelSpace(Width#660, Height#420)
     .contentB{::
       .background(Color.ghostWhite)
       .north{:: .fill
-        .button{:: .text "Add project" .action{m.add}}
-        .button{:: .text "Change flag" .action{m.cycle}}
-        .label{:: .text "Click a tile to select it, double click to run it" .save status}
+        .button{b -> b .text "Manager" .action{b.openMenu{mm -> m.managerMenu mm}}}
+        .button{b -> b .text "Run" .action{b.openMenu{mm -> m.runMenu mm}}}
+        .label{:: .text "Click a tile to select it, double click to run it, right click it for its menu" .save status}
         }
       .center{:: .fill .stackScroll(True) .widthGap 0 .heightGap 0 .save grid}
       },
@@ -55,12 +60,34 @@ Tiles:{ #(name: Str, flag: Painter): Tile -> Block#
   }
 Names:{ #(i: Nat): Str -> Lists#("alpha", "beta", "gamma", "delta", "basketball", "a project with a very long name", "tour", "hello world").get(i.getRem 8) }
 
-GridModels:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label]): mut GridModel -> Block#
+GridModels:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label], frame: mut Slot[mut Frame]): mut GridModel -> Block#
   .var[List[Tile]] tiles= {Lists#(Tiles#(Names#0, Flags#0), Tiles#(Names#1, Flags#1), Tiles#(Names#2, Flags#2), Tiles#(Names#3, Flags#3), Tiles#(Names#4, Flags#4), Tiles#(Names#5, Flags#5))}
   .var[Nat] selected= {0}
   .var[Nat] cycle= {0}
+  .var[List[Bool]] ticks= {Lists#(True, False, False)}
   .return{mut GridModel:{'self
-    mut .render: Void -> TileGrids#(grid!, tiles.get, Opts#(selected.get), {i, _ -> self.click i}, {i, t -> self.run(i, t)});
+    mut .render: Void -> TileGrids#(grid!, tiles.get, Opts#(selected.get), {i, _ -> self.click i}, {i, t -> self.run(i, t)}, {mm, i -> self.tileMenu(mm, i)});
+    mut .managerMenu(mm: mut Menu): mut Menu -> mm
+      .item{:: .text "Add project" .action{self.add}}
+      .item{:: .text "Change flag" .action{self.cycle}}
+      .item{:: .text "Select" .submenu{s -> SelectItems#(s, tiles.get, selected.get, self, 0)}}
+      .separator
+      .item{:: .text "Close the window" .action{frame!.close}};
+    mut .runMenu(mm: mut Menu): mut Menu -> RunItems#(mm, ticks.get, self, 0)
+      .separator
+      .item{:: .text "Run the ticked mains" .enabled(Ticked#(ticks.get, 0)) .action{self.run(selected.get, frame!.elapsed)}};
+    mut .tileMenu(mm: mut Menu, i: Nat): mut Menu -> mm
+      .item{:: .text("Run " + (tiles.get.get(i).name)) .action{self.run(i, frame!.elapsed)}}
+      .item{:: .text "Select" .enabled(selected.get != i) .action{self.click i}}
+      .separator
+      .item{:: .text "Forget" .enabled(tiles.get.size > 1) .action{self.forget i}};
+    mut .tick(i: Nat): Void -> Block#
+      .do{ticks.set(ticks.get.with(i, ticks.get.get(i).not))}
+      .return{Block#(status!.text("Ticked: "+(Mains#i)), Void)};
+    mut .forget(i: Nat): Void -> Block#
+      .do{tiles.set(tiles.get.without i)}
+      .do{selected.set 0}
+      .return{self.render};
     mut .add: Void -> Block#
       .do{tiles.set(tiles.get ++ (Lists#(Tiles#(Names#(tiles.get.size), Flags#(tiles.get.size)))))}
       .return{self.render};
@@ -80,14 +107,25 @@ GridModels:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label]): mut GridM
     }}
   }
 TileClicked:{ mut #(index: Nat, elapsed: Instant): Void; }
-TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked): Void -> Block#
+TileMenu:{ mut #(menu: mut Menu, index: Nat): mut Menu; }
+TileGrids:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, menu: mut TileMenu): Void -> Block#
   .do{Block#(grid.clear, Void)}
-  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, 0)}
+  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, menu, 0)}
   }
-AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, i: Nat): Void -> Block#
+AddTiles:{ #(grid: mut Pane, tiles: List[Tile], selected: Opt[Nat], clicked: mut TileClicked, doubleClicked: mut TileClicked, menu: mut TileMenu, i: Nat): Void -> Block#
   .if{i >= (tiles.size)} .return{Void}
-  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .tooltip((tiles.get i).name | "Double click to run it") .mouse{:: .clicked{_, _, t, _, _ -> clicked#(i, t)} .doubleClicked{_, _, t, _, _ -> doubleClicked#(i, t)}}}, Void)}
-  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, i + 1)}
+  .do{Block#(grid.pane{:: .width 128 .height 88 .paint(TilePainter#(tiles.get i, selected.isSome && {selected! == i})) .tooltip((tiles.get i).name | "Double click to run it") .mouse{:: .clicked{_, _, t, _, _ -> clicked#(i, t)} .doubleClicked{_, _, t, _, _ -> doubleClicked#(i, t)}} .contextMenu{mm -> menu#(mm, i)}}, Void)}
+  .return{AddTiles#(grid, tiles, selected, clicked, doubleClicked, menu, i + 1)}
+  }
+Mains:{ #(i: Nat): Str -> Lists#("main", "test", "bench").get i }
+RunItems:{ #(menu: mut Menu, ticks: List[Bool], m: mut GridModel, i: Nat): mut Menu -> Block#
+  .if{i >= (ticks.size)} .return{menu}
+  .return{RunItems#(menu.item{:: .text(Mains#i) .check(ticks.get i) .action{m.tick i}}, ticks, m, i + 1)}
+  }
+Ticked:{ #(ticks: List[Bool], i: Nat): Bool -> (i >= (ticks.size)) ? { .then -> False; .else -> ticks.get i || {Ticked#(ticks, i + 1)} } }
+SelectItems:{ #(menu: mut Menu, tiles: List[Tile], selected: Nat, m: mut GridModel, i: Nat): mut Menu -> Block#
+  .if{i >= (tiles.size)} .return{menu}
+  .return{SelectItems#(menu.item{:: .text((tiles.get i).name) .radio(i == selected) .action{m.click i}}, tiles, selected, m, i + 1)}
   }
 Retile:{ #(t: Tile, flag: Painter): Tile -> { .name -> t.name; .image -> t.image; .flag -> flag; } }
 

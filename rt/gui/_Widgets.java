@@ -296,6 +296,7 @@ abstract class AWidget implements Widget$2o$1{
   // other style fields.
   String text= "";
   String tooltip= "";
+  Object contextMenu;
 
   final _Frame frame;
   final SkComponent component= new SkComponent(this);
@@ -459,6 +460,18 @@ abstract class AWidget implements Widget$2o$1{
     return onEdt(() -> tooltip = s);
   }
   @Override public Object read$uTooltip$0(){ return UStr$s$0Instance.instance(tooltip); }
+  @Override public Object mut$contextMenu$1(Object s){ return onEdt(() -> contextMenu = s); }
+  @Override public Object mut$openMenu$1(Object s){
+    var m= CMenu.build(s);
+    frame.onEdtAndWait(() -> {
+      if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the Gui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
+      if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to Gui.run has not returned"); }
+      if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a replaced Border slot or a new .content removed it, or the scope that adds it has not returned"); }
+      var at= SwingUtilities.convertPoint(component, 0, 0, frame.top.component);
+      frame.menus.show(m, new Rectangle(at.x, at.y, component.getWidth(), component.getHeight()));
+    });
+    return Void$o$0.instance;
+  }
   @Override public Object read$topInset$0(){ return h(top); }
   @Override public Object read$bottomInset$0(){ return h(bottom); }
   @Override public Object read$leftInset$0(){ return w(left); }
@@ -518,6 +531,7 @@ final class _Frame implements Frame$1c$0{
   final _FluentGUI gui;
   final SkMouse mouse= new SkMouse(this);
   final CTextKeys textKeys= new CTextKeys(this);
+  final SkMenus menus= new SkMenus(this);
   @SuppressWarnings("serial")
   final JComponent surface= new JComponent(){
     @Override protected void paintComponent(java.awt.Graphics g){ blit(g); }
@@ -549,7 +563,7 @@ final class _Frame implements Frame$1c$0{
   // scheduled; post-start readers are queue tasks whose submission (from the
   // EDT) happens after the write, so the queue handoff gives the
   // happens-before. Single mutator at every point in time: no volatile.
-  private boolean started;
+  boolean started;
   private final AtomicBoolean layoutDirty= new AtomicBoolean();
   private Bitmap bitmap;
   private Canvas canvas;
@@ -706,6 +720,7 @@ final class _Frame implements Frame$1c$0{
     canvas.clipRect(io.github.humbleui.types.Rect.makeWH(c.getWidth(), c.getHeight()));
     canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
     Sk.paintNode(c, canvas);
+    menus.paint(canvas);
     mouse.paintTip(canvas);
     canvas.restoreToCount(picture);
     stage.paintCorner(canvas);

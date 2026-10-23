@@ -582,6 +582,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     return c != CHAR_UNDEFINED && !Character.isISOControl(c) && typesWith(e);
   }
   @Override public void keyPressed(KeyEvent e){
+    if (frame.menus.key(e)){ reservedDown = true; e.consume(); return; }
     reservedDown = frame.reserved(e.getKeyCode());
     if (!uses(e)){ return; }
     e.consume();
@@ -611,7 +612,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     }
     e.consume();
     var t= frame.focus;
-    if (t == null){ return; }
+    if (t == null || frame.menus.isOpen()){ return; }
     t.composing = composing.toString();
     if (!done.isEmpty()){ t.input(done.toString()); }
   }
