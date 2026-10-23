@@ -150,14 +150,14 @@ public final class Util{
   public static Deterministic deterministic(Info$o$0 i){ return new Deterministic(i); }
   public static NonDeterministic nonDeterministic(Info$o$0 i){ return new NonDeterministic(i); }
   public static boolean topLevel(Runnable r){
-    try{ r.run(); endMarker(); _CapProcess$18g$0.report("ok", null); return true; }
+    try{ r.run(); endMarker(); _CapProcess$18g$0.result("ok", null); return true; }
     catch (Deterministic d){ uncaught("det", d.i, d); }
     catch (NonDeterministic d){ uncaught("nondet", d.i, d); }
-    catch (Throwable t){ t.printStackTrace(); _CapProcess$18g$0.report("nondet", (Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t)))); }
+    catch (Throwable t){ t.printStackTrace(); _CapProcess$18g$0.result("nondet", (Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t)))); }
     return false;
   }
   private static void uncaught(String kind, Info$o$0 i, RuntimeException d){
-    if (_CapProcess$18g$0.report(kind, i)){ return; }
+    if (_CapProcess$18g$0.result(kind, (Info$o$0)_CapTry$2s$0.addStackInfo(i, d))){ return; }
     printInfo(i, d);
   }
   private static void endMarker(){

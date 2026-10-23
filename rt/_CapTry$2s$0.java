@@ -24,7 +24,7 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
       }
     };
   }
-   private static Object addStackInfo(Object info, Throwable t){
+   static Object addStackInfo(Object info, Throwable t){
     return ((Info$o$0)info).imm$$plus$1(stackTraceOf(aboveHere(t.getStackTrace())).read$info$1(dtId));
   }
   private static StackTraceElement[] aboveHere(StackTraceElement[] st){

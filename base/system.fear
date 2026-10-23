@@ -25,7 +25,7 @@ System: ToIso[System],WidenTo[System] {
   mut .readLog[T](InMemoryLog[T]): mut LogReader[T];
   
   mut .gui:mut Gui;
-  ///A new flag, not started: a `StartRevokeSystem` and the other capability wrappers that can be revoked check it.
+  ///A new flag, not started: a `RevokableSystem` and the capabilities it gives check it before every call.
   mut .revocation: mut RevocationRoot;
   }
   
