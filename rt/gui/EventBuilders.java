@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ final class CMouseBuilder implements Mouse$1c$0{
   CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
     owner.frame.onEdtAndWait(() -> {
+      if (owner.frame.frame.completed()){ throw Util.detErr("This Mouse belongs to a closed window: the Gui.run that showed the window has returned, so a handler set now would never run"); }
       if (!changeable && (owner.handlers != handlers || !owner.canChange())){
         throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
       }
@@ -67,12 +69,14 @@ final class SkMouse extends MouseAdapter{
   private Point at= new Point();
   private AWidget pressTarget;
   private Point pressAt;
+  private AWidget secondary;
   private AWidget tip;
   private long tipSince;
   private Point tipAt;
   private boolean tipOff;
   private AWidget dragged;
   private boolean draggedVert;
+  private boolean paging;
   private _Split dividing;
   private int grab;
 
@@ -94,8 +98,17 @@ final class SkMouse extends MouseAdapter{
     frame.focus = null;
   }
 
+  void forget(){
+    if (pressTarget instanceof _Button b){ b.down = false; }
+    pressTarget = null;
+    dragged = null;
+    paging = false;
+    dividing = null;
+  }
+
   void rehover(){
     assert SwingUtilities.isEventDispatchThread();
+    if (frame.menus.isOpen()){ return; }
     if (java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(MouseEvent.MOUSE_MOVED) != null){ return; }
     var s= frame.surface.getMousePosition();
     if (s == null){ hoverTo(List.of()); return; }
@@ -105,7 +118,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   void paintTip(Canvas cv){
-    var owner= hover.stream().filter(t -> !t.tooltip.isEmpty()).findFirst().orElse(null);
+    var owner= frame.menus.isOpen() ? null : hover.stream().filter(t -> !t.tooltip.isEmpty()).findFirst().orElse(null);
     if (owner != tip){ tip = owner; tipSince = System.nanoTime(); tipAt = null; }
     if (tip == null || tipOff || System.nanoTime() - tipSince < 500_000_000L){ return; }
     if (tipAt == null){ tipAt = at; }
@@ -115,8 +128,10 @@ final class SkMouse extends MouseAdapter{
   @Override public void mousePressed(MouseEvent e){
     tipOff = true;
     var p= point(e);
-    var d= deepestAt(p);
     boolean left= SwingUtilities.isLeftMouseButton(e);
+    if (frame.menus.pressed(p, e.getClickCount(), left)){ return; }
+    var d= deepestAt(p);
+    if (SwingUtilities.isRightMouseButton(e)){ secondary = d; }
     frame.pressed(d);
     if (left && d instanceof AEditText t){ frame.focus = t; }
     if (left && d != null && (onBar(d, p, true) || onBar(d, p, false))){ return; }
@@ -138,14 +153,17 @@ final class SkMouse extends MouseAdapter{
 
   @Override public void mouseReleased(MouseEvent e){
     var p= point(e);
-    if ((dragged != null || dividing != null) && SwingUtilities.isLeftMouseButton(e)){ dragged = null; dividing = null; return; }
     boolean left= SwingUtilities.isLeftMouseButton(e);
+    int buttons= MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
+    if (frame.menus.released(p, left, (e.getModifiersEx() & buttons) == 0)){ return; }
+    if ((dragged != null || dividing != null || paging) && left){ dragged = null; dividing = null; paging = false; return; }
     // mousePressed only ever captures a left press into pressTarget, so only
     // a left release is interpreted against that press chain (AWT delivers
     // it to the pressed component even if the cursor left it); any other
     // button was dispatched at its own current location on press and is
     // released the same way, not against an unrelated left gesture's target.
     dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p);
+    if (SwingUtilities.isRightMouseButton(e)){ context(p); }
     if (!left){ return; }
     if (pressTarget instanceof _Button b){ b.down = false; }
     click(p, e.getClickCount());
@@ -155,12 +173,15 @@ final class SkMouse extends MouseAdapter{
   @Override public void mouseMoved(MouseEvent e){
     if (tipOff){ tipOff = false; tipSince = System.nanoTime(); tipAt = null; }
     var p= point(e);
+    if (frame.menus.moved(p)){ return; }
     updateHover(p);
     dispatch(deepestAt(p), Moved, p);
   }
 
   @Override public void mouseDragged(MouseEvent e){
     var p= point(e);
+    if (frame.menus.moved(p)){ return; }
+    if (paging){ return; }
     if (dragged != null){ dragThumb(p); return; }
     if (dividing != null){
       var at= SwingUtilities.convertPoint(top(), p, dividing.component);
@@ -173,10 +194,11 @@ final class SkMouse extends MouseAdapter{
     dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);
   }
 
-  @Override public void mouseEntered(MouseEvent e){ updateHover(point(e)); }
-  @Override public void mouseExited(MouseEvent e){ hoverTo(List.of()); }
+  @Override public void mouseEntered(MouseEvent e){ if (!frame.menus.isOpen()){ updateHover(point(e)); } }
+  @Override public void mouseExited(MouseEvent e){ if (!frame.menus.isOpen()){ hoverTo(List.of()); } }
 
   int cursor(Point p){
+    if (frame.menus.isOpen()){ return Cursor.DEFAULT_CURSOR; }
     var d= deepestAt(p);
     if (d instanceof AEditText t && t.view().contains(SwingUtilities.convertPoint(top(), p, t.component))){ return Cursor.TEXT_CURSOR; }
     if (onDivider(d, p)){ return ((_Split) d).vertical ? Cursor.N_RESIZE_CURSOR : Cursor.E_RESIZE_CURSOR; }
@@ -203,6 +225,7 @@ final class SkMouse extends MouseAdapter{
       grab = vert ? at.y - m.y : at.x - m.x;
       return true;
     }
+    paging = true;
     int page= (vert ? at.y < m.y : at.x < m.x) ? -1 : 1;
     if (vert){ q.scrollTo(q.scrollX, q.scrollY + page * q.viewH()); }
     else{ q.scrollTo(q.scrollX + page * q.viewW(), q.scrollY); }
@@ -218,6 +241,10 @@ final class SkMouse extends MouseAdapter{
   }
 
   void wheel(Point p, double rotation, boolean horizontal){
+    if (frame.menus.isOpen()){
+      if (!horizontal){ frame.menus.wheel(p, rotation); }
+      return;
+    }
     int d= (int) Math.round(rotation * 40);
     for (var t : chainOf(deepestAt(p))){
       if (!(horizontal ? t.barBottom() : t.barRight())){ continue; }
@@ -242,6 +269,21 @@ final class SkMouse extends MouseAdapter{
       if (t instanceof _Sections s && s.click(local(s, pressAt), local(s, p))){ return; }
       if (clicks == 2 && fire(t, DoubleClicked, p)){ return; }
       if (fire(t, Clicked, p)){ return; }
+    }
+  }
+
+  private void context(Point p){
+    var from= secondary;
+    secondary = null;
+    for (var t : chainOf(from)){
+      if (t.contextMenu == null || !inside(t, p)){ continue; }
+      var s= t.contextMenu;
+      frame.frame.queue.submit(whileShown(t, new MF$7$1(){ @Override public Object mut$$hash$0(){
+        var m= CMenu.build(s);
+        frame.onEdtAndWait(() -> frame.menus.show(m, new Rectangle(p.x, p.y, 0, 0)));
+        return Void$o$0.instance;
+      }}));
+      return;
     }
   }
 

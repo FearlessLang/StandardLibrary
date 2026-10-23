@@ -24,7 +24,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
   CKeyManager(_Frame frame){ this.frame= frame; }
 
   @Override public void keyPressed(KeyEvent e){
-    if (frame.reserved(e.getKeyCode()) || frame.textKeys.uses(e)){ return; }
+    if (frame.reserved(e.getKeyCode()) || e.isConsumed()){ return; }
     if (held.add(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){
@@ -80,7 +80,8 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
 
   private Object addKeyAction(Object scope, List<KeyAction$m8$0> list){
     frame.onEdtAndWait(() -> {
-      if (!changeable && !List.of(frame.surface.getKeyListeners()).contains(this)){
+      if (frame.frame.completed()){ throw Util.detErr("This Keys belongs to a closed window: the Gui.run that showed the window has returned, so a key action added now would never run"); }
+      if (!changeable &&!List.of(frame.surface.getKeyListeners()).contains(this)){
         throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");
       }
     });

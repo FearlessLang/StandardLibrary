@@ -115,8 +115,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
 
   @Override public Object mut$uText$1(Object t){
     var s= ustr(t);
-    int nl= s.indexOf('\n');
-    if (oneLine() && nl >= 0){ throw Util.detErr("The new text of this TextField has a newline at offset " + s.codePointCount(0, nl) + ": the text of a TextField is one line; a TextArea holds more lines"); }
+    var b= lineBreak(s);
+    if (oneLine() && b != null){ throw Util.detErr("The new text of this TextField has " + b + ": the text of a TextField is one line; a TextArea holds more lines"); }
     return reStyle(() -> {
       program(0, buf.length(), s, s.length(), s.length());
       reveal = true;
@@ -405,8 +405,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   private String filtered(String in){
     var f= frame.onEdtAndWait(() -> onInput);
     var s= f == null ? standard(in, oneLine()) : ustr(f.mut$$hash$1(UStr$s$0Instance.instance(in)));
-    int nl= s.indexOf('\n');
-    if (oneLine() && nl >= 0){ throw Util.detErr("The .onInput of this TextField returned a text with a newline at offset " + s.codePointCount(0, nl) + ": the text of a TextField is one line; return the text without newlines, for example with each newline replaced by a space"); }
+    var b= lineBreak(s);
+    if (oneLine() && b != null){ throw Util.detErr("The .onInput of this TextField returned a text with " + b + ": the text of a TextField is one line; return the text without line breaks, for example with each line break replaced by a space"); }
     return s;
   }
   static String standard(String in, boolean oneLine){
@@ -582,6 +582,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     return c != CHAR_UNDEFINED && !Character.isISOControl(c) && typesWith(e);
   }
   @Override public void keyPressed(KeyEvent e){
+    if (frame.menus.key(e)){ reservedDown = true; e.consume(); return; }
     reservedDown = frame.reserved(e.getKeyCode());
     if (!uses(e)){ return; }
     e.consume();
@@ -611,7 +612,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     }
     e.consume();
     var t= frame.focus;
-    if (t == null){ return; }
+    if (t == null || frame.menus.isOpen()){ return; }
     t.composing = composing.toString();
     if (!done.isEmpty()){ t.input(done.toString()); }
   }

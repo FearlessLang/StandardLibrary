@@ -118,13 +118,8 @@ BoardPainters: { #(model: mut Model): Painter -> Block#
 //The click handler only flips `dirty`; .modelFps is the sole caller of
 //canvas!.paint, matching testBasketball's shape (its mouse handler only
 //flips model state; model!.tick, driven by .modelFps, is what repaints).
-//Kept for that separation of concerns, not because a direct repaint from
-//the click handler was unsafe -- it wasn't; the actual repaint crash this
-//project turned up was a real Nat.* bug (StandardLibrary/rt/Nat$c$0Instance
-//.java's mulChecked divided by the right operand while overflow-checking,
-//without the same before that check guarded the left one for zero, so any
-//`n * 0` with n != 0 threw division-by-zero -- CellBounds#'s `cell*col`
-//hits exactly that for every cell in the leftmost column).
+//This is for that separation of concerns: a direct repaint from the click
+//handler would be safe too.
 ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[mut Frame] -> Block#
   .var dirty = { False }
   .return { mut ResizableGui: Consumer[mut Frame] {::

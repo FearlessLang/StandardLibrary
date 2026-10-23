@@ -105,11 +105,43 @@ GuiFrameTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name "  " .run{f -> f.content{::}}}).run{
       .ok _ -> Error.msg "A blank name always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "  " is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "  ".u is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 2007 202F 200B 2060 0007").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A name made only of invisible characters always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "".u"00A0 2007 202F 200B 2060 0007" is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 00E9 200B").run{f -> Error.msg "A visible character among invisible ones makes a name"}}).run{
+      .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "A visible character among invisible ones makes a name"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name("a" | "b").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A newline in the name always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this Gui has a line break (U+000A) at offset 1: the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("ab".u "2028").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A line separator in the name always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this Gui has a line break (U+2028) at offset 2: the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.title("a" | "b").content{::}}}).run{
+      .ok _ -> Error.msg "A newline in the title always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new title of this Frame has a line break (U+000A) at offset 1: the title bar shows the title on one line"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.uTitle("abc".u "0085").content{::}}}).run{
+      .ok _ -> Error.msg "A next line character in the title always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new title of this Frame has a line break (U+0085) at offset 3: the title bar shows the title on one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"F11").run{f -> f.content{::}}}).run{
       .ok _ -> Error.msg "A close key equal to the full screen key always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(F11) is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(Key#"SEPARATOR").closeKey(Key#"SEPARATER").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A close key naming the key of the full screen key always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(SEPARATER) is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"SEPARATER").fullScreenKey(Key#"SEPARATOR").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A full screen key naming the key of the close key always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.fullScreenKey(SEPARATOR) is the close key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.closeKey first"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.opacityFloor(Alpha#(100.getByte)).run{f -> f.opacity(Alpha#(50.getByte)).content{::}}}).run{
       .ok _ -> Error.msg "An opacity below the floor always stops the Gui";
@@ -123,6 +155,31 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "A Frame without content always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedFrame#(s.gui).content{:: .label{:: .text "b"}}}).run{
+      .ok _ -> Error.msg "A new content of a closed window always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> Block#(ClosedFrame#(s.gui).title "b", Void)}).run{
+      .ok _ -> Error.msg "A new title of a closed window always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> Block#(ClosedFrame#(s.gui).modelFps(100, {::}), Void)}).run{
+      .ok _ -> Error.msg "A new modelFps of a closed window always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedFrame#(s.gui).close}).run{
+      .ok _ -> Error.msg "Closing a closed window always fails";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      }}
+  }
+ClosedFrame: {#(gui: mut base.Gui): mut Frame -> Block#
+  .let[mut Slot[mut Frame]] kept = {Slots#[mut Frame]}
+  .do{gui.run{f -> Block#
+    .do{kept.fill f}
+    .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
+    .return{f.content{::}}
+    }}
+  .return{kept!}
   }
 KeepsItsArea: {#(gui: mut base.Gui): Void -> Block#
   .do{Block#(gui.startAsWindow(+0.5), Void)}

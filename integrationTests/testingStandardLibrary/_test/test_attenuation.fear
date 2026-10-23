@@ -1,0 +1,175 @@
+///Every method reaches the received System, but the download capability is revoked.
+NoDownload: SystemAttenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
+  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
+  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
+  .iso -> NoDownload#(u.iso.close); .close -> s;
+  }}
+///Every method reaches the received System, but the manager capability is revoked.
+NoManager: SystemAttenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
+  .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
+  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
+  .iso -> NoManager#(u.iso.close); .close -> s;
+  }}
+///Only the try and output capabilities reach the received System.
+OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
+///Calls the received System while running: not an attenuator the runtime can apply.
+Probe: SystemAttenuator { u -> Block#(u.out, u) }
+
+TestAttenuation: Test {::
+  .checkWithSys{sys -> sys.try#(NoDownload#(sys).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
+  .checkWithSys{sys -> sys.try#(NoDownload#(sys).iso.close, {s -> s.manager}).assertOk}
+  .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
+  .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.manager}).assertInfo{:: > "msg" .isMsg{::.contains "NoManager"}}}
+  .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.out}).assertOk}
+  .checkWithSys{sys -> sys.try#(OnlyOutput#(sys).iso.close, {s -> s.out}).assertOk}
+  .checkWithSys{sys -> sys.try#(OnlyOutput#(sys).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "System.download is revoked."}}}
+  .checkWithSys{sys -> sys.try#(ErrorSystem, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked."}}}
+  .checkWithSys{sys -> sys.try#(ErrorSystem.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked."}}}
+  .checkWithSys{sys -> sys.try#(ErrorSystem, {s -> s.revocation}).assertInfo{:: > "msg" .isMsg{::.contains "System.revocation is revoked."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .return{ real.revocation# }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was not called yet."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut Revocation] copy= {root.iso.close}
+    .do{ root.start }
+    .do{ root# }
+    .return{ copy# }
+    }).assertOk}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut Revocation] copy= {root.iso.close}
+    .do{ root.start }
+    .do{ root.revoke }
+    .return{ copy# }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut RevocationRoot] copy= {root.iso.close}
+    .do{ copy.start }
+    .do{ root# }
+    .return{ copy.revoke }
+    }).assertOk}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .do{ root.start }
+    .return{ root.start }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was called twice."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .return{ real.revocation.revoke }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called before .start."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .do{ root.start }
+    .do{ root.revoke }
+    .return{ root.revoke }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called twice."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .return{ RevokableSystem#(real.revocation, real).out }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was not called yet."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .return{ RevokableSystem#(real.revocation, real).iso.close.out }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was not called yet."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut System] s= {RevokableSystem#(root, real)}
+    .do{ root.start }
+    .return{ s.out }
+    }).assertOk}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut System] s= {RevokableSystem#(root, real)}
+    .do{ root.start }
+    .do{ root.revoke }
+    .return{ s.out }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut System] s= {RevokableSystem#(root, real)}
+    .do{ root.start }
+    .let[mut System] image= {s.iso.close}
+    .let o= {image.out}
+    .do{ root.revoke }
+    .return{ image.out }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut System] s= {RevokableSystem#(root, real)}
+    .do{ root.start }
+    .let[mut System] image= {s.iso.close.iso.close}
+    .do{ root.revoke }
+    .return{ image.try#(image.iso.close, {c -> c.out}) }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut System] s= {RevokableSystem#(root, real)}
+    .do{ root.start }
+    .let[mut CapTry] t= {s.try}
+    .do{ t#{Void}.run{.ok v -> v; .info i -> Error!(i)} }
+    .do{ root.revoke }
+    .return{ t#{Void}.run{.ok v -> v; .info i -> Error!(i)} }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut System] s= {RevokableSystem#(root, real)}
+    .do{ root.start }
+    .let o= {s.out}
+    .do{ root.revoke }
+    .return{ o.println "the revoked output still prints" }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut System] s= {RevokableSystem#(root, real)}
+    .do{ root.start }
+    .let c= {s.inputCursor.next}
+    .do{ root.revoke }
+    .return{ c# }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let attenuated= {NoDownload#(RevokableSystem#(root, real))}
+    .do{ root.start }
+    .return{ attenuated.manager }
+    }).assertOk}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let attenuated= {NoDownload#(RevokableSystem#(root, real))}
+    .do{ root.start }
+    .return{ attenuated.download }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut RevocationRoot] root= {real.revocation}
+    .let attenuated= {NoDownload#(RevokableSystem#(root, real))}
+    .do{ root.start }
+    .let[mut System] image= {attenuated.iso.close}
+    .do{ root.revoke }
+    .return{ image.manager }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#[System, mut System](sys.iso.close, {r -> Block#
+    .openIso real = r
+    .return{ Probe#(RevokableSystem#(real.revocation, real)) }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was not called yet."}}}
+  }

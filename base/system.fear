@@ -18,12 +18,15 @@ System: ToIso[System],WidenTo[System] {
   mut .dataRead: mut CapDataRead;
   mut .dataReadWrite: mut CapDataReadWrite;
   mut .manager: mut CapManager;
+  mut .process: mut CapProcess;
   ///Creates a reader for this in memory log.
   ///Concrete log types must be non generic.
   ///Creating a reader throw with nondeterministic error if the concrete log type is generic.
   mut .readLog[T](InMemoryLog[T]): mut LogReader[T];
   
   mut .gui:mut Gui;
+  ///A new flag, not started: a `RevokableSystem` and the capabilities it gives check it before every call.
+  mut .revocation: mut RevocationRoot;
   }
   
 /// This try-catch will catch non-deterministic errors.

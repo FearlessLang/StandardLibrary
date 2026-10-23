@@ -42,13 +42,20 @@ public final class _FluentGUI implements Gui$c$0, Cloneable{
     if (v > 0 && v <= 1){ return v; }
     throw Util.detErr(what+"("+v+") is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0");
   }
-  @Override public Object read$screenWidth$0(){ return Scopes.w(screen().width); }
-  @Override public Object read$screenHeight$0(){ return Scopes.h(screen().height); }
+  @Override public Object mut$screenWidth$0(){ return Scopes.w(screen().width); }
+  @Override public Object mut$screenHeight$0(){ return Scopes.h(screen().height); }
   private static java.awt.Rectangle screen(){ return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds(); }
   @Override public Object mut$uName$1(Object u){
     var s= Scopes.ustr(u);
-    if (s.isBlank()){ throw Util.detErr("The name \""+s+"\" is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character"); }
-    return set(g -> g.name = s);
+    var b= Scopes.lineBreak(s);
+    if (b != null){ throw Util.detErr("The new name of this Gui has "+b+": the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"); }
+    if (!s.codePoints().allMatch(_FluentGUI::invisible)){ return set(g -> g.name = s); }
+    var shown= ((Str$c$0Instance)((UStr$s$0Instance) u).imm$escape$0()).val();
+    throw Util.detErr("The name "+shown+" is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character");
+  }
+  private static boolean invisible(int c){
+    var t= Character.getType(c);
+    return Character.isSpaceChar(c) || t == Character.FORMAT || t == Character.CONTROL;
   }
   @Override public Object mut$icon$1(Object i){
     if (preloaded.containsKey(i)){ return set(g -> g.icon = i); }
@@ -77,12 +84,12 @@ public final class _FluentGUI implements Gui$c$0, Cloneable{
   @Override public Object mut$opacityFloor$1(Object a){ return set(g -> g.opacityFloor = Scopes.alpha(a)); }
   @Override public Object mut$closeKey$1(Object k){
     var v= key(k);
-    if (v.equals(fullScreenKey)){ throw Util.detErr("Gui.closeKey("+v+") is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"); }
+    if (code(v) == code(fullScreenKey)){ throw Util.detErr("Gui.closeKey("+v+") is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"); }
     return set(g -> g.closeKey = v);
   }
   @Override public Object mut$fullScreenKey$1(Object k){
     var v= key(k);
-    if (v.equals(closeKey)){ throw Util.detErr("Gui.fullScreenKey("+v+") is the close key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.closeKey first"); }
+    if (code(v) == code(closeKey)){ throw Util.detErr("Gui.fullScreenKey("+v+") is the close key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.closeKey first"); }
     return set(g -> g.fullScreenKey = v);
   }
   @Override public Object mut$run$1(Object o){

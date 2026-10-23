@@ -304,6 +304,7 @@ abstract class AWidget implements Widget$2o$1{
   // other style fields.
   String text= "";
   String tooltip= "";
+  Object contextMenu;
 
   final _Frame frame;
   final SkComponent component= new SkComponent(this);
@@ -322,6 +323,7 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   void change(){
+    if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the Gui.run that showed the window has returned, so changing it would have no visible effect"); }
     if (canChange()){ return; }
     throw Util.detErr("This " + getClass().getSimpleName().substring(1)
       + " is not in the window any more: .clear, a replaced Border slot or a new .content removed it,"
@@ -456,6 +458,8 @@ abstract class AWidget implements Widget$2o$1{
   public Object read$belowBaseline$0(){ return ratio(below); }
   public Object mut$uText$1(Object t){
     var s= ustr(t);
+    var b= lineBreak(s);
+    if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
     return reText(() -> text = s);
   }
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
@@ -466,6 +470,18 @@ abstract class AWidget implements Widget$2o$1{
     return onEdt(() -> tooltip = s);
   }
   @Override public Object read$uTooltip$0(){ return UStr$s$0Instance.instance(tooltip); }
+  @Override public Object mut$contextMenu$1(Object s){ return onEdt(() -> contextMenu = s); }
+  @Override public Object mut$openMenu$1(Object s){
+    var m= CMenu.build(s);
+    frame.onEdtAndWait(() -> {
+      if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the Gui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
+      if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to Gui.run has not returned"); }
+      if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a replaced Border slot or a new .content removed it, or the scope that adds it has not returned"); }
+      var at= SwingUtilities.convertPoint(component, 0, 0, frame.top.component);
+      frame.menus.show(m, new Rectangle(at.x, at.y, component.getWidth(), component.getHeight()));
+    });
+    return Void$o$0.instance;
+  }
   @Override public Object read$topInset$0(){ return h(top); }
   @Override public Object read$bottomInset$0(){ return h(bottom); }
   @Override public Object read$leftInset$0(){ return w(left); }
@@ -525,6 +541,7 @@ final class _Frame implements Frame$1c$0{
   final _FluentGUI gui;
   final SkMouse mouse= new SkMouse(this);
   final CTextKeys textKeys= new CTextKeys(this);
+  final SkMenus menus= new SkMenus(this);
   @SuppressWarnings("serial")
   final JComponent surface= new JComponent(){
     @Override protected void paintComponent(java.awt.Graphics g){ blit(g); }
@@ -556,7 +573,7 @@ final class _Frame implements Frame$1c$0{
   // scheduled; post-start readers are queue tasks whose submission (from the
   // EDT) happens after the write, so the queue handoff gives the
   // happens-before. Single mutator at every point in time: no volatile.
-  private boolean started;
+  boolean started;
   private final AtomicBoolean layoutDirty= new AtomicBoolean();
   private Bitmap bitmap;
   private Canvas canvas;
@@ -716,6 +733,7 @@ final class _Frame implements Frame$1c$0{
     canvas.clipRect(io.github.humbleui.types.Rect.makeWH(c.getWidth(), c.getHeight()));
     canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
     Sk.paintNode(c, canvas);
+    menus.paint(canvas);
     mouse.paintTip(canvas);
     canvas.restoreToCount(picture);
     stage.paintCorner(canvas);
@@ -774,6 +792,7 @@ final class _Frame implements Frame$1c$0{
     }});
   }
   @Override public Object mut$virtualPixelSpace$2(Object w, Object h){
+    requireOpen();
     int ww= extent((WidthNat$as$0) w, "virtual pixel space width");
     int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
     if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
@@ -790,25 +809,30 @@ final class _Frame implements Frame$1c$0{
   @Override public Object read$virtualWidth$0(){ return w(canvasW); }
   @Override public Object read$virtualHeight$0(){ return h(canvasH); }
   @Override public Object mut$bands$1(Object c){
+    requireOpen();
     int b= Sk.color((Color$1c$0) c) | 0xFF000000;
     onEdtAndWait(() -> bands = b);
     return this;
   }
   @Override public Object mut$opacity$1(Object a){
+    requireOpen();
     int v= alpha(a);
     if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this Gui: the window can not be more transparent than Gui.opacityFloor allows"); }
     opacity = v / 255f;
     if (started){ onEdtAndWait(() -> stage.opacity(opacity)); }
     return this;
   }
-  @Override public Object mut$onResize$1(Object c){ onResize = (Consumer$ao$1) c; return this; }
-  @Override public Object mut$onClose$1(Object a){ onClose = (MF$7$1) a; return this; }
+  private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"); } }
+  @Override public Object mut$onResize$1(Object c){ requireOpen(); onResize = (Consumer$ao$1) c; return this; }
+  @Override public Object mut$onClose$1(Object a){ requireOpen(); onClose = (MF$7$1) a; return this; }
   @Override public Object mut$close$0(){
+    requireOpen();
     if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to Gui.run has not returned"); }
     onEdtAndWait(frame::closed);
     return Void$o$0.instance;
   }
   @Override public Object mut$onKey$1(Object scope){
+    requireOpen();
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
     onEdtAndWait(() -> {
@@ -822,11 +846,16 @@ final class _Frame implements Frame$1c$0{
     return this;
   }
   @Override public Object mut$uTitle$1(Object t){
-    title = ustr(t);
+    requireOpen();
+    var s= ustr(t);
+    var b= lineBreak(s);
+    if (b != null){ throw Util.detErr("The new title of this Frame has " + b + ": the title bar shows the title on one line"); }
+    title = s;
     if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }
     return this;
   }
   @Override public Object mut$fps$1(Object f){
+    requireOpen();
     fps = (int) fpsOf(f, "fps");
     if (started){
       int delay= Math.round(1000.0f / fps);
@@ -840,12 +869,14 @@ final class _Frame implements Frame$1c$0{
   @Override public Object read$fps$0(){ return n(fps); }
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object mut$modelFps$2(Object f, Object scope){
+    requireOpen();
     long nn= fpsOf(f, "modelFps");
     var actions= new ArrayList<MF$7$1>();
     var b= new ModelFps$as$0(){
       boolean changeable= true;
       @Override public Object mut$action$1(Object r){
         onEdtAndWait(() -> {
+          if (frame.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the Gui.run that showed the window has returned, so an action set now would never run"); }
           if (!changeable && modelTickActions != actions){
             throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
           }
@@ -869,6 +900,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$contentB$1(Object s){ return newContent(s, _Border::new); }
 
   private Object newContent(Object scope, Function<_Frame,? extends AWidget> make){
+    requireOpen();
     var t= onEdtAndWait(() -> make.apply(this));
     if (!started){
       onEdtAndWait(() -> {
