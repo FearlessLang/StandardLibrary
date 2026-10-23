@@ -42,8 +42,8 @@ public final class _FluentGUI implements Gui$c$0, Cloneable{
     if (v > 0 && v <= 1){ return v; }
     throw Util.detErr(what+"("+v+") is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0");
   }
-  @Override public Object read$screenWidth$0(){ return Scopes.w(screen().width); }
-  @Override public Object read$screenHeight$0(){ return Scopes.h(screen().height); }
+  @Override public Object mut$screenWidth$0(){ return Scopes.w(screen().width); }
+  @Override public Object mut$screenHeight$0(){ return Scopes.h(screen().height); }
   private static java.awt.Rectangle screen(){ return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds(); }
   @Override public Object mut$uName$1(Object u){
     var s= Scopes.ustr(u);

@@ -1,0 +1,251 @@
+///An attenuator of a capability type ``C`` derives from a ``mut C`` a ``mut C`` with less authority: the capability it
+///gives reaches the world only through the capability it receives.
+///An attenuator captures nothing, so its type name identifies it.
+Attenuator[C]: CaptureFree, F[mut C, mut C]{}
+
+///An attenuator of `System`. The Fearless manager and `CapProcess` apply attenuators of `System` by name, in the process
+///they start: every attenuator receives a `RevokableSystem` whose `Revocation` is not started yet, and the real System
+///starts it only after every attenuator has run. Thus an attenuator can only build the System it gives: a call on the
+///received System while the attenuator runs is a non deterministic error, in every process, and the System it gives calls
+///the received System only from its own methods. In this way the attenuated System built in a new process is
+///structurally equivalent to the one its parent built.
+///```
+///NoDownload: SystemAttenuator { u -> {'s
+///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
+///  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
+///  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
+///  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
+///  .iso -> NoDownload#(u.iso.close); .close -> s;
+///  }}
+///OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
+///```
+SystemAttenuator: Attenuator[System]{}
+
+///A System with no authority: every method throws the non deterministic error ``System.<method> is revoked.``.
+///It is the System of a test that must not touch the world, and the base of an attenuator keeping a few capabilities,
+///which overrides the methods it keeps, `.iso` and `.close` included: the `.iso` of ErrorSystem is an ErrorSystem.
+ErrorSystem: System {
+  .try -> _Revoked#".try";
+  .out -> _Revoked#".out";
+  .inputCursor -> _Revoked#".inputCursor";
+  .assetRead -> _Revoked#".assetRead";
+  .download -> _Revoked#".download";
+  .dataRead -> _Revoked#".dataRead";
+  .dataReadWrite -> _Revoked#".dataReadWrite";
+  .manager -> _Revoked#".manager";
+  .process -> _Revoked#".process";
+  .readLog _ -> _Revoked#".readLog";
+  .gui -> _Revoked#".gui";
+  .revocation -> _Revoked#".revocation";
+  .iso -> ErrorSystem;
+  .close -> this;
+  }
+_Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked.") }
+
+///A flag in one of three states, in this order and with no way back: not started, started, revoked.
+///``#`` returns when started; otherwise it throws the non deterministic error ``Revocation.start was not called yet.``
+///or ``Revocation.revoke was called.``. A capability wrapper checks the flag before delegating: ``.out -> Block#(r#, u.out)``.
+///The copies ``.iso`` gives share the flag, so revocation reaches the images too. A Revocation is created by `System`,
+///so its flag is part of the world: sharing it across ``.iso`` is sound, as sharing a file is. A Revocation holds no value.
+Revocation: ToIso[Revocation]{ mut #: Void; }
+///The Revocation `System.revocation` gives: the one that can change the flag. Its copies are roots too.
+///``.start`` on a started or revoked root, and ``.revoke`` on one not started or already revoked, are non deterministic
+///errors: the holder of a copy has no way to know the state.
+RevocationRoot: Revocation, ToIso[RevocationRoot]{ mut .start: Void; mut .revoke: Void; mut .iso: iso RevocationRoot; mut .close: mut RevocationRoot; }
+
+///The System ``u`` under the Revocation ``r``: every method checks ``r`` and delegates to ``u``, and what it gives
+///checks ``r`` the same way, down to every capability of ``u`` but the `Frame` of `Gui.run`.
+///``.iso`` does not check ``r``: the image it gives checks a copy of ``r`` at every call.
+RevokableSystem: { #(r: mut Revocation, u: mut System): mut System -> {'s
+  .try -> Block#(r#, RevokableTry#(r, u.try));
+  .out -> Block#(r#, RevokableOutput#(r, u.out));
+  .inputCursor -> Block#(r#, RevokableInputCursor#(r, u.inputCursor));
+  .assetRead -> Block#(r#, RevokableAssetRead#(r, u.assetRead));
+  .download -> Block#(r#, RevokableDownload#(r, u.download));
+  .dataRead -> Block#(r#, RevokableDataRead#(r, u.dataRead));
+  .dataReadWrite -> Block#(r#, RevokableDataReadWrite#(r, u.dataReadWrite));
+  .manager -> Block#(r#, RevokableManager#(r, u.manager));
+  .process -> Block#(r#, RevokableProcess#(r, u.process));
+  .readLog l -> Block#(r#, RevokableLogReader#(r, u.readLog l));
+  .gui -> Block#(r#, RevokableGui#(r, u.gui));
+  .revocation -> Block#(r#, u.revocation);
+  .iso -> RevokableSystem#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableTry: { #(r: mut Revocation, u: mut CapTry): mut CapTry -> {'s
+  #(f) -> Block#(r#, u#(f));
+  #(d, f) -> Block#(r#, u#(d, f));
+  .currentStackTrace -> Block#(r#, u.currentStackTrace);
+  .iso -> RevokableTry#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableOutput: { #(r: mut Revocation, u: mut Output): mut Output -> {'s
+  .print x -> Block#(r#, u.print x);
+  .println x -> Block#(r#, u.println x);
+  .byte b -> Block#(r#, u.byte b);
+  .bytes bs -> Block#(r#, u.bytes bs);
+  .iso -> RevokableOutput#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableInputCursor: { #(r: mut Revocation, u: mut InputCursor): mut InputCursor -> {'s
+  # -> Block#(r#, u#.match{.some n -> Opts#(RevokableInputCursorNode#(r, n)); .empty -> {}});
+  .next -> Block#(r#, RevokableInputCursor#(r, u.next));
+  .iso -> RevokableInputCursor#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableInputCursorNode: { #(r: mut Revocation, u: mut InputCursorNode): mut InputCursorNode -> {'s
+  .label -> Block#(r#, u.label);
+  .readStrUtf8 rec -> Block#(r#, u.readStrUtf8 rec);
+  .readUStrUtf8 rec -> Block#(r#, u.readUStrUtf8 rec);
+  .readStrUtf16Le rec -> Block#(r#, u.readStrUtf16Le rec);
+  .readUStrUtf16Le rec -> Block#(r#, u.readUStrUtf16Le rec);
+  .readStrUtf32Le rec -> Block#(r#, u.readStrUtf32Le rec);
+  .readUStrUtf32Le rec -> Block#(r#, u.readUStrUtf32Le rec);
+  .readStrUtf16Be rec -> Block#(r#, u.readStrUtf16Be rec);
+  .readUStrUtf16Be rec -> Block#(r#, u.readUStrUtf16Be rec);
+  .readStrUtf32Be rec -> Block#(r#, u.readStrUtf32Be rec);
+  .readUStrUtf32Be rec -> Block#(r#, u.readUStrUtf32Be rec);
+  .readStrAscii rec -> Block#(r#, u.readStrAscii rec);
+  .readUStrAscii rec -> Block#(r#, u.readUStrAscii rec);
+  .readStrLatin1 rec -> Block#(r#, u.readStrLatin1 rec);
+  .readUStrLatin1 rec -> Block#(r#, u.readUStrLatin1 rec);
+  .readBytes -> Block#(r#, u.readBytes);
+  .readImage n -> Block#(r#, u.readImage n);
+  .iso -> RevokableInputCursorNode#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableAssetRead: { #(r: mut Revocation, u: mut AssetReadCapability): mut AssetReadCapability -> {'s
+  .readStrUtf8(p, d, z, e, rec) -> Block#(r#, u.readStrUtf8(p, d, z, e, rec));
+  .readUStrUtf8(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf8(p, d, z, e, rec));
+  .readStrUtf16Le(p, d, z, e, rec) -> Block#(r#, u.readStrUtf16Le(p, d, z, e, rec));
+  .readUStrUtf16Le(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf16Le(p, d, z, e, rec));
+  .readStrUtf32Le(p, d, z, e, rec) -> Block#(r#, u.readStrUtf32Le(p, d, z, e, rec));
+  .readUStrUtf32Le(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf32Le(p, d, z, e, rec));
+  .readStrUtf16Be(p, d, z, e, rec) -> Block#(r#, u.readStrUtf16Be(p, d, z, e, rec));
+  .readUStrUtf16Be(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf16Be(p, d, z, e, rec));
+  .readStrUtf32Be(p, d, z, e, rec) -> Block#(r#, u.readStrUtf32Be(p, d, z, e, rec));
+  .readUStrUtf32Be(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf32Be(p, d, z, e, rec));
+  .readStrAscii(p, d, z, e, rec) -> Block#(r#, u.readStrAscii(p, d, z, e, rec));
+  .readUStrAscii(p, d, z, e, rec) -> Block#(r#, u.readUStrAscii(p, d, z, e, rec));
+  .readStrLatin1(p, d, z, e, rec) -> Block#(r#, u.readStrLatin1(p, d, z, e, rec));
+  .readUStrLatin1(p, d, z, e, rec) -> Block#(r#, u.readUStrLatin1(p, d, z, e, rec));
+  .readImage(p, d, z, e, n) -> Block#(r#, u.readImage(p, d, z, e, n));
+  .iso -> RevokableAssetRead#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableDownload: { #(r: mut Revocation, u: mut DownloadCapability): mut DownloadCapability -> {'s
+  .downloadBytes(url, n) -> Block#(r#, u.downloadBytes(url, n));
+  .downloadStrUtf8(url, n, rec) -> Block#(r#, u.downloadStrUtf8(url, n, rec));
+  .downloadUStrUtf8(url, n, rec) -> Block#(r#, u.downloadUStrUtf8(url, n, rec));
+  .downloadStrUtf16Le(url, n, rec) -> Block#(r#, u.downloadStrUtf16Le(url, n, rec));
+  .downloadUStrUtf16Le(url, n, rec) -> Block#(r#, u.downloadUStrUtf16Le(url, n, rec));
+  .downloadStrUtf16Be(url, n, rec) -> Block#(r#, u.downloadStrUtf16Be(url, n, rec));
+  .downloadUStrUtf16Be(url, n, rec) -> Block#(r#, u.downloadUStrUtf16Be(url, n, rec));
+  .downloadStrUtf32Le(url, n, rec) -> Block#(r#, u.downloadStrUtf32Le(url, n, rec));
+  .downloadUStrUtf32Le(url, n, rec) -> Block#(r#, u.downloadUStrUtf32Le(url, n, rec));
+  .downloadStrUtf32Be(url, n, rec) -> Block#(r#, u.downloadStrUtf32Be(url, n, rec));
+  .downloadUStrUtf32Be(url, n, rec) -> Block#(r#, u.downloadUStrUtf32Be(url, n, rec));
+  .downloadStrAscii(url, n, rec) -> Block#(r#, u.downloadStrAscii(url, n, rec));
+  .downloadUStrAscii(url, n, rec) -> Block#(r#, u.downloadUStrAscii(url, n, rec));
+  .downloadStrLatin1(url, n, rec) -> Block#(r#, u.downloadStrLatin1(url, n, rec));
+  .downloadUStrLatin1(url, n, rec) -> Block#(r#, u.downloadUStrLatin1(url, n, rec));
+  .downloadImage(url, n, px) -> Block#(r#, u.downloadImage(url, n, px));
+  .iso -> RevokableDownload#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableDataRead: { #(r: mut Revocation, u: mut CapDataRead): mut CapDataRead -> {'s
+  .roots -> Block#(r#, u.roots);
+  .paths(n, p) -> Block#(r#, u.paths(n, p));
+  .read(n, p) -> Block#(r#, u.read(n, p).map{x -> RevokableInputCursorNode#(r, x)});
+  .iso -> RevokableDataRead#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableDataReadWrite: { #(r: mut Revocation, u: mut CapDataReadWrite): mut CapDataReadWrite -> {'s
+  .roots -> Block#(r#, u.roots);
+  .paths(n, p) -> Block#(r#, u.paths(n, p));
+  .read(n, p) -> Block#(r#, u.read(n, p).map{x -> RevokableInputCursorNode#(r, x)});
+  .writeStrUtf8(n, p, c) -> Block#(r#, u.writeStrUtf8(n, p, c));
+  .writeUStrUtf8(n, p, c) -> Block#(r#, u.writeUStrUtf8(n, p, c));
+  .writeStrUtf16Le(n, p, c) -> Block#(r#, u.writeStrUtf16Le(n, p, c));
+  .writeUStrUtf16Le(n, p, c) -> Block#(r#, u.writeUStrUtf16Le(n, p, c));
+  .writeStrUtf32Le(n, p, c) -> Block#(r#, u.writeStrUtf32Le(n, p, c));
+  .writeUStrUtf32Le(n, p, c) -> Block#(r#, u.writeUStrUtf32Le(n, p, c));
+  .writeStrUtf16Be(n, p, c) -> Block#(r#, u.writeStrUtf16Be(n, p, c));
+  .writeUStrUtf16Be(n, p, c) -> Block#(r#, u.writeUStrUtf16Be(n, p, c));
+  .writeStrUtf32Be(n, p, c) -> Block#(r#, u.writeStrUtf32Be(n, p, c));
+  .writeUStrUtf32Be(n, p, c) -> Block#(r#, u.writeUStrUtf32Be(n, p, c));
+  .writeStrAscii(n, p, c) -> Block#(r#, u.writeStrAscii(n, p, c));
+  .writeUStrAscii(n, p, c, rec) -> Block#(r#, u.writeUStrAscii(n, p, c, rec));
+  .writeStrLatin1(n, p, c) -> Block#(r#, u.writeStrLatin1(n, p, c));
+  .writeUStrLatin1(n, p, c, rec) -> Block#(r#, u.writeUStrLatin1(n, p, c, rec));
+  .writeBytes(n, p, c) -> Block#(r#, u.writeBytes(n, p, c));
+  .writeImagePng(n, p, c) -> Block#(r#, u.writeImagePng(n, p, c));
+  .delete(n, p) -> Block#(r#, u.delete(n, p));
+  .iso -> RevokableDataReadWrite#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {'s
+  .show -> Block#(r#, u.show);
+  .show n -> Block#(r#, u.show n);
+  .register p -> Block#(r#, u.register p);
+  .quit -> Block#(r#, u.quit);
+  .reset -> Block#(r#, u.reset);
+  .connectEclipse p -> Block#(r#, u.connectEclipse p);
+  .editMetadata p -> Block#(r#, u.editMetadata p);
+  .openWithOrShortcut p -> Block#(r#, u.openWithOrShortcut p);
+  .openWithOrShortcut(p, n, m) -> Block#(r#, u.openWithOrShortcut(p, n, m));
+  .run(n, ms) -> Block#(r#, u.run(n, ms));
+  .compile n -> Block#(r#, u.compile n);
+  .check n -> Block#(r#, u.check n);
+  .terminate n -> Block#(r#, u.terminate n);
+  .deleteCache n -> Block#(r#, u.deleteCache n);
+  .kindIdle n -> Block#(r#, u.kindIdle n);
+  .kindCode n -> Block#(r#, u.kindCode n);
+  .kindDataReadOnly n -> Block#(r#, u.kindDataReadOnly n);
+  .kindDataReadWrite n -> Block#(r#, u.kindDataReadWrite n);
+  .forget n -> Block#(r#, u.forget n);
+  .linkRead(n, d, ts) -> Block#(r#, u.linkRead(n, d, ts));
+  .linkWrite(n, d, ts) -> Block#(r#, u.linkWrite(n, d, ts));
+  .iso -> RevokableManager#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableProcess: { #(r: mut Revocation, u: mut CapProcess): mut CapProcess -> {'s
+  .run(m, as) -> Block#(r#, u.run(m, as));
+  .iso -> RevokableProcess#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableLogReader: { #[T](r: mut Revocation, u: mut LogReader[T]): mut LogReader[T] -> {'s
+  .read -> Block#(r#, u.read);
+  .consume -> Block#(r#, u.consume);
+  .logName -> u.logName;
+  .iso -> RevokableLogReader#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableGui: { #(r: mut Revocation, u: mut Gui): mut Gui -> {
+  .screenWidth -> Block#(r#, u.screenWidth);
+  .screenHeight -> Block#(r#, u.screenHeight);
+  .uName n -> Block#(r#, RevokableGui#(r, u.uName n));
+  .icon i -> Block#(r#, RevokableGui#(r, u.icon i));
+  .startAsWindow a -> Block#(r#, RevokableGui#(r, u.startAsWindow a));
+  .startMaximised -> Block#(r#, RevokableGui#(r, u.startMaximised));
+  .startUndecorated a -> Block#(r#, RevokableGui#(r, u.startUndecorated a));
+  .startFullScreen -> Block#(r#, RevokableGui#(r, u.startFullScreen));
+  .minArea a -> Block#(r#, RevokableGui#(r, u.minArea a));
+  .opacityFloor a -> Block#(r#, RevokableGui#(r, u.opacityFloor a));
+  .closeKey k -> Block#(r#, RevokableGui#(r, u.closeKey k));
+  .fullScreenKey k -> Block#(r#, RevokableGui#(r, u.fullScreenKey k));
+  .run c -> Block#(r#, u.run c);
+  }}
+
+///The object capability to run another main of this program in a new process.
+///The new process starts as this program started: with the same first input file, the same data projects and the same manager.
+///Its main receives a System with the authority of this program or less: the attenuators of this program, in their order,
+///then ``attenuators`` in their order, build that System in the new process, as described in `SystemAttenuator`;
+///no object of this program reaches the new process.
+///The new process prints to the output of this program, and its error output goes to the error output of this program.
+///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,
+///it throws the non deterministic error ``main`` threw.
+///A new process that can not start, or that ends before its main ends, is a non deterministic error.
+CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
+  mut .run(main: Main, attenuators: List[SystemAttenuator]): Void;
+  }

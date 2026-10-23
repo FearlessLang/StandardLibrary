@@ -84,6 +84,13 @@ use base.InfoValidators as InfoValidators;
 use base.Enum as Enum;
 use base.ControlFlow as ControlFlow;
 use base.Enums as Enums;
+use base.System as System;
+use base.ErrorSystem as ErrorSystem;
+use base.SystemAttenuator as SystemAttenuator;
+use base.RevokableSystem as RevokableSystem;
+use base.Revocation as Revocation;
+use base.RevocationRoot as RevocationRoot;
+use base.CapTry as CapTry;
 
 MyTests:UnitTests{::
   .test TestByte
@@ -133,4 +140,5 @@ MyTests:UnitTests{::
   .test TestTryGet
   .test TestFlowDesign
   .test TestMaxShapes
+  .test TestAttenuation
   }

@@ -355,8 +355,8 @@ Graphics:ScreenContext{
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
 ///the same text looks the same on every OS, and a character outside those fonts is drawn as a box everywhere.
 Gui:{
-  read .screenWidth: WidthNat;
-  read .screenHeight: HeightNat;
+  mut .screenWidth: WidthNat;
+  mut .screenHeight: HeightNat;
   mut .name(s: Str): mut Gui -> this.uName(s.u);
   mut .uName(UStr): mut Gui;
   mut .icon(ImageFile): mut Gui;
