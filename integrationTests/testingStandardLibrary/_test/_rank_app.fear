@@ -89,6 +89,9 @@ use base.ErrorSystem as ErrorSystem;
 use base.SystemAttenuator as SystemAttenuator;
 use base.StartRevokeSystem as StartRevokeSystem;
 use base.StartRevokeSystems as StartRevokeSystems;
+use base.Revocation as Revocation;
+use base.RevocationRoot as RevocationRoot;
+use base.CapTry as CapTry;
 
 MyTests:UnitTests{::
   .test TestByte

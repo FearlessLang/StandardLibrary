@@ -17,5 +17,6 @@ public final class _System$2o$0 implements System$2o$0{
   @Override public Object mut$process$0(){ return new _CapProcess$18g$0(); }
 
   @Override public Object mut$gui$0(){ return new _FluentGUI(); }
+  @Override public Object mut$revocation$0(){ return new _RevocationRoot$iyw$0(); }
 
 }

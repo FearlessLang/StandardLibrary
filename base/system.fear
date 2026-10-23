@@ -25,6 +25,8 @@ System: ToIso[System],WidenTo[System] {
   mut .readLog[T](InMemoryLog[T]): mut LogReader[T];
   
   mut .gui:mut Gui;
+  ///A new flag, not started: a `StartRevokeSystem` and the other capability wrappers that can be revoked check it.
+  mut .revocation: mut RevocationRoot;
   }
   
 /// This try-catch will catch non-deterministic errors.

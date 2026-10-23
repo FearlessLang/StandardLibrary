@@ -21,10 +21,10 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   static final String namesKey= "fearlessAttenuators";
   static final String portKey= "fearlessProcess.port";
   public static Object system(){
-    Object sys= new _System$2o$0();
+    var sys= new _System$2o$0();
     var names= System.getProperty(namesKey);
     if (names == null){ return sys; }
-    var s= (StartRevokeSystem$49b4$0)StartRevokeSystems$8im8$0.instance.imm$$hash$0();
+    var s= (StartRevokeSystem$49b4$0)StartRevokeSystems$8im8$0.instance.imm$$hash$1(sys.mut$revocation$0());
     Object u= s;
     for (var n : names.split(",")){ u= ((F$3$2)instance(n)).read$$hash$1(u); }
     s.mut$start$1(sys);

@@ -14,7 +14,7 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
 ///  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
 ///  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
-///  .readLog l -> u.readLog l; .gui -> u.gui;
+///  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
 ///  .iso -> NoDownload#(u.iso.close); .close -> s;
 ///  }}
 ///OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
@@ -36,53 +36,72 @@ ErrorSystem: System {
   .process -> _Revoked#".process";
   .readLog _ -> _Revoked#".readLog";
   .gui -> _Revoked#".gui";
+  .revocation -> _Revoked#".revocation";
   .iso -> ErrorSystem;
   .close -> this;
   }
 _Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked.") }
 
-///A System in one of three states, in this order and with no way back: not started, started, revoked.
-///Not started, and revoked: every method of System throws a non deterministic error saying which call is missing or was made.
-///Started, by ``.start(sys)``: every method of System delegates to ``sys``; what the methods give belongs to ``sys``,
-///and stays usable after ``.revoke``.
-///``.start`` on a started or revoked StartRevokeSystem, and ``.revoke`` on one not started or already revoked, are
-///deterministic errors: the holder of a StartRevokeSystem knows its state, since only its own calls change it.
+///A flag in one of three states, in this order and with no way back: not started, started, revoked.
+///``#`` returns when started; otherwise it throws the non deterministic error ``Revocation.start was not called yet.``
+///or ``Revocation.revoke was called.``. A capability wrapper checks the flag before delegating: ``.out -> Block#(r#, u.out)``.
+///The copies ``.iso`` gives share the flag, so revocation reaches the images too. A Revocation is created by `System`,
+///so its flag is part of the world: sharing it across ``.iso`` is sound, as sharing a file is. A copy can not change the flag.
+Revocation: ToIso[Revocation]{ mut #: Void; }
+///The Revocation `System.revocation` gives: the one that can change the flag.
+///``.start`` on a started or revoked RevocationRoot, and ``.revoke`` on one not started or already revoked, are
+///deterministic errors: the holder of a RevocationRoot knows its state, since only its own calls change it.
+RevocationRoot: Revocation{ mut .start: Void; mut .revoke: Void; }
+
+///A System in the three states of the `RevocationRoot` it receives: not started, started, revoked.
+///Not started, and revoked: every method of System throws the non deterministic error of the `Revocation`.
+///Started, by ``.start(sys)``: every method of System checks the `Revocation` and delegates to ``sys``.
+///The images ``.iso`` gives check a copy of the same `Revocation`, so revocation reaches them too.
+///What the other methods give (an `Output`, a `CapTry`) belongs to ``sys`` and stays usable after ``.revoke``.
+///``.start`` and ``.revoke`` change the `RevocationRoot`, with its deterministic errors on misuse.
 StartRevokeSystem: System {
   mut .start(sys: mut System): Void;
   mut .revoke: Void;
   }
 StartRevokeSystems: {
-  #: mut StartRevokeSystem -> Block#
-    .var[mut Opt[mut System]] gate= {{}}
-    .var[Bool] started= {False}
-    .let[mut MF[Str, mut System]] current= {{m -> gate.get.match{
-      .some sys -> sys;
-      .empty -> Error.nonDeterministic("System"+m+" is revoked: "+(started.get ? {.then -> ".revoke was called."; .else -> ".start was not called yet."}));
-      }}}
+  #(r: mut RevocationRoot): mut StartRevokeSystem -> Block#
+    .var[mut Opt[mut System]] real= {{}}
+    .let[mut MF[mut System]] sys= {{Block#(r#, real.get!)}}
     .return{{'s
-      .try -> (current#".try").try;
-      .out -> (current#".out").out;
-      .inputCursor -> (current#".inputCursor").inputCursor;
-      .assetRead -> (current#".assetRead").assetRead;
-      .download -> (current#".download").download;
-      .dataRead -> (current#".dataRead").dataRead;
-      .dataReadWrite -> (current#".dataReadWrite").dataReadWrite;
-      .manager -> (current#".manager").manager;
-      .process -> (current#".process").process;
-      .readLog l -> (current#".readLog").readLog l;
-      .gui -> (current#".gui").gui;
-      .iso -> (current#".iso").iso;
+      .try -> sys#.try;
+      .out -> sys#.out;
+      .inputCursor -> sys#.inputCursor;
+      .assetRead -> sys#.assetRead;
+      .download -> sys#.download;
+      .dataRead -> sys#.dataRead;
+      .dataReadWrite -> sys#.dataReadWrite;
+      .manager -> sys#.manager;
+      .process -> sys#.process;
+      .readLog l -> sys#.readLog l;
+      .gui -> sys#.gui;
+      .revocation -> sys#.revocation;
+      .iso -> _Revocable#(r.iso.close, sys#.iso.close);
       .close -> s;
-      .start sys -> started.get ? {
-        .then -> Error.msg "StartRevokeSystem.start was called twice.";
-        .else -> Block#(started.set(True), gate.set(Opts#sys));
-        };
-      .revoke -> gate.get.match{
-        .some _ -> gate.set({});
-        .empty -> Error.msg(started.get ? {.then -> "StartRevokeSystem.revoke was called twice."; .else -> "StartRevokeSystem.revoke was called before .start."});
-        };
+      .start u -> Block#(real.set(Opts#u), r.start);
+      .revoke -> r.revoke;
       }};
   }
+_Revocable: { #(r: mut Revocation, u: mut System): mut System -> {'s
+  .try -> Block#(r#, u.try);
+  .out -> Block#(r#, u.out);
+  .inputCursor -> Block#(r#, u.inputCursor);
+  .assetRead -> Block#(r#, u.assetRead);
+  .download -> Block#(r#, u.download);
+  .dataRead -> Block#(r#, u.dataRead);
+  .dataReadWrite -> Block#(r#, u.dataReadWrite);
+  .manager -> Block#(r#, u.manager);
+  .process -> Block#(r#, u.process);
+  .readLog l -> Block#(r#, u.readLog l);
+  .gui -> Block#(r#, u.gui);
+  .revocation -> Block#(r#, u.revocation);
+  .iso -> _Revocable#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
 
 ///The object capability to run another main of this program in a new process.
 ///The new process starts as this program started: with the same first input file, the same data projects and the same manager.

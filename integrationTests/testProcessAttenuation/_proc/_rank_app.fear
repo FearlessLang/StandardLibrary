@@ -11,7 +11,7 @@ NoDownload: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
   .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
   .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
-  .readLog l -> u.readLog l; .gui -> u.gui;
+  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoDownload#(u.iso.close); .close -> s;
   }}
 ///Every method reaches the received System, but the manager capability is revoked.
@@ -19,7 +19,7 @@ NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
   .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
-  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui;
+  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
 ///Prints which of the download and manager capabilities it can reach.
