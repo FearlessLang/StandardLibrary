@@ -109,6 +109,7 @@ final class Stage extends MouseAdapter{
     var l= new WindowAdapter(){
       @Override public void windowClosing(WindowEvent e){ owner.closeRequest(); }
       @Override public void windowGainedFocus(WindowEvent e){ owner.surface.requestFocusInWindow(); }
+      @Override public void windowLostFocus(WindowEvent e){ owner.menus.close(0); }
     };
     frame.addWindowListener(l);
     frame.addWindowFocusListener(l);

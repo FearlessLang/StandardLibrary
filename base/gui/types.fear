@@ -447,10 +447,14 @@ MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, p
 ///The items of a menu are fixed once its scope returns.
 ///A frame has at most one open menu, and the submenus opened from it: opening a menu closes the open one.
 ///A menu opens after its anchor or, when it does not fit there and fits before it, before it: below or above a widget or the pointer; right or left of the menu of its item.
+///A menu below or above a widget or the pointer starts at the left edge of the widget or at the pointer or, when it does not fit there and fits so, ends at the right edge of the widget or at the pointer.
 ///Then it moves back by the least amount that keeps it inside the virtual pixel space.
+///A menu taller than the virtual pixel space is as tall as the space and has a scroll bar on its right: the mouse wheel, the scroll bar, Up and Down scroll its items.
 ///While a menu is open, the mouse and the keys reach only the menus:
 ///  a click of the primary mouse button on an enabled item chooses it; a press and a release on two different items choose nothing;
 ///  a press outside the menus closes them all, and neither the press nor the rest of its gesture reaches anything else;
+///  the window losing the focus closes them all;
+///  text from an input method reaches nothing;
 ///  the second click of a double click reaches nothing when a menu took its first click or opened after it;
 ///  Up and Down highlight the previous and the next enabled item of the last open menu, Enter chooses the highlighted one;
 ///  the close key of the Gui closes the last open menu; the full screen key keeps its meaning; every other key reaches nothing.

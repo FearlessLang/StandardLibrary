@@ -239,7 +239,10 @@ final class SkMouse extends MouseAdapter{
   }
 
   void wheel(Point p, double rotation, boolean horizontal){
-    if (frame.menus.isOpen()){ return; }
+    if (frame.menus.isOpen()){
+      if (!horizontal){ frame.menus.wheel(p, rotation); }
+      return;
+    }
     int d= (int) Math.round(rotation * 40);
     for (var t : chainOf(deepestAt(p))){
       if (!(horizontal ? t.barBottom() : t.barRight())){ continue; }
