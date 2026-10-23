@@ -1,23 +1,24 @@
 use base.Main as Main;
-use base.Attenuator as Attenuator;
+use base.SystemAttenuator as SystemAttenuator;
 use base.Error as Error;
 use base.Block as Block;
 use base.Void as Void;
 use base.Str as Str;
+use base.Lists as Lists;
 
 ///Every method reaches the received System, but the download capability is revoked.
-NoDownload: Attenuator { u -> {'s
+NoDownload: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
-  .download -> Error.nonDeterministic "NoDownload: the download capability is revoked.";
+  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
   .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
   .readLog l -> u.readLog l; .gui -> u.gui;
   .iso -> NoDownload#(u.iso.close); .close -> s;
   }}
 ///Every method reaches the received System, but the manager capability is revoked.
-NoManager: Attenuator { u -> {'s
+NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
-  .manager -> Error.nonDeterministic "NoManager: the manager capability is revoked.";
+  .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
   .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui;
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
@@ -42,17 +43,17 @@ Parent: Main { sys -> Block#
     .ok _ -> sys.out.println "parent: manager ok";
     .info _ -> sys.out.println "parent: manager revoked";
     }}
-  .do{ sys.process.run(Child).run{
+  .do{ sys.try#(sys.iso.close, {s -> s.process.run(Child, {})}).run{
     .ok _ -> sys.out.println "parent: child ok";
-    .info i -> sys.out.println("parent: child failed: "+(i.getMsg));
+    .info i -> sys.out.println("parent: child failed: "+((i.getMap.get "msg").getMsg));
     }}
-  .do{ sys.process.run(Child, NoDownload).run{
+  .do{ sys.try#(sys.iso.close, {s -> s.process.run(Child, Lists#[SystemAttenuator](NoDownload))}).run{
     .ok _ -> sys.out.println "parent: child ok";
-    .info i -> sys.out.println("parent: child failed: "+(i.getMsg));
+    .info i -> sys.out.println("parent: child failed: "+((i.getMap.get "msg").getMsg));
     }}
-  .do{ sys.process.run(Failing).run{
+  .do{ sys.try#(sys.iso.close, {s -> s.process.run(Failing, {})}).run{
     .ok _ -> sys.out.println "parent: failing ok";
-    .info i -> sys.out.println("parent: failing failed: "+(i.getMsg));
+    .info i -> sys.out.println("parent: failing failed: "+((i.getMap.get "msg").getMsg));
     }}
   .return{ sys.out.println "parent ends" }
   }

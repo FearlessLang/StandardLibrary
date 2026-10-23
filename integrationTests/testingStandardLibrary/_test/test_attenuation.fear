@@ -1,21 +1,23 @@
 ///Every method reaches the received System, but the download capability is revoked.
-NoDownload: Attenuator { u -> {'s
+NoDownload: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
-  .download -> Error.nonDeterministic "NoDownload: the download capability is revoked.";
+  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
   .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
   .readLog l -> u.readLog l; .gui -> u.gui;
   .iso -> NoDownload#(u.iso.close); .close -> s;
   }}
 ///Every method reaches the received System, but the manager capability is revoked.
-NoManager: Attenuator { u -> {'s
+NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
-  .manager -> Error.nonDeterministic "NoManager: the manager capability is revoked.";
+  .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
   .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui;
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
+///Only the try and output capabilities reach the received System.
+OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
 ///Calls the received System while running: not an attenuator the runtime can apply.
-Probe: Attenuator { u -> Block#(u.out, u) }
+Probe: SystemAttenuator { u -> Block#(u.out, u) }
 
 TestAttenuation: Test {::
   .checkWithSys{sys -> sys.try#(NoDownload#(sys).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
@@ -23,25 +25,50 @@ TestAttenuation: Test {::
   .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
   .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.manager}).assertInfo{:: > "msg" .isMsg{::.contains "NoManager"}}}
   .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.out}).assertOk}
-  .checkWithSys{sys -> sys.try#(Systems.revoked.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "revoked: System.out"}}}
-  .checkWithSys{sys -> Block#
-    .var[mut System] gate= {Systems.revoked}
-    .let[mut System] fwd= {Caretakers#(gate)}
-    .do{ sys.try#(fwd.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "revoked"}} }
-    .do{ gate.set(sys) }
-    .do{ sys.try#(fwd.iso.close, {s -> s.out}).assertOk }
-    .do{ gate.set(Systems.revoked) }
-    .return{ sys.try#(fwd.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "revoked"}} }
-    }
-  .checkWithSys{sys -> Block#
-    .var[mut System] gate= {Systems.revoked}
-    .let[mut System] attenuated= {NoDownload#(Caretakers#(gate))}
-    .do{ gate.set(sys) }
-    .do{ sys.try#(attenuated.iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}} }
-    .return{ sys.try#(attenuated.iso.close, {s -> s.manager}).assertOk }
-    }
-  .checkWithSys{sys -> Block#
-    .var[mut System] gate= {Systems.revoked}
-    .return{ sys.try#[System, mut System](Caretakers#(gate).iso.close, {s -> Probe#(s)}).assertInfo{:: > "msg" .isMsg{::.contains "revoked: System.out"}} }
-    }
+  .checkWithSys{sys -> sys.try#(OnlyOutput#(sys).iso.close, {s -> s.out}).assertOk}
+  .checkWithSys{sys -> sys.try#(OnlyOutput#(sys).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "System.download is revoked."}}}
+  .checkWithSys{sys -> sys.try#(ErrorSystem, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked."}}}
+  .checkWithSys{sys -> sys.try#(ErrorSystem.iso.close, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked."}}}
+  .checkWithSys{sys -> sys.try#(StartRevokeSystems#, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked: .start was not called yet."}}}
+  .checkWithSys{sys -> sys.try#(StartRevokeSystems#, {s -> s.iso.close}).assertInfo{:: > "msg" .isMsg{::.contains "System.iso is revoked: .start was not called yet."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut StartRevokeSystem] s= {StartRevokeSystems#}
+    .do{ s.start(real) }
+    .return{ s.out }
+    }).assertOk}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut StartRevokeSystem] s= {StartRevokeSystems#}
+    .do{ s.start(real) }
+    .do{ s.revoke }
+    .return{ s.out }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked: .revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut StartRevokeSystem] s= {StartRevokeSystems#}
+    .let attenuated= {NoDownload#(s)}
+    .do{ s.start(real) }
+    .return{ attenuated.manager }
+    }).assertOk}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut StartRevokeSystem] s= {StartRevokeSystems#}
+    .let attenuated= {NoDownload#(s)}
+    .do{ s.start(real) }
+    .return{ attenuated.download }
+    }).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
+  .checkWithSys{sys -> sys.try#[System, mut System](StartRevokeSystems#, {s -> Probe#(s)}).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked: .start was not called yet."}}}
+  .checkDetErr({::.isMsg{::.contains "StartRevokeSystem.start was called twice."}}, {Block#
+    .let[mut StartRevokeSystem] s= {StartRevokeSystems#}
+    .do{ s.start(ErrorSystem) }
+    .return{ s.start(ErrorSystem) }
+    })
+  .checkDetErr({::.isMsg{::.contains "StartRevokeSystem.revoke was called before .start."}}, {StartRevokeSystems#.revoke})
+  .checkDetErr({::.isMsg{::.contains "StartRevokeSystem.revoke was called twice."}}, {Block#
+    .let[mut StartRevokeSystem] s= {StartRevokeSystems#}
+    .do{ s.start(ErrorSystem) }
+    .do{ s.revoke }
+    .return{ s.revoke }
+    })
   }

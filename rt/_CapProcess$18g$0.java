@@ -14,30 +14,30 @@ import java.net.SocketTimeoutException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   static final String namesKey= "fearlessAttenuators";
   static final String portKey= "fearlessProcess.port";
-  static final String ok= "ok\n";
-  static final String info= "info\n";
   public static Object system(){
     Object sys= new _System$2o$0();
     var names= System.getProperty(namesKey);
     if (names == null){ return sys; }
-    var gate= (Var$c$1)Vars$o$0.instance.imm$$hash$1(Systems$5c$0.instance.imm$revoked$0());
-    var u= Caretakers$16o$0.instance.imm$$hash$1(gate);
+    var s= (StartRevokeSystem$49b4$0)StartRevokeSystems$8im8$0.instance.imm$$hash$0();
+    Object u= s;
     for (var n : names.split(",")){ u= ((F$3$2)instance(n)).read$$hash$1(u); }
-    gate.mut$set$1(sys);
+    s.mut$start$1(sys);
     return u;
   }
-  public static void report(Info$o$0 i){
+  public static boolean report(String kind, Info$o$0 i){
     var port= System.getProperty(portKey);
-    if (port == null){ return; }
+    if (port == null){ return false; }
     try (var s= new Socket(InetAddress.getLoopbackAddress(), Integer.parseInt(port))){
-      s.getOutputStream().write((i == null ? ok : info+toS(i)).getBytes(UTF_8));
+      s.getOutputStream().write((kind+"\n"+(i == null ? "" : toS(i))).getBytes(UTF_8));
     }
     catch (IOException e){ throw new UncheckedIOException(e); }
+    return true;
   }
   private static Object[] table(String pkg, String field){
     try{ return (Object[])Class.forName("_"+pkg+".Main").getField(field).get(null); }
@@ -50,19 +50,22 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     for (var i= 0; i < names.length; i += 1){ if (names[i].equals(name)){ return instances[i]; } }
     throw nonDetErr("No attenuator called "+name+" in package "+pkg+".");
   }
-  private static String mainName(Object main){
-    var pkg= main.getClass().getPackageName().substring(1);
-    var names= table(pkg, "all");
-    var instances= table(pkg, "mainInstances");
-    for (var i= 0; i < names.length; i += 1){ if (instances[i] == main){ return (String)names[i]; } }
-    return null;
+  private static String name(Object instance, String namesField, String instancesField){
+    var pkg= instance.getClass().getPackageName().substring(1);
+    var names= table(pkg, namesField);
+    var instances= table(pkg, instancesField);
+    for (var i= 0; i < names.length; i += 1){ if (instances[i] == instance){ return (String)names[i]; } }
+    throw new Error("Broken Environment");
   }
-  private static Object run(Object main, Stream<String> extra){
-    var name= mainName(main);
-    if (name == null){ return fail("The main is not a main of this program: only a main that captures nothing can run in a new process."); }
+  @Override public Object mut$run$2(Object main, Object attenuators){
+    var name= name(main, "all", "mainInstances");
+    var list= (List$o$1)attenuators;
+    var size= ((Nat$c$0Instance)list.read$size$0()).val();
+    var extra= LongStream.range(0, size).mapToObj(i -> name(list.read$get$1(Nat$c$0Instance.instance(i)), "attenuators", "attenuatorInstances"));
     var inherited= System.getProperty(namesKey);
     var names= String.join(",", Stream.concat(inherited == null ? Stream.of() : Stream.of(inherited), extra).toList());
-    return Try$c$0.actionLazy(() -> { runChild(name, names); return Void$o$0.instance; });
+    runChild(name, names);
+    return Void$o$0.instance;
   }
   private static void runChild(String name, String names){
     try (var server= new ServerSocket(0, 1, InetAddress.getLoopbackAddress())){
@@ -93,19 +96,15 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+portKey+"=") && !arg.startsWith("-Dfearless.endMarker=");
   }
   private static void result(String name, String text){
-    if (text.equals(ok)){ return; }
-    if (!text.startsWith(info)){ throw nonDetErr("The process running "+name+" ended without saying how its main ended."); }
-    throw deterministic((Info$o$0)Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(text.substring(info.length()))));
+    var nl= text.indexOf('\n');
+    if (nl < 0){ throw nonDetErr("The process running "+name+" ended without saying how its main ended."); }
+    var kind= text.substring(0, nl);
+    if (kind.equals("ok")){ return; }
+    var info= (Info$o$0)Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(text.substring(nl+1)));
+    if (kind.equals("det")){ throw deterministic(info); }
+    assert kind.equals("nondet");
+    throw nonDeterministic(info);
   }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
-  @Override public Object mut$run$1(Object main){ return run(main, Stream.of()); }
-  @Override public Object mut$run$2(Object main, Object attenuator){ return run(main, Stream.of(attenuatorName(attenuator))); }
-  private static String attenuatorName(Object attenuator){
-    var pkg= attenuator.getClass().getPackageName().substring(1);
-    var names= table(pkg, "attenuators");
-    var instances= table(pkg, "attenuatorInstances");
-    for (var i= 0; i < names.length; i += 1){ if (instances[i] == attenuator){ return (String)names[i]; } }
-    throw new Error("Broken Environment");
-  }
 }

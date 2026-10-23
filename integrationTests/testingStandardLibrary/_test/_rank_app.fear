@@ -85,9 +85,10 @@ use base.Enum as Enum;
 use base.ControlFlow as ControlFlow;
 use base.Enums as Enums;
 use base.System as System;
-use base.Systems as Systems;
-use base.Attenuator as Attenuator;
-use base.Caretakers as Caretakers;
+use base.ErrorSystem as ErrorSystem;
+use base.SystemAttenuator as SystemAttenuator;
+use base.StartRevokeSystem as StartRevokeSystem;
+use base.StartRevokeSystems as StartRevokeSystems;
 
 MyTests:UnitTests{::
   .test TestByte
