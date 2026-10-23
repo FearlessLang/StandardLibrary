@@ -1,4 +1,4 @@
-Main: { .main(sys: mut System): Void }
+Main: CaptureFree{ .main(sys: mut System): Void }
 /// A `Main` implementing ``OpenWith[I,E]`` asks the Fearless manager to run it on a double click
 /// on any file with the extension ``E``, and to show those files with the icon ``I``:
 /// ``Foo: Main, OpenWith[IconsFoo,"foo"]{ s -> ... }`` opens every ``.foo`` file.
