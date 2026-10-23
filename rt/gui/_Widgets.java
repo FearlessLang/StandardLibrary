@@ -447,6 +447,8 @@ abstract class AWidget implements Widget$2o$1{
   public Object read$belowBaseline$0(){ return ratio(below); }
   public Object mut$uText$1(Object t){
     var s= ustr(t);
+    var b= lineBreak(s);
+    if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
     return reText(() -> text = s);
   }
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
