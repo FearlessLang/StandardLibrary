@@ -105,7 +105,15 @@ GuiFrameTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name "  " .run{f -> f.content{::}}}).run{
       .ok _ -> Error.msg "A blank name always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "  " is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "  ".u is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 2007 202F 200B 2060 0007").run{f -> f.content{::}}}).run{
+      .ok _ -> Error.msg "A name made only of invisible characters always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "".u"00A0 2007 202F 200B 2060 0007" is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 00E9 200B").run{f -> Error.msg "A visible character among invisible ones makes a name"}}).run{
+      .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "A visible character among invisible ones makes a name"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"F11").run{f -> f.content{::}}}).run{
       .ok _ -> Error.msg "A close key equal to the full screen key always stops the Gui";
