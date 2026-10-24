@@ -191,26 +191,11 @@ final class _Border extends AContainer implements Border$2o$0{
     component.setLayout(new MutableBorderLayout(this));
   }
   @Override Dimension need(){ return ((MutableBorderLayout) component.getLayout()).natural(component); }
-  @Override public Border$2o$0 mut$north$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$south$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$east$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$west$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$center$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Pane::new); return this; }
-  @Override public Border$2o$0 mut$northB$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$southB$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$eastB$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$westB$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$centerB$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Border::new); return this; }
-  @Override public Border$2o$0 mut$northS$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Split::new); return this; }
-  @Override public Border$2o$0 mut$southS$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Split::new); return this; }
-  @Override public Border$2o$0 mut$eastS$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Split::new); return this; }
-  @Override public Border$2o$0 mut$westS$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Split::new); return this; }
-  @Override public Border$2o$0 mut$centerS$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Split::new); return this; }
-  @Override public Border$2o$0 mut$northSections$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Sections::new); return this; }
-  @Override public Border$2o$0 mut$southSections$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Sections::new); return this; }
-  @Override public Border$2o$0 mut$eastSections$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Sections::new); return this; }
-  @Override public Border$2o$0 mut$westSections$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Sections::new); return this; }
-  @Override public Border$2o$0 mut$centerSections$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Sections::new); return this; }
+  @Override public Border$2o$0 mut$north$1(Object s){ frame.region(this, BorderLayout.NORTH, "north region of a Border", s); return this; }
+  @Override public Border$2o$0 mut$south$1(Object s){ frame.region(this, BorderLayout.SOUTH, "south region of a Border", s); return this; }
+  @Override public Border$2o$0 mut$east$1(Object s){ frame.region(this, BorderLayout.EAST, "east region of a Border", s); return this; }
+  @Override public Border$2o$0 mut$west$1(Object s){ frame.region(this, BorderLayout.WEST, "west region of a Border", s); return this; }
+  @Override public Border$2o$0 mut$center$1(Object s){ frame.region(this, BorderLayout.CENTER, "center region of a Border", s); return this; }
 }
 
 @SuppressWarnings("serial")
@@ -269,14 +254,37 @@ final class _Split extends AContainer implements Split$1c$0{
   @Override public Object read$dividerPosition$0(){ return n(frame.onEdtAndWait(() -> position)); }
   @Override public Object mut$draggable$1(Object b){ return reStyle(() -> draggable = Util.isTrue(b)); }
   @Override public Object read$draggable$0(){ return Util.bool(draggable); }
-  @Override public Split$1c$0 mut$first$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Pane::new); return this; }
-  @Override public Split$1c$0 mut$firstB$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Border::new); return this; }
-  @Override public Split$1c$0 mut$firstS$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Split::new); return this; }
-  @Override public Split$1c$0 mut$second$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Pane::new); return this; }
-  @Override public Split$1c$0 mut$secondB$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Border::new); return this; }
-  @Override public Split$1c$0 mut$secondS$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Split::new); return this; }
-  @Override public Split$1c$0 mut$firstSections$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Sections::new); return this; }
-  @Override public Split$1c$0 mut$secondSections$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Sections::new); return this; }
+  @Override public Split$1c$0 mut$first$1(Object s){ frame.region(this, BorderLayout.LINE_START, "first region of a Split", s); return this; }
+  @Override public Split$1c$0 mut$second$1(Object s){ frame.region(this, BorderLayout.LINE_END, "second region of a Split", s); return this; }
+}
+
+final class _Adder implements Adder$1c$0{
+  interface Sink{ void add(Object scope, Function<_Frame,? extends AWidget> make); }
+  private final String region;
+  private final Sink sink;
+  private boolean used;
+  private _Adder(String region, Sink sink){ this.region= region; this.sink= sink; }
+  static Object fill(String region, Object scope, Sink sink){
+    var a= new _Adder(region, sink);
+    ((Consumer$ao$1) scope).mut$accept$1(a);
+    if (!a.used){ throw Util.detErr("The "+region+" is empty: the scope of the region returned without adding a widget"); }
+    return Void$o$0.instance;
+  }
+  private Object add(Object scope, Function<_Frame,? extends AWidget> make){
+    if (used){ throw Util.detErr("The "+region+" is already filled: a region holds one widget, and the scope of the region adds a second one"); }
+    used = true;
+    sink.add(scope, make);
+    return Void$o$0.instance;
+  }
+  @Override public Object mut$pane$1(Object s){ return add(s, _Pane::new); }
+  @Override public Object mut$border$1(Object s){ return add(s, _Border::new); }
+  @Override public Object mut$split$1(Object s){ return add(s, _Split::new); }
+  @Override public Object mut$sections$1(Object s){ return add(s, _Sections::new); }
+  @Override public Object mut$button$1(Object s){ return add(s, _Button::new); }
+  @Override public Object mut$label$1(Object s){ return add(s, _Label::new); }
+  @Override public Object mut$picture$1(Object s){ return add(s, _Picture::new); }
+  @Override public Object mut$textField$1(Object s){ return add(s, _TextField::new); }
+  @Override public Object mut$textArea$1(Object s){ return add(s, _TextArea::new); }
 }
 
 abstract class AWidget implements Widget$2o$1{
@@ -622,6 +630,9 @@ final class _Frame implements Frame$1c$0{
     }
   }
 
+  void region(AWidget into, String where, String region, Object scope){
+    _Adder.fill(region, scope, (s, make) -> addTo(into, where, s, make));
+  }
   void addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
     var parent= into.component;
     var b= onEdtAndWait(() -> make.apply(this));
@@ -751,7 +762,7 @@ final class _Frame implements Frame$1c$0{
 
   void start(){
     assert SwingUtilities.isEventDispatchThread();
-    if (top == null){ throw Util.detErr("This Frame has no content, so there is nothing to show: call .content{...} or .contentB{...} on it before the consumer given to Gui.run returns"); }
+    if (top == null){ throw Util.detErr("This Frame has no content, so there is nothing to show: call .content{::.pane{...}} or .content{::.border{...}} on it before the consumer given to Gui.run returns"); }
     top.component.setBounds(0, 0, canvasW, canvasH);
     top.component.validate();
     layoutDirty.set(false);
@@ -898,8 +909,7 @@ final class _Frame implements Frame$1c$0{
     });
     return this;
   }
-  @Override public Object mut$content$1(Object s){ return newContent(s, _Pane::new); }
-  @Override public Object mut$contentB$1(Object s){ return newContent(s, _Border::new); }
+  @Override public Object mut$content$1(Object s){ return _Adder.fill("content of the Frame", s, this::newContent); }
 
   private Object newContent(Object scope, Function<_Frame,? extends AWidget> make){
     requireOpen();

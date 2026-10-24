@@ -18,11 +18,11 @@ ShowInput: Main { sys -> sys.gui.run{f -> Block#
     .title "Show input: drop more files here"
     .virtualPixelSpace(WidthNat#600, HeightNat#400)
     .modelFps(10, {:: .action{ShowFiles#(at, lines!)}})
-    .content{::
+    .content{::.pane{::
       .background (Color.ghostWhite)
       .vertical .minPerLine 1000000 .heightGap 0
       .save lines
-      }
+      }}
     }
   }}
 ShowFiles: {#(at: mut Var[mut InputCursor], lines: mut Pane): Void -> at.get#.match{

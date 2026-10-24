@@ -11,31 +11,31 @@ GuiSetterTests: Test {::
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[3] Height[4]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#32768, Height#80).content{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#32768, Height#80).content{::.pane{::}}}}).run{
       .ok _ -> Error.msg "A virtual pixel space width over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "virtual pixel space width 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#32768).content{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#32768).content{::.pane{::}}}}).run{
       .ok _ -> Error.msg "A virtual pixel space height over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "virtual pixel space height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#0, Height#80).content{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#0, Height#80).content{::.pane{::}}}}).run{
       .ok _ -> Error.msg "An empty virtual pixel space always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The virtual pixel space 0x80 is empty: a virtual pixel space has at least one virtual pixel in each direction"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.icon(base.IconsConflict).run{f -> f.content{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.icon(base.IconsConflict).run{f -> f.content{::.pane{::}}}}).run{
       .ok _ -> Error.msg "An icon the main does not preload always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{::.contains `", but the main running this Gui preloads only the icons base.IconsFearless.`}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(0).content{:: .paint{g -> Error.msg "An fps below the limit was accepted"} }}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(0).content{::.pane{:: .paint{g -> Error.msg "An fps below the limit was accepted"} }}}}).run{
       .ok _ -> Error.msg "An fps below the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "fps 0 is out of range; it must be between 1 and 500"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(18446744073709551615).content{:: .paint{g -> Error.msg "An fps over the limit was accepted"} }}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(18446744073709551615).content{::.pane{:: .paint{g -> Error.msg "An fps over the limit was accepted"} }}}}).run{
       .ok _ -> Error.msg "An fps over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "fps 18446744073709551615 is out of range; it must be between 1 and 500"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.modelFps(501, {::}).content{:: .paint{g -> Error.msg "A modelFps over the limit was accepted"} }}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.modelFps(501, {::}).content{::.pane{:: .paint{g -> Error.msg "A modelFps over the limit was accepted"} }}}}).run{
       .ok _ -> Error.msg "A modelFps over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "modelFps 501 is out of range; it must be between 1 and 500"}}.assertTrue{i};
       }}

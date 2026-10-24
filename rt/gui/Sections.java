@@ -18,12 +18,11 @@ import static _base.Scopes.*;
 final class _Sections extends AContainer implements Sections$ao$0, LayoutManager{
   static final int mark= 16;
   static final class Section{
-    final String name;
     final AWidget title;
     final AWidget content;
     boolean expanded;
     Rectangle head= new Rectangle();
-    Section(String name, AWidget title, AWidget content){ this.name= name; this.title= title; this.content= content; }
+    Section(AWidget title, AWidget content){ this.title= title; this.content= content; }
   }
   record Part(Section s, boolean x){}
   final ArrayList<Section> sections= new ArrayList<>();// EDT confined
@@ -38,20 +37,20 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     super(frame);
     component.setLayout(this);
   }
-  static String str(Object s){ return ((Str$c$0Instance) s).val(); }
-  Section named(String name){
-    for (var s : sections){ if (s.name.equals(name)){ return s; } }
-    var names= sections.stream().map(s -> "\"" + s.name + "\"").toList();
-    throw Util.detErr("There is no section named \"" + name + "\" in this Sections: "
-      + (names.isEmpty() ? "it has no sections" : "the names of its sections are " + String.join(", ", names)));
+  Section at(long i){
+    if (Long.compareUnsigned(i, sections.size()) < 0){ return sections.get((int) i); }
+    throw Util.detErr("There is no section at index " + Long.toUnsignedString(i) + " in this Sections: "
+      + (sections.isEmpty() ? "it has no sections" : "it has " + sections.size() + " sections, so the index is at most " + (sections.size() - 1)));
   }
-  Object add(String name, AWidget title, Object scope, Function<_Frame,? extends AWidget> make){
+  AWidget build(Object scope, Function<_Frame,? extends AWidget> make){
     var c= frame.onEdtAndWait(() -> make.apply(frame));
     ((Scope$1c$1) scope).mut$run$1(c);
+    return c;
+  }
+  void add(AWidget title, AWidget c){
     frame.onEdtAndWait(() -> {
       change();
-      if (sections.stream().anyMatch(s -> s.name.equals(name))){ throw Util.detErr("This Sections already has a section named \"" + name + "\": the name identifies the section, so every section of a Sections has its own name"); }
-      var s= new Section(name, title, c);
+      var s= new Section(title, c);
       sections.add(s);
       component.add(title.component);
       component.add(c.component);
@@ -62,7 +61,6 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       c.changeable = false;
     });
     frame.markLayoutDirty();
-    return this;
   }
   int lead(){ return tabs ? 0 : mark + widthGap; }
   int trail(){ return onClose == null ? 0 : widthGap + mark; }
@@ -168,8 +166,9 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   void handle(SectionHandler$j0g$0 h, Section s){
     var self= this;
+    var i= n(sections.indexOf(s));
     frame.frame.queue.submit(SkMouse.whileShown(s.title, new MF$7$1(){ @Override public Object mut$$hash$0(){
-      return h.mut$$hash$2(self, Str$c$0Instance.instance(s.name));
+      return h.mut$$hash$2(self, i);
     }}));
   }
   void expand(Section s){
@@ -180,11 +179,27 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     s.expanded = expanded;
     if (!expanded){ frame.mouse.detached(s.content.component); }
   }
-  @Override public Object mut$section$2(Object n, Object scope){
-    var name= str(n);
-    var title= frame.onEdtAndWait(() -> new _Pane(frame));
-    ((Scope$1c$1) scope).mut$run$1(title);
-    return new CNewSection(this, name, title);
+  @Override public Object mut$section$1(Object scope){
+    var b= new _Section();
+    ((Scope$1c$1) scope).mut$run$1(b);
+    if (b.title == null){ throw Util.detErr("The title of the section is empty: the scope of .section returned without .title"); }
+    if (b.content == null){ throw Util.detErr("The content of the section is empty: the scope of .section returned without .content"); }
+    add(b.title, b.content);
+    return this;
+  }
+  final class _Section implements Section$5c$0{
+    AWidget title;
+    AWidget content;
+    @Override public Object mut$title$1(Object s){
+      if (title != null){ throw Util.detErr("The title of the section is already filled: .title is called again"); }
+      _Adder.fill("title of a section", s, (sc, make) -> title = build(sc, make));
+      return this;
+    }
+    @Override public Object mut$content$1(Object s){
+      if (content != null){ throw Util.detErr("The content of the section is already filled: .content is called again"); }
+      _Adder.fill("content of a section", s, (sc, make) -> content = build(sc, make));
+      return this;
+    }
   }
   @Override public Object mut$column$0(){ return reStyle(() -> tabs = false); }
   @Override public Object mut$tabs$0(){
@@ -202,28 +217,18 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     });
   }
   @Override public Object mut$scroll$1(Object b){ return reStyle(() -> scroll = Util.isTrue(b)); }
-  @Override public Object mut$expand$1(Object n){
-    var name= str(n);
-    return reStyle(() -> expand(named(name)));
+  @Override public Object mut$expand$1(Object i){
+    long k= Util.natToLong(i);
+    return reStyle(() -> expand(at(k)));
   }
-  @Override public Object mut$collapse$1(Object n){
-    var name= str(n);
-    return reStyle(() -> show(named(name), false));
+  @Override public Object mut$collapse$1(Object i){
+    long k= Util.natToLong(i);
+    return reStyle(() -> show(at(k), false));
   }
-  @Override public Object mut$index$2(Object n, Object i){
-    var name= str(n);
-    long to= Util.natToLong(i);
+  @Override public Object mut$remove$1(Object i){
+    long k= Util.natToLong(i);
     return reStyle(() -> {
-      var s= named(name);
-      if (Long.compareUnsigned(to, sections.size()) >= 0){ throw Util.detErr(".index(\"" + name + "\", " + Long.toUnsignedString(to) + ") is out of range: this Sections has " + sections.size() + " sections, so the index is at most " + (sections.size() - 1)); }
-      sections.remove(s);
-      sections.add((int) to, s);
-    });
-  }
-  @Override public Object mut$remove$1(Object n){
-    var name= str(n);
-    return reStyle(() -> {
-      var s= named(name);
+      var s= at(k);
       sections.remove(s);
       for (var w : List.of(s.title, s.content)){
         frame.mouse.detached(w.component);
@@ -233,21 +238,9 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   @Override public Object mut$onToggle$1(Object h){ return onEdt(() -> onToggle = (SectionHandler$j0g$0) h); }
   @Override public Object mut$onClose$1(Object h){ return reStyle(() -> onClose = (SectionHandler$j0g$0) h); }
-  @Override public Object read$names$0(){
-    return frame.onEdtAndWait(() -> new List$o$1Instance(sections.stream().map(s -> (Object) Str$c$0Instance.instance(s.name)).toList()));
+  @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }
+  @Override public Object read$isExpanded$1(Object i){
+    long k= Util.natToLong(i);
+    return frame.onEdtAndWait(() -> Util.bool(at(k).expanded));
   }
-  @Override public Object read$index$1(Object o){
-    var name= str(o);
-    return frame.onEdtAndWait(() -> n(sections.indexOf(named(name))));
-  }
-  @Override public Object read$isExpanded$1(Object n){
-    var name= str(n);
-    return frame.onEdtAndWait(() -> Util.bool(named(name).expanded));
-  }
-}
-
-record CNewSection(_Sections owner, String name, AWidget title) implements NewSection$18g$0{
-  @Override public Object mut$content$1(Object s){ return owner.add(name, title, s, _Pane::new); }
-  @Override public Object mut$contentB$1(Object s){ return owner.add(name, title, s, _Border::new); }
-  @Override public Object mut$contentS$1(Object s){ return owner.add(name, title, s, _Split::new); }
 }
