@@ -8,7 +8,6 @@ use base.FileLog as FileLog;
 
 Steps: InMemoryLog[Str]{"steps"}
 PkgLog: FileLog{"logging"}
-MyLog[T]:FileLog{"bah"}
 
 LoggingExample: UnitTests {
   .tests t-> t.checkWithSys{sys-> Block#
@@ -23,5 +22,5 @@ LoggingExample: UnitTests {
     .do{ PkgLog.log("package-specific log entry") }
     .do{ sys.readLog(Steps).consume.assertEq({::},Lists#("step 1","step 2","step 3")) }
     .done
-    }.checkNonDetErr({::},{MyLog[Str].log("should not work")})
+    }
   }

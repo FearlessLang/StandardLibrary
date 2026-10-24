@@ -61,8 +61,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///System.readLog creates a reader for this log.
 ///The reader can inspect or consume the values currently stored for this log.
 ///
-///Concrete log types must be non generic.
-///Creating a reader throw with nondeterministic error if the concrete log type is generic.
+///A concrete log type can not have generic parameters: this is a compile time error.
 ///
 InMemoryLog[T]: CaptureFree{
   .name: Str;
@@ -101,8 +100,7 @@ InMemoryLog[T]: CaptureFree{
 ///managed by the same circular-log mechanism (moved to a stamped archive on
 ///startup/shutdown, empty logs deleted, a bounded number of archives kept).
 ///
-///Concrete log types must be non generic.
-///Writing throws a nondeterministic error if the concrete log type is generic.
+///A concrete log type can not have generic parameters: this is a compile time error.
 ///
 ///See also: base.Log (the single fixed shared log, no declaration needed),
 ///base.InMemoryLog (in memory instead of a file, for unit testing).
