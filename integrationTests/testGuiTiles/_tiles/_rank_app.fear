@@ -128,6 +128,7 @@ Managers:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label], frame: mut S
       .let[Str] name= {(projects.get.get i).name}
       .do{projects.set(projects.get.without i)}
       .if{name == (selected.get)} .do{selected.set((projects.get.get 0).name)}
+      .do{self.say("Forgot: "+name)}
       .return{self.render};
     mut .add: Void -> Block#
       .let[Str] name= {Names#(count.get)}
