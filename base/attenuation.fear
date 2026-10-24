@@ -242,7 +242,15 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   }}
 RevokableProcess: { #(r: mut Revocation, u: mut CapProcess): mut CapProcess -> {'s
   .run(m, as) -> Block#(r#, u.run(m, as));
+  .start(m, as) -> Block#(r#, RevokableRunningMain#(r, u.start(m, as)));
   .iso -> RevokableProcess#(r.iso.close, u.iso.close);
+  .close -> s;
+  }}
+RevokableRunningMain: { #(r: mut Revocation, u: mut RunningMain): mut RunningMain -> {'s
+  .await -> Block#(r#, u.await);
+  .awaitUpTo t -> Block#(r#, u.awaitUpTo t);
+  .terminate -> Block#(r#, u.terminate);
+  .iso -> RevokableRunningMain#(r.iso.close, u.iso.close);
   .close -> s;
   }}
 RevokableLogReader: { #[T](r: mut Revocation, u: mut LogReader[T]): mut LogReader[T] -> {'s
@@ -277,6 +285,22 @@ RevokableGui: { #(r: mut Revocation, u: mut Gui): mut Gui -> {
 ///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,
 ///it throws the non deterministic error ``main`` threw.
 ///A new process that can not start, or that ends before its main ends, is a non deterministic error.
+///``.start`` starts the new process and returns at once; the `RunningMain` it gives is how this program waits for the process or ends it.
+///``.run`` is ``.start`` then `RunningMain.await`.
 CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
   mut .run(main: Main, attenuators: List[SystemAttenuator]): Void;
+  mut .start(main: Main, attenuators: List[SystemAttenuator]): mut RunningMain;
+  }
+
+///A process started by `CapProcess.start`. A RunningMain is running or surely terminated: ``.await`` and ``.terminate`` make it
+///surely terminated, and so does an ``.awaitUpTo`` that returns true or throws.
+///A call on a surely terminated RunningMain is the deterministic error ``RunningMain.<method> was called on a surely terminated RunningMain.``.
+///The copies ``.iso`` gives share the process and its state.
+RunningMain: ToIso[RunningMain], WidenTo[RunningMain]{
+  ///Returns when the process ends, as `CapProcess.run` does: the Void of the main, or its Info as the error it threw.
+  mut .await: Void;
+  ///``.await`` when the process ends within ``millis`` milliseconds, returning true; false when the process did not end in time.
+  mut .awaitUpTo(millis: Nat): Bool;
+  ///Ends the process and every process it started. When the process ended by itself, ``.await``.
+  mut .terminate: Void;
   }

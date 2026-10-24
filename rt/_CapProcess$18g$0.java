@@ -57,37 +57,22 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     var parts= instance.getClass().getInterfaces()[0].getName().substring(1).split("\\$");
     return parts.length == 3 ? parts[0] : parts[0]+"'".repeat(Integer.parseInt(parts[1].substring(1)));
   }
-  @Override public Object mut$run$2(Object main, Object attenuators){
+  @Override public Object mut$run$2(Object main, Object attenuators){ return ((_RunningMain$2dk$0)mut$start$2(main, attenuators)).mut$await$0(); }
+  @Override public Object mut$start$2(Object main, Object attenuators){
     var list= (List$o$1)attenuators;
     var size= ((Nat$c$0Instance)list.read$size$0()).val();
     var extra= LongStream.range(0, size).mapToObj(i -> name(list.read$get$1(Nat$c$0Instance.instance(i))));
     var inherited= System.getProperty(namesKey);
     var names= Stream.concat(inherited == null ? Stream.of() : Stream.of(inherited), extra).collect(Collectors.joining(","));
-    runChild(name(main), names);
-    return Void$o$0.instance;
+    return new _RunningMain$2dk$0(name(main), names);
   }
-  private static void runChild(String name, String names){
-    var marker= "fearless result "+ProcessHandle.current().pid()+" "+children.incrementAndGet();
-    System.out.flush();
-    System.err.flush();
-    Process p;
-    try{ p= new ProcessBuilder(command(name, names, marker)).start(); }
-    catch (IOException e){ throw nonDetErr("The process running "+name+" could not be started: "+e.getClass().getSimpleName()); }
-    var tail= new StringBuilder();
-    var out= Thread.startVirtualThread(() -> forward(p.getInputStream()));
-    var err= Thread.startVirtualThread(() -> forward(p.getErrorStream(), marker, tail));
-    int exit;
-    try{ exit= p.waitFor(); out.join(); err.join(); }
-    catch (InterruptedException e){ throw nonDetErr("The process running "+name+" was interrupted."); }
-    finally{ try{ p.getOutputStream().close(); } catch (IOException _){} }
-    result(name, tail.toString(), exit);
-  }
-  private static void forward(InputStream in){
+  static String marker(){ return "fearless result "+ProcessHandle.current().pid()+" "+children.incrementAndGet(); }
+  static void forward(InputStream in){
     try (in){ in.transferTo(System.out); }
     catch (IOException e){ throw new UncheckedIOException(e); }
     finally{ System.out.flush(); }
   }
-  private static void forward(InputStream in, String marker, StringBuilder tail){
+  static void forward(InputStream in, String marker, StringBuilder tail){
     try (var r= new BufferedReader(new InputStreamReader(in, UTF_8))){
       for (var line= r.readLine(); line != null; line = r.readLine()){
         if (line.equals(marker)){ r.lines().forEach(l -> tail.append(l).append('\n')); return; }
@@ -97,7 +82,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     catch (IOException e){ throw new UncheckedIOException(e); }
     finally{ System.err.flush(); }
   }
-  private static List<String> command(String name, String names, String marker){
+  static List<String> command(String name, String names, String marker){
     var cmd= new ArrayList<String>();
     cmd.add(Path.of(System.getProperty("java.home"), "bin", System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java").toString());
     ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(_CapProcess$18g$0::inherited).forEach(cmd::add);
@@ -111,16 +96,6 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   }
   private static boolean inherited(String arg){
     return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+markerKey+"=") && !arg.startsWith("-Dfearless.endMarker=");
-  }
-  private static void result(String name, String tail, int exit){
-    var nl= tail.indexOf('\n');
-    if (nl < 0){ throw nonDetErr("The process running "+name+" ended with "+exit+" before its main ended."); }
-    var kind= tail.substring(0, nl);
-    if (kind.equals("ok")){ return; }
-    var info= (Info$o$0)Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(tail.substring(nl+1).stripTrailing()));
-    if (kind.equals("det")){ throw deterministic(info); }
-    assert kind.equals("nondet");
-    throw nonDeterministic(info);
   }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
