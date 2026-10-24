@@ -18,14 +18,14 @@ import static _base.Scopes.*;
 final class _Sections extends AContainer implements Sections$ao$0, LayoutManager{
   static final int mark= 16;
   static final class Section{
-    final AWidget title;
-    final AWidget content;
+    AWidget title;
+    AWidget content;
     boolean expanded;
     Rectangle head= new Rectangle();
     Section(AWidget title, AWidget content){ this.title= title; this.content= content; }
   }
   record Part(Section s, boolean x){}
-  final ArrayList<Section> sections= new ArrayList<>();// EDT confined
+  final ArrayList<Section> sections= new ArrayList<>();
   boolean tabs;
   boolean autoCollapse= true;
   boolean scroll;
@@ -54,14 +54,30 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       sections.add(s);
       component.add(title.component);
       component.add(c.component);
-      var t= title.own();
-      var k= c.own();
-      grow(Math.max(lead() + t.width + trail(), k.width) + edgeW(), t.height + heightGap + k.height + edgeH());
+      grow(s);
       title.changeable = false;
       c.changeable = false;
     });
     frame.markLayoutDirty();
     return this;
+  }
+  void grow(Section s){
+    var t= s.title.own();
+    var k= s.content.own();
+    grow(Math.max(lead() + t.width + trail(), k.width) + edgeW(), t.height + heightGap + k.height + edgeH());
+  }
+  Object replacer(long i, boolean title){ return new _RegionFiller(frame, (s, make) -> replace(i, title, build(s, make))); }
+  Object replace(long i, boolean title, AWidget w){
+    return reStyle(() -> {
+      var s= at(i);
+      var old= title ? s.title : s.content;
+      frame.mouse.detached(old.component);
+      component.remove(old.component);
+      component.add(w.component);
+      if (title){ s.title = w; } else { s.content = w; }
+      grow(s);
+      w.changeable = false;
+    });
   }
   int lead(){ return tabs ? 0 : mark + widthGap; }
   int trail(){ return onClose == null ? 0 : widthGap + mark; }
@@ -217,6 +233,8 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       }
     });
   }
+  @Override public Object mut$title$1(Object i){ return replacer(Util.natToLong(i), true); }
+  @Override public Object mut$content$1(Object i){ return replacer(Util.natToLong(i), false); }
   @Override public Object mut$onToggle$1(Object h){ return onEdt(() -> onToggle = (SectionHandler$j0g$0) h); }
   @Override public Object mut$onClose$1(Object h){ return reStyle(() -> onClose = (SectionHandler$j0g$0) h); }
   @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }

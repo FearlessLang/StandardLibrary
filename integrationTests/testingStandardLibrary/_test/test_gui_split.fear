@@ -47,6 +47,12 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[100] Height[68]"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{:: .width 200 .paint{g -> Error.msg "A replaced widget was drawn"}}.with{:: .width 300 .height 80 .dividerPosition 100 .second.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} } }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[183] Height[68]"}}.assertTrue{i};
+      }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.border{::
     .center.pane{:: .width 200 .paint{g -> Error.msg "A replaced widget was drawn"}}
     .center.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}}

@@ -254,6 +254,8 @@ final class _Split extends AContainer implements Split$1c$0{
   @Override public Object read$dividerPosition$0(){ return n(frame.onEdtAndWait(() -> position)); }
   @Override public Object mut$draggable$1(Object b){ return reStyle(() -> draggable = Util.isTrue(b)); }
   @Override public Object read$draggable$0(){ return Util.bool(draggable); }
+  @Override public Object mut$first$0(){ return frame.region(this, BorderLayout.LINE_START); }
+  @Override public Object mut$second$0(){ return frame.region(this, BorderLayout.LINE_END); }
 }
 
 final class _RegionFiller implements RegionFiller$4rk$1{

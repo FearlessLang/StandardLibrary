@@ -66,6 +66,18 @@ GuiSectionsTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[288] Height[24]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
+    .sections{:: .width 300 .height 200 .section.pane{::}.and.pane{:: .paint{g -> Error.msg "A replaced content was drawn"}} .expand 0 .content(0).pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}}}
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[288] Height[24]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
+    .sections{:: .section.pane{:: .paint{g -> Error.msg "A replaced title was drawn"}}.and.pane{::} .title(0).pane{:: .paint{g -> Error.msg "The new title was drawn"}}}
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new title was drawn"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
     .sections{:: .onToggle{x, n -> Error.msg "A program call ran onToggle"}
       .section.pane{::}.and.pane{:: .paint{g -> Error.msg "A collapsed content was drawn"}}
       .section.pane{::}.and.pane{::}
