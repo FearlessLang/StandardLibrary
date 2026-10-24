@@ -299,8 +299,8 @@ CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
 RunningMain: ToIso[RunningMain], WidenTo[RunningMain]{
   ///Returns when the process ends, as `CapProcess.run` does: the Void of the main, or its Info as the error it threw.
   mut .await: Void;
-  ///``.await`` when the process ends within ``millis`` milliseconds, returning true; false when the process did not end in time.
-  mut .awaitUpTo(millis: Nat): Bool;
+  ///``.await`` when the process ends within ``time``, returning true; false when the process did not end in time.
+  mut .awaitUpTo(time: Duration): Bool;
   ///Ends the process and every process it started. When the process ended by itself, ``.await``.
   mut .terminate: Void;
   }
