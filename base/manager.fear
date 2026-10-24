@@ -57,4 +57,7 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Links the code project ``name`` to the data project ``data`` for reading and writing, under the type names ``types``.
   ///No type names removes that link.
   mut .linkWrite(name: Str, data: Str, types: List[Str]): Void;
+  ///Sets the attenuators the manager applies to the main ``main`` of the project ``name`` to ``attenuators``, in that order.
+  ///No attenuator removes them all.
+  mut .attenuate(name: Str, main: Str, attenuators: List[Str]): Void;
   }

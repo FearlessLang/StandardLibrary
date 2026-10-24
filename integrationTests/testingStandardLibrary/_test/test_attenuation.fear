@@ -6,14 +6,6 @@ NoDownload: SystemAttenuator { u -> {'s
   .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoDownload#(u.iso.close); .close -> s;
   }}
-///Every method reaches the received System, but the manager capability is revoked.
-NoManager: SystemAttenuator { u -> {'s
-  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
-  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
-  .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
-  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
-  .iso -> NoManager#(u.iso.close); .close -> s;
-  }}
 ///Only the try and output capabilities reach the received System.
 OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
 ///Calls the received System while running: not an attenuator the runtime can apply.
@@ -25,6 +17,10 @@ TestAttenuation: Test {::
   .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
   .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.manager}).assertInfo{:: > "msg" .isMsg{::.contains "NoManager"}}}
   .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.out}).assertOk}
+  .checkWithSys{sys -> sys.try#(NoManager#(sys).iso.close, {s -> s.manager}).assertInfo{:: > "msg" .isMsg{::.contains "NoManager: System.manager is revoked."}}}
+  .checkWithSys{sys -> sys.try#(NoManagerQuit#(sys).iso.close, {s -> s.manager.quit}).assertInfo{:: > "msg" .isMsg{::.contains "NoManagerQuit: CapManager.quit is revoked."}}}
+  .checkWithSys{sys -> sys.try#(NoManagerQuit#(sys).iso.close, {s -> s.manager.reset}).assertInfo{:: > "msg" .isMsg{::.contains "NoManagerQuit: CapManager.reset is revoked."}}}
+  .checkWithSys{sys -> sys.try#(NoManagerQuit#(sys).iso.close, {s -> s.manager.show}).assertInfo{:: > "msg" .isMsg{::.contains "not started by the Fearless manager."}}}
   .checkWithSys{sys -> sys.try#(OnlyOutput#(sys).iso.close, {s -> s.out}).assertOk}
   .checkWithSys{sys -> sys.try#(OnlyOutput#(sys).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "System.download is revoked."}}}
   .checkWithSys{sys -> sys.try#(ErrorSystem, {s -> s.out}).assertInfo{:: > "msg" .isMsg{::.contains "System.out is revoked."}}}

@@ -42,6 +42,36 @@ ErrorSystem: System {
   }
 _Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked.") }
 
+///Every method reaches the received System, but `.manager` is revoked: the program can not call the Fearless manager.
+NoManager: SystemAttenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
+  .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
+  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
+  .iso -> NoManager#(u.iso.close); .close -> s;
+  }}
+///Every method reaches the received System, but the `CapManager` it gives revokes `.quit` and `.reset`:
+///the program can not end the Fearless manager.
+NoManagerQuit: SystemAttenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
+  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
+  .manager -> NoQuitManager#(u.manager);
+  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
+  .iso -> NoManagerQuit#(u.iso.close); .close -> s;
+  }}
+NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
+  .show -> u.show; .show n -> u.show n; .register p -> u.register p;
+  .quit -> Error.nonDeterministic "NoManagerQuit: CapManager.quit is revoked.";
+  .reset -> Error.nonDeterministic "NoManagerQuit: CapManager.reset is revoked.";
+  .connectEclipse p -> u.connectEclipse p; .editMetadata p -> u.editMetadata p;
+  .openWithOrShortcut p -> u.openWithOrShortcut p; .openWithOrShortcut(p, n, m) -> u.openWithOrShortcut(p, n, m);
+  .run(n, ms) -> u.run(n, ms); .compile n -> u.compile n; .check n -> u.check n; .terminate n -> u.terminate n;
+  .deleteCache n -> u.deleteCache n; .kindIdle n -> u.kindIdle n; .kindCode n -> u.kindCode n;
+  .kindDataReadOnly n -> u.kindDataReadOnly n; .kindDataReadWrite n -> u.kindDataReadWrite n; .forget n -> u.forget n;
+  .linkRead(n, d, ts) -> u.linkRead(n, d, ts); .linkWrite(n, d, ts) -> u.linkWrite(n, d, ts); .attenuate(n, m, as) -> u.attenuate(n, m, as);
+  .iso -> NoQuitManager#(u.iso.close); .close -> s;
+  }}
+
 ///A flag in one of three states, in this order and with no way back: not started, started, revoked.
 ///``#`` returns when started; otherwise it throws the non deterministic error ``Revocation.start was not called yet.``
 ///or ``Revocation.revoke was called.``. A capability wrapper checks the flag before delegating: ``.out -> Block#(r#, u.out)``.
@@ -206,6 +236,7 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   .forget n -> Block#(r#, u.forget n);
   .linkRead(n, d, ts) -> Block#(r#, u.linkRead(n, d, ts));
   .linkWrite(n, d, ts) -> Block#(r#, u.linkWrite(n, d, ts));
+  .attenuate(n, m, as) -> Block#(r#, u.attenuate(n, m, as));
   .iso -> RevokableManager#(r.iso.close, u.iso.close);
   .close -> s;
   }}

@@ -81,4 +81,5 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$forget$1(Object name){ return send("Forget", AssetBytesRead.str(name)); }
   @Override public Object mut$linkRead$3(Object name, Object data, Object types){ return link(name, data, "read", types); }
   @Override public Object mut$linkWrite$3(Object name, Object data, Object types){ return link(name, data, "write", types); }
+  @Override public Object mut$attenuate$3(Object name, Object main, Object attenuators){ return send("Attenuate", Stream.concat(Stream.of(AssetBytesRead.str(name), AssetBytesRead.str(main)), strs(attenuators))); }
 }
