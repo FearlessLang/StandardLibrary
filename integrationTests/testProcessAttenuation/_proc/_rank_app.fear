@@ -9,6 +9,7 @@ use base.Lists as Lists;
 use base.RunningMain as RunningMain;
 use base.Action as Action;
 use base.Nat as Nat;
+use base.Duration as Duration;
 use base.Continue as Continue;
 use base.Break as Break;
 
@@ -66,10 +67,10 @@ Caught: { #(a: mut Action[Void]): Str -> a.run{.ok _ -> "ok"; .info i -> (i.getM
 Starter: Main { sys -> Block#
   .do{ sys.out.println "starter starts" }
   .let[mut RunningMain] child= {sys.process.start(Child, {})}
-  .do{ sys.out.println("child awaited: "+(child.awaitUpTo 60000).str) }
+  .do{ sys.out.println("child awaited: "+(child.awaitUpTo(Duration.seconds 60)).str) }
   .do{ sys.out.println("child again: "+(Caught#(sys.try#(child.iso.close, {r -> Block#.openIso m = r .return{m.await}})))) }
   .let[mut RunningMain] spin= {sys.process.start(Spin, {})}
-  .do{ sys.out.println("spin awaited: "+(spin.awaitUpTo 1).str) }
+  .do{ sys.out.println("spin awaited: "+(spin.awaitUpTo(Duration.milliSeconds 1)).str) }
   .do{ spin.terminate }
   .do{ sys.out.println "spin terminated" }
   .do{ sys.out.println("spin again: "+(Caught#(sys.try#(spin.iso.close, {r -> Block#.openIso m = r .return{m.terminate}})))) }

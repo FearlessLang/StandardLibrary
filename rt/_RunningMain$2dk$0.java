@@ -30,10 +30,10 @@ public final class _RunningMain$2dk$0 implements RunningMain$2dk$0{
     catch (InterruptedException e){ throw interrupted(); }
     return ended();
   }
-  @Override public Object mut$awaitUpTo$1(Object millis){
+  @Override public Object mut$awaitUpTo$1(Object time){
     running("awaitUpTo");
     boolean done;
-    try{ done= p.waitFor(natToLong(millis), TimeUnit.MILLISECONDS); }
+    try{ done= p.waitFor(natToLong(((Duration$ao$0)time).read$get$0()), TimeUnit.MICROSECONDS); }
     catch (InterruptedException e){ throw interrupted(); }
     if (!done){ return bool(false); }
     ended();
