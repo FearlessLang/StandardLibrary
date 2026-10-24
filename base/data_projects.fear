@@ -7,17 +7,18 @@
 ///A zip is a folder named without ".zip": a path enters it as it enters any other folder.
 ///A resource or folder whose name starts with "." is not part of the data project, and neither is the marker of the
 ///data project, the resource with the extension ".fearless" at its top: a path naming them is not valid.
-///A ``name`` that is not a root, or a ``path`` naming no resource or folder, gives an Info.
-///A data project that changed on disk so that the request can not be done is a non deterministic error.
+///A ``path`` that is not valid is a deterministic error.
+///A ``name`` that is not a root, a ``path`` naming no resource or folder, and a data project that changed on disk
+///so that the request can not be done are non deterministic errors.
 ///A program started by the portable Fearless has no root.
 CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
   ///The roots of this capability, sorted.
   mut .roots: List[Str];
   ///The names of the resources and folders in the folder at ``path``, sorted; a zip is named without ".zip".
   ///An empty ``path`` is the root folder.
-  mut .paths(name: Str, path: List[Str]): mut Action[List[Str]];
+  mut .paths(name: Str, path: List[Str]): List[Str];
   ///The resource at ``path``, read again at every read.
-  mut .read(name: Str, path: List[Str]): mut Action[mut InputCursorNode];
+  mut .read(name: Str, path: List[Str]): mut InputCursorNode;
   }
 
 ///The object capability to read and write the data projects linked to this program in "edits".
@@ -33,30 +34,30 @@ CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
 CapDataReadWrite: ToIso[CapDataReadWrite], WidenTo[CapDataReadWrite]{
   ///The roots of this capability, sorted.
   mut .roots: List[Str];
-  mut .paths(name: Str, path: List[Str]): mut Action[List[Str]];
-  mut .read(name: Str, path: List[Str]): mut Action[mut InputCursorNode];
-  mut .writeStrUtf8(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeUStrUtf8(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  mut .writeStrUtf16Le(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeUStrUtf16Le(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  mut .writeStrUtf32Le(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeUStrUtf32Le(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  mut .writeStrUtf16Be(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeUStrUtf16Be(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  mut .writeStrUtf32Be(name: Str, path: List[Str], content: Str): mut Action[Void];
-  mut .writeUStrUtf32Be(name: Str, path: List[Str], content: UStr): mut Action[Void];
-  mut .writeStrAscii(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .paths(name: Str, path: List[Str]): List[Str];
+  mut .read(name: Str, path: List[Str]): mut InputCursorNode;
+  mut .writeStrUtf8(name: Str, path: List[Str], content: Str): Void;
+  mut .writeUStrUtf8(name: Str, path: List[Str], content: UStr): Void;
+  mut .writeStrUtf16Le(name: Str, path: List[Str], content: Str): Void;
+  mut .writeUStrUtf16Le(name: Str, path: List[Str], content: UStr): Void;
+  mut .writeStrUtf32Le(name: Str, path: List[Str], content: Str): Void;
+  mut .writeUStrUtf32Le(name: Str, path: List[Str], content: UStr): Void;
+  mut .writeStrUtf16Be(name: Str, path: List[Str], content: Str): Void;
+  mut .writeUStrUtf16Be(name: Str, path: List[Str], content: UStr): Void;
+  mut .writeStrUtf32Be(name: Str, path: List[Str], content: Str): Void;
+  mut .writeUStrUtf32Be(name: Str, path: List[Str], content: UStr): Void;
+  mut .writeStrAscii(name: Str, path: List[Str], content: Str): Void;
   ///A character above U+007F is written as the bytes ``recover`` gives for it.
-  mut .writeUStrAscii(name: Str, path: List[Str], content: UStr, recover: mut UnencodableRecover): mut Action[Void];
-  mut .writeStrLatin1(name: Str, path: List[Str], content: Str): mut Action[Void];
+  mut .writeUStrAscii(name: Str, path: List[Str], content: UStr, recover: mut UnencodableRecover): Void;
+  mut .writeStrLatin1(name: Str, path: List[Str], content: Str): Void;
   ///A character above U+00FF is written as the bytes ``recover`` gives for it.
-  mut .writeUStrLatin1(name: Str, path: List[Str], content: UStr, recover: mut UnencodableRecover): mut Action[Void];
-  mut .writeBytes(name: Str, path: List[Str], content: List[Byte]): mut Action[Void];
+  mut .writeUStrLatin1(name: Str, path: List[Str], content: UStr, recover: mut UnencodableRecover): Void;
+  mut .writeBytes(name: Str, path: List[Str], content: List[Byte]): Void;
   ///Writes ``content`` as a PNG image.
-  mut .writeImagePng(name: Str, path: List[Str], content: Image): mut Action[Void];
+  mut .writeImagePng(name: Str, path: List[Str], content: Image): Void;
   ///Deletes the resource at ``path``, then every folder that deleting it left empty:
   ///a zip left with no resource is deleted too.
-  mut .delete(name: Str, path: List[Str]): mut Action[Void];
+  mut .delete(name: Str, path: List[Str]): Void;
   }
 
 ///The bytes to write in place of a character that the encoding of a write does not encode.

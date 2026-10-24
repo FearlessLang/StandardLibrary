@@ -44,7 +44,6 @@ final class DataFiles{
   record Resource(Path path, List<String> steps, String entry) implements Node{}
   record Item(long time, byte[] bytes){}
   interface Op{ Object apply(String name, Path root, List<String> path) throws IOException; }
-  @SuppressWarnings("serial") static final class Refused extends RuntimeException{ Refused(String msg){ super(msg, null, false, false); } }
   private static Map<String,Path> linked(String prefix){
     var res= new TreeMap<String,Path>();
     for (var k : System.getProperties().stringPropertyNames()){
@@ -82,8 +81,7 @@ final class DataFiles{
   private static Object act(Map<String,Path> view, Object name, Object path, boolean write, Op op){
     var n= AssetBytesRead.str(name);
     var p= List$o$1Instance.asJava(path).stream().map(AssetBytesRead::str).toList();
-    try{ return ok(op.apply(n, root(view, n), p)); }
-    catch (Refused r){ return fail(r.getMessage()); }
+    try{ return op.apply(n, root(view, n), p); }
     catch (IOException e){ throw failed(n, p, write, e); }
     catch (UncheckedIOException e){ throw failed(n, p, write, e.getCause()); }
   }
@@ -94,10 +92,11 @@ final class DataFiles{
     var res= view.get(name);
     if (res != null){ return res; }
     var roots= view.isEmpty() ? " This capability has no root." : view.keySet().stream().map(n -> "\""+n+"\"").collect(Collectors.joining(", ", " Its roots are ", "."));
-    throw new Refused("\""+name+"\" is not a root of this capability."+roots);
+    throw nonDetErr("\""+name+"\" is not a root of this capability."+roots);
   }
   private static String at(String name, List<String> path){ return "path \""+String.join("/", path)+"\" of \""+name+"\""; }
-  private static Refused refused(String name, List<String> path, String why){ return new Refused("The "+at(name, path)+" "+why); }
+  private static Error refused(String name, List<String> path, String why){ return nonDetErr("The "+at(name, path)+" "+why); }
+  private static Error invalid(String name, List<String> path, String why){ return detErr("The "+at(name, path)+" is not valid: "+why); }
   private static boolean atom(String s){ return s.matches("[a-z_][a-z0-9_]*") && !reserved.contains(s); }
   private static boolean fileName(String s){
     var dot= s.indexOf('.');
@@ -107,18 +106,18 @@ final class DataFiles{
   }
   private static void folders(String name, List<String> path, List<String> folders){
     for (var s : folders){
-      if (!atom(s)){ throw refused(name, path, "is not valid: \""+s+"\" is not a valid folder name. A folder name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not \"con\", \"prn\", \"aux\", \"nul\", \"com1\" to \"com9\" or \"lpt1\" to \"lpt9\"."); }
+      if (!atom(s)){ throw invalid(name, path, "\""+s+"\" is not a valid folder name. A folder name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not \"con\", \"prn\", \"aux\", \"nul\", \"com1\" to \"com9\" or \"lpt1\" to \"lpt9\"."); }
     }
   }
   private static void resource(String name, List<String> path){
     if (path.isEmpty()){ throw refused(name, path, "names the root folder, not a resource."); }
     folders(name, path, path.subList(0, path.size()-1));
-    if (path.size() == 1 && path.getFirst().endsWith(".fearless")){ throw refused(name, path, "is not valid: the top of a data project holds no resource with the extension \"fearless\": that is the place of the marker of the project, which is not part of the data project."); }
-    if (!fileName(path.getLast())){ throw refused(name, path, "is not valid: \""+path.getLast()+"\" is not a valid resource name. A resource name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than \"zip\" (a zip is a folder); a few well known names, like \"readme\", have no extension, and a few well known extensions, like \"tar.gz\", have two parts."); }
+    if (path.size() == 1 && path.getFirst().endsWith(".fearless")){ throw invalid(name, path, "the top of a data project holds no resource with the extension \"fearless\": that is the place of the marker of the project, which is not part of the data project."); }
+    if (!fileName(path.getLast())){ throw invalid(name, path, "\""+path.getLast()+"\" is not a valid resource name. A resource name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than \"zip\" (a zip is a folder); a few well known names, like \"readme\", have no extension, and a few well known extensions, like \"tar.gz\", have two parts."); }
   }
   private static void writable(String name, List<String> path){
     resource(name, path);
-    if (String.join("/", path).length() > 200){ throw refused(name, path, "is not valid: a path is at most 200 characters long."); }
+    if (String.join("/", path).length() > 200){ throw invalid(name, path, "a path is at most 200 characters long."); }
   }
   private static Object list(String name, Path root, List<String> path) throws IOException{
     folders(name, path, path);
