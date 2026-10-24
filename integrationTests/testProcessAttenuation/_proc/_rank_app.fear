@@ -1,5 +1,6 @@
 use base.Main as Main;
 use base.SystemAttenuator as SystemAttenuator;
+use base.NoManager as NoManager;
 use base.Error as Error;
 use base.Block as Block;
 use base.Void as Void;
@@ -13,14 +14,6 @@ NoDownload: SystemAttenuator { u -> {'s
   .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
   .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoDownload#(u.iso.close); .close -> s;
-  }}
-///Every method reaches the received System, but the manager capability is revoked.
-NoManager: SystemAttenuator { u -> {'s
-  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
-  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
-  .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
-  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
-  .iso -> NoManager#(u.iso.close); .close -> s;
   }}
 ///Prints which of the download and manager capabilities it can reach.
 Child: Main { sys -> Block#
