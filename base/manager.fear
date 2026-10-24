@@ -1,6 +1,6 @@
 ///The object capability to send messages to the Fearless manager running this program.
 ///Each method sends one message, as the manager program does when started with the arguments ``FearlessCommand<Verb>``,
-///and returns once the manager has applied the message; `.run` and `.compile` return once their job ends.
+///and returns once the manager has applied the message; `.run` and `.compile` return once the mains or the compilation end.
 ///A message the manager refuses is a non deterministic error saying why, as the manager window shows it.
 ///`.quit`, `.reset` and `.terminate` of the project of this program end this program before the method returns.
 ///A program started by the portable Fearless has no manager: every method is a non deterministic error.
@@ -16,9 +16,9 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   mut .show(name: Str): Void;
   ///Registers the folder at ``path``, or the folder holding the file at ``path``, then selects it.
   mut .register(path: List[Byte]): Void;
-  ///Ends the manager and every job it runs, this program included.
+  ///Ends the manager and every main and compilation it runs, this program included.
   mut .quit: Void;
-  ///Ends the manager and every job it runs, this program included,
+  ///Ends the manager and every main and compilation it runs, this program included,
   ///removes every file association of the manager and deletes the manager folder.
   mut .reset: Void;
   ///Connects the Eclipse found from ``path``.
@@ -30,14 +30,14 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Opens the file at ``path`` with the main ``main`` of the project ``name``, one of the mains claiming its extension.
   mut .openWithOrShortcut(path: List[Byte], name: Str, main: Str): Void;
   ///Selects the project ``name`` and runs ``mains``, in the order of the mains of the project.
-  ///Returns the Output of that job, empty when no job starts.
+  ///Returns the Output of those mains, empty when no main starts.
   mut .run(name: Str, mains: List[Str]): UStr;
   ///Selects the project ``name`` and compiles it if it needs compiling.
-  ///Returns the Output of that job, empty when no job starts.
+  ///Returns the Output of that compilation, empty when no compilation starts.
   mut .compile(name: Str): UStr;
   ///Selects the project ``name`` and reports in its Output why it is invalid or out of date, or that it is neither.
   mut .check(name: Str): Void;
-  ///Selects the project ``name`` and ends its job, if any.
+  ///Selects the project ``name`` and ends the main or the compilation of the project currently running, if any.
   mut .terminate(name: Str): Void;
   ///Selects the project ``name`` and deletes its compiled cache.
   mut .deleteCache(name: Str): Void;
