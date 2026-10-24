@@ -37,6 +37,7 @@ import static _base.Scopes.*;
 
 interface Sk{
   Paint paint= new Paint().setAntiAlias(true);
+  Paint stroke= new Paint().setAntiAlias(true).setStrokeWidth(2);
   // Lookup order. The script fonts must precede Math: it has isolated Arabic
   // letters, and would win them from the Arabic font, which joins them.
   String[] fontFiles= {
@@ -158,14 +159,13 @@ interface Sk{
     c.w.clipChildren(cv);
     for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
+      if (c.w.hides(k)){ continue; }
       var kw= ((SkComponent) k).w;
       kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k));
       kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i));
       int save= cv.save();
-      if (c.w instanceof _Split s){
-        var r= s.region(k);
-        cv.clipRect(Rect.makeXYWH(r.x, r.y, r.width, r.height));
-      }
+      var r= c.w.region(k);
+      if (r != null){ cv.clipRect(Rect.makeXYWH(r.x, r.y, r.width, r.height)); }
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
       paintNode((SkComponent) k, cv);
@@ -173,6 +173,23 @@ interface Sk{
     }
     cv.restoreToCount(outer);
     c.w.skOver(cv);
+  }
+
+  static void head(Canvas cv, _Sections p, _Sections.Section s){
+    var h= s.head;
+    paint.setColor(p.fg & 0xFFFFFF | (s.expanded ? 0x40000000 : 0x18000000));
+    cv.drawRRect(RRect.makeXYWH(h.x, h.y, h.width, h.height, 4), paint);
+    stroke.setColor(p.fg & 0xFFFFFF | 0xA0000000);
+    float y= h.y + h.height / 2f;
+    if (!p.tabs){
+      float x= h.x + _Sections.mark / 2f;
+      if (s.expanded){ cv.drawLine(x - 4, y - 2, x, y + 2, stroke); cv.drawLine(x, y + 2, x + 4, y - 2, stroke); }
+      else{ cv.drawLine(x - 2, y - 4, x + 2, y, stroke); cv.drawLine(x + 2, y, x - 2, y + 4, stroke); }
+    }
+    if (p.onClose == null){ return; }
+    float x= h.x + h.width - _Sections.mark / 2f;
+    cv.drawLine(x - 3, y - 3, x + 3, y + 3, stroke);
+    cv.drawLine(x - 3, y + 3, x + 3, y - 3, stroke);
   }
 
   static void bar(Canvas cv, AWidget p, boolean vert){
@@ -234,7 +251,8 @@ interface Sk{
   }
 
   static String boundsClip(SkComponent c, Component k){
-    if (c.w instanceof _Split s){ return regionClip(s, k); }
+    var r= c.w.region(k);
+    if (r != null){ return regionClip(c.w, k, r); }
     boolean scrollsX= c.w.barBottom();
     boolean scrollsY= c.w.barRight();
     boolean insideX= scrollsX || k.getX() >= 0 && k.getX() + k.getWidth() <= c.getWidth();
@@ -244,12 +262,11 @@ interface Sk{
     return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped";
   }
 
-  static String regionClip(_Split s, Component k){
-    var r= s.region(k);
+  static String regionClip(AWidget s, Component k, java.awt.Rectangle r){
     boolean inside= k.getX() >= r.x && k.getY() >= r.y && k.getX() + k.getWidth() <= r.x + r.width && k.getY() + k.getHeight() <= r.y + r.height;
     if (inside){ return null; }
-    var which= k == s.side(BorderLayout.LINE_START) ? "first" : "second";
-    return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in the " + which + " region of its parent, " + s.describe() + ": that region is " + r.width + "x" + r.height + " at (" + r.x + ", " + r.y + "), and the part outside it is clipped";
+    var which= !(s instanceof _Split p) ? "content area" : k == p.side(BorderLayout.LINE_START) ? "first region" : "second region";
+    return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in the " + which + " of its parent, " + s.describe() + ": the " + which + " is " + r.width + "x" + r.height + " at (" + r.x + ", " + r.y + "), and the part outside it is clipped";
   }
 
   static String overlap(SkComponent c, int i){

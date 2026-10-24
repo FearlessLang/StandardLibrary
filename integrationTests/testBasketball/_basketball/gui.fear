@@ -10,14 +10,14 @@ Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  h
       }
     .modelFps(30, {:: .action { model!.tick } })
     .virtualPixelSpace(Width#width, Height#height)
-    .content {::
+    .content {::.pane{::
       .save canvas 
       .paint Menu
       .mouse {:: .clicked { x, y, _, w, h -> Block# 
         .if { MenuBounds#(w, h).contains(x, y) }
           .do { model!.play }
         .done
-        }}};
+        }}}};
     mut .set(p: Painter): Void -> Block#(canvas!.paint(p), Void);
     }}
 

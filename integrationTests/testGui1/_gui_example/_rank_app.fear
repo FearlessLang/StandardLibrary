@@ -12,6 +12,7 @@ use base.Slot as Slot;
 use base.Slots as Slots;
 use base.Pane as Pane;
 use base.True as True;
+use base.False as False;
 use base.WidthNat as Width;
 use base.HeightNat as Height;
 use base.XInt as X;
@@ -40,18 +41,20 @@ Foo:base.Main{s->Block#
   .do{ g.run Gui16 }
   .do{ g.run Gui17 }
   .do{ g.run Gui18 }
+  .do{ g.run Gui19 }
+  .do{ g.run Gui20 }
   .done
   }
 Gui01:Consumer[mut Frame]{::
   .title "Gui01: two labels"
-  .content{::
+  .content{::.pane{::
     .label{:: .text "Hello" }
     .label{:: .text "World" }
-    }
+    }}
   }
 Gui02:Consumer[mut Frame]{::
   .title "Gui02: many labels in flow"
-  .content{::
+  .content{::.pane{::
     .label{:: .text "One" }
     .label{:: .text "Two" }
     .label{:: .text "Three" }
@@ -62,12 +65,12 @@ Gui02:Consumer[mut Frame]{::
     .label{:: .text "Eight" }
     .label{:: .text "Nine" }
     .label{:: .text "Ten" }
-    }
+    }}
   }
 
 Gui03:Consumer[mut Frame]{::
   .title "Gui03: nested panes with colors"
-  .content{::
+  .content{::.pane{::
     .background (Color.ghostWhite)
     .pane{::
       .background (Color.rubberDuck)
@@ -82,45 +85,45 @@ Gui03:Consumer[mut Frame]{::
       .label{:: .text "row 2 / right".foreground (Color.ghostWhite) }
       .pack
       }
-    }
+    }}
   }
 
 Gui04:Consumer[mut Frame]{::
   .title "Gui04: border layout with colors"
   .virtualPixelSpace(Width#184, Height#150)
-  .contentB{::
+  .content{::.border{::
     .background (Color.ghostWhite)
-    .north{:: .fill
+    .north{::.pane{:: .fill
       .background (Color.rubberDuck)
-      .label{:: .text "north" } }
-    .west{:: .fill
+      .label{:: .text "north" } }}
+    .west{::.pane{:: .fill
       .background (Color.goblinGreen)
-      .label{:: .text "west" } }
-    .center{:: .fill
+      .label{:: .text "west" } }}
+    .center{::.pane{:: .fill
       .background (Color.sleepyBlue)
-      .label{:: .text "center".foreground (Color.ghostWhite) } }
-    .east{:: .fill
+      .label{:: .text "center".foreground (Color.ghostWhite) } }}
+    .east{::.pane{:: .fill
       .background (Color.lavaOrange)
-      .label{:: .text "east" } }
-    .south{:: .fill
+      .label{:: .text "east" } }}
+    .south{::.pane{:: .fill
       .background (Color.wizardPurple)
-      .label{:: .text "south".foreground (Color.ghostWhite) } }
-    }
+      .label{:: .text "south".foreground (Color.ghostWhite) } }}
+    }}
   }
 
 
 Gui05:Consumer[mut Frame]{::
   .title "Gui05: buttons"
-  .content{::
+  .content{::.pane{::
     .label{:: .text "Clicking buttons should not crash" }
     .button{:: .text "button A".action{Debug#"Button A Pressed" } }
     .button{:: .text "button B".action{Debug#"Button B Pressed" } }
     .button{:: .text "button C".action{Debug#"Button C Pressed" } }
-    }
+    }}
   }
 Gui06:Consumer[mut Frame]{::
   .title "Gui06: mouse handlers"
-  .content{::
+  .content{::.pane{::
     .background (Color.ghostWhite)
     .label{:: .text "Move/click inside the window, then close" }
     .pane{::
@@ -137,7 +140,7 @@ Gui06:Consumer[mut Frame]{::
         .exited{ _, _, _, _, _ -> Debug#"mouse exited" }
         }
       }
-    }
+    }}
   }
 
 Gui07:Consumer[mut Frame]{::
@@ -168,19 +171,19 @@ Gui07:Consumer[mut Frame]{::
       .doOnly{ e-> Debug#"pressed RIGHT" }
       }
     }
-  .content{::
+  .content{::.pane{::
     .background (Color.ghostWhite)
     .label{:: .text "Press A, SPACE, ENTER, LEFT, RIGHT" }
     .label{:: .text "Then click the button and try the keys again" }
     .button{:: .text "click me".action{Debug#"button clicked"} }
-    }
+    }}
   }
 
 Gui08:Consumer[mut Frame]{
   mut .slot: mut Slot[mut Label];
   ::
   .title "Gui08: button mutates label"
-  .content{::
+  .content{::.pane{::
     .background (Color.ghostWhite)
    .label{::
       .text "Hello"
@@ -196,12 +199,12 @@ Gui08:Consumer[mut Frame]{
         Block#(this.slot!.text ((this.slot!.text) + "!"),Void)
         }
       }
-    }
+    }}
   }
 
 Gui09:Consumer[mut Frame]{::
   .uTitle ("Gui09: unicode text ".u "1F30D")
-  .content{::
+  .content{::.pane{::
     .background (Color.ghostWhite)
     .label{:: .uText ("Latin caf".u "00E9 0020 00DF 0020 0141 00F3 0064 017A 0020 0391 03B8 03AE 03BD 03B1 0020 041C 043E 0441 043A 0432 0430") }
     .label{:: .uText ("".u "0645 0631 062D 0628 0627 0020 05E9 05DC 05D5 05DD 0020 0928 092E 0938 094D 0924 0947 0020 0E2A 0E27 0E31 0E2A 0E14 0E35") }
@@ -210,13 +213,13 @@ Gui09:Consumer[mut Frame]{::
     .label{:: .uText ("".u "1F600 0020 2764 FE0F 0020 1F468 200D 1F469 200D 1F467 0020 1F1F3 1F1FF 0020 1F44D 1F3FD").textHeight 32 }
     .label{:: .uText ("".u "1781 17D2 1789 17BB 17C6 0020 1019 103C 1014 103A 1019 102C 0020 0C95 0CA8 0CCD 0CA8 0CA1 0020 0628 0650 0633 0652 0645 0650").textHeight 32 .aboveBaseline(+1.25) .belowBaseline(0.75) .background (Color.rubberDuck) }
     .button{:: .uText ("Press ".u "1F680").action{Debug#"rocket pressed"} }
-    }
+    }}
   }
 
 Gui10:Consumer[mut Frame]{::
   .title "Gui10: nested pane wraps"
   .virtualPixelSpace(Width#200, Height#150)
-  .content{::
+  .content{::.pane{::
     .pane{::
       .fill .height 78
       .background (Color.rubberDuck)
@@ -225,35 +228,35 @@ Gui10:Consumer[mut Frame]{::
       .button{:: .text "Export as image".action{Debug#"Export as image pressed"} }
       .button{:: .text "Quit".action{Debug#"Quit pressed"} }
       }
-    }
+    }}
   }
 
 Gui11:Consumer[mut Frame]{f -> f
   .title "Gui11: north border wraps when narrowed"
   .virtualPixelSpace(Width#400, Height#300)
   .onResize{r -> Block#(f.virtualPixelSpace(Width#((+300.0 * (r.aspectRatio)).softRound.getNat), Height#300), Void)}
-  .contentB{::
+  .content{::.border{::
     .background (Color.ghostWhite)
-    .northB{:: .fill
+    .north{::.border{:: .fill
       .background (Color.rubberDuck)
-      .center{:: .fill
+      .center{::.pane{:: .fill
         .button{:: .text "Open file".action{Debug#"Open file pressed"} }
         .button{:: .text "Save file".action{Debug#"Save file pressed"} }
         .button{:: .text "Export as image".action{Debug#"Export as image pressed"} }
         .button{:: .text "Quit".action{Debug#"Quit pressed"} }
-        }
-      }
-    .center{:: .fill
+        }}
+      }}
+    .center{::.pane{:: .fill
       .background (Color.sleepyBlue)
       .label{:: .text "Narrow the window".foreground (Color.ghostWhite) }
-      }
-    }
+      }}
+    }}
   }
 
 Gui12:Consumer[mut Frame]{::
   .title "Gui12: sizes and drawing beyond any screen"
   .virtualPixelSpace(Width#400, Height#300)
-  .content{::
+  .content{::.pane{::
     .paint{g -> g
       .color(Color.sleepyBlue)
       .position(X.origin, Y.origin)
@@ -266,14 +269,14 @@ Gui12:Consumer[mut Frame]{::
       }
     .label{:: .text "Blue fills the window at any size" .foreground(Color.ghostWhite) }
     .pane{:: .width 5000 .height 30 .background(Color.dangerTomato) }
-    }
+    }}
   }
 
 Gui13:Consumer[mut Frame]{f -> f
   .title "Gui13: a grid of tiles wraps and scrolls down"
   .virtualPixelSpace(Width#400, Height#300)
   .onResize{r -> Block#(f.virtualPixelSpace(Width#((+300.0 * (r.aspectRatio)).softRound.getNat), Height#300), Void)}
-  .content{::
+  .content{::.pane{::
     .background (Color.ghostWhite)
     .stackScroll(True)
     .button{:: .text "Tile 1" }
@@ -336,7 +339,7 @@ Gui13:Consumer[mut Frame]{f -> f
     .button{:: .text "Tile 58" }
     .button{:: .text "Tile 59" }
     .button{:: .text "Tile 60" }
-    }
+    }}
   }
 
 Gui14:Consumer[mut Frame]{
@@ -344,10 +347,10 @@ Gui14:Consumer[mut Frame]{
   ::
   .title "Gui14: a log in the center of a Border"
   .virtualPixelSpace(Width#400, Height#300)
-  .contentB{::
+  .content{::.border{::
     .background (Color.ghostWhite)
-    .north{:: .fill .background (Color.rubberDuck) .label{:: .text "The button adds a line at the end" } }
-    .center{:: .fill .maxPerLine 1 .stackScroll(True) .background (Color.alienMint) .save (this.log)
+    .north{::.pane{:: .fill .background (Color.rubberDuck) .label{:: .text "The button adds a line at the end" } }}
+    .center{::.pane{:: .fill .maxPerLine 1 .stackScroll(True) .background (Color.alienMint) .save (this.log)
       .label{:: .text "line 1: short" }
       .label{:: .text "line 2: short" }
       .label{:: .text "line 3: a longer line of the log" }
@@ -388,17 +391,17 @@ Gui14:Consumer[mut Frame]{
       .label{:: .text "line 38: short" }
       .label{:: .text "line 39: a longer line of the log" }
       .label{:: .text "line 40: short" }
-      }
-    .south{:: .fill .button{:: .text "Add a line" .action{Block#(this.log!.label{:: .text "a new line" }, Void)} } }
-    }
+      }}
+    .south{::.pane{:: .fill .button{:: .text "Add a line" .action{Block#(this.log!.label{:: .text "a new line" }, Void)} } }}
+    }}
   }
 
 Gui15:Consumer[mut Frame]{::
   .title "Gui15: a strip of chips scrolls sideways"
   .virtualPixelSpace(Width#400, Height#300)
-  .contentB{::
+  .content{::.border{::
     .background (Color.ghostWhite)
-    .north{:: .fill .minPerLine 1000 .lineScroll(True) .background (Color.rubberDuck)
+    .north{::.pane{:: .fill .minPerLine 1000 .lineScroll(True) .background (Color.rubberDuck)
       .button{:: .text "chip 1" }
       .button{:: .text "chip 2" }
       .button{:: .text "chip 3" }
@@ -424,15 +427,15 @@ Gui15:Consumer[mut Frame]{::
       .button{:: .text "chip 23" }
       .button{:: .text "chip 24" }
       .button{:: .text "chip 25" }
-      }
-    .center{:: .fill .label{:: .text "Scroll the strip with shift and the wheel, or drag its bar" } }
-    }
+      }}
+    .center{::.pane{:: .fill .label{:: .text "Scroll the strip with shift and the wheel, or drag its bar" } }}
+    }}
   }
 
 Gui16:Consumer[mut Frame]{::
   .title "Gui16: a big canvas scrolls both ways"
   .virtualPixelSpace(Width#400, Height#300)
-  .content{::
+  .content{::.pane{::
     .lineScroll(True) .stackScroll(True)
     .pane{:: .width 1460 .height 1220 .background (Color.deepNapBlue) .paint{g -> g
       .color (Color.rubberDuck)
@@ -526,13 +529,13 @@ Gui16:Consumer[mut Frame]{::
       .position(X#(+1240), Y#(+1000))
       .oval(Width#120, Height#120)
       }}
-    }
+    }}
   }
 
 Gui17:Consumer[mut Frame]{::
   .title "Gui17: lists inside a list"
   .virtualPixelSpace(Width#400, Height#300)
-  .content{::
+  .content{::.pane{::
     .background (Color.ghostWhite)
     .maxPerLine 1 .stackScroll(True)
     .label{:: .text "outer line 1" }
@@ -588,17 +591,17 @@ Gui17:Consumer[mut Frame]{::
     .label{:: .text "outer line 17" }
     .label{:: .text "outer line 18" }
     .label{:: .text "outer line 19" }
-    }
+    }}
   }
 
 Gui18:Consumer[mut Frame]{::
   .title "Gui18: drag the dividers"
   .virtualPixelSpace(Width#600, Height#400)
-  .contentB{::
+  .content{::.border{::
     .background (Color.ghostWhite)
-    .north{:: .fill .background (Color.rubberDuck) .label{:: .text "Drag the dividers" } }
-    .centerS{:: .fill .dividerPosition 200
-      .first{:: .fill .width 120 .maxPerLine 1 .stackScroll(True) .background (Color.alienMint)
+    .north{::.pane{:: .fill .background (Color.rubberDuck) .label{:: .text "Drag the dividers" } }}
+    .center{::.split{:: .fill .dividerPosition 200
+      .first{::.pane{:: .fill .width 120 .maxPerLine 1 .stackScroll(True) .background (Color.alienMint)
         .button{:: .text "Tile 1" }
         .button{:: .text "Tile 2" }
         .button{:: .text "Tile 3" }
@@ -609,11 +612,44 @@ Gui18:Consumer[mut Frame]{::
         .button{:: .text "Tile 8" }
         .button{:: .text "Tile 9" }
         .button{:: .text "Tile 10" }
-        }
-      .secondS{:: .fill .vertical .dividerPosition 150
-        .first{:: .fill .width 200 .background (Color.moonCheese) .label{:: .text "The data of the selected tile" } }
-        .second{:: .fill .width 200 .background (Color.dustyRose) .label{:: .text "The output of the selected tile" } }
-        }
-      }
-    }
+        }}
+      .second{::.split{:: .fill .vertical .dividerPosition 150
+        .first{::.pane{:: .fill .width 200 .background (Color.moonCheese) .label{:: .text "The data of the selected tile" } }}
+        .second{::.pane{:: .fill .width 200 .background (Color.dustyRose) .label{:: .text "The output of the selected tile" } }}
+        }}
+      }}
+    }}
+  }
+Gui19:Consumer[mut Frame]{::
+  .title "Gui19: tabs, the x asks to close a tab"
+  .virtualPixelSpace(Width#600, Height#400)
+  .content{::.border{::
+    .background (Color.ghostWhite)
+    .center{::.sections{:: .fill .tabs .onClose{s, n -> Block#(s.remove n, Void)}
+      .section{:: .title{::.label{:: .text "readme.txt" }} .content{::.pane{:: .fill .background (Color.moonCheese) .label{:: .text "Click a tab to expand it, click it again to collapse it" }}}}
+      .section{:: .title{::.label{:: .text "main.fear" }} .content{::.pane{:: .fill .background (Color.alienMint) .textArea{:: .width 400 .height 200 .text "A text area keeps its text while its tab is collapsed" }}}}
+      .section{:: .title{::.label{:: .text "notes" }} .content{::.pane{:: .fill .background (Color.dustyRose) .label{:: .text "With every tab closed, the space below the row is empty" }}}}
+      .expand 0
+      }}
+    }}
+  }
+Gui20:Consumer[mut Frame]{::
+  .title "Gui20: sections in a column, more than one expanded"
+  .virtualPixelSpace(Width#600, Height#400)
+  .content{::.border{::
+    .background (Color.ghostWhite)
+    .center{::.split{:: .fill .dividerPosition 140
+      .first{::.pane{:: .fill .maxPerLine 1 .stackScroll(True) .background (Color.alienMint)
+        .button{:: .text "Tile 1" }
+        .button{:: .text "Tile 2" }
+        }}
+      .second{::.sections{:: .fill .autoCollapse(False) .scroll(True)
+        .section{:: .title{::.pane{:: .label{:: .text "Output" } .button{:: .text "Clear" } .pack}} .content{::.pane{:: .textArea{:: .width 400 .height 150 .text "The button in the title has no action: a click on it expands or collapses Output" }}}}
+        .section{:: .title{::.label{:: .text "Extensions" }} .content{::.pane{:: .maxPerLine 1 .label{:: .text "extension a" } .label{:: .text "extension b" } .pack}}}
+        .section{:: .title{::.pane{:: .tooltip "The links of this project" .label{:: .text "Links" }}} .content{::.pane{:: .maxPerLine 1 .textField{:: .width 300 .height 30 .text "link one" } .textField{:: .width 300 .height 30 .text "link two" } .pack}}}
+        .section{:: .title{::.label{:: .text "Logs" }} .content{::.pane{:: .maxPerLine 1 .label{:: .text "log 1" } .label{:: .text "log 2" } .label{:: .text "log 3" } .pack}}}
+        .expand 0 .expand 1
+        }}
+      }}
+    }}
   }

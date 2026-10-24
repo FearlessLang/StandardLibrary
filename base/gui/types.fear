@@ -248,21 +248,11 @@ _Container[S]:Widget[S]{
   }
 Border:_Container[Border]{
   .self->this;
-  mut .north(mut Scope[Pane]):mut Border;
-  mut .south(mut Scope[Pane]):mut Border;
-  mut .east(mut Scope[Pane]):mut Border;
-  mut .west(mut Scope[Pane]):mut Border;
-  mut .center(mut Scope[Pane]):mut Border;
-  mut .northB(mut Scope[Border]):mut Border;
-  mut .southB(mut Scope[Border]):mut Border;
-  mut .eastB(mut Scope[Border]):mut Border;
-  mut .westB(mut Scope[Border]):mut Border;
-  mut .centerB(mut Scope[Border]):mut Border;
-  mut .northS(mut Scope[Split]):mut Border;
-  mut .southS(mut Scope[Split]):mut Border;
-  mut .eastS(mut Scope[Split]):mut Border;
-  mut .westS(mut Scope[Split]):mut Border;
-  mut .centerS(mut Scope[Split]):mut Border;
+  mut .north(mut Consumer[mut Adder]):mut Border;
+  mut .south(mut Consumer[mut Adder]):mut Border;
+  mut .east(mut Consumer[mut Adder]):mut Border;
+  mut .west(mut Consumer[mut Adder]):mut Border;
+  mut .center(mut Consumer[mut Adder]):mut Border;
   }
 Split:Widget[Split]{
   .self->this;
@@ -274,13 +264,45 @@ Split:Widget[Split]{
   read .draggable: Bool;
   mut .mouse(mut Scope[Mouse]):mut Split;
   mut .paint(Painter):mut Split;
-  mut .first(mut Scope[Pane]):mut Split;
-  mut .firstB(mut Scope[Border]):mut Split;
-  mut .firstS(mut Scope[Split]):mut Split;
-  mut .second(mut Scope[Pane]):mut Split;
-  mut .secondB(mut Scope[Border]):mut Split;
-  mut .secondS(mut Scope[Split]):mut Split;
+  mut .first(mut Consumer[mut Adder]):mut Split;
+  mut .second(mut Consumer[mut Adder]):mut Split;
   }
+///A list of sections. A section has a title and a content, each a region holding one widget.
+///The title is always shown; a click on the title expands or collapses the section.
+///The content shows only while the section is expanded. A collapsed content keeps its widgets and their state, and the program can change them.
+///A section is named by its index, its position in the list from 0; an index that is not below ``.size`` is a deterministic error.
+///A new section starts collapsed. Calls of the program never run ``.onToggle`` or ``.onClose``: those run only for clicks of the user.
+///``.column`` (the default) shows each title above its content, one section under the other.
+///``.tabs`` shows the titles in one row, and the content of the expanded section in the space below the row.
+Sections:_Container[Sections]{
+  .self->this;
+  ///Adds a section at the end when the scope returns: ``.section{:: .title{::.label{:: .text "Logs"}} .content{::.pane{:: ...}}}``.
+  ///``.section`` introduces the title and the content of the section: one of them still empty when the scope returns is a deterministic error.
+  mut .section(mut Scope[Section]): mut Sections;
+  mut .column: mut Sections;
+  ///A deterministic error when ``.autoCollapse`` is False: a row of tabs shows one content at a time.
+  mut .tabs: mut Sections;
+  ///True (the default): expanding a section collapses the expanded one, so at most one section is expanded.
+  ///Setting it to True keeps expanded only the first expanded section.
+  ///False with ``.tabs`` is a deterministic error.
+  mut .autoCollapse(Bool): mut Sections;
+  ///True shows a vertical scroll bar, as ``Pane.stackScroll``: the column of titles and expanded contents scrolls when it is taller than the Sections.
+  mut .scroll(Bool): mut Sections;
+  mut .expand(index: Nat): mut Sections;
+  mut .collapse(index: Nat): mut Sections;
+  mut .remove(index: Nat): mut Sections;
+  ///Runs after a click of the user on a title expanded or collapsed its section, with the index of that section.
+  mut .onToggle(mut SectionHandler): mut Sections;
+  ///Shows an x at the end of every title: a click on the x runs the handler with the index of the section, and the section stays until the program removes it.
+  mut .onClose(mut SectionHandler): mut Sections;
+  read .size: Nat;
+  read .isExpanded(index: Nat): Bool;
+  }
+Section:{
+  mut .title(mut Consumer[mut Adder]): mut Section;
+  mut .content(mut Consumer[mut Adder]): mut Section;
+  }
+SectionHandler:{ mut #(sections: mut Sections, index: Nat): Void; }
 _Caption[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
   mut .uText(UStr):mut S;
@@ -325,8 +347,7 @@ Frame:_Styled[Frame]{ .self->this;
   read .fps: Nat;
   read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
-  mut .content(s: mut Scope[Pane]): Void;
-  mut .contentB(s: mut Scope[Border]): Void;
+  mut .content(s: mut Consumer[mut Adder]): Void;
   mut .onKey(mut Scope[Keys]): mut Frame;
   }
 ResizeRequest:ScreenContext{ .aspectRatio: Float; }
@@ -484,6 +505,7 @@ Pane:_Container[Pane]{
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
   mut .split(mut Scope[Split]):mut Pane;
+  mut .sections(mut Scope[Sections]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
   mut .picture(mut Scope[Picture]):mut Pane;
@@ -511,6 +533,20 @@ Pane:_Container[Pane]{
   //the stack of lines across it, and each child across its line.
   //.centered(False) places them all at the start: the left and the top.
   mut .centered(Bool): mut Pane;
+  }
+
+///A region holds one child: the five regions of a Border, the two of a Split, the content of a Frame, the title and the content of a section.
+///The scope of a region calls exactly one method of its Adder: an Adder not used when the method that introduced it returns, and an Adder used again, are deterministic errors naming the region.
+Adder:{
+  mut .pane(mut Scope[Pane]): Void;
+  mut .border(mut Scope[Border]): Void;
+  mut .split(mut Scope[Split]): Void;
+  mut .sections(mut Scope[Sections]): Void;
+  mut .button(mut Scope[Button]): Void;
+  mut .label(mut Scope[Label]): Void;
+  mut .picture(mut Scope[Picture]): Void;
+  mut .textField(mut Scope[TextField]): Void;
+  mut .textArea(mut Scope[TextArea]): Void;
   }
 
 Scope[T]: { mut .run(mut T): mut T; }
