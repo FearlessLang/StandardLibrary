@@ -47,7 +47,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     ((Scope$1c$1) scope).mut$run$1(c);
     return c;
   }
-  void add(AWidget title, AWidget c){
+  Object add(AWidget title, AWidget c){
     frame.onEdtAndWait(() -> {
       change();
       var s= new Section(title, c);
@@ -61,6 +61,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       c.changeable = false;
     });
     frame.markLayoutDirty();
+    return this;
   }
   int lead(){ return tabs ? 0 : mark + widthGap; }
   int trail(){ return onClose == null ? 0 : widthGap + mark; }
@@ -179,28 +180,8 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     s.expanded = expanded;
     if (!expanded){ frame.mouse.detached(s.content.component); }
   }
-  @Override public Object mut$section$1(Object scope){
-    var b= new _Section();
-    ((Scope$1c$1) scope).mut$run$1(b);
-    if (b.title == null){ throw Util.detErr("The title of the section is empty: the scope of .section returned without .title"); }
-    if (b.content == null){ throw Util.detErr("The content of the section is empty: the scope of .section returned without .content"); }
-    add(b.title, b.content);
-    return this;
-  }
-  final class _Section implements Section$5c$0{
-    AWidget title;
-    AWidget content;
-    @Override public Object mut$title$1(Object s){
-      if (title != null){ throw Util.detErr("The title of the section is already filled: .title is called again"); }
-      _Adder.fill("title of a section", s, (sc, make) -> title = build(sc, make));
-      return this;
-    }
-    @Override public Object mut$content$1(Object s){
-      if (content != null){ throw Util.detErr("The content of the section is already filled: .content is called again"); }
-      _Adder.fill("content of a section", s, (sc, make) -> content = build(sc, make));
-      return this;
-    }
-  }
+  @Override public Object mut$section$0(){ return new _RegionFiller(frame, (s, make) -> titled(build(s, make))); }
+  Object titled(AWidget title){ return _RegionFiller.and(frame, (s, make) -> add(title, build(s, make))); }
   @Override public Object mut$column$0(){ return reStyle(() -> tabs = false); }
   @Override public Object mut$tabs$0(){
     return reStyle(() -> {

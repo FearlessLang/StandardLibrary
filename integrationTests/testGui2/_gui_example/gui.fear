@@ -7,12 +7,12 @@ Gui:Consumer[mut Frame]{::
   .modelFps (1, {::
     .action{Debug#"tick done"}
     })
-  .content{::.border{::
+  .content.border{::
     .background(Color.ghostWhite)
-    .north{::.pane(mut ShapeHeader)}
-    .center{::.pane{:: .style(ShapeCanvas) .save(this.canvas)}}//how to avoid bad errors for () instead of {}
-    .south{::.pane(mut ShapeButtons{this.model})}
-    }};
+    .north.pane(mut ShapeHeader)
+    .center.pane{:: .style(ShapeCanvas) .save(this.canvas)}//how to avoid bad errors for () instead of {}
+    .south.pane(mut ShapeButtons{this.model})
+    };
 
   mut .frame: mut Slot[mut Frame];
   mut .canvas: mut Slot[mut Pane];

@@ -2,11 +2,11 @@ GuiFrameTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
     .do{Block#(f.modelFps(100, {:: .action{Error.msg(root!.background.str + " " + (root!.radius.str))}}), Void)}
-    .return{f.virtualPixelSpace(Width#300, Height#80).content{::.pane{::
+    .return{f.virtualPixelSpace(Width#300, Height#80).content.pane{::
       .radius 20
       .background(Color#(Red#(200.getByte), Green#(0.getByte), Blue#(0.getByte), Alpha#(128.getByte)))
       .save root
-      }}}
+      }}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == (Color#(Red#(200.getByte), Green#(0.getByte), Blue#(0.getByte), Alpha#(128.getByte)).str + " 20")}}.assertTrue{i};
@@ -17,19 +17,19 @@ GuiFrameTests: Test {::
     .do{Block#(f.modelFps(100, {:: .action{Block#
       .if{swapped.get} .do{Error.msg(root!.background.str + " " + (root!.radius.str))}
       .do{swapped.set True}
-      .return{f.content{::.pane{:: .save root}}}
+      .return{f.content.pane{:: .save root}}
       }}), Void)}
-    .return{f.virtualPixelSpace(Width#300, Height#80).content{::.pane{::}}}
+    .return{f.virtualPixelSpace(Width#300, Height#80).content.pane{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == (Color.transparent.str + " 12")}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> (g.elapsed >= (Instant.origin + (Duration.milliSeconds 300))).if{
       .then -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str));
       .else -> g
       }}
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300] Height[80]"}}.assertTrue{i};
       }}
@@ -44,58 +44,58 @@ GuiFrameTests: Test {::
       .let[Str] virtual = {f.virtualWidth.str + " " + (f.virtualHeight.str)}
       .return{Block#(root!.paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str) + " " + virtual)}, Void)}
       }}), Void)}
-    .return{f.virtualPixelSpace(Width#300, Height#80).content{::.pane{:: .save root}}}
+    .return{f.virtualPixelSpace(Width#300, Height#80).content.pane{:: .save root}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[200] Height[100] Width[200] Height[100]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startFullScreen.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startFullScreen.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> (g.elapsed >= (Instant.origin + (Duration.milliSeconds 300))).if{
       .then -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str));
       .else -> g
       }}
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300] Height[80]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startUndecorated(+0.25).run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startUndecorated(+0.25).run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> (g.elapsed >= (Instant.origin + (Duration.milliSeconds 300))).if{
       .then -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str));
       .else -> g
       }}
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300] Height[80]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startMaximised.run{f -> f.virtualPixelSpace(Width#300, Height#80).content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startMaximised.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> (g.elapsed >= (Instant.origin + (Duration.milliSeconds 300))).if{
       .then -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str));
       .else -> g
       }}
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300] Height[80]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
-    .return{f.content{::.pane{::}}}
+    .return{f.content.pane{::}}
     }}).run{
       .ok _ -> Void;
       .info i -> Error.msg "Frame.close stopped the Gui with an error";
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startAsWindow(+1.5).run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startAsWindow(+1.5).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "An initial area over 1.0 always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.startAsWindow(1.5) is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startUndecorated(+0.0078125).run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startUndecorated(+0.0078125).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "An initial area under the min area always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.startUndecorated(0.0078125) is less than Gui.minArea(0.02) of this Gui: the picture always covers at least minArea of the screen area, so the window can not open covering only 0.0078125 of it. Lower Gui.minArea first"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.minArea(0.0).run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.minArea(0.0).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A min area of 0.0 always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.minArea(0.0) is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.minArea(+0.5).run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.minArea(+0.5).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A min area over the initial area always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.minArea(0.5) is more than the initial area 0.3 of this Gui: the picture always covers at least minArea of the screen area, so the window could not open covering only 0.3 of it. Raise the initial area with Gui.startAsWindow or Gui.startUndecorated first"}}.assertTrue{i};
       }}
@@ -103,11 +103,11 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A full screen start leaves minArea free"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name "  " .run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name "  " .run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A blank name always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "  ".u is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 2007 202F 200B 2060 0007").run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 2007 202F 200B 2060 0007").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A name made only of invisible characters always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "".u"00A0 2007 202F 200B 2060 0007" is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
       }}
@@ -115,35 +115,35 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A visible character among invisible ones makes a name"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name("a" | "b").run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name("a" | "b").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A newline in the name always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this Gui has a line break (U+000A) at offset 1: the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("ab".u "2028").run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("ab".u "2028").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A line separator in the name always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this Gui has a line break (U+2028) at offset 2: the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.title("a" | "b").content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.title("a" | "b").content.pane{::}}}).run{
       .ok _ -> Error.msg "A newline in the title always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The new title of this Frame has a line break (U+000A) at offset 1: the title bar shows the title on one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.uTitle("abc".u "0085").content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.uTitle("abc".u "0085").content.pane{::}}}).run{
       .ok _ -> Error.msg "A next line character in the title always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The new title of this Frame has a line break (U+0085) at offset 3: the title bar shows the title on one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"F11").run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"F11").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A close key equal to the full screen key always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(F11) is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(Key#"SEPARATOR").closeKey(Key#"SEPARATER").run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(Key#"SEPARATOR").closeKey(Key#"SEPARATER").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A close key naming the key of the full screen key always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(SEPARATER) is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"SEPARATER").fullScreenKey(Key#"SEPARATOR").run{f -> f.content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"SEPARATER").fullScreenKey(Key#"SEPARATOR").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A full screen key naming the key of the close key always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.fullScreenKey(SEPARATOR) is the close key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.closeKey first"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.opacityFloor(Alpha#(100.getByte)).run{f -> f.opacity(Alpha#(50.getByte)).content{::.pane{::}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.opacityFloor(Alpha#(100.getByte)).run{f -> f.opacity(Alpha#(50.getByte)).content.pane{::}}}).run{
       .ok _ -> Error.msg "An opacity below the floor always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Frame.opacity(Alpha[50]) is below the opacity floor Alpha[100] of this Gui: the window can not be more transparent than Gui.opacityFloor allows"}}.assertTrue{i};
       }}
@@ -151,11 +151,7 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "A min area over the initial area of the old Gui always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.minArea(0.375) is more than the initial area 0.3 of this Gui: the picture always covers at least minArea of the screen area, so the window could not open covering only 0.3 of it. Raise the initial area with Gui.startAsWindow or Gui.startUndecorated first"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#(f.title "no content", Void)}}).run{
-      .ok _ -> Error.msg "A Frame without content always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame has no content, so there is nothing to show: call .content{::.pane{...}} or .content{::.border{...}} on it before the consumer given to Gui.run returns"}}.assertTrue{i};
-      }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedFrame#(s.gui).content{::.pane{:: .label{:: .text "b"}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedFrame#(s.gui).content.pane{:: .label{:: .text "b"}}}).run{
       .ok _ -> Error.msg "A new content of a closed window always fails";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
       }}
@@ -177,7 +173,7 @@ ClosedFrame: {#(gui: mut base.Gui): mut Frame -> Block#
   .do{gui.run{f -> Block#
     .do{kept.fill f}
     .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
-    .return{f.content{::.pane{::}}}
+    .return{f.content.pane{::}}
     }}
   .return{kept!}
   }

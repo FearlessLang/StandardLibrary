@@ -41,15 +41,15 @@ TileGrid:Main{sys -> Block#
   .return{sys.gui.name "Tiles" .run{f -> Block#(f
     .save frame
     .virtualPixelSpace(Width#660, Height#420)
-    .content{::.border{::
+    .content.border{::
       .background(Color.ghostWhite)
-      .north{::.pane{:: .fill
+      .north.pane{:: .fill
         .button{b -> b .text "Manager" .action{b.openMenu{mm -> m.managerMenu mm}}}
         .button{b -> b .text "Run" .action{b.openMenu{mm -> m.runMenu mm}}}
         .label{:: .text "Click a tile to select it, double click a compiled one to run it, right click it for its menu" .save status}
-        }}
-      .center{::.pane{:: .fill .centered(False) .stackScroll(True) .widthGap 0 .heightGap 0 .save grid}}
-      }},
+        }
+      .center.pane{:: .fill .centered(False) .stackScroll(True) .widthGap 0 .heightGap 0 .save grid}
+      },
     m.render)}}
   }
 

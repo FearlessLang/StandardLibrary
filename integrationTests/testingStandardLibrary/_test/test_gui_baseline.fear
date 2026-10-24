@@ -1,61 +1,61 @@
 GuiBaselineTests: Test {::
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[42]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .uText ("".u "1781 17D2 1789 17BB 17C6") } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[42]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .button{:: .uText ("".u "1781 17D2 1789 17BB 17C6 0020 1019 103C 1014 103A 1019 102C 0020 0C95 0CA8 0CCD 0CA8 0CA1 0020 0628 0650 0633 0652 0645 0650") } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[42]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .textHeight 32 } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[72]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .textHeight 13 } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[44]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .aboveBaseline(+2.0) .belowBaseline(0.25) .pack } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[51]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .aboveBaseline(+2.0) .textHeight 24 } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[84]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .aboveBaseline(0.0 .getSucc) .belowBaseline(0.0 .getSucc) .pack } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[24]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .aboveBaseline(0.0 .getSucc) .belowBaseline(0.0 .getSucc) } .paint{g -> Error.msg(g.panelHeight.str)} }
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[42]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{::
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .label{l -> Error.msg(l.aboveBaseline.str + " " + (l.belowBaseline.str) + " " + (l.belowBaseline(0.75).belowBaseline.str))}
-    }}}}).run{
+    }}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "TextRatio[+1.0] TextRatio[+0.5] TextRatio[+0.75]"}}.assertTrue{i};
       }}

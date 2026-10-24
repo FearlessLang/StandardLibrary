@@ -248,11 +248,11 @@ _Container[S]:Widget[S]{
   }
 Border:_Container[Border]{
   .self->this;
-  mut .north(mut Consumer[mut Adder]):mut Border;
-  mut .south(mut Consumer[mut Adder]):mut Border;
-  mut .east(mut Consumer[mut Adder]):mut Border;
-  mut .west(mut Consumer[mut Adder]):mut Border;
-  mut .center(mut Consumer[mut Adder]):mut Border;
+  mut .north: mut RegionFiller[mut Border];
+  mut .south: mut RegionFiller[mut Border];
+  mut .east: mut RegionFiller[mut Border];
+  mut .west: mut RegionFiller[mut Border];
+  mut .center: mut RegionFiller[mut Border];
   }
 Split:Widget[Split]{
   .self->this;
@@ -264,8 +264,6 @@ Split:Widget[Split]{
   read .draggable: Bool;
   mut .mouse(mut Scope[Mouse]):mut Split;
   mut .paint(Painter):mut Split;
-  mut .first(mut Consumer[mut Adder]):mut Split;
-  mut .second(mut Consumer[mut Adder]):mut Split;
   }
 ///A list of sections. A section has a title and a content, each a region holding one widget.
 ///The title is always shown; a click on the title expands or collapses the section.
@@ -276,9 +274,8 @@ Split:Widget[Split]{
 ///``.tabs`` shows the titles in one row, and the content of the expanded section in the space below the row.
 Sections:_Container[Sections]{
   .self->this;
-  ///Adds a section at the end when the scope returns: ``.section{:: .title{::.label{:: .text "Logs"}} .content{::.pane{:: ...}}}``.
-  ///``.section`` introduces the title and the content of the section: one of them still empty when the scope returns is a deterministic error.
-  mut .section(mut Scope[Section]): mut Sections;
+  ///Fills the title of a new section; ``.and`` fills its content and adds the section at the end: ``.section.label{:: .text "Logs"}.and.pane{:: ...}``.
+  mut .section: mut RegionFiller[mut And[mut Sections]];
   mut .column: mut Sections;
   ///A deterministic error when ``.autoCollapse`` is False: a row of tabs shows one content at a time.
   mut .tabs: mut Sections;
@@ -297,10 +294,6 @@ Sections:_Container[Sections]{
   mut .onClose(mut SectionHandler): mut Sections;
   read .size: Nat;
   read .isExpanded(index: Nat): Bool;
-  }
-Section:{
-  mut .title(mut Consumer[mut Adder]): mut Section;
-  mut .content(mut Consumer[mut Adder]): mut Section;
   }
 SectionHandler:{ mut #(sections: mut Sections, index: Nat): Void; }
 _Caption[S]: Widget[S]{
@@ -347,7 +340,7 @@ Frame:_Styled[Frame]{ .self->this;
   read .fps: Nat;
   read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
-  mut .content(s: mut Consumer[mut Adder]): Void;
+  mut .content: mut RegionFiller[Void];
   mut .onKey(mut Scope[Keys]): mut Frame;
   }
 ResizeRequest:ScreenContext{ .aspectRatio: Float; }
@@ -504,7 +497,7 @@ Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
-  mut .split(mut Scope[Split]):mut Pane;
+  mut .split: mut RegionFiller[mut And[mut SplitWith[mut Pane]]];
   mut .sections(mut Scope[Sections]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
@@ -536,18 +529,22 @@ Pane:_Container[Pane]{
   }
 
 ///A region holds one child: the five regions of a Border, the two of a Split, the content of a Frame, the title and the content of a section.
-///The scope of a region calls exactly one method of its Adder: an Adder not used when the method that introduced it returns, and an Adder used again, are deterministic errors naming the region.
-Adder:{
-  mut .pane(mut Scope[Pane]): Void;
-  mut .border(mut Scope[Border]): Void;
-  mut .split(mut Scope[Split]): Void;
-  mut .sections(mut Scope[Sections]): Void;
-  mut .button(mut Scope[Button]): Void;
-  mut .label(mut Scope[Label]): Void;
-  mut .picture(mut Scope[Picture]): Void;
-  mut .textField(mut Scope[TextField]): Void;
-  mut .textArea(mut Scope[TextArea]): Void;
+///Each method puts its widget in the region, replacing the widget the region holds, and returns the container of the region.
+RegionFiller[S:*]:{
+  mut .pane(mut Scope[Pane]): S;
+  mut .border(mut Scope[Border]): S;
+  mut .split: mut RegionFiller[mut And[mut SplitWith[S]]];
+  mut .sections(mut Scope[Sections]): S;
+  mut .button(mut Scope[Button]): S;
+  mut .label(mut Scope[Label]): S;
+  mut .picture(mut Scope[Picture]): S;
+  mut .textField(mut Scope[TextField]): S;
+  mut .textArea(mut Scope[TextArea]): S;
   }
+///Fills the next mandatory region: ``.split.label{...}.and.pane{...}``.
+And[T:*]:{ mut .and: mut RegionFiller[T]; }
+///Receives the Split with both regions filled: ``.split.label{...}.and.pane{...}.with{:: .vertical}``.
+SplitWith[S:*]:{ mut .with(mut Scope[Split]): S; }
 
 Scope[T]: { mut .run(mut T): mut T; }
 Painter: { .run(mut Graphics): mut Graphics; }

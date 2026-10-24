@@ -22,42 +22,42 @@ GuiImageTests: Test {::
   .checkDetErr({::.isMsg{:: == "The text given to Graphics.text has a line break (U+000A) at offset 1: Graphics.text draws one line"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.text("a" | "b")}})
   .checkDetErr({::.isMsg{:: == "The text given to Graphics.textWidth has a line break (U+2029) at offset 3: Graphics.textWidth measures one line"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.uTextWidth("abc".u "2029 0064").str)}})
   .checkDetErr({::.isMsg{:: == "text height 32768 is too large; it must be <= 32767"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.textHeight 32768}})
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .label{l -> Error.msg(l.text "Fearless" .pack .width.str)}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> Error.msg(l.text "Fearless" .pack .width.str)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[59]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .pane{:: .width 20 .height 20 .foreground(Color.sleepyBlue) .paint{g -> Error.msg((g.color).str)}}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .pane{:: .width 20 .height 20 .foreground(Color.sleepyBlue) .paint{g -> Error.msg((g.color).str)}}}}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Color[Red[72], Green[120], Blue[210], Alpha[255]]"}}.assertTrue{i};
       }}
   .checkDetErr({::.isMsg{:: == "image width 0 is too small; it must be >= 1"}}, {base.Images#(Width#0, Height#5, Color.transparent)})
   .checkDetErr({::.isMsg{:: == "image height 32768 is too large; it must be <= 32767"}}, {base.Images#(Width#5, Height#32768, Color.transparent)})
   .checkDetErr({::.isMsg{:: == "image 20000 x 20000 has 400000000 pixels; it must have <= 268435456"}}, {base.Images#(Width#20000, Height#20000, Color.transparent)})
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureGrow")))}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureGrow")))}}}}).run{
       .ok _ -> Error.msg "The picture always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[52] Height[32]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureWidth").width(92)))}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureWidth").width(92)))}}}}).run{
       .ok _ -> Error.msg "The picture always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[92] Height[52]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureHeight").height(52)))}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureHeight").height(52)))}}}}).run{
       .ok _ -> Error.msg "The picture always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[92] Height[52]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureLast").height(52).width(32)))}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureLast").height(52).width(32)))}}}}).run{
       .ok _ -> Error.msg "The picture always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[32] Height[22]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureStretch").keepAspect(False).width(92)))}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"pictureStretch").keepAspect(False).width(92)))}}}}).run{
       .ok _ -> Error.msg "The picture always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[92] Height[32]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"picturePack").width(92).pack))}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .picture{p -> Error.msg(PictureSize#(p.image(PictureImage#"picturePack").width(92).pack))}}}}).run{
       .ok _ -> Error.msg "The picture always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[52] Height[32]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content{::.pane{:: .picture{p -> p.image(PictureImage#"pictureBig").height(20000)}}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .picture{p -> p.image(PictureImage#"pictureBig").height(20000)}}}}).run{
       .ok _ -> Error.msg "A keepAspect width over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "keepAspect width 39988 is too large; it must be <= 32767"}}.assertTrue{i};
       }}

@@ -129,10 +129,10 @@ ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[m
         dirty.set(False),
         Void
         )} } })
-    .content{::.border{::
+    .content.border{::
       .background (Color.ghostWhite)
-      .north{::.pane{:: .fill .label{:: .text(model.status) .save(model.statusSlot) } }}
-      .center{::.pane{:: .fill
+      .north.pane{:: .fill .label{:: .text(model.status) .save(model.statusSlot) } }
+      .center.pane{:: .fill
         .save canvas
         .paint(BoardPainters#(model))
         .mouse{:: .clicked{ x, y, _, w, h -> Block#
@@ -148,12 +148,12 @@ ResizableGuis: { #(model: mut Model, canvas: mut Slot[mut Pane]): mut Consumer[m
               }
           .done
           }}
-        }}
-      .south{::.pane{:: .fill .button{:: .text "New Game" .action{Block#(
+        }
+      .south.pane{:: .fill .button{:: .text "New Game" .action{Block#(
           model.reset,
           dirty.set(True),
           Void
-          )} } }}
-      }}
+          )} } }
+      }
     }}
   }

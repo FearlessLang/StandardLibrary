@@ -4,7 +4,7 @@ GuiLiveTests: Test {::
     .do{Block#(f.modelFps(100, {:: .save old}), Void)}
     .do{Block#(f.modelFps(100, {::}), Void)}
     .do{Block#(old!.action{Void}, Void)}
-    .return{f.content{::.pane{::}}}
+    .return{f.content.pane{::}}
     }}).run{
       .ok _ -> Error.msg "Changing a replaced ModelFps always fails";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "This ModelFps was replaced by a later .modelFps, so an action set now would never run"}}.assertTrue{i};
@@ -28,7 +28,7 @@ GuiLiveTests: Test {::
           .done}}
         }), Void)}
       }}), Void)}
-    .return{f.content{::.pane{::}}}
+    .return{f.content.pane{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The actions of a .modelFps ran only once its scope finished"}}.assertTrue{i};
@@ -45,7 +45,7 @@ GuiLiveTests: Test {::
         .return{p.paint{g -> Error.msg "A widget was painted only once its scope finished"}}
         }, Void)}
       }}), Void)}
-    .return{f.content{::.pane{:: .save root}}}
+    .return{f.content.pane{:: .save root}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "A widget was painted only once its scope finished"}}.assertTrue{i};
@@ -62,7 +62,7 @@ GuiLiveTests: Test {::
       .do{Block#(root!.clear, Void)}
       .return{Block#(root!.pane{:: .paint{g -> Error.msg "Painted once its task refilled it"}}, Void)}
       }}), Void)}
-    .return{f.content{::.pane{:: .pane{:: .save root}}}}
+    .return{f.content.pane{:: .pane{:: .save root}}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted once its task refilled it"}}.assertTrue{i};
@@ -77,11 +77,11 @@ GuiLiveTests: Test {::
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(root!.paint{g -> Error.msg("Painted at "+(g.panelWidth.str))}, Void)}
       }}), Void)}
-    .return{f.content{::.pane{:: .pane{::
+    .return{f.content.pane{:: .pane{::
       .save root
       .width 100 .height 30
       .paint{g -> (g.panelWidth.get == 100).if{.then -> g; .else -> Error.msg "A pane was painted with its new width and its old painter"}}
-      }}}}
+      }}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted at Width[200]"}}.assertTrue{i};
@@ -92,14 +92,14 @@ GuiLiveTests: Test {::
     .do{Block#(f.modelFps(100, {:: .action{Block#
       .if{started.get} .return{Void}
       .do{started.set True}
-      .do{f.content{::.pane{:: .pane{::
+      .do{f.content.pane{:: .pane{::
         .save inner
         .paint{g -> Error.msg "A new content was painted before its task filled it"}
-        }}}}
+        }}}
       .do{GuiWait#(f, Duration.milliSeconds 300)}
       .return{Block#(inner!.paint{g -> Error.msg "Painted once its task filled it"}, Void)}
       }}), Void)}
-    .return{f.virtualPixelSpace(Width#300, Height#80).content{::.pane{::}}}
+    .return{f.virtualPixelSpace(Width#300, Height#80).content.pane{::}}
     }}).run{
       .ok _ -> Error.msg "A painter always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Painted once its task filled it"}}.assertTrue{i};
@@ -109,7 +109,7 @@ GuiLiveTests: Test {::
       .action{Error.msg "The first model action ran after a second .action replaced it"}
       .action{Error.msg "The second model action ran"}
       }), Void)}
-    .return{f.content{::.pane{::}}}
+    .return{f.content.pane{::}}
     }}).run{
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The second model action ran"}}.assertTrue{i};
