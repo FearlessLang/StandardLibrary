@@ -51,7 +51,6 @@ public final class Util{
   }
   public static Bool$o$0 bool(boolean b){ return b ? True$o$0.instance : False$1c$0.instance; }
   public static boolean isTrue(Object b){ return b == True$o$0.instance; }
-  public static boolean isGeneric(Object o){ return !o.getClass().getInterfaces()[0].getSimpleName().endsWith("$0"); }
   private static final Order$1c$0 ordLt= new Order$1c$0(){ @Override public Object read$$hash$1(Object m){ return ((OrderMatch$174$1)m).mut$lt$0(); } };
   private static final Order$1c$0 ordEq= new Order$1c$0(){ @Override public Object read$$hash$1(Object m){ return ((OrderMatch$174$1)m).mut$eq$0(); } };
   private static final Order$1c$0 ordGt= new Order$1c$0(){ @Override public Object read$$hash$1(Object m){ return ((OrderMatch$174$1)m).mut$gt$0(); } };
