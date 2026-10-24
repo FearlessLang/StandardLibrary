@@ -12,6 +12,7 @@ use base.Slot as Slot;
 use base.Slots as Slots;
 use base.Pane as Pane;
 use base.True as True;
+use base.False as False;
 use base.WidthNat as Width;
 use base.HeightNat as Height;
 use base.XInt as X;
@@ -40,6 +41,8 @@ Foo:base.Main{s->Block#
   .do{ g.run Gui16 }
   .do{ g.run Gui17 }
   .do{ g.run Gui18 }
+  .do{ g.run Gui19 }
+  .do{ g.run Gui20 }
   .done
   }
 Gui01:Consumer[mut Frame]{::
@@ -613,6 +616,39 @@ Gui18:Consumer[mut Frame]{::
       .secondS{:: .fill .vertical .dividerPosition 150
         .first{:: .fill .width 200 .background (Color.moonCheese) .label{:: .text "The data of the selected tile" } }
         .second{:: .fill .width 200 .background (Color.dustyRose) .label{:: .text "The output of the selected tile" } }
+        }
+      }
+    }
+  }
+Gui19:Consumer[mut Frame]{::
+  .title "Gui19: tabs, the x asks to close a tab"
+  .virtualPixelSpace(Width#600, Height#400)
+  .contentB{::
+    .background (Color.ghostWhite)
+    .centerSections{:: .fill .tabs .onClose{s, n -> Block#(s.remove n, Void)}
+      .section("readme", {:: .label{:: .text "readme.txt" }}).content{:: .fill .background (Color.moonCheese) .label{:: .text "Click a tab to expand it, click it again to collapse it" }}
+      .section("main", {:: .label{:: .text "main.fear" }}).content{:: .fill .background (Color.alienMint) .textArea{:: .width 400 .height 200 .text "A text area keeps its text while its tab is collapsed" }}
+      .section("notes", {:: .label{:: .text "notes" }}).content{:: .fill .background (Color.dustyRose) .label{:: .text "With every tab closed, the space below the row is empty" }}
+      .expand "readme"
+      }
+    }
+  }
+Gui20:Consumer[mut Frame]{::
+  .title "Gui20: sections in a column, more than one expanded"
+  .virtualPixelSpace(Width#600, Height#400)
+  .contentB{::
+    .background (Color.ghostWhite)
+    .centerS{:: .fill .dividerPosition 140
+      .first{:: .fill .maxPerLine 1 .stackScroll(True) .background (Color.alienMint)
+        .button{:: .text "Tile 1" }
+        .button{:: .text "Tile 2" }
+        }
+      .secondSections{:: .fill .autoCollapse(False) .scroll(True)
+        .section("output", {:: .label{:: .text "Output" } .button{:: .text "Clear" } .pack}).content{:: .textArea{:: .width 400 .height 150 .text "The button in the title has no action: a click on it expands or collapses Output" }}
+        .section("extensions", {:: .label{:: .text "Extensions" }}).content{:: .maxPerLine 1 .label{:: .text "extension a" } .label{:: .text "extension b" } .pack}
+        .section("links", {:: .tooltip "The links of this project" .label{:: .text "Links" }}).content{:: .maxPerLine 1 .textField{:: .width 300 .height 30 .text "link one" } .textField{:: .width 300 .height 30 .text "link two" } .pack}
+        .section("logs", {:: .label{:: .text "Logs" }}).content{:: .maxPerLine 1 .label{:: .text "log 1" } .label{:: .text "log 2" } .label{:: .text "log 3" } .pack}
+        .expand "output" .expand "extensions"
         }
       }
     }

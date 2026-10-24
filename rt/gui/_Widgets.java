@@ -139,6 +139,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Pane$o$0 mut$split$1(Object s){ frame.addTo(this, null, s, _Split::new); return this; }
   @Override public Pane$o$0 mut$textField$1(Object s){ frame.addTo(this, null, s, _TextField::new); return this; }
   @Override public Pane$o$0 mut$textArea$1(Object s){ frame.addTo(this, null, s, _TextArea::new); return this; }
+  @Override public Pane$o$0 mut$sections$1(Object s){ frame.addTo(this, null, s, _Sections::new); return this; }
   @Override public Object mut$clear$0(){
     return reStyle(() -> {
       // Removed widgets get no Exited events (DOM semantics: removal is not
@@ -205,6 +206,11 @@ final class _Border extends AContainer implements Border$2o$0{
   @Override public Border$2o$0 mut$eastS$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Split::new); return this; }
   @Override public Border$2o$0 mut$westS$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Split::new); return this; }
   @Override public Border$2o$0 mut$centerS$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Split::new); return this; }
+  @Override public Border$2o$0 mut$northSections$1(Object s){ frame.addTo(this, BorderLayout.NORTH, s, _Sections::new); return this; }
+  @Override public Border$2o$0 mut$southSections$1(Object s){ frame.addTo(this, BorderLayout.SOUTH, s, _Sections::new); return this; }
+  @Override public Border$2o$0 mut$eastSections$1(Object s){ frame.addTo(this, BorderLayout.EAST, s, _Sections::new); return this; }
+  @Override public Border$2o$0 mut$westSections$1(Object s){ frame.addTo(this, BorderLayout.WEST, s, _Sections::new); return this; }
+  @Override public Border$2o$0 mut$centerSections$1(Object s){ frame.addTo(this, BorderLayout.CENTER, s, _Sections::new); return this; }
 }
 
 @SuppressWarnings("serial")
@@ -219,7 +225,7 @@ final class _Split extends AContainer implements Split$1c$0{
   }
   Component side(String where){ return ((BorderLayout) component.getLayout()).getLayoutComponent(where); }
   int span(){ return vertical ? viewH() : viewW(); }
-  Rectangle region(Component k){
+  @Override Rectangle region(Component k){
     boolean first= k == side(BorderLayout.LINE_START);
     int from= first ? 0 : position + bar;
     int length= Math.max(0, first ? Math.min(position, span()) : span() - from);
@@ -269,6 +275,8 @@ final class _Split extends AContainer implements Split$1c$0{
   @Override public Split$1c$0 mut$second$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Pane::new); return this; }
   @Override public Split$1c$0 mut$secondB$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Border::new); return this; }
   @Override public Split$1c$0 mut$secondS$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Split::new); return this; }
+  @Override public Split$1c$0 mut$firstSections$1(Object s){ frame.addTo(this, BorderLayout.LINE_START, s, _Sections::new); return this; }
+  @Override public Split$1c$0 mut$secondSections$1(Object s){ frame.addTo(this, BorderLayout.LINE_END, s, _Sections::new); return this; }
 }
 
 abstract class AWidget implements Widget$2o$1{
@@ -341,6 +349,8 @@ abstract class AWidget implements Widget$2o$1{
   abstract Dimension need();
   void fit(){}
   void clipChildren(Canvas cv){}
+  boolean hides(Component k){ return false; }
+  Rectangle region(Component k){ return null; }
   boolean barRight(){ return false; }
   boolean barBottom(){ return false; }
   int edgeW(){ return left + right + (barRight() ? bar : 0); }
@@ -605,8 +615,11 @@ final class _Frame implements Frame$1c$0{
   }
 
   private static void edits(java.awt.Container c, ArrayList<AEditText> all){
-    if (c instanceof SkComponent s && s.w instanceof AEditText t){ all.add(t); }
-    for (var k : c.getComponents()){ edits((java.awt.Container) k, all); }
+    var w= ((SkComponent) c).w;
+    if (w instanceof AEditText t){ all.add(t); }
+    for (var k : c.getComponents()){
+      if (!w.hides(k)){ edits((java.awt.Container) k, all); }
+    }
   }
 
   void addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
