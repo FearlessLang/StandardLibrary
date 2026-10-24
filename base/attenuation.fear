@@ -186,14 +186,14 @@ RevokableDownload: { #(r: mut Revocation, u: mut DownloadCapability): mut Downlo
 RevokableDataRead: { #(r: mut Revocation, u: mut CapDataRead): mut CapDataRead -> {'s
   .roots -> Block#(r#, u.roots);
   .paths(n, p) -> Block#(r#, u.paths(n, p));
-  .read(n, p) -> Block#(r#, u.read(n, p).map{x -> RevokableInputCursorNode#(r, x)});
+  .read(n, p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(n, p)));
   .iso -> RevokableDataRead#(r.iso.close, u.iso.close);
   .close -> s;
   }}
 RevokableDataReadWrite: { #(r: mut Revocation, u: mut CapDataReadWrite): mut CapDataReadWrite -> {'s
   .roots -> Block#(r#, u.roots);
   .paths(n, p) -> Block#(r#, u.paths(n, p));
-  .read(n, p) -> Block#(r#, u.read(n, p).map{x -> RevokableInputCursorNode#(r, x)});
+  .read(n, p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(n, p)));
   .writeStrUtf8(n, p, c) -> Block#(r#, u.writeStrUtf8(n, p, c));
   .writeUStrUtf8(n, p, c) -> Block#(r#, u.writeUStrUtf8(n, p, c));
   .writeStrUtf16Le(n, p, c) -> Block#(r#, u.writeStrUtf16Le(n, p, c));
