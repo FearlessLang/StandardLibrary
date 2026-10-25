@@ -182,45 +182,29 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
 
   @Override public Object read$imm$0(){ return this; }
 
+  private static long truncDiv(long val, long d){
+    if (Long.compareUnsigned(d, Long.MAX_VALUE) <= 0){ return val / d; }
+    return val == Long.MIN_VALUE && d == Long.MIN_VALUE ? -1L : 0L;
+  }
   @Override public Object imm$getTruncDiv$1(Object p0){
     long d= unsignedLongFromNat(p0);
     if (d == 0L){ throw err("Int.getTruncDiv: d==0"); }
-
-    // if a > b then a / b == 0.
-    // We can't directly compare val and d since val is signed,
-    // so Long.compareUnsigned would assume it to be a large negative number.
-    // Since this is a signed num if d > Long.MAX_VALUE then it is > val and thus the result is 0.
-    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0){
-      return instance(0L);
-    }
-
-    // In the range of unsigned longs, so we can just do the division.
-    return instance(val / d);
+    return instance(truncDiv(val, d));
   }
   @Override public Object imm$tryGetTruncDiv$1(Object p0){
     long d= unsignedLongFromNat(p0);
     if (d == 0L){ return fail("Int.getTruncDiv: d==0"); }
-    if (Long.compareUnsigned(d, Long.MAX_VALUE) > 0){
-      return ok(instance(0L));
-    }
-    return ok(instance(val / d));
-  }
-  public static long remainderWithUnsignedLong(long signed, long unsignedRemainder){
-    // if a % b = a if b> a,
-    if (Long.compareUnsigned(unsignedRemainder, Long.MAX_VALUE) > 0){
-      return signed;
-    }
-    return signed % unsignedRemainder;
+    return ok(instance(truncDiv(val, d)));
   }
   @Override public Object imm$getRem$1(Object p0){
     long d= unsignedLongFromNat(p0);
     if (d == 0L){ throw err("Int.getRem: d==0"); }
-    return instance(remainderWithUnsignedLong(val, d));
+    return instance(val - truncDiv(val, d) * d);
   }
   @Override public Object imm$tryGetRem$1(Object p0){
     long d= unsignedLongFromNat(p0);
     if (d == 0L){ return fail("Int.getRem: d==0"); }
-    return ok(instance(remainderWithUnsignedLong(val, d)));
+    return ok(instance(val - truncDiv(val, d) * d));
   }
 
   /**
