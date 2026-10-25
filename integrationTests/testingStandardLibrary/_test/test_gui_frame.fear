@@ -87,23 +87,23 @@ GuiFrameTests: Test {::
     .return{f.content.pane{::}}
     }}).run{
       .ok _ -> Void;
-      .info i -> Error.msg "Frame.close stopped the Gui with an error";
+      .info i -> Error.msg "Frame.close stopped the CapGui with an error";
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startAsWindow(+1.5).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "An initial area over 1.0 always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.startAsWindow(1.5) is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.startAsWindow(1.5) is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startUndecorated(+0.0078125).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "An initial area under the min area always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.startUndecorated(0.0078125) is less than Gui.minArea(0.02) of this Gui: the picture always covers at least minArea of the screen area, so the window cannot open covering only 0.0078125 of it. Lower Gui.minArea first"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.startUndecorated(0.0078125) is less than CapGui.minArea(0.02) of this CapGui: the picture always covers at least minArea of the screen area, so the window cannot open covering only 0.0078125 of it. Lower CapGui.minArea first"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.minArea(0.0).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A min area of 0.0 always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.minArea(0.0) is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.minArea(0.0) is out of range: it is a fraction of the screen area, so it must be more than 0.0 and at most 1.0"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.minArea(+0.5).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A min area over the initial area always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.minArea(0.5) is more than the initial area 0.3 of this Gui: the picture always covers at least minArea of the screen area, so the window could not open covering only 0.3 of it. Raise the initial area with Gui.startAsWindow or Gui.startUndecorated first"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.minArea(0.5) is more than the initial area 0.3 of this CapGui: the picture always covers at least minArea of the screen area, so the window could not open covering only 0.3 of it. Raise the initial area with CapGui.startAsWindow or CapGui.startUndecorated first"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.startFullScreen.minArea(+0.5).startAsWindow(+0.75).run{f -> Error.msg "A full screen start leaves minArea free"}}).run{
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
@@ -111,11 +111,11 @@ GuiFrameTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name "  " .run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A blank name always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "  ".u is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "  ".u is blank: the name of a CapGui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 2007 202F 200B 2060 0007").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A name made only of invisible characters always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "".u"00A0 2007 202F 200B 2060 0007" is blank: the name of a Gui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The name "".u"00A0 2007 202F 200B 2060 0007" is blank: the name of a CapGui is what the title bar, the taskbar and the task switcher show, so it needs a visible character`}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("".u "00A0 00E9 200B").run{f -> Error.msg "A visible character among invisible ones makes a name"}}).run{
       .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
@@ -123,11 +123,11 @@ GuiFrameTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name("a" | "b").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A newline in the name always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this Gui has a line break (U+000A) at offset 1: the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this CapGui has a line break (U+000A) at offset 1: the name of a CapGui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("ab".u "2028").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A line separator in the name always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this Gui has a line break (U+2028) at offset 2: the name of a Gui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new name of this CapGui has a line break (U+2028) at offset 2: the name of a CapGui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.title("a" | "b").content.pane{::}}}).run{
       .ok _ -> Error.msg "A newline in the title always stops the Gui";
@@ -139,42 +139,42 @@ GuiFrameTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"F11").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A close key equal to the full screen key always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(F11) is the full screen key of this Gui: one key press cannot both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.closeKey(F11) is the full screen key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.fullScreenKey first"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(Key#"SEPARATOR").closeKey(Key#"SEPARATER").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A close key naming the key of the full screen key always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.closeKey(SEPARATER) is the full screen key of this Gui: one key press cannot both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.closeKey(SEPARATER) is the full screen key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.fullScreenKey first"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"SEPARATER").fullScreenKey(Key#"SEPARATOR").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A full screen key naming the key of the close key always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.fullScreenKey(SEPARATOR) is the close key of this Gui: one key press cannot both ask to close the window and toggle full screen. Change Gui.closeKey first"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.fullScreenKey(SEPARATOR) is the close key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.closeKey first"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.opacityFloor(Alpha#(100.getByte)).run{f -> f.opacity(Alpha#(50.getByte)).content.pane{::}}}).run{
       .ok _ -> Error.msg "An opacity below the floor always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Frame.opacity(Alpha[50]) is below the opacity floor Alpha[100] of this Gui: the window cannot be more transparent than Gui.opacityFloor allows"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Frame.opacity(Alpha[50]) is below the opacity floor Alpha[100] of this CapGui: the window cannot be more transparent than CapGui.opacityFloor allows"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> KeepsItsArea#(s.gui)}).run{
-      .ok _ -> Error.msg "A min area over the initial area of the old Gui always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Gui.minArea(0.375) is more than the initial area 0.3 of this Gui: the picture always covers at least minArea of the screen area, so the window could not open covering only 0.3 of it. Raise the initial area with Gui.startAsWindow or Gui.startUndecorated first"}}.assertTrue{i};
+      .ok _ -> Error.msg "A min area over the initial area of the old CapGui always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "CapGui.minArea(0.375) is more than the initial area 0.3 of this CapGui: the picture always covers at least minArea of the screen area, so the window could not open covering only 0.3 of it. Raise the initial area with CapGui.startAsWindow or CapGui.startUndecorated first"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedFrame#(s.gui).content.pane{:: .label{:: .text "b"}}}).run{
       .ok _ -> Error.msg "A new content of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> Block#(ClosedFrame#(s.gui).title "b", Void)}).run{
       .ok _ -> Error.msg "A new title of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> Block#(ClosedFrame#(s.gui).modelFps(100, {::}), Void)}).run{
       .ok _ -> Error.msg "A new modelFps of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedFrame#(s.gui).close}).run{
       .ok _ -> Error.msg "Closing a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"}}.assertTrue{i};
       }}
   }
-ClosedFrame: {#(gui: mut base.Gui): mut Frame -> Block#
+ClosedFrame: {#(gui: mut base.CapGui): mut Frame -> Block#
   .let[mut Slot[mut Frame]] kept = {Slots#[mut Frame]}
   .do{gui.run{f -> Block#
     .do{kept.fill f}
@@ -183,7 +183,7 @@ ClosedFrame: {#(gui: mut base.Gui): mut Frame -> Block#
     }}
   .return{kept!}
   }
-KeepsItsArea: {#(gui: mut base.Gui): Void -> Block#
+KeepsItsArea: {#(gui: mut base.CapGui): Void -> Block#
   .do{Block#(gui.startAsWindow(+0.5), Void)}
   .return{Block#(gui.minArea(+0.375), Void)}
   }

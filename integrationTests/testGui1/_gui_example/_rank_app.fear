@@ -1,6 +1,6 @@
 use base.Void as Void;
 use base.Str as Str;
-use base.Gui as Gui;
+use base.CapGui as CapGui;
 use base.Block as Block;
 use base.Consumer as Consumer;
 use base.Frame as Frame;

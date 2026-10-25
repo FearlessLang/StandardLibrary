@@ -1,6 +1,6 @@
 package _base;
 
-public final class _DownloadCapability$8fsw$0 implements DownloadCapability$8fsw$0{
+public final class _CapDownload$2gw$0 implements CapDownload$2gw$0{
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
 

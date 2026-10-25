@@ -1,5 +1,5 @@
 
-Gui:Consumer[mut Frame]{::
+CapGui:Consumer[mut Frame]{::
   .title "Gui buttons replace canvas painter"
   .virtualPixelSpace(Width#532, Height#424)
   .style{:: .fps 30 }

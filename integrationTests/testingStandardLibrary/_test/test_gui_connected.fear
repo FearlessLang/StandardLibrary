@@ -71,22 +71,22 @@ GuiConnectedTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedLabel#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a widget of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is in a closed window: the Gui.run that showed the window has returned, so changing it would have no visible effect"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedMouse#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a Mouse of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Mouse belongs to a closed window: the Gui.run that showed the window has returned, so a handler set now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedKeys#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a Keys of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Keys belongs to a closed window: the Gui.run that showed the window has returned, so a key action added now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Keys belongs to a closed window: the CapGui.run that showed the window has returned, so a key action added now would never run"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedModelFps#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a ModelFps of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This ModelFps belongs to a closed window: the Gui.run that showed the window has returned, so an action set now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"}}.assertTrue{i};
       }}
   }
-ClosedLabel: {#(gui: mut base.Gui): Void -> Block#
+ClosedLabel: {#(gui: mut base.CapGui): Void -> Block#
   .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
@@ -94,7 +94,7 @@ ClosedLabel: {#(gui: mut base.Gui): Void -> Block#
     }}
   .return{Block#(l!.text "b", Void)}
   }
-ClosedMouse: {#(gui: mut base.Gui): Void -> Block#
+ClosedMouse: {#(gui: mut base.CapGui): Void -> Block#
   .let[mut Slot[mut Mouse]] m = {Slots#[mut Mouse]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
@@ -102,7 +102,7 @@ ClosedMouse: {#(gui: mut base.Gui): Void -> Block#
     }}
   .return{Block#(m!.clicked{_, _, _, _, _ -> Void}, Void)}
   }
-ClosedKeys: {#(gui: mut base.Gui): Void -> Block#
+ClosedKeys: {#(gui: mut base.CapGui): Void -> Block#
   .let[mut Slot[mut Keys]] k = {Slots#[mut Keys]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{f.close}}).onKey{:: .save k}, Void)}
@@ -110,7 +110,7 @@ ClosedKeys: {#(gui: mut base.Gui): Void -> Block#
     }}
   .return{Block#(k!.pressed{:: .matchOnly(Key#"A")}, Void)}
   }
-ClosedModelFps: {#(gui: mut base.Gui): Void -> Block#
+ClosedModelFps: {#(gui: mut base.CapGui): Void -> Block#
   .let[mut Slot[mut ModelFps]] old = {Slots#[mut ModelFps]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .save old .action{f.close}}), Void)}

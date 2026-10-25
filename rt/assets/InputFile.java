@@ -6,7 +6,7 @@ import java.util.List;
 
 import static _base.Util.*;
 
-record InputFile(String what, String label, Path path, List<String> zipSteps, String zipEntry) implements InputCursorNode$12bs$0{
+record InputFile(String what, String label, Path path, List<String> zipSteps, String zipEntry) implements CapInputCursorNode$8sg8$0{
   InputFile(Path path){ this("input file", portable(path.getFileName().toString()), path, List.of(), ""); }
   static String portable(String name){
     return name.codePoints()

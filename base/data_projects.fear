@@ -18,7 +18,7 @@ CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
   ///An empty ``path`` is the root folder.
   mut .paths(path: List[Str]): List[Str];
   ///The resource at ``path``, read again at every read.
-  mut .read(path: List[Str]): mut InputCursorNode;
+  mut .read(path: List[Str]): mut CapInputCursorNode;
   }
 
 ///The object capability to read and write the data project mounted on a DataEdit type, given by ``System.dataEdit``.
@@ -28,11 +28,11 @@ CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
 ///A written path keeps the data project valid: each folder name uses only lowercase letters,
 ///digits and underscores, and starts with a letter or an underscore;
 ///the resource name is such a name, a dot and an extension, other than ".zip".
-///The write methods mirror the read methods of `InputCursorNode`, and every text is written with no byte order mark.
+///The write methods mirror the read methods of `CapInputCursorNode`, and every text is written with no byte order mark.
 ///A `Str` holds only ASCII characters, so ``.writeStrUtf8``, ``.writeStrAscii`` and ``.writeStrLatin1`` write the same bytes.
 CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .paths(path: List[Str]): List[Str];
-  mut .read(path: List[Str]): mut InputCursorNode;
+  mut .read(path: List[Str]): mut CapInputCursorNode;
   mut .writeStrUtf8(path: List[Str], content: Str): Void;
   mut .writeUStrUtf8(path: List[Str], content: UStr): Void;
   mut .writeStrUtf16Le(path: List[Str], content: Str): Void;

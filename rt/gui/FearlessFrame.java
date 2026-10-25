@@ -69,7 +69,7 @@ final class FearlessFrame{
     catch (UnsupportedFlavorException|IOException ex){ throw new Error("Broken Environment", ex); }
     var files= dropped.stream().map(f -> ((File) f).toPath()).toList();
     var ok= files.stream().allMatch(Files::isRegularFile);
-    if (ok){ _InputCursor$2e8$0.files.addAll(files); }
+    if (ok){ _CapInputCursor$js0$0.files.addAll(files); }
     e.dropComplete(ok);
   }
 

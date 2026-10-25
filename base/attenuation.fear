@@ -81,10 +81,10 @@ Revocation: ToIso[Revocation]{ mut #: Void; }
 ///The Revocation `System.revocation` gives: the one that can change the flag. Its copies are roots too.
 ///``.start`` on a started or revoked root, and ``.revoke`` on one not started or already revoked, are non deterministic
 ///errors: the holder of a copy has no way to know the state.
-RevocationRoot: Revocation, ToIso[RevocationRoot]{ mut .start: Void; mut .revoke: Void; mut .iso: iso RevocationRoot; mut .close: mut RevocationRoot; }
+CapRevocationRoot: Revocation, ToIso[CapRevocationRoot]{ mut .start: Void; mut .revoke: Void; mut .iso: iso CapRevocationRoot; mut .close: mut CapRevocationRoot; }
 
 ///The System ``u`` under the Revocation ``r``: every method checks ``r`` and delegates to ``u``, and what it gives
-///checks ``r`` the same way, down to every capability of ``u`` but the `Frame` of `Gui.run`.
+///checks ``r`` the same way, down to every capability of ``u`` but the `Frame` of `CapGui.run`.
 ///``.iso`` does not check ``r``: the image it gives checks a copy of ``r`` at every call.
 RevokableSystem: { #(r: mut Revocation, u: mut System): mut System -> {'s
   .try -> Block#(r#, RevokableTry#(r, u.try));
@@ -109,7 +109,7 @@ RevokableTry: { #(r: mut Revocation, u: mut CapTry): mut CapTry -> {'s
   .iso -> RevokableTry#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableOutput: { #(r: mut Revocation, u: mut Output): mut Output -> {'s
+RevokableOutput: { #(r: mut Revocation, u: mut CapOutput): mut CapOutput -> {'s
   .print x -> Block#(r#, u.print x);
   .println x -> Block#(r#, u.println x);
   .byte b -> Block#(r#, u.byte b);
@@ -117,13 +117,13 @@ RevokableOutput: { #(r: mut Revocation, u: mut Output): mut Output -> {'s
   .iso -> RevokableOutput#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableInputCursor: { #(r: mut Revocation, u: mut InputCursor): mut InputCursor -> {'s
+RevokableInputCursor: { #(r: mut Revocation, u: mut CapInputCursor): mut CapInputCursor -> {'s
   # -> Block#(r#, u#.match{.some n -> Opts#(RevokableInputCursorNode#(r, n)); .empty -> {}});
   .next -> Block#(r#, RevokableInputCursor#(r, u.next));
   .iso -> RevokableInputCursor#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableInputCursorNode: { #(r: mut Revocation, u: mut InputCursorNode): mut InputCursorNode -> {'s
+RevokableInputCursorNode: { #(r: mut Revocation, u: mut CapInputCursorNode): mut CapInputCursorNode -> {'s
   .label -> Block#(r#, u.label);
   .readStrUtf8 rec -> Block#(r#, u.readStrUtf8 rec);
   .readUStrUtf8 rec -> Block#(r#, u.readUStrUtf8 rec);
@@ -144,7 +144,7 @@ RevokableInputCursorNode: { #(r: mut Revocation, u: mut InputCursorNode): mut In
   .iso -> RevokableInputCursorNode#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableAssetRead: { #(r: mut Revocation, u: mut AssetReadCapability): mut AssetReadCapability -> {'s
+RevokableAssetRead: { #(r: mut Revocation, u: mut CapAssetRead): mut CapAssetRead -> {'s
   .readStrUtf8(p, d, z, e, rec) -> Block#(r#, u.readStrUtf8(p, d, z, e, rec));
   .readUStrUtf8(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf8(p, d, z, e, rec));
   .readStrUtf16Le(p, d, z, e, rec) -> Block#(r#, u.readStrUtf16Le(p, d, z, e, rec));
@@ -163,7 +163,7 @@ RevokableAssetRead: { #(r: mut Revocation, u: mut AssetReadCapability): mut Asse
   .iso -> RevokableAssetRead#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableDownload: { #(r: mut Revocation, u: mut DownloadCapability): mut DownloadCapability -> {'s
+RevokableDownload: { #(r: mut Revocation, u: mut CapDownload): mut CapDownload -> {'s
   .downloadBytes(url, n) -> Block#(r#, u.downloadBytes(url, n));
   .downloadStrUtf8(url, n, rec) -> Block#(r#, u.downloadStrUtf8(url, n, rec));
   .downloadUStrUtf8(url, n, rec) -> Block#(r#, u.downloadUStrUtf8(url, n, rec));
@@ -246,21 +246,21 @@ RevokableProcess: { #(r: mut Revocation, u: mut CapProcess): mut CapProcess -> {
   .iso -> RevokableProcess#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableRunningMain: { #[R](r: mut Revocation, u: mut RunningMain[R]): mut RunningMain[R] -> {'s
+RevokableRunningMain: { #[R](r: mut Revocation, u: mut CapRunningMain[R]): mut CapRunningMain[R] -> {'s
   .await -> Block#(r#, u.await);
   .awaitUpTo t -> Block#(r#, u.awaitUpTo t);
   .terminate -> Block#(r#, u.terminate);
   .iso -> RevokableRunningMain#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableLogReader: { #[T](r: mut Revocation, u: mut LogReader[T]): mut LogReader[T] -> {'s
+RevokableLogReader: { #[T](r: mut Revocation, u: mut CapLogReader[T]): mut CapLogReader[T] -> {'s
   .read -> Block#(r#, u.read);
   .consume -> Block#(r#, u.consume);
   .logName -> u.logName;
   .iso -> RevokableLogReader#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableGui: { #(r: mut Revocation, u: mut Gui): mut Gui -> {
+RevokableGui: { #(r: mut Revocation, u: mut CapGui): mut CapGui -> {
   .screenWidth -> Block#(r#, u.screenWidth);
   .screenHeight -> Block#(r#, u.screenHeight);
   .uName n -> Block#(r#, RevokableGui#(r, u.uName n));
@@ -287,16 +287,16 @@ InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 ///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,
 ///it throws the non deterministic error ``main`` threw.
 ///A new process that cannot start, or that ends before its main ends, is a non deterministic error.
-///``.start`` starts the new process and returns at once; the `RunningMain` it gives is how this program waits for the process or ends it.
-///``.run`` is ``.start`` then `RunningMain.await`.
+///``.start`` starts the new process and returns at once; the `CapRunningMain` it gives is how this program waits for the process or ends it.
+///``.run`` is ``.start`` then `CapRunningMain.await`.
 CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
   mut .run(main: Main, attenuators: List[SystemAttenuator]): Void;
   mut .run(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): Info;
-  mut .start(main: Main, attenuators: List[SystemAttenuator]): mut RunningMain[Void];
-  mut .start(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): mut RunningMain[Info];
+  mut .start(main: Main, attenuators: List[SystemAttenuator]): mut CapRunningMain[Void];
+  mut .start(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): mut CapRunningMain[Info];
   }
 
-RunningMain[R]: ToIso[RunningMain[R]], WidenTo[RunningMain[R]]{
+CapRunningMain[R]: ToIso[CapRunningMain[R]], WidenTo[CapRunningMain[R]]{
   mut .await: R;
   mut .awaitUpTo(time: Duration): Opt[R];
   mut .terminate: Void;

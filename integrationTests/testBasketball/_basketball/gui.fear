@@ -1,5 +1,5 @@
-Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  height: Nat): mut Gui ->
-  mut Gui: Consumer[mut Frame] {::
+Guis: { #(model: mut Slot[mut Model], canvas: mut Slot[mut Pane], width: Nat,  height: Nat): mut CapGui ->
+  mut CapGui: Consumer[mut Frame] {::
     .fps 30
     .onKey {::
       .pressed  {:: .matchOnly(Key#"W") .doOnly { e -> model!.player.jump } }

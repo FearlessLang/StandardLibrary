@@ -1,4 +1,4 @@
-Models:{#(gui:mut Gui):mut Model->Block#
+Models:{#(gui:mut CapGui):mut Model->Block#
   .var size={100}
   .return {mut Model:{
     mut .imgPortal: Void -> gui .setImage PaintPortal;
@@ -18,7 +18,7 @@ Division Model - Gui and closing the loop
 
   .let model={Slots#[mut Model]}
   .let canvas={Slots#[mut Pane]}
-  .let[mut Gui] gui= {mut Gui{.canvas->canvas; .model->model!;}}
+  .let[mut CapGui] gui= {mut CapGui{.canvas->canvas; .model->model!;}}
 The main defines the 'gui fields' as slots that are filled later
 and the model will never see them
 

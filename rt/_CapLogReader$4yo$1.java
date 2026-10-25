@@ -1,6 +1,6 @@
 package _base;
 
-public record _LogReader$m8$1(InMemoryLog$2kk$1 o) implements LogReader$m8$1{
+public record _CapLogReader$4yo$1(InMemoryLog$2kk$1 o) implements CapLogReader$4yo$1{
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$read$0(){ return o._readCopy(); }

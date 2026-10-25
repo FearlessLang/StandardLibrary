@@ -108,7 +108,7 @@ FileLog: CaptureFree{
   .name: Str;
   .log(s: read ToStr): Void -> _Magic!;
   }
-LogReader[T]: ToIso[LogReader[T]], WidenTo[LogReader[T]]{
+CapLogReader[T]: ToIso[CapLogReader[T]], WidenTo[CapLogReader[T]]{
   mut .read: List[T];    ///Returns the values currently stored in the log without removing them
   mut .consume: List[T]; ///Returns the values currently stored in the log and clears the log
   read .logName: Str;   ///The diagnostic name of the corresponding log

@@ -1,7 +1,7 @@
 package _base;
 import static _base.Util.*;
 
-public final class _RevocationRoot$iyw$0 implements RevocationRoot$iyw$0{
+public final class _CapRevocationRoot$4e14$0 implements CapRevocationRoot$4e14$0{
   private volatile int state= 0;
   @Override public Object mut$$hash$0(){
     if (state == 1){ return Void$o$0.instance; }

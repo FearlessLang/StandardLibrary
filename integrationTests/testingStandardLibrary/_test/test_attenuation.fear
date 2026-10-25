@@ -32,7 +32,7 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was not called yet."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut Revocation] copy= {root.iso.close}
     .do{ root.start }
     .do{ root# }
@@ -40,7 +40,7 @@ TestAttenuation: Test {::
     }).assertOk}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut Revocation] copy= {root.iso.close}
     .do{ root.start }
     .do{ root.revoke }
@@ -48,15 +48,15 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
-    .let[mut RevocationRoot] copy= {root.iso.close}
+    .let[mut CapRevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] copy= {root.iso.close}
     .do{ copy.start }
     .do{ root# }
     .return{ copy.revoke }
     }).assertOk}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .do{ root.start }
     .return{ root.start }
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was called twice."}}}
@@ -66,7 +66,7 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called before .start."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .do{ root.start }
     .do{ root.revoke }
     .return{ root.revoke }
@@ -81,14 +81,14 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.start was not called yet."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut System] s= {RevokableSystem#(root, real)}
     .do{ root.start }
     .return{ s.out }
     }).assertOk}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut System] s= {RevokableSystem#(root, real)}
     .do{ root.start }
     .do{ root.revoke }
@@ -96,7 +96,7 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut System] s= {RevokableSystem#(root, real)}
     .do{ root.start }
     .let[mut System] image= {s.iso.close}
@@ -106,7 +106,7 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut System] s= {RevokableSystem#(root, real)}
     .do{ root.start }
     .let[mut System] image= {s.iso.close.iso.close}
@@ -115,7 +115,7 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut System] s= {RevokableSystem#(root, real)}
     .do{ root.start }
     .let[mut CapTry] t= {s.try}
@@ -125,7 +125,7 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut System] s= {RevokableSystem#(root, real)}
     .do{ root.start }
     .let o= {s.out}
@@ -134,7 +134,7 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let[mut System] s= {RevokableSystem#(root, real)}
     .do{ root.start }
     .let c= {s.inputCursor.next}
@@ -143,21 +143,21 @@ TestAttenuation: Test {::
     }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let attenuated= {NoDownload#(RevokableSystem#(root, real))}
     .do{ root.start }
     .return{ attenuated.manager }
     }).assertOk}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let attenuated= {NoDownload#(RevokableSystem#(root, real))}
     .do{ root.start }
     .return{ attenuated.download }
     }).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
-    .let[mut RevocationRoot] root= {real.revocation}
+    .let[mut CapRevocationRoot] root= {real.revocation}
     .let attenuated= {NoDownload#(RevokableSystem#(root, real))}
     .do{ root.start }
     .let[mut System] image= {attenuated.iso.close}

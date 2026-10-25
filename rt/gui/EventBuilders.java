@@ -26,7 +26,7 @@ final class CMouseBuilder implements Mouse$1c$0{
   CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
     owner.frame.onEdtAndWait(() -> {
-      if (owner.frame.frame.completed()){ throw Util.detErr("This Mouse belongs to a closed window: the Gui.run that showed the window has returned, so a handler set now would never run"); }
+      if (owner.frame.frame.completed()){ throw Util.detErr("This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"); }
       if (!changeable && (owner.handlers != handlers || !owner.canChange())){
         throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
       }

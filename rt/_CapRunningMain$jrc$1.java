@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public final class _RunningMain$2dk$1 implements RunningMain$2dk$1{
+public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
   private final String name;
   private final Process p;
   private final Thread out;
   private final Thread err;
   private final StringBuilder tail= new StringBuilder();
   private volatile boolean surelyTerminated;
-  _RunningMain$2dk$1(String name, String names, Optional<String> arg){
+  _CapRunningMain$jrc$1(String name, String names, Optional<String> arg){
     this.name= name;
     var marker= _CapProcess$18g$0.marker();
     System.out.flush();
@@ -54,7 +54,7 @@ public final class _RunningMain$2dk$1 implements RunningMain$2dk$1{
     return Void$o$0.instance;
   }
   private void running(String m){
-    if (surelyTerminated){ throw detErr("RunningMain."+m+" was called on a surely terminated RunningMain."); }
+    if (surelyTerminated){ throw detErr("CapRunningMain."+m+" was called on a surely terminated CapRunningMain."); }
   }
   private void joined(){
     try{ out.join(); err.join(); }

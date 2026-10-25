@@ -1,7 +1,7 @@
 use base.Void as Void;
 use base.Str as Str;
 use base.Nat as Nat;
-use base.Gui as GuiC;
+use base.CapGui as GuiC;
 use base.Block as Block;
 use base.Consumer as Consumer;
 use base.Frame as Frame;
@@ -24,7 +24,7 @@ Foo:base.Main{s->Block#
   .let model={Slots#[mut Model]}
   .let canvas={Slots#[mut Pane]}
   .let frame={Slots#[mut Frame]}
-  .let[mut Gui] gui= {mut Gui{.canvas->canvas; .frame->frame; .model->model!;}}
+  .let[mut CapGui] gui= {mut CapGui{.canvas->canvas; .frame->frame; .model->model!;}}
 
   .do {model.fill (Models#gui) }
 
