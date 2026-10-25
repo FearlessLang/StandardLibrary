@@ -4,6 +4,7 @@ import static _base.Util.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,6 +14,7 @@ import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -22,6 +24,13 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   static final String namesKey= "fearlessAttenuators";
   static final String markerKey= "fearlessProcess.resultMarker";
   private static final AtomicInteger children= new AtomicInteger();
+  public static void main(String[] args) throws IOException{
+    var line= new ByteArrayOutputStream();
+    for (var b= System.in.read(); b != '\n'; b= System.in.read()){ assert b >= 0; line.write(b); }
+    installParentLifeline();
+    var arg= Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(line.toString(UTF_8)));
+    if (!topLevel(() -> ((InfoMain$aw$0)instance(args[0])).imm$main$2(system(), arg))){ System.exit(1); }
+  }
   public static Object system(){
     var sys= new _System$2o$0();
     var names= System.getProperty(namesKey);
@@ -42,7 +51,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   private static Object instance(String name){
     var simple= name.substring(name.indexOf('.')+1);
     try{ return Class.forName("_"+primes(name)+"$"+caseTag(simple)+"$0").getField("instance").get(null); }
-    catch (ReflectiveOperationException _){ throw nonDetErr("No attenuator called "+name+"."); }
+    catch (ReflectiveOperationException _){ throw nonDetErr("No type called "+name+"."); }
   }
   private static String primes(String s){
     var k= 0;
@@ -57,14 +66,16 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     var parts= instance.getClass().getInterfaces()[0].getName().substring(1).split("\\$");
     return parts.length == 3 ? parts[0] : parts[0]+"'".repeat(Integer.parseInt(parts[1].substring(1)));
   }
-  @Override public Object mut$run$2(Object main, Object attenuators){ return ((_RunningMain$2dk$0)mut$start$2(main, attenuators)).mut$await$0(); }
-  @Override public Object mut$start$2(Object main, Object attenuators){
+  @Override public Object mut$run$2(Object main, Object attenuators){ return ((_RunningMain$2dk$1)mut$start$2(main, attenuators)).mut$await$0(); }
+  @Override public Object mut$run$3(Object main, Object arg, Object attenuators){ return ((_RunningMain$2dk$1)mut$start$3(main, arg, attenuators)).mut$await$0(); }
+  @Override public Object mut$start$2(Object main, Object attenuators){ return new _RunningMain$2dk$1(name(main), names(attenuators), Optional.empty()); }
+  @Override public Object mut$start$3(Object main, Object arg, Object attenuators){ return new _RunningMain$2dk$1(name(main), names(attenuators), Optional.of(toS(arg))); }
+  private static String names(Object attenuators){
     var list= (List$o$1)attenuators;
     var size= ((Nat$c$0Instance)list.read$size$0()).val();
     var extra= LongStream.range(0, size).mapToObj(i -> name(list.read$get$1(Nat$c$0Instance.instance(i))));
     var inherited= System.getProperty(namesKey);
-    var names= Stream.concat(inherited == null ? Stream.of() : Stream.of(inherited), extra).collect(Collectors.joining(","));
-    return new _RunningMain$2dk$0(name(main), names);
+    return Stream.concat(inherited == null ? Stream.of() : Stream.of(inherited), extra).collect(Collectors.joining(","));
   }
   static String marker(){ return "fearless result "+ProcessHandle.current().pid()+" "+children.incrementAndGet(); }
   static void forward(InputStream in){
@@ -82,7 +93,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     catch (IOException e){ throw new UncheckedIOException(e); }
     finally{ System.err.flush(); }
   }
-  static List<String> command(String name, String names, String marker){
+  static List<String> command(String name, String names, String marker, boolean info){
     var cmd= new ArrayList<String>();
     cmd.add(Path.of(System.getProperty("java.home"), "bin", System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java").toString());
     ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(_CapProcess$18g$0::inherited).forEach(cmd::add);
@@ -90,7 +101,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     cmd.add("-D"+markerKey+"="+marker);
     cmd.add("-cp");
     cmd.add(System.getProperty("java.class.path"));
-    cmd.add("_"+name.substring(0, name.indexOf('.'))+".Main");
+    cmd.add(info ? _CapProcess$18g$0.class.getName() : "_"+name.substring(0, name.indexOf('.'))+".Main");
     cmd.add(name);
     return cmd;
   }

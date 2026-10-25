@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 public final class Util{
   private static final AtomicBoolean parentLifelineStarted= new AtomicBoolean();
   public static void installParentLifeline(){
@@ -148,8 +149,8 @@ public final class Util{
   
   public static Deterministic deterministic(Info$o$0 i){ return new Deterministic(i); }
   public static NonDeterministic nonDeterministic(Info$o$0 i){ return new NonDeterministic(i); }
-  public static boolean topLevel(Runnable r){
-    try{ r.run(); endMarker(); _CapProcess$18g$0.result("ok", null); return true; }
+  public static boolean topLevel(Supplier<Object> r){
+    try{ var res= r.get(); endMarker(); _CapProcess$18g$0.result("ok", res instanceof Info$o$0 i ? i : null); return true; }
     catch (Deterministic d){ uncaught("det", d.i, d); }
     catch (NonDeterministic d){ uncaught("nondet", d.i, d); }
     catch (Throwable t){ t.printStackTrace(); _CapProcess$18g$0.result("nondet", (Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t)))); }

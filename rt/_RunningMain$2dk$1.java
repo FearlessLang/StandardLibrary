@@ -1,23 +1,28 @@
 package _base;
 
 import static _base.Util.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public final class _RunningMain$2dk$0 implements RunningMain$2dk$0{
+public final class _RunningMain$2dk$1 implements RunningMain$2dk$1{
   private final String name;
   private final Process p;
   private final Thread out;
   private final Thread err;
   private final StringBuilder tail= new StringBuilder();
   private volatile boolean surelyTerminated;
-  _RunningMain$2dk$0(String name, String names){
+  _RunningMain$2dk$1(String name, String names, Optional<String> arg){
     this.name= name;
     var marker= _CapProcess$18g$0.marker();
     System.out.flush();
     System.err.flush();
-    try{ p= new ProcessBuilder(_CapProcess$18g$0.command(name, names, marker)).start(); }
+    try{
+      p= new ProcessBuilder(_CapProcess$18g$0.command(name, names, marker, arg.isPresent())).start();
+      if (arg.isPresent()){ p.getOutputStream().write((arg.get()+"\n").getBytes(UTF_8)); p.getOutputStream().flush(); }
+    }
     catch (IOException e){ throw nonDetErr("The process running "+name+" could not be started: "+e.getClass().getSimpleName()); }
     out= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(p.getInputStream()));
     err= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(p.getErrorStream(), marker, tail));
@@ -35,9 +40,8 @@ public final class _RunningMain$2dk$0 implements RunningMain$2dk$0{
     boolean done;
     try{ done= p.waitFor(natToLong(((Duration$ao$0)time).read$get$0()), TimeUnit.MICROSECONDS); }
     catch (InterruptedException e){ throw interrupted(); }
-    if (!done){ return bool(false); }
-    ended();
-    return bool(true);
+    if (!done){ return optEmpty(); }
+    return optSome(ended());
   }
   @Override public Object mut$terminate$0(){
     running("terminate");
@@ -68,8 +72,10 @@ public final class _RunningMain$2dk$0 implements RunningMain$2dk$0{
     var nl= text.indexOf('\n');
     if (nl < 0){ throw nonDetErr("The process running "+name+" ended with "+p.exitValue()+" before its main ended."); }
     var kind= text.substring(0, nl);
-    if (kind.equals("ok")){ return Void$o$0.instance; }
-    var info= (Info$o$0)Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(text.substring(nl+1).stripTrailing()));
+    var rest= text.substring(nl+1).stripTrailing();
+    if (kind.equals("ok") && rest.isEmpty()){ return Void$o$0.instance; }
+    var info= (Info$o$0)Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(rest));
+    if (kind.equals("ok")){ return info; }
     if (kind.equals("det")){ throw deterministic(info); }
     assert kind.equals("nondet");
     throw nonDeterministic(info);
