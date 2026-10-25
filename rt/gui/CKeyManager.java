@@ -102,5 +102,5 @@ record CKeyCtx(
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
-  @Override public Object imm$keyStroke$0(){ return keyStroke; }
+  @Override public Object read$keyStroke$0(){ return keyStroke; }
 }

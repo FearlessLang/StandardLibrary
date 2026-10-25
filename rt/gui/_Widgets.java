@@ -955,7 +955,7 @@ final class _Frame implements Frame$1c$0{
 
 record CResizeRequest(Instant$5c$0 elapsed, Float$1c$0 aspectRatio, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight) implements ResizeRequest$9j4$0{
   @Override public Object read$elapsed$0(){ return elapsed; }
-  @Override public Object imm$aspectRatio$0(){ return aspectRatio; }
+  @Override public Object read$aspectRatio$0(){ return aspectRatio; }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
 }

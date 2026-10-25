@@ -554,9 +554,9 @@ record CTextEvent(Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
-  @Override public Object imm$text$0(){ return text; }
-  @Override public Object imm$caret$0(){ return caret; }
-  @Override public Object imm$anchor$0(){ return anchor; }
+  @Override public Object read$text$0(){ return text; }
+  @Override public Object read$caret$0(){ return caret; }
+  @Override public Object read$anchor$0(){ return anchor; }
 }
 
 final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodListener, InputMethodRequests{
