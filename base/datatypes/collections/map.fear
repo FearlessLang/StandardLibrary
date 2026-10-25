@@ -56,12 +56,12 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
 //  mut  .merge(merge: mut F[E,E,E], other: mut Map[K,E]): mut Map[K,E];
 
   /// ``this.flow`` returns a `BiFlow` of the keys and the elements of `this`, in insertion order.
-  /// The merges of the `BiFlow` of an ``imm`` map are in mode `ParImm`, the others are sequential.
+  /// Its merges are sequential; `Flow.recoverFlow` gives the parallelism back.
   /// Its two channels always have the same size: ``this.flow f``, `Map.fold` and `Map.foldUntil` are its ``get`` methods, that never throw for different sizes.
   //>   .check{Maps#({::}, "a", 1, "b", 2).flow.with(Flows#(10, 20)).getMerge{k, e, x -> k + (e + x)}.list .assertEq({::}, Lists#("a11", "b22"))}
   mut  .flow: mut BiFlow[K,E];                 /// keys and elements as a BiFlow, in insertion order; its merges are sequential
   read .flow: mut BiFlow[K,read/imm E];        /// keys and elements as a BiFlow, in insertion order; its merges are sequential
-  imm  .flow: mut BiFlow[K,imm E];             /// keys and elements as a BiFlow, in insertion order; its merges are in mode ParImm
+  imm  .flow: mut BiFlow[K,imm E];             /// keys and elements as a BiFlow, in insertion order; its merges are sequential
 
   /// ``this.flow f`` is ``this.flow.getMerge f``: the flow of ``f#(k, e)`` for each key ``k`` and its element ``e``, in insertion order.
   //>   .check{Maps#({::}, "a", 1, "b", 2).flow{k, e -> k + e}.list .assertEq({::}, Lists#("a1", "b2"))}

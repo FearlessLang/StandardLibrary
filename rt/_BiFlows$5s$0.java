@@ -10,21 +10,20 @@ import java.util.stream.Stream;
 import static _base.Util.*;
 
 public interface _BiFlows$5s$0{
-  default Object imm$$hash$2(Object p0, Object p1){ return MultiFlow.of(List.of(List$o$1Instance.asJava(p0), List$o$1Instance.asJava(p1)), FlowMode.Seq); }
+  default Object imm$$hash$2(Object p0, Object p1){ return MultiFlow.of(List.of(List$o$1Instance.asJava(p0), List$o$1Instance.asJava(p1))); }
   default Object imm$tri$2(Object p0, Object p1){ return ((MultiFlow) p1).after(List$o$1Instance.asJava(p0)); }
   default Object imm$quad$2(Object p0, Object p1){ return ((MultiFlow) p1).after(List$o$1Instance.asJava(p0)); }
   _BiFlows$5s$0 instance= new _BiFlows$5s$0(){};
 }
 abstract class MultiFlow{
-  static MultiFlow of(List<? extends List<Object>> cs, FlowMode mode){
+  static MultiFlow of(List<? extends List<Object>> cs){
     return switch (cs.size()){
-      case 2 -> new BiFlow$2w$2Instance(cs, mode);
-      case 3 -> new TriFlow$5k$3Instance(cs, mode);
-      default -> new QuadFlow$aw$4Instance(cs, mode);
+      case 2 -> new BiFlow$2w$2Instance(cs);
+      case 3 -> new TriFlow$5k$3Instance(cs);
+      default -> new QuadFlow$aw$4Instance(cs);
     };
   }
-  MultiFlow(List<? extends List<Object>> cs, FlowMode mode){ this.cs= cs.stream().map(c -> new ArrayList<>(c)).toList(); this.mode= mode; }
-  private final FlowMode mode;
+  MultiFlow(List<? extends List<Object>> cs){ this.cs= cs.stream().map(c -> new ArrayList<>(c)).toList(); }
   private final List<ArrayList<Object>> cs;
   private boolean consumed= false;
   private String name(){ return List.of("BiFlow", "TriFlow", "QuadFlow").get(cs.size() - 2); }
@@ -49,7 +48,7 @@ abstract class MultiFlow{
   private static Object[] prepend(Object x, Object[] xs){ return Stream.concat(Stream.of(x), Stream.of(xs)).toArray(); }
   private Object lazy(IntFunction<Object> e){
     Iterable<Object> it= () -> IntStream.range(0, longest()).mapToObj(e).iterator();
-    return Flow$o$1Instance.of(it, mode);
+    return Flow$o$1Instance.of(it, FlowMode.Seq);
   }
   private Object merged(Object f){ return lazy(i -> call(f, row(i))); }
   private Object folded(Object acc, Object f, IntFunction<Object[]> row, Predicate<Object> stop){
@@ -58,15 +57,15 @@ abstract class MultiFlow{
     return r;
   }
   private static Predicate<Object> until(Object pred){ return r -> isTrue(callF$2(pred, r)); }
-  private static Object channels(List<? extends List<Object>> first, List<? extends List<Object>> rest, FlowMode mode){
+  private static Object channels(List<? extends List<Object>> first, List<? extends List<Object>> rest){
     var res= new ArrayList<List<Object>>(first);
     res.addAll(rest);
-    return MultiFlow.of(res, mode);
+    return MultiFlow.of(res);
   }
-  Object after(List<Object> first){ take(); return channels(List.of(first), cs, FlowMode.Seq); }
-  public Object mut$with$1(Object p0){ take(); return channels(cs, List.of(Flow$o$1Instance.toJava(p0)), FlowMode.Seq); }
-  public Object mut$withBoth$1(Object p0){ take(); var o= (MultiFlow) p0; o.take(); return channels(cs, o.cs, mode == o.mode ? mode : FlowMode.Seq); }
-  public Object mut$enumerate$0(){ take(); return channels(List.of(IntStream.range(0, longest()).<Object>mapToObj(Nat$c$0Instance::instance).toList()), cs, mode); }
+  Object after(List<Object> first){ take(); return channels(List.of(first), cs); }
+  public Object mut$with$1(Object p0){ take(); return channels(cs, List.of(Flow$o$1Instance.toJava(p0))); }
+  public Object mut$withBoth$1(Object p0){ take(); var o= (MultiFlow) p0; o.take(); return channels(cs, o.cs); }
+  public Object mut$enumerate$0(){ take(); return channels(List.of(IntStream.range(0, longest()).<Object>mapToObj(Nat$c$0Instance::instance).toList()), cs); }
   public Object mut$tryGetMerge$1(Object p0){ take(); return same() ? ok(merged(p0)) : fail(sizesErr("getMerge")); }
   public Object mut$mergeOpts$1(Object p0){ take(); return lazy(i -> call(p0, optRow(i))); }
   public Object mut$tryGetFold$2(Object p0, Object p1){ take(); return same() ? ok(folded(p0, p1, this::row, r -> false)) : fail(sizesErr("getFold")); }
@@ -97,6 +96,6 @@ abstract class MultiFlow{
     return this;
   }
 }
-final class BiFlow$2w$2Instance extends MultiFlow implements BiFlow$2w$2{ BiFlow$2w$2Instance(List<? extends List<Object>> cs, FlowMode mode){ super(cs, mode); } }
-final class TriFlow$5k$3Instance extends MultiFlow implements TriFlow$5k$3{ TriFlow$5k$3Instance(List<? extends List<Object>> cs, FlowMode mode){ super(cs, mode); } }
-final class QuadFlow$aw$4Instance extends MultiFlow implements QuadFlow$aw$4{ QuadFlow$aw$4Instance(List<? extends List<Object>> cs, FlowMode mode){ super(cs, mode); } }
+final class BiFlow$2w$2Instance extends MultiFlow implements BiFlow$2w$2{ BiFlow$2w$2Instance(List<? extends List<Object>> cs){ super(cs); } }
+final class TriFlow$5k$3Instance extends MultiFlow implements TriFlow$5k$3{ TriFlow$5k$3Instance(List<? extends List<Object>> cs){ super(cs); } }
+final class QuadFlow$aw$4Instance extends MultiFlow implements QuadFlow$aw$4{ QuadFlow$aw$4Instance(List<? extends List<Object>> cs){ super(cs); } }
