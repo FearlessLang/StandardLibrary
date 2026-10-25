@@ -270,16 +270,13 @@ Split:Widget[Split]{
 Sections:_Container[Sections]{
   .self->this;
   mut .section: mut RegionFiller[mut And[mut Sections]];
-  mut .column: mut Sections;
-  mut .tabs: mut Sections;
-  mut .autoCollapse(Bool): mut Sections;
-  mut .scroll(Bool): mut Sections;
+  mut .tabs(Bool): mut Sections;
   mut .expand(index: Nat): mut Sections;
   mut .collapse(index: Nat): mut Sections;
   mut .remove(index: Nat): mut Sections;
   mut .title(index: Nat): mut RegionFiller[mut Sections];
   mut .content(index: Nat): mut RegionFiller[mut Sections];
-  mut .onToggle(mut SectionHandler): mut Sections;
+  mut .onTitleClick(mut SectionHandler): mut Sections;
   mut .onClose(mut SectionHandler): mut Sections;
   read .size: Nat;
   read .isExpanded(index: Nat): Bool;

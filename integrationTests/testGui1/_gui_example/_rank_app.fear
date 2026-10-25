@@ -625,16 +625,16 @@ Gui19:Consumer[mut Frame]{::
   .virtualPixelSpace(Width#600, Height#400)
   .content.border{::
     .background (Color.ghostWhite)
-    .center.sections{:: .fill .tabs .onClose{s, n -> Block#(s.remove n, Void)}
-      .section.label{:: .text "readme.txt" } .and.pane{:: .fill .background (Color.moonCheese) .label{:: .text "Click a tab to expand it, click it again to collapse it" }}
+    .center.sections{:: .fill .tabs(True) .onClose{s, n -> Block#(s.remove n, Void)}
+      .section.label{:: .text "readme.txt" } .and.pane{:: .fill .background (Color.moonCheese) .label{:: .text "Click a tab to show its content" }}
       .section.label{:: .text "main.fear" } .and.pane{:: .fill .background (Color.alienMint) .textArea{:: .width 400 .height 200 .text "A text area keeps its text while its tab is collapsed" }}
-      .section.label{:: .text "notes" } .and.pane{:: .fill .background (Color.dustyRose) .label{:: .text "With every tab closed, the space below the row is empty" }}
+      .section.label{:: .text "notes" } .and.pane{:: .fill .background (Color.dustyRose) .label{:: .text "The x of a tab removes the tab" }}
       .expand 0
       }
     }
   }
 Gui20:Consumer[mut Frame]{::
-  .title "Gui20: sections in a column, more than one expanded"
+  .title "Gui20: sections in a column, one expanded at a time"
   .virtualPixelSpace(Width#600, Height#400)
   .content.border{::
     .background (Color.ghostWhite)
@@ -643,12 +643,12 @@ Gui20:Consumer[mut Frame]{::
         .button{:: .text "Tile 1" }
         .button{:: .text "Tile 2" }
         }
-      .and.sections{:: .fill .autoCollapse(False) .scroll(True)
-        .section.pane{:: .label{:: .text "Output" } .button{:: .text "Clear" } .pack} .and.pane{:: .textArea{:: .width 400 .height 150 .text "The button in the title has no action: a click on it expands or collapses Output" }}
+      .and.sections{:: .fill
+        .section.pane{:: .label{:: .text "Output" } .button{:: .text "Clear" } .pack} .and.pane{:: .textArea{:: .width 400 .height 150 .text "The button in the title has no action: a click on it expands Output" }}
         .section.label{:: .text "Extensions" } .and.pane{:: .maxPerLine 1 .label{:: .text "extension a" } .label{:: .text "extension b" } .pack}
         .section.pane{:: .tooltip "The links of this project" .label{:: .text "Links" }} .and.pane{:: .maxPerLine 1 .textField{:: .width 300 .height 30 .text "link one" } .textField{:: .width 300 .height 30 .text "link two" } .pack}
         .section.label{:: .text "Logs" } .and.pane{:: .maxPerLine 1 .label{:: .text "log 1" } .label{:: .text "log 2" } .label{:: .text "log 3" } .pack}
-        .expand 0 .expand 1
+        .expand 0
         }
       .with{:: .fill .dividerPosition 140}
     }
