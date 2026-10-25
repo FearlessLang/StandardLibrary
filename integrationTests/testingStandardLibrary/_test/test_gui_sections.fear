@@ -16,12 +16,12 @@ GuiSectionsTests: Test {::
       .section.pane{::}.and.pane{::}
       .section.pane{::}.and.pane{::}
       .section.pane{::}.and.pane{::}
-      .autoCollapse(False) .expand 2 .expand 1 .expand 0,
-      Error.msg((x.isExpanded 0 .str) + (x.isExpanded 1 .str) + (x.isExpanded 2 .str) + " " + (x.autoCollapse(True).isExpanded 0 .str) + (x.isExpanded 1 .str) + (x.isExpanded 2 .str) + " " + (x.expand 2 .isExpanded 0 .str) + (x.isExpanded 2 .str) + " " + (x.collapse 2 .isExpanded 2 .str))
+      .expand 2 .expand 1 .expand 0,
+      Error.msg((x.isExpanded 0 .str) + (x.isExpanded 1 .str) + (x.isExpanded 2 .str) + " " + (x.expand 2 .isExpanded 0 .str) + (x.isExpanded 2 .str) + " " + (x.collapse 2 .isExpanded 2 .str))
       )}
     }}}).run{
       .ok _ -> Error.msg "The sections always stop the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "TrueTrueTrue TrueFalseFalse FalseTrue False"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "TrueFalseFalse FalseTrue False"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{:: .section.pane{::}.and.pane{::} .section.pane{::}.and.pane{::} .expand 2 .paint{g -> Error.msg "Expanding a missing section was accepted"}}
@@ -36,25 +36,13 @@ GuiSectionsTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "There is no section at index 0 in this Sections: it has no sections"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .sections{:: .autoCollapse(False) .tabs .paint{g -> Error.msg "Tabs without autoCollapse were accepted"}}
-    }}}).run{
-      .ok _ -> Error.msg "Tabs without autoCollapse always stop the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == ".tabs is called on a Sections with .autoCollapse(False): a row of tabs shows the content of one section at a time, so tabs need .autoCollapse(True)"}}.assertTrue{i};
-      }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .sections{:: .tabs .autoCollapse(False) .paint{g -> Error.msg "Tabs without autoCollapse were accepted"}}
-    }}}).run{
-      .ok _ -> Error.msg "Tabs without autoCollapse always stop the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == ".autoCollapse(False) is called on a Sections shown as tabs: a row of tabs shows the content of one section at a time. Call .column first"}}.assertTrue{i};
-      }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .sections{x -> Error.msg(x.section.pane{::}.and.pane{:: .width 100 .height 40}.section.pane{::}.and.pane{:: .width 60 .height 30}.width.str + " " + (x.height.str) + " " + (x.pack.width.str) + " " + (x.height.str) + " " + (x.tabs.pack.width.str) + " " + (x.height.str))}
+    .sections{x -> Error.msg(x.section.pane{::}.and.pane{:: .width 100 .height 40}.section.pane{::}.and.pane{:: .width 60 .height 30}.width.str + " " + (x.height.str) + " " + (x.pack.width.str) + " " + (x.height.str) + " " + (x.tabs(True).pack.width.str) + " " + (x.height.str))}
     }}}).run{
       .ok _ -> Error.msg "The sections always stop the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[112] Height[82] Width[112] Height[148] Width[112] Height[82]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[112] Height[82] Width[112] Height[112] Width[112] Height[82]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
-    .sections{:: .width 300 .height 200 .tabs .section.pane{:: .width 50 .height 30}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}} .expand 0}
+    .sections{:: .width 300 .height 200 .tabs(True) .section.pane{:: .width 50 .height 30}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}} .expand 0}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[288] Height[152]"}}.assertTrue{i};
@@ -78,7 +66,7 @@ GuiSectionsTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "The new title was drawn"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
-    .sections{:: .onToggle{x, n -> Error.msg "A program call ran onToggle"}
+    .sections{:: .onTitleClick{x, n -> Error.msg "A program call ran onTitleClick"}
       .section.pane{::}.and.pane{:: .paint{g -> Error.msg "A collapsed content was drawn"}}
       .section.pane{::}.and.pane{::}
       .expand 0 .expand 1}

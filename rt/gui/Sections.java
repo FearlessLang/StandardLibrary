@@ -26,10 +26,12 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   record Part(Section s, boolean x){}
   final ArrayList<Section> sections= new ArrayList<>();
+  static final SectionHandler$j0g$0 expandClicked= new SectionHandler$j0g$0(){ @Override public Object mut$$hash$2(Object s, Object i){
+    ((_Sections) s).mut$expand$1(i);
+    return Void$o$0.instance;
+  }};
   boolean tabs;
-  boolean autoCollapse= true;
-  boolean scroll;
-  SectionHandler$j0g$0 onToggle;
+  SectionHandler$j0g$0 onTitleClick= expandClicked;
   SectionHandler$j0g$0 onClose;
   Rectangle area= new Rectangle();
 
@@ -93,7 +95,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       return new Dimension(Math.max(row, contentW) + edgeW(), rowH + (n == 0 ? 0 : heightGap) + contentH + edgeH());
     }
     int titleW= ts.stream().mapToInt(d -> lead() + d.width + trail()).max().orElse(0);
-    int h= ts.stream().mapToInt(d -> d.height).sum() + cs.stream().mapToInt(d -> d.height).sum() + heightGap * Math.max(0, 2 * n - 1);
+    int h= ts.stream().mapToInt(d -> d.height).sum() + cs.stream().mapToInt(d -> d.height).max().orElse(0) + heightGap * n;
     return new Dimension(Math.max(titleW, contentW) + edgeW(), h + edgeH());
   }
   @Override public void addLayoutComponent(String name, Component comp){}
@@ -103,9 +105,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   @Override public void layoutContainer(Container target){
     if (tabs){ layoutTabs(); return; }
     int w= viewW();
-    contentH = sections.stream().mapToInt(s -> s.title.own().height + (s.expanded ? heightGap + s.content.own().height : 0)).sum() + heightGap * Math.max(0, sections.size() - 1);
-    scrollY = Math.clamp(scrollY, 0, maxScrollY());
-    int y= top - scrollY;
+    int y= top;
     for (var s : sections){
       var t= s.title.own();
       s.head = new Rectangle(left, y, w, t.height);
@@ -133,8 +133,6 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     for (var s : sections){
       if (s.expanded){ MutableBorderLayout.place(s.content.component, area.x, area.y, area.width, area.height, true, true); }
     }
-    contentH = viewH();
-    scrollY = 0;
   }
   @Override boolean hides(Component k){
     for (var s : sections){ if (s.content.component == k){ return !s.expanded; } }
@@ -145,20 +143,12 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     for (var s : sections){ if (s.content.component == k){ return area; } }
     return null;
   }
-  @Override boolean barRight(){ return scroll; }
-  @Override void clipChildren(Canvas cv){
-    if (!scroll){ return; }
-    cv.clipRect(Rect.makeXYWH(left, top, viewW(), viewH()));
-  }
   @Override void sk(Canvas cv){
     super.sk(cv);
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(left, top, viewW(), viewH()));
     for (var s : sections){ Sk.head(cv, this, s); }
     cv.restoreToCount(save);
-  }
-  @Override void skOver(Canvas cv){
-    if (scroll){ Sk.bar(cv, this, true); }
   }
   Part part(Point p){
     if (!view().contains(p)){ return null; }
@@ -174,11 +164,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       handle(onClose, p.s());
       return true;
     }
-    if (p.s().expanded){ show(p.s(), false); }
-    else{ expand(p.s()); }
-    component.invalidate();
-    frame.markLayoutDirty();
-    if (onToggle != null){ handle(onToggle, p.s()); }
+    handle(onTitleClick, p.s());
     return true;
   }
   void handle(SectionHandler$j0g$0 h, Section s){
@@ -189,7 +175,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     }}));
   }
   void expand(Section s){
-    if (autoCollapse){ sections.stream().filter(o -> o != s).forEach(o -> show(o, false)); }
+    sections.stream().filter(o -> o != s).forEach(o -> show(o, false));
     show(s, true);
   }
   void show(Section s, boolean expanded){
@@ -198,22 +184,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   @Override public Object mut$section$0(){ return new _RegionFiller(frame, (s, make) -> titled(build(s, make))); }
   Object titled(AWidget title){ return _RegionFiller.and(frame, (s, make) -> add(title, build(s, make))); }
-  @Override public Object mut$column$0(){ return reStyle(() -> tabs = false); }
-  @Override public Object mut$tabs$0(){
-    return reStyle(() -> {
-      if (!autoCollapse){ throw Util.detErr(".tabs is called on a Sections with .autoCollapse(False): a row of tabs shows the content of one section at a time, so tabs need .autoCollapse(True)"); }
-      tabs = true;
-    });
-  }
-  @Override public Object mut$autoCollapse$1(Object b){
-    boolean v= Util.isTrue(b);
-    return reStyle(() -> {
-      if (!v && tabs){ throw Util.detErr(".autoCollapse(False) is called on a Sections shown as tabs: a row of tabs shows the content of one section at a time. Call .column first"); }
-      autoCollapse = v;
-      if (v){ sections.stream().filter(s -> s.expanded).findFirst().ifPresent(this::expand); }
-    });
-  }
-  @Override public Object mut$scroll$1(Object b){ return reStyle(() -> scroll = Util.isTrue(b)); }
+  @Override public Object mut$tabs$1(Object b){ return reStyle(() -> tabs = Util.isTrue(b)); }
   @Override public Object mut$expand$1(Object i){
     long k= Util.natToLong(i);
     return reStyle(() -> expand(at(k)));
@@ -235,7 +206,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   @Override public Object mut$title$1(Object i){ return replacer(Util.natToLong(i), true); }
   @Override public Object mut$content$1(Object i){ return replacer(Util.natToLong(i), false); }
-  @Override public Object mut$onToggle$1(Object h){ return onEdt(() -> onToggle = (SectionHandler$j0g$0) h); }
+  @Override public Object mut$onTitleClick$1(Object h){ return onEdt(() -> onTitleClick = (SectionHandler$j0g$0) h); }
   @Override public Object mut$onClose$1(Object h){ return reStyle(() -> onClose = (SectionHandler$j0g$0) h); }
   @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }
   @Override public Object read$isExpanded$1(Object i){
