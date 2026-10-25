@@ -42,9 +42,22 @@
 /// Now ``North.match(DirectionMatch[Str]{ .north->`n`; .east->`e`; .south->`s`; .west->`w`; })``
 /// is ``n``: every value still gets `.list`/`.map`/`.index`/`.info`/`.fromInfo` for free from
 /// `Enums`/`Enum`, on top of its own `.match`.
+///
+/// Or, declaring the family and the values inside the family type:
+/// ```
+/// Direction: Enum[Direction]{ read .close->this; .close->::;
+///   Directions: Enums[Direction]{Lists#(
+///     North: Direction{},
+///     East: Direction{},
+///     South: Direction{},
+///     West: Direction{}
+///     )};
+///   }
+/// ```
+/// `Enums` is `CaptureFree`, so ``Directions.list`` still works outside of ``Direction``.
 
 /// The "list of values" side of an enumeration family.
-Enums[E]: FromInfo[E]{
+Enums[E]: FromInfo[E], CaptureFree{
   /// every value, in declaration order, as an ``Enum[E]``.
   .enumList: List[Enum[E]];
   /// every value, in declaration order.

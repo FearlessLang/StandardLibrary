@@ -15,6 +15,13 @@ East:  Direction{::.east}
 South: Direction{::.south}
 West:  Direction{::.west}
 
+Suit: Enum[Suit]{ read .close->this; .close->::;
+  Suits: Enums[Suit]{Lists#(
+    Hearts: Suit{},
+    Spades: Suit{}
+    )};
+  }
+
 EnumTests: Test {::
   .check{Directions.list.size.assertEq 4}
   .check{Directions.list.get(0).assertEq North}
@@ -48,6 +55,11 @@ EnumTests: Test {::
 
   .check{North.info.assertEq(Infos.msg "North")}
   .check{North.imm.assertEq North}
+
+  .check{Suits.list.assertEq({::}, Lists#(Hearts, Spades))}
+  .check{Spades.index.assertEq 1}
+  .check{Hearts < Spades .assertTrue}
+  .check{Suits.map.get("Spades").assertEq Spades}
   }
 
 TestEnum: Test {::
