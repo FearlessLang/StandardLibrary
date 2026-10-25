@@ -196,12 +196,6 @@ Widget[S]:_Styled[S]{
   mut .leftInset'(WidthNat):mut S;
   mut .rightInset(n:Nat):mut S->this.rightInset'(WidthNat#n);
   mut .rightInset'(WidthNat):mut S;
-  //The size of a widget (insets included, default 24x24) is the last of:
-  //  the size set by .width and .height;
-  //  the size grown by a new text or a new child, to fit it;
-  //  the size set by .pack, to fit the current content.
-  //With .fill, the widget is drawn larger: a Border gives its whole region,
-  //a Pane its whole line.
   mut .width(n:Nat):mut S->this.width'(WidthNat#n);
   mut .width'(WidthNat):mut S;
   mut .height(n:Nat):mut S->this.height'(HeightNat#n);
@@ -324,7 +318,7 @@ Frame:_Styled[Frame]{ .self->this;
   mut .close: Void;
   mut .fps(fps: Nat): mut Frame;
   read .fps: Nat;
-  read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
+  read .elapsed: Instant;
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
   mut .content: mut RegionFiller[Void];
   mut .onKey(mut Scope[Keys]): mut Frame;
@@ -378,7 +372,7 @@ Gui:{
   mut .opacityFloor(Alpha): mut Gui;
   mut .closeKey(KeyStroke): mut Gui;
   mut .fullScreenKey(KeyStroke): mut Gui;
-  mut .run(mut Consumer[mut Frame]): Void;//public interface TopF{ void run(Frame f); }
+  mut .run(mut Consumer[mut Frame]): Void;
   }
 Label:_Caption[Label]{
   .self->this;
@@ -417,11 +411,6 @@ TextArea:_EditText[TextArea]{
 TextEvent:ScreenContext{ .text:UStr; .caret:Nat; .anchor:Nat; }
 CaretPainter:{ .run(mut CaretGraphics):mut Graphics; }
 CaretGraphics:Graphics{ read .sinceMove:Duration; read .lineHeight:HeightNat; }
-//The image always covers the whole widget, insets excluded.
-//With .keepAspect(False) the image stretches to the widget.
-//With .keepAspect(True) (the default) the last of .width and .height decides
-//the other one, so the widget has the proportions of the image; a widget drawn
-//larger by .fill shows the image scaled to cover it, centered, clipped on one axis.
 Picture:Widget[Picture]{
   .self->this;
   mut .image(Image):mut Picture;
@@ -491,26 +480,12 @@ Pane:_Container[Pane]{
   mut .textField(mut Scope[TextField]):mut Pane;
   mut .textArea(mut Scope[TextArea]):mut Pane;
   mut .clear:mut Pane;
-  //Flow axis: .horizontal (default) lays children left-to-right, wrapping
-  //into new rows; .vertical lays them top-to-bottom, wrapping into new
-  //columns.
   mut .horizontal: mut Pane;
   mut .vertical: mut Pane;
-  //A line holds at least .minPerLine children (default 1) and at most
-  //.maxPerLine children (default Math.maxNat). Between the two, a child
-  //that would overflow the Pane starts a new line.
-  //A line holding .minPerLine children too long for the Pane overflows it.
   mut .minPerLine(Nat): mut Pane;
   mut .maxPerLine(Nat): mut Pane;
-  //.lineScroll(True) scrolls along the lines, .stackScroll(True) across them;
-  //with False (the default) what does not fit is clipped. A scroll bar is
-  //shown whenever its setting is True, and the lines break against the
-  //space left beside the bars.
   mut .lineScroll(Bool): mut Pane;
   mut .stackScroll(Bool): mut Pane;
-  //.centered(True) (the default) centers each line along the flow axis,
-  //the stack of lines across it, and each child across its line.
-  //.centered(False) places them all at the start: the left and the top.
   mut .centered(Bool): mut Pane;
   }
 
@@ -544,7 +519,6 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
       });
     read .isFull: Bool -> e.get.isSome;
     mut .opt: mut Opt[E] -> e.get;
-    //read .opt: read Opt[read/imm E] -> e.get; //TODO: correctly returning Opt[E], but it is undesirable?
     }};
   }
 KeyEvent:ScreenContext{
