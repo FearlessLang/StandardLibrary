@@ -355,7 +355,6 @@ interface Sk{
   }
 
   private static int baseColor(int c, boolean over, boolean down){
-    if (c >>> 24 == 0){ c = 0xFFBEBEBE; }
     if (over){ c = mix(c, 0xFFFFFFFF, 12); }
     if (down){ c = mix(c, 0xFF000000, 16); }
     return c;

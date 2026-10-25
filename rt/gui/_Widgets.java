@@ -60,7 +60,11 @@ final class _Button extends AWidget implements Button$2o$0{
   Path bevelTl, bevelBr;
   int bevelW= -1, bevelH= -1, bevelR= -1, bevelD= -1;
 
-  _Button(_Frame frame){ super(frame); }
+  _Button(_Frame frame){
+    super(frame);
+    background = (Color$1c$0) Color$1c$0.instance.imm$rgb$3(n(190), n(190), n(190));
+    bg = Sk.color(background);
+  }
 
   @Override public Object mut$action$1(Object r){
     return onEdt(() -> action = (MF$7$1) r);
