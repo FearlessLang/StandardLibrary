@@ -24,6 +24,11 @@ ByteDivRemTests: Test {::
   .check{+6.getByte.div 3 .assertEq ({::},Opts#(+2.getByte))}
   .check{+7.getByte.div 3 .assertEq ({::},Opt[Byte])}
   .check{+7.getByte.div 0 .assertEq ({::},Opt[Byte])}
+  .check{200.getByte / 1 .assertEq(200 / 1)}
+  .check{200.getByte / 2 .getFloat .assertEq +100.0}
+  .check{200.getByte .getTruncDiv(Math.maxNat) .assertEq(0.getByte)}
+  .check{200.getByte .truncDiv(Math.maxNat) .assertEq({::}, Opts#(0.getByte))}
+  .check{(200.getByte .tryGetTruncDiv(Math.maxNat)).ok.assertEq({::}, Opts#(0.getByte))}
   }
 
 ByteConvTests: Test {::

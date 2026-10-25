@@ -88,7 +88,7 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
       throw err("Byte/: Cannot create a Num with denominator 0.");
     }
     return Num$c$0Instance.instance(
-      BigInteger.valueOf(val),
+      BigInteger.valueOf(u8(val)),
       unsignedLongToBigInteger(d)
     );
   }
@@ -101,13 +101,13 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
     long d= natBits(p0);
 
     if (d == 0L){ throw err("Byte.getTruncDiv: d==0"); }
-    return instance((byte)(u8(val) / d));
+    return instance((byte)Long.divideUnsigned(u8(val), d));
   }
   @Override public Object imm$tryGetTruncDiv$1(Object p0){
     long d= natBits(p0);
 
     if (d == 0L){ return fail("Byte.getTruncDiv: d==0"); }
-    return ok(instance((byte)(u8(val) / d)));
+    return ok(instance((byte)Long.divideUnsigned(u8(val), d)));
   }
   /// for a % b = c, c <= a.
   /// Therefore it is safe to cast this % nat to byte
