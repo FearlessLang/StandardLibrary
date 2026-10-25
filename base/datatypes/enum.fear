@@ -8,7 +8,7 @@
 /// Minimal usage, without a dedicated Match type:
 /// ```
 /// Directions: Enums[Direction]{
-///   .enumList -> Lists#(North,East,South,West).as{::};
+///   .enumList -> Lists#(North,East,South,West);
 ///   }
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
@@ -52,12 +52,12 @@ Enums[E]: FromInfo[E]{
   .list: List[E] -> this.enumList.flow.map{::.imm}.list;
   /// looks a value up by its `.str`.
   /// `` Directions.map.get`North` `` is ``North``.
-  .map: Map[Str,E] -> this.enumList.flow.mapping({::},{.key e->e.str; .elem e->e.imm;}).as{::};
+  .map: Map[Str,E] -> this.enumList.flow.mapping({::},{.key e->e.str; .elem e->e.imm;});
   /// declaration index of every value's `.str`.
   /// `` Directions.indexMap.get`West` `` is ``3``.
   .indexMap: Map[Str,Nat] -> this.enumList.flow.fold(
-    {Maps#[Str,Str,Nat]{::}.as{::}},
-    {acc,e->acc.with(e.str,acc.size).as{::}}
+    {Maps#[Str,Str,Nat]{::}},
+    {acc,e->acc.with(e.str,acc.size)}
     );
   /// looks a value up by its `.info`, the inverse of `Enum.info`.
   /// ``Directions.fromInfo(North.info)`` is ``North``.
