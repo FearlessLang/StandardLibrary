@@ -1,4 +1,4 @@
 /// A type implementing `Named` gets `.name`: the qualified name and the generic arity of the concrete type of the object.
 /// For ``North: Named{}`` in the package ``hello``, ``North.name`` is `` `hello.North` ``.
 /// For ``Box[T]: Named{}`` in the package ``hello``, ``Box[Nat].name`` is `` `hello.Box[_]` ``.
-Named: { read .name: Str -> _Magic!; }
+Named: Final[".name"]{ read .name: Str -> _Magic!; }
