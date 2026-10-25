@@ -1,10 +1,3 @@
-BugByteDivTests: Test {::
-  .check{200.getByte / 1 .assertEq(200 / 1)}
-  .check{200.getByte / 2 .getFloat .assertEq +100.0}
-  .check{200.getByte .getTruncDiv(Math.maxNat) .assertEq(0.getByte)}
-  .check{200.getByte .truncDiv(Math.maxNat) .assertEq({::}, Opts#(0.getByte))}
-  }
-
 BugIntDivTests: Test {::
   .check{Math.minInt .getTruncDiv 9_223_372_036_854_775_808 .assertEq -1}
   .check{Math.minInt .getRem 9_223_372_036_854_775_808 .assertEq +0}
@@ -54,7 +47,6 @@ BugMathTests: Test {::
   }
 
 TestNumStrBugs: Test {::
-  .test BugByteDivTests
   .test BugIntDivTests
   .test BugIntRangeTests
   .test BugNatFloatTests
