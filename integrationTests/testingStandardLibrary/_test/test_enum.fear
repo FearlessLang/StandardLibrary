@@ -1,6 +1,5 @@
 Directions: Enums[Direction]{
-  .list -> Lists#(North,East,South,West);
-  .strBy -> {::};
+  .enumList -> Lists#(North,East,South,West).as{::};
   }
 
 DirectionMatch[R:**]: { mut .north: R; mut .east: R; mut .south: R; mut .west: R; }
@@ -20,6 +19,7 @@ EnumTests: Test {::
   .check{Directions.list.size.assertEq 4}
   .check{Directions.list.get(0).assertEq North}
   .check{Directions.list.get(3).assertEq West}
+  .check{Directions.list.get(1).match(DirectionMatch[Str]{ .north->"n"; .east->"e"; .south->"s"; .west->"w"; }).assertEq "e"}
 
   .check{North.str.assertEq "North"}
   .check{West.str.assertEq "West"}
