@@ -39,7 +39,7 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   mut .check(name: Str): Void;
   ///Selects the project ``name`` and ends the main or the compilation of the project currently running, if any.
   mut .terminate(name: Str): Void;
-  ///Selects the project ``name`` and deletes its compiled cache.
+  ///Selects the project ``name`` and deletes its compilation cache.
   mut .deleteCache(name: Str): Void;
   ///Sets the kind of the project ``name`` to idle.
   mut .kindIdle(name: Str): Void;
