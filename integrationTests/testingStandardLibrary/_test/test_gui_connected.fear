@@ -2,7 +2,7 @@ GuiConnectedTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
     .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
-    .do{f.content{:: .save p .label{:: .text "a" .save l}}}
+    .do{f.content.pane{:: .save p .label{:: .text "a" .save l}}}
     .do{Block#(p!.clear, Void)}
     .return{Block#(l!.text "b", Void)}
     }}).run{
@@ -12,7 +12,7 @@ GuiConnectedTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
     .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
-    .do{f.content{:: .save p .label{:: .text "a" .save l}}}
+    .do{f.content.pane{:: .save p .label{:: .text "a" .save l}}}
     .do{Block#(p!.clear, Void)}
     .do{Block#(l!.changeDetached{:: .text "b"}, Void)}
     .return{Error.msg(l!.text)}
@@ -23,7 +23,7 @@ GuiConnectedTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
     .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
-    .do{f.content{:: .save p .label{:: .text "a" .save l}}}
+    .do{f.content.pane{:: .save p .label{:: .text "a" .save l}}}
     .do{Block#(p!.clear, Void)}
     .do{Block#(l!.changeDetached{:: .text "b"}, Void)}
     .return{Block#(l!.text "c", Void)}
@@ -35,7 +35,7 @@ GuiConnectedTests: Test {::
     .let[mut Slot[mut Pane]] outer = {Slots#[mut Pane]}
     .let[mut Slot[mut Pane]] inner = {Slots#[mut Pane]}
     .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
-    .do{f.content{:: .save outer .pane{:: .save inner .label{:: .text "a" .save l}}}}
+    .do{f.content.pane{:: .save outer .pane{:: .save inner .label{:: .text "a" .save l}}}}
     .do{Block#(outer!.clear, Void)}
     .do{Block#(inner!.changeDetached{q -> Block#(l!.text "d", q)}, Void)}
     .return{Error.msg(l!.text)}
@@ -45,8 +45,8 @@ GuiConnectedTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
-    .do{f.content{:: .label{:: .text "a" .save l}}}
-    .do{f.content{::}}
+    .do{f.content.pane{:: .label{:: .text "a" .save l}}}
+    .do{f.content.pane{::}}
     .return{Block#(l!.text "b", Void)}
     }}).run{
       .ok _ -> Error.msg "Changing a widget of a replaced content always fails";
@@ -54,7 +54,7 @@ GuiConnectedTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Mouse]] m = {Slots#[mut Mouse]}
-    .do{f.content{:: .mouse{:: .save m} .mouse{::}}}
+    .do{f.content.pane{:: .mouse{:: .save m} .mouse{::}}}
     .return{Block#(m!.clicked{_, _, _, _, _ -> Void}, Void)}
     }}).run{
       .ok _ -> Error.msg "Changing a replaced Mouse always fails";
@@ -64,7 +64,7 @@ GuiConnectedTests: Test {::
     .let[mut Slot[mut Keys]] k = {Slots#[mut Keys]}
     .do{Block#(f.onKey{:: .save k}.onKey{::}, Void)}
     .do{Block#(k!.pressed{:: .matchOnly(Key#"A")}, Void)}
-    .return{f.content{::}}
+    .return{f.content.pane{::}}
     }}).run{
       .ok _ -> Error.msg "Changing a replaced Keys always fails";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "This Keys was replaced by a later .onKey, so a key action added now would never run"}}.assertTrue{i};
@@ -90,7 +90,7 @@ ClosedLabel: {#(gui: mut base.Gui): Void -> Block#
   .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
-    .return{f.content{:: .label{:: .text "a" .save l}}}
+    .return{f.content.pane{:: .label{:: .text "a" .save l}}}
     }}
   .return{Block#(l!.text "b", Void)}
   }
@@ -98,7 +98,7 @@ ClosedMouse: {#(gui: mut base.Gui): Void -> Block#
   .let[mut Slot[mut Mouse]] m = {Slots#[mut Mouse]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
-    .return{f.content{:: .mouse{:: .save m}}}
+    .return{f.content.pane{:: .mouse{:: .save m}}}
     }}
   .return{Block#(m!.clicked{_, _, _, _, _ -> Void}, Void)}
   }
@@ -106,7 +106,7 @@ ClosedKeys: {#(gui: mut base.Gui): Void -> Block#
   .let[mut Slot[mut Keys]] k = {Slots#[mut Keys]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .action{f.close}}).onKey{:: .save k}, Void)}
-    .return{f.content{::}}
+    .return{f.content.pane{::}}
     }}
   .return{Block#(k!.pressed{:: .matchOnly(Key#"A")}, Void)}
   }
@@ -114,7 +114,7 @@ ClosedModelFps: {#(gui: mut base.Gui): Void -> Block#
   .let[mut Slot[mut ModelFps]] old = {Slots#[mut ModelFps]}
   .do{gui.run{f -> Block#
     .do{Block#(f.modelFps(100, {:: .save old .action{f.close}}), Void)}
-    .return{f.content{::}}
+    .return{f.content.pane{::}}
     }}
   .return{Block#(old!.action{Void}, Void)}
   }

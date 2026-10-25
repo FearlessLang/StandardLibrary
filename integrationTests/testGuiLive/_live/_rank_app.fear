@@ -32,7 +32,7 @@ Live:Main{sys -> sys.gui.run{f -> Block#
   .var[Nat] draggedE = {0}
   .return{f
     .title "GuiLive: live changes are atomic"
-    .content{::
+    .content.pane{::
       .background(Color.ghostWhite)
       .save root
       .vertical

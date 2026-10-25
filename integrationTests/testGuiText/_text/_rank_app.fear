@@ -22,7 +22,7 @@ TextDemo: Main { sys -> sys.gui.run{f -> Block#
     .onKey{:: .pressed{:: .matchOnly(KeyStroke#"F1") .matchAlso(KeyStroke#"S") .matchAlso(KeyStroke#"UP")
       .doOnly{e -> Block#(log!.append("key " + (e.keyStroke.get) | ""), Void)}
       }}
-    .content{::
+    .content.pane{::
       .background(Color.ghostWhite)
       .horizontal .maxPerLine 1
       .textField{:: .width 760 .height 34 .text "a field" .save field

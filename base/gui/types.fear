@@ -248,21 +248,11 @@ _Container[S]:Widget[S]{
   }
 Border:_Container[Border]{
   .self->this;
-  mut .north(mut Scope[Pane]):mut Border;
-  mut .south(mut Scope[Pane]):mut Border;
-  mut .east(mut Scope[Pane]):mut Border;
-  mut .west(mut Scope[Pane]):mut Border;
-  mut .center(mut Scope[Pane]):mut Border;
-  mut .northB(mut Scope[Border]):mut Border;
-  mut .southB(mut Scope[Border]):mut Border;
-  mut .eastB(mut Scope[Border]):mut Border;
-  mut .westB(mut Scope[Border]):mut Border;
-  mut .centerB(mut Scope[Border]):mut Border;
-  mut .northS(mut Scope[Split]):mut Border;
-  mut .southS(mut Scope[Split]):mut Border;
-  mut .eastS(mut Scope[Split]):mut Border;
-  mut .westS(mut Scope[Split]):mut Border;
-  mut .centerS(mut Scope[Split]):mut Border;
+  mut .north: mut RegionFiller[mut Border];
+  mut .south: mut RegionFiller[mut Border];
+  mut .east: mut RegionFiller[mut Border];
+  mut .west: mut RegionFiller[mut Border];
+  mut .center: mut RegionFiller[mut Border];
   }
 Split:Widget[Split]{
   .self->this;
@@ -274,13 +264,27 @@ Split:Widget[Split]{
   read .draggable: Bool;
   mut .mouse(mut Scope[Mouse]):mut Split;
   mut .paint(Painter):mut Split;
-  mut .first(mut Scope[Pane]):mut Split;
-  mut .firstB(mut Scope[Border]):mut Split;
-  mut .firstS(mut Scope[Split]):mut Split;
-  mut .second(mut Scope[Pane]):mut Split;
-  mut .secondB(mut Scope[Border]):mut Split;
-  mut .secondS(mut Scope[Split]):mut Split;
+  mut .first: mut RegionFiller[mut Split];
+  mut .second: mut RegionFiller[mut Split];
   }
+Sections:_Container[Sections]{
+  .self->this;
+  mut .section: mut RegionFiller[mut And[mut Sections]];
+  mut .column: mut Sections;
+  mut .tabs: mut Sections;
+  mut .autoCollapse(Bool): mut Sections;
+  mut .scroll(Bool): mut Sections;
+  mut .expand(index: Nat): mut Sections;
+  mut .collapse(index: Nat): mut Sections;
+  mut .remove(index: Nat): mut Sections;
+  mut .title(index: Nat): mut RegionFiller[mut Sections];
+  mut .content(index: Nat): mut RegionFiller[mut Sections];
+  mut .onToggle(mut SectionHandler): mut Sections;
+  mut .onClose(mut SectionHandler): mut Sections;
+  read .size: Nat;
+  read .isExpanded(index: Nat): Bool;
+  }
+SectionHandler:{ mut #(sections: mut Sections, index: Nat): Void; }
 _Caption[S]: Widget[S]{
   mut .text(s:Str):mut S->this.uText(s.u);
   mut .uText(UStr):mut S;
@@ -325,8 +329,7 @@ Frame:_Styled[Frame]{ .self->this;
   read .fps: Nat;
   read .elapsed: Instant;  //Time since game time zero (warmup end), as seen by the last repaint tick.
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
-  mut .content(s: mut Scope[Pane]): Void;
-  mut .contentB(s: mut Scope[Border]): Void;
+  mut .content: mut RegionFiller[Void];
   mut .onKey(mut Scope[Keys]): mut Frame;
   }
 ResizeRequest:ScreenContext{ .aspectRatio: Float; }
@@ -483,7 +486,8 @@ Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
-  mut .split(mut Scope[Split]):mut Pane;
+  mut .split: mut RegionFiller[mut And[mut SplitWith[mut Pane]]];
+  mut .sections(mut Scope[Sections]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
   mut .picture(mut Scope[Picture]):mut Pane;
@@ -512,6 +516,20 @@ Pane:_Container[Pane]{
   //.centered(False) places them all at the start: the left and the top.
   mut .centered(Bool): mut Pane;
   }
+
+RegionFiller[S:*]:{
+  mut .pane(mut Scope[Pane]): S;
+  mut .border(mut Scope[Border]): S;
+  mut .split: mut RegionFiller[mut And[mut SplitWith[S]]];
+  mut .sections(mut Scope[Sections]): S;
+  mut .button(mut Scope[Button]): S;
+  mut .label(mut Scope[Label]): S;
+  mut .picture(mut Scope[Picture]): S;
+  mut .textField(mut Scope[TextField]): S;
+  mut .textArea(mut Scope[TextArea]): S;
+  }
+And[T:*]:{ mut .and: mut RegionFiller[T]; }
+SplitWith[S:*]:{ mut .with(mut Scope[Split]): S; }
 
 Scope[T]: { mut .run(mut T): mut T; }
 Painter: { .run(mut Graphics): mut Graphics; }

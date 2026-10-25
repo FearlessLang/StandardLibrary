@@ -118,6 +118,7 @@ MyTests:UnitTests{::
   .test GuiImageTests
   .test GuiTextTests
   .test GuiSplitTests
+  .test GuiSectionsTests
   .test TestList
   .test TestESparseList
   .test TestMultiFlowFence
