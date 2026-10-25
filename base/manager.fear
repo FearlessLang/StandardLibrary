@@ -43,20 +43,19 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   mut .deleteCache(name: Str): Void;
   ///Sets the kind of the project ``name`` to idle.
   mut .kindIdle(name: Str): Void;
-  ///Sets the kind of the project ``name`` to code; the kind changes only from idle.
+  ///Sets the kind of the project ``name`` to code.
   mut .kindCode(name: Str): Void;
-  ///Sets the kind of the project ``name`` to read only data; the kind changes only from idle.
-  mut .kindDataReadOnly(name: Str): Void;
-  ///Sets the kind of the project ``name`` to read write data; the kind changes only from idle.
-  mut .kindDataReadWrite(name: Str): Void;
+  ///Sets the kind of the project ``name`` to dataRead.
+  mut .kindDataRead(name: Str): Void;
+  ///Sets the kind of the project ``name`` to dataEdit.
+  mut .kindDataEdit(name: Str): Void;
   ///Forgets the project ``name``.
   mut .forget(name: Str): Void;
-  ///Links the code project ``name`` to the data project ``data`` for reading, under the type names ``types``.
-  ///No type names removes that link.
-  mut .linkRead(name: Str, data: Str, types: List[Str]): Void;
-  ///Links the code project ``name`` to the data project ``data`` for reading and writing, under the type names ``types``.
-  ///No type names removes that link.
-  mut .linkWrite(name: Str, data: Str, types: List[Str]): Void;
+  ///Mounts the data project ``data`` on the DataRead type ``type`` of the code project ``name``;
+  ///``type`` is a qualified type name, like "hello.Diary".
+  mut .mount(name: Str, type: Str, data: Str): Void;
+  ///Removes the mount of the DataRead type ``type`` of the code project ``name``.
+  mut .unmount(name: Str, type: Str): Void;
   ///Sets the attenuators the manager applies to the main ``main`` of the project ``name`` to ``attenuators``, in that order.
   ///No attenuator removes them all.
   mut .attenuate(name: Str, main: Str, attenuators: List[Str]): Void;

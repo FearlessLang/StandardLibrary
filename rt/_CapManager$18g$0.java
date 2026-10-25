@@ -55,9 +55,6 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     catch (InvalidPathException _){ return false; }
   }
   private static Stream<String> strs(Object list){ return List$o$1Instance.asJava(list).stream().map(AssetBytesRead::str); }
-  private static Object link(Object name, Object data, String how, Object types){
-    return send("Link", Stream.concat(Stream.of(AssetBytesRead.str(name), AssetBytesRead.str(data), how), strs(types)));
-  }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$show$0(){ return send("Show"); }
@@ -76,10 +73,10 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$deleteCache$1(Object name){ return send("DeleteCache", AssetBytesRead.str(name)); }
   @Override public Object mut$kindIdle$1(Object name){ return send("Kind", AssetBytesRead.str(name), "idle"); }
   @Override public Object mut$kindCode$1(Object name){ return send("Kind", AssetBytesRead.str(name), "code"); }
-  @Override public Object mut$kindDataReadOnly$1(Object name){ return send("Kind", AssetBytesRead.str(name), "data:readOnly"); }
-  @Override public Object mut$kindDataReadWrite$1(Object name){ return send("Kind", AssetBytesRead.str(name), "data:readWrite"); }
+  @Override public Object mut$kindDataRead$1(Object name){ return send("Kind", AssetBytesRead.str(name), "dataRead"); }
+  @Override public Object mut$kindDataEdit$1(Object name){ return send("Kind", AssetBytesRead.str(name), "dataEdit"); }
   @Override public Object mut$forget$1(Object name){ return send("Forget", AssetBytesRead.str(name)); }
-  @Override public Object mut$linkRead$3(Object name, Object data, Object types){ return link(name, data, "read", types); }
-  @Override public Object mut$linkWrite$3(Object name, Object data, Object types){ return link(name, data, "write", types); }
+  @Override public Object mut$mount$3(Object name, Object type, Object data){ return send("Mount", AssetBytesRead.str(name), AssetBytesRead.str(type), AssetBytesRead.str(data)); }
+  @Override public Object mut$unmount$2(Object name, Object type){ return send("Mount", AssetBytesRead.str(name), AssetBytesRead.str(type)); }
   @Override public Object mut$attenuate$3(Object name, Object main, Object attenuators){ return send("Attenuate", Stream.concat(Stream.of(AssetBytesRead.str(name), AssetBytesRead.str(main)), strs(attenuators))); }
 }

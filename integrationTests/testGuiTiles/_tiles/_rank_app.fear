@@ -56,19 +56,19 @@ TileGrid:Main{sys -> Block#
 State:{ .text: Str; .flag: Painter; .runs: Bool -> False; .at(now: Instant): State -> this; }
 States:{
   .idle: State -> { .text -> "idle"; .flag -> Dot#(Color.rgb(117, 117, 117), ""); };
-  .dataReadOnly: State -> { .text -> "data: read only"; .flag -> Dot#(Color.rgb(21, 101, 192), "R"); };
-  .dataReadWrite: State -> { .text -> "data: read write"; .flag -> Dot#(Color.rgb(106, 27, 154), "W"); };
+  .dataRead: State -> { .text -> "dataRead"; .flag -> Dot#(Color.rgb(21, 101, 192), "R"); };
+  .dataEdit: State -> { .text -> "dataEdit"; .flag -> Dot#(Color.rgb(106, 27, 154), "W"); };
   .codeNoCache: State -> { .text -> "code: not compiled (no cache)"; .flag -> Dot#(Color.rgb(239, 108, 0), "!"); };
   .codeOutdated: State -> { .text -> "code: not compiled (cache out of date)"; .flag -> Dot#(Color.rgb(239, 108, 0), "!"); };
   .codeInvalid: State -> { .text -> "code: invalid content"; .flag -> Dot#(Color.rgb(198, 40, 40), "X"); };
-  .dataInvalid: State -> { .text -> "data: invalid content"; .flag -> Dot#(Color.rgb(198, 40, 40), "X"); };
+  .dataReadInvalid: State -> { .text -> "dataRead: invalid content"; .flag -> Dot#(Color.rgb(198, 40, 40), "X"); };
   .codeCompiled: State -> { .text -> "code: compiled"; .flag -> Dot#(Color.rgb(46, 125, 50), ">"); .runs -> True; };
   .busy(end: Instant): State -> { 'self
     .text -> "code: busy";
     .flag -> Busy#(end, States.codeCompiled.flag);
     .at(now) -> (now < end) ? { .then -> self; .else -> States.codeCompiled };
     };
-  .all: List[State] -> Lists#(this.idle, this.dataReadOnly, this.dataReadWrite, this.codeNoCache, this.codeOutdated, this.codeInvalid, this.dataInvalid, this.codeCompiled);
+  .all: List[State] -> Lists#(this.idle, this.dataRead, this.dataEdit, this.codeNoCache, this.codeOutdated, this.codeInvalid, this.dataReadInvalid, this.codeCompiled);
   }
 
 Project:{ read .name: Str; .state: State; .image: Image;
@@ -94,7 +94,7 @@ IndexOf:{ #(ps: List[Project], name: Str, i: Nat): Opt[Nat] -> Block#[Opt[Nat]]
 
 Managers:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label], frame: mut Slot[mut Frame], fearless: Image): mut Manager -> Block#
   .var[List[Project]] projects= {Sorted#(Lists#(
-    Projects#(Names#0, States.idle), Projects#(Names#1, States.dataReadOnly), Projects#(Names#2, States.dataReadWrite),
+    Projects#(Names#0, States.idle), Projects#(Names#1, States.dataRead), Projects#(Names#2, States.dataEdit),
     Projects#(Names#3, States.codeOutdated), Projects#(Names#4, States.codeInvalid), Projects#(Names#5, States.codeCompiled),
     Projects#(Names#6, States.codeCompiled), Projects#(Names#7, States.codeNoCache), Projects#("tour", States.codeCompiled, fearless)))}
   .var[Str] selected= {Names#0}

@@ -67,8 +67,8 @@ NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
   .openWithOrShortcut p -> u.openWithOrShortcut p; .openWithOrShortcut(p, n, m) -> u.openWithOrShortcut(p, n, m);
   .run(n, ms) -> u.run(n, ms); .compile n -> u.compile n; .check n -> u.check n; .terminate n -> u.terminate n;
   .deleteCache n -> u.deleteCache n; .kindIdle n -> u.kindIdle n; .kindCode n -> u.kindCode n;
-  .kindDataReadOnly n -> u.kindDataReadOnly n; .kindDataReadWrite n -> u.kindDataReadWrite n; .forget n -> u.forget n;
-  .linkRead(n, d, ts) -> u.linkRead(n, d, ts); .linkWrite(n, d, ts) -> u.linkWrite(n, d, ts); .attenuate(n, m, as) -> u.attenuate(n, m, as);
+  .kindDataRead n -> u.kindDataRead n; .kindDataEdit n -> u.kindDataEdit n; .forget n -> u.forget n;
+  .mount(n, t, d) -> u.mount(n, t, d); .unmount(n, t) -> u.unmount(n, t); .attenuate(n, m, as) -> u.attenuate(n, m, as);
   .iso -> NoQuitManager#(u.iso.close); .close -> s;
   }}
 
@@ -229,11 +229,11 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   .deleteCache n -> Block#(r#, u.deleteCache n);
   .kindIdle n -> Block#(r#, u.kindIdle n);
   .kindCode n -> Block#(r#, u.kindCode n);
-  .kindDataReadOnly n -> Block#(r#, u.kindDataReadOnly n);
-  .kindDataReadWrite n -> Block#(r#, u.kindDataReadWrite n);
+  .kindDataRead n -> Block#(r#, u.kindDataRead n);
+  .kindDataEdit n -> Block#(r#, u.kindDataEdit n);
   .forget n -> Block#(r#, u.forget n);
-  .linkRead(n, d, ts) -> Block#(r#, u.linkRead(n, d, ts));
-  .linkWrite(n, d, ts) -> Block#(r#, u.linkWrite(n, d, ts));
+  .mount(n, t, d) -> Block#(r#, u.mount(n, t, d));
+  .unmount(n, t) -> Block#(r#, u.unmount(n, t));
   .attenuate(n, m, as) -> Block#(r#, u.attenuate(n, m, as));
   .iso -> RevokableManager#(r.iso.close, u.iso.close);
   .close -> s;
