@@ -2,8 +2,8 @@
 /// A family with a few named values is declared by implementing `Enum` and
 /// `Enums`: the family type binds every value to its list via `.enums` and
 /// gives `.close` once (`.cmp`/`.hash`/`.index` come for free from that);
-/// each value then supplies its own `.str` and `.imm` (a fixed singleton
-/// value has no other way to prove it is imm).
+/// each value then supplies its own `.imm` (a fixed singleton value has no
+/// other way to prove it is imm), and gets `.str` from its simple name.
 ///
 /// Minimal usage, without a dedicated Match type:
 /// ```
@@ -15,10 +15,10 @@
 ///   .enums->Directions;
 ///   .close->this; .close->::;
 ///   }
-/// North: Direction{.imm->North; `North`}
-/// East:  Direction{.imm->East;  `East` }
-/// South: Direction{.imm->South; `South`}
-/// West:  Direction{.imm->West;  `West` }
+/// North: Direction{.imm->North}
+/// East:  Direction{.imm->East}
+/// South: Direction{.imm->South}
+/// West:  Direction{.imm->West}
 /// ```
 /// With this alone: ``Directions.list`` is ``Lists#(North,East,South,West)``,
 /// ``Directions.map`` is a ``Map[Str,Direction]`` from ``North``/``East``/``South``/``West``
@@ -35,10 +35,10 @@
 ///   read .match[R:**](m: mut DirectionMatch[R]): R;
 ///   .close->this; .close->::;
 ///   }
-/// North: Direction{::.north; .imm->North; `North`}
-/// East:  Direction{::.east;  .imm->East;  `East` }
-/// South: Direction{::.south; .imm->South; `South`}
-/// West:  Direction{::.west;  .imm->West;  `West` }
+/// North: Direction{::.north; .imm->North}
+/// East:  Direction{::.east;  .imm->East}
+/// South: Direction{::.south; .imm->South}
+/// West:  Direction{::.west;  .imm->West}
 /// ```
 /// Now ``North.match(DirectionMatch[Str]{ .north->`n`; .east->`e`; .south->`s`; .west->`w`; })``
 /// is ``n``: every value still gets `.list`/`.map`/`.index`/`.info`/`.fromInfo` for free from
@@ -72,11 +72,14 @@ Enums[E]: FromInfo[E]{
 /// no methods of its own, so `.close` still needs to be given once at the
 /// family: it is what lets `.cmp` below turn an arbitrary value of type E
 /// back into an ``Enum[E]`` with an `.index` to compare.
-Enum[E]: DataType[E,E]{
+Enum[E]: DataType[E,E], Named{
   /// the family this value belongs to; families may also add a `.match`
   /// method of their own, as shown in the second example above.
   /// ``North.enums`` is ``Directions``.
   read .enums: Enums[E];
+  /// the simple name of this value.
+  /// ``North.str`` is `` `North` ``.
+  .str -> this.name.split "." .get 1;
   /// derived from `.str`, and round-trips through `Enums.fromInfo`.
   /// ``North.info`` is `` Infos.msg`North` ``.
   .info -> Infos.msg(this.str);

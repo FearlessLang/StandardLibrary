@@ -11,10 +11,10 @@ Direction: Enum[Direction]{
   .close->this; .close->::;
   }
 
-North: Direction{::.north; .imm->North; "North"}
-East:  Direction{::.east;  .imm->East;  "East" }
-South: Direction{::.south; .imm->South; "South"}
-West:  Direction{::.west;  .imm->West;  "West" }
+North: Direction{::.north; .imm->North}
+East:  Direction{::.east;  .imm->East}
+South: Direction{::.south; .imm->South}
+West:  Direction{::.west;  .imm->West}
 
 EnumTests: Test {::
   .check{Directions.list.size.assertEq 4}
