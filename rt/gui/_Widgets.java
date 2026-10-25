@@ -310,6 +310,7 @@ abstract class AWidget implements Widget$2o$1{
   double above= 1;
   double below= 0.5;
   TextLine line;
+  Rect ink;
   static final int bar= 5;
   int scrollX;
   int scrollY;

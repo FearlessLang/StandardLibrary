@@ -141,7 +141,9 @@ interface Sk{
   }
 
   static TextLine line(AWidget s){
-    if (s.line == null){ s.line = shape(s.text, s.textSize); }
+    if (s.line != null){ return s.line; }
+    s.line = shape(s.text, s.textSize);
+    try (var blob= s.line.getTextBlob()){ s.ink = blob == null ? Rect.makeWH(0, 0) : blob.getTightBounds(); }
     return s.line;
   }
 
@@ -281,9 +283,14 @@ interface Sk{
   }
 
   static Dimension textSizeWithInsets(AWidget s){
+    float w= line(s).getWidth();
+    long h= lineHeight(s);
+    double a= s.textSize * s.above;
+    double overX= Math.max(Math.max(0, -s.ink.getLeft()), s.ink.getRight() - w);
+    double overY= Math.max(Math.max(0, -s.ink.getTop() - a), s.ink.getBottom() + a - h);
     return new Dimension(
-      (int) Math.ceil(line(s).getWidth()) + s.left + s.right,
-      (int) lineHeight(s) + s.top + s.bottom);
+      (int) Math.ceil(w + 2 * overX) + s.left + s.right,
+      (int) Math.ceil(h + 2 * overY) + s.top + s.bottom);
   }
 
   static void text(Canvas cv, AWidget s, float dx, float dy){
