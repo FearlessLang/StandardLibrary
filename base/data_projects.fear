@@ -12,7 +12,7 @@ DataEdit: DataRead{}
 ///data project, the resource with the extension ".fearless" at its top: a path naming them is not valid.
 ///A ``path`` that is not valid is a deterministic error.
 ///A ``path`` naming no resource or folder, and a data project that changed on disk
-///so that the request can not be done are non deterministic errors.
+///so that the request cannot be done are non deterministic errors.
 CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
   ///The names of the resources and folders in the folder at ``path``, sorted; a zip is named without ".zip".
   ///An empty ``path`` is the root folder.

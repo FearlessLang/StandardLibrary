@@ -158,7 +158,7 @@ final class DataFiles{
     var other= dot < 0
       ? names(at).stream().filter(n -> n.startsWith(last+".")).findFirst()
       : child(at, base).filter(Resource.class::isInstance).map(_ -> base);
-    other.ifPresent(o -> { throw refused(name, path, "is not written: its folder holds \""+o+"\", and a resource without extension can not share its name with a resource with an extension."); });
+    other.ifPresent(o -> { throw refused(name, path, "is not written: its folder holds \""+o+"\", and a resource without extension cannot share its name with a resource with an extension."); });
   }
   private static void put(Node at, List<String> rest, byte[] bytes, Path root) throws IOException{
     switch (at){

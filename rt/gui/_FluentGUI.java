@@ -70,7 +70,7 @@ public final class _FluentGUI implements Gui$c$0, Cloneable{
   @Override public Object mut$startFullScreen$0(){ return set(g -> g.start = Start.fullScreen); }
   private _FluentGUI start(Object f, Start s, String what){
     double v= area(f, what);
-    if (v < minArea){ throw Util.detErr(what+"("+v+") is less than Gui.minArea("+minArea+") of this Gui: the picture always covers at least minArea of the screen area, so the window can not open covering only "+v+" of it. Lower Gui.minArea first"); }
+    if (v < minArea){ throw Util.detErr(what+"("+v+") is less than Gui.minArea("+minArea+") of this Gui: the picture always covers at least minArea of the screen area, so the window cannot open covering only "+v+" of it. Lower Gui.minArea first"); }
     var res= set(g -> g.start = s);
     res.initialArea = v;
     return res;
@@ -84,12 +84,12 @@ public final class _FluentGUI implements Gui$c$0, Cloneable{
   @Override public Object mut$opacityFloor$1(Object a){ return set(g -> g.opacityFloor = Scopes.alpha(a)); }
   @Override public Object mut$closeKey$1(Object k){
     var v= key(k);
-    if (code(v) == code(fullScreenKey)){ throw Util.detErr("Gui.closeKey("+v+") is the full screen key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"); }
+    if (code(v) == code(fullScreenKey)){ throw Util.detErr("Gui.closeKey("+v+") is the full screen key of this Gui: one key press cannot both ask to close the window and toggle full screen. Change Gui.fullScreenKey first"); }
     return set(g -> g.closeKey = v);
   }
   @Override public Object mut$fullScreenKey$1(Object k){
     var v= key(k);
-    if (code(v) == code(closeKey)){ throw Util.detErr("Gui.fullScreenKey("+v+") is the close key of this Gui: one key press can not both ask to close the window and toggle full screen. Change Gui.closeKey first"); }
+    if (code(v) == code(closeKey)){ throw Util.detErr("Gui.fullScreenKey("+v+") is the close key of this Gui: one key press cannot both ask to close the window and toggle full screen. Change Gui.closeKey first"); }
     return set(g -> g.fullScreenKey = v);
   }
   @Override public Object mut$run$1(Object o){

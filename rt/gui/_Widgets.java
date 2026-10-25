@@ -836,7 +836,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$opacity$1(Object a){
     requireOpen();
     int v= alpha(a);
-    if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this Gui: the window can not be more transparent than Gui.opacityFloor allows"); }
+    if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this Gui: the window cannot be more transparent than Gui.opacityFloor allows"); }
     opacity = v / 255f;
     if (started){ onEdtAndWait(() -> stage.opacity(opacity)); }
     return this;

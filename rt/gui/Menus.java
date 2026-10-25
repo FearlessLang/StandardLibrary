@@ -73,20 +73,20 @@ final class CMenuItem implements MenuItem$aw$0{
   @Override public Object mut$radio$1(Object b){ return mark(2, b); }
   private Object mark(int m, Object b){
     open();
-    if (mark + m == 3){ throw Util.detErr(named() + " already shows a " + (mark == 1 ? "check box" : "radio button") + ", so it can not also show a " + (m == 1 ? "check box" : "radio button") + ": an item shows at most one mark"); }
+    if (mark + m == 3){ throw Util.detErr(named() + " already shows a " + (mark == 1 ? "check box" : "radio button") + ", so it cannot also show a " + (m == 1 ? "check box" : "radio button") + ": an item shows at most one mark"); }
     mark = m;
     ticked = Util.isTrue(b);
     return this;
   }
   @Override public Object mut$action$1(Object a){
     open();
-    if (submenu != null){ throw Util.detErr(named() + " already has a submenu, so it can not also have an action: choosing an item either opens its submenu or runs its action"); }
+    if (submenu != null){ throw Util.detErr(named() + " already has a submenu, so it cannot also have an action: choosing an item either opens its submenu or runs its action"); }
     action = (MF$7$1) a;
     return this;
   }
   @Override public Object mut$submenu$1(Object s){
     open();
-    if (action != null){ throw Util.detErr(named() + " already has an action, so it can not also have a submenu: choosing an item either opens its submenu or runs its action"); }
+    if (action != null){ throw Util.detErr(named() + " already has an action, so it cannot also have a submenu: choosing an item either opens its submenu or runs its action"); }
     submenu = s;
     return this;
   }

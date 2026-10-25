@@ -3,10 +3,10 @@
 ///so the results can be cached, reordered and computed in parallel with no visible difference.
 ///Whatever may answer differently to the same question (input, files, downloads, in memory logs,
 ///non deterministic errors) is observed through a method of System or of a capability created by it.
-///Acting on the world needs no capability when the program can not observe the action:
+///Acting on the world needs no capability when the program cannot observe the action:
 ///Debug, Log and FileLog can be used anywhere, and so can InMemoryLog.log,
 ///whose content can only be read through System.
-///Output only acts: it makes printing explicit in the code, while the program can not observe what was printed.
+///Output only acts: it makes printing explicit in the code, while the program cannot observe what was printed.
 System: ToIso[System],WidenTo[System] {
   //mut .io: mut IO;
   //mut .rng: mut RandomSeed;
@@ -67,7 +67,7 @@ InputCursor: ToIso[InputCursor],WidenTo[InputCursor] {
   mut .next: mut InputCursor;
   }
 
-///An input file, read again at every read: a file that can not be read is a non deterministic error.
+///An input file, read again at every read: a file that cannot be read is a non deterministic error.
 InputCursorNode: ToIso[InputCursorNode],WidenTo[InputCursorNode] {
   mut .label: Str; ///best effort portable name to help debugging
   mut .readStrUtf8(recover: mut BadStrUnitRecover): Str;

@@ -42,7 +42,7 @@ ErrorSystem: System {
   }
 _Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked.") }
 
-///Every method reaches the received System, but `.manager` is revoked: the program can not call the Fearless manager.
+///Every method reaches the received System, but `.manager` is revoked: the program cannot call the Fearless manager.
 NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
@@ -51,7 +51,7 @@ NoManager: SystemAttenuator { u -> {'s
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
 ///Every method reaches the received System, but the `CapManager` it gives revokes `.quit` and `.reset`:
-///the program can not end the Fearless manager.
+///the program cannot end the Fearless manager.
 NoManagerQuit: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
@@ -286,7 +286,7 @@ InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 ///The new process prints to the output of this program, and its error output goes to the error output of this program.
 ///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,
 ///it throws the non deterministic error ``main`` threw.
-///A new process that can not start, or that ends before its main ends, is a non deterministic error.
+///A new process that cannot start, or that ends before its main ends, is a non deterministic error.
 ///``.start`` starts the new process and returns at once; the `RunningMain` it gives is how this program waits for the process or ends it.
 ///``.run`` is ``.start`` then `RunningMain.await`.
 CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{

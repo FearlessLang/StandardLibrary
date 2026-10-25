@@ -9,19 +9,19 @@ GuiMenuTests: Test {::
     .button{b -> Block#(b.openMenu{:: .item{:: .text "Open" .action{Void} .submenu{::}}}, b)}
     }}}).run{
       .ok _ -> Error.msg "An item with an action and a submenu always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == `The MenuItem "Open" already has an action, so it can not also have a submenu: choosing an item either opens its submenu or runs its action`}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The MenuItem "Open" already has an action, so it cannot also have a submenu: choosing an item either opens its submenu or runs its action`}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .button{b -> Block#(b.openMenu{:: .item{:: .submenu{::} .action{Void}}}, b)}
     }}}).run{
       .ok _ -> Error.msg "An item with a submenu and an action always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This MenuItem already has a submenu, so it can not also have an action: choosing an item either opens its submenu or runs its action"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This MenuItem already has a submenu, so it cannot also have an action: choosing an item either opens its submenu or runs its action"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .button{b -> Block#(b.openMenu{:: .item{:: .text "Wrap" .check True .check False .radio False}}, b)}
     }}}).run{
       .ok _ -> Error.msg "An item with a check box and a radio button always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == `The MenuItem "Wrap" already shows a check box, so it can not also show a radio button: an item shows at most one mark`}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == `The MenuItem "Wrap" already shows a check box, so it cannot also show a radio button: an item shows at most one mark`}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .button{b -> Block#(b.openMenu{:: .item{:: .text("Open" | "Close")}}, b)}
