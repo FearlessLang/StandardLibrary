@@ -8,8 +8,7 @@
 /// Minimal usage, without a dedicated Match type:
 /// ```
 /// Directions: Enums[Direction]{
-///   .list -> Lists#(North,East,South,West);
-///   .strBy -> {::};
+///   .list -> Lists#(North,East,South,West).as{::};
 ///   }
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
@@ -45,22 +44,18 @@
 /// `Enums`/`Enum`, on top of its own `.match`.
 
 /// The "list of values" side of an enumeration family.
-/// `.strBy` witnesses that E implements `ToStr`: a bare generic parameter
-/// carries no methods of its own, so ``{::}`` is how a concrete family
-/// vouches for its own values.
 Enums[E]: FromInfo[E]{
   /// every value, in declaration order.
   /// ``Directions.list`` is ``Lists#(North,East,South,West)``.
-  .list: List[E];
-  .strBy: ToStrBy[E];
+  .list: List[Enum[E]];
   /// looks a value up by its `.str`.
   /// `` Directions.map.get`North` `` is ``North``.
-  .map: Map[Str,E] -> this.list.flow.mapping({::},{.key e->(this.strBy#e).str; .elem e->e;}).as{::};
+  .map: Map[Str,E] -> this.list.flow.mapping({::},{.key e->e.str; .elem e->e.imm;}).as{::};
   /// declaration index of every value's `.str`.
   /// `` Directions.indexMap.get`West` `` is ``3``.
   .indexMap: Map[Str,Nat] -> this.list.flow.fold(
     {Maps#[Str,Str,Nat]{::}.as{::}},
-    {acc,e->acc.with((this.strBy#e).str,acc.size).as{::}}
+    {acc,e->acc.with(e.str,acc.size).as{::}}
     );
   /// looks a value up by its `.info`, the inverse of `Enum.info`.
   /// ``Directions.fromInfo(North.info)`` is ``North``.
