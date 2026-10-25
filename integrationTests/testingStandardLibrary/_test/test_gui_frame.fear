@@ -24,6 +24,12 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == (Color.transparent.str + " 12")}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .button{b -> Error.msg(b.background.str)}
+    }}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == (Color.rgb(190, 190, 190).str)}}.assertTrue{i};
+      }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> (g.elapsed >= (Instant.origin + (Duration.milliSeconds 300))).if{
       .then -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str));
