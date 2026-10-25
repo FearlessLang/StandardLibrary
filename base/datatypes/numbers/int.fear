@@ -346,7 +346,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
 _IntRanges: Sealed {
   #(startInclusive: Int, endInclusive: Int, str: Str): Range[Int] -> {'self
-    .size -> endInclusive - startInclusive .getNat + 1; // Cheap enough that computing everytime is okay
+    .size -> endInclusive.aluSubWrap(startInclusive).aluNat + 1; // Cheap enough that computing everytime is okay
     .start -> startInclusive;
     .end -> endInclusive;
     .flow -> _NumFlow.ints(startInclusive, endInclusive);
