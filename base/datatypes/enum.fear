@@ -1,9 +1,9 @@
 /// Support for closed sets of named singleton values (enumerations).
 /// A family with a few named values is declared by implementing `Enum` and
 /// `Enums`: the family type binds every value to its list via `.enums` and
-/// gives `.close` once (`.cmp`/`.hash`/`.index` come for free from that);
-/// each value then supplies its own `.imm` (a fixed singleton value has no
-/// other way to prove it is imm), and gets `.str` from its simple name.
+/// gives ``read .close`` once (`.cmp`/`.hash`/`.index` come for free from that;
+/// ``mut .close`` stays abstract, since a `CaptureFree` value is never mut);
+/// each value then gets `.imm` from `.close`, and `.str` from its simple name.
 ///
 /// Minimal usage, without a dedicated Match type:
 /// ```
@@ -13,12 +13,12 @@
 ///   }
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
-///   .close->this; .close->::;
+///   read .close->this; .close->::;
 ///   }
-/// North: Direction{.imm->North}
-/// East:  Direction{.imm->East}
-/// South: Direction{.imm->South}
-/// West:  Direction{.imm->West}
+/// North: Direction{}
+/// East:  Direction{}
+/// South: Direction{}
+/// West:  Direction{}
 /// ```
 /// With this alone: ``Directions.list`` is ``Lists#(North,East,South,West)``,
 /// ``Directions.map`` is a ``Map[Str,Direction]`` from ``North``/``East``/``South``/``West``
@@ -33,12 +33,12 @@
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
 ///   read .match[R:**](m: mut DirectionMatch[R]): R;
-///   .close->this; .close->::;
+///   read .close->this; .close->::;
 ///   }
-/// North: Direction{::.north; .imm->North}
-/// East:  Direction{::.east;  .imm->East}
-/// South: Direction{::.south; .imm->South}
-/// West:  Direction{::.west;  .imm->West}
+/// North: Direction{::.north}
+/// East:  Direction{::.east}
+/// South: Direction{::.south}
+/// West:  Direction{::.west}
 /// ```
 /// Now ``North.match(DirectionMatch[Str]{ .north->`n`; .east->`e`; .south->`s`; .west->`w`; })``
 /// is ``n``: every value still gets `.list`/`.map`/`.index`/`.info`/`.fromInfo` for free from
@@ -72,7 +72,7 @@ Enums[E]: FromInfo[E]{
 /// no methods of its own, so `.close` still needs to be given once at the
 /// family: it is what lets `.cmp` below turn an arbitrary value of type E
 /// back into an ``Enum[E]`` with an `.index` to compare.
-Enum[E]: DataType[E,E], Named{
+Enum[E]: DataType[E,E], Named, CaptureFree{
   /// the family this value belongs to; families may also add a `.match`
   /// method of their own, as shown in the second example above.
   /// ``North.enums`` is ``Directions``.
@@ -80,6 +80,9 @@ Enum[E]: DataType[E,E], Named{
   /// the simple name of this value.
   /// ``North.str`` is `` `North` ``.
   .str -> this.name.split "." .get 1;
+  /// the value itself: an `Enum` is `CaptureFree`, so `this` is imm.
+  /// ``North.imm`` is ``North``.
+  .imm -> this.close;
   /// derived from `.str`, and round-trips through `Enums.fromInfo`.
   /// ``North.info`` is `` Infos.msg`North` ``.
   .info -> Infos.msg(this.str);
