@@ -8,13 +8,13 @@ DirectionMatch[R:**]: { mut .north: R; mut .east: R; mut .south: R; mut .west: R
 Direction: Enum[Direction]{
   .enums->Directions;
   read .match[R:**](m: mut DirectionMatch[R]): R;
-  .close->this; .close->::;
+  read .close->this; .close->::;
   }
 
-North: Direction{::.north; .imm->North}
-East:  Direction{::.east;  .imm->East}
-South: Direction{::.south; .imm->South}
-West:  Direction{::.west;  .imm->West}
+North: Direction{::.north}
+East:  Direction{::.east}
+South: Direction{::.south}
+West:  Direction{::.west}
 
 EnumTests: Test {::
   .check{Directions.list.size.assertEq 4}
