@@ -40,6 +40,16 @@ IntDivRemTests: Test {::
   .check{(-7).getRem 3 .assertEq -1}
   .check{+7.getTruncDiv 3 .assertEq +2}
   .check{+7.getRem 3 .assertEq +1}
+  .check{Math.minInt .getTruncDiv 9_223_372_036_854_775_808 .assertEq -1}
+  .check{(Math.minInt .tryGetTruncDiv 9_223_372_036_854_775_808).ok.assertEq({::}, Opts# -1)}
+  .check{Math.minInt .getRem 9_223_372_036_854_775_808 .assertEq +0}
+  .check{(Math.minInt .tryGetRem 9_223_372_036_854_775_808).ok.assertEq({::}, Opts# +0)}
+  .check{Math.minInt .getDiv 9_223_372_036_854_775_808 .assertEq -1}
+  .check{Math.minInt .div 9_223_372_036_854_775_808 .assertEq({::}, Opts#(-1))}
+  .check{(Math.minInt + +1) .getTruncDiv 9_223_372_036_854_775_808 .assertEq +0}
+  .check{(Math.minInt + +1) .getRem 9_223_372_036_854_775_808 .assertEq(Math.minInt + +1)}
+  .check{Math.minInt .getTruncDiv(Math.maxNat) .assertEq +0}
+  .check{Math.minInt .getRem(Math.maxNat) .assertEq(Math.minInt)}
   .check{+6.div 3 .assertEq ({::},Opts#(+2))}
   .check{+7.div 3 .assertEq ({::},Opt[Int])}
   .check{+7.div 0 .assertEq ({::},Opt[Int])}
