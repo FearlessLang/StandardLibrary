@@ -519,6 +519,7 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
       });
     read .isFull: Bool -> e.get.isSome;
     mut .opt: mut Opt[E] -> e.get;
+    read .opt: mut Opt[read/imm E] -> e.get.mapSome{x -> x};
     }};
   }
 KeyEvent:ScreenContext{
