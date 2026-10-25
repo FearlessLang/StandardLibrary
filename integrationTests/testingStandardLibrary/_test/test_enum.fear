@@ -1,5 +1,5 @@
 Directions: Enums[Direction]{
-  .enumList -> Lists#(North,East,South,West).as{::};
+  .enumList -> Lists#(North,East,South,West);
   }
 
 DirectionMatch[R:**]: { mut .north: R; mut .east: R; mut .south: R; mut .west: R; }
