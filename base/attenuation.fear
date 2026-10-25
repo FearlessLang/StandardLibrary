@@ -242,11 +242,13 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   }}
 RevokableProcess: { #(r: mut Revocation, u: mut CapProcess): mut CapProcess -> {'s
   .run(m, as) -> Block#(r#, u.run(m, as));
+  .run(m, a, as) -> Block#(r#, u.run(m, a, as));
   .start(m, as) -> Block#(r#, RevokableRunningMain#(r, u.start(m, as)));
+  .start(m, a, as) -> Block#(r#, RevokableRunningMain#(r, u.start(m, a, as)));
   .iso -> RevokableProcess#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableRunningMain: { #(r: mut Revocation, u: mut RunningMain): mut RunningMain -> {'s
+RevokableRunningMain: { #[R](r: mut Revocation, u: mut RunningMain[R]): mut RunningMain[R] -> {'s
   .await -> Block#(r#, u.await);
   .awaitUpTo t -> Block#(r#, u.awaitUpTo t);
   .terminate -> Block#(r#, u.terminate);
@@ -276,6 +278,8 @@ RevokableGui: { #(r: mut Revocation, u: mut Gui): mut Gui -> {
   .run c -> Block#(r#, u.run c);
   }}
 
+InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
+
 ///The object capability to run another main of this program in a new process.
 ///The new process starts as this program started: with the same first input file, the same data projects and the same manager.
 ///Its main receives a System with the authority of this program or less: the attenuators of this program, in their order,
@@ -289,18 +293,13 @@ RevokableGui: { #(r: mut Revocation, u: mut Gui): mut Gui -> {
 ///``.run`` is ``.start`` then `RunningMain.await`.
 CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
   mut .run(main: Main, attenuators: List[SystemAttenuator]): Void;
-  mut .start(main: Main, attenuators: List[SystemAttenuator]): mut RunningMain;
+  mut .run(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): Info;
+  mut .start(main: Main, attenuators: List[SystemAttenuator]): mut RunningMain[Void];
+  mut .start(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): mut RunningMain[Info];
   }
 
-///A process started by `CapProcess.start`. A RunningMain is running or surely terminated: ``.await`` and ``.terminate`` make it
-///surely terminated, and so does an ``.awaitUpTo`` that returns true or throws.
-///A call on a surely terminated RunningMain is the deterministic error ``RunningMain.<method> was called on a surely terminated RunningMain.``.
-///The copies ``.iso`` gives share the process and its state.
-RunningMain: ToIso[RunningMain], WidenTo[RunningMain]{
-  ///Returns when the process ends, as `CapProcess.run` does: the Void of the main, or its Info as the error it threw.
-  mut .await: Void;
-  ///``.await`` when the process ends within ``time``, returning true; false when the process did not end in time.
-  mut .awaitUpTo(time: Duration): Bool;
-  ///Ends the process and every process it started. When the process ended by itself, ``.await``.
+RunningMain[R]: ToIso[RunningMain[R]], WidenTo[RunningMain[R]]{
+  mut .await: R;
+  mut .awaitUpTo(time: Duration): Opt[R];
   mut .terminate: Void;
   }
