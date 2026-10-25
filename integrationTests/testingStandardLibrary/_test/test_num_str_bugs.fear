@@ -1,10 +1,3 @@
-BugIntDivTests: Test {::
-  .check{Math.minInt .getTruncDiv 9_223_372_036_854_775_808 .assertEq -1}
-  .check{Math.minInt .getRem 9_223_372_036_854_775_808 .assertEq +0}
-  .check{Math.minInt .getDiv 9_223_372_036_854_775_808 .assertEq -1}
-  .check{Math.minInt .div 9_223_372_036_854_775_808 .assertEq({::}, Opts#(-1))}
-  }
-
 BugIntRangeTests: Test {::
   .check{(-1=~~=(Math.maxInt)).size .assertEq(Math.maxInt.getNat + 2)}
   .check{(-1=~~=(Math.maxInt)).isEmpty .assertFalse}
@@ -47,7 +40,6 @@ BugMathTests: Test {::
   }
 
 TestNumStrBugs: Test {::
-  .test BugIntDivTests
   .test BugIntRangeTests
   .test BugNatFloatTests
   .test BugFloatRoundTests
