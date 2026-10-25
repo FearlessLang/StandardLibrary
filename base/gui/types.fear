@@ -329,7 +329,7 @@ Frame:_Styled[Frame]{ .self->this;
   mut .content: mut RegionFiller[Void];
   mut .onKey(mut Scope[Keys]): mut Frame;
   }
-ResizeRequest:ScreenContext{ .aspectRatio: Float; }
+ResizeRequest:ScreenContext{ read .aspectRatio: Float; }
 ScreenContext:{
   read .elapsed: Instant;
   read .panelWidth: WidthNat;
@@ -414,7 +414,7 @@ TextArea:_EditText[TextArea]{
   mut .wrap(Bool):mut TextArea;
   read .wrap:Bool;
   }
-TextEvent:ScreenContext{ .text:UStr; .caret:Nat; .anchor:Nat; }
+TextEvent:ScreenContext{ read .text:UStr; read .caret:Nat; read .anchor:Nat; }
 CaretPainter:{ .run(mut CaretGraphics):mut Graphics; }
 CaretGraphics:Graphics{ read .sinceMove:Duration; read .lineHeight:HeightNat; }
 //The image always covers the whole widget, insets excluded.
@@ -548,7 +548,7 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
     }};
   }
 KeyEvent:ScreenContext{
-  .keyStroke:KeyStroke;
+  read .keyStroke:KeyStroke;
 }
 KeyActions:{#:mut KeyAction->Block#
   .let[mut EList[KeyStroke]] match= {ELists#}
