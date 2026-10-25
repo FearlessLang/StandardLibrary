@@ -24,7 +24,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,7 +31,7 @@ import java.util.zip.ZipOutputStream;
 
 final class DataFiles{
   static final Map<String,Path> reads= linked("fearlessDataRead.");
-  static final Map<String,Path> edits= linked("fearlessDataWrite.");
+  static final Map<String,Path> edits= linked("fearlessDataEdit.");
   static final Map<String,Path> readable= readable();
   private static final Object lock= new Object();
   private static final Set<String> reserved= Set.of("con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
@@ -43,6 +42,7 @@ final class DataFiles{
   record ZipDir(Path zip, List<String> steps, String prefix) implements Node{}
   record Resource(Path path, List<String> steps, String entry) implements Node{}
   record Item(long time, byte[] bytes){}
+  record Root(String name, Path path){}
   interface Op{ Object apply(String name, Path root, List<String> path) throws IOException; }
   private static Map<String,Path> linked(String prefix){
     var res= new TreeMap<String,Path>();
@@ -56,43 +56,41 @@ final class DataFiles{
     res.putAll(edits);
     return Collections.unmodifiableMap(res);
   }
-  static Object roots(Map<String,Path> view){ return List$o$1Instance.wrap(view.keySet().stream().<Object>map(Str$c$0Instance::instance).toList()); }
-  static Object paths(Map<String,Path> view, Object name, Object path){ return act(view, name, path, false, DataFiles::list); }
-  static Object read(Map<String,Path> view, Object name, Object path){ return act(view, name, path, false, DataFiles::open); }
-  static Object writeBytes(Object name, Object path, byte[] bytes){ return act(edits, name, path, true, (n, root, p) -> write(n, root, p, bytes)); }
-  static Object writeText(Object name, Object path, Object content, Charset cs){
-    var cps= ((UStr$s$0Instance)content).val();
-    return writeBytes(name, path, new String(cps, 0, cps.length).getBytes(cs));
+  static Root root(Map<String,Path> view, String kind, Object data){
+    var name= AssetBytesRead.str(((Named$1c$0)data).read$name$0());
+    var res= view.get(name);
+    if (res == null){ throw nonDetErr("No "+kind+" is mounted on \""+name+"\"."); }
+    return new Root(name, res);
   }
-  static Object writeLossy(Object name, Object path, Object content, Object recover, int max){
+  static Object paths(Root root, Object path){ return act(root, path, false, DataFiles::list); }
+  static Object read(Root root, Object path){ return act(root, path, false, DataFiles::open); }
+  static Object writeBytes(Root root, Object path, byte[] bytes){ return act(root, path, true, (n, r, p) -> write(n, r, p, bytes)); }
+  static Object writeText(Root root, Object path, Object content, Charset cs){
+    var cps= ((UStr$s$0Instance)content).val();
+    return writeBytes(root, path, new String(cps, 0, cps.length).getBytes(cs));
+  }
+  static Object writeLossy(Root root, Object path, Object content, Object recover, int max){
     var out= new ByteArrayOutputStream();
     var cps= ((UStr$s$0Instance)content).val();
     for (var i= 0; i < cps.length; i += 1){
       if (cps[i] <= max){ out.write(cps[i]); continue; }
       for (var b : List$o$1Instance.asJava(((UnencodableRecover$8fgg$0)recover).mut$$hash$2(Nat$c$0Instance.instance(cps[i]), Nat$c$0Instance.instance(i)))){ out.write(Byte$o$0Instance.unwrap(b)); }
     }
-    return writeBytes(name, path, out.toByteArray());
+    return writeBytes(root, path, out.toByteArray());
   }
-  static Object delete(Object name, Object path){ return act(edits, name, path, true, DataFiles::delete); }
+  static Object delete(Root root, Object path){ return act(root, path, true, DataFiles::delete); }
   static byte[] bytes(Path path, List<String> steps, String entry) throws IOException{
     if (entry.isEmpty()){ return Files.readAllBytes(path); }
     return item(items(path, steps), entry).bytes();
   }
-  private static Object act(Map<String,Path> view, Object name, Object path, boolean write, Op op){
-    var n= AssetBytesRead.str(name);
+  private static Object act(Root root, Object path, boolean write, Op op){
     var p= List$o$1Instance.asJava(path).stream().map(AssetBytesRead::str).toList();
-    try{ return op.apply(n, root(view, n), p); }
-    catch (IOException e){ throw failed(n, p, write, e); }
-    catch (UncheckedIOException e){ throw failed(n, p, write, e.getCause()); }
+    try{ return op.apply(root.name(), root.path(), p); }
+    catch (IOException e){ throw failed(root.name(), p, write, e); }
+    catch (UncheckedIOException e){ throw failed(root.name(), p, write, e.getCause()); }
   }
   private static Error failed(String name, List<String> path, boolean write, IOException e){
     return nonDetErr("The "+at(name, path)+" could not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName());
-  }
-  private static Path root(Map<String,Path> view, String name){
-    var res= view.get(name);
-    if (res != null){ return res; }
-    var roots= view.isEmpty() ? " This capability has no root." : view.keySet().stream().map(n -> "\""+n+"\"").collect(Collectors.joining(", ", " Its roots are ", "."));
-    throw nonDetErr("\""+name+"\" is not a root of this capability."+roots);
   }
   private static String at(String name, List<String> path){ return "path \""+String.join("/", path)+"\" of \""+name+"\""; }
   private static Error refused(String name, List<String> path, String why){ return nonDetErr("The "+at(name, path)+" "+why); }

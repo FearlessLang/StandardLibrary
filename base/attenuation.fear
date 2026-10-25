@@ -13,7 +13,7 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///NoDownload: SystemAttenuator { u -> {'s
 ///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
 ///  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
-///  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
+///  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d; .manager -> u.manager; .process -> u.process;
 ///  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
 ///  .iso -> NoDownload#(u.iso.close); .close -> s;
 ///  }}
@@ -30,8 +30,8 @@ ErrorSystem: System {
   .inputCursor -> _Revoked#".inputCursor";
   .assetRead -> _Revoked#".assetRead";
   .download -> _Revoked#".download";
-  .dataRead -> _Revoked#".dataRead";
-  .dataReadWrite -> _Revoked#".dataReadWrite";
+  .dataRead _ -> _Revoked#".dataRead";
+  .dataEdit _ -> _Revoked#".dataEdit";
   .manager -> _Revoked#".manager";
   .process -> _Revoked#".process";
   .readLog _ -> _Revoked#".readLog";
@@ -45,7 +45,7 @@ _Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked
 ///Every method reaches the received System, but `.manager` is revoked: the program can not call the Fearless manager.
 NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
-  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
+  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
   .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
   .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoManager#(u.iso.close); .close -> s;
@@ -54,7 +54,7 @@ NoManager: SystemAttenuator { u -> {'s
 ///the program can not end the Fearless manager.
 NoManagerQuit: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
-  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite;
+  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
   .manager -> NoQuitManager#(u.manager);
   .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoManagerQuit#(u.iso.close); .close -> s;
@@ -92,8 +92,8 @@ RevokableSystem: { #(r: mut Revocation, u: mut System): mut System -> {'s
   .inputCursor -> Block#(r#, RevokableInputCursor#(r, u.inputCursor));
   .assetRead -> Block#(r#, RevokableAssetRead#(r, u.assetRead));
   .download -> Block#(r#, RevokableDownload#(r, u.download));
-  .dataRead -> Block#(r#, RevokableDataRead#(r, u.dataRead));
-  .dataReadWrite -> Block#(r#, RevokableDataReadWrite#(r, u.dataReadWrite));
+  .dataRead d -> Block#(r#, RevokableDataRead#(r, u.dataRead d));
+  .dataEdit d -> Block#(r#, RevokableDataEdit#(r, u.dataEdit d));
   .manager -> Block#(r#, RevokableManager#(r, u.manager));
   .process -> Block#(r#, RevokableProcess#(r, u.process));
   .readLog l -> Block#(r#, RevokableLogReader#(r, u.readLog l));
@@ -184,34 +184,32 @@ RevokableDownload: { #(r: mut Revocation, u: mut DownloadCapability): mut Downlo
   .close -> s;
   }}
 RevokableDataRead: { #(r: mut Revocation, u: mut CapDataRead): mut CapDataRead -> {'s
-  .roots -> Block#(r#, u.roots);
-  .paths(n, p) -> Block#(r#, u.paths(n, p));
-  .read(n, p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(n, p)));
+  .paths(p) -> Block#(r#, u.paths(p));
+  .read(p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(p)));
   .iso -> RevokableDataRead#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableDataReadWrite: { #(r: mut Revocation, u: mut CapDataReadWrite): mut CapDataReadWrite -> {'s
-  .roots -> Block#(r#, u.roots);
-  .paths(n, p) -> Block#(r#, u.paths(n, p));
-  .read(n, p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(n, p)));
-  .writeStrUtf8(n, p, c) -> Block#(r#, u.writeStrUtf8(n, p, c));
-  .writeUStrUtf8(n, p, c) -> Block#(r#, u.writeUStrUtf8(n, p, c));
-  .writeStrUtf16Le(n, p, c) -> Block#(r#, u.writeStrUtf16Le(n, p, c));
-  .writeUStrUtf16Le(n, p, c) -> Block#(r#, u.writeUStrUtf16Le(n, p, c));
-  .writeStrUtf32Le(n, p, c) -> Block#(r#, u.writeStrUtf32Le(n, p, c));
-  .writeUStrUtf32Le(n, p, c) -> Block#(r#, u.writeUStrUtf32Le(n, p, c));
-  .writeStrUtf16Be(n, p, c) -> Block#(r#, u.writeStrUtf16Be(n, p, c));
-  .writeUStrUtf16Be(n, p, c) -> Block#(r#, u.writeUStrUtf16Be(n, p, c));
-  .writeStrUtf32Be(n, p, c) -> Block#(r#, u.writeStrUtf32Be(n, p, c));
-  .writeUStrUtf32Be(n, p, c) -> Block#(r#, u.writeUStrUtf32Be(n, p, c));
-  .writeStrAscii(n, p, c) -> Block#(r#, u.writeStrAscii(n, p, c));
-  .writeUStrAscii(n, p, c, rec) -> Block#(r#, u.writeUStrAscii(n, p, c, rec));
-  .writeStrLatin1(n, p, c) -> Block#(r#, u.writeStrLatin1(n, p, c));
-  .writeUStrLatin1(n, p, c, rec) -> Block#(r#, u.writeUStrLatin1(n, p, c, rec));
-  .writeBytes(n, p, c) -> Block#(r#, u.writeBytes(n, p, c));
-  .writeImagePng(n, p, c) -> Block#(r#, u.writeImagePng(n, p, c));
-  .delete(n, p) -> Block#(r#, u.delete(n, p));
-  .iso -> RevokableDataReadWrite#(r.iso.close, u.iso.close);
+RevokableDataEdit: { #(r: mut Revocation, u: mut CapDataEdit): mut CapDataEdit -> {'s
+  .paths(p) -> Block#(r#, u.paths(p));
+  .read(p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(p)));
+  .writeStrUtf8(p, c) -> Block#(r#, u.writeStrUtf8(p, c));
+  .writeUStrUtf8(p, c) -> Block#(r#, u.writeUStrUtf8(p, c));
+  .writeStrUtf16Le(p, c) -> Block#(r#, u.writeStrUtf16Le(p, c));
+  .writeUStrUtf16Le(p, c) -> Block#(r#, u.writeUStrUtf16Le(p, c));
+  .writeStrUtf32Le(p, c) -> Block#(r#, u.writeStrUtf32Le(p, c));
+  .writeUStrUtf32Le(p, c) -> Block#(r#, u.writeUStrUtf32Le(p, c));
+  .writeStrUtf16Be(p, c) -> Block#(r#, u.writeStrUtf16Be(p, c));
+  .writeUStrUtf16Be(p, c) -> Block#(r#, u.writeUStrUtf16Be(p, c));
+  .writeStrUtf32Be(p, c) -> Block#(r#, u.writeStrUtf32Be(p, c));
+  .writeUStrUtf32Be(p, c) -> Block#(r#, u.writeUStrUtf32Be(p, c));
+  .writeStrAscii(p, c) -> Block#(r#, u.writeStrAscii(p, c));
+  .writeUStrAscii(p, c, rec) -> Block#(r#, u.writeUStrAscii(p, c, rec));
+  .writeStrLatin1(p, c) -> Block#(r#, u.writeStrLatin1(p, c));
+  .writeUStrLatin1(p, c, rec) -> Block#(r#, u.writeUStrLatin1(p, c, rec));
+  .writeBytes(p, c) -> Block#(r#, u.writeBytes(p, c));
+  .writeImagePng(p, c) -> Block#(r#, u.writeImagePng(p, c));
+  .delete(p) -> Block#(r#, u.delete(p));
+  .iso -> RevokableDataEdit#(r.iso.close, u.iso.close);
   .close -> s;
   }}
 RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {'s
