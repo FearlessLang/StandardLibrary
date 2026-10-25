@@ -11,10 +11,10 @@ Direction: Enum[Direction]{
   .close->this; .close->::;
   }
 
-North: Direction{::.north; .imm->North; "North"}
-East:  Direction{::.east;  .imm->East;  "East" }
-South: Direction{::.south; .imm->South; "South"}
-West:  Direction{::.west;  .imm->West;  "West" }
+North: Direction{::.north; .imm->North}
+East:  Direction{::.east;  .imm->East}
+South: Direction{::.south; .imm->South}
+West:  Direction{::.west;  .imm->West}
 
 EnumTests: Test {::
   .check{Directions.list.size.assertEq 4}
@@ -23,6 +23,9 @@ EnumTests: Test {::
 
   .check{North.str.assertEq "North"}
   .check{West.str.assertEq "West"}
+  .check{North.name.assertEq "test.North"}
+  .check{base.Named.name.assertEq "base.Named"}
+  .check{base.Named{ .x: Nat -> 5 }.name.startsWith "test._" .assertTrue}
 
   .check{North.index.assertEq 0}
   .check{East.index.assertEq 1}

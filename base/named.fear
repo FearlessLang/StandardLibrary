@@ -1,0 +1,3 @@
+/// A type implementing `Named` gets `.name`: the qualified name of the concrete type of the object.
+/// For ``North: Named{}`` in the package ``hello``, ``North.name`` is `` `hello.North` ``.
+Named: { read .name: Str -> _Magic!; }
