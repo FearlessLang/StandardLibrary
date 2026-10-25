@@ -2,7 +2,7 @@
 NoDownload: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
   .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
-  .dataRead -> u.dataRead; .dataReadWrite -> u.dataReadWrite; .manager -> u.manager; .process -> u.process;
+  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d; .manager -> u.manager; .process -> u.process;
   .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoDownload#(u.iso.close); .close -> s;
   }}

@@ -15,8 +15,12 @@ System: ToIso[System],WidenTo[System] {
   mut .inputCursor: mut InputCursor;
   mut .assetRead: mut AssetReadCapability;//TODO: rename as CapAssetRead? and complete real system and the inherited metods returning 'this'
   mut .download: mut DownloadCapability;
-  mut .dataRead: mut CapDataRead;
-  mut .dataReadWrite: mut CapDataReadWrite;
+  ///The capability to read the data project mounted on ``data``.
+  ///A ``data`` with no data project mounted is a non deterministic error: a program started by the portable Fearless has no mount.
+  mut .dataRead(data: DataRead): mut CapDataRead;
+  ///The capability to read and write the data project mounted on ``data``.
+  ///A ``data`` with no data project mounted for editing is a non deterministic error.
+  mut .dataEdit(data: DataEdit): mut CapDataEdit;
   mut .manager: mut CapManager;
   mut .process: mut CapProcess;
   ///Creates a reader for this in memory log.
