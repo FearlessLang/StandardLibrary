@@ -1,9 +1,5 @@
 NamedBox[T:*]: base.Named{}
 NamedPair[A:*,B:*]: base.Named{}
-NamedOverride: base.Named{ .name -> "mine" }
-NamedInherit: NamedOverride{}
-NamedAbstract: base.Named{ read .name: Str; }
-NamedStillAbstract: NamedAbstract{}
 
 NamedTests: Test {::
   .check{North.name.assertEq "test.North"}
@@ -11,8 +7,6 @@ NamedTests: Test {::
   .check{NamedPair[Nat,Str].name.assertEq "test.NamedPair[_,_]"}
   .check{base.Named.name.assertEq "base.Named"}
   .check{base.Named{ .x: Nat -> 5 }.name.assertEq "test._FName"}
-  .check{NamedInherit.name.assertEq "mine"}
-  .check{NamedStillAbstract{ .name -> "lit" }.name.assertEq "lit"}
   }
 
 TestNamed: Test {::

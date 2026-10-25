@@ -1,0 +1,4 @@
+///``Final["m"]`` makes every method named ``m`` final, whatever its arity and receiver capability:
+///the type implementing ``Final["m"]`` directly may implement those methods, and no subtype of that type implements them.
+///The type argument is a string literal type holding a method name, like ``".name"`` or ``"+"``.
+Final[M]: {}
