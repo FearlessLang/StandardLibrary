@@ -104,6 +104,7 @@ MyTests:UnitTests{::
   .test TestNum
   .test TestStr
   .test TestEnum
+  .test TestNamed
   .test TestWrappers
   .test GuiLayoutTests
   .test GuiBuilderTests

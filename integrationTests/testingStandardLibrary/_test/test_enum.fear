@@ -23,9 +23,6 @@ EnumTests: Test {::
 
   .check{North.str.assertEq "North"}
   .check{West.str.assertEq "West"}
-  .check{North.name.assertEq "test.North"}
-  .check{base.Named.name.assertEq "base.Named"}
-  .check{base.Named{ .x: Nat -> 5 }.name.startsWith "test._" .assertTrue}
 
   .check{North.index.assertEq 0}
   .check{East.index.assertEq 1}
