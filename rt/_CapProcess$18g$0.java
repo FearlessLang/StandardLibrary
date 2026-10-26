@@ -51,7 +51,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   private static Object instance(String name){
     var simple= name.substring(name.indexOf('.')+1);
     try{ return Class.forName("_"+primes(name)+"$"+caseTag(simple)+"$0").getField("instance").get(null); }
-    catch (ReflectiveOperationException _){ throw nonDetErr("No type called "+name+"."); }
+    catch (ReflectiveOperationException _){ throw detErr("No type called "+name+"."); }
   }
   private static String primes(String s){
     var k= 0;
