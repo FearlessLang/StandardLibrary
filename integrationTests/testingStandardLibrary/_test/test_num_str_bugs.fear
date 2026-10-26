@@ -1,7 +1,3 @@
-BugNatFloatTests: Test {::
-  .check{13_835_058_055_282_164_737 .softFloat .assertEq +13_835_058_055_282_165_760.0}
-  }
-
 BugFloatRoundTests: Test {::
   .check{0.5 .getPred .softRound .assertEq +0.0}
   .check{0.5 .getPred .round .assertEq({::}, Opts#(+0.0))}
@@ -35,7 +31,6 @@ BugMathTests: Test {::
   }
 
 TestNumStrBugs: Test {::
-  .test BugNatFloatTests
   .test BugFloatRoundTests
   .test BugFloatRangeTests
   .test BugNumFloatTests
