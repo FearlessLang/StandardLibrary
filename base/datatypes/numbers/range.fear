@@ -17,16 +17,9 @@ Range[N]: ToFlow[N], Container[N], Pipe[Range[N]], ToStr {
   /// `this.end` returns the last value in this range
   .end: N;
 
-  /// `this.size` returns the number of elements in this range.
+  /// `this.size` returns the number of elements in this range; a range is never empty, since it has a `.start` and an `.end`.
+  /// Throws when the number does not fit in a `Nat`, as for the full ranges of `Nat` and `Int`.
   .size: Nat;
-
-  /// `this.isEmpty` returns true if this range represents an empty sequence.
-  /// Equivalent to: ``this.size == 0``.
-  .isEmpty: Bool -> this.size == 0;
-
-  /// `this.isEmpty` return `False` if this represents an empty sequence.
-  /// Equivalent to: ``this.isEmpty.not``
-  .notEmpty: Bool -> this.isEmpty.not;
 
   /// `this.flow` creates a flow of all the elements in the range
   //> .check{1=~~=6.flow.list .assertEq({::}, Lists#(1,2,3,4,5,6))}
