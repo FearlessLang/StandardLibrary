@@ -82,8 +82,8 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0(){};
     double end= Float$1c$0Instance.unwrap(p1);
     assert start <= end;
     return Flow$o$1Instance.range(
-      streamDoublesBetweenAsBits(start, end)
-        .mapToObj(bits -> Float$1c$0Instance.instance(Double.longBitsToDouble(bits)))
+      LongStream.rangeClosed(_FloatsBetween$9j4$0.ord(start), _FloatsBetween$9j4$0.ord(end))
+        .mapToObj(k -> Float$1c$0Instance.instance(Double.longBitsToDouble(k < 0 ? -k | Long.MIN_VALUE : k)))
     );
   }
 
@@ -102,27 +102,6 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0(){};
   private static double grown(double d, double step){
     if (d + step == d){ throw err("Range.flow(step): the step "+toS(Float$1c$0Instance.instance(step))+" is too small to move past "+toS(Float$1c$0Instance.instance(d))+": adding it gives the same Float back."); }
     return d + step;
-  }
-
-  long smallestNegBits= Double.doubleToRawLongBits(Math.nextDown(-0.0));
-
-  static LongStream streamDoublesBetweenAsBits(double start, double end){
-    assert !Double.isNaN(start) && !Double.isNaN(end);
-    assert start <= end;
-    long startBits= Double.doubleToRawLongBits(start);
-    long endBits= Double.doubleToRawLongBits(end);
-    // I love -0.0 and 0.0...
-    boolean startNeg= startBits < 0; // true for negatives AND -0.0
-    boolean endNeg= endBits < 0;
-
-    if (startNeg && !endNeg){
-      return LongStream.concat(
-        streamDoublesBetweenAsBits(Math.nextDown(-0.0), start)
-          .map(doubleBits -> smallestNegBits - doubleBits + startBits), // reverse the stream
-        streamDoublesBetweenAsBits(0.0, end)
-        );
-    }
-    return LongStream.rangeClosed(startBits, endBits);
   }
 
   private static Error badStep(Object step){

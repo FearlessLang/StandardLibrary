@@ -143,6 +143,14 @@ FloatRangeTests: Test {::
   .check{1.0.getPred  < 1.0.assertTrue}
   .check{+0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
   .check{-0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
+  .check{(-0.0=~~= +0.0).size .assertEq 1}
+  .check{(+0.0=~~= -0.0).size .assertEq 1}
+  .check{(+0.0=~~= -0.0).list .assertEq({::}, Lists# +0.0)}
+  .check{(-1.0=~~= +0.0).size .assertEq((-1.0=~~= -0.0).size)}
+  .check{(Math.negInf=~~=(Math.inf)).size .assertEq 18_437_736_874_454_810_625}
+  .check{((-1.0 .getPred)=~~= -1.0).list .assertEq({::}, Lists#(-1.0 .getPred, -1.0))}
+  .check{((0.0 .getPred .getPred)=~~=(0.0 .getSucc)).list
+    .assertEq({::}, Lists#(0.0 .getPred .getPred, 0.0 .getPred, +0.0, 0.0 .getSucc))}
   .check{
     +0.0=~~= +1.0.flow +0.25 .list
       .assertEq({::}, Lists#(+0.0,+0.25,+0.5,+0.75,+1.0))}
