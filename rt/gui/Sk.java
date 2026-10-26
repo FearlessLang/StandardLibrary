@@ -37,6 +37,7 @@ import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import static _base.Scopes.*;
 
@@ -253,13 +254,25 @@ interface Sk{
     cv.drawRRect(RRect.makeXYWH(cx - gw / 2, cy - gh / 2, gw, gh, t / 2f), paint);
   }
 
-  static void tooltip(Canvas cv, String text, java.awt.Point at, int w, int h){
+  record Tip(String text, List<TextLine> lines, List<Dimension> needs, int width, int height) implements AutoCloseable{
+    @Override public void close(){ lines.forEach(TextLine::close); }
+  }
+
+  static Tip tip(String text){
     var texts= text.split("\n", -1);
     var lines= Arrays.stream(texts).map(l -> shape(l, 12)).toList();
     var needs= new ArrayList<Dimension>();
     for (int i= 0; i < texts.length; i += 1){ needs.add(need(lines.get(i), ink(texts[i], 12), 12, 1, 0.5)); }
-    float bw= needs.stream().mapToInt(d -> d.width).max().orElseThrow() + 10;
-    float bh= needs.stream().mapToInt(d -> d.height).sum() + 6;
+    int bw= needs.stream().mapToInt(d -> d.width).max().orElseThrow() + 10;
+    int bh= needs.stream().mapToInt(d -> d.height).sum() + 6;
+    return new Tip(text, lines, List.copyOf(needs), bw, bh);
+  }
+
+  static void tooltip(Canvas cv, Tip tip, java.awt.Point at, int w, int h){
+    var lines= tip.lines();
+    var needs= tip.needs();
+    float bw= tip.width();
+    float bh= tip.height();
     float x= Math.clamp(at.x, 0, Math.max(0, w - bw));
     float y= at.y + 20 + bh <= h ? at.y + 20 : Math.max(0, at.y - 4 - bh);
     paint.setColor(0xFF767676);
@@ -270,7 +283,7 @@ interface Sk{
     float ly= y + 3;
     for (int i= 0; i < lines.size(); i += 1){
       var n= needs.get(i);
-      try (var l= lines.get(i)){ draw(cv, l, x + 5, ly, n.width, n.height, 12, 1, 0.5, paint); }
+      draw(cv, lines.get(i), x + 5, ly, n.width, n.height, 12, 1, 0.5, paint);
       ly += n.height;
     }
   }

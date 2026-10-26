@@ -74,6 +74,7 @@ final class SkMouse extends MouseAdapter{
   private long tipSince;
   private Point tipAt;
   private boolean tipOff;
+  private Sk.Tip shown;
   private AWidget dragged;
   private boolean draggedVert;
   private boolean paging;
@@ -122,7 +123,11 @@ final class SkMouse extends MouseAdapter{
     if (owner != tip){ tip = owner; tipSince = System.nanoTime(); tipAt = null; }
     if (tip == null || tipOff || System.nanoTime() - tipSince < 500_000_000L){ return; }
     if (tipAt == null){ tipAt = at; }
-    Sk.tooltip(cv, tip.tooltip, tipAt, top().getWidth(), top().getHeight());
+    if (shown == null || !shown.text().equals(tip.tooltip)){
+      if (shown != null){ shown.close(); }
+      shown = Sk.tip(tip.tooltip);
+    }
+    Sk.tooltip(cv, shown, tipAt, top().getWidth(), top().getHeight());
   }
 
   @Override public void mousePressed(MouseEvent e){
