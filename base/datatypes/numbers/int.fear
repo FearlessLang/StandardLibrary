@@ -231,12 +231,12 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .aluRem(x: Int): Int;
 
   /// ``this.aluShiftLeft(bits)`` returns `this` shifted left by ``bits``, with the effective shift
-  /// taken modulo ``64`` (``bits & 33``)
+  /// taken modulo ``64`` (``bits & 63``)
   //>   .check{+1 .aluShiftLeft 3 .assertEq +8}
   .aluShiftLeft(bits: Nat): Int;
 
   /// ``this.aluShiftRight(bits)`` returns `this` arithmetically shifted right (sign-extending) by
-  /// ``bits``, with the effective shift taken modulo ``64`` (``bits & 64``)
+  /// ``bits``, with the effective shift taken modulo ``64`` (``bits & 63``)
   //>   .check{-8 .aluShiftRight 1 .assertEq -4}
   .aluShiftRight(bits: Nat): Int;
 

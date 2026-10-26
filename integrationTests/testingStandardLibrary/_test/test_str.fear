@@ -190,6 +190,16 @@ StrParseFloatTests: Test {::
   .check{" +1.0" .float .assertEq({::}, Opt[Float])}
   .check{"+1.0 " .float .assertEq({::}, Opt[Float])}
   .check{"+1.0_e3" .float .assertEq({::}, Opt[Float])}
+  .check{"1.0" .float .assertEq({::}, Opts#(+1.0))}
+  .check{"+1" .float .assertEq({::}, Opt[Float])}
+  .check{"+1." .float .assertEq({::}, Opt[Float])}
+  .check{"+.1" .float .assertEq({::}, Opt[Float])}
+  .check{"+1e0" .float .assertEq({::}, Opt[Float])}
+  .check{"+1.0e-3" .float .assertEq({::}, Opt[Float])}
+  .check{"+01__0.00__1" .float .assertEq({::}, Opt[Float])}
+  .check{"+1.25" .float .assertEq({::}, Opts#(+1.25))}
+  .check{"+01__0.2__5" .float .assertEq({::}, Opts#(+10.25))}
+  .check{"+1.25e-1" .float .assertEq({::}, Opts#(+0.125))}
   }
 
 StrParseSoftFloatTests: Test {::
