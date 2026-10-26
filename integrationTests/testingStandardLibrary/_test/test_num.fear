@@ -52,6 +52,15 @@ NumConvTests: Test {::
   .check{+5.num.getNat .assertEq 5}
   .check{+5.num.getByte .assertEq (+5.getByte)}
   .check{+5.num.getFloat .assertEq +5.0}
+  .check{(2/1 ** +1024) .float .assertEmpty {::}}
+  .checkDetErr({::}, {(2/1 ** +1024) .getFloat})
+  .check{(2/1 ** +1024) .softFloat .assertEq(Math.inf)}
+  .check{0.0 .getSucc .getNum .float .assertEq({::}, Opts#(0.0 .getSucc))}
+  .check{0.0 .getSucc .getNum .softFloat .assertEq(0.0 .getSucc)}
+  .check{0.0 .getPred .getNum .getFloat .assertEq(0.0 .getPred)}
+  .check{(2/1 ** +1100) + (1/1) / (2/1 ** +1100) .softFloat .assertEq +1.0}
+  .check{(2/1 ** +53) + (1/1) / (2/1 ** +53) .softFloat .assertEq +1.0}
+  .check{(2/1 ** +54) + (3/1) / (2/1 ** +54) .softFloat .assertEq(1.0 .getSucc)}
   .check{+1.num / (+2.num).softInt .assertEq +0}
   .check{(-1.num) / (+2.num).softNat .assertEq 0}
   .check{+5000000000.num.softInt .assertEq +5000000000}
