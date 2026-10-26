@@ -81,7 +81,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   static final Pattern unsignedInt= Pattern.compile("[0-9](?:[0-9_]*[0-9])?");
   static final Pattern optionallySignedFloat= Pattern.compile(
     "[+-]?(?:[0-9](?:[0-9_]*[0-9])?)\\.(?:[0-9](?:[0-9_]*[0-9])?)"
-    + "(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?");
+    + "(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?(?:soft)?");
   static final Pattern optionallySignedRational= Pattern.compile(
     "[+-]?(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)/(?:[0-9](?:[0-9_]*[0-9])?(?:\\.[0-9](?:[0-9_]*[0-9])?)?)");
   static final long maxNatU= -1;
@@ -266,13 +266,15 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       return new Dec(new BigInteger(s.substring(0, dot)+s.substring(dot+1)), s.length()-dot-1);
     }
   }
+  private static boolean soft(String s){ return s.endsWith("soft"); }
+  private static String floatDigits(String s){ return no_(soft(s) ? s.substring(0, s.length()-"soft".length()) : s); }
   @Override public Object imm$float$0(){
     if (!optionallySignedFloat.matcher(val).matches()){ return optEmpty(); }
     try{
-      String x= no_(val);
+      String x= floatDigits(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return optEmpty(); }
-      if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return optEmpty(); }
+      if (!soft(val) && new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return optEmpty(); }
       if (d == 0.0d){ d = 0.0d; }
       return optSome(Float$1c$0Instance.instance(d));
     }
@@ -286,10 +288,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
               "\n For example: -2.4, 3000.2, +24.0");
     }
     try{
-      String x= no_(val);
+      String x= floatDigits(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return fail("Str.getFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
-      if (new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return fail("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
+      if (!soft(val) && new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return fail("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
               + "If rounded, the nearest representable value is "+floatExactFearlessLit(d)+"."
               + "If this rounding is desired use Str.getSoftFloat");}
       if (d == 0.0d){ d = 0.0d; }
@@ -306,7 +308,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$softFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){ return optEmpty(); }
     try{
-      double d= Double.parseDouble(no_(val));
+      double d= Double.parseDouble(floatDigits(val));
       if (!Double.isFinite(d)){ return optEmpty(); }
       if (d == 0.0d){ d = 0.0d; }
       return optSome(Float$1c$0Instance.instance(d));
@@ -320,7 +322,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
               "\n For example: -2.4, 3000.2, +24.0");
     }
     try{
-      String x= no_(val);
+      String x= floatDigits(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return fail("Str.getSoftFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
       if (d == 0.0d){ d = 0.0d; }
