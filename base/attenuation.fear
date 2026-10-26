@@ -286,7 +286,7 @@ InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 ///The new process prints to the output of this program, and its error output goes to the error output of this program.
 ///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,
 ///it throws the non deterministic error ``main`` threw.
-///A new process that cannot start, or that ends before its main ends, is a non deterministic error.
+///A new process that cannot start, or that ends before its main ends, is a deterministic error.
 ///``.start`` starts the new process and returns at once; the `CapRunningMain` it gives is how this program waits for the process or ends it.
 ///``.run`` is ``.start`` then `CapRunningMain.await`.
 CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{

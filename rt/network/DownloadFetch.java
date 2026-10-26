@@ -108,19 +108,19 @@ final class DownloadFetch{
     throw nonDetErr("Invalid URL descriptor.\nunsupported scheme (only http/https allowed): "+scheme+" in "+url);
   }
   static RuntimeException downloadFailed(String url, String reason){
-    throw nonDetErr("Download failed.\nurl: "+url+"\n"+reason);
+    throw detErr("Download failed.\nurl: "+url+"\n"+reason);
   }
   static RuntimeException downloadTimedOut(String url, long timeoutMs){
-    throw nonDetErr("Download timed out.\nurl: "+url+"\ntimeoutMs: "+timeoutMs);
+    throw detErr("Download timed out.\nurl: "+url+"\ntimeoutMs: "+timeoutMs);
   }
   static RuntimeException httpStatus(String url, int status){
-    throw nonDetErr("Download failed.\nurl: "+url+"\nHTTP status: "+status);
+    throw detErr("Download failed.\nurl: "+url+"\nHTTP status: "+status);
   }
   static RuntimeException tooManyRedirects(String url){
-    throw nonDetErr("Download failed.\nurl: "+url+"\ntoo many redirects");
+    throw detErr("Download failed.\nurl: "+url+"\ntoo many redirects");
   }
   static RuntimeException exceedsMaxBytes(String url, String observedLabel, long observed, long maxBytes){
-    throw nonDetErr(
+    throw detErr(
       "Download exceeds maxBytes.\nurl: "+url
       +"\n"+observedLabel+": "+Long.toUnsignedString(observed)
       +"\nmaxBytes: "+Long.toUnsignedString(maxBytes)

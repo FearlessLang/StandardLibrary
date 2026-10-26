@@ -23,7 +23,7 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
       p= new ProcessBuilder(_CapProcess$18g$0.command(name, names, marker, arg.isPresent())).start();
       if (arg.isPresent()){ p.getOutputStream().write((arg.get()+"\n").getBytes(UTF_8)); p.getOutputStream().flush(); }
     }
-    catch (IOException e){ throw nonDetErr("The process running "+name+" could not be started: "+e.getClass().getSimpleName()); }
+    catch (IOException e){ throw detErr("The process running "+name+" could not be started: "+e.getClass().getSimpleName()); }
     out= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(p.getInputStream()));
     err= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(p.getErrorStream(), marker, tail));
   }
@@ -65,12 +65,12 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
       catch (IOException _){}
     }
   }
-  private Error interrupted(){ return nonDetErr("The process running "+name+" was interrupted."); }
+  private Error interrupted(){ return detErr("The process running "+name+" was interrupted."); }
   private Object ended(){
     joined();
     var text= tail.toString();
     var nl= text.indexOf('\n');
-    if (nl < 0){ throw nonDetErr("The process running "+name+" ended with "+p.exitValue()+" before its main ended."); }
+    if (nl < 0){ throw detErr("The process running "+name+" ended with "+p.exitValue()+" before its main ended."); }
     var kind= text.substring(0, nl);
     var rest= text.substring(nl+1).stripTrailing();
     if (kind.equals("ok") && rest.isEmpty()){ return Void$o$0.instance; }

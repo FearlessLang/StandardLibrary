@@ -3,11 +3,12 @@ package _base;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import static _base.Util.*;
 
-record InputFile(String what, String label, Path path, List<String> zipSteps, String zipEntry) implements CapInputCursorNode$8sg8$0{
-  InputFile(Path path){ this("input file", portable(path.getFileName().toString()), path, List.of(), ""); }
+record InputFile(Optional<DataFiles.Root> root, String label, Path path, List<String> zipSteps, String zipEntry) implements CapInputCursorNode$8sg8$0{
+  InputFile(Path path){ this(Optional.empty(), portable(path.getFileName().toString()), path, List.of(), ""); }
   static String portable(String name){
     return name.codePoints()
       .map(c -> UStr$s$0Instance.isStrScalar(c) ? c : '?')
@@ -17,8 +18,12 @@ record InputFile(String what, String label, Path path, List<String> zipSteps, St
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$label$0(){ return Str$c$0Instance.instance(label); }
   byte[] bytes(){
+    root.ifPresent(DataFiles::reachable);
     try{ return DataFiles.bytes(path, zipSteps, zipEntry); }
-    catch (IOException e){ throw nonDetErr("The "+what+" \""+label+"\" could not be read: "+e.getClass().getSimpleName()); }
+    catch (IOException e){
+      var msg= "The "+(root.isPresent() ? "resource" : "input file")+" \""+label+"\" could not be read: "+e.getClass().getSimpleName();
+      throw root.isPresent() ? DataFiles.lost(msg, e) : detErr(msg);
+    }
   }
   Object str(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.str(bytes(), recover, decoder); }
   Object uStr(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.uStr(bytes(), recover, decoder); }
@@ -43,6 +48,6 @@ record InputFile(String what, String label, Path path, List<String> zipSteps, St
     return List$o$1Instance.wrap(l);
   }
   @Override public Object mut$readImage$1(Object maxPixels){
-    return new Image$1c$0Instance(AssetImageRead.decode(label, bytes(), AssetBytesRead.nat(maxPixels)));
+    return new Image$1c$0Instance(AssetImageRead.decode(label, bytes(), AssetBytesRead.nat(maxPixels), Util::detErr));
   }
 }

@@ -83,17 +83,22 @@ final class DataFiles{
     if (entry.isEmpty()){ return Files.readAllBytes(path); }
     return item(items(path, steps), entry).bytes();
   }
+  static void reachable(Root root){
+    if (!Files.isDirectory(root.path())){ throw nonDetErr("The root folder of the data project mounted on \""+root.name()+"\" cannot be reached."); }
+  }
+  static Error lost(String msg, IOException e){ return e instanceof NoSuchFileException ? detErr(msg) : nonDetErr(msg); }
   private static Object act(Root root, Object path, boolean write, Op op){
     var p= List$o$1Instance.asJava(path).stream().map(AssetBytesRead::str).toList();
+    reachable(root);
     try{ return op.apply(root.name(), root.path(), p); }
     catch (IOException e){ throw failed(root.name(), p, write, e); }
     catch (UncheckedIOException e){ throw failed(root.name(), p, write, e.getCause()); }
   }
   private static Error failed(String name, List<String> path, boolean write, IOException e){
-    return nonDetErr("The "+at(name, path)+" could not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName());
+    return lost("The "+at(name, path)+" could not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName(), e);
   }
   private static String at(String name, List<String> path){ return "path \""+String.join("/", path)+"\" of \""+name+"\""; }
-  private static Error refused(String name, List<String> path, String why){ return nonDetErr("The "+at(name, path)+" "+why); }
+  private static Error refused(String name, List<String> path, String why){ return detErr("The "+at(name, path)+" "+why); }
   private static Error invalid(String name, List<String> path, String why){ return detErr("The "+at(name, path)+" is not valid: "+why); }
   private static boolean atom(String s){ return s.matches("[a-z_][a-z0-9_]*") && !reserved.contains(s); }
   private static boolean fileName(String s){
@@ -131,7 +136,7 @@ final class DataFiles{
     resource(name, path);
     var at= resolve(root, path);
     if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a resource."); }
-    return new InputFile("resource", name+"/"+String.join("/", path), f.path(), f.steps(), f.entry());
+    return new InputFile(Optional.of(new Root(name, root)), name+"/"+String.join("/", path), f.path(), f.steps(), f.entry());
   }
   private static Object write(String name, Path root, List<String> path, byte[] bytes) throws IOException{
     writable(name, path);

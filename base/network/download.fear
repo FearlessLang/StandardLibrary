@@ -10,6 +10,7 @@
 ///Redirects are followed automatically up to a fixed cap of 5 hops, each
 ///one re-validated against the same URL/scheme rule.
 ///Connect and per-request timeouts are a fixed 30s each, not configurable.
+///A download that fails, times out, exceeds ``maxBytes``, or gives an image that cannot be decoded is a deterministic error.
 CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadBytes(url: Str, maxBytes: Nat): List[Byte];
 
