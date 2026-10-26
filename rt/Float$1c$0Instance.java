@@ -256,8 +256,8 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     return instance(Math.rint(val));
   }
   @Override public Object imm$softRound$0(){
-    if (val >= 0.0d){ return instance(Math.floor(val + 0.5)); }
-    return instance(Math.ceil(val - 0.5));
+    double a= Math.abs(val), t= Math.floor(a);
+    return instance(Math.copySign(a - t >= 0.5 ? t + 1 : t, val));
   }
   @Override public Object imm$softCeil$0(){ return instance(Math.ceil(val)); }
   @Override public Object imm$softFloor$0(){ return instance(Math.floor(val)); }
