@@ -60,8 +60,8 @@ LnTests: Test {::
   .check{Math.ln(+2.0).assertInRange(+0.69314717soft =~~= +0.6931471805599453soft)}
   .check{Math.ln(Math.e).assertEq(+1.0)}
   .check{Math.ln(+1.0).assertEq(+0.0)}
-  .checkDetErr({::}, {Math.ln(-1.0)})
-  .checkDetErr({::}, {Math.ln(Math.nan)})
+  .checkDetErr({::.isMsg{:: == "Math.ln: Cannot take the ln of a negative number, given -1.0"}}, {Math.ln(-1.0)})
+  .checkDetErr({::.isMsg{:: == "Math.ln: Input was NaN, cannot take the ln of NaN"}}, {Math.ln(Math.nan)})
   .checkDetErr({::}, {Math.ln(Math.negInf)})
   }
 
@@ -72,8 +72,8 @@ LogTests: Test {::
   .check{Math.log(+10.0).assertEq(+1.0)}
   .check{Math.log(+1.0).assertEq(+0.0)}
   .check{Math.log(+2.0).assertInRange(+0.3010299956soft =~~= +0.3010299958soft)}
-  .checkDetErr({::}, {Math.log(-1.0)})
-  .checkDetErr({::}, {Math.log(Math.nan)})
+  .checkDetErr({::.isMsg{:: == "Math.log: Cannot take the log of a negative number, given -1.0"}}, {Math.log(-1.0)})
+  .checkDetErr({::.isMsg{:: == "Math.log: Input was NaN, cannot take the log of NaN"}}, {Math.log(Math.nan)})
   .checkDetErr({::}, {Math.log(Math.negInf)})
   }
 
@@ -131,10 +131,11 @@ AtanTests: Test {::
   }
 
 Atan2Tests: Test {::
-  .check{Math.atan2(+1.0, +0.0)#.assertEq(Math.pi / +2.0)}
-  .check{Math.atan2(-1.0, +0.0)#.assertEq(Math.pi / -2.0)}
-  .check{Math.atan2(+0.0, +1.0)#.assertEq(+0.0)}
-  .check{Math.atan2(+0.0, -1.0)#.assertEq(Math.pi)}
+  .check{Math.atan2(+0.0, +1.0)#.assertEq(Math.pi / +2.0)}
+  .check{Math.atan2(+0.0, -1.0)#.assertEq(Math.pi / -2.0)}
+  .check{Math.atan2(+1.0, +0.0)#.assertEq(+0.0)}
+  .check{Math.atan2(-1.0, +0.0)#.assertEq(Math.pi)}
+  .check{Math.atan2(+1.0, +1.0)#.assertEq(Math.pi / +4.0)}
   .checkDetErr({::}, {Math.atan2(Math.nan, +1.0)})
   .checkDetErr({::}, {Math.atan2(+1.0, Math.nan)})
   }
