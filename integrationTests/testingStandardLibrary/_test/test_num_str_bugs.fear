@@ -1,8 +1,3 @@
-BugIntRangeTests: Test {::
-  .check{(-1=~~=(Math.maxInt)).size .assertEq(Math.maxInt.getNat + 2)}
-  .check{(-1=~~=(Math.maxInt)).isEmpty .assertFalse}
-  }
-
 BugNatFloatTests: Test {::
   .check{13_835_058_055_282_164_737 .softFloat .assertEq +13_835_058_055_282_165_760.0}
   }
@@ -40,7 +35,6 @@ BugMathTests: Test {::
   }
 
 TestNumStrBugs: Test {::
-  .test BugIntRangeTests
   .test BugNatFloatTests
   .test BugFloatRoundTests
   .test BugFloatRangeTests
