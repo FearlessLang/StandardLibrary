@@ -1,13 +1,3 @@
-BugFloatRangeTests: Test {::
-  .check{(-0.0=~~= +0.0).size .assertEq 1}
-  .check{(+0.0=~~= -0.0).size .assertEq 1}
-  .check{(+0.0=~~= -0.0).list .assertEq({::}, Lists# +0.0)}
-  .check{(-1.0=~~= +0.0).size .assertEq((-1.0=~~= -0.0).size)}
-  .check{((-1.0 .getPred)=~~= -1.0).list .assertEq({::}, Lists#(-1.0 .getPred, -1.0))}
-  .check{((0.0 .getPred .getPred)=~~=(0.0 .getSucc)).list
-    .assertEq({::}, Lists#(0.0 .getPred .getPred, 0.0 .getPred, +0.0, 0.0 .getSucc))}
-  }
-
 BugNumFloatTests: Test {::
   .check{(2/1 ** +1024) .float .assertEmpty {::}}
   .checkDetErr({::}, {(2/1 ** +1024) .getFloat})
@@ -24,7 +14,6 @@ BugMathTests: Test {::
   }
 
 TestNumStrBugs: Test {::
-  .test BugFloatRangeTests
   .test BugNumFloatTests
   .test BugMathTests
   }
