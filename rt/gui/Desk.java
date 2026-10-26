@@ -17,7 +17,6 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
@@ -60,7 +59,7 @@ final class Desk{
     var windowClass= deskId+"-"+icon;
     if (!windows){ call(X11.appClass, windowClass); return; }
     f.addNotify();
-    var ico= Path.of(System.getProperty("fearlessDesk.icons")).resolve(icon+".ico")+",0";
+    var ico= Util.pathProperty("fearlessDesk.icons").resolve(icon+".ico")+",0";
     Win.identify(hwnd(f), List.of(windowClass, System.getProperty("fearlessDesk.relaunch"), ico, name));
   }
   private static MemorySegment hwnd(Frame f){ return MemorySegment.ofAddress((long)reflect(() -> Win.hwnd.invoke(reflect(() -> peer.get(f))))); }

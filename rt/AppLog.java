@@ -30,8 +30,7 @@ public final class AppLog{
   private static final AtomicBoolean hookInstalled= new AtomicBoolean();
   private static final AtomicBoolean closing= new AtomicBoolean();
   public static AppLog open(Path path, boolean raw){
-    String rootStr= System.getProperty("fearlessUser.dir");
-    var root= Path.of(rootStr);
+    var root= Util.pathProperty("fearlessUser.dir");
     errPath = root.resolve(".out", "logs", "err.log");
     var p= root.resolve(path).normalize();
     startupFor(errPath, keepErrLogs);

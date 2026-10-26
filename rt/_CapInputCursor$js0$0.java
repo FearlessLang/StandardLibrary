@@ -10,8 +10,7 @@ public final class _CapInputCursor$js0$0 implements CapInputCursor$js0$0{
   static final List<Path> files= opened();
   private static List<Path> opened(){
     var res= new CopyOnWriteArrayList<Path>();
-    var file= System.getProperty("fearlessInput.file");
-    if (file != null){ res.add(Path.of(file)); }
+    if (System.getProperty("fearlessInput.file") != null){ res.add(pathProperty("fearlessInput.file")); }
     return res;
   }
   private final int at;

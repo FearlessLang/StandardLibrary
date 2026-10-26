@@ -25,6 +25,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   static final String markerKey= "fearlessProcess.resultMarker";
   private static final AtomicInteger children= new AtomicInteger();
   public static void main(String[] args) throws IOException{
+    NativeLocale.force();
     var line= new ByteArrayOutputStream();
     for (var b= System.in.read(); b != '\n'; b= System.in.read()){ assert b >= 0; line.write(b); }
     installParentLifeline();
@@ -101,6 +102,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     cmd.add("-D"+markerKey+"="+marker);
     cmd.add("-cp");
     cmd.add(System.getProperty("java.class.path"));
+    cmd.add(_CapProcess$18g$0.class.getClassLoader().getClass().getName());
     cmd.add(info ? _CapProcess$18g$0.class.getName() : "_"+name.substring(0, name.indexOf('.'))+".Main");
     cmd.add(name);
     return cmd;
