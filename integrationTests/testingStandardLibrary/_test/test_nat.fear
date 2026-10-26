@@ -46,6 +46,11 @@ NatConvTests: Test {::
   .check{5.byte .assertEq ({::},Opts#(+5.getByte))}
   .check{300.byte .assertEq ({::},Opt[Byte])}
   .check{(-1).aluNat.softInt .assertEq(Math.maxInt)}
+  .check{13_835_058_055_282_164_737 .softFloat .assertEq +13_835_058_055_282_165_760.0}
+  .check{9_223_372_036_854_776_832 .softFloat .assertEq +9_223_372_036_854_775_808.0}
+  .check{9_223_372_036_854_776_833 .softFloat .assertEq +9_223_372_036_854_777_856.0}
+  .check{Math.maxNat .softFloat .assertEq +18_446_744_073_709_551_616.0}
+  .check{Math.maxInt.getNat .softFloat .assertEq +9_223_372_036_854_775_808.0}
   }
 
 NatAluTests: Test {::

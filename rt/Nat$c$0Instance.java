@@ -140,17 +140,8 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
     return Float$1c$0Instance.instance(unsignedLongToDouble(val));
   }
   static double unsignedLongToDouble(long num){
-    if (Long.compareUnsigned(num, Long.MAX_VALUE) > 0){
-      // Hopefully correct...
-      // a + b - b is an identity function, up to floating point precision
-      // We add Long.MIN_VALUE rather than subtracting Long.MAX_VALUE,
-      // MIN_VALUE = -2^63 rather than MAX_VALUE = 2^63 - 1
-      return ((double) (num + Long.MIN_VALUE)) - Long.MIN_VALUE;
-    }
-    // Since the number is small enough that the sign bit is not set,
-    // we can safely interpret the unsigned long as a signed long
-    // and thus use the regular conversion to double.
-    return (double) num;
+    if (num >= 0){ return num; }
+    return (double)((num >>> 1) | (num & 1)) * 2;
   }
   static boolean canConvertToFloat(long val){
     // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
