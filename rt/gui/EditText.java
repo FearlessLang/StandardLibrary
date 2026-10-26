@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.Locale;
 import javax.swing.SwingUtilities;
 
@@ -69,8 +70,10 @@ final class _TextArea extends AEditText implements TextArea$aw$0{
 
 abstract class AEditText extends AWidget implements _EditText$aw$1{
   record Step(int at, String removed, String inserted, int caretBefore, int anchorBefore, int caretAfter, int anchorAfter){}
-  record Seg(int from, int to, TextLine line){}
-  record VLine(int start, int end, TextLine line, boolean wrapped){}
+  record Seg(int from, int to, TextLine line, Rect ink){}
+  record VLine(int start, int end, TextLine line, boolean wrapped, int y, int w, int h){
+    float dx(){ return line == null ? 0 : (w - line.getWidth()) / 2; }
+  }
   record Fire(Consumer$ao$1 handler, TextEvent$ls$0 event){}
   static final Paint stroke= new Paint().setAntiAlias(true).setMode(PaintMode.STROKE);
   final StringBuilder buf= new StringBuilder();
@@ -103,12 +106,15 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
 
   @Override Dimension need(){
     int w= 0;
-    var ls= buf.toString().split("\n", -1);
-    for (var l : ls){
-      if (l.isEmpty()){ continue; }
-      try (var t= Sk.shape(l, textSize)){ w = Math.max(w, (int) Math.ceil(t.getWidth())); }
+    int h= 0;
+    for (var l : buf.toString().split("\n", -1)){
+      try (var t= Sk.shape(l, textSize)){
+        var n= Sk.need(t, Sk.ink(l, textSize), textSize, above, below);
+        w = Math.max(w, n.width);
+        h += Math.max(lineHeight(), n.height);
+      }
     }
-    return new Dimension(w + 2 + edgeW(), ls.length * lineHeight() + edgeH());
+    return new Dimension(w + 2 + edgeW(), h + edgeH());
   }
   @Override void grow(int w, int h){}
   @Override void fit(){ dirty = true; }
@@ -163,22 +169,26 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     var old= shaped;
     shaped = new HashMap<>();
     lines = new ArrayList<>();
-    float w= 0;
+    int w= 0;
+    int y= 0;
     for (int s= 0;;){
       int e= buf.indexOf("\n", s);
       int end= e < 0 ? buf.length() : e;
       var segs= segsOf(buf.substring(s, end), old, ww);
       for (int i= 0; i < segs.size(); i += 1){
         var g= segs.get(i);
-        lines.add(new VLine(s + g.from(), s + g.to(), g.line(), i < segs.size() - 1));
-        w = Math.max(w, width(g.line()));
+        var n= g.line() == null ? new Dimension() : Sk.need(g.line(), g.ink(), textSize, above, below);
+        int h= Math.max(lineHeight(), n.height);
+        lines.add(new VLine(s + g.from(), s + g.to(), g.line(), i < segs.size() - 1, y, n.width, h));
+        w = Math.max(w, n.width);
+        y += h;
       }
       if (e < 0){ break; }
       s = e + 1;
     }
     close(old);
-    contentW = (int) Math.ceil(w) + 2;
-    contentH = lines.size() * lineHeight();
+    contentW = w + 2;
+    contentH = y;
     scrollX = Math.clamp(scrollX, 0, maxScrollX());
     scrollY = Math.clamp(scrollY, 0, maxScrollY());
     if (follow){ follow = false; scrollY = maxScrollY(); }
@@ -200,9 +210,9 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   static float width(TextLine t){ return t == null ? 0 : t.getWidth(); }
   private ArrayList<Seg> segs(String s, int ww){
     var res= new ArrayList<Seg>();
-    if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
+    if (s.isEmpty()){ res.add(new Seg(0, 0, null, null)); return res; }
     var whole= Sk.shape(s, textSize);
-    if (whole.getWidth() <= ww){ res.add(new Seg(0, s.length(), whole)); return res; }
+    if (whole.getWidth() <= ww){ res.add(new Seg(0, s.length(), whole, Sk.ink(s, textSize))); return res; }
     var words= BreakIterator.getLineInstance(Locale.ROOT);
     words.setText(s);
     var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
@@ -211,7 +221,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
       int to= fit(s, whole, words, from, ww);
       if (to == from){ to = fit(s, whole, clusters, from, ww); }
       if (to == from){ to = clusters.following(from); }
-      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize)));
+      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize), Sk.ink(s.substring(from, to), textSize)));
       from = to;
     }
     whole.close();
@@ -229,20 +239,22 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     return res;
   }
 
-  int lineOf(int off){
+  int find(ToIntFunction<VLine> key, int at){
     int lo= 0;
     int hi= lines.size() - 1;
     while (lo < hi){
       int mid= (lo + hi + 1) >>> 1;
-      if (lines.get(mid).start() <= off){ lo = mid; }
+      if (key.applyAsInt(lines.get(mid)) <= at){ lo = mid; }
       else{ hi = mid - 1; }
     }
     return lo;
   }
-  static float xOf(VLine v, int off){ return v.line() == null ? 0 : v.line().getCoordAtOffset(off - v.start()); }
+  int lineOf(int off){ return find(VLine::start, off); }
+  int lineAt(int y){ return find(VLine::y, y); }
+  static float xOf(VLine v, int off){ return v.line() == null ? 0 : v.dx() + v.line().getCoordAtOffset(off - v.start()); }
   int offsetAt(int x, int y){
-    var v= lines.get(Math.clamp(Math.floorDiv(y, lineHeight()), 0, lines.size() - 1));
-    int off= v.line() == null ? v.start() : Math.clamp(v.start() + v.line().getOffsetAtCoord(x), v.start(), v.end());
+    var v= lines.get(lineAt(y));
+    int off= v.line() == null ? v.start() : Math.clamp(v.start() + v.line().getOffsetAtCoord(x - v.dx()), v.start(), v.end());
     if (v.wrapped() && off == v.end()){ off = prev(off); }
     return snap(off);
   }
@@ -277,12 +289,10 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   }
 
   void showCaret(){
-    int lh= lineHeight();
-    int k= lineOf(caret);
-    int x= (int) xOf(lines.get(k), caret);
-    int y= k * lh;
+    var v= lines.get(lineOf(caret));
+    int x= (int) xOf(v, caret);
     int nx= Math.max(Math.min(scrollX, x), x + 2 - viewW());
-    int ny= Math.max(Math.min(scrollY, y), y + lh - viewH());
+    int ny= Math.max(Math.min(scrollY, v.y()), v.y() + v.h() - viewH());
     scrollTo(nx, ny);
   }
   void moved(){ movedAt = micros(frame.elapsed); }
@@ -299,16 +309,17 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     if (!extend && caret != anchor){ return moveTo(right ? selB() : selA(), false); }
     return moveTo(right ? next(caret) : prev(caret), extend);
   }
-  boolean vertical(int by, boolean extend){
-    int k= lineOf(caret);
-    float g= goalX < 0 ? xOf(lines.get(k), caret) : goalX;
-    int t= k + by;
-    int c= t < 0 ? 0 : t >= lines.size() ? buf.length() : offsetAt((int) g, t * lineHeight());
+  boolean vertical(int dy, boolean extend){
+    var v= lines.get(lineOf(caret));
+    float g= goalX < 0 ? xOf(v, caret) : goalX;
+    int by= Math.max(v.h(), Math.abs(dy));
+    int y= dy > 0 ? v.y() + by : v.y() + v.h() - 1 - by;
+    int c= y < 0 ? 0 : y >= contentH ? buf.length() : offsetAt((int) g, y);
     moveTo(c, extend);
     goalX = g;
     return false;
   }
-  int page(){ return Math.max(1, viewH() / lineHeight()); }
+  int page(){ return Math.max(1, viewH()); }
   boolean home(boolean ctrl, boolean extend){ return moveTo(ctrl ? 0 : lines.get(lineOf(caret)).start(), extend); }
   boolean end(boolean ctrl, boolean extend){
     var v= lines.get(lineOf(caret));
@@ -463,13 +474,12 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
 
   Rectangle caretOnScreen(){
     layout();
-    int lh= lineHeight();
-    int k= lineOf(caret);
-    var p= SwingUtilities.convertPoint(component, (int) (left - scrollX + xOf(lines.get(k), caret)), top - scrollY + k * lh, frame.top.component);
+    var v= lines.get(lineOf(caret));
+    var p= SwingUtilities.convertPoint(component, (int) (left - scrollX + xOf(v, caret)), top - scrollY + v.y(), frame.top.component);
     double s= frame.stage.scale();
     var o= frame.stage.offset(s);
     var on= frame.surface.getLocationOnScreen();
-    return new Rectangle(on.x + o.x + (int) (p.x * s), on.y + o.y + (int) (p.y * s), 1, (int) Math.ceil(lh * s));
+    return new Rectangle(on.x + o.x + (int) (p.x * s), on.y + o.y + (int) (p.y * s), 1, (int) Math.ceil(v.h() * s));
   }
 
   @Override void sk(Canvas cv){
@@ -486,32 +496,30 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(left, top, viewW(), viewH()));
     cv.translate(left - scrollX, top - scrollY);
-    int lh= lineHeight();
-    int first= Math.max(0, scrollY / lh);
-    int last= Math.min(lines.size() - 1, (scrollY + viewH()) / lh);
-    for (int i= first; i <= last; i += 1){ line(cv, lines.get(i), i * lh, lh, focused); }
+    int last= lineAt(scrollY + viewH());
+    for (int i= lineAt(scrollY); i <= last; i += 1){ line(cv, lines.get(i), focused); }
     if (focused && frame.keyboard){
-      int k= lineOf(caret);
-      cv.translate(xOf(lines.get(k), caret), k * lh);
-      caret(cv, lh);
+      var v= lines.get(lineOf(caret));
+      cv.translate(xOf(v, caret), v.y());
+      caret(cv, v.h());
     }
     cv.restoreToCount(save);
     if (barRight()){ Sk.bar(cv, this, true); }
     if (barBottom()){ Sk.bar(cv, this, false); }
   }
-  private void line(Canvas cv, VLine v, int y, int lh, boolean focused){
+  private void line(Canvas cv, VLine v, boolean focused){
     int a= selA();
     int b= selB();
     int vEnd= v.wrapped() ? v.end() : v.end() + 1;
     if (a < b && a < vEnd && b > v.start()){
       float x1= a <= v.start() ? 0 : xOf(v, a);
-      float x2= b > v.end() ? width(v.line()) + (v.wrapped() ? 0 : textSize / 3f) : xOf(v, b);
+      float x2= b > v.end() ? v.dx() + width(v.line()) + (v.wrapped() ? 0 : textSize / 3f) : xOf(v, b);
       Sk.paint.setColor(focused ? 0xFFB4CDF5 : 0xFFDCDCDC);
-      cv.drawRect(Rect.makeXYWH(x1, y, x2 - x1, lh), Sk.paint);
+      cv.drawRect(Rect.makeXYWH(x1, v.y(), x2 - x1, v.h()), Sk.paint);
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);
-    cv.drawTextLine(v.line(), 0, (float) (y + textSize * above), Sk.paint);
+    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), textSize, above, below);
   }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){
@@ -519,7 +527,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
         Sk.paint.setColor(0xFFFFFFF0);
         cv.drawRect(Rect.makeXYWH(0, 0, t.getWidth(), lh), Sk.paint);
         Sk.paint.setColor(fg);
-        float base= (float) (textSize * above);
+        float base= (float) ((lh - Sk.lineHeight(this)) / 2d + textSize * above);
         cv.drawTextLine(t, 0, base, Sk.paint);
         cv.drawRect(Rect.makeXYWH(0, base + 2, t.getWidth(), 1), Sk.paint);
         cv.translate(t.getWidth(), 0);

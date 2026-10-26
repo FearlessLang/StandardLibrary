@@ -176,7 +176,9 @@ interface Sk{
     return s.line;
   }
 
-  static long lineHeight(AWidget s){ return Math.round(s.textSize * (s.above + s.below)); }
+  static long lineHeight(int size, double above, double below){ return Math.round(size * (above + below)); }
+
+  static long lineHeight(AWidget s){ return lineHeight(s.textSize, s.above, s.below); }
 
   static int color(Color$1c$0 c){
     return alpha(c.read$alpha$0()) << 24 | red(c.read$red$0()) << 16
@@ -250,9 +252,12 @@ interface Sk{
   }
 
   static void tooltip(Canvas cv, String text, java.awt.Point at, int w, int h){
-    var lines= Arrays.stream(text.split("\n", -1)).map(l -> shape(l, 12)).toList();
-    float bw= (float) lines.stream().mapToDouble(TextLine::getWidth).max().orElseThrow() + 10;
-    float bh= lines.size() * 18 + 6;
+    var texts= text.split("\n", -1);
+    var lines= Arrays.stream(texts).map(l -> shape(l, 12)).toList();
+    var needs= new ArrayList<Dimension>();
+    for (int i= 0; i < texts.length; i += 1){ needs.add(need(lines.get(i), ink(texts[i], 12), 12, 1, 0.5)); }
+    float bw= needs.stream().mapToInt(d -> d.width).max().orElseThrow() + 10;
+    float bh= needs.stream().mapToInt(d -> d.height).sum() + 6;
     float x= Math.clamp(at.x, 0, Math.max(0, w - bw));
     float y= at.y + 20 + bh <= h ? at.y + 20 : Math.max(0, at.y - 4 - bh);
     paint.setColor(0xFF767676);
@@ -260,8 +265,11 @@ interface Sk{
     paint.setColor(0xFFFAFAFA);
     cv.drawRect(Rect.makeXYWH(x + 1, y + 1, bw - 2, bh - 2), paint);
     paint.setColor(0xFF000000);
+    float ly= y + 3;
     for (int i= 0; i < lines.size(); i += 1){
-      try (var l= lines.get(i)){ cv.drawTextLine(l, x + 5, y + 3 + i * 18 + 12, paint); }
+      var n= needs.get(i);
+      try (var l= lines.get(i)){ draw(cv, l, x + 5, ly, n.width, n.height, 12, 1, 0.5); }
+      ly += n.height;
     }
   }
 
@@ -311,15 +319,22 @@ interface Sk{
     return null;
   }
 
+  static Dimension need(TextLine line, Rect ink, int size, double above, double below){
+    float w= line.getWidth();
+    long h= lineHeight(size, above, below);
+    double a= size * above;
+    double overX= Math.max(Math.max(0, -ink.getLeft()), ink.getRight() - w);
+    double overY= Math.max(Math.max(0, -ink.getTop() - a), ink.getBottom() + a - h);
+    return new Dimension((int) Math.ceil(w + 2 * overX), (int) Math.ceil(h + 2 * overY));
+  }
+
+  static void draw(Canvas cv, TextLine line, float x, float y, float w, float h, int size, double above, double below){
+    cv.drawTextLine(line, x + (w - line.getWidth()) / 2, (float) (y + (h - lineHeight(size, above, below)) / 2d + size * above), paint);
+  }
+
   static Dimension textSizeWithInsets(AWidget s){
-    float w= line(s).getWidth();
-    long h= lineHeight(s);
-    double a= s.textSize * s.above;
-    double overX= Math.max(Math.max(0, -s.ink.getLeft()), s.ink.getRight() - w);
-    double overY= Math.max(Math.max(0, -s.ink.getTop() - a), s.ink.getBottom() + a - h);
-    return new Dimension(
-      (int) Math.ceil(w + 2 * overX) + s.left + s.right,
-      (int) Math.ceil(h + 2 * overY) + s.top + s.bottom);
+    var need= need(line(s), s.ink, s.textSize, s.above, s.below);
+    return new Dimension(need.width + s.left + s.right, need.height + s.top + s.bottom);
   }
 
   static void text(Canvas cv, AWidget s, float dx, float dy){
@@ -333,7 +348,7 @@ interface Sk{
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
     paint.setColor(s.fg);
-    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, (float) (y0 + (ch - lineHeight(s)) / 2d + s.textSize * s.above + dy), paint);
+    draw(cv, line, x0 + dx, y0 + dy, cw, ch, s.textSize, s.above, s.below);
     cv.restoreToCount(save);
   }
 
