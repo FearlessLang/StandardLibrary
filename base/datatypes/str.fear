@@ -38,6 +38,8 @@
 /// - Float value 0.1 (and many others) do not exist; so it is rejected.
 /// - accepted: ``1.0``.getFloat  ``+0.5``.getFloat  ``+1.25``.getFloat  ``+01__0.2__5``.getFloat  ``+1.25e-1``.getFloat
 /// - canonicalization: ``-0.0``.getFloat.str==``+0.0``
+/// - Str.getFloat, like Float.str and Float.hash, does not tell the two zeros apart: ``-0.0``.getFloat is the positive zero,
+///   while the literal ``-0.0`` is the negative zero. Str.ieeeFloat and Float.ieeeStr keep the sign of zero.
 ///
 /// Str.ieeeFloat:
 /// - rejected: ``duck``.ieeeFloat
