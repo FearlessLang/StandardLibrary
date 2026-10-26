@@ -2,8 +2,8 @@ Dot:{ #(c: Color, glyph: Str): Painter -> {g -> g
   .color(Color.ghostWhite).position(X#(+70), Y#(+36)).oval(Width#20, Height#20)
   .color c .position(X#(+72), Y#(+38)).oval(Width#16, Height#16)
   .color(Color.ghostWhite).textHeight 11
-  .position(X#((72 + ((16 - ((g.textWidth glyph).get)).getTruncDiv 2)).getInt), Y#(+38))
-  .text glyph
+  .position(X#(+72), Y#(+38))
+  .text(glyph, Width#16, Height#16)
   }}
 Busy:{ #(end: Instant, then: Painter): Painter -> {g -> (g.elapsed < end) ? { .then -> Spinner.run g; .else -> then.run g }} }
 Spinner:Painter{g -> Block#

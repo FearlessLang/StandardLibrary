@@ -16,14 +16,14 @@ TilePainter:{ #(t: Tile, selected: Bool): Painter -> {g -> Block#
   .do{Block#(t.flag.run g, Void)}
   .do{Block#(g.color(Color.voidBlack).textHeight 12, Void)}
   .let[Str] name= {Fit#(g, t.name)}
-  .return{g.position(X#(((128 - ((g.textWidth name).get)).getTruncDiv 2).getInt), Y#(+58)).text name}
+  .return{g.position(X#(+0), Y#(+58)).text(name, Width#128, Height#18)}
   }}
 SelectionBox:{ #(g: mut Graphics): Void -> Block#(g
   .color(Color.rgb(0, 120, 215)).position(X#(+0), Y#(+0)).rect(Width#128, Height#88)
   .color(Color.rgb(204, 228, 247)).position(X#(+2), Y#(+2)).rect(Width#124, Height#84), Void) }
-Fit:{ #(g: read Graphics, s: Str): Str -> ((g.textWidth s).get <= 120) ? { .then -> s; .else -> Dots#(g, s) } }
+Fit:{ #(g: read Graphics, s: Str): Str -> ((g.textRoom s).width.get <= 120) ? { .then -> s; .else -> Dots#(g, s) } }
 Dots:{ #(g: read Graphics, s: Str): Str -> Block#
   .let d= {s+"..."}
-  .if{s.isEmpty || {(g.textWidth d).get <= 120}} .return{d}
+  .if{s.isEmpty || {(g.textRoom d).width.get <= 120}} .return{d}
   .return{Dots#(g, s.sub(0, s.size - 1))}
   }

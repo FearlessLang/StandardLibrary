@@ -3,6 +3,7 @@ package _base;
 import static _base.Scopes.*;
 import static java.awt.event.KeyEvent.*;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -52,6 +53,7 @@ final class CMenuItem implements MenuItem$aw$0{
   Object submenu;
   boolean built;
   TextLine line;
+  Rect ink;
   private void open(){
     if (built){ throw Util.detErr("This MenuItem is already built: an item is fixed once the scope of its .item returns, so a change now would never show"); }
   }
@@ -104,6 +106,7 @@ final class SkMenus{
       return new Rectangle(t.x, t.y + at, t.width, size);
     }
     void scrollTo(int v){ scroll[0] = Math.clamp(v, 0, content - box.height); }
+    int height(int i){ return (i + 1 < tops.length ? tops[i + 1] : content - 4) - tops[i]; }
   }
   static final int row= 24;
   static final int gap= 9;
@@ -142,10 +145,12 @@ final class SkMenus{
     for (int i= 0; i < tops.length; i += 1){
       var it= m.items.get(i);
       tops[i] = y;
-      y += it == null ? gap : row;
-      if (it == null){ continue; }
+      if (it == null){ y += gap; continue; }
       it.line = Sk.shape(it.text, 12);
-      text = Math.max(text, it.line.getWidth());
+      it.ink = Sk.ink(it.text, 12);
+      var need= need(it);
+      y += need.height + row - 18;
+      text = Math.max(text, need.width);
     }
     int textAt= 1 + pad + (marks ? 18 : 0);
     int content= y + 4;
@@ -158,6 +163,8 @@ final class SkMenus{
     if (w > vw){ frame.frame.warn("a menu " + w + " virtual pixels wide does not fit in the virtual pixel space " + vw + " wide: the part outside it is clipped"); }
     open.add(new Open(m, new Rectangle(x, top, w, h), tops, textAt, from, content, new int[1]));
   }
+
+  private static Dimension need(CMenuItem it){ return Sk.need(it.line, it.ink, 12, 1, 0.5); }
 
   private static int flip(int start, int length, int size, int room){
     int after= start + length;
@@ -212,7 +219,7 @@ final class SkMenus{
   private void sub(int mine, CMenu parent, int i, CMenu m){
     if (mine != asked || m.empty() || open.getLast().menu() != parent){ return; }
     var o= open.getLast();
-    add(m, new Rectangle(o.box().x, o.box().y + o.tops()[i] - 4 - o.scroll()[0], o.box().width, row), true, i);
+    add(m, new Rectangle(o.box().x, o.box().y + o.tops()[i] - 4 - o.scroll()[0], o.box().width, o.height(i)), true, i);
   }
 
   private int[] hit(Point p){
@@ -222,7 +229,7 @@ final class SkMenus{
       if (onBar(o, p)){ return new int[]{ k, -1 }; }
       int y= p.y - o.box().y + o.scroll()[0];
       for (int i= 0; i < o.tops().length; i += 1){
-        boolean on= o.menu().items.get(i) != null && y >= o.tops()[i] && y < o.tops()[i] + row;
+        boolean on= o.menu().items.get(i) != null && y >= o.tops()[i] && y < o.tops()[i] + o.height(i);
         if (on){ return new int[]{ k, i }; }
       }
       return new int[]{ k, -1 };
@@ -316,7 +323,7 @@ final class SkMenus{
 
   private static void reveal(Open o, int i){
     int top= o.tops()[i] - 4;
-    int bottom= o.tops()[i] + row + 4 - o.box().height;
+    int bottom= o.tops()[i] + o.height(i) + 4 - o.box().height;
     if (top < o.scroll()[0]){ o.scrollTo(top); }
     if (bottom > o.scroll()[0]){ o.scrollTo(bottom); }
   }
@@ -354,18 +361,19 @@ final class SkMenus{
       cv.drawRect(Rect.makeXYWH(b.x + 5, y + 4, w - 10, 1), Sk.paint);
       return;
     }
+    int h= o.height(i);
     boolean high= highMenu == k && highItem == i;
     boolean path= open.size() > k + 1 && open.get(k + 1).from() == i;
     if (high || path){
       Sk.paint.setColor(high ? 0xFFB4CDF5 : 0xFFDCDCDC);
-      cv.drawRect(Rect.makeXYWH(b.x + 1, y, w - 2, row), Sk.paint);
+      cv.drawRect(Rect.makeXYWH(b.x + 1, y, w - 2, h), Sk.paint);
     }
     int ink= it.enabled ? 0xFF000000 : 0xFF9A9A9A;
     Sk.paint.setColor(ink);
     line.setColor(ink);
-    cv.drawTextLine(it.line, b.x + o.textAt(), y + 15, Sk.paint);
+    Sk.draw(cv, it.line, b.x + o.textAt(), y, need(it).width, h, 12, 1, 0.5, Sk.paint);
     float mx= b.x + 1 + pad + 5;
-    float my= y + row / 2f;
+    float my= y + h / 2f;
     if (it.mark == 1){ cv.drawRect(Rect.makeXYWH(mx - 5, my - 5, 10, 10), line); }
     if (it.mark == 1 && it.ticked){
       cv.drawLine(mx - 3, my, mx - 1, my + 3, line);

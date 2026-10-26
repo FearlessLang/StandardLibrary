@@ -33,9 +33,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import static _base.Scopes.*;
 
 interface Sk{
@@ -176,7 +178,9 @@ interface Sk{
     return s.line;
   }
 
-  static long lineHeight(AWidget s){ return Math.round(s.textSize * (s.above + s.below)); }
+  static long lineHeight(int size, double above, double below){ return Math.round(size * (above + below)); }
+
+  static long lineHeight(AWidget s){ return lineHeight(s.textSize, s.above, s.below); }
 
   static int color(Color$1c$0 c){
     return alpha(c.read$alpha$0()) << 24 | red(c.read$red$0()) << 16
@@ -250,9 +254,12 @@ interface Sk{
   }
 
   static void tooltip(Canvas cv, String text, java.awt.Point at, int w, int h){
-    var lines= Arrays.stream(text.split("\n", -1)).map(l -> shape(l, 12)).toList();
-    float bw= (float) lines.stream().mapToDouble(TextLine::getWidth).max().orElseThrow() + 10;
-    float bh= lines.size() * 18 + 6;
+    var texts= text.split("\n", -1);
+    var lines= Arrays.stream(texts).map(l -> shape(l, 12)).toList();
+    var needs= new ArrayList<Dimension>();
+    for (int i= 0; i < texts.length; i += 1){ needs.add(need(lines.get(i), ink(texts[i], 12), 12, 1, 0.5)); }
+    float bw= needs.stream().mapToInt(d -> d.width).max().orElseThrow() + 10;
+    float bh= needs.stream().mapToInt(d -> d.height).sum() + 6;
     float x= Math.clamp(at.x, 0, Math.max(0, w - bw));
     float y= at.y + 20 + bh <= h ? at.y + 20 : Math.max(0, at.y - 4 - bh);
     paint.setColor(0xFF767676);
@@ -260,8 +267,11 @@ interface Sk{
     paint.setColor(0xFFFAFAFA);
     cv.drawRect(Rect.makeXYWH(x + 1, y + 1, bw - 2, bh - 2), paint);
     paint.setColor(0xFF000000);
+    float ly= y + 3;
     for (int i= 0; i < lines.size(); i += 1){
-      try (var l= lines.get(i)){ cv.drawTextLine(l, x + 5, y + 3 + i * 18 + 12, paint); }
+      var n= needs.get(i);
+      try (var l= lines.get(i)){ draw(cv, l, x + 5, ly, n.width, n.height, 12, 1, 0.5, paint); }
+      ly += n.height;
     }
   }
 
@@ -311,15 +321,65 @@ interface Sk{
     return null;
   }
 
+  static Dimension need(TextLine line, Rect ink, int size, double above, double below){
+    float w= line.getWidth();
+    long h= lineHeight(size, above, below);
+    double a= size * above;
+    double overX= Math.max(Math.max(0, -ink.getLeft()), ink.getRight() - w);
+    double overY= Math.max(Math.max(0, -ink.getTop() - a), ink.getBottom() + a - h);
+    return new Dimension((int) Math.ceil(w + 2 * overX), (int) Math.ceil(h + 2 * overY));
+  }
+
+  static double baseline(float h, int size, double above, double below){ return (h - lineHeight(size, above, below)) / 2d + size * above; }
+
+  static void draw(Canvas cv, TextLine line, float x, float y, float w, float h, int size, double above, double below, Paint p){
+    cv.drawTextLine(line, x + (w - line.getWidth()) / 2, (float) (y + baseline(h, size, above, below)), p);
+  }
+
+  static int roomWidth(String text, int size, double above, double below){
+    try (var line= shape(text, size)){ return need(line, ink(text, size), size, above, below).width; }
+  }
+
+  static ArrayList<Integer> wrap(String s, int size, double above, double below, int ww){
+    var res= new ArrayList<Integer>();
+    var words= BreakIterator.getLineInstance(Locale.ROOT);
+    words.setText(s);
+    var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
+    clusters.setText(s);
+    try (var whole= shape(s, size)){
+      for (int from= 0; from < s.length();){
+        int to= fit(s, whole, words, from, size, above, below, ww);
+        if (to == from){ to = fit(s, whole, clusters, from, size, above, below, ww); }
+        if (to == from){ to = clusters.following(from); }
+        res.add(to);
+        from = to;
+      }
+    }
+    if (res.isEmpty()){ res.add(0); }
+    return res;
+  }
+
+  private static int fit(String s, TextLine whole, BreakIterator b, int from, int size, double above, double below, int ww){
+    float x0= whole.getCoordAtOffset(from);
+    var fits= new ArrayList<Integer>();
+    for (int at= b.following(from); at != BreakIterator.DONE; at = b.next()){
+      if (whole.getCoordAtOffset(trimmed(s, from, at)) - x0 > ww){ break; }
+      fits.add(at);
+    }
+    for (int i= fits.size() - 1; i >= 0; i -= 1){
+      if (roomWidth(s.substring(from, trimmed(s, from, fits.get(i))), size, above, below) <= ww){ return fits.get(i); }
+    }
+    return from;
+  }
+
+  static int trimmed(String s, int from, int to){
+    while (to > from && s.charAt(to - 1) == ' '){ to -= 1; }
+    return to;
+  }
+
   static Dimension textSizeWithInsets(AWidget s){
-    float w= line(s).getWidth();
-    long h= lineHeight(s);
-    double a= s.textSize * s.above;
-    double overX= Math.max(Math.max(0, -s.ink.getLeft()), s.ink.getRight() - w);
-    double overY= Math.max(Math.max(0, -s.ink.getTop() - a), s.ink.getBottom() + a - h);
-    return new Dimension(
-      (int) Math.ceil(w + 2 * overX) + s.left + s.right,
-      (int) Math.ceil(h + 2 * overY) + s.top + s.bottom);
+    var need= need(line(s), s.ink, s.textSize, s.above, s.below);
+    return new Dimension(need.width + s.left + s.right, need.height + s.top + s.bottom);
   }
 
   static void text(Canvas cv, AWidget s, float dx, float dy){
@@ -333,7 +393,7 @@ interface Sk{
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
     paint.setColor(s.fg);
-    cv.drawTextLine(line, x0 + (cw - line.getWidth()) / 2 + dx, (float) (y0 + (ch - lineHeight(s)) / 2d + s.textSize * s.above + dy), paint);
+    draw(cv, line, x0 + dx, y0 + dy, cw, ch, s.textSize, s.above, s.below, paint);
     cv.restoreToCount(save);
   }
 
