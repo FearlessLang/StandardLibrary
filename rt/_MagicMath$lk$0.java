@@ -8,7 +8,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
       throw err("Math."+methodName+": Cannot take the "+methodName+" of a negative number, given " + x);
     }
     if (Double.isNaN(x)){
-      throw err(methodName+": Input was NaN, cannot take the log of NaN");
+      throw err("Math."+methodName+": Input was NaN, cannot take the "+methodName+" of NaN");
     }
   }
   static void inverseTrigContract(String methodName, double x){
@@ -22,12 +22,12 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
 
   default Object imm$ln$1(Object p0){
     double x= Float$1c$0Instance.unwrap(p0);
-    logContract("ln:", x);
+    logContract("ln", x);
     return Float$1c$0Instance.instance(Math.log(x));
   }
   default Object imm$log$1(Object p0){
     double x= Float$1c$0Instance.unwrap(p0);
-    logContract("log:", x);
+    logContract("log", x);
     return Float$1c$0Instance.instance(Math.log10(x));
   }
   default Object imm$asin$1(Object p0){
@@ -72,7 +72,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
     if (Double.isNaN(y)){
       throw err("Math.atan2: Second argument was NaN, cannot take atan2 of NaN");
     }
-    var theta= Float$1c$0Instance.instance(Math.atan2(x, y));
+    var theta= Float$1c$0Instance.instance(Math.atan2(y, x));
     return new Radian$2o$0(){
       @Override public Object read$$hash$0(){
         return theta;
