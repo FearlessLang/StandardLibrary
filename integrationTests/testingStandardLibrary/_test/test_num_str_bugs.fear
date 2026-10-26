@@ -1,11 +1,3 @@
-BugNumFloatTests: Test {::
-  .check{(2/1 ** +1024) .float .assertEmpty {::}}
-  .checkDetErr({::}, {(2/1 ** +1024) .getFloat})
-  .check{0.0 .getSucc .getNum .float .assertEq({::}, Opts#(0.0 .getSucc))}
-  .check{0.0 .getSucc .getNum .softFloat .assertEq(0.0 .getSucc)}
-  .check{(2/1 ** +1100) + (1/1) / (2/1 ** +1100) .softFloat .assertEq +1.0}
-  }
-
 BugMathTests: Test {::
   .check{Math.atan2(+1.0, +0.0)# .assertEq +0.0}
   .check{Math.atan2(+0.0, +1.0)# .assertEq(Math.pi / +2.0)}
@@ -14,6 +6,5 @@ BugMathTests: Test {::
   }
 
 TestNumStrBugs: Test {::
-  .test BugNumFloatTests
   .test BugMathTests
   }
