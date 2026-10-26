@@ -7,7 +7,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// Throws if `this` is `Math.nan` or `Math.inf` (there is no larger value).
   /// Note: Unlike `.getSucc` for the other numeric types this does not return ``this + 1``.
   //>   .check{1.0 .getSucc .assertGt 1.0}
-  //>   .check{-0.0 .getSucc .assertEq(+0.0.getSucc)}
+  //>   .check{Math.negZero .getSucc .assertEq(+0.0.getSucc)}
   //>   .checkDetErr({::}, {Math.nan .getSucc})
   //>   .checkDetErr({::}, {Math.inf .getSucc})
   .getSucc: Float;
@@ -20,7 +20,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// Throws if `this` is `Math.nan` or `Math.negInf` (there is no smaller value).
   /// Note: Unlike `.getPred` for the other numeric types this does not return ``this - 1``.
   //>   .check{1.0 .getPred .assertLt 1.0}
-  //>   .check{0.0 .getPred .assertEq(-0.0.getPred)}
+  //>   .check{0.0 .getPred .assertEq(Math.negZero.getPred)}
   //>   .checkDetErr({::}, {Math.nan .getPred})
   //>   .checkDetErr({::}, {Math.negInf .getPred})
   .getPred: Float;
@@ -59,7 +59,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   ///  - ``x**(Math.inf) for ``x < 0.0``, ``+/-0.0 ** +/-0.0``, Math.inf ** 0.0 all return ``Math.nan`
   //>   .check{2.0 ** 3.0 .assertEq 8.0}
   //>   .check{Math.nan ** 0.0 .isNaN .assertTrue} // not true of ieee
-  //>   .check{0.0 ** -0.0 .isNaN .assertTrue}  // not true of ieee
+  //>   .check{0.0 ** (Math.negZero) .isNaN .assertTrue}  // not true of ieee
   **(x: Float): Float;
 
   /// `this.absOrNaN` returns the IEEE absolute value of `this`: `this` if ``this >= 0``,
@@ -114,7 +114,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.sqrtOrNaN` returns the IEEE square root of `this`.
   /// Returns `Math.nan` iff `this` is negative (excluding ``-0.0``, whose sqrt is ``-0.0``) or NaN.
   //>   .check{4.0 .sqrtOrNaN .assertEq 2.0}
-  //>   .check{-0.0 .sqrtOrNaN .assertEq -0.0}
+  //>   .check{Math.negZero .sqrtOrNaN .isNegZero .assertTrue}
   //>   .check{-4.0 .sqrtOrNaN .isNaN .assertTrue}
   //>   .check{Math.nan .sqrtOrNaN .isNaN .assertTrue}
   .sqrtOrNaN: Float;
@@ -143,7 +143,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{4.75 .signOrNaN .assertEq 1.0}
   //>   .check{-4.75 .signOrNaN .assertEq -1.0}
   //>   .check{0.0 .signOrNaN .isPosZero .assertTrue}
-  //>   .check{-0.0 .signOrNaN .isNegZero .assertTrue}
+  //>   .check{Math.negZero .signOrNaN .isNegZero .assertTrue}
   //>   .check{Math.nan .signOrNaN .isNaN .assertTrue}
   .signOrNaN: Float;
 
@@ -335,13 +335,14 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.isNegZero` returns `True` iff the raw bits of `this` are exactly ``-0.0``
   /// (distinct from ``+0.0`` at the bit level, even though ``-0.0 == +0.0``).
-  //>   .check{-0.0 .isNegZero .assertTrue}
+  //>   .check{Math.negZero .isNegZero .assertTrue}
+  //>   .check{-0.0 .isNegZero .assertFalse}
   //>   .check{0.0 .isNegZero .assertFalse}
   .isNegZero: Bool;
 
   /// `this.isPosZero` returns `True` iff the raw bits of `this` are exactly ``+0.0``.
   //>   .check{0.0 .isPosZero .assertTrue}
-  //>   .check{-0.0 .isPosZero .assertFalse}
+  //>   .check{Math.negZero .isPosZero .assertFalse}
   .isPosZero: Bool;
 
   /// `this.isFinite` returns `True` if `this` is not `Math.nan`, `Math.inf`, or `Math.negInf`.
@@ -373,7 +374,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// ``this.ieeeSameBits(x)`` compares raw bit patterns: distinguishes NaN payloads and signed zero
   /// (unlike ``ieeeEq`` and the type's own ``==``).
-  //>   .check{(0.0 .ieeeSameBits(-0.0)) .assertFalse}
+  //>   .check{(0.0 .ieeeSameBits(Math.negZero)) .assertFalse}
   //>   .check{(1.0 .ieeeSameBits 1.0) .assertTrue}
   .ieeeSameBits(x: Float): Bool;
 
@@ -392,7 +393,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// ``this.ieeeEq(x)`` return true if `this` equals ``x`` according to the IEEE standard.
   /// Note: this differs from Fearless ``==`` as ``Math.nan.ieeeEq(Math.nan) is false``
   //>   .check{Math.nan.ieeeEq(Math.nan).assertFalse}
-  //>   .check{+0.0 .ieeeEq -0.0  .assertTrue}
+  //>   .check{+0.0 .ieeeEq(Math.negZero) .assertTrue}
   .ieeeEq(x: Float): Bool;
 
   /// `this.int` returns `.some` of `this` as an `Int` if `this` is an integer in ``[minInt, maxInt]``,
@@ -479,7 +480,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.hash` returns a hash consistent with ``==``: ``-0.0`` hashes the same as ``+0.0``, and every
   /// NaN hashes the same as every other NaN (since ``ieeeStr`` does not distinguish NaN payloads).
-  //>   .check{0.0 .hash .assertEq((-0.0) .hash)}
+  //>   .check{0.0 .hash .assertEq(Math.negZero .hash)}
   //>   .check{Math.nan .hash .assertEq((Math.nan.negAbsOrNaN) .hash)}
   //>   .check{1.0 .hash .assertNotEq(2.0 .hash)}
   .hash -> this.imm.isNegZero?{.then->"0.0".hash; .else->this.imm.ieeeStr.hash};/// hash via str
@@ -637,7 +638,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 _FloatRanges: Sealed {
     #(startInclusive: Float, endInclusive: Float): Range[Float] -> {'self
         /// Magic method that counts all floats in a given range.
-        /// Counts -0.0 and +0.0 as the same float i.e. -0.0 =~~= +0.0 .size == 1;
+        /// Counts -0.0 and +0.0 as the same float i.e. Math.negZero =~~= +0.0 .size == 1;
         .size -> _FloatsBetween#(startInclusive, endInclusive);
         .start -> startInclusive;
         .end -> endInclusive;

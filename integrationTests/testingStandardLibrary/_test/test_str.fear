@@ -167,7 +167,7 @@ StrParseFloatTests: Test {::
   .check{"+0.0" .float .assertEq({::}, Opts#(+0.0))}
   .check{"-0.0" .float .assertEq({::}, Opts#(+0.0))}
   .check{"-0.0" .getFloat .isNegZero .assertFalse}
-  .check{-0.0 .str .assertEq "+0.0"}
+  .check{Math.negZero .str .assertEq "+0.0"}
   .check{"+0.5" .float .assertEq({::}, Opts#(+0.5))}
   .check{"+1.5" .float .assertEq({::}, Opts#(+1.5))}
   .check{"+2.5" .float .assertEq({::}, Opts#(+2.5))}

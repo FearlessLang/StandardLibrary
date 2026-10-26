@@ -55,7 +55,7 @@ MathConstantsTests: Test {::
 
 LnTests: Test {::
   .check{Math.ln(+0.0).assertEq(Math.negInf)}
-  .check{Math.ln(-0.0).assertEq(Math.negInf)}
+  .check{Math.ln(Math.negZero).assertEq(Math.negInf)}
   .check{Math.ln(Math.inf).assertEq(Math.inf)}
   .check{Math.ln(+2.0).assertInRange(+0.69314717soft =~~= +0.6931471805599453soft)}
   .check{Math.ln(Math.e).assertEq(+1.0)}
@@ -67,7 +67,7 @@ LnTests: Test {::
 
 LogTests: Test {::
   .check{Math.log(+0.0).assertEq(Math.negInf)}
-  .check{Math.log(-0.0).assertEq(Math.negInf)}
+  .check{Math.log(Math.negZero).assertEq(Math.negInf)}
   .check{Math.log(Math.inf).assertEq(Math.inf)}
   .check{Math.log(+10.0).assertEq(+1.0)}
   .check{Math.log(+1.0).assertEq(+0.0)}
@@ -103,7 +103,7 @@ Log2Tests: Test {::
 
 AsinTests: Test {::
   .check{Math.asin(+0.0)#.assertEq(+0.0)}
-  .check{Math.asin(-0.0)#.assertEq(-0.0)}
+  .check{Math.asin(Math.negZero)#.isNegZero.assertTrue}
   .check{Math.asin(+1.0)#.assertEq(Math.pi / +2.0)}
   .check{Math.asin(-1.0)#.assertEq(Math.pi / -2.0)}
   .checkDetErr({::}, {Math.asin(+2.0)})
@@ -122,7 +122,7 @@ AcosTests: Test {::
 
 AtanTests: Test {::
   .check{Math.atan(+0.0)#.assertEq(+0.0)}
-  .check{Math.atan(-0.0)#.assertEq(-0.0)}
+  .check{Math.atan(Math.negZero)#.isNegZero.assertTrue}
   .check{Math.atan(+1.0)#.assertEq(Math.pi / +4.0)}
   .check{Math.atan(-1.0)#.assertEq(Math.pi / -4.0)}
   .check{Math.atan(Math.inf)#.assertEq(Math.pi / +2.0)}
