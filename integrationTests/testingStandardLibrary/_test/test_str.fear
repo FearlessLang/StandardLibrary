@@ -202,6 +202,17 @@ StrParseFloatTests: Test {::
   .check{"+1.25" .float .assertEq({::}, Opts#(+1.25))}
   .check{"+01__0.2__5" .float .assertEq({::}, Opts#(+10.25))}
   .check{"+1.25e-1" .float .assertEq({::}, Opts#(+0.125))}
+  .check{"+0.1soft" .float .assertEq({::}, Opts#(+0.1soft))}
+  .check{"+0.1soft" .getFloat .assertEq(+0.1soft)}
+  .check{"-0__0.1e1soft" .float .assertEq({::}, Opts#(-1.0))}
+  .check{"0.1soft" .float .assertEq({::}, Opts#(+0.1soft))}
+  .check{"+1.0e400soft" .float .assertEq({::}, Opt[Float])}
+  .check{"+0.1 soft" .float .assertEq({::}, Opt[Float])}
+  .check{"+0.1SOFT" .float .assertEq({::}, Opt[Float])}
+  .check{"+0.1softsoft" .float .assertEq({::}, Opt[Float])}
+  .check{"+1soft" .float .assertEq({::}, Opt[Float])}
+  .check{"+0.1soft" .softFloat .assertEq({::}, Opts#(+0.1soft))}
+  .check{"+0.1soft" .getSoftFloat .assertEq(+0.1soft)}
   }
 
 StrParseSoftFloatTests: Test {::
