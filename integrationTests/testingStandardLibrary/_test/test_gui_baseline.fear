@@ -9,13 +9,19 @@ GuiBaselineTests: Test {::
     .pane{:: .label{:: .uText ("".u "1781 17D2 1789 17BB 17C6") } .paint{g -> Error.msg(g.panelHeight.str)} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[42]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[43]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .button{:: .uText ("".u "1781 17D2 1789 17BB 17C6 0020 1019 103C 1014 103A 1019 102C 0020 0C95 0CA8 0CCD 0CA8 0CA1 0020 0628 0650 0633 0652 0645 0650") } .paint{g -> Error.msg(g.panelHeight.str)} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[42]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[44]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .pane{:: .label{:: .uText ("".u "005A 030D 030D 030D 0316 0316 0316") } .paint{g -> Error.msg(g.panelHeight.str)} }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[54]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .textHeight 32 } .paint{g -> Error.msg(g.panelHeight.str)} }
@@ -27,7 +33,7 @@ GuiBaselineTests: Test {::
     .pane{:: .label{:: .uText ("".u "1781 17D2 1789 17BB 17C6") .textHeight 32 } .paint{g -> Error.msg(g.panelHeight.str)} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[72]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[75]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .pane{:: .label{:: .text "Latin" .textHeight 13 } .paint{g -> Error.msg(g.panelHeight.str)} }
