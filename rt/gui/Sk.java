@@ -19,10 +19,13 @@ import io.github.humbleui.skija.Typeface;
 import io.github.humbleui.skija.shaper.FontRun;
 import io.github.humbleui.skija.shaper.HbIcuScriptRunIterator;
 import io.github.humbleui.skija.shaper.IcuBidiRunIterator;
+import io.github.humbleui.skija.shaper.RunHandler;
+import io.github.humbleui.skija.shaper.RunInfo;
 import io.github.humbleui.skija.shaper.Shaper;
 import io.github.humbleui.skija.shaper.ShapingOptions;
 import io.github.humbleui.skija.shaper.TextLineRunHandler;
 import io.github.humbleui.skija.shaper.TrivialLanguageRunIterator;
+import io.github.humbleui.types.Point;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 import java.awt.BorderLayout;
@@ -117,6 +120,33 @@ interface Sk{
   }
 
   static TextLine shape(String text, int size){
+    try (var handler= new TextLineRunHandler(text)){ shape(text, size, handler); return handler.makeLine(); }
+  }
+
+  static Rect ink(String text, int size){
+    var handler= new RunHandler(){
+      float x;
+      Rect ink= Rect.makeWH(0, 0);
+      @Override public void beginLine(){}
+      @Override public void runInfo(RunInfo info){}
+      @Override public void commitRunInfo(){}
+      @Override public Point runOffset(RunInfo info){ return new Point(x, 0); }
+      @Override public void commitRun(RunInfo info, short[] glyphs, Point[] at, int[] clusters){
+        var bounds= info.getFont().getBounds(glyphs);
+        for (int i= 0; i < glyphs.length; i += 1){
+          if (bounds[i].isEmpty()){ continue; }
+          var b= bounds[i].offset(at[i]);
+          ink = Rect.makeLTRB(Math.min(ink.getLeft(), b.getLeft()), Math.min(ink.getTop(), b.getTop()), Math.max(ink.getRight(), b.getRight()), Math.max(ink.getBottom(), b.getBottom()));
+        }
+        x += info.getAdvanceX();
+      }
+      @Override public void commitLine(){}
+    };
+    shape(text, size, handler);
+    return handler.ink;
+  }
+
+  static void shape(String text, int size, RunHandler handler){
     synchronized (shaper){
       var runs= new ArrayList<FontRun>();
       int font= -1;
@@ -133,9 +163,8 @@ interface Sk{
         i = next;
       }
       if (font >= 0){ runs.add(new FontRun(text.length(), font(font, size))); }
-      try (var handler= new TextLineRunHandler(text); var bidi= new IcuBidiRunIterator(text, 0xFE); var script= new HbIcuScriptRunIterator(text)){
+      try (var bidi= new IcuBidiRunIterator(text, 0xFE); var script= new HbIcuScriptRunIterator(text)){
         shaper.shape(text, runs.iterator(), bidi, script, new TrivialLanguageRunIterator(text, "en"), ShapingOptions.DEFAULT, Float.POSITIVE_INFINITY, handler);
-        return handler.makeLine();
       }
     }
   }
@@ -143,7 +172,7 @@ interface Sk{
   static TextLine line(AWidget s){
     if (s.line != null){ return s.line; }
     s.line = shape(s.text, s.textSize);
-    try (var blob= s.line.getTextBlob()){ s.ink = blob == null ? Rect.makeWH(0, 0) : blob.getTightBounds(); }
+    s.ink = ink(s.text, s.textSize);
     return s.line;
   }
 
