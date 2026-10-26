@@ -1,5 +1,7 @@
 package _base;
 
+import java.util.Locale;
+
 final class Scopes{
   static final Painter$5c$0 idP= new Painter$5c$0(){ @Override public Object imm$run$1(Object p0){ return p0; } };
 
@@ -41,7 +43,7 @@ final class Scopes{
   static String lineBreak(String s){
     var m= lineBreaks.matcher(s);
     if (!m.find()){ return null; }
-    return "a line break (U+%04X) at offset %d".formatted(s.codePointAt(m.start()), s.codePointCount(0, m.start()));
+    return String.format(Locale.ROOT, "a line break (U+%04X) at offset %d", s.codePointAt(m.start()), s.codePointCount(0, m.start()));
   }
   static String ustr(Object u){
     var cps= ((UStr$s$0Instance) u).val();

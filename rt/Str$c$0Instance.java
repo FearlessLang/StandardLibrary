@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.regex.Pattern;
 import java.util.List;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -384,8 +385,8 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     res.add(instance(val.substring(start)));
     return List$o$1Instance.wrap(res);
   }
-  @Override public Object imm$lower$0(){ return new Str$c$0Instance(val.toLowerCase()); }
-  @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase()); }
+  @Override public Object imm$lower$0(){ return new Str$c$0Instance(val.toLowerCase(Locale.ROOT)); }
+  @Override public Object imm$upper$0(){ return new Str$c$0Instance(val.toUpperCase(Locale.ROOT)); }
   @Override public Object imm$norm$0(){
     if (val.length() < 64){ return this; }
     return myCache.computeIfAbsent(val, _ -> new Norm(this));
