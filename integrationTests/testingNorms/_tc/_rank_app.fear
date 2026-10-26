@@ -9,6 +9,7 @@ use base.Block as Block;
 use base.Debug as Debug;
 use base.Nat as Nat;
 use base.Str as Str;
+use base.UStr as UStr;
 use base.Info as Info;
 use base.Repr as Repr;
 use base.Var as Var;
@@ -183,5 +184,14 @@ MainListNormInterning:Main{s->Block#
   .do{ Debug#(SumAllTraced#(NormL#(Lists#(1,2,3)))) }
   .do{ Debug#(SumAllTraced#(NormL#(Lists#(1,2,3)))) }
   .do{ Debug#(SumAllTraced#(NormL#(Lists#(1,2,4)))) }
+  .done
+  }
+
+///Same for UStr: two equal UStr built apart are the same Norm.
+UStrSize:{ #(s: Norm[UStr]): Nat -> Cache#(s,{s'->Block#(Debug#("sizingU"),s'.get.size)})}
+MainUStrNormInterning:Main{s->Block#
+  .do{ Debug#(UStrSize#("ab".u.norm)) }
+  .do{ Debug#(UStrSize#("ab".u.norm)) }
+  .do{ Debug#(UStrSize#("abc".u.norm)) }
   .done
   }
