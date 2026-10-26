@@ -4,6 +4,7 @@ import static _base.Util.*;
 import static java.nio.charset.StandardCharsets.UTF_16BE;
 import static java.nio.charset.StandardCharsets.UTF_16LE;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,7 +90,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     for (var b : bs){ res.add(Byte$o$0Instance.instance(b)); }
     return List$o$1Instance.wrap(res);
   }
-  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(val, _ -> new Norm(this)); }
+  @Override public Object imm$norm$0(){ return myCache.computeIfAbsent(IntBuffer.wrap(val), _ -> new Norm(this)); }
   static java.util.concurrent.ConcurrentHashMap<Object,Object> myCache= new java.util.concurrent.ConcurrentHashMap<>(); 
 
   private static int[] cat(int[] a, int[] b){
