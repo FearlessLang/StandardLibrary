@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.Locale;
 import javax.swing.SwingUtilities;
 
 import io.github.humbleui.skija.Canvas;
@@ -202,9 +203,9 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
     var whole= Sk.shape(s, textSize);
     if (whole.getWidth() <= ww){ res.add(new Seg(0, s.length(), whole)); return res; }
-    var words= BreakIterator.getLineInstance();
+    var words= BreakIterator.getLineInstance(Locale.ROOT);
     words.setText(s);
-    var clusters= BreakIterator.getCharacterInstance();
+    var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
     clusters.setText(s);
     for (int from= 0; from < s.length();){
       int to= fit(s, whole, words, from, ww);
@@ -251,7 +252,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     return e < 0 ? buf.length() : e;
   }
   private BreakIterator clusters(int s, int e){
-    var b= BreakIterator.getCharacterInstance();
+    var b= BreakIterator.getCharacterInstance(Locale.ROOT);
     b.setText(buf.substring(s, e));
     return b;
   }
