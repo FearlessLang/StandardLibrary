@@ -33,9 +33,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import static _base.Scopes.*;
 
 interface Sk{
@@ -268,7 +270,7 @@ interface Sk{
     float ly= y + 3;
     for (int i= 0; i < lines.size(); i += 1){
       var n= needs.get(i);
-      try (var l= lines.get(i)){ draw(cv, l, x + 5, ly, n.width, n.height, 12, 1, 0.5); }
+      try (var l= lines.get(i)){ draw(cv, l, x + 5, ly, n.width, n.height, 12, 1, 0.5, paint); }
       ly += n.height;
     }
   }
@@ -328,8 +330,51 @@ interface Sk{
     return new Dimension((int) Math.ceil(w + 2 * overX), (int) Math.ceil(h + 2 * overY));
   }
 
-  static void draw(Canvas cv, TextLine line, float x, float y, float w, float h, int size, double above, double below){
-    cv.drawTextLine(line, x + (w - line.getWidth()) / 2, (float) (y + (h - lineHeight(size, above, below)) / 2d + size * above), paint);
+  static double baseline(float h, int size, double above, double below){ return (h - lineHeight(size, above, below)) / 2d + size * above; }
+
+  static void draw(Canvas cv, TextLine line, float x, float y, float w, float h, int size, double above, double below, Paint p){
+    cv.drawTextLine(line, x + (w - line.getWidth()) / 2, (float) (y + baseline(h, size, above, below)), p);
+  }
+
+  static int roomWidth(String text, int size, double above, double below){
+    try (var line= shape(text, size)){ return need(line, ink(text, size), size, above, below).width; }
+  }
+
+  static ArrayList<Integer> wrap(String s, int size, double above, double below, int ww){
+    var res= new ArrayList<Integer>();
+    var words= BreakIterator.getLineInstance(Locale.ROOT);
+    words.setText(s);
+    var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
+    clusters.setText(s);
+    try (var whole= shape(s, size)){
+      for (int from= 0; from < s.length();){
+        int to= fit(s, whole, words, from, size, above, below, ww);
+        if (to == from){ to = fit(s, whole, clusters, from, size, above, below, ww); }
+        if (to == from){ to = clusters.following(from); }
+        res.add(to);
+        from = to;
+      }
+    }
+    if (res.isEmpty()){ res.add(0); }
+    return res;
+  }
+
+  private static int fit(String s, TextLine whole, BreakIterator b, int from, int size, double above, double below, int ww){
+    float x0= whole.getCoordAtOffset(from);
+    var fits= new ArrayList<Integer>();
+    for (int at= b.following(from); at != BreakIterator.DONE; at = b.next()){
+      if (whole.getCoordAtOffset(trimmed(s, from, at)) - x0 > ww){ break; }
+      fits.add(at);
+    }
+    for (int i= fits.size() - 1; i >= 0; i -= 1){
+      if (roomWidth(s.substring(from, trimmed(s, from, fits.get(i))), size, above, below) <= ww){ return fits.get(i); }
+    }
+    return from;
+  }
+
+  static int trimmed(String s, int from, int to){
+    while (to > from && s.charAt(to - 1) == ' '){ to -= 1; }
+    return to;
   }
 
   static Dimension textSizeWithInsets(AWidget s){
@@ -348,7 +393,7 @@ interface Sk{
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
     paint.setColor(s.fg);
-    draw(cv, line, x0 + dx, y0 + dy, cw, ch, s.textSize, s.above, s.below);
+    draw(cv, line, x0 + dx, y0 + dy, cw, ch, s.textSize, s.above, s.below, paint);
     cv.restoreToCount(save);
   }
 

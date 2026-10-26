@@ -34,7 +34,7 @@ RoundRect:{ #(g: mut Graphics, x: Nat, y: Nat, side: Nat, r: Nat): mut Graphics 
   }
 Initials:{ #(g: mut Graphics, name: Str): mut Graphics -> Block#
   .let[Str] s= {name.sub(0, (name.size < 2) ? { .then -> name.size; .else -> 2 }).upper}
-  .let[Nat] x= {(186 - (g.textHeight(88).textWidth(s).get)).getTruncDiv 2}
+  .let[Nat] x= {(186 - (g.textHeight(88).textRoom(s).width.get)).getTruncDiv 2}
   .do{Block#(Bold#(g.color(Shade#150), x + 5, 45, s), Void)}
   .return{Bold#(g.color(Color.rgb(255, 255, 255)), x, 40, s)}
   }

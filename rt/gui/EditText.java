@@ -211,30 +211,11 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   private ArrayList<Seg> segs(String s, int ww){
     var res= new ArrayList<Seg>();
     if (s.isEmpty()){ res.add(new Seg(0, 0, null, null)); return res; }
-    var whole= Sk.shape(s, textSize);
-    if (whole.getWidth() <= ww){ res.add(new Seg(0, s.length(), whole, Sk.ink(s, textSize))); return res; }
-    var words= BreakIterator.getLineInstance(Locale.ROOT);
-    words.setText(s);
-    var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
-    clusters.setText(s);
-    for (int from= 0; from < s.length();){
-      int to= fit(s, whole, words, from, ww);
-      if (to == from){ to = fit(s, whole, clusters, from, ww); }
-      if (to == from){ to = clusters.following(from); }
-      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize), Sk.ink(s.substring(from, to), textSize)));
+    int from= 0;
+    for (int to : Sk.wrap(s, textSize, above, below, ww)){
+      var t= s.substring(from, to);
+      res.add(new Seg(from, to, Sk.shape(t, textSize), Sk.ink(t, textSize)));
       from = to;
-    }
-    whole.close();
-    return res;
-  }
-  private static int fit(String s, TextLine whole, BreakIterator b, int from, int ww){
-    float x0= whole.getCoordAtOffset(from);
-    int res= from;
-    for (int at= b.following(from); at != BreakIterator.DONE; at = b.next()){
-      int ink= at;
-      while (ink > from && s.charAt(ink - 1) == ' '){ ink -= 1; }
-      if (whole.getCoordAtOffset(ink) - x0 > ww){ return res; }
-      res = at;
     }
     return res;
   }
@@ -519,7 +500,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);
-    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), textSize, above, below);
+    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), textSize, above, below, Sk.paint);
   }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){
@@ -527,7 +508,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
         Sk.paint.setColor(0xFFFFFFF0);
         cv.drawRect(Rect.makeXYWH(0, 0, t.getWidth(), lh), Sk.paint);
         Sk.paint.setColor(fg);
-        float base= (float) ((lh - Sk.lineHeight(this)) / 2d + textSize * above);
+        float base= (float) Sk.baseline(lh, textSize, above, below);
         cv.drawTextLine(t, 0, base, Sk.paint);
         cv.drawRect(Rect.makeXYWH(0, base + 2, t.getWidth(), 1), Sk.paint);
         cv.translate(t.getWidth(), 0);

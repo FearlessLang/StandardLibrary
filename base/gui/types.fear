@@ -341,19 +341,46 @@ Graphics:ScreenContext{
   mut .image(image: Image, width: WidthNat, height: HeightNat): mut Graphics;
   mut .textHeight(n: Nat): mut Graphics -> this.textHeight'(HeightNat#n);
   mut .textHeight'(HeightNat): mut Graphics;
+  mut .aboveBaseline(f: Float): mut Graphics -> this.aboveBaseline'(TextRatio#f);
+  mut .aboveBaseline'(TextRatio): mut Graphics;
+  mut .belowBaseline(f: Float): mut Graphics -> this.belowBaseline'(TextRatio#f);
+  mut .belowBaseline'(TextRatio): mut Graphics;
   mut .text(s: Str): mut Graphics -> this.uText(s.u);
-  ///Draws ``text`` in the color, on one line whose top left corner is the position.
-  ///The baseline is ``textHeight`` below the position, and the line is one and a half ``textHeight`` high, as the line of a ``Label`` with the default ``.aboveBaseline`` and ``.belowBaseline``.
-  ///The position does not change. The text height starts at 12.
+  ///Draws ``text`` in the color, on one line, in its room (see ``TextRoom``) with the top left corner of the room at the position.
+  ///The position does not change.
   mut .uText(text: UStr): mut Graphics;
+  mut .text(s: Str, width: WidthNat, height: HeightNat): mut Graphics -> this.uText(s.u, width, height);
+  ///Draws ``text`` in the color, on one line, centered in the box of ``width`` x ``height`` whose top left corner is the position, as a ``Label`` draws its text in its content box.
+  ///A box smaller than the room of the text does not clip the text.
+  ///The position does not change.
+  mut .uText(text: UStr, width: WidthNat, height: HeightNat): mut Graphics;
   ///The color of the next drawing: the foreground of the widget, or opaque black for an image, until ``.color`` changes it.
   read .color: Color;
   read .positionX: XInt;
   read .positionY: YInt;
+  ///The text settings start as the defaults of a ``Label``: text height 12, ``.aboveBaseline`` +1.0 and ``.belowBaseline`` +0.5.
   read .textHeight: HeightNat;
-  read .textWidth(text: Str): WidthNat -> this.uTextWidth(text.u);
-  ///The width of ``text`` drawn by ``.uText`` at the current ``.textHeight``, rounded up to a whole virtual pixel.
-  read .uTextWidth(text: UStr): WidthNat;
+  read .aboveBaseline: TextRatio;
+  read .belowBaseline: TextRatio;
+  read .textRoom(text: Str): TextRoom -> this.uTextRoom(text.u);
+  ///The room of ``text`` on one line with the current text settings.
+  read .uTextRoom(text: UStr): TextRoom;
+  read .textLines(text: Str, width: WidthNat): List[Str] -> this.uTextLines(text.u, width).flow.map{::.getStr}.list;
+  ///``text`` broken into lines whose rooms are at most ``width`` wide, with the current text settings, as a ``TextArea`` wraps its text.
+  ///A line break of ``text`` ends a line.
+  ///A line breaks after a word; a word wider than ``width`` breaks between characters; a single character (a grapheme cluster) wider than ``width`` is a line alone.
+  ///The spaces where a line breaks are not part of the line.
+  read .uTextLines(text: UStr, width: WidthNat): List[UStr];
+  }
+///The room a line of text needs.
+///The line box of the text is ``.textHeight`` times ``.aboveBaseline`` + ``.belowBaseline`` high, rounded to the nearest virtual pixel, and as wide as the advance of the text.
+///The ink of the text may go past the line box: then the room grows on each axis by twice the largest part of the ink past the line box on that axis.
+///The text is drawn centered in its room, so a ``Label`` with the same text and text settings packs to its room plus its insets.
+TextRoom:{
+  read .width: WidthNat;
+  read .height: HeightNat;
+  ///The distance from the top of the room to the baseline of the text, rounded to the nearest virtual pixel.
+  read .baseline: HeightNat;
   }
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:

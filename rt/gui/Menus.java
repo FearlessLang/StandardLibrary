@@ -371,7 +371,7 @@ final class SkMenus{
     int ink= it.enabled ? 0xFF000000 : 0xFF9A9A9A;
     Sk.paint.setColor(ink);
     line.setColor(ink);
-    Sk.draw(cv, it.line, b.x + o.textAt(), y, need(it).width, h, 12, 1, 0.5);
+    Sk.draw(cv, it.line, b.x + o.textAt(), y, need(it).width, h, 12, 1, 0.5, Sk.paint);
     float mx= b.x + 1 + pad + 5;
     float my= y + h / 2f;
     if (it.mark == 1){ cv.drawRect(Rect.makeXYWH(mx - 5, my - 5, 10, 10), line); }
