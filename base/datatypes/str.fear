@@ -33,10 +33,10 @@
 /// - canonicalization: ``+12.4/3.2``.getNum!.str==``+31/8``  ``+12/2``.getNum!.str==``+6/1``
 ///
 /// Str.getFloat (IEEE 754 binary 64):
-/// - rejected (syntax): ``1.0``.getFloat  ``+1``.getFloat  ``+1.``.getFloat  ``+.1``.getFloat  ``+1e0``.getFloat
-/// - rejected (value): ``+NaN``.getFloat  ``+Infinity``.getFloat  ``-Infinity``.getFloat  ``+0.1``.getFloat
+/// - rejected (syntax): ``+1``.getFloat  ``+1.``.getFloat  ``+.1``.getFloat  ``+1e0``.getFloat
+/// - rejected (value): ``+NaN``.getFloat  ``+Infinity``.getFloat  ``-Infinity``.getFloat  ``+0.1``.getFloat  ``+1.0e-3``.getFloat  ``+01__0.00__1``.getFloat
 /// - Float value 0.1 (and many others) do not exist; so it is rejected.
-/// - accepted: ``+0.5``.getFloat  ``+1.25``.getFloat  ``+01__0.00__1``.getFloat  ``+1.0e-3``.getFloat
+/// - accepted: ``1.0``.getFloat  ``+0.5``.getFloat  ``+1.25``.getFloat  ``+01__0.2__5``.getFloat  ``+1.25e-1``.getFloat
 /// - canonicalization: ``-0.0``.getFloat.str==``+0.0``
 ///
 /// Str.ieeeFloat:
