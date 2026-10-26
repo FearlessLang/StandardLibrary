@@ -1,6 +1,8 @@
 package _base;
 
 import java.math.BigInteger;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -67,6 +69,11 @@ public final class Util{
   }
   public static Object ok(Object x){ return Actions$5c$0.instance.imm$ok$1(x); }
   public static Object fail(String msg){ return Actions$5c$0.instance.imm$msg$1(new Str$c$0Instance(msg)); }
+  ///The paths a Fearless program reads from its properties are written by PathClassLoader.text of Commons.
+  public static Path pathProperty(String key){
+    var text= System.getProperty(key);
+    return System.getProperty("os.name").startsWith("Windows") ? Path.of(text) : Path.of(URI.create(text));
+  }
   public static Error nonDetErr(String msg){
     return (Error)Error$1c$0.instance.imm$nonDeterministic$1(new Str$c$0Instance(msg));
     }

@@ -47,7 +47,7 @@ final class DataFiles{
   private static Map<String,Path> linked(String prefix){
     var res= new TreeMap<String,Path>();
     for (var k : System.getProperties().stringPropertyNames()){
-      if (k.startsWith(prefix)){ res.put(k.substring(prefix.length()), Path.of(System.getProperty(k))); }
+      if (k.startsWith(prefix)){ res.put(k.substring(prefix.length()), pathProperty(k)); }
     }
     return Collections.unmodifiableMap(res);
   }

@@ -110,7 +110,7 @@ final class AssetBytesRead{
 
   static Path localAssetPath(String path, String diskPath){
     var dirKey= autoloadJavaPackage(path).equals("_base") ? "fearlessBase.dir" : "fearlessUser.dir";
-    var root= Path.of(System.getProperty(dirKey)).toAbsolutePath().normalize();
+    var root= pathProperty(dirKey).toAbsolutePath().normalize();
     var segments= portableSegments("diskPath", diskPath);
     var full= root;
     for (var s : segments){ full = full.resolve(s); }

@@ -102,6 +102,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     cmd.add("-D"+markerKey+"="+marker);
     cmd.add("-cp");
     cmd.add(System.getProperty("java.class.path"));
+    cmd.add(_CapProcess$18g$0.class.getClassLoader().getClass().getName());
     cmd.add(info ? _CapProcess$18g$0.class.getName() : "_"+name.substring(0, name.indexOf('.'))+".Main");
     cmd.add(name);
     return cmd;
