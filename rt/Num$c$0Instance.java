@@ -2,6 +2,7 @@ package _base;
 
 import static _base.Util.*;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
@@ -182,12 +183,18 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     return instance(q, one);
   }
 
-  public boolean isRepresentableAsDouble(){
+  private double nearestDouble(){
+    var a= numerator.abs();
+    int s= Math.max(0, 56 - a.bitLength() + denominator.bitLength());
+    var qr= a.shiftLeft(s).divideAndRemainder(denominator);
+    var q= qr[1].signum() == 0 ? qr[0] : qr[0].setBit(0);
+    double r= new BigDecimal(q.multiply(BigInteger.valueOf(5).pow(s)), s).doubleValue();
+    return numerator.signum() < 0 ? -r : r;
+  }
+  private boolean isExact(double x){
     // Works as all Num's that are numerically equal are the same fraction
     // i.e. Num(1, 2).equals(Num(2, 4));
-    return Float$1c$0Instance.numExactFinite(
-            numerator.doubleValue() / denominator.doubleValue()
-    ).equals(this);
+    return !Double.isInfinite(x) && Float$1c$0Instance.numExactFinite(x).equals(this);
   }
   public boolean isInteger(){ return this.denominator.equals(one); }
   public boolean isIntegerInRange(BigInteger min, BigInteger max){
@@ -211,8 +218,9 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     return optEmpty();
   }
   @Override public Object imm$float$0(){
-    if (!isRepresentableAsDouble()){ return optEmpty(); }
-    return optSome(Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
+    double x= nearestDouble();
+    if (!isExact(x)){ return optEmpty(); }
+    return optSome(Float$1c$0Instance.instance(x));
   }
   private boolean outOfRange(BigInteger min, BigInteger max){ return numerator.compareTo(min) < 0 || numerator.compareTo(max) > 0; }
   private String notInteger(String m, String to){ return "Num."+m+": cannot convert Num " + this.asString() + " to "+to+" as the denominator is not 1."; }
@@ -253,16 +261,18 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   }
 
   @Override public Object imm$getFloat$0(){
-    if (!isRepresentableAsDouble()){
+    double x= nearestDouble();
+    if (!isExact(x)){
       throw err("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
-    return Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
+    return Float$1c$0Instance.instance(x);
   }
   @Override public Object imm$tryGetFloat$0(){
-    if (!isRepresentableAsDouble()){
+    double x= nearestDouble();
+    if (!isExact(x)){
       return fail("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
-    return ok(Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue()));
+    return ok(Float$1c$0Instance.instance(x));
   }
 
   @Override public Object imm$softInt$0(){
@@ -278,7 +288,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     return Byte$o$0Instance.instance(clampByteBitsZ(z));
   }
   @Override public Object imm$softFloat$0(){
-    return Float$1c$0Instance.instance(numerator.doubleValue() / denominator.doubleValue());
+    return Float$1c$0Instance.instance(nearestDouble());
   }
   String asString(){
     String sn= (numerator.signum() < 0 ? "" : "+")+ numerator;
