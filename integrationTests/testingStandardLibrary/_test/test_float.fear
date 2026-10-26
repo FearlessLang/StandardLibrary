@@ -24,6 +24,14 @@ FloatRoundTests: Test {::
   .check{(-0.5).softRound.assertEq -1.0}
   .check{(-1.5).softRound.assertEq -2.0}
   .check{(-2.5).softRound.assertEq -3.0}
+  .check{0.5 .getPred .softRound .assertEq +0.0}
+  .check{0.5 .getPred .round .assertEq({::}, Opts#(+0.0))}
+  .check{-0.5 .getSucc .softRound .isNegZero .assertTrue}
+  .check{+4_503_599_627_370_497.0 .softRound .assertEq +4_503_599_627_370_497.0}
+  .check{-4_503_599_627_370_497.0 .softRound .assertEq -4_503_599_627_370_497.0}
+  .check{+4_503_599_627_370_495.5 .softRound .assertEq +4_503_599_627_370_496.0}
+  .check{-4_503_599_627_370_495.5 .softRound .assertEq -4_503_599_627_370_496.0}
+  .check{Math.negInf .softRound .assertEq(Math.negInf)}
   .check{+1.5 - (+1.0 / +64.0).softRoundTiesEven.assertEq +1.0}
   .check{+1.5 + (+1.0 / +64.0).softRoundTiesEven.assertEq +2.0}
   .check{(-1.5) - (+1.0 / +64.0).softRoundTiesEven.assertEq -2.0}
