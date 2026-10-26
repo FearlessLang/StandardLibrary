@@ -164,6 +164,6 @@ final class AssetBytesRead{
       ){ throw invalidAssetDescriptor("bad "+field+" segment in "+path+": "+s); }
   }
   static RuntimeException invalidAssetDescriptor(String msg){
-    throw nonDetErr("Invalid asset descriptor.\n"+msg);
+    throw detErr("Invalid asset descriptor.\n"+msg);
   }
 }

@@ -102,10 +102,10 @@ final class DownloadFetch{
   }
 
   static RuntimeException invalidUrl(String url, String reason){
-    throw nonDetErr("Invalid URL descriptor.\n"+reason+"\nurl: "+url);
+    throw detErr("Invalid URL descriptor.\n"+reason+"\nurl: "+url);
   }
   static RuntimeException badScheme(String url, String scheme){
-    throw nonDetErr("Invalid URL descriptor.\nunsupported scheme (only http/https allowed): "+scheme+" in "+url);
+    throw detErr("Invalid URL descriptor.\nunsupported scheme (only http/https allowed): "+scheme+" in "+url);
   }
   static RuntimeException downloadFailed(String url, String reason){
     throw detErr("Download failed.\nurl: "+url+"\n"+reason);
