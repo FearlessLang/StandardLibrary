@@ -665,7 +665,7 @@ _Float_Examples: base.Test {::
   .test base.Test{::
   .check{2.0 ** 3.0 .assertEq 8.0}
   .check{Math.nan ** 0.0 .isNaN .assertTrue} // not true of ieee
-  .check{0.0 ** -0.0 .isNaN .assertTrue}  // not true of ieee
+  .check{0.0 ** (Math.negZero) .isNaN .assertTrue}  // not true of ieee
   }
   .test base.Test{::
   .check{2.0 * 3.0 .assertEq 6.0}
@@ -761,7 +761,7 @@ _Float_Examples: base.Test {::
   }
   .test base.Test{::
   .check{1.0 .getPred .assertLt 1.0}
-  .check{0.0 .getPred .assertEq(-0.0.getPred)}
+  .check{0.0 .getPred .assertEq(Math.negZero.getPred)}
   .checkDetErr({::}, {Math.nan .getPred})
   .checkDetErr({::}, {Math.negInf .getPred})
   }
@@ -790,7 +790,7 @@ _Float_Examples: base.Test {::
   }
   .test base.Test{::
   .check{1.0 .getSucc .assertGt 1.0}
-  .check{-0.0 .getSucc .assertEq(+0.0.getSucc)}
+  .check{Math.negZero .getSucc .assertEq(+0.0.getSucc)}
   .checkDetErr({::}, {Math.nan .getSucc})
   .checkDetErr({::}, {Math.inf .getSucc})
   }
@@ -800,19 +800,19 @@ _Float_Examples: base.Test {::
   .checkDetErr({::}, {(Math.nan) .getTrunc0})
   }
   .test base.Test{::
-  .check{0.0 .hash .assertEq((-0.0) .hash)}
+  .check{0.0 .hash .assertEq(Math.negZero .hash)}
   .check{Math.nan .hash .assertEq((Math.nan.negAbsOrNaN) .hash)}
   .check{1.0 .hash .assertNotEq(2.0 .hash)}
   }
   .test base.Test{::
   .check{Math.nan.ieeeEq(Math.nan).assertFalse}
-  .check{+0.0 .ieeeEq -0.0  .assertTrue}
+  .check{+0.0 .ieeeEq(Math.negZero) .assertTrue}
   }
   .test base.Test{::
   .check{5.0 .ieeeRemainder 3.0 .assertEq -1.0}
   }
   .test base.Test{::
-  .check{(0.0 .ieeeSameBits(-0.0)) .assertFalse}
+  .check{(0.0 .ieeeSameBits(Math.negZero)) .assertFalse}
   .check{(1.0 .ieeeSameBits 1.0) .assertTrue}
   }
   .test base.Test{::
@@ -849,7 +849,8 @@ _Float_Examples: base.Test {::
   .check{Math.inf .isNegInfinity .assertFalse}
   }
   .test base.Test{::
-  .check{-0.0 .isNegZero .assertTrue}
+  .check{Math.negZero .isNegZero .assertTrue}
+  .check{-0.0 .isNegZero .assertFalse}
   .check{0.0 .isNegZero .assertFalse}
   }
   .test base.Test{::
@@ -858,7 +859,7 @@ _Float_Examples: base.Test {::
   }
   .test base.Test{::
   .check{0.0 .isPosZero .assertTrue}
-  .check{-0.0 .isPosZero .assertFalse}
+  .check{Math.negZero .isPosZero .assertFalse}
   }
   .test base.Test{::
   .check{(0.0 .match({.posZero -> "pz"; .negZero -> "nz"; .posInf -> "pi"; .negInf -> "ni"; .nan -> "n"; .regular x -> "r"})) .assertEq "pz"}
@@ -905,7 +906,7 @@ _Float_Examples: base.Test {::
   .check{4.75 .signOrNaN .assertEq 1.0}
   .check{-4.75 .signOrNaN .assertEq -1.0}
   .check{0.0 .signOrNaN .isPosZero .assertTrue}
-  .check{-0.0 .signOrNaN .isNegZero .assertTrue}
+  .check{Math.negZero .signOrNaN .isNegZero .assertTrue}
   .check{Math.nan .signOrNaN .isNaN .assertTrue}
   }
   .test base.Test{::
@@ -960,7 +961,7 @@ _Float_Examples: base.Test {::
   }
   .test base.Test{::
   .check{4.0 .sqrtOrNaN .assertEq 2.0}
-  .check{-0.0 .sqrtOrNaN .assertEq -0.0}
+  .check{Math.negZero .sqrtOrNaN .isNegZero .assertTrue}
   .check{-4.0 .sqrtOrNaN .isNaN .assertTrue}
   .check{Math.nan .sqrtOrNaN .isNaN .assertTrue}
   }

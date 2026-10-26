@@ -56,6 +56,7 @@ Math: Sealed, _MagicMath {
   .inf: Float -> +1.0 / +0.0;                   /// The representation of positive infinity in the Float type
   .negInf: Float -> (-1.0) / +0.0;              /// The representation of negative infinity in the Float type
   .nan: Float -> +0.0 / +0.0;                   /// The representation of NaN in the Float type
+  .negZero: Float -> (-1.0) / (this.inf);       /// The negative zero of the Float type; every Float literal of zero, also -0.0, is the positive zero
   .floatBits: Nat -> 64;                        /// The number of bits in the binary representation of a Float (64)
 
   .pi: Float -> +3.141592653589793115997963468544185161590576171875;    /// The mathematical constant Pi

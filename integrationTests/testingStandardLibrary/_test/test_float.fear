@@ -52,25 +52,30 @@ FloatPredTests: Test {::
   .check{Math.inf .isPosInfinity .assertEq True}
   .check{Math.inf .isNegInfinity .assertEq False}
   .check{Math.negInf .isNegInfinity .assertEq True}
-  .check{(-0.0).isNegZero .assertEq True}
-  .check{(-0.0).isPosZero .assertEq False}
+  .check{(Math.negZero).isNegZero .assertEq True}
+  .check{(-0.0).isNegZero .assertEq False}
+  .check{(-0__0.000).isNegZero .assertEq False}
+  .check{(Math.negZero).isPosZero .assertEq False}
+  .check{(-0.0).isPosZero .assertEq True}
   .check{+0.0.isPosZero .assertEq True}
   .check{+0.0.isNegZero .assertEq False}
-  .check{(-0.0).assertEq +0.0}
+  .check{(Math.negZero).assertEq +0.0}
   .check{Math.nan .assertEq (Math.nan)}
   .check{Math.nan .assertGt +1.0}
   }
 
 FloatIeeeTests: Test {::
-  .check{+0.0.ieeeEq(-0.0) .assertEq True}
-  .check{+0.0.ieeeSameBits(-0.0) .assertEq False}
+  .check{+0.0.ieeeEq(Math.negZero) .assertEq True}
+  .check{+0.0.ieeeSameBits(Math.negZero) .assertEq False}
+  .check{+0.0.ieeeSameBits(-0.0) .assertEq True}
   .check{Math.nan .ieeeEq(Math.nan) .assertEq False}
   .check{+5.0.ieeeRemainder+2.0 .assertEq +1.0}
   .check{+7.0.ieeeRemainder+2.0 .assertEq -1.0}
   .check{+6.0.ieeeRemainder(+4.0) .assertEq -2.0}
   .check{+10.0.ieeeRemainder(+4.0) .assertEq +2.0}
   .check{+0.0.ieeeStr .assertEq "0.0"}
-  .check{(-0.0).ieeeStr .assertEq "-0.0"}
+  .check{(Math.negZero).ieeeStr .assertEq "-0.0"}
+  .check{(-0.0).ieeeStr .assertEq "0.0"}
   .check{Math.nan .ieeeStr .assertEq "NaN"}
   .check{Math.inf .ieeeStr .assertEq "Infinity"}
   .check{Math.negInf .ieeeStr .assertEq "-Infinity"}
@@ -133,7 +138,7 @@ FloatSignNumTests: Test {::
   .check{-12.0.getSign .assertEq -1.0}
   .check{+7.0.getSign .assertEq +1.0}
   .check{+0.0.getSign.isPosZero.assertTrue}
-  .check{-0.0.getSign.isNegZero.assertTrue}
+  .check{Math.negZero.getSign.isNegZero.assertTrue}
   .check{Math.inf.getSign .assertEq +1.0}
   .check{Math.negInf.getSign .assertEq -1.0}
   .check{Math.nan.signOrNaN .assertEq(Math.nan)}
@@ -142,11 +147,11 @@ FloatSignNumTests: Test {::
 FloatRangeTests: Test {::
   .check{1.0.getPred  < 1.0.assertTrue}
   .check{+0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
-  .check{-0.0=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
-  .check{(-0.0=~~= +0.0).size .assertEq 1}
-  .check{(+0.0=~~= -0.0).size .assertEq 1}
-  .check{(+0.0=~~= -0.0).list .assertEq({::}, Lists# +0.0)}
-  .check{(-1.0=~~= +0.0).size .assertEq((-1.0=~~= -0.0).size)}
+  .check{(Math.negZero)=~~= +0.0.list.assertEq({::}, Lists# +0.0)}
+  .check{((Math.negZero)=~~= +0.0).size .assertEq 1}
+  .check{(+0.0=~~=(Math.negZero)).size .assertEq 1}
+  .check{(+0.0=~~=(Math.negZero)).list .assertEq({::}, Lists# +0.0)}
+  .check{(-1.0=~~= +0.0).size .assertEq((-1.0=~~=(Math.negZero)).size)}
   .check{(Math.negInf=~~=(Math.inf)).size .assertEq 18_437_736_874_454_810_625}
   .check{((-1.0 .getPred)=~~= -1.0).list .assertEq({::}, Lists#(-1.0 .getPred, -1.0))}
   .check{((0.0 .getPred .getPred)=~~=(0.0 .getSucc)).list
@@ -198,20 +203,20 @@ FloatRangeTests: Test {::
 
 FloatIEEEPowTests: Test {::
   .check{5.0 .ieeePow(0.0) .assertEq 1.0}
-  .check{5.0 .ieeePow(-0.0) .assertEq 1.0}
+  .check{5.0 .ieeePow(Math.negZero) .assertEq 1.0}
   .check{(Math.nan) .ieeePow(0.0) .assertEq 1.0}
 
   .check{0.0 .ieeePow(-3.0) .assertEq(Math.inf)}
-  .check{(-0.0) .ieeePow(-3.0) .assertEq(Math.negInf)}
+  .check{(Math.negZero) .ieeePow(-3.0) .assertEq(Math.negInf)}
 
   .check{0.0 .ieeePow(Math.negInf) .assertEq(Math.inf)}
-  .check{(-0.0) .ieeePow(Math.negInf) .assertEq(Math.inf)}
+  .check{(Math.negZero) .ieeePow(Math.negInf) .assertEq(Math.inf)}
 
   .check{0.0 .ieeePow(Math.inf) .assertEq 0.0}
-  .check{(-0.0) .ieeePow(Math.inf) .isPosZero .assertTrue}
+  .check{(Math.negZero) .ieeePow(Math.inf) .isPosZero .assertTrue}
 
   .check{0.0 .ieeePow(3.0) .assertEq 0.0}
-  .check{(-0.0) .ieeePow(3.0) .assertEq(-0.0)}
+  .check{(Math.negZero) .ieeePow(3.0) .isNegZero .assertTrue}
 
   .check{(-1.0) .ieeePow(Math.inf) .assertEq 1.0}
   .check{(-1.0) .ieeePow(Math.negInf) .assertEq 1.0}
@@ -237,7 +242,7 @@ FloatIEEEPowTests: Test {::
 
   .check{(Math.inf) .ieeePow(3.0) .assertEq(Math.inf)}
 
-  .check{(Math.negInf) .ieeePow(-3.0) .assertEq(-0.0)}
+  .check{(Math.negInf) .ieeePow(-3.0) .isNegZero .assertTrue}
 
   .check{(Math.negInf) .ieeePow(3.0) .assertEq(Math.negInf)}
 
@@ -246,10 +251,10 @@ FloatIEEEPowTests: Test {::
   .check{(Math.negInf) .ieeePow(4.0) .assertEq(Math.inf)}
 
   .check{0.0 .ieeePow(-4.0) .assertEq(Math.inf)}
-  .check{(-0.0) .ieeePow(-4.0) .assertEq(Math.inf)}
+  .check{(Math.negZero) .ieeePow(-4.0) .assertEq(Math.inf)}
 
   .check{0.0 .ieeePow(4.0) .assertEq 0.0}
-  .check{(-0.0) .ieeePow(4.0) .assertEq 0.0}
+  .check{(Math.negZero) .ieeePow(4.0) .isPosZero .assertTrue}
 
   .check{(-2.0) .ieeePow(0.5) .isNaN .assertTrue}
   }

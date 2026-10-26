@@ -102,7 +102,7 @@ TextRatioTests: Test {::
   .check{(TextRatio#(0.0 .getSucc)) .get .assertEq(0.0 .getSucc)}
   .check{(TextRatio#(+1024.0 .getPred)) .get .assertEq(+1024.0 .getPred)}
   .checkNonDetErr({::.isMap{m -> m.get `msg` .getMsg .contains "TextRatio +0.0 is out of range; it must be in (+0.0, +1024.0)"}}, {TextRatio#(0.0)})
-  .checkNonDetErr({::}, {TextRatio#(-0.0)})
+  .checkNonDetErr({::}, {TextRatio#(Math.negZero)})
   .checkNonDetErr({::}, {TextRatio#(-1.0)})
   .checkNonDetErr({::}, {TextRatio#(+1024.0)})
   .checkNonDetErr({::}, {TextRatio#(Math.inf)})
