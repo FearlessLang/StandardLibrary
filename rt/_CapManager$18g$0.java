@@ -37,7 +37,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static String applied(String verb, String text){
     if (text.startsWith(applied)){ return text.substring(applied.length()); }
     if (!text.startsWith(refused)){ throw nonDetErr("The Fearless manager ended the connection of the message \""+verb+"\" without saying whether it applied it."); }
-    throw nonDetErr(InputFile.portable(text.substring(refused.length())));
+    throw detErr(InputFile.portable(text.substring(refused.length())));
   }
   private static Object send(String verb, Stream<String> args){ return send(verb, args, _ -> Void$o$0.instance); }
   private static Object output(String verb, Stream<String> args){ return send(verb, args, o -> new UStr$s$0Instance(o.codePoints().toArray())); }

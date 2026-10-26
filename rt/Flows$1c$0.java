@@ -287,7 +287,7 @@ final class FlowMisuse{
   }
   private Error decisionMisuse(int s, int d){
     return misuse("`"+show(s)+"` receives the elements of `"+c.mode+"` as `mut` and runs before the decision of `"+show(d)
-      +"`, with no fence between them: it can not run in parallel without mutating elements the flow may never process. End the flow expression with `.list` before `"
+      +"`, with no fence between them: it cannot run in parallel without mutating elements the flow may never process. End the flow expression with `.list` before `"
       +show(d)+"`, and continue with `.seqFlow`.");
   }
   private void checkForEach(){

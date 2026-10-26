@@ -9,7 +9,7 @@ use base.Void as Void;
 use base.ToStr as ToStr;
 use base.Str as Str;
 use base.Nat as Nat;
-use base.Gui as GuiC;
+use base.CapGui as GuiC;
 use base.Block as Block;
 use base.Math as Math;
 use base.Bool as Bool;

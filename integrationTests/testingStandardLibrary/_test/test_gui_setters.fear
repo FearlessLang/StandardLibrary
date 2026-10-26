@@ -25,7 +25,7 @@ GuiSetterTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.icon(base.IconsConflict).run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "An icon the main does not preload always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{::.contains `", but the main running this Gui preloads only the icons base.IconsFearless.`}}.assertTrue{i};
+      .info i -> i.validate{:: > "msg" .isMsg{::.contains `", but the main running this CapGui preloads only the icons base.IconsFearless.`}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.fps(0).content.pane{:: .paint{g -> Error.msg "An fps below the limit was accepted"} }}}).run{
       .ok _ -> Error.msg "An fps below the limit always stops the Gui";

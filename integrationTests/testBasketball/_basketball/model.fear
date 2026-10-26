@@ -80,7 +80,7 @@ Squares: { #(startX: Nat, startY: Nat, width: Nat): mut Square -> Block#
     read .y: Nat -> startY;
     mut .tick: Void -> xAxis.tick(0.0, speed, minX =~~= maxX);
     }}}
-Models: { #(gui: mut Gui, width: Nat, height: Nat): mut Model -> Block#
+Models: { #(gui: mut CapGui, width: Nat, height: Nat): mut Model -> Block#
   .var playing      = { False }
   .let playerW      = { PlayerSize#(Width#width).get }
   .let playerX      = { (width.aluDiv 2) - (playerW.aluDiv 2) }

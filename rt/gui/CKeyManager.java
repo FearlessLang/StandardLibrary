@@ -80,7 +80,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
 
   private Object addKeyAction(Object scope, List<KeyAction$m8$0> list){
     frame.onEdtAndWait(() -> {
-      if (frame.frame.completed()){ throw Util.detErr("This Keys belongs to a closed window: the Gui.run that showed the window has returned, so a key action added now would never run"); }
+      if (frame.frame.completed()){ throw Util.detErr("This Keys belongs to a closed window: the CapGui.run that showed the window has returned, so a key action added now would never run"); }
       if (!changeable &&!List.of(frame.surface.getKeyListeners()).contains(this)){
         throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");
       }

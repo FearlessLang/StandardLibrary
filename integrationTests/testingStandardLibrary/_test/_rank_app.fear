@@ -93,7 +93,7 @@ use base.NoManager as NoManager;
 use base.NoManagerQuit as NoManagerQuit;
 use base.RevokableSystem as RevokableSystem;
 use base.Revocation as Revocation;
-use base.RevocationRoot as RevocationRoot;
+use base.CapRevocationRoot as CapRevocationRoot;
 use base.CapTry as CapTry;
 
 MyTests:UnitTests{::

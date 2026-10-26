@@ -35,7 +35,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     var sys= new _System$2o$0();
     var names= System.getProperty(namesKey);
     if (names == null){ return sys; }
-    var r= (RevocationRoot$iyw$0)sys.mut$revocation$0();
+    var r= (CapRevocationRoot$4e14$0)sys.mut$revocation$0();
     var u= RevokableSystem$11y8$0.instance.imm$$hash$2(r, sys);
     for (var n : names.split(",")){ u= ((F$3$2)instance(n)).read$$hash$1(u); }
     r.mut$start$0();
@@ -66,10 +66,10 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     var parts= instance.getClass().getInterfaces()[0].getName().substring(1).split("\\$");
     return parts.length == 3 ? parts[0] : parts[0]+"'".repeat(Integer.parseInt(parts[1].substring(1)));
   }
-  @Override public Object mut$run$2(Object main, Object attenuators){ return ((_RunningMain$2dk$1)mut$start$2(main, attenuators)).mut$await$0(); }
-  @Override public Object mut$run$3(Object main, Object arg, Object attenuators){ return ((_RunningMain$2dk$1)mut$start$3(main, arg, attenuators)).mut$await$0(); }
-  @Override public Object mut$start$2(Object main, Object attenuators){ return new _RunningMain$2dk$1(name(main), names(attenuators), Optional.empty()); }
-  @Override public Object mut$start$3(Object main, Object arg, Object attenuators){ return new _RunningMain$2dk$1(name(main), names(attenuators), Optional.of(toS(arg))); }
+  @Override public Object mut$run$2(Object main, Object attenuators){ return ((_CapRunningMain$jrc$1)mut$start$2(main, attenuators)).mut$await$0(); }
+  @Override public Object mut$run$3(Object main, Object arg, Object attenuators){ return ((_CapRunningMain$jrc$1)mut$start$3(main, arg, attenuators)).mut$await$0(); }
+  @Override public Object mut$start$2(Object main, Object attenuators){ return new _CapRunningMain$jrc$1(name(main), names(attenuators), Optional.empty()); }
+  @Override public Object mut$start$3(Object main, Object arg, Object attenuators){ return new _CapRunningMain$jrc$1(name(main), names(attenuators), Optional.of(toS(arg))); }
   private static String names(Object attenuators){
     var list= (List$o$1)attenuators;
     var size= ((Nat$c$0Instance)list.read$size$0()).val();

@@ -1,6 +1,6 @@
 package _base;
 
-public final class _AssetReadCapability$h1j4$0 implements AssetReadCapability$h1j4$0{
+public final class _CapAssetRead$4y0$0 implements CapAssetRead$4y0$0{
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$readStrUtf8$5(Object path, Object diskPath, Object zipSteps, Object zipEntry, Object recover){

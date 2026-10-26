@@ -358,20 +358,20 @@ Graphics:ScreenContext{
 ///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
 ///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
 ///the same text looks the same on every OS, and a character outside those fonts is drawn as a box everywhere.
-Gui:{
+CapGui:{
   mut .screenWidth: WidthNat;
   mut .screenHeight: HeightNat;
-  mut .name(s: Str): mut Gui -> this.uName(s.u);
-  mut .uName(UStr): mut Gui;
-  mut .icon(ImageFile): mut Gui;
-  mut .startAsWindow(initialArea: Float): mut Gui;
-  mut .startMaximised: mut Gui;
-  mut .startUndecorated(initialArea: Float): mut Gui;
-  mut .startFullScreen: mut Gui;
-  mut .minArea(Float): mut Gui;
-  mut .opacityFloor(Alpha): mut Gui;
-  mut .closeKey(KeyStroke): mut Gui;
-  mut .fullScreenKey(KeyStroke): mut Gui;
+  mut .name(s: Str): mut CapGui -> this.uName(s.u);
+  mut .uName(UStr): mut CapGui;
+  mut .icon(ImageFile): mut CapGui;
+  mut .startAsWindow(initialArea: Float): mut CapGui;
+  mut .startMaximised: mut CapGui;
+  mut .startUndecorated(initialArea: Float): mut CapGui;
+  mut .startFullScreen: mut CapGui;
+  mut .minArea(Float): mut CapGui;
+  mut .opacityFloor(Alpha): mut CapGui;
+  mut .closeKey(KeyStroke): mut CapGui;
+  mut .fullScreenKey(KeyStroke): mut CapGui;
   mut .run(mut Consumer[mut Frame]): Void;
   }
 Label:_Caption[Label]{
@@ -449,7 +449,7 @@ MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, p
 ///  text from an input method reaches nothing;
 ///  the second click of a double click reaches nothing when a menu took its first click or opened after it;
 ///  Up and Down highlight the previous and the next enabled item of the last open menu, Enter chooses the highlighted one;
-///  the close key of the Gui closes the last open menu; the full screen key keeps its meaning; every other key reaches nothing.
+///  the close key of the CapGui closes the last open menu; the full screen key keeps its meaning; every other key reaches nothing.
 ///Choosing an item with a submenu opens the submenu, or closes it when it is open; choosing an item without a submenu closes every menu and queues its action.
 ///Nothing opens a menu on its own: no hover, no delay, no key binding.
 Menu:_Styled[Menu]{ .self->this;

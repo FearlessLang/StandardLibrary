@@ -61,7 +61,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///System.readLog creates a reader for this log.
 ///The reader can inspect or consume the values currently stored for this log.
 ///
-///A concrete log type can not have generic parameters: this is a compile time error.
+///A concrete log type cannot have generic parameters: this is a compile time error.
 ///
 InMemoryLog[T]: CaptureFree{
   .name: Str;
@@ -100,7 +100,7 @@ InMemoryLog[T]: CaptureFree{
 ///managed by the same circular-log mechanism (moved to a stamped archive on
 ///startup/shutdown, empty logs deleted, a bounded number of archives kept).
 ///
-///A concrete log type can not have generic parameters: this is a compile time error.
+///A concrete log type cannot have generic parameters: this is a compile time error.
 ///
 ///See also: base.Log (the single fixed shared log, no declaration needed),
 ///base.InMemoryLog (in memory instead of a file, for unit testing).
@@ -108,7 +108,7 @@ FileLog: CaptureFree{
   .name: Str;
   .log(s: read ToStr): Void -> _Magic!;
   }
-LogReader[T]: ToIso[LogReader[T]], WidenTo[LogReader[T]]{
+CapLogReader[T]: ToIso[CapLogReader[T]], WidenTo[CapLogReader[T]]{
   mut .read: List[T];    ///Returns the values currently stored in the log without removing them
   mut .consume: List[T]; ///Returns the values currently stored in the log and clears the log
   read .logName: Str;   ///The diagnostic name of the corresponding log

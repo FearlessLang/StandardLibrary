@@ -1,6 +1,6 @@
 package _base;
 
-public final class _DownloadCapability$8fsw$0 implements DownloadCapability$8fsw$0{
+public final class _CapDownload$2gw$0 implements CapDownload$2gw$0{
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
 
@@ -57,6 +57,6 @@ public final class _DownloadCapability$8fsw$0 implements DownloadCapability$8fsw
   @Override public Object mut$downloadImage$3(Object url, Object maxBytes, Object maxPixels){
     var u= AssetBytesRead.str(url);
     var bs= DownloadFetch.bytes(u, AssetBytesRead.nat(maxBytes));
-    return new Image$1c$0Instance(AssetImageRead.decode(u, bs, AssetBytesRead.nat(maxPixels)));
+    return new Image$1c$0Instance(AssetImageRead.decode(u, bs, AssetBytesRead.nat(maxPixels), Util::detErr));
   }
 }

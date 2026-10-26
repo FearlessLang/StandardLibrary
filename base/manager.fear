@@ -1,7 +1,7 @@
 ///The object capability to send messages to the Fearless manager running this program.
 ///Each method sends one message, as the manager program does when started with the arguments ``FearlessCommand<Verb>``,
 ///and returns once the manager has applied the message; `.run` and `.compile` return once the mains or the compilation end.
-///A message the manager refuses is a non deterministic error saying why, as the manager window shows it.
+///A message the manager refuses is a deterministic error saying why, as the manager window shows it.
 ///`.quit`, `.reset` and `.terminate` of the project of this program end this program before the method returns.
 ///A program started by the portable Fearless has no manager: every method is a non deterministic error.
 ///``name`` is the name of a registered project.

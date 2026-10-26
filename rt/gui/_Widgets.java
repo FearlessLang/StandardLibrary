@@ -340,7 +340,7 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   void change(){
-    if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the Gui.run that showed the window has returned, so changing it would have no visible effect"); }
+    if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"); }
     if (canChange()){ return; }
     throw Util.detErr("This " + getClass().getSimpleName().substring(1)
       + " is not in the window any more: .clear, a replaced Border slot or a new .content removed it,"
@@ -491,8 +491,8 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$openMenu$1(Object s){
     var m= CMenu.build(s);
     frame.onEdtAndWait(() -> {
-      if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the Gui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
-      if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to Gui.run has not returned"); }
+      if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
+      if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
       if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a replaced Border slot or a new .content removed it, or the scope that adds it has not returned"); }
       var at= SwingUtilities.convertPoint(component, 0, 0, frame.top.component);
       frame.menus.show(m, new Rectangle(at.x, at.y, component.getWidth(), component.getHeight()));
@@ -836,17 +836,17 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$opacity$1(Object a){
     requireOpen();
     int v= alpha(a);
-    if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this Gui: the window can not be more transparent than Gui.opacityFloor allows"); }
+    if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this CapGui: the window cannot be more transparent than CapGui.opacityFloor allows"); }
     opacity = v / 255f;
     if (started){ onEdtAndWait(() -> stage.opacity(opacity)); }
     return this;
   }
-  private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the Gui.run that showed it has returned, so changing it would have no effect"); } }
+  private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
   @Override public Object mut$onResize$1(Object c){ requireOpen(); onResize = (Consumer$ao$1) c; return this; }
   @Override public Object mut$onClose$1(Object a){ requireOpen(); onClose = (MF$7$1) a; return this; }
   @Override public Object mut$close$0(){
     requireOpen();
-    if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to Gui.run has not returned"); }
+    if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
     onEdtAndWait(frame::closed);
     return Void$o$0.instance;
   }
@@ -895,7 +895,7 @@ final class _Frame implements Frame$1c$0{
       boolean changeable= true;
       @Override public Object mut$action$1(Object r){
         onEdtAndWait(() -> {
-          if (frame.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the Gui.run that showed the window has returned, so an action set now would never run"); }
+          if (frame.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"); }
           if (!changeable && modelTickActions != actions){
             throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
           }

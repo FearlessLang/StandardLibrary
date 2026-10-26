@@ -3,18 +3,18 @@
 ///so the results can be cached, reordered and computed in parallel with no visible difference.
 ///Whatever may answer differently to the same question (input, files, downloads, in memory logs,
 ///non deterministic errors) is observed through a method of System or of a capability created by it.
-///Acting on the world needs no capability when the program can not observe the action:
+///Acting on the world needs no capability when the program cannot observe the action:
 ///Debug, Log and FileLog can be used anywhere, and so can InMemoryLog.log,
 ///whose content can only be read through System.
-///Output only acts: it makes printing explicit in the code, while the program can not observe what was printed.
+///CapOutput only acts: it makes printing explicit in the code, while the program cannot observe what was printed.
 System: ToIso[System],WidenTo[System] {
   //mut .io: mut IO;
   //mut .rng: mut RandomSeed;
   mut .try: mut CapTry;
-  mut .out: mut Output;
-  mut .inputCursor: mut InputCursor;
-  mut .assetRead: mut AssetReadCapability;//TODO: rename as CapAssetRead? and complete real system and the inherited metods returning 'this'
-  mut .download: mut DownloadCapability;
+  mut .out: mut CapOutput;
+  mut .inputCursor: mut CapInputCursor;
+  mut .assetRead: mut CapAssetRead;//TODO: complete real system and the inherited metods returning 'this'
+  mut .download: mut CapDownload;
   ///The capability to read the data project mounted on ``data``.
   ///A ``data`` with no data project mounted is a non deterministic error: a program started by the portable Fearless has no mount.
   mut .dataRead(data: DataRead): mut CapDataRead;
@@ -25,12 +25,11 @@ System: ToIso[System],WidenTo[System] {
   mut .process: mut CapProcess;
   ///Creates a reader for this in memory log.
   ///Concrete log types must be non generic.
-  ///Creating a reader throw with nondeterministic error if the concrete log type is generic.
-  mut .readLog[T](InMemoryLog[T]): mut LogReader[T];
+  mut .readLog[T](InMemoryLog[T]): mut CapLogReader[T];
   
-  mut .gui:mut Gui;
+  mut .gui:mut CapGui;
   ///A new flag, not started: a `RevokableSystem` and the capabilities it gives check it before every call.
-  mut .revocation: mut RevocationRoot;
+  mut .revocation: mut CapRevocationRoot;
   }
   
 /// This try-catch will catch non-deterministic errors.
@@ -52,7 +51,7 @@ CapTry: ToIso[CapTry],WidenTo[CapTry] {
 
 CapTrys: F[mut System, mut CapTry] {sys -> sys.try}
   
-Output: ToIso[Output],WidenTo[Output] {
+CapOutput: ToIso[CapOutput],WidenTo[CapOutput] {
   mut .print(ToStr): Void;
   mut .println(ToStr): Void;//later add printU and printlnU
   mut .byte(Byte): Void;///Does not flush
@@ -62,13 +61,13 @@ Output: ToIso[Output],WidenTo[Output] {
 ///A position in the list of the input files of the program, in the order they arrived.
 ///The file opened to start the program is the first one; every file dropped on a window of the program arrives after it.
 ///``sys.inputCursor`` is the first position.
-InputCursor: ToIso[InputCursor],WidenTo[InputCursor] {
-  mut #: mut Opt[mut InputCursorNode]; ///the file at this position: empty until a file arrives there, then always that file
-  mut .next: mut InputCursor;
+CapInputCursor: ToIso[CapInputCursor],WidenTo[CapInputCursor] {
+  mut #: mut Opt[mut CapInputCursorNode]; ///the file at this position: empty until a file arrives there, then always that file
+  mut .next: mut CapInputCursor;
   }
 
-///An input file, read again at every read: a file that can not be read is a non deterministic error.
-InputCursorNode: ToIso[InputCursorNode],WidenTo[InputCursorNode] {
+///An input file, read again at every read: a file that cannot be read is a deterministic error.
+CapInputCursorNode: ToIso[CapInputCursorNode],WidenTo[CapInputCursorNode] {
   mut .label: Str; ///best effort portable name to help debugging
   mut .readStrUtf8(recover: mut BadStrUnitRecover): Str;
   mut .readUStrUtf8(recover: mut BadUStrUnitRecover): UStr;

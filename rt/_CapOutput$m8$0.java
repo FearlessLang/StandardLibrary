@@ -2,7 +2,7 @@ package _base;
 
 import static _base.Util.*;
 
-public final class _Output$2o$0 implements Output$2o$0{
+public final class _CapOutput$m8$0 implements CapOutput$m8$0{
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$print$1(Object p0){

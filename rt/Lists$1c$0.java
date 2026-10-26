@@ -127,7 +127,7 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object read$opt$1(Object p0){ return mut$opt$1(p0); }
   @Override public Object imm$opt$1(Object p0){ return mut$opt$1(p0); }
   @Override public Object mut$getFirst$0(){
-    //can not be empty check(!val.isEmpty(), "List was empty");
+    //cannot be empty check(!val.isEmpty(), "List was empty");
     return val.getFirst();
   }
   @Override public Object mut$tryGetFirst$0(){
@@ -136,7 +136,7 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object read$getFirst$0(){ return mut$getFirst$0(); }
   @Override public Object read$tryGetFirst$0(){ return mut$tryGetFirst$0(); }
   @Override public Object mut$getLast$0(){
-    //can not be empty check(!val.isEmpty(), "List was empty");
+    //cannot be empty check(!val.isEmpty(), "List was empty");
     return val.getLast();
   }
   @Override public Object mut$tryGetLast$0(){
