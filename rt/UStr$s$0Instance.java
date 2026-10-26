@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public record UStr$s$0Instance(int[] val) implements UStr$s$0{
@@ -147,7 +148,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     return res.toString();
   }
   private static void appendHex(StringBuilder res, int cp){
-    String s= Integer.toHexString(cp).toUpperCase();
+    String s= Integer.toHexString(cp).toUpperCase(Locale.ROOT);
     for (int i= s.length(); i < 4; i += 1){ res.append('0'); }
     res.append(s);
   }
