@@ -154,15 +154,15 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   }
   private static int[] parseUCode(String s){
     if (s.isEmpty()){ return empty; }
-    if (!uCodeText.matcher(s).matches()){ throw err("Malformed UStr.u input: "+s); }
+    if (!uCodeText.matcher(s).matches()){ throw err("UStr.u: malformed input: "+s); }
     String[] parts= s.split(" ");
     var res= new int[parts.length];
     for (int i= 0; i<parts.length; i += 1){
       int cp;
       try{ cp= Integer.parseInt(parts[i], 16); }
-      catch (NumberFormatException e){ throw err("Malformed UStr.u input: "+s); }
+      catch (NumberFormatException e){ throw err("UStr.u: malformed input: "+s); }
       if (cp > 0x10FFFF || (0xD800 <= cp && cp <= 0xDFFF)){
-        throw err("Malformed UStr.u input: "+s);
+        throw err("UStr.u: malformed input: "+s);
       }
       res[i] = cp;
     }

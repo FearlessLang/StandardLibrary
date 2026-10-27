@@ -4,11 +4,11 @@ import java.util.List;
 
 public final class Replacements{
   public static String replaceSimultaneousOrdered(List<Str$c$0Instance> rules, String text){
-    validateRules(rules, false);
+    validateRules("Str.replaceSimultaneousOrdered", rules, false);
     return applyOrdered(rules, text);
   }
   public static String replaceSimultaneous(List<Str$c$0Instance> rules, String text){
-    validateRules(rules, true);
+    validateRules("Str.replaceSimultaneous", rules, true);
     return applyOrdered(rules, text);
   }
   private static String applyOrdered(List<Str$c$0Instance> rules, String text){
@@ -30,16 +30,16 @@ public final class Replacements{
     }
     return -1;
   }
-  private static void validateRules(List<Str$c$0Instance> rules, boolean checkPrefixes){
-    if ((rules.size() & 1) != 0){ throw Util.err("Odd number of strings"); }
+  private static void validateRules(String m, List<Str$c$0Instance> rules, boolean checkPrefixes){
+    if ((rules.size() & 1) != 0){ throw Util.err(m+": odd number of strings"); }
     for (int i= 0; i < rules.size(); i += 2){
       var ki= rules.get(i).val();
-      if (ki.isEmpty()){ throw Util.err("Empty key in position "+i); }
+      if (ki.isEmpty()){ throw Util.err(m+": empty key in position "+i); }
       for (int j= i + 2; j < rules.size(); j += 2){
         var kj= rules.get(j).val();
-        if (ki.equals(kj)){ throw Util.err("Duplicate key in positions "+i+" and "+j); }
+        if (ki.equals(kj)){ throw Util.err(m+": duplicate key in positions "+i+" and "+j); }
         var prefix= checkPrefixes && (ki.startsWith(kj) || kj.startsWith(ki));
-        if (prefix){ throw Util.err("Prefix clash in positions "+i+" and "+j); }
+        if (prefix){ throw Util.err(m+": prefix clash in positions "+i+" and "+j); }
       }
     }
   }

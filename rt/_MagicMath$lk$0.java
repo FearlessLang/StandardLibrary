@@ -30,6 +30,18 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
     logContract("log", x);
     return Float$1c$0Instance.instance(Math.log10(x));
   }
+  default Object imm$logb$2(Object p0, Object p1){
+    double b= Float$1c$0Instance.unwrap(p0);
+    double x= Float$1c$0Instance.unwrap(p1);
+    if (!(b > 0.0)){ throw err("Math.logb: the base must be greater than 0, given " + b); }
+    logContract("logb", x);
+    return Float$1c$0Instance.instance(Math.log(x) / Math.log(b));
+  }
+  default Object imm$log2$1(Object p0){
+    double x= Float$1c$0Instance.unwrap(p0);
+    logContract("log2", x);
+    return Float$1c$0Instance.instance(Math.log(x) / Math.log(2.0));
+  }
   default Object imm$asin$1(Object p0){
     double x= ((Float$1c$0Instance) p0).val();
     inverseTrigContract("asin", x);

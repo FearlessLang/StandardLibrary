@@ -62,6 +62,7 @@ FloatPredTests: Test {::
   .check{(Math.negZero).assertEq +0.0}
   .check{Math.nan .assertEq (Math.nan)}
   .check{Math.nan .assertGt +1.0}
+  .check{Math.inf .tryGetSucc .assertInfo{::.isMsg{::.contains "Math.inf"}}}
   }
 
 FloatIeeeTests: Test {::

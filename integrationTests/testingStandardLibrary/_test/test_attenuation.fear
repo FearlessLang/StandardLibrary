@@ -11,7 +11,9 @@ OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.
 ///Calls the received System while running: not an attenuator the runtime can apply.
 Probe: SystemAttenuator { u -> Block#(u.out, u) }
 
+_CapLog: base.InMemoryLog[Str]{"CapLog"}
 TestAttenuation: Test {::
+  .checkWithSys{sys -> sys.readLog(_CapLog).logName.assertEq "CapLog"}
   .checkWithSys{sys -> sys.try#(NoDownload#(sys).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}
   .checkWithSys{sys -> sys.try#(NoDownload#(sys).iso.close, {s -> s.manager}).assertOk}
   .checkWithSys{sys -> sys.try#(NoManager#(NoDownload#(sys)).iso.close, {s -> s.download}).assertInfo{:: > "msg" .isMsg{::.contains "NoDownload"}}}

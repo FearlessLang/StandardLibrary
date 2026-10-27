@@ -10,6 +10,9 @@ StrBasicsTests: Test {::
   .check{"a" .close .assertEq "a"}
   .check{"ab" .close .assertEq "ab"}
   .check{"ab" .repeat(3) .assertEq "ababab"}
+  .checkDetErr({::.isMsg{::.startsWith "Str.sub:"}}, {"ab".sub(3, 4)})
+  .checkDetErr({::.isMsg{::.startsWith "Str.replaceSimultaneous:"}}, {"ab".replaceSimultaneous(Lists#("a", "x", "ab", "y"))})
+  .checkDetErr({::.isMsg{::.startsWith "Str.replaceSimultaneousOrdered:"}}, {"ab".replaceSimultaneousOrdered(Lists#("", "x"))})
   }
 
 StrConcatTests: Test {::

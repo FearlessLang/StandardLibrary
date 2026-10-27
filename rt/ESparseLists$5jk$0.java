@@ -22,7 +22,7 @@ interface SparseStore{
   long[] present();
   SparseStore empty(long cap);
   SparseStore copy();
-  void grow(long cap);
+  void grow(String m, long cap);
 }
 final class SparseArrayStore implements SparseStore{
   SparseArrayStore(int cap){ xs= new Object[cap]; }
@@ -47,7 +47,7 @@ final class SparseArrayStore implements SparseStore{
     r.count = count;
     return r;
   }
-  @Override public void grow(long cap){ xs = Arrays.copyOf(xs, checkedCap("ESparseList.softIncreaseCapacity", cap)); }
+  @Override public void grow(String m, long cap){ xs = Arrays.copyOf(xs, checkedCap(m, cap)); }
 }
 final class SparseMapStore implements SparseStore{
   SparseMapStore(long cap){ this.cap= cap; }
@@ -67,7 +67,7 @@ final class SparseMapStore implements SparseStore{
     r.m.putAll(m);
     return r;
   }
-  @Override public void grow(long cap){ this.cap = cap; }
+  @Override public void grow(String m, long cap){ this.cap = cap; }
 }
 final class SparseTreeStore implements SparseStore{
   SparseTreeStore(long cap){ this.cap= cap; bits= bitsFor(cap); }
@@ -131,7 +131,7 @@ final class SparseTreeStore implements SparseStore{
     r.root = root == null ? null : deep(root, bits);
     return r;
   }
-  @Override public void grow(long cap){
+  @Override public void grow(String m, long cap){
     this.cap = cap;
     int nb= bitsFor(cap);
     while (root != null && bits < nb){
@@ -251,7 +251,13 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   @Override public Object mut$shallowClone$0(){ return new ESparseList$2rs$1Instance(s.copy()); }
   @Override public Object mut$softIncreaseCapacity$1(Object p0){
     long c= Nat$c$0Instance.unwrap(p0);
-    if (Long.compareUnsigned(c, s.cap()) > 0){ s.grow(c); }
+    if (Long.compareUnsigned(c, s.cap()) > 0){ s.grow("ESparseList.softIncreaseCapacity", c); }
+    return this;
+  }
+  @Override public Object mut$increaseCapacity$1(Object p0){
+    long c= Nat$c$0Instance.unwrap(p0);
+    if (Long.compareUnsigned(c, s.cap()) <= 0){ throw detErr("ESparseList.increaseCapacity: the capacity "+Long.toUnsignedString(c)+" is not greater than the current capacity "+Long.toUnsignedString(s.cap())); }
+    s.grow("ESparseList.increaseCapacity", c);
     return this;
   }
   @Override public Object mut$fillHoles$1(Object p0){
@@ -275,7 +281,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     if (next == n){ return this; }
     long cap= s.cap();
     if (Long.compareUnsigned(cap, -1L - (n - next)) > 0){ throw detErr("ESparseList.fillAndExpand: capacity "+Long.toUnsignedString(cap)+" plus "+(n - next)+" elements is greater than Math.maxNat"); }
-    s.grow(cap + (n - next));
+    s.grow("ESparseList.fillAndExpand", cap + (n - next));
     for (long i= cap; next < n; i += 1){ s.put(i, l.mut$get$1(nat(next++))); }
     return this;
   }

@@ -70,4 +70,5 @@ TestESparseList: Test {::
     .let c={l.shallowClone}
     .do{l.set(1500, 9).remove 5 .void}
     .return{c.flatSeqFlow.list .assertEq({::}, Lists#(1, 2))}}
+  .checkDetErr({::.isMsg{::.startsWith "ESparseList.increaseCapacity:"}}, {ESparseLists.backedWithArray[Nat] 2 .increaseCapacity 2147483647})
   }

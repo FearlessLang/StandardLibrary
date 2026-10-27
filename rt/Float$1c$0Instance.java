@@ -42,7 +42,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
       throw err("Float.getSucc: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY){
-      throw err("Float.getSucc: Math.posInf does not have a successor");
+      throw err("Float.getSucc: Math.inf does not have a successor");
     }
     return Float$1c$0Instance.instance(Math.nextUp(val));
   }
@@ -51,7 +51,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
       return fail("Float.getSucc: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY){
-      return fail("Float.getSucc: Math.posInf does not have a successor");
+      return fail("Float.getSucc: Math.inf does not have a successor");
     }
     return ok(Float$1c$0Instance.instance(Math.nextUp(val)));
   }

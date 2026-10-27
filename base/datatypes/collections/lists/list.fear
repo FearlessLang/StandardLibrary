@@ -27,20 +27,20 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   read +> e->Lists.singletonRead[E](e);
   
   .subList(start,end) -> Block#
-    .if{start!=0 || {end!=0}} .error{".subList("+start+", "+end+") called on empty list"}
+    .if{start!=0 || {end!=0}} .error{"List.subList: range "+start+" to "+end+" out of range for empty list"}
     .return {{}};
 
   .subList(start)->this.subList(start,this.size);
 
-  .with(i,e)->Error.msg ".with called on empty list";
+  .with(i,e)->Error.msg "List.with: called on empty list";
   mut .withAlso(i,e)->Block#
-    .if {i!=0} .error{".withAlso("+i+", _) called on empty list"}
+    .if {i!=0} .error{"List.withAlso: List index "+i+" out of range for empty list"}
     .return{Lists#e};
   read .withAlso(i,e)->Block#
-    .if {i!=0} .error{".withAlso("+i+", _) called on empty list"}
+    .if {i!=0} .error{"List.withAlso: List index "+i+" out of range for empty list"}
     .return{Lists.singletonRead[E]e};
 
-  .without(i)->Error.msg ".without called on empty list";
+  .without(i)->Error.msg "List.without: called on empty list";
 
   .reverse->{};
 
