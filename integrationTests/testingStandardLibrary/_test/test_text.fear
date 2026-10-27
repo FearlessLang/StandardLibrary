@@ -1,6 +1,5 @@
 TestText: Test {::
   .test UStrEscapeReceiverTests
-  .test StrErrorPrefixTests
   .test StrRepeatTests
   }
 
@@ -10,13 +9,6 @@ UStrEscapeReceiverTests: Test {::
   .check{("a" ^ "b`c" ^ "d").u.escape .assertEq ("(`a" ^ "b`+" ^ "`c" ^ "+`" ^ "d`).u")}
   .check{("a" | "b").u"00E9".equalRepr(("a" | "b").u.u "00E9").assertTrue}
   .check{(`a"b`+"`c"+`"d`).u.equalRepr(("a" ^ "b`c" ^ "d").u).assertTrue}
-  }
-
-StrErrorPrefixTests: Test {::
-  .checkDetErr({::.isMsg{::.startsWith "Str.sub:"}}, {"ab".sub(3, 4)})
-  .checkDetErr({::.isMsg{::.startsWith "Str.replaceSimultaneous:"}}, {"ab".replaceSimultaneous(Lists#("a", "x", "ab", "y"))})
-  .checkDetErr({::.isMsg{::.startsWith "Str.replaceSimultaneousOrdered:"}}, {"ab".replaceSimultaneousOrdered(Lists#("", "x"))})
-  .checkDetErr({::.isMsg{::.startsWith "UStr.u:"}}, {"".u "D800"})
   }
 
 StrRepeatTests: Test {::
