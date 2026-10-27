@@ -84,8 +84,8 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     }
 
     if (this.val == 0.0 && power == 0.0
-            || (this.val < 0.0 && power == Double.POSITIVE_INFINITY)
-            || (this.val == Double.POSITIVE_INFINITY && power == 0.0)
+            || (this.val < 0.0 && Double.isInfinite(power))
+            || (Double.isInfinite(this.val) && power == 0.0)
     ){
       return Float$1c$0Instance.instance(Double.NaN);
     }
