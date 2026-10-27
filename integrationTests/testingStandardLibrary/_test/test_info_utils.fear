@@ -87,6 +87,9 @@ InfoValidatorTests: Test {::
   .checkTrue{info.extract{:: .extractMap .where{:: > "enemies" .isList}}.isEmpty}
   .checkDetErr({::.isMsg{::.startsWith "Info.getList:"}}, {Infos.msg "hi" .getList})
   .check{Infos.msg "hi" .tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
+  .checkFalse{Infos.msg "A".validate{:: .isList & .isList .not}}
+  .checkFalse{info.validate{:: > "enemies" .isList & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
+  .checkTrue{info.validate{:: > "friends" .not .not .isList}}
   }
 
 InfoExtractorTests: Test {::
