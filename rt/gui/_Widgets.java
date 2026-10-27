@@ -27,6 +27,7 @@ import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.SamplingMode;
+import io.github.humbleui.skija.Surface;
 import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
@@ -590,6 +591,7 @@ final class _Frame implements Frame$1c$0{
   boolean started;
   private final AtomicBoolean layoutDirty= new AtomicBoolean();
   private Bitmap bitmap;
+  private Surface gpu;
   private Canvas canvas;
   private java.awt.image.BufferedImage bimg;
   private java.nio.IntBuffer pixels;
@@ -727,10 +729,12 @@ final class _Frame implements Frame$1c$0{
 
     boolean resized= bimg == null || bimg.getWidth() != pw || bimg.getHeight() != ph;
     if (resized){
-      if (bimg != null){ canvas.close(); bitmap.close(); }
+      if (bimg != null){ gpu.close(); bitmap.close(); }
+      var info= new ImageInfo(pw, ph, ColorType.BGRA_8888, ColorAlphaType.PREMUL);
       bitmap = new Bitmap();
-      bitmap.allocPixels(new ImageInfo(pw, ph, ColorType.BGRA_8888, ColorAlphaType.PREMUL));
-      canvas = new Canvas(bitmap);
+      bitmap.allocPixels(info);
+      gpu = Vk.surface(info);
+      canvas = gpu.getCanvas();
       bimg = new java.awt.image.BufferedImage(pw, ph, java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE);
       pixels = bitmap.peekPixels().getBuffer().order(java.nio.ByteOrder.LITTLE_ENDIAN).asIntBuffer();
     }
@@ -754,7 +758,7 @@ final class _Frame implements Frame$1c$0{
     canvas.restoreToCount(picture);
     stage.paintCorner(canvas);
     canvas.restoreToCount(save);
-
+    Vk.read(gpu, bitmap);
     pixels.get(0, ((java.awt.image.DataBufferInt) bimg.getRaster().getDataBuffer()).getData());
   }
 
