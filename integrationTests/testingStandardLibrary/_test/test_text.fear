@@ -1,0 +1,16 @@
+TestText: Test {::
+  .test UStrEscapeReceiverTests
+  .test StrRepeatTests
+  }
+
+UStrEscapeReceiverTests: Test {::
+  .check{("a" | "b").u.escape .assertEq (`("a" | "b").u`)}
+  .check{("a" | "b").u.u "00E9" .escape .assertEq (`("a" | "b").u"00E9"`)}
+  .check{("a" ^ "b`c" ^ "d").u.escape .assertEq ("(`a" ^ "b`+" ^ "`c" ^ "+`" ^ "d`).u")}
+  .check{("a" | "b").u"00E9".equalRepr(("a" | "b").u.u "00E9").assertTrue}
+  .check{(`a"b`+"`c"+`"d`).u.equalRepr(("a" ^ "b`c" ^ "d").u).assertTrue}
+  }
+
+StrRepeatTests: Test {::
+  .check{"ab".repeat(100_000).size .assertEq 200_000}
+  }

@@ -14,6 +14,7 @@ AssetTextReadAsciiTests: UnitTests { ::
   .test AssetTextReadAsciiRepeatedRead
   .test AssetTextReadAsciiConsumeProtocol
   .test AssetOriginalFileName
+  .test AssetTextReadCutTests
   }
 
 AssetTextReadAsciiPlainFiles: Test { ::
@@ -88,6 +89,15 @@ AssetOriginalFileName: Test { ::
   .check { AutoZipLoadSubTestTextInZip.originalFileName.assertEq "test_text_in_zip.txt" }
   }
 
+AssetTextReadCutTests: Test { ::
+  .checkWithSys { s->
+    AssetTextUtf8Cut.readStrUtf8(s.assetRead,ShowBadStr).assertEq "a[truncatedEncoding:1:2:226]"
+    }
+  .checkWithSys { s->
+    AssetTextUtf16leCutPair.readStrUtf16Le(s.assetRead,ShowBadStr).assertEq "a[truncatedEncoding:2:2:55357]"
+    }
+  }
+
 GoodAsciiStr: F[Str,Void] { ::.assertEq "Hello safe Str!" }
 
 GoodAsciiUStr: F[UStr,Void] { ::.scalarHex.assertEq "0048 0065 006C 006C 006F 0020 0073 0061 0066 0065 0020 0053 0074 0072 0021"}
@@ -102,6 +112,10 @@ UnexpectedBadStr: BadStrUnitRecover { reason, byteOffset, byteLength, rejectedVa
   + ":"
   + rejectedValue
   + "]"
+  }
+
+ShowBadStr: BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
+  "["+(BadTextReasonName#reason)+":"+byteOffset+":"+byteLength+":"+rejectedValue+"]"
   }
 
 UnexpectedBadUStr: BadUStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->

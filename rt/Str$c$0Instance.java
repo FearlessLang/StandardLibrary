@@ -119,6 +119,14 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     for (int i= val.indexOf(text); i != -1; i = i < val.length() ? val.indexOf(text, i + 1) : -1){ res.add(Nat$c$0Instance.instance(i)); }
     return Flow$o$1Instance.of(res, FlowMode.ParImm);
   }
+  @Override public Object imm$repeat$1(Object p0){
+    long n= ((Nat$c$0Instance)p0).val();
+    if (val.isEmpty()){ return this; }
+    if (Long.compareUnsigned(n, Integer.MAX_VALUE / val.length()) > 0){
+      throw Util.nonDetErr("Str.repeat: overflow, a Str of size "+val.length()+" repeated "+Long.toUnsignedString(n)+" times is longer than "+Integer.MAX_VALUE);
+    }
+    return new Str$c$0Instance(val.repeat((int)n));
+  }
   @Override public Object imm$sub$2(Object p1, Object p2){
     long from= ((Nat$c$0Instance)p1).val();
     long to= ((Nat$c$0Instance)p2).val();

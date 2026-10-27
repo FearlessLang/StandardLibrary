@@ -191,7 +191,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   private static boolean isOneLiteral(String e){
     return e.length() >= 2
       && (e.charAt(0) == '"' || e.charAt(0) == '`')
-      && e.charAt(e.length() - 1) == e.charAt(0);
+      && e.indexOf(e.charAt(0), 1) == e.length() - 1;
   }
   private static String strExpr(String s){
     return ((Str$c$0Instance)Str$c$0Instance.instance(s).imm$escape$0()).val();
