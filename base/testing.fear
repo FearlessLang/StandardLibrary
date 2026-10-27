@@ -26,7 +26,7 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 ///While a Test is a named Test that only calls `.check`.
 ///We can then arbitrary make trees of test suites or by nesting them in other test suites.
 ///
-///A name name is only reported when the name is present.
+///A name is only reported when the name is present.
 ///Example code with two test suites.
 ///```
 ///MyTests: UnitTests {::
@@ -39,16 +39,16 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 ///  .test TestCarsCanMove: Test {:: .check {..}}
 ///  
 ///  //disabled test with name inside test suite TestCars
-///  .disableTest TestCarsCanFly: Test {:: .check {..}}
+///  .disabledTest TestCarsCanFly: Test {:: .check {..}}
 ///  
 ///  //unnamed check in the test suite.. possible but not advised
-///  .check {Cars#(...).assertEquals(MakeCar#23)  }
+///  .check {Cars#(...).assertEq(MakeCar#23)  }
 ///  
 ///  //A single test can have many checks
-///  .test TestCarsCanPark: Test {t-> Block#
-///    .if {..} .do{ t.check {..} }
-///    .if {..} .do{ t.check {..} }
-///    .done}
+///  .test TestCarsCanPark: Test {::
+///    .check {..}
+///    .check {..}
+///    }
 ///  }
 /// ```
 /// Example using logs:
@@ -118,7 +118,7 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
        }
      }
     };
-  mut .checkNonDetErr[T](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.checkWithSys{
+  mut .checkNonDetErr[T:*](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.checkWithSys{
     sys -> sys.try#({Try#(f).run {
       .ok _ -> "Expected error but got success";
       .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
@@ -230,9 +230,9 @@ _FailureMsg: {
 
 _FailureExpected: {
   #(i: Info): Str ->
-    i.extract{:: > "expected" .extractMsg}.match {
-      .some e -> "<expected>" + (_XmlEscape#e) + "</expected>" |;
-      .empty -> "";
+    i.validate{:: > "expected"} .if {
+      .then -> "<expected>" + (_XmlEscape#(i.getMap.get "expected" .softMsg)) + "</expected>" |;
+      .else -> "";
     };
     //i.map.opt(`expected`).match {
     //  .some e -> Block#(
@@ -245,9 +245,9 @@ _FailureExpected: {
 
 _FailureActual: {
   #(i: Info): Str ->
-    i.extract{:: > "actual" .extractMsg}.match {
-      .some a -> "<actual>" + (_XmlEscape#a) + "</actual>" |;
-      .empty -> "";
+    i.validate{:: > "actual"} .if {
+      .then -> "<actual>" + (_XmlEscape#(i.getMap.get "actual" .softMsg)) + "</actual>" |;
+      .else -> "";
     };
   }
 
@@ -311,5 +311,6 @@ _XmlEscape: {
     s.replaceSimultaneous(Lists#(
       "&", "&amp;",
       "<", "&lt;",
+      ">", "&gt;",
       `"`, "&quot;",
       ));}

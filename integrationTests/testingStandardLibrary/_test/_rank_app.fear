@@ -138,6 +138,7 @@ MyTests:UnitTests{::
   .test TestComparators
   .test TestUStr
   .test TestText
+  .test AssertionTextTests
   .test MathUnitTests
   .test InfoTests
   .test InfoValidatorTests

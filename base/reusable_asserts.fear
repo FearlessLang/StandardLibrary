@@ -8,7 +8,7 @@ _AssertApprox[T]: DataType[T,T] {
       | "actual: "+this });
   .assertEqDelta(expected: T, delta: T, msg: read LazyInfo): Void -> Assert!(
     this.eqDelta(expected,delta),
-    { msg#.info + (""
+    { msg#.info + ("Expected within delta"
       | "expected: "+(this.close(expected))
       | "delta: "+(this.close(delta))
       | "actual: "+this .info)});
@@ -20,9 +20,9 @@ _AssertSize: {
   read .assertSize(expected: Nat): Void -> this.assertSize(expected,{""});
   read .assertSize(expected: Nat, msg: read LazyInfo): Void -> Assert!(
     this.size == expected,
-    { msg#.info + (""
-      | "Expected size: "+expected
-      | "Actual size: "+(this.size) .info)});
+    { msg#.info + (("Expected size: "+expected
+      | "Actual size: "+(this.size)).info)
+      + (Infos.map("expected", expected.str, "actual", this.size.str))});
   }
 
 _AssertImmSize: {
@@ -31,9 +31,9 @@ _AssertImmSize: {
   imm .assertSize(expected: Nat): Void -> this.assertSize(expected,{""});
   imm .assertSize(expected: Nat, msg: read LazyInfo): Void -> Assert!(
     this.size == expected,
-    { msg#.info + (""
-      | "Expected size: "+expected
-      | "Actual size: "+(this.size) .info) });
+    { msg#.info + (("Expected size: "+expected
+      | "Actual size: "+(this.size)).info)
+      + (Infos.map("expected", expected.str, "actual", this.size.str)) });
   }
 
 _AssertEmpty: {
@@ -42,7 +42,7 @@ _AssertEmpty: {
   read .assertEmpty: Void -> this.assertEmpty({""});
   read .assertEmpty(msg: read LazyInfo): Void -> Assert!(
     this.isEmpty,
-    { msg#.info + ("" | "Expected empty" .info)});
+    { msg#.info + ("Expected empty".info)});
   }
 
 _AssertImmEmpty: {
@@ -51,5 +51,5 @@ _AssertImmEmpty: {
   imm .assertEmpty: Void -> this.assertEmpty({""});
   imm .assertEmpty(msg: read LazyInfo): Void -> Assert!(
     this.isEmpty,
-    { msg#.info + ("" | "Expected empty" .info)});
+    { msg#.info + ("Expected empty".info)});
   }
