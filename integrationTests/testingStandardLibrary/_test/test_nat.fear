@@ -15,6 +15,8 @@ NatArithTests: Test {::
   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat**: overflow"}}, {(Math.maxNat) ** 2})
   .check{9007199254740992 .float .assertEq({::}, Opts# +9007199254740992.0)}
   .check{9007199254740993 .float .assertEmpty {::}}
+  .check{36_028_797_018_963_968 .float .assertEq({::}, Opts# +36_028_797_018_963_968.0)}
+  .check{9_223_372_036_854_775_808 .getFloat .assertEq +9_223_372_036_854_775_808.0}
   .check{(Math.maxNat).tryGetInt .assertInfo{::.isMsg{::.startsWith "Nat.getInt: cannot convert to Int, 18446744073709551615 is greater than Math.maxInt (9223372036854775807)"}}}
   .check{5 .assertLt 7}
   .check{7 .assertGt 5}
