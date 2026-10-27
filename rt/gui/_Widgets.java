@@ -28,7 +28,6 @@ import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.Surface;
-import io.github.humbleui.skija.SurfaceOrigin;
 import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
@@ -734,7 +733,7 @@ final class _Frame implements Frame$1c$0{
       var info= new ImageInfo(pw, ph, ColorType.BGRA_8888, ColorAlphaType.PREMUL);
       bitmap = new Bitmap();
       bitmap.allocPixels(info);
-      gpu = Surface.makeRenderTarget(Vk.context, false, info, 0, SurfaceOrigin.TOP_LEFT, null, false);
+      gpu = Vk.surface(info);
       canvas = gpu.getCanvas();
       bimg = new java.awt.image.BufferedImage(pw, ph, java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE);
       pixels = bitmap.peekPixels().getBuffer().order(java.nio.ByteOrder.LITTLE_ENDIAN).asIntBuffer();
@@ -759,7 +758,7 @@ final class _Frame implements Frame$1c$0{
     canvas.restoreToCount(picture);
     stage.paintCorner(canvas);
     canvas.restoreToCount(save);
-    gpu.readPixels(bitmap, 0, 0);
+    Vk.read(gpu, bitmap);
     pixels.get(0, ((java.awt.image.DataBufferInt) bimg.getRaster().getDataBuffer()).getData());
   }
 
