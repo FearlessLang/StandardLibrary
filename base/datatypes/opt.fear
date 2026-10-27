@@ -11,7 +11,7 @@ Opt[E:*]: _Opt[E] {
     .empty -> Void;
     };
   .assertSome -> this.assertSome {""};
-  .assertSome msg -> Assert.expectedActual(this.isSome, msg, ".some _", ".empty ");
+  .assertSome msg -> Assert.expectedActual(this.isSome, msg, ".some _", ".empty");
 
   !           -> this.match{.some x -> x; .empty -> Error.msg "Opt was empty"};
   ! msg       -> this.match{.some x -> x; .empty -> Error!(msg#.info)};

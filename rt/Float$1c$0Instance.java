@@ -250,7 +250,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     double exp= f(p0), d= f(p1);
     if (Double.isNaN(exp) || Double.isNaN(d) || Double.isNaN(val)){ return bool(false); }
     if (d < 0.0d){ throw err("Float.eqDelta: delta<0"); }
-    return bool(Math.abs(val - exp) <= d);
+    return bool(val == exp || Math.abs(val - exp) <= d);
   }
   @Override public Object imm$softRoundTiesEven$0(){
     return instance(Math.rint(val));

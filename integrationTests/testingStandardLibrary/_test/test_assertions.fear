@@ -1,0 +1,10 @@
+AssertionTextTests: Test {::
+  .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected size: 3" | "Actual size: 2")}}, {Lists#(1,2).assertSize 3})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected size: 3" | "Actual size: 1")}}, {"a".assertSize 3})
+  .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected empty")}}, {Lists#(1).assertEmpty})
+  .checkNonDetErr({:: > "expected" .isMsg{:: == "3"}}, {Lists#(1,2).assertSize 3})
+  .checkNonDetErr({:: > "actual" .isMsg{:: == "2"}}, {Lists#(1,2).assertSize 3})
+  .checkNonDetErr({:: > "msg" .isMsg{::.contains "Expected within delta"}}, {1.0 .assertEqDelta(2.0, 0.5, {"ctx"})})
+  .checkNonDetErr({:: > "actual" .isMsg{:: == ".empty"}}, {Opt[Nat]{}.assertSome})
+  .check{Math.inf.assertEqDelta(Math.inf, 0.0)}
+  }
