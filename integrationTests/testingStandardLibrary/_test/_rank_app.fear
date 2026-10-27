@@ -19,6 +19,7 @@ use base.Int as Int;
 use base.Float as Float;
 use base.Byte as Byte;
 use base.ELists as ELists;
+use base.EList as EList;
 use base.ESparseLists as ESparseLists;
 use base.ESparseList as ESparseList;
 use base.Vars as Vars;
@@ -122,6 +123,7 @@ MyTests:UnitTests{::
   .test GuiSectionsTests
   .test TestList
   .test TestESparseList
+  .test TestEList
   .test TestMultiFlowFence
   .test TestMultiFlowTrickle
   .test TestMultiFlowSizes
