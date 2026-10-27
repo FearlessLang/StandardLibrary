@@ -1,11 +1,6 @@
 package _base;
 
 import io.github.humbleui.skija.Canvas;
-import io.github.humbleui.skija.Data;
-import io.github.humbleui.skija.Font;
-import io.github.humbleui.skija.FontEdging;
-import io.github.humbleui.skija.FontHinting;
-import io.github.humbleui.skija.FontMgr;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
@@ -14,18 +9,6 @@ import io.github.humbleui.skija.PathBuilder;
 import io.github.humbleui.skija.PathOp;
 import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.Surface;
-import io.github.humbleui.skija.TextLine;
-import io.github.humbleui.skija.Typeface;
-import io.github.humbleui.skija.shaper.FontRun;
-import io.github.humbleui.skija.shaper.HbIcuScriptRunIterator;
-import io.github.humbleui.skija.shaper.IcuBidiRunIterator;
-import io.github.humbleui.skija.shaper.RunHandler;
-import io.github.humbleui.skija.shaper.RunInfo;
-import io.github.humbleui.skija.shaper.Shaper;
-import io.github.humbleui.skija.shaper.ShapingOptions;
-import io.github.humbleui.skija.shaper.TextLineRunHandler;
-import io.github.humbleui.skija.shaper.TrivialLanguageRunIterator;
-import io.github.humbleui.types.Point;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 import java.awt.BorderLayout;
@@ -33,6 +16,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.foreign.MemorySegment;
+import java.text.Bidi;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,14 +67,41 @@ interface Sk{
     "NotoSansCJKsc-Regular.otf",
     "Twemoji.Mozilla.ttf"};
   int emoji= fontFiles.length - 1;
-  Typeface[] typefaces= new Typeface[fontFiles.length];
-  HashMap<Long,Font> fonts= new HashMap<>();
+  MemorySegment[] fonts= new MemorySegment[fontFiles.length];
+  int[] upems= new int[fontFiles.length];
   HashMap<Integer,Integer> fontByCp= new HashMap<>();
-  Shaper shaper= Shaper.makeShaperDrivenWrapper();
+  HashMap<Long,Glyph> glyphs= new HashMap<>();
+  record Glyph(List<Hb.Layer> layers, Rect box){}
+  record Run(int from, int to, int font, int level, int script){}
+  record G(int font, int glyph, int cluster, boolean rtl, double x, double advance, double dx, double dy){}
+  record Line(String text, int size, List<G> glyphs, double width){
+    double coord(int off){
+      G best= null;
+      for (var g : glyphs){
+        if (g.cluster() >= off && (best == null || g.cluster() < best.cluster() || g.cluster() == best.cluster() && (g.rtl() ? g.x() > best.x() : g.x() < best.x()))){ best = g; }
+      }
+      if (best == null){ return width; }
+      return best.rtl() ? best.x() + best.advance() : best.x();
+    }
+    int offsetAt(double x){
+      var cs= glyphs.stream().mapToInt(G::cluster).distinct().sorted().toArray();
+      int res= 0;
+      double d= Double.POSITIVE_INFINITY;
+      for (var g : glyphs){
+        int k= Arrays.binarySearch(cs, g.cluster());
+        int after= k + 1 < cs.length ? cs[k + 1] : text.length();
+        double l= Math.abs(g.x() - x);
+        double r= Math.abs(g.x() + g.advance() - x);
+        if (l < d){ d = l; res = g.rtl() ? after : g.cluster(); }
+        if (r < d){ d = r; res = g.rtl() ? g.cluster() : after; }
+      }
+      return res;
+    }
+  }
 
-  static Typeface typeface(int i){
-    if (typefaces[i] == null){ typefaces[i] = FontMgr.getDefault().makeFromData(Data.makeFromBytes(fontBytes(fontFiles[i]))); }
-    return typefaces[i];
+  static MemorySegment font(int i){
+    if (fonts[i] == null){ fonts[i] = Hb.font(fontBytes(fontFiles[i])); upems[i] = Hb.upem(fonts[i]); }
+    return fonts[i];
   }
 
   static byte[] fontBytes(String name){
@@ -97,21 +109,14 @@ interface Sk{
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
 
-  static Font font(int i, int size){
-    return fonts.computeIfAbsent((long) i << 32 | size, _ -> new Font(typeface(i), size)
-      .setSubpixel(true)
-      .setEdging(FontEdging.ANTI_ALIAS)
-      .setHinting(FontHinting.NONE));
-  }
-
   static int fontOf(int cp, boolean emojiFirst){
     return fontByCp.computeIfAbsent(cp << 1 | (emojiFirst ? 1 : 0), _ -> search(cp, emojiFirst));
   }
 
   static int search(int cp, boolean emojiFirst){
-    if (emojiFirst && typeface(emoji).getUTF32Glyph(cp) != 0){ return emoji; }
+    if (emojiFirst && Hb.has(font(emoji), cp)){ return emoji; }
     for (int i= 0; i < fontFiles.length; i += 1){
-      if (typeface(i).getUTF32Glyph(cp) != 0){ return i; }
+      if (Hb.has(font(i), cp)){ return i; }
     }
     return 0;
   }
@@ -122,62 +127,79 @@ interface Sk{
       || t == Character.COMBINING_SPACING_MARK || t == Character.FORMAT || Character.isEmojiModifier(cp);
   }
 
-  static TextLine shape(String text, int size){
-    try (var handler= new TextLineRunHandler(text)){ shape(text, size, handler); return handler.makeLine(); }
-  }
-
-  static Rect ink(String text, int size){
-    var handler= new RunHandler(){
-      float x;
-      Rect ink= Rect.makeWH(0, 0);
-      @Override public void beginLine(){}
-      @Override public void runInfo(RunInfo info){}
-      @Override public void commitRunInfo(){}
-      @Override public Point runOffset(RunInfo info){ return new Point(x, 0); }
-      @Override public void commitRun(RunInfo info, short[] glyphs, Point[] at, int[] clusters){
-        var bounds= info.getFont().getBounds(glyphs);
-        for (int i= 0; i < glyphs.length; i += 1){
-          if (bounds[i].isEmpty()){ continue; }
-          var b= bounds[i].offset(at[i]);
-          ink = Rect.makeLTRB(Math.min(ink.getLeft(), b.getLeft()), Math.min(ink.getTop(), b.getTop()), Math.max(ink.getRight(), b.getRight()), Math.max(ink.getBottom(), b.getBottom()));
-        }
-        x += info.getAdvanceX();
-      }
-      @Override public void commitLine(){}
-    };
-    shape(text, size, handler);
-    return handler.ink;
-  }
-
-  static void shape(String text, int size, RunHandler handler){
-    synchronized (shaper){
-      var runs= new ArrayList<FontRun>();
-      int font= -1;
+  static Line shape(String text, int size){
+    if (text.isEmpty()){ return new Line(text, size, List.of(), 0); }
+    synchronized (fonts){
+      var bidi= new Bidi(text, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
+      var runs= new ArrayList<Run>();
+      int from= 0, font= -1, level= 0, script= Hb.common;
       for (int i= 0, prev= -1; i < text.length();){
         int cp= text.codePointAt(i);
         int next= i + Character.charCount(cp);
+        int f= font;
         if (font < 0 || !(sticky(cp) || prev == 0x200D)){
           int nx= next < text.length() ? text.codePointAt(next) : -1;
-          int f= fontOf(cp, nx == 0xFE0F || Character.isEmojiPresentation(cp));
-          if (font >= 0 && f != font){ runs.add(new FontRun(i, font(font, size))); }
-          font = f;
+          f = fontOf(cp, nx == 0xFE0F || Character.isEmojiPresentation(cp));
         }
+        int s= Hb.script(cp);
+        boolean weak= s == Hb.common || s == Hb.inherited || s == Hb.unknown;
+        int l= bidi.getLevelAt(i);
+        if (font >= 0 && (f != font || l != level || !weak && script != Hb.common && s != script)){ runs.add(new Run(from, i, font, level, script)); from = i; }
+        font = f;
+        level = l;
+        if (!weak){ script = s; }
         prev = cp;
         i = next;
       }
-      if (font >= 0){ runs.add(new FontRun(text.length(), font(font, size))); }
-      try (var bidi= new IcuBidiRunIterator(text, 0xFE); var script= new HbIcuScriptRunIterator(text)){
-        shaper.shape(text, runs.iterator(), bidi, script, new TrivialLanguageRunIterator(text, "en"), ShapingOptions.DEFAULT, Float.POSITIVE_INFINITY, handler);
+      runs.add(new Run(from, text.length(), font, level, script));
+      var levels= new byte[runs.size()];
+      for (int i= 0; i < levels.length; i += 1){ levels[i] = (byte) runs.get(i).level(); }
+      var order= runs.toArray(Run[]::new);
+      Bidi.reorderVisually(levels, 0, order, 0, order.length);
+      var res= new ArrayList<G>();
+      double x= 0;
+      for (var r : order){
+        double k= (double) size / upems[r.font()];
+        boolean rtl= (r.level() & 1) != 0;
+        for (var g : Hb.shape(fonts[r.font()], text, r.from(), r.to(), rtl, r.script())){
+          res.add(new G(r.font(), g.glyph(), g.cluster(), rtl, x, g.advance() * k, g.dx() * k, -g.dy() * k));
+          x += g.advance() * k;
+        }
       }
+      return new Line(text, size, List.copyOf(res), x);
     }
   }
 
-  static TextLine line(AWidget s){
-    if (s.line != null){ return s.line; }
-    s.line = shape(s.text, s.textSize);
-    s.ink = ink(s.text, s.textSize);
+  static Glyph glyph(int font, int glyph){
+    synchronized (fonts){
+      return glyphs.computeIfAbsent((long) font << 32 | glyph, _ -> {
+        var layers= Hb.layers(fonts[font], glyph);
+        return new Glyph(layers, layers.stream().map(l -> l.path().getBounds()).filter(b -> !b.isEmpty()).reduce(Sk::union).orElse(null));
+      });
+    }
+  }
+
+  static Rect union(Rect a, Rect b){
+    return Rect.makeLTRB(Math.min(a.getLeft(), b.getLeft()), Math.min(a.getTop(), b.getTop()), Math.max(a.getRight(), b.getRight()), Math.max(a.getBottom(), b.getBottom()));
+  }
+
+  static Rect ink(Line line){
+    var res= Rect.makeWH(0, 0);
+    for (var g : line.glyphs()){
+      var b= glyph(g.font(), g.glyph()).box();
+      if (b == null){ continue; }
+      double k= (double) line.size() / upems[g.font()];
+      double x= g.x() + g.dx();
+      res = union(res, Rect.makeLTRB((float) (x + b.getLeft() * k), (float) (g.dy() + b.getTop() * k), (float) (x + b.getRight() * k), (float) (g.dy() + b.getBottom() * k)));
+    }
+    return res;
+  }
+
+  static Line line(AWidget s){
+    if (s.line == null){ s.line = shape(s.text, s.textSize); }
     return s.line;
   }
+
 
   static long lineHeight(int size, double above, double below){ return Math.round(size * (above + below)); }
 
@@ -254,18 +276,14 @@ interface Sk{
     cv.drawRRect(RRect.makeXYWH(cx - gw / 2, cy - gh / 2, gw, gh, t / 2f), paint);
   }
 
-  record Tip(String text, List<TextLine> lines, List<Dimension> needs, int width, int height) implements AutoCloseable{
-    @Override public void close(){ lines.forEach(TextLine::close); }
-  }
+  record Tip(String text, List<Line> lines, List<Dimension> needs, int width, int height){}
 
   static Tip tip(String text){
-    var texts= text.split("\n", -1);
-    var lines= Arrays.stream(texts).map(l -> shape(l, 12)).toList();
-    var needs= new ArrayList<Dimension>();
-    for (int i= 0; i < texts.length; i += 1){ needs.add(need(lines.get(i), ink(texts[i], 12), 12, 1, 0.5)); }
+    var lines= Arrays.stream(text.split("\n", -1)).map(l -> shape(l, 12)).toList();
+    var needs= lines.stream().map(l -> need(l, 1, 0.5)).toList();
     int bw= needs.stream().mapToInt(d -> d.width).max().orElseThrow() + 10;
     int bh= needs.stream().mapToInt(d -> d.height).sum() + 6;
-    return new Tip(text, lines, List.copyOf(needs), bw, bh);
+    return new Tip(text, lines, needs, bw, bh);
   }
 
   static void tooltip(Canvas cv, Tip tip, java.awt.Point at, int w, int h){
@@ -283,7 +301,7 @@ interface Sk{
     float ly= y + 3;
     for (int i= 0; i < lines.size(); i += 1){
       var n= needs.get(i);
-      draw(cv, lines.get(i), x + 5, ly, n.width, n.height, 12, 1, 0.5, paint);
+      draw(cv, lines.get(i), x + 5, ly, n.width, n.height, 1, 0.5, paint);
       ly += n.height;
     }
   }
@@ -334,10 +352,11 @@ interface Sk{
     return null;
   }
 
-  static Dimension need(TextLine line, Rect ink, int size, double above, double below){
-    float w= line.getWidth();
-    long h= lineHeight(size, above, below);
-    double a= size * above;
+  static Dimension need(Line line, double above, double below){
+    var ink= ink(line);
+    double w= line.width();
+    long h= lineHeight(line.size(), above, below);
+    double a= line.size() * above;
     double overX= Math.max(Math.max(0, -ink.getLeft()), ink.getRight() - w);
     double overY= Math.max(Math.max(0, -ink.getTop() - a), ink.getBottom() + a - h);
     return new Dimension((int) Math.ceil(w + 2 * overX), (int) Math.ceil(h + 2 * overY));
@@ -345,13 +364,27 @@ interface Sk{
 
   static double baseline(float h, int size, double above, double below){ return (h - lineHeight(size, above, below)) / 2d + size * above; }
 
-  static void draw(Canvas cv, TextLine line, float x, float y, float w, float h, int size, double above, double below, Paint p){
-    cv.drawTextLine(line, x + (w - line.getWidth()) / 2, (float) (y + baseline(h, size, above, below)), p);
+  static void draw(Canvas cv, Line line, float x, float y, float w, float h, double above, double below, Paint p){
+    drawAt(cv, line, x + (w - line.width()) / 2, y + baseline(h, line.size(), above, below), p);
   }
 
-  static int roomWidth(String text, int size, double above, double below){
-    try (var line= shape(text, size)){ return need(line, ink(text, size), size, above, below).width; }
+  static void drawAt(Canvas cv, Line line, double x, double y, Paint p){
+    int fg= p.getColor();
+    for (var g : line.glyphs()){
+      float k= (float) ((double) line.size() / upems[g.font()]);
+      cv.save();
+      cv.translate((float) (x + g.x() + g.dx()), (float) (y + g.dy()));
+      cv.scale(k, k);
+      for (var l : glyph(g.font(), g.glyph()).layers()){
+        p.setColor(l.foreground() ? fg : l.color());
+        cv.drawPath(l.path(), p);
+      }
+      cv.restore();
+    }
+    p.setColor(fg);
   }
+
+  static int roomWidth(String text, int size, double above, double below){ return need(shape(text, size), above, below).width; }
 
   static ArrayList<Integer> wrap(String s, int size, double above, double below, int ww){
     var res= new ArrayList<Integer>();
@@ -359,24 +392,23 @@ interface Sk{
     words.setText(s);
     var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
     clusters.setText(s);
-    try (var whole= shape(s, size)){
-      for (int from= 0; from < s.length();){
-        int to= fit(s, whole, words, from, size, above, below, ww);
-        if (to == from){ to = fit(s, whole, clusters, from, size, above, below, ww); }
-        if (to == from){ to = clusters.following(from); }
-        res.add(to);
-        from = to;
-      }
+    var whole= shape(s, size);
+    for (int from= 0; from < s.length();){
+      int to= fit(s, whole, words, from, size, above, below, ww);
+      if (to == from){ to = fit(s, whole, clusters, from, size, above, below, ww); }
+      if (to == from){ to = clusters.following(from); }
+      res.add(to);
+      from = to;
     }
     if (res.isEmpty()){ res.add(0); }
     return res;
   }
 
-  private static int fit(String s, TextLine whole, BreakIterator b, int from, int size, double above, double below, int ww){
-    float x0= whole.getCoordAtOffset(from);
+  private static int fit(String s, Line whole, BreakIterator b, int from, int size, double above, double below, int ww){
+    double x0= whole.coord(from);
     var fits= new ArrayList<Integer>();
     for (int at= b.following(from); at != BreakIterator.DONE; at = b.next()){
-      if (whole.getCoordAtOffset(trimmed(s, from, at)) - x0 > ww){ break; }
+      if (whole.coord(trimmed(s, from, at)) - x0 > ww){ break; }
       fits.add(at);
     }
     for (int i= fits.size() - 1; i >= 0; i -= 1){
@@ -391,7 +423,7 @@ interface Sk{
   }
 
   static Dimension textSizeWithInsets(AWidget s){
-    var need= need(line(s), s.ink, s.textSize, s.above, s.below);
+    var need= need(line(s), s.above, s.below);
     return new Dimension(need.width + s.left + s.right, need.height + s.top + s.bottom);
   }
 
@@ -406,7 +438,7 @@ interface Sk{
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
     paint.setColor(s.fg);
-    draw(cv, line, x0 + dx, y0 + dy, cw, ch, s.textSize, s.above, s.below, paint);
+    draw(cv, line, x0 + dx, y0 + dy, cw, ch, s.above, s.below, paint);
     cv.restoreToCount(save);
   }
 

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.skija.TextLine;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
@@ -52,8 +51,7 @@ final class CMenuItem implements MenuItem$aw$0{
   MF$7$1 action;
   Object submenu;
   boolean built;
-  TextLine line;
-  Rect ink;
+  Sk.Line line;
   private void open(){
     if (built){ throw Util.detErr("This MenuItem is already built: an item is fixed once the scope of its .item returns, so a change now would never show"); }
   }
@@ -147,7 +145,6 @@ final class SkMenus{
       tops[i] = y;
       if (it == null){ y += gap; continue; }
       it.line = Sk.shape(it.text, 12);
-      it.ink = Sk.ink(it.text, 12);
       var need= need(it);
       y += need.height + row - 18;
       text = Math.max(text, need.width);
@@ -164,7 +161,7 @@ final class SkMenus{
     open.add(new Open(m, new Rectangle(x, top, w, h), tops, textAt, from, content, new int[1]));
   }
 
-  private static Dimension need(CMenuItem it){ return Sk.need(it.line, it.ink, 12, 1, 0.5); }
+  private static Dimension need(CMenuItem it){ return Sk.need(it.line, 1, 0.5); }
 
   private static int flip(int start, int length, int size, int room){
     int after= start + length;
@@ -183,11 +180,7 @@ final class SkMenus{
   void close(int k){
     if (open.size() <= k){ return; }
     asked += 1;
-    while (open.size() > k){
-      for (var i : open.removeLast().menu().items){
-        if (i != null){ i.line.close(); }
-      }
-    }
+    while (open.size() > k){ open.removeLast(); }
     if (highMenu >= k){ highMenu = -1; }
     if (pressMenu >= k){ pressMenu = -1; }
     if (dragMenu >= k){ dragMenu = -1; }
@@ -371,7 +364,7 @@ final class SkMenus{
     int ink= it.enabled ? 0xFF000000 : 0xFF9A9A9A;
     Sk.paint.setColor(ink);
     line.setColor(ink);
-    Sk.draw(cv, it.line, b.x + o.textAt(), y, need(it).width, h, 12, 1, 0.5, Sk.paint);
+    Sk.draw(cv, it.line, b.x + o.textAt(), y, need(it).width, h, 1, 0.5, Sk.paint);
     float mx= b.x + 1 + pad + 5;
     float my= y + h / 2f;
     if (it.mark == 1){ cv.drawRect(Rect.makeXYWH(mx - 5, my - 5, 10, 10), line); }

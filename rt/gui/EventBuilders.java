@@ -124,7 +124,6 @@ final class SkMouse extends MouseAdapter{
     if (tip == null || tipOff || System.nanoTime() - tipSince < 500_000_000L){ return; }
     if (tipAt == null){ tipAt = at; }
     if (shown == null || !shown.text().equals(tip.tooltip)){
-      if (shown != null){ shown.close(); }
       shown = Sk.tip(tip.tooltip);
     }
     Sk.tooltip(cv, shown, tipAt, top().getWidth(), top().getHeight());

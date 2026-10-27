@@ -3,6 +3,7 @@ package _base;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
@@ -36,6 +37,20 @@ final class Image$1c$0Instance implements Image$1c$0{
   @Override public Object imm$scaleToHeight$p1$1(Object h){
     var newH= heightVal(h);
     return scaled(side(proportional(w, newH, this.h), "image width"), newH);
+  }
+  @Override public Object read$color$2(Object x, Object y){
+    try (var b= new Bitmap()){
+      b.allocN32Pixels(1, 1);
+      image().readPixels(b, pixel(((XInt$s$0) x).read$get$0(), w, "x"), pixel(((YInt$s$0) y).read$get$0(), h, "y"));
+      int c= b.getColor(0, 0);
+      return Color$1c$0.instance.imm$$hash$4(Red$c$0.instance.read$$hash$1(byt(c >>> 16)), Green$1c$0.instance.read$$hash$1(byt(c >>> 8)), Blue$o$0.instance.read$$hash$1(byt(c)), Alpha$1c$0.instance.read$$hash$1(byt(c >>> 24)));
+    }
+  }
+  private static Object byt(int c){ return Byte$o$0Instance.instance((byte) c); }
+  private static int pixel(Object c, int side, String what){
+    long v= Util.intToLong(c);
+    if (v < 0 || v >= side){ throw Util.detErr("pixel " + what + " " + v + " is out of range; it must be between 0 and " + (side - 1)); }
+    return (int) v;
   }
   @Override public Object imm$paint$1(Object p){
     try (var paint= new Paint().setAntiAlias(true)){

@@ -35,7 +35,6 @@ import javax.swing.SwingUtilities;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.skija.TextLine;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
@@ -70,9 +69,9 @@ final class _TextArea extends AEditText implements TextArea$aw$0{
 
 abstract class AEditText extends AWidget implements _EditText$aw$1{
   record Step(int at, String removed, String inserted, int caretBefore, int anchorBefore, int caretAfter, int anchorAfter){}
-  record Seg(int from, int to, TextLine line, Rect ink){}
-  record VLine(int start, int end, TextLine line, boolean wrapped, int y, int w, int h){
-    float dx(){ return line == null ? 0 : (w - line.getWidth()) / 2; }
+  record Seg(int from, int to, Sk.Line line){}
+  record VLine(int start, int end, Sk.Line line, boolean wrapped, int y, int w, int h){
+    float dx(){ return line == null ? 0 : (float) ((w - line.width()) / 2); }
   }
   record Fire(Consumer$ao$1 handler, TextEvent$ls$0 event){}
   static final Paint stroke= new Paint().setAntiAlias(true).setMode(PaintMode.STROKE);
@@ -108,11 +107,9 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     int w= 0;
     int h= 0;
     for (var l : buf.toString().split("\n", -1)){
-      try (var t= Sk.shape(l, textSize)){
-        var n= Sk.need(t, Sk.ink(l, textSize), textSize, above, below);
-        w = Math.max(w, n.width);
-        h += Math.max(lineHeight(), n.height);
-      }
+      var n= Sk.need(Sk.shape(l, textSize), above, below);
+      w = Math.max(w, n.width);
+      h += Math.max(lineHeight(), n.height);
     }
     return new Dimension(w + 2 + edgeW(), h + edgeH());
   }
@@ -158,7 +155,6 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   void layout(){
     int ww= wrap ? Math.max(1, viewW()) : Integer.MAX_VALUE;
     if (ww != laidWidth || textSize != laidSize){
-      close(shaped);
       shaped = new HashMap<>();
       laidWidth = ww;
       laidSize = textSize;
@@ -177,7 +173,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
       var segs= segsOf(buf.substring(s, end), old, ww);
       for (int i= 0; i < segs.size(); i += 1){
         var g= segs.get(i);
-        var n= g.line() == null ? new Dimension() : Sk.need(g.line(), g.ink(), textSize, above, below);
+        var n= g.line() == null ? new Dimension() : Sk.need(g.line(), above, below);
         int h= Math.max(lineHeight(), n.height);
         lines.add(new VLine(s + g.from(), s + g.to(), g.line(), i < segs.size() - 1, y, n.width, h));
         w = Math.max(w, n.width);
@@ -186,7 +182,6 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
       if (e < 0){ break; }
       s = e + 1;
     }
-    close(old);
     contentW = w + 2;
     contentH = y;
     scrollX = Math.clamp(scrollX, 0, maxScrollX());
@@ -202,19 +197,13 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     shaped.put(text, res);
     return res;
   }
-  private static void close(HashMap<String,ArrayList<Seg>> m){
-    for (var segs : m.values()){
-      for (var g : segs){ if (g.line() != null){ g.line().close(); } }
-    }
-  }
-  static float width(TextLine t){ return t == null ? 0 : t.getWidth(); }
+  static float width(Sk.Line t){ return t == null ? 0 : (float) t.width(); }
   private ArrayList<Seg> segs(String s, int ww){
     var res= new ArrayList<Seg>();
-    if (s.isEmpty()){ res.add(new Seg(0, 0, null, null)); return res; }
+    if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
     int from= 0;
     for (int to : Sk.wrap(s, textSize, above, below, ww)){
-      var t= s.substring(from, to);
-      res.add(new Seg(from, to, Sk.shape(t, textSize), Sk.ink(t, textSize)));
+      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize)));
       from = to;
     }
     return res;
@@ -232,10 +221,10 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   }
   int lineOf(int off){ return find(VLine::start, off); }
   int lineAt(int y){ return find(VLine::y, y); }
-  static float xOf(VLine v, int off){ return v.line() == null ? 0 : v.dx() + v.line().getCoordAtOffset(off - v.start()); }
+  static float xOf(VLine v, int off){ return v.line() == null ? 0 : (float) (v.dx() + v.line().coord(off - v.start())); }
   int offsetAt(int x, int y){
     var v= lines.get(lineAt(y));
-    int off= v.line() == null ? v.start() : Math.clamp(v.start() + v.line().getOffsetAtCoord(x - v.dx()), v.start(), v.end());
+    int off= v.line() == null ? v.start() : Math.clamp(v.start() + v.line().offsetAt(x - v.dx()), v.start(), v.end());
     if (v.wrapped() && off == v.end()){ off = prev(off); }
     return snap(off);
   }
@@ -500,19 +489,19 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);
-    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), textSize, above, below, Sk.paint);
+    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), above, below, Sk.paint);
   }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){
-      try (var t= Sk.shape(composing, textSize)){
-        Sk.paint.setColor(0xFFFFFFF0);
-        cv.drawRect(Rect.makeXYWH(0, 0, t.getWidth(), lh), Sk.paint);
-        Sk.paint.setColor(fg);
-        float base= (float) Sk.baseline(lh, textSize, above, below);
-        cv.drawTextLine(t, 0, base, Sk.paint);
-        cv.drawRect(Rect.makeXYWH(0, base + 2, t.getWidth(), 1), Sk.paint);
-        cv.translate(t.getWidth(), 0);
-      }
+      var t= Sk.shape(composing, textSize);
+      float tw= (float) t.width();
+      Sk.paint.setColor(0xFFFFFFF0);
+      cv.drawRect(Rect.makeXYWH(0, 0, tw, lh), Sk.paint);
+      Sk.paint.setColor(fg);
+      float base= (float) Sk.baseline(lh, textSize, above, below);
+      Sk.drawAt(cv, t, 0, base, Sk.paint);
+      cv.drawRect(Rect.makeXYWH(0, base + 2, tw, 1), Sk.paint);
+      cv.translate(tw, 0);
     }
     long since= Math.max(0, micros(frame.elapsed) - movedAt);
     if (caretPainter == null){

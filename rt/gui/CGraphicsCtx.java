@@ -6,7 +6,6 @@ import io.github.humbleui.skija.FilterMode;
 import io.github.humbleui.skija.MipmapMode;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.skija.TextLine;
 import io.github.humbleui.types.Rect;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -50,10 +49,8 @@ class CGraphicsCtx implements Graphics$ao$0{
   @Override public Object read$belowBaseline$0(){ return Scopes.ratio(below); }
   @Override public Object read$uTextRoom$1(Object text){
     var s= oneLine(text, "Graphics.textRoom", "measures");
-    try (var line= Sk.shape(s, textSize)){
-      var room= room(line, s);
-      return new CTextRoom(Scopes.w(room.width), Scopes.h(room.height), Scopes.h(Math.round(Sk.baseline(room.height, textSize, above, below))));
-    }
+    var room= Sk.need(Sk.shape(s, textSize), above, below);
+    return new CTextRoom(Scopes.w(room.width), Scopes.h(room.height), Scopes.h(Math.round(Sk.baseline(room.height, textSize, above, below))));
   }
   @Override public Object read$uTextLines$2(Object text, Object width){
     int ww= Scopes.extent((WidthNat$as$0) width, "textLines width");
@@ -67,7 +64,6 @@ class CGraphicsCtx implements Graphics$ao$0{
     }
     return new List$o$1Instance(List.copyOf(res));
   }
-  private Dimension room(TextLine line, String s){ return Sk.need(line, Sk.ink(s, textSize), textSize, above, below); }
   private static String oneLine(Object text, String method, String does){
     var s= Scopes.ustr(text);
     var b= Scopes.lineBreak(s);
@@ -128,19 +124,19 @@ class CGraphicsCtx implements Graphics$ao$0{
   }
   @Override public Object mut$uText$1(Object text){
     var s= oneLine(text, "Graphics.text", "draws");
-    try (var line= Sk.shape(s, textSize)){
-      var room= room(line, s);
-      return text(line, room, room);
-    }
+    var line= Sk.shape(s, textSize);
+    var room= Sk.need(line, above, below);
+    return text(line, room, room);
   }
   @Override public Object mut$uText$3(Object text, Object w, Object h){
     var s= oneLine(text, "Graphics.text", "draws");
     var box= new Dimension(Scopes.extent((WidthNat$as$0) w, "text box width"), Scopes.extent((HeightNat$lg$0) h, "text box height"));
-    try (var line= Sk.shape(s, textSize)){ return text(line, room(line, s), box); }
+    var line= Sk.shape(s, textSize);
+    return text(line, Sk.need(line, above, below), box);
   }
-  private Object text(TextLine line, Dimension room, Dimension box){
+  private Object text(Sk.Line line, Dimension room, Dimension box){
     paint.setMode(PaintMode.FILL);
-    Sk.draw(cv, line, x, y, box.width, box.height, textSize, above, below, paint);
+    Sk.draw(cv, line, x, y, box.width, box.height, above, below, paint);
     reach(Rect.makeXYWH(x + (box.width - room.width) / 2f, y + (box.height - room.height) / 2f, room.width, room.height));
     return this;
   }

@@ -118,6 +118,7 @@ MyTests:UnitTests{::
   .test GuiKeyTests
   .test GuiImageTests
   .test GuiTextTests
+  .test GuiFontTests
   .test GuiSplitTests
   .test GuiSectionsTests
   .test TestList
