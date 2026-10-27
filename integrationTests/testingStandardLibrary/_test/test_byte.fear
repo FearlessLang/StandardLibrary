@@ -39,6 +39,7 @@ ByteConvTests: Test {::
   .check{+5.getByte.float .assertEq +5.0}
   .check{+255.getByte.float .assertEq +255.0}
   .check{+5.getByte.num .assertEq (+5.num)}
+  .check{+5.getByte.info .softMsg .assertEq "5"}
   }
 
 ByteAluTests: Test {::

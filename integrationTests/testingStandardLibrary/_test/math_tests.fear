@@ -89,6 +89,8 @@ LogbTests: Test {::
   .checkDetErr({::}, {Math.logb(+0.0, +4.0)})
   .checkDetErr({::}, {Math.logb(Math.nan, +1.0)})
   .checkDetErr({::}, {Math.logb(+3.0, Math.nan)})
+  .checkDetErr({::.isMsg{::.startsWith "Math.logb:"}}, {Math.logb(-2.0, +4.0)})
+  .checkDetErr({::.isMsg{::.startsWith "Math.logb:"}}, {Math.logb(+0.0, +4.0)})
   }
 
 Log2Tests: Test {::
@@ -146,6 +148,7 @@ EuclideanModTests: Test {::
   .check{Math.euclideanMod(+10.0, +5.0).assertEq(+0.0)}
   .check{Math.euclideanMod(-10.0, +5.0).assertEq(+0.0)}
   .check{Math.euclideanMod(+3.0, -7.0).assertEq(+3.0)}
+  .check{Math.euclideanMod(-3.0, -7.0).assertEq(+4.0)}
   }
 
 HypotTests: Test {::

@@ -6,6 +6,7 @@ TestUStr:Test{::
 
   .check{"".u.scalarHex.assertEq ""}
   .check{"".u "".scalarHex.assertEq ""}
+  .checkDetErr({::.isMsg{::.startsWith "UStr.u:"}}, {"".u "D800"})
   .check{"".u.u "".scalarHex.assertEq ""}
 
   .check{"".u "0".scalarHex.assertEq "0000"}

@@ -52,10 +52,7 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// Throws if ``n <= this.capacity``.
   //> .check{ESparseLists.backedWithArray[Nat] 2 .increaseCapacity 4 .capacity .assertEq 4}
   //> .checkDetErr({::.isMsg{:: == "ESparseList.increaseCapacity: the capacity 2 is not greater than the current capacity 2"}}, {ESparseLists.backedWithArray[Nat] 2 .increaseCapacity 2})
-  mut .increaseCapacity(n: Nat): mut ESparseList[E] -> (n > (this.capacity)).if {
-    .then -> this.softIncreaseCapacity n;
-    .else -> Error.msg("ESparseList.increaseCapacity: the capacity " + n + " is not greater than the current capacity " + (this.capacity));
-    };
+  mut .increaseCapacity(n: Nat): mut ESparseList[E];
 
   /// ``this.softIncreaseCapacity n`` returns ``this`` after adding holes at the end, up to capacity ``n``.
   /// Does nothing if ``n <= this.capacity``.

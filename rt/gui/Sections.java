@@ -42,7 +42,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   Section at(long i){
     if (Long.compareUnsigned(i, sections.size()) < 0){ return sections.get((int) i); }
     throw Util.detErr("There is no section at index " + Long.toUnsignedString(i) + " in this Sections: "
-      + (sections.isEmpty() ? "it has no sections" : "it has " + sections.size() + " sections, so the index is at most " + (sections.size() - 1)));
+      + (sections.isEmpty() ? "it has no sections" : "it has " + sections.size() + (sections.size() == 1 ? " section" : " sections") + ", so the index is at most " + (sections.size() - 1)));
   }
   AWidget build(Object scope, Function<_Frame,? extends AWidget> make){
     var c= frame.onEdtAndWait(() -> make.apply(frame));

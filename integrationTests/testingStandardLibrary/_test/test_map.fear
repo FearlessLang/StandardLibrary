@@ -24,6 +24,7 @@ MapBasicsTests: Test {::
   .check{Maps#({::}, "a", "x") .without "a" .size .assertEq 0}
   .check{Maps#({::}, "a", "x") .without "a" .opt "a" .isEmpty .assertEq True}
   .check{Maps#({::}, "a", "x") .without "a" .containsKey "a" .assertEq False}
+  .checkDetErr({::.isMsg{::.startsWith "Map.without: "}}, {Maps#({::}, "a", "x") .without "b"})
   .check{Maps#({::}, "a", "x", "bb", "y") .imm{::.imm} .size .assertEq 2}
   .check{Maps#({::}, "a", "x", "bb", "y") .imm{::.imm} .get "a" .assertEq "x"}
   .check{Maps#({::}, "a", "x", "bb", "y") .imm{::.imm} .get "bb" .assertEq "y"}

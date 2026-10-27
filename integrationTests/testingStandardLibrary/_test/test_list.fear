@@ -74,6 +74,14 @@ ListBasicsTests: Test {::
     .do{elist.size .assertEq 1}
     .done
     }
+  .checkDetErr({::.isMsg{::.startsWith "List.with:"}}, {Lists#(1, 2).with(5, 0)})
+  .checkDetErr({::.isMsg{::.startsWith "List.without:"}}, {Lists#(1, 2).without 5})
+  .checkDetErr({::.isMsg{::.startsWith "List.subList:"}}, {Lists#(1, 2).subList(1, 5)})
+  .checkDetErr({::.isMsg{::.startsWith "List.withAlso:"}}, {Lists#(1, 2).withAlso(5, 0)})
+  .checkDetErr({::.isMsg{::.startsWith "List.with:"}}, {List[Nat].with(0, 1)})
+  .checkDetErr({::.isMsg{::.startsWith "List.without:"}}, {List[Nat].without 0})
+  .checkDetErr({::.isMsg{::.startsWith "List.subList:"}}, {List[Nat].subList(0, 1)})
+  .checkDetErr({::.isMsg{::.startsWith "List.withAlso:"}}, {List[Nat].withAlso(1, 0)})
   }
 
 TestList: Test {::

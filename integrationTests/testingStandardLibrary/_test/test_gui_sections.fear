@@ -30,6 +30,12 @@ GuiSectionsTests: Test {::
       .info i -> i.validate{:: > "msg" .isMsg{:: == "There is no section at index 2 in this Sections: it has 2 sections, so the index is at most 1"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .sections{:: .section.pane{::}.and.pane{::} .expand 1 .paint{g -> Error.msg "Expanding a missing section was accepted"}}
+    }}}).run{
+      .ok _ -> Error.msg "Expanding a missing section always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "There is no section at index 1 in this Sections: it has 1 section, so the index is at most 0"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{:: .remove 0 .paint{g -> Error.msg "Removing from an empty Sections was accepted"}}
     }}}).run{
       .ok _ -> Error.msg "Removing from an empty Sections always stops the Gui";
