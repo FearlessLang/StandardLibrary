@@ -27,7 +27,6 @@ import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.SamplingMode;
-import io.github.humbleui.skija.TextLine;
 import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
@@ -309,8 +308,7 @@ abstract class AWidget implements Widget$2o$1{
   int textSize= 12;
   double above= 1;
   double below= 0.5;
-  TextLine line;
-  Rect ink;
+  Sk.Line line;
   static final int bar= 5;
   int scrollX;
   int scrollY;
@@ -441,7 +439,6 @@ abstract class AWidget implements Widget$2o$1{
   Object reText(Runnable r){
     return reStyle(() -> {
       r.run();
-      if (line != null){ line.close(); }
       line = null;
       var n= need();
       grow(n.width, n.height);

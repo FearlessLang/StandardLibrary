@@ -155,6 +155,9 @@ Image:{
   ///The color starts as opaque black, and the position at (0, 0).
   ///What ``painter`` draws past the edges of this image is clipped, with a warning, as for the painter of a widget.
   .paint(painter: Painter): Image;
+  ///The color of the pixel at (``x``, ``y``) of this image; (0, 0) is the top left pixel.
+  ///``x`` is between 0 and ``.width`` - 1, and ``y`` is between 0 and ``.height`` - 1.
+  read .color(x: XInt, y: YInt): Color;
   }
 ///``Images#(width, height, background)`` is an image of ``width`` x ``height`` pixels, each of the color ``background``.
 ///Each side is between 1 and 32767, and the image has at most 268435456 pixels.
