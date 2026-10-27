@@ -196,10 +196,17 @@ _InfoFromStr: {
       .if {(i.get) >= (s.size)} .error {"Infos.fromStr: unterminated string in "+(s.escape)+"."}
       .let c = {s.sub(i.get, (i.get) + 1)}
       .if {c == `"`} .return {OuterReturn#(i.get)}
+      .let[Nat] at = {i.get}
+      .if {c == "\" && {this.isEscape(s, at).not}} .error {"Infos.fromStr: invalid escape at position "+at+" in "+(s.escape)+"."}
       .do {i.set((i.get) + (c == "\" ? {.then -> 2; .else -> 1}))}
       .return {Continue#}
       }
     .return {Unreachable!};
+
+  .isEscape(s: Str, pos: Nat): Bool -> (pos + 2 <= (s.size)) && {Block#
+    .let e = {s.sub(pos, pos + 2)}
+    .return {e == "\\" || {e == `\"`} || {e == "\n"}}
+    };
 
   .listValue(s: Str, pos: Nat): _InfoParsed -> Block#
     .var[Nat] i = {pos}
@@ -222,6 +229,7 @@ _InfoFromStr: {
   .mapValue(s: Str, pos: Nat): _InfoParsed -> Block#
     .var[Nat] i = {pos}
     .let acc = {ELists#[KeyElem[Str,Info]]}
+    .let keys = {ESets#[Str,Str]{::}}
     .loop { Block#
       .if {(i.get) >= (s.size)} .error {"Infos.fromStr: unterminated map in "+(s.escape)+"."}
       .if {(s.sub(i.get, (i.get) + 1)) == "}"} .return {Block#
@@ -230,10 +238,14 @@ _InfoFromStr: {
         .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
         }
       .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, ",")}}
-      .let key = {this.msgValue(s, start)}
-      .let afterColon = {this.expect(s, key.pos, ":")}
+      .let keyStart = {this.expect(s, start, `"`)}
+      .let keyEnd = {this.strEnd(s, keyStart)}
+      .let key = {_JsonUnescape#(s.sub(keyStart, keyEnd))}
+      .if {keys.contains key} .error {"Infos.fromStr: repeated key "+(key.escape)+" at position "+start+" in "+(s.escape)+"."}
+      .do {keys.add(key).void}
+      .let afterColon = {this.expect(s, keyEnd + 1, ":")}
       .let elem = {this.value(s, afterColon)}
-      .do {acc.add({.key -> key.info.getMsg; .elem -> elem.info}).void}
+      .do {acc.add({.key -> key; .elem -> elem.info}).void}
       .do {i.set(elem.pos)}
       .return {Continue#}
       }
