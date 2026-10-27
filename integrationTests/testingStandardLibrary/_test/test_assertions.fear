@@ -1,4 +1,5 @@
 AssertionTextTests: Test {::
+  .checkNonDetErr({:: > "msg" .isMsg{::.contains "7"}}, {(1=~~=4).assertContains 7})
   .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected size: 3" | "Actual size: 2")}}, {Lists#(1,2).assertSize 3})
   .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected size: 3" | "Actual size: 1")}}, {"a".assertSize 3})
   .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected empty")}}, {Lists#(1).assertEmpty})
