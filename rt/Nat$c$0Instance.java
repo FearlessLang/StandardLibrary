@@ -150,7 +150,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
       return true;
     }
     BigInteger bigInteger= toUnsignedBigInteger(val);
-    return BigDecimal.valueOf(bigInteger.doubleValue()).toBigInteger().equals(bigInteger);
+    return new BigDecimal(bigInteger.doubleValue()).toBigInteger().equals(bigInteger);
   }
   /**
    * Code is from a private method in the open jdk <a href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/Long.java">Long</a> class.

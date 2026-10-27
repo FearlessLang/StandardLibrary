@@ -8,6 +8,9 @@ FloatArithTests: Test {::
   .check{+9.0.sqrt .assertEq({::}, Opts#(+3.0))}
   .check{(-1.0).sqrt.isEmpty .assertEq True}
   .check{+2.0 ** +3.0 .assertEq +8.0}
+  .check{Math.negInf ** 0.0 .isNaN .assertTrue}
+  .check{-2.0 ** (Math.negInf) .isNaN .assertTrue}
+  .check{-0.5 ** (Math.negInf) .isNaN .assertTrue}
   .check{+1.0.assertEqDelta(+1.0,+0.0)}
   }
 

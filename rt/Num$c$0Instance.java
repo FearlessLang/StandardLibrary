@@ -101,28 +101,18 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     var o= num(p0);
     return instance(numerator.multiply(o.numerator), denominator.multiply(o.denominator));
   }
-  public static BigInteger pow(BigInteger n, long exponent){
-    assert exponent >= 0;
+  static BigInteger pow(BigInteger n, long exponent){
     if (n.signum() == 0 || n.equals(one)){ return exponent == 0 ? one : n; }
     if (n.equals(one.negate())){ return (exponent & 1) == 0 ? one : n; }
-    if (exponent <= Integer.MAX_VALUE){
-      // is small enough to safely cast
-      return n.pow((int) exponent);
-    }
-    // Exponent is too large, use the rule:
-    // a^(n+m) = a^n * a^m
-    // we break it down into a^MAX_INT_1 * ... * a^MAX_INT_k * a^rem,
-    // where MAX_INT_1 + ... + MAX_INT_K + rem = exponent;
-    BigInteger result= BigInteger.ONE;
-    long timesToDecompose= exponent / Integer.MAX_VALUE;
-    int remainder= (int) (exponent % Integer.MAX_VALUE);
-    for (int i= 0; i < timesToDecompose; i += 1){
-      result = result.multiply(n.pow(Integer.MAX_VALUE));
-    }
-    return result.multiply(n.pow(remainder));
+    if (Long.compareUnsigned(exponent, Integer.MAX_VALUE) > 0){ throw new ArithmeticException(); }
+    return n.pow((int) exponent);
   }
   @Override public Object imm$$star_star$1(Object p0){
     long exponent= ((Int$c$0Instance) p0).val();
+    try{ return starStar(exponent); }
+    catch (ArithmeticException e){ throw nonDetErr("Num**: overflow, "+asString()+" ** "+exponent+" is too large to be represented"); }
+  }
+  private Object starStar(long exponent){
     if (exponent == 0){return NumCache.get(1);}
     if (exponent == 1){return this;}
     if (exponent > 0){
@@ -132,17 +122,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
     }
     if (numerator.signum() == 0){ throw err("Num**: cannot raise +0/1 to the negative power "+exponent); }
     // Since negative flip fraction
-    if (exponent == Long.MIN_VALUE){
-      // Since |Long.MIN_VALUE| is too large to fit in long
-      return new Num$c$0Instance(
-              pow(denominator, Long.MAX_VALUE).multiply(denominator),
-              pow(numerator, Long.MAX_VALUE).multiply(numerator)
-      );
-    }
-    return new Num$c$0Instance(
-            pow(denominator, Math.abs(exponent)),
-            pow(numerator, Math.abs(exponent))
-    );
+    return new Num$c$0Instance(pow(denominator, -exponent), pow(numerator, -exponent));
   }
 
   @Override public Object imm$$slash$1(Object p0){
