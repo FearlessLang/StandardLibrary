@@ -1,0 +1,35 @@
+_SetByAbs: OrderHashBy[Int,Nat]{# i -> i.imm.abs}
+
+SetUnionTests: Test {::
+  .check{Sets#(_SetByAbs, +1).union(_SetByAbs, Sets#(_SetByAbs, -1)).list .assertEq({::}, Lists#(+1))}
+  .check{Block#
+    .let s={Sets#(_SetByAbs, +1).union(_SetByAbs, Sets#(_SetByAbs, -1))}
+    .return{s.get(+1) .assertEq(s.list.get 0)}}
+  .check{Sets#(_SetByAbs, +1, +2).union(_SetByAbs, Sets#({::}, -3)).size .assertEq 3}
+  .check{Sets#({::}, +1).union(_SetByAbs, Sets#(_SetByAbs, -2)).list .assertEq({::}, Lists#(+1, -2))}
+  .check{Sets#({::}, +1).union(_SetByAbs, Sets#(_SetByAbs, -2)).contains(+2) .assertTrue}
+  }
+SetRehashTests: Test {::
+  .check{Sets#({::}, +1, +2).distinctBy({::.imm.abs}).get(-1) .assertEq +1}
+  .check{Sets#({::}, +1, +2).intersection({::.imm.abs}, Sets#({::}, -1)).get(-1) .assertEq +1}
+  }
+ESetTests: Test {::
+  .check{ESets#[Int,Nat]({::.imm.abs}).add(+1).add(-1).get(-1) .assertEq +1}
+  .check{Block#
+    .let s={ESets#[Int,Nat]({::.imm.abs}).add(+1).add(-1).set}
+    .return{s.get(-1) .assertEq(s.list.get 0)}}
+  .check{ESets#[Int,Nat]({::.imm.abs}).addAll(ESets#[Int,Int]{::}.add(-1)).get(+1) .assertEq -1}
+  .check{ESets#[Int,Int]{::}.add(-1).distinctBy({::.imm.abs}).contains(+1) .assertTrue}
+  .check{ESets#[Int,Int]{::}.add(-1).distinctBy({::.imm.abs}).add(+1).size .assertEq 1}
+  .check{ESets#[Int,Int]{::}.add(-1).add(+2).distinctBy({::.imm.abs}).set.contains(+1) .assertTrue}
+  .check{Block#
+    .let s={ESets#[Int,Nat]({::.imm.abs})}
+    .return{s.orderHash.hash(-3) .assertEq(s.orderHash.hash(+3))}}
+  .check{ESets#[Int,Nat]({::.imm.abs}).add(+1).containsAll(ESets#[Int,Int]{::}.add(+1).add(-1)) .assertTrue}
+  }
+
+TestSet: Test {::
+  .test SetUnionTests
+  .test SetRehashTests
+  .test ESetTests
+  }

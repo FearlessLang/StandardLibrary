@@ -131,6 +131,7 @@ MyTests:UnitTests{::
   .test TestMultiFlowFoldsAndMapping
   .test TestFlow
   .test TestMap
+  .test TestSet
   .test TestAs
   .test TestRepr
   .test TestLiteralErrors
