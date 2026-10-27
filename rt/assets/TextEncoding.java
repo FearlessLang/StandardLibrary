@@ -137,9 +137,8 @@ final class TextEncoding{
         continue;
       }
       if (i+3 >= bs.length){
-        out.bad(notScalar, i, 2, w1);
-        i += 2;
-        continue;
+        out.bad(truncatedEncoding, i, bs.length-i, w1);
+        break;
       }
       int w2= le?u16le(bs, i+2):u16be(bs, i+2);
       if (!low(w2)){

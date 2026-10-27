@@ -137,6 +137,7 @@ MyTests:UnitTests{::
   .test TestPipe
   .test TestComparators
   .test TestUStr
+  .test TestText
   .test MathUnitTests
   .test InfoTests
   .test InfoValidatorTests
