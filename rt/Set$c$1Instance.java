@@ -119,24 +119,8 @@ public final class Set$c$1Instance implements Set$c$1{
     Set$c$1Instance other= toSet(p1);
     // See if we can avoid rehashing some of the elements
     if (newOrdering.equals(this.ordering) && newOrdering.equals(other.ordering)){
-      Map<MapKey,Object> map= new HashMap<>(other.set);
-      map.putAll(set);
-      return new Set$c$1Instance(ordering, map);
-    }
-    if (newOrdering.equals(ordering)){
-      return new Set$c$1Instance(ordering, Stream.concat(
-        this.set.keySet().stream(), // don't have to rehash this one
-        other.sortedList.stream()
-          .filter(k -> !this.set.containsKey(mapKey(newOrdering, k)))
-      ).collect(Collectors.toMap(
-        o -> mapKey(newOrdering, o),
-        o -> o,
-        (v1, _) -> v1 // keep old value
-      )));
-    }
-    if (newOrdering.equals(other.ordering)){
-      Map<MapKey,Object> map= new HashMap<>(other.set);
-      map.putAll(rehash(set, newOrdering));
+      Map<MapKey,Object> map= new HashMap<>(set);
+      other.set.forEach(map::putIfAbsent);
       return new Set$c$1Instance(ordering, map);
     }
     var set= Stream.concat(
@@ -160,22 +144,21 @@ public final class Set$c$1Instance implements Set$c$1{
     thisMap.keySet().removeIf(k -> !otherMap.containsKey(k));
     return new Set$c$1Instance(newOrdering, thisMap);
   }
-  private static Map<MapKey,Object> rehash(Map<MapKey,Object> s, OrderHashBy$2ea$2 ordering){
-    return s.keySet().stream()
-      .map(Set$c$1Instance::extractKey)
+  private static Map<MapKey,Object> rehash(Set$c$1Instance s, OrderHashBy$2ea$2 ordering){
+    return s.sortedList.stream()
       .collect(Collectors.toMap(
         k -> mapKey(ordering, k),
-        k -> mapKey(ordering, k),
+        k -> k,
         (v1, _) -> v1
       ));
   }
   private static Map<MapKey,Object> rehashSet(Set$c$1Instance set, OrderHashBy$2ea$2 ordering){
     if (set.ordering.equals(ordering)){return set.set;}
-    return rehash(set.set, ordering);
+    return rehash(set, ordering);
   }
   private static Map<MapKey,Object> rehashAndCloneSet(Set$c$1Instance set, OrderHashBy$2ea$2 ordering){
     if (set.ordering.equals(ordering)){return new HashMap<>(set.set);}
-    return rehash(set.set, ordering);
+    return rehash(set, ordering);
   }
   @Override public Object imm$containsAll$2(Object p0, Object p1){
     Set$c$1Instance other= toSet(p1);
@@ -187,7 +170,7 @@ public final class Set$c$1Instance implements Set$c$1{
   @Override public Object imm$distinctBy$1(Object p0){
     var newOrdering= ordering(p0);
     if (this.ordering.equals(newOrdering)){return this;}
-    return new Set$c$1Instance(newOrdering, rehash(set, newOrdering));
+    return new Set$c$1Instance(newOrdering, rehash(this, newOrdering));
   }
   @Override public Object imm$list$0(){
     return List$o$1Instance.wrap(sortedList);

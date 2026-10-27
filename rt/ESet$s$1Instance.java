@@ -13,7 +13,7 @@ import static _base.Set$c$1Instance.extractKey;
 final class ESet$s$1Instance implements ESet$s$1{
     /// A map to allow for O(1) get
     private LinkedHashMap<MapKey,Object> set;
-    private final OrderHashBy$2ea$2 ordering;
+    private OrderHashBy$2ea$2 ordering;
 
     static Object wrap(LinkedHashSet<MapKey> s, OrderHashBy$2ea$2 ordering){ return new ESet$s$1Instance(new LinkedHashSet<>(s), ordering); }
 
@@ -48,19 +48,18 @@ final class ESet$s$1Instance implements ESet$s$1{
 
     @Override public Object read$size$0(){ return Nat$c$0Instance.instance(set.size()); }
     @Override public Object read$orderHash$0(){
-        return this.ordering;
+        return this.ordering.imm$hideKey$0();
     }
     @Override public Object read$contains$1(Object p0){ return bool(set.containsKey(mapKey(ordering, p0))); }
     @Override public Object read$containsAll$1(Object p0){
         ESet$s$1Instance eset= (ESet$s$1Instance) p0;
-        if (eset.set.size() > this.set.size()){ return bool(false); }
         if (eset.ordering.equals(this.ordering)){
             return bool(this.set.keySet().containsAll(eset.set.keySet()));
         }
         return bool(eset.unhashedObjects().allMatch(e -> this.set.containsKey(mapKey(this.ordering, e))));
     }
     @Override public Object mut$add$1(Object p0){
-        set.put(mapKey(ordering, p0), p0);
+        set.putIfAbsent(mapKey(ordering, p0), p0);
         return this;
     }
     @Override public Object mut$remove$1(Object p0){
@@ -72,12 +71,7 @@ final class ESet$s$1Instance implements ESet$s$1{
         return this;
     }
     @Override public Object mut$addAll$1(Object p0){
-        ESet$s$1Instance other= (ESet$s$1Instance) p0;
-        if (other.ordering.equals(this.ordering)){
-            this.set.putAll(other.set);
-            return this;
-        }
-        other.set.keySet().forEach(k -> set.put(mapKey(ordering, extractKey(k)), p0));
+        ((ESet$s$1Instance) p0).unhashedObjects().forEach(this::mut$add$1);
         return this;
     }
     @Override public Object mut$removeIf$1(Object p0){
@@ -109,12 +103,8 @@ final class ESet$s$1Instance implements ESet$s$1{
     @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey), FlowMode.Seq); }
     @Override public Object mut$set$0(){ return Set$c$1Instance.of(ordering, drain()); }
     @Override public Object mut$distinctBy$1(Object p0){
-        reOrderHash((OrderHashBy$2ea$2) p0);
+        ordering= (OrderHashBy$2ea$2) p0;
+        drain().values().forEach(this::mut$add$1);
         return this;
-    }
-    private void reOrderHash(OrderHashBy$2ea$2 ordering){
-        LinkedHashMap<MapKey,Object> newSet= new LinkedHashMap<>();
-        set.forEach((k, v) -> newSet.put(mapKey(ordering, extractKey(k)), v));
-        this.set = newSet;
     }
 }
