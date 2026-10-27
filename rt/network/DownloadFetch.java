@@ -25,20 +25,19 @@ final class DownloadFetch{
     .build();
 
   static byte[] bytes(String url, long maxBytes){
-    String current= url;
     int redirectsLeft= maxRedirects;
     for (;;){
-      var uri= validate(current);
-      HttpResponse<InputStream> resp= send(current, uri);
+      var uri= validate(url);
+      HttpResponse<InputStream> resp= send(url, uri);
       int status= resp.statusCode();
       if (300 <= status && status < 400){
         closeQuietly(resp);
         var locationOpt= resp.headers().firstValue("Location");
-        if (locationOpt.isEmpty()){ throw downloadFailed(current, "redirect with no Location header"); }
+        if (locationOpt.isEmpty()){ throw downloadFailed(url, "redirect with no Location header"); }
         var location= locationOpt.get();
         if (redirectsLeft == 0){ throw tooManyRedirects(url); }
         redirectsLeft -= 1;
-        current = uri.resolve(location).toString();
+        url = redirect(url, uri, location);
         continue;
       }
       if (status < 200 || status >= 300){
@@ -51,11 +50,17 @@ final class DownloadFetch{
     }
   }
 
+  static String redirect(String url, URI uri, String location){
+    try{ return uri.resolve(new URI(location)).toASCIIString(); }
+    catch (URISyntaxException e){ throw downloadFailed(url, "redirect to a malformed Location: "+location); }
+  }
+
   static HttpResponse<InputStream> send(String url, URI uri){
     var req= HttpRequest.newBuilder(uri).timeout(responseTimeout).GET().build();
     try{ return client.send(req, HttpResponse.BodyHandlers.ofInputStream()); }
     catch (HttpTimeoutException e){ throw downloadTimedOut(url, responseTimeout.toMillis()); }
     catch (IOException e){ throw downloadFailed(url, e.toString()); }
+    catch (IllegalArgumentException e){ throw downloadFailed(url, "malformed response: "+e.getMessage()); }
     catch (InterruptedException e){
       Thread.currentThread().interrupt();
       throw downloadFailed(url, e.toString());
@@ -68,9 +73,7 @@ final class DownloadFetch{
   }
 
   static void checkContentLength(String url, HttpResponse<InputStream> resp, long maxBytes){
-    long contentLength;
-    try{ contentLength= resp.headers().firstValueAsLong("Content-Length").orElse(-1); }
-    catch (NumberFormatException e){ return; }
+    long contentLength= resp.headers().firstValueAsLong("Content-Length").orElse(-1);
     if (contentLength < 0){ return; }
     if (Long.compareUnsigned(contentLength, maxBytes) <= 0){ return; }
     closeQuietly(resp);
@@ -98,6 +101,7 @@ final class DownloadFetch{
     var scheme= uri.getScheme().toLowerCase(Locale.ROOT);
     if (!scheme.equals("http") && !scheme.equals("https")){ throw badScheme(url, uri.getScheme()); }
     if (uri.getHost() == null){ throw invalidUrl(url, "missing host"); }
+    if (uri.getPort() > 65535){ throw invalidUrl(url, "port out of range: "+uri.getPort()); }
     return uri;
   }
 
