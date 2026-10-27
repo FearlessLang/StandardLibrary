@@ -26,6 +26,7 @@ InfoFromStrRoundTripTests: Test {::
   .check{Infos.fromStr(_Infos.largeNested.str) .assertEq(_Infos.largeNested)}
   .check{Infos.fromStr(_Infos.wideFlat.str) .assertEq(_Infos.wideFlat)}
   .check{Infos.fromStr(Infos.map("", Infos.msg "x").str) .assertEq(Infos.map("", Infos.msg "x"))}
+  .check{Infos.fromStr(_Infos.largeNested.prettyStr) .assertEq(_Infos.largeNested)}
   }
 
 InfoFromStrErrorTests: Test {::

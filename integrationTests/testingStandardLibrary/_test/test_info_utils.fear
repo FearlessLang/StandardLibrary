@@ -90,6 +90,7 @@ InfoValidatorTests: Test {::
   .checkFalse{Infos.msg "A".validate{:: .isList & .isList .not}}
   .checkFalse{info.validate{:: > "enemies" .isList & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
   .checkTrue{info.validate{:: > "friends" .not .not .isList}}
+  .check{Infos.list(Infos.msg "hi").tryGetMsg .assertInfo{::.isMsg{::.contains `["hi"]`}}}
   }
 
 InfoExtractorTests: Test {::
