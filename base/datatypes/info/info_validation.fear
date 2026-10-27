@@ -56,140 +56,20 @@ InfoValidator: Sealed {
 
   .not: InfoValidator;
 
-  &: InfoValidator -> _ChainedInfoValidator {
-    .close -> this.close;
-    .left -> this;
-    .right -> InfoValidators#(this.close);
-    .combiner l, r -> l & r;
+  &: InfoValidator -> this.isValid.if {
+    .then -> InfoValidators#(this.close);
+    .else -> _SettledInfoValidator {.close -> this.close; .isValid -> False};
     };
 
-  |: InfoValidator -> _ChainedInfoValidator {
-    .close -> this.close;
-    .left -> this;
-    .right -> InfoValidators#(this.close);
-    .combiner l, r -> l | r;
+  |: InfoValidator -> this.isValid.if {
+    .then -> _SettledInfoValidator {.close -> this.close; .isValid -> True};
+    .else -> InfoValidators#(this.close);
     };
   }
 
-_ChainedInfoValidator: InfoValidator {
+_SettledInfoValidator: InfoValidator {
   .close: Info;
-  .left: InfoValidator;
-  .right: InfoValidator;
-  .combiner(Bool, Bool): Bool;
-  .isValid: Bool -> this.combiner(this.left.isValid, this.right.isValid);
-
-  > key -> _ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right > key
-    };
-
-  .where f -> Block#
-    .let right={this.right.where f}
-    .return{ _ChainedInfoValidator {
-      .close -> this.close;
-      .combiner a, b -> this.combiner(a,b);
-      .left -> this.left;
-      .right -> right
-      }};
-
-
-  .isMsg f -> _ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right.isMsg f
-    };
-
-  .isList f -> _ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right.isList f
-    };
-
-  .isMap f -> _ChainedInfoValidator {
-    .close -> this.close;
-    .combiner a, b -> this.combiner(a,b);
-    .left -> this.left;
-    .right -> this.right.isMap f
-    };
-
-  .isEmpty -> _ChainedInfoValidator {
-   .close -> this.close;
-   .combiner a, b -> this.combiner(a,b);
-   .left -> this.left;
-   .right -> this.right.isEmpty
-   };
-
-  .not -> _ChainedInfoValidator {
-   .close -> this.close;
-   .combiner a, b -> this.combiner(a,b);
-   .left -> this.left;
-   .right -> this.right.not
-   };
-  }
-
-_SuccessfulInfoValidator: InfoValidator {
-  /// The Base level info we are matching on, different from .matchLevel as it is the base we chain on.
-  /// Is an opt as the matchers produced by InfoExtractors may not have an info in them.
-  .close: Info;
-
-  .isValid: Bool -> True;
-  /// The info we are matching against - how far we have "descended" into info.
-  .matchLevel: Info -> this.close;
-
-  > key -> key.indexInto(this.matchLevel).match {
-    .some info -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> info; };
-    .empty -> _FailedInfoValidator {this.close};
-    };
-
-  .where f -> this.matchLevel.validate f .match {
-    .true -> this;
-    .false -> _FailedInfoValidator {this.close}
-    };
-
-  .isMsg fn -> this.matchLevel.matchWithDefault {
-    .msg m -> fn# m .match {
-      .true -> this;
-      .false -> _FailedInfoValidator {this.close};
-      };
-    .default -> _FailedInfoValidator {this.close};
-    };
-
-  .isList fn -> this.matchLevel.matchWithDefault {
-    .list l -> fn#(l) .match {
-      .true -> this;
-      .false -> _FailedInfoValidator {this.close};
-      };
-    .default -> _FailedInfoValidator {this.close}
-    };
-
-  .isMap fn -> this.matchLevel.matchWithDefault {
-    .map m -> fn#(m) .match {
-      .true -> this;
-      .false -> _FailedInfoValidator {this.close};
-      };
-    .default -> _FailedInfoValidator {this.close}
-    };
-
-  .isEmpty -> this.matchLevel.matchWithDefault {
-    .empty -> this;
-    .default -> _FailedInfoValidator {this.close};
-    };
-
-  .not -> _FailedInfoValidator {this.close};
-
-  &  -> _SuccessfulInfoValidator {this.close};
-
-  // note this uses the above or's as otherwise you just always ignore this
-  }
-
-_FailedInfoValidator: InfoValidator {
-  .close: Info;
-
-  .isValid -> False;
+  .isValid: Bool;
 
   > _ -> this;
   .where _ -> this;
@@ -199,9 +79,75 @@ _FailedInfoValidator: InfoValidator {
   .isMap _ -> this;
   .isEmpty -> this;
 
-  .not -> _SuccessfulInfoValidator {this.close};
+  .not -> this;
+  }
 
-  & -> this;
+_SuccessfulInfoValidator: InfoValidator {
+  /// The Base level info we are matching on, different from .matchLevel as it is the base we chain on.
+  /// Is an opt as the matchers produced by InfoExtractors may not have an info in them.
+  .close: Info;
 
-  |: InfoValidator -> _SuccessfulInfoValidator {this.close};
+  .negated: Bool -> False;
+  .isValid: Bool -> this.negated.not;
+  /// The info we are matching against - how far we have "descended" into info.
+  .matchLevel: Info -> this.close;
+  .fail: InfoValidator -> _FailedInfoValidator {.close -> this.close; .negated -> this.negated};
+
+  > key -> key.indexInto(this.matchLevel).match {
+    .some info -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> info; .negated -> this.negated };
+    .empty -> this.fail;
+    };
+
+  .where f -> this.matchLevel.validate f .match {
+    .true -> this;
+    .false -> this.fail
+    };
+
+  .isMsg fn -> this.matchLevel.matchWithDefault {
+    .msg m -> fn# m .match {
+      .true -> this;
+      .false -> this.fail;
+      };
+    .default -> this.fail;
+    };
+
+  .isList fn -> this.matchLevel.matchWithDefault {
+    .list l -> fn#(l) .match {
+      .true -> this;
+      .false -> this.fail;
+      };
+    .default -> this.fail
+    };
+
+  .isMap fn -> this.matchLevel.matchWithDefault {
+    .map m -> fn#(m) .match {
+      .true -> this;
+      .false -> this.fail;
+      };
+    .default -> this.fail
+    };
+
+  .isEmpty -> this.matchLevel.matchWithDefault {
+    .empty -> this;
+    .default -> this.fail;
+    };
+
+  .not -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> this.matchLevel; .negated -> this.negated.not };
+  }
+
+_FailedInfoValidator: InfoValidator {
+  .close: Info;
+
+  .negated: Bool -> False;
+  .isValid -> this.negated;
+
+  > _ -> this;
+  .where _ -> this;
+
+  .isMsg _ -> this;
+  .isList _ -> this;
+  .isMap _ -> this;
+  .isEmpty -> this;
+
+  .not -> _FailedInfoValidator {.close -> this.close; .negated -> this.negated.not};
   }
