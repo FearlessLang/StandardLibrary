@@ -113,7 +113,7 @@ final class _Picture extends AWidget implements Picture$5c$0{
     cv.restoreToCount(save);
   }
   @Override public Object mut$image$1(Object i){
-    var img= ((Image$1c$0Instance) i).image();
+    var img= ((Image$1c$0Instance) i).image;
     return reStyle(() -> { image = img; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
