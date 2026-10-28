@@ -3,6 +3,7 @@ package _base;
 import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Codec;
 import io.github.humbleui.skija.ColorAlphaType;
+import io.github.humbleui.skija.ColorSpace;
 import io.github.humbleui.skija.ColorType;
 import io.github.humbleui.skija.Data;
 import io.github.humbleui.skija.Image;
@@ -33,7 +34,7 @@ final class AssetImageRead{
   static Image decode(String path, byte[] bs, long maxPixels, Function<String,Error> err){
     try (var data= Data.makeFromBytes(bs); var codec= Codec.makeFromData(data); var bm= new Bitmap()){
       checkSize(path, codec.getWidth(), codec.getHeight(), maxPixels, err);
-      bm.allocPixels(new ImageInfo(codec.getWidth(), codec.getHeight(), ColorType.BGRA_8888, ColorAlphaType.PREMUL));
+      bm.allocPixels(new ImageInfo(codec.getWidth(), codec.getHeight(), ColorType.BGRA_8888, ColorAlphaType.PREMUL, ColorSpace.getSRGB()));
       codec.readPixels(bm);
       return Image.makeRasterFromBitmap(bm.setImmutable());//shares pixels, no copy
     }
