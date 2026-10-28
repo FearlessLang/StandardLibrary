@@ -87,6 +87,20 @@ GuiMenuTests: Test {::
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Opened four menus"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var started = {False}
+    .let[mut Slot[mut Pane]] inner = {Slots#[mut Pane]}
+    .do{Block#(f.modelFps(100, {:: .action{Block#
+      .if{started.get} .return{Void}
+      .do{started.set True}
+      .do{inner!.openMenu{:: .item{:: .text "Open"}}}
+      .return{Error.msg "Opened a menu below a widget of a collapsed section"}
+      }}), Void)}
+    .return{f.content.pane{:: .sections{:: .section.pane{::}.and.pane{:: .pane{:: .save inner}}}}}
+    }}).run{
+      .ok _ -> Error.msg "A model action always stops the Gui";
+      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Pane is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"}}.assertTrue{i};
+      }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedMenu#(s.gui)}).run{
       .ok _ -> Error.msg "Opening a menu in a closed window always fails";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "This Pane is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"}}.assertTrue{i};
