@@ -1,5 +1,7 @@
 package _base;
 
+import java.util.function.Consumer;
+
 import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Image;
@@ -39,28 +41,24 @@ final class Image$1c$0Instance implements Image$1c$0{
     if (v < 0 || v >= side){ throw Util.detErr("pixel " + what + " " + v + " is out of range; it must be between 0 and " + (side - 1)); }
     return (int) v;
   }
-  @Override public Object imm$paint$1(Object p){
-    try (var paint= new Paint().setAntiAlias(true); var surf= Surface.makeRaster(ImageInfo.makeN32Premul(image.getWidth(), image.getHeight()))){
+  @Override public Object imm$paint$1(Object p){ return painted(image.getWidth(), image.getHeight(), cv -> cv.drawImage(image, 0, 0), p); }
+  private static Image$1c$0Instance painted(int w, int h, Consumer<Canvas> start, Object p){
+    try (var paint= new Paint().setAntiAlias(true); var surf= Surface.makeRaster(ImageInfo.makeN32Premul(w, h))){
       var cv= surf.getCanvas();
-      cv.drawImage(image, 0, 0);
-      painted(cv, (Painter$5c$0) p, paint);
+      start.accept(cv);
+      var g= new CGraphicsCtx(cv, Scopes.time(0), width(w), height(h), paint, (Color$1c$0) Color$1c$0.instance);
+      ((Painter$5c$0) p).imm$run$1(g);
+      var outside= g.outside("an image", "image", w, h);
+      if (outside != null){ System.err.print("Warning: "+outside+"\n"); }
       return new Image$1c$0Instance(surf.makeImageSnapshot());
     }
   }
-  private void painted(Canvas cv, Painter$5c$0 p, Paint paint){
-    var g= new CGraphicsCtx(cv, Scopes.time(0), width(image.getWidth()), height(image.getHeight()), paint, (Color$1c$0) Color$1c$0.instance);
-    p.imm$run$1(g);
-    var outside= g.outside("an image", "image", image.getWidth(), image.getHeight());
-    if (outside != null){ System.err.print("Warning: "+outside+"\n"); }
-  }
-  static Image$1c$0Instance blank(Object w, Object h, Object background){
+  static ImageBuilder$4sg$0 builder(Object w, Object h, Object background){
     var iw= widthVal(w);
     var ih= heightVal(h);
     checkPixels(iw, ih);
-    try (var surf= Surface.makeRaster(ImageInfo.makeN32Premul(iw, ih))){
-      surf.getCanvas().clear(Sk.color((Color$1c$0) background));
-      return new Image$1c$0Instance(surf.makeImageSnapshot());
-    }
+    var bg= Sk.color((Color$1c$0) background);
+    return new ImageBuilder$4sg$0(){ @Override public Object imm$paint$1(Object p){ return painted(iw, ih, cv -> cv.clear(bg), p); } };
   }
 
   private Image$1c$0Instance scaled(int w, int h){

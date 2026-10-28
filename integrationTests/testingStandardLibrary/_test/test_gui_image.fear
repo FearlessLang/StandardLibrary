@@ -10,7 +10,7 @@ GuiImageTests: Test {::
   .checkDetErr({::.isMsg{:: == "image 20000 x 20000 has 400000000 pixels; it must have <= 268435456"}}, {base.IconsConflict.consumeImage("imageAreaBig").scale(Width#20000, Height#20000)})
   .checkDetErr({::.isMsg{:: == "image 32767 x 16384 has 536854528 pixels; it must have <= 268435456"}}, {base.IconsConflict.consumeImage("toWidthAreaBig").scale(Width#2, Height#1).scaleToWidth 32767})
   .check{base.IconsConflict.consumeImage("imageWidthMax").scale(Width#32767, Height#1).width .assertEq(Width#32767)}
-  .check{base.Images#(Width#30, Height#20, Color.transparent).width .assertEq(Width#30)}
+  .check{base.Images#(Width#30, Height#20, Color.transparent).paint{g -> g}.width .assertEq(Width#30)}
   .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.color(Color.dangerTomato).position(X#(+20), Y#(-10)).oval(Width#40, Height#40)}.height .assertEq(Height#20)}
   .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.image(base.IconsConflict.consumeImage("paintImage").scale(Width#10, Height#10)).position(X#(+5), Y#(+5)).line(X#(+25), Y#(+15))}.scale(Width#60, Height#40).width .assertEq(Width#60)}
   .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.position(X#(+5), Y#(+5)).image(base.IconsConflict.consumeImage("paintImageScaled"), Width#10, Height#10)}.width .assertEq(Width#30)}
@@ -21,10 +21,10 @@ GuiImageTests: Test {::
   .checkDetErr({::.isMsg{:: == "Height[28] Height[17]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg((g.uTextRoom("".u "005A 030D 030D 030D 0316 0316 0316").height.str) + " " + (g.uTextRoom("".u "005A 030D 030D 030D 0316 0316 0316").baseline.str))}})
   .checkDetErr({::.isMsg{:: == "[Fearless Fearless][Fearless][][a]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.textLines("Fearless Fearless Fearless" | "" | "a", Width#100).flow.map{l -> "["+l+"]"}.join "")}})
   .checkDetErr({::.isMsg{:: == "[F][e][a][r][l][e][s][s]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.textLines("Fearless", Width#0).flow.map{l -> "["+l+"]"}.join "")}})
-  .checkDetErr({::.isMsg{:: == "Color[Red[245], Green[245], Blue[245], Alpha[255]]"}}, {Error.msg[Str](base.Images#(Width#30, Height#20, Color.ghostWhite).color(X#(+29), Y#(+19)).str)})
+  .checkDetErr({::.isMsg{:: == "Color[Red[245], Green[245], Blue[245], Alpha[255]]"}}, {Error.msg[Str](base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g}.color(X#(+29), Y#(+19)).str)})
   .checkDetErr({::.isMsg{:: == "Color[Red[230], Green[64], Blue[48], Alpha[255]] Color[Red[245], Green[245], Blue[245], Alpha[255]]"}}, {Error.msg[Str](ImagePixels#(base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.color(Color.dangerTomato).position(X#(+2), Y#(+3)).rect(Width#4, Height#5)}))})
-  .checkDetErr({::.isMsg{:: == "pixel x 30 is out of range; it must be between 0 and 29"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).color(X#(+30), Y#(+0))})
-  .checkDetErr({::.isMsg{:: == "pixel y -1 is out of range; it must be between 0 and 19"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).color(X#(+0), Y#(-1))})
+  .checkDetErr({::.isMsg{:: == "pixel x 30 is out of range; it must be between 0 and 29"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g}.color(X#(+30), Y#(+0))})
+  .checkDetErr({::.isMsg{:: == "pixel y -1 is out of range; it must be between 0 and 19"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g}.color(X#(+0), Y#(-1))})
   .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.position(X#(+2), Y#(+2)).text("ab", Width#26, Height#16)}.width .assertEq(Width#30)}
   .checkDetErr({::.isMsg{:: == "Color[Red[0], Green[0], Blue[0], Alpha[255]] Color[Red[230], Green[64], Blue[48], Alpha[255]] X[+0] Y[+0] X[+7] Y[-3] Height[12] Height[24]"}},{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg((g.color).str + " " + ((g.color(Color.dangerTomato).color).str) + " " + ((g.positionX).str) + " " + ((g.positionY).str) + " " + ((g.position(X#(+7), Y#(-3)).positionX).str) + " " + ((g.positionY).str) + " " + ((g.textHeight).str) + " " + ((g.textHeight(24).textHeight).str))}})
   .check{base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> g.textHeight 16 .position(X#(+2), Y#(+2)).text "Fearless" .position(X#(-5), Y#(+15)).uText("ab".u)}.width .assertEq(Width#30)}
