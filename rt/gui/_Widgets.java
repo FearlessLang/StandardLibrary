@@ -642,6 +642,7 @@ final class _Frame implements Frame$1c$0{
     var b= onEdtAndWait(() -> make.apply(this));
     ((Scope$1c$1) scope).mut$run$1(b);
     onEdtAndWait(() -> {
+      into.change();
       // Border slots are replaceable: a second .north evicts the first. The
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
@@ -651,7 +652,6 @@ final class _Frame implements Frame$1c$0{
         mouse.detached((SkComponent) old);
         parent.remove(old);
       }
-      into.change();
       parent.add(b.component, where);
       into.grow(b.width + into.edgeW(), b.height + into.edgeH());
       b.changeable = false;
@@ -702,6 +702,7 @@ final class _Frame implements Frame$1c$0{
       top.component.validate();
       mouse.rehover();
     }
+    if (surface.getWidth() != renderLogicalW || surface.getHeight() != renderLogicalH){ mouse.rehover(); }
     render();
     // Paint synchronously: after this tick the pixels on screen and the
     // bounds used for hit testing agree for every subsequent mouse event.

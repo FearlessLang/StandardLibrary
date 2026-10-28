@@ -273,6 +273,7 @@ final class SkMouse extends MouseAdapter{
       if (t instanceof _Sections s && s.click(local(s, pressAt), local(s, p))){ return; }
       if (clicks == 2 && fire(t, DoubleClicked, p)){ return; }
       if (fire(t, Clicked, p)){ return; }
+      if (t.handlers.containsKey(DoubleClicked)){ return; }
     }
   }
 

@@ -370,6 +370,7 @@ final class Stage extends MouseAdapter{
   @Override public void mousePressed(MouseEvent e){
     count(e);
     if (e.getButton() != MouseEvent.BUTTON1 || !inCorner(e.getPoint())){ forward(e); return; }
+    owner.menus.close(0);
     owner.pressed(null);
     if (clicks == 2 || Desk.managed){ return; }
     pressAt = e.getLocationOnScreen();
