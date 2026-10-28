@@ -36,7 +36,7 @@ public final class Util{
     halter.start();
     Runtime.getRuntime().exit(code);
   }
-  private static void sleepUninterruptibly(long millis){
+  static void sleepUninterruptibly(long millis){
     boolean interrupted= false;
     try{
       long end= System.nanoTime()+java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(millis);

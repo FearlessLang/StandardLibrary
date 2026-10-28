@@ -144,10 +144,7 @@ public final class AppLog{
     for (int i= 0; i < maxStampRetries; i += 1){
       var dst= rotatedPath(src, stampNow());
       try{ Files.move(src, dst); if (starting){ appendOrThrow(dst); } return; }
-      catch (FileAlreadyExistsException e){ 
-        try{ Thread.sleep(100); }
-        catch (InterruptedException _){}//refuse to interrupt during log cleanup
-      }
+      catch (FileAlreadyExistsException e){ Util.sleepUninterruptibly(100); }//refuse to interrupt during log cleanup
     }
     throw new IOException(" OS timestamps unresponsive when renaming "+src);
   }
