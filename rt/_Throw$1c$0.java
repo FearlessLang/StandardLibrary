@@ -26,12 +26,12 @@ public interface _Throw$1c$0{
     var dtId= new DataTypeBy$17m$3(){ @Override public Object imm$$hash$1(Object p0){ return p0; } };
     return list.read$info$1(dtId);
   }
-  static Set<String> machinery= Set.of("errors.fear", "action.fear", "attenuation.fear", "_Throw$1c$0.java", "Try$c$0.java", "_CapTry$2s$0.java");
+  static Set<String> machinery= Set.of("errors.fear", "action.fear", "attenuation.fear");
   static Set<String> rcs= Set.of("imm", "mut", "read", "iso", "readH", "mutH");
   static StackFrame$174$0 frameData(StackTraceElement e){
     var cn= e.getClassName();
     int dot= cn.indexOf('.');
-    if (dot < 0 || cn.indexOf('.', dot + 1) != -1 || e.getFileName() == null || machinery.contains(e.getFileName())){ return null; }
+    if (dot < 0 || cn.indexOf('.', dot + 1) != -1 || e.getFileName() == null || e.getFileName().endsWith(".java") || machinery.contains(e.getFileName())){ return null; }
     var ty= cn.substring(dot + 1).split("\\$");
     var meth= fmtMethodName(e.getMethodName());
     if (ty.length < 3 || meth == null){ return null; }

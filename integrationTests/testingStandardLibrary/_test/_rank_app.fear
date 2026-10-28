@@ -147,6 +147,7 @@ MyTests:UnitTests{::
   .test InfoValidatorTests
   .test InfoExtractorTests
   .test TestBlock
+  .test TestCapabilities
   .test TestInfoFromStr
   .test TestDungeon
   .test TestTryGet
