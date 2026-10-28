@@ -43,7 +43,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///
 ///Use by defining a capture-free singleton log:
 ///```
-///PointLog: InMemoryLog[Point]{"PointLog"}
+///PointLog: InMemoryLog[Point]{}
 ///...//usage
 ///PointLog.log(myPoint)
 ///..//later, reading the log and confirming is what we expect
@@ -52,8 +52,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///
 ///In memory logs are particularly useful for unit testing of immutable computation via mock objects.
 ///
-///The name is only diagnostic, to be used for debugging, test reports, and failure messages.
-///Two different logs with the same name do not interfere with each other.
+///The name of the log is the name of its type (see base.Named), to be used for debugging, test reports, and failure messages.
 ///
 ///The log is kept in runtime memory. Calling .log appends a value to the
 ///current in-memory contents of this log.
@@ -63,9 +62,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///
 ///A concrete log type cannot have generic parameters: this is a compile time error.
 ///
-InMemoryLog[T]: CaptureFree{
-  .name: Str;
-  
+InMemoryLog[T]: CaptureFree, Named{
   ///Submits s to an in memory log that requires a capability to be read.
   .log(s: T): Void -> _Magic!;
   }
@@ -74,13 +71,12 @@ InMemoryLog[T]: CaptureFree{
 ///
 ///Use by defining a capture-free singleton log:
 ///```
-///PkgLog: FileLog{"myFeature"}
+///PkgLog: FileLog{}
 ///...//usage
 ///PkgLog.log("something happened")
 ///```
 ///
-///The name is only diagnostic, exactly like InMemoryLog's -- it never picks
-///the file. The file is named after the type, the way an asset file names its
+///The file is named after the type, the way an asset file names its
 ///type, read backwards: PkgLog writes to .out/logs/_<package>/pkg_log.log.
 ///There is one folder per package, named like the folder of that package
 ///(base.Log and base.UnitTestLog write in _base, as log.log and
@@ -104,8 +100,7 @@ InMemoryLog[T]: CaptureFree{
 ///
 ///See also: base.Log (the single fixed shared log, no declaration needed),
 ///base.InMemoryLog (in memory instead of a file, for unit testing).
-FileLog: CaptureFree{
-  .name: Str;
+FileLog: CaptureFree, Named{
   .log(s: read ToStr): Void -> _Magic!;
   }
 CapLogReader[T]: ToIso[CapLogReader[T]], WidenTo[CapLogReader[T]]{
