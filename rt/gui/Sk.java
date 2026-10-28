@@ -397,6 +397,7 @@ interface Sk{
       int to= fit(s, whole, words, from, size, above, below, ww);
       if (to == from){ to = fit(s, whole, clusters, from, size, above, below, ww); }
       if (to == from){ to = clusters.following(from); }
+      while (to < s.length() && Character.isWhitespace(s.charAt(to))){ to += 1; }
       res.add(to);
       from = to;
     }
@@ -418,7 +419,7 @@ interface Sk{
   }
 
   static int trimmed(String s, int from, int to){
-    while (to > from && s.charAt(to - 1) == ' '){ to -= 1; }
+    while (to > from && Character.isWhitespace(s.charAt(to - 1))){ to -= 1; }
     return to;
   }
 
