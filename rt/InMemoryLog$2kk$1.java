@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface InMemoryLog$2kk$1 extends CaptureFree$2dk$0{
   default Object imm$name$0(){
-    throw new AssertionError("Uncallable method: InMemoryLog$2kk$1.imm$name$0"+this.getClass().getName());
+    throw new AssertionError("Uncallable method: InMemoryLog$2kk$1.imm$name$0 on "+this.getClass().getName());
   }
   ArrayList<Object> _log();
   default Object imm$log$1(Object p0){
