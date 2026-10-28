@@ -169,9 +169,8 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   void handle(SectionHandler$j0g$0 h, Section s){
     var self= this;
-    var i= n(sections.indexOf(s));
     frame.frame.queue.submit(SkMouse.whileShown(s.title, new MF$7$1(){ @Override public Object mut$$hash$0(){
-      return h.mut$$hash$2(self, i);
+      return h.mut$$hash$2(self, frame.onEdtAndWait(() -> n(sections.indexOf(s))));
     }}));
   }
   void expand(Section s){
