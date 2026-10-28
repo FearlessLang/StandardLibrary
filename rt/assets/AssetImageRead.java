@@ -6,8 +6,10 @@ import io.github.humbleui.skija.ColorAlphaType;
 import io.github.humbleui.skija.ColorSpace;
 import io.github.humbleui.skija.ColorType;
 import io.github.humbleui.skija.Data;
+import io.github.humbleui.skija.EncodedOrigin;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
+import io.github.humbleui.skija.Surface;
 
 import java.util.function.Function;
 
@@ -33,10 +35,21 @@ final class AssetImageRead{
   //are pure blits.
   static Image decode(String path, byte[] bs, long maxPixels, Function<String,Error> err){
     try (var data= Data.makeFromBytes(bs); var codec= Codec.makeFromData(data); var bm= new Bitmap()){
-      checkSize(path, codec.getWidth(), codec.getHeight(), maxPixels, err);
-      bm.allocPixels(new ImageInfo(codec.getWidth(), codec.getHeight(), ColorType.BGRA_8888, ColorAlphaType.PREMUL, ColorSpace.getSRGB()));
+      var origin= codec.getEncodedOrigin();
+      int w= codec.getWidth();
+      int h= codec.getHeight();
+      int uprightW= origin.swapsWidthHeight() ? h : w;
+      int uprightH= origin.swapsWidthHeight() ? w : h;
+      checkSize(path, uprightW, uprightH, maxPixels, err);
+      var info= new ImageInfo(w, h, ColorType.BGRA_8888, ColorAlphaType.PREMUL, ColorSpace.getSRGB());
+      bm.allocPixels(info);
       codec.readPixels(bm);
-      return Image.makeRasterFromBitmap(bm.setImmutable());//shares pixels, no copy
+      var image= Image.makeRasterFromBitmap(bm.setImmutable());//shares pixels, no copy
+      if (origin == EncodedOrigin.TOP_LEFT){ return image; }
+      try (image; var surf= Surface.makeRaster(info.withWidthHeight(uprightW, uprightH))){
+        surf.getCanvas().concat(origin.toMatrix(uprightW, uprightH)).drawImage(image, 0, 0);
+        return surf.makeImageSnapshot();
+      }
     }
     catch (RuntimeException re){
       if (re.getClass().getName().startsWith("_base.")){ throw re; }
