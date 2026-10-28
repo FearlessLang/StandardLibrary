@@ -2,6 +2,7 @@ package _base;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
@@ -21,9 +22,10 @@ final class Norm implements Norm$o$1{
 final class Entry{
   final CompletableFuture<Object> ready= new CompletableFuture<>();
   volatile boolean broken= false;
-  public Object computeNow(Supplier<Object> s){
+  public Object computeNow(Supplier<Object> s, Runnable forget){
     try{ var res= s.get(); ready.complete(res); return res; }
-    catch (Throwable t){ ready.completeExceptionally(t); throw t; }//Compiles in Java 24
+    catch (Deterministic d){ ready.completeExceptionally(d); throw d; }
+    catch (Throwable t){ forget.run(); ready.completeExceptionally(t); throw t; }//Compiles in Java 24
   }
   public Object joinWait(long time, Supplier<Object> s){
     if (!ready.isDone() && broken){ return sequential(s); }
@@ -32,7 +34,10 @@ final class Entry{
       broken = true;
       return sequential(s);
     }
-    catch (ExecutionException ex){ return sneakyThrow(ex.getCause()); }
+    catch (ExecutionException ex){
+      if (ex.getCause() instanceof Deterministic d){ throw d; }
+      return s.get();
+    }
     catch (InterruptedException ex){
       Thread.currentThread().interrupt();
       throw new RuntimeException(ex);
@@ -40,23 +45,17 @@ final class Entry{
     }
   private Object sequential(Supplier<Object> s){
     var res= s.get();
-    if (!ready.isDone()){ return res; }
-    try{ return ready.get(); }
-    catch (ExecutionException ex){ return sneakyThrow(ex.getCause()); }
-    catch (InterruptedException ex){
-      Thread.currentThread().interrupt();
-      throw new RuntimeException(ex);
-    }//return the more normalized if possible
+    if (ready.state() != Future.State.SUCCESS){ return res; }
+    return ready.resultNow();//return the more normalized if possible
   }
-  @SuppressWarnings("unchecked")
-  private static <E extends Throwable,T> T sneakyThrow(Throwable t) throws E{ throw (E)t; }
 }
 interface Cache{
   Entry former(Object k, Entry candidate);
+  void forget(Object k, Entry e);
   default Object get(Object k, Supplier<Object> f, long time){
     var fresh= new Entry();
     var e= former(k, fresh);
-    if (e == null){ return fresh.computeNow(f); }
+    if (e == null){ return fresh.computeNow(f, () -> forget(k, fresh)); }
     return e.joinWait(time, f);
   }
 }
