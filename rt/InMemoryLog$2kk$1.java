@@ -14,13 +14,12 @@ public interface InMemoryLog$2kk$1 extends CaptureFree$2dk$0{
   }
   default Object _readCopy(){
     var log= _log();
-    if (log.isEmpty()){ return List$o$1.instance; }
-    synchronized (log){ return new List$o$1Instance(List.copyOf(log)); }
+    synchronized (log){ return log.isEmpty() ? List$o$1.instance : new List$o$1Instance(List.copyOf(log)); }
   }
   default Object _consumeCopy(){
     var log= _log();
-    if (log.isEmpty()){ return List$o$1.instance; }
     synchronized (log){
+      if (log.isEmpty()){ return List$o$1.instance; }
       var res= new List$o$1Instance(List.copyOf(log));
       log.clear();
       return res;
