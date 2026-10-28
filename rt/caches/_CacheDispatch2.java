@@ -1,5 +1,6 @@
 package _base;
 interface _CacheDispatch2 extends _base.CacheHandler$4sg$0{
+  default Object imm$_uniqueCache$0(){ return _base.Void$o$0.instance; }
   default Object imm$$hash$2(Object p0, Object p1){
     throw new AssertionError("Uncallable method: imm$$hash$2 on "+this.getClass().getName());
   }
