@@ -103,12 +103,13 @@ RevokableSystem: { #(r: mut Revocation, u: mut System): mut System -> {'s
   .close -> s;
   }}
 RevokableTry: { #(r: mut Revocation, u: mut CapTry): mut CapTry -> {'s
-  #(f) -> Block#(r#, u#(f));
-  #(d, f) -> Block#(r#, u#(d, f));
+  #(f) -> Block#(r#, _RevokableAction#(r, u#(f)));
+  #(d, f) -> Block#(r#, _RevokableAction#(r, u#(d, f)));
   .currentStackTrace -> Block#(r#, u.currentStackTrace);
   .iso -> RevokableTry#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+_RevokableAction: { #[R:*](r: mut Revocation, u: mut Action[R]): mut Action[R] -> {m -> Block#(r#, u.run m)} }
 RevokableOutput: { #(r: mut Revocation, u: mut CapOutput): mut CapOutput -> {'s
   .print x -> Block#(r#, u.print x);
   .println x -> Block#(r#, u.println x);
