@@ -153,4 +153,5 @@ MyTests:UnitTests{::
   .test TestFlowDesign
   .test TestMaxShapes
   .test TestAttenuation
+  .test TestTryErrors
   }

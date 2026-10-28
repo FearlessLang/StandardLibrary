@@ -1,0 +1,7 @@
+TestTryErrors: Test {::
+  .checkWithSys{sys -> Block#
+    .let[mut CapRevocationRoot] root= {sys.revocation}
+    .do{root.start}
+    .return{RevokableSystem#(root, sys).try.currentStackTrace.getFirst.fileName.assertEq "_test/test_try_errors.fear"}
+    }
+  }
