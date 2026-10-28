@@ -118,8 +118,8 @@ final class _Picture extends AWidget implements Picture$5c$0{
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
   @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }
-  @Override public Object mut$width$p1$1(Object w){ byHeight = false; return super.mut$width$p1$1(w); }
-  @Override public Object mut$height$p1$1(Object h){ byHeight = true; return super.mut$height$p1$1(h); }
+  @Override public Object mut$width$p1$1(Object w){ return reStyle(extent((WidthNat$as$0) w, "width"), n -> { insetsFit("width " + n, left, right, top, bottom, n, height); width = n; byHeight = false; }); }
+  @Override public Object mut$height$p1$1(Object h){ return reStyle(extent((HeightNat$lg$0) h, "height"), n -> { insetsFit("height " + n, left, right, top, bottom, width, n); height = n; byHeight = true; }); }
 }
 
 final class _Pane extends AContainer implements Pane$o$0{
