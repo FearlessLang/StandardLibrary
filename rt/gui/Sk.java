@@ -509,15 +509,17 @@ interface Sk{
 
   static Image scaled(Image src, int w, int h){
     var s= src;
-    while (s.getWidth() / 2 >= w && s.getHeight() / 2 >= h){
-      var t= pass(s, s.getWidth() / 2, s.getHeight() / 2, SamplingMode.LINEAR);
+    while (s.getWidth() / 2 >= w || s.getHeight() / 2 >= h){
+      var t= pass(s, half(s.getWidth(), w), half(s.getHeight(), h), SamplingMode.LINEAR);
       if (s != src){ s.close(); }
       s = t;
     }
-    var res= pass(s, w, h, SamplingMode.MITCHELL);
+    var res= pass(s, w, h, SamplingMode.CATMULL_ROM);
     if (s != src){ s.close(); }
     return res;
   }
+
+  private static int half(int side, int goal){ return side / 2 >= goal ? side / 2 : side; }
 
   static Image pass(Image src, int w, int h, SamplingMode m){
     try (var surf= Surface.makeRaster(ImageInfo.makeN32Premul(w, h))){
