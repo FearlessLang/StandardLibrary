@@ -58,8 +58,6 @@ final class _TextArea extends AEditText implements TextArea$aw$0{
       boolean last= follow || scrollY >= maxScrollY();
       int n= buf.length();
       program(n, n, s, caret, anchor);
-      caret = snap(caret);
-      anchor = snap(anchor);
       follow = last;
     });
   }
@@ -137,10 +135,14 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   @Override public Object mut$caret$1(Object p){ return onEdt(() -> caretPainter = (CaretPainter$4sg$0) p); }
 
   void program(int at, int end, String s, int c, int a){
-    var step= new Step(at, buf.substring(at, end), s, caret, anchor, c, a);
+    var removed= buf.substring(at, end);
+    int caretBefore= caret;
+    int anchorBefore= anchor;
     buf.replace(at, end, s);
-    caret = c;
-    anchor = a;
+    caret = snap(c);
+    anchor = snap(a);
+    var step= new Step(at, removed, s, caretBefore, anchorBefore, caret, anchor);
+    moved();
     redo.clear();
     if (clearsUndo){ undo.clear(); }
     else{ undo.add(step); }
@@ -305,8 +307,9 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   }
 
   boolean edit(int a, int b, String s){
-    if (!editable || a == b && s.isEmpty()){ return false; }
+    if (!editable){ return false; }
     int c= a + s.length();
+    if (buf.substring(a, b).equals(s)){ return moveTo(c, false); }
     var step= new Step(a, buf.substring(a, b), s, caret, anchor, c, c);
     undo.add(step);
     redo.clear();
@@ -346,7 +349,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   }
   boolean copy(){
     if (caret == anchor){ return false; }
-    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(buf.substring(selA(), selB())), null);
+    try{ Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(buf.substring(selA(), selB())), null); }
+    catch (IllegalStateException _){}
     return false;
   }
   boolean cut(){
@@ -437,8 +441,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     var c= Toolkit.getDefaultToolkit().getSystemClipboard();
     String s;
     try{ s= c.isDataFlavorAvailable(DataFlavor.stringFlavor) ? (String) c.getData(DataFlavor.stringFlavor) : null; }
-    catch (IllegalStateException _){ s= null; }
-    catch (UnsupportedFlavorException | IOException e){ throw new Error("Broken Environment", e); }
+    catch (IllegalStateException | UnsupportedFlavorException | IOException _){ s= null; }
     if (s != null){ input(s); }
   }
 
