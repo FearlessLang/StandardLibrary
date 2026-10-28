@@ -6,8 +6,8 @@ use base.Str as Str;
 use base.InMemoryLog as InMemoryLog;
 use base.FileLog as FileLog;
 
-Steps: InMemoryLog[Str]{"steps"}
-PkgLog: FileLog{"logging"}
+Steps: InMemoryLog[Str]{}
+PkgLog: FileLog{}
 
 LoggingExample: UnitTests {
   .tests t-> t.checkWithSys{sys-> Block#

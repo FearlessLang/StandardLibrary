@@ -53,7 +53,7 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 /// ```
 /// Example using logs:
 /// ```
-/// Events:InMemoryLog[Event]{"Events"}
+/// Events:InMemoryLog[Event]{}
 ///...
 /// .checkWithSys { sys -> Block#
 ///   .let log=sys.readLog(Events);
