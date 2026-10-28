@@ -1,6 +1,12 @@
 _CapNoMount: base.DataRead{}
+_CapManagerProbe: base.InfoMain{sys, arg -> Block#(sys.manager, arg)}
+_CapQuitProbe: base.InfoMain{sys, arg -> Block#(sys.manager.quit, arg)}
 _CapFails: base.InfoMain{sys, arg -> Error.msg "the child fails"}
 TestCapabilities: Test {::
+  .checkWithSys{sys -> sys.try#(base.NoManager#(sys).iso.close, {s -> s.process.run(_CapManagerProbe, base.Infos.msg "", {})})
+    .assertInfo{:: > "msg" .isMsg{::.contains "NoManager: System.manager is revoked."}}}
+  .checkWithSys{sys -> sys.try#(base.NoManagerQuit#(sys).iso.close, {s -> s.process.run(_CapQuitProbe, base.Infos.msg "", {})})
+    .assertInfo{:: > "msg" .isMsg{::.contains "NoManagerQuit: CapManager.quit is revoked."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> Block#(s.dataRead(_CapNoMount), Void)})
     .run{.ok _ -> ""; .info i -> i.str}.contains(".java").assertFalse}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.process.run(_CapFails, base.Infos.msg "", {})})
