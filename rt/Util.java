@@ -160,10 +160,10 @@ public final class Util{
     try{ var res= r.get(); endMarker(); _CapProcess$18g$0.result("ok", res instanceof Info$o$0 i ? i : null); return true; }
     catch (Deterministic d){ uncaught("det", d.i, d); }
     catch (NonDeterministic d){ uncaught("nondet", d.i, d); }
-    catch (Throwable t){ t.printStackTrace(); _CapProcess$18g$0.result("nondet", (Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t)))); }
+    catch (Throwable t){ uncaught("nondet", (Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t))), t); }
     return false;
   }
-  private static void uncaught(String kind, Info$o$0 i, RuntimeException d){
+  private static void uncaught(String kind, Info$o$0 i, Throwable d){
     if (_CapProcess$18g$0.result(kind, (Info$o$0)_CapTry$2s$0.addStackInfo(i, d))){ return; }
     printInfo(i, d);
   }
@@ -171,7 +171,7 @@ public final class Util{
     var m= System.getProperty("fearless.endMarker");
     if (m != null){ System.out.print(m+"\n"); }
   }
-  public static void printInfo(Info$o$0 i, RuntimeException d){
+  public static void printInfo(Info$o$0 i, Throwable d){
     printInfoMsg("", "", i);
     var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
     map.entrySet().stream()
