@@ -99,7 +99,7 @@ final class SkMenus{
     Rectangle track(){ return new Rectangle(box.x + box.width - 3 - AWidget.bar, box.y + 4, AWidget.bar, box.height - 8); }
     Rectangle thumb(){
       var t= track();
-      int size= Math.min(t.height, Math.max(4 * AWidget.bar, (int) ((long) t.height * box.height / content)));
+      int size= AWidget.thumbLength(t.height, box.height, content);
       int at= (int) ((long) (t.height - size) * scroll[0] / (content - box.height));
       return new Rectangle(t.x, t.y + at, t.width, size);
     }

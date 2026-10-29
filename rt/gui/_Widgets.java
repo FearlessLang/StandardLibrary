@@ -394,10 +394,11 @@ abstract class AWidget implements Widget$2o$1{
     int length= vert ? t.height : t.width;
     int view= vert ? viewH() : viewW();
     int content= Math.max(view, vert ? contentH : contentW);
-    int size= Math.min(length, Math.max(4 * bar, (int) ((long) length * view / Math.max(1, content))));
+    int size= thumbLength(length, view, content);
     int at= (int) ((long) (length - size) * (vert ? scrollY : scrollX) / Math.max(1, content - view));
     return vert ? new Rectangle(t.x, t.y + at, bar, size) : new Rectangle(t.x + at, t.y, size, bar);
   }
+  static int thumbLength(int length, int view, int content){ return Math.min(length, Math.max(Math.min(4 * bar, length / 2), (int) ((long) length * view / Math.max(1, content)))); }
   int scrollFor(boolean vert, int thumbAt){
     var t= track(vert);
     int size= vert ? thumb(vert).height : thumb(vert).width;
