@@ -298,12 +298,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     return moveTo(ctrl ? buf.length() : v.wrapped() ? prev(v.end()) : v.end(), extend);
   }
   boolean selectAll(){
-    caret = buf.length();
     anchor = 0;
-    goalX = -1;
-    moved();
-    showCaret();
-    return false;
+    return moveTo(buf.length(), true);
   }
 
   boolean edit(int a, int b, String s){

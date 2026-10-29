@@ -114,8 +114,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       y += t.height + heightGap;
       if (!s.expanded){ continue; }
       var c= s.content.own();
-      int cw= s.content.fill ? Math.max(c.width, w) : c.width;
-      s.content.component.setBounds(left + (w - cw) / 2, y, cw, c.height);
+      MutableBorderLayout.place(s.content.component, left, y, w, c.height, true, false);
       y += c.height + heightGap;
     }
   }
@@ -160,11 +159,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   boolean click(Point press, Point release){
     var p= part(press);
     if (p == null || !p.equals(part(release))){ return false; }
-    if (p.x()){
-      handle(onClose, p.s());
-      return true;
-    }
-    handle(onTitleClick, p.s());
+    handle(p.x() ? onClose : onTitleClick, p.s());
     return true;
   }
   void handle(SectionHandler$j0g$0 h, Section s){
