@@ -34,7 +34,7 @@ final class AssetImageRead{
   //machine and JDK. Eager decode: errors surface here, at load; draws later
   //are pure blits.
   static Image decode(String path, byte[] bs, long maxPixels, Function<String,Error> err){
-    try (var data= Data.makeFromBytes(bs); var codec= Codec.makeFromData(data); var bm= new Bitmap()){
+    try (var data= Data.makeFromBytes(bs); var codec= codec(path, data, err); var bm= new Bitmap()){
       var origin= codec.getEncodedOrigin();
       int w= codec.getWidth();
       int h= codec.getHeight();
@@ -43,7 +43,8 @@ final class AssetImageRead{
       checkSize(path, uprightW, uprightH, maxPixels, err);
       var info= new ImageInfo(w, h, ColorType.BGRA_8888, ColorAlphaType.PREMUL, ColorSpace.getSRGB());
       bm.allocPixels(info);
-      codec.readPixels(bm);
+      try{ codec.readPixels(bm); }
+      catch (IllegalArgumentException _){ throw badImage(path, "the image data is damaged, or ends before the image does", err); }
       var image= Image.makeRasterFromBitmap(bm.setImmutable());//shares pixels, no copy
       if (origin == EncodedOrigin.TOP_LEFT){ return image; }
       try (image; var surf= Surface.makeRaster(info.withWidthHeight(uprightW, uprightH))){
@@ -51,10 +52,10 @@ final class AssetImageRead{
         return surf.makeImageSnapshot();
       }
     }
-    catch (RuntimeException re){
-      if (re.getClass().getName().startsWith("_base.")){ throw re; }
-      throw badImage(path, "image could not be decoded: "+re, err);
-    }
+  }
+  static Codec codec(String path, Data data, Function<String,Error> err){
+    try{ return Codec.makeFromData(data); }
+    catch (IllegalArgumentException _){ throw badImage(path, "the data is not an image in a format that can be read", err); }
   }
 
   static void checkSize(String path, int w, int h, long maxPixels, Function<String,Error> err){
