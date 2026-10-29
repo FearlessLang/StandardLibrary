@@ -11,6 +11,7 @@ public interface _CacheFlush$174$0{
       case CacheF$2p$1 c -> c._cache0().entry().set(null);
       default -> {}
     }
+    Cache0.onces.forEach(c -> c.entry().set(null));
     return _base.Void$o$0.instance;
   }
   //repr caches are flushed by repr instead
