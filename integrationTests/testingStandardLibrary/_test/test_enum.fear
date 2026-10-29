@@ -7,7 +7,7 @@ DirectionMatch[R:**]: { mut .north: R; mut .east: R; mut .south: R; mut .west: R
 Direction: Enum[Direction]{
   .enums->Directions;
   read .match[R:**](m: mut DirectionMatch[R]): R;
-  read .close->this; .close->::;
+  read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
   }
 
 North: Direction{::.north}
@@ -15,7 +15,7 @@ East:  Direction{::.east}
 South: Direction{::.south}
 West:  Direction{::.west}
 
-Suit: Enum[Suit]{ read .close->this; .close->::;
+Suit: Enum[Suit]{ read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
   Suits: Enums[Suit]{Lists#(
     Hearts: Suit{},
     Spades: Suit{}
@@ -35,6 +35,7 @@ EnumTests: Test {::
   .check{East.index.assertEq 1}
   .check{South.index.assertEq 2}
   .check{West.index.assertEq 3}
+  .check{West.norm.get.assertEq West}
 
   .check{Directions.map.get("North").assertEq North}
   .check{Directions.map.get("West").assertEq West}
