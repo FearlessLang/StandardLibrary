@@ -22,6 +22,10 @@ CacheF[A,B,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type impl
   //via magic it defines
   //Cache2 _cache= new Cache2(1, instance);
   }
+///Caching on factory identity: every CacheMemo caches on its own identity, not on the value it returns.
+///`Cache.ofMemo` gives the same Norm for the same CacheMemo and equal arguments.
+///That Norm is a different Norm from the `.norm` of an equal value, and from the Norm another CacheMemo gives for an equal value.
+///So each CacheMemo adds a new caching point, allowing several Norms for the same value: bad style, but possible and sometimes useful.
 CacheMemo[R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implementing CacheMemo will be a singleton (because of CaptureFree)
   ._uniqueCache: Void -> _Magic!;
   #: R;
