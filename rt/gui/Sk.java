@@ -255,7 +255,7 @@ interface Sk{
     var m= p.thumb(vert);
     paint.setColor(p.fg & 0xFFFFFF | 0x30000000);
     cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, AWidget.bar / 2f), paint);
-    boolean fits= vert ? m.height == t.height : m.width == t.width;
+    boolean fits= (vert ? p.maxScrollY() : p.maxScrollX()) == 0;
     paint.setColor(p.fg & 0xFFFFFF | (fits ? 0x30000000 : 0xA0000000));
     cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), paint);
   }
