@@ -41,7 +41,7 @@ public final class _CapDataEdit$2h4$0 implements CapDataEdit$2h4$0{
     return DataFiles.writeBytes(root, path, res);
   }
   @Override public Object mut$writeImagePng$2(Object path, Object content){
-    try (var png= EncoderPNG.encode(((Image$1c$0Instance)content).image())){ return DataFiles.writeBytes(root, path, png.getBytes()); }
+    try (var png= EncoderPNG.encode(((Image$1c$0Instance)content).image)){ return DataFiles.writeBytes(root, path, png.getBytes()); }
   }
   @Override public Object mut$delete$1(Object path){ return DataFiles.delete(root, path); }
 }

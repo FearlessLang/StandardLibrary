@@ -159,6 +159,11 @@ Image:{
   ///``x`` is between 0 and ``.width`` - 1, and ``y`` is between 0 and ``.height`` - 1.
   read .color(x: XInt, y: YInt): Color;
   }
-///``Images#(width, height, background)`` is an image of ``width`` x ``height`` pixels, each of the color ``background``.
+///``Images#(width, height, background)`` is a builder of images of ``width`` x ``height`` pixels, each of the color ``background``.
 ///Each side is between 1 and 32767, and the image has at most 268435456 pixels.
-Images:{ #(width: WidthNat, height: HeightNat, background: Color): Image -> _Magic!; }
+Images:{ #(width: WidthNat, height: HeightNat, background: Color): ImageBuilder -> _Magic!; }
+///An `ImageBuilder` holds no pixels: each `.paint` makes the pixels of one image.
+ImageBuilder:{
+  ///An image of the size of this builder, each pixel of its background color, with ``painter`` drawn over it as `Image.paint` draws.
+  .paint(painter: Painter): Image;
+  }

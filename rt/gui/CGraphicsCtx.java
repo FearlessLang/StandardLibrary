@@ -100,7 +100,7 @@ class CGraphicsCtx implements Graphics$ao$0{
     return Rect.makeXYWH(x, y, Scopes.extent((WidthNat$as$0) w, what + " width"), Scopes.extent((HeightNat$lg$0) h, what + " height"));
   }
   @Override public Object mut$image$3(Object image, Object w, Object h){
-    var img= ((Image$1c$0Instance) image).image();
+    var img= ((Image$1c$0Instance) image).image;
     cv.drawImageRect(
       img,
       Rect.makeWH(img.getWidth(), img.getHeight()),
