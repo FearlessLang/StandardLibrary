@@ -155,24 +155,17 @@ final class SkMenus{
     int vh= frame.top.component.getHeight();
     int h= Math.min(content, vh);
     int w= textAt + (int) Math.ceil(text) + (subs ? 20 : pad) + 1 + (content > vh ? AWidget.bar + 4 : 0);
-    int x= side ? flip(anchor.x, anchor.width, w, vw) : align(anchor.x, anchor.width, w, vw);
-    int top= side ? clamp(anchor.y, h, vh) : flip(anchor.y, anchor.height, h, vh);
+    int x= side ? place(anchor.x + anchor.width, anchor.x, w, vw) : place(anchor.x, anchor.x + anchor.width, w, vw);
+    int top= side ? clamp(anchor.y, h, vh) : place(anchor.y + anchor.height, anchor.y, h, vh);
     if (w > vw){ frame.frame.warn("a menu " + w + " virtual pixels wide does not fit in the virtual pixel space " + vw + " wide: the part outside it is clipped"); }
     open.add(new Open(m, new Rectangle(x, top, w, h), tops, textAt, from, content, new int[1]));
   }
 
   private static Dimension need(CMenuItem it){ return Sk.need(it.line, 1, 0.5); }
 
-  private static int flip(int start, int length, int size, int room){
-    int after= start + length;
-    if (after + size > room && start - size >= 0){ return start - size; }
-    return clamp(after, size, room);
-  }
-
-  private static int align(int start, int length, int size, int room){
-    int end= start + length;
-    if (start + size > room && end - size >= 0){ return end - size; }
-    return clamp(start, size, room);
+  private static int place(int first, int second, int size, int room){
+    if (first + size > room && second - size >= 0){ return second - size; }
+    return clamp(first, size, room);
   }
 
   private static int clamp(int at, int size, int room){ return Math.max(0, Math.min(at, room - size)); }
