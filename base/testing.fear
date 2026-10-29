@@ -109,7 +109,7 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
   mut .disabledCheck(Check): mut TestCap; 
   mut .checkWithSys(CheckSys): mut TestCap;
   mut .disabledCheckWithSys(CheckSys): mut TestCap;  
-  mut .checkDetErr[T:*](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.check{
+  mut .checkDetErr[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[T]): mut TestCap -> this.check{
     Try#(f).run {
      .ok _ -> Error.msg "Expected error but got success";
      .info i -> i.validate errorMatch .match {
@@ -118,7 +118,7 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
        }
      }
     };
-  mut .checkNonDetErr[T:*](errorMatch: F[InfoValidator, InfoValidator], f: F[T]): mut TestCap -> this.checkWithSys{
+  mut .checkNonDetErr[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[T]): mut TestCap -> this.checkWithSys{
     sys -> sys.try#({Try#(f).run {
       .ok _ -> "Expected error but got success";
       .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
