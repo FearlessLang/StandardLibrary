@@ -191,19 +191,18 @@ final class SkMenus{
     boolean was= open.size() > k + 1 && open.get(k + 1).from() == i;
     close(k + 1);
     if (was){ return; }
-    var parent= open.get(k).menu();
     var scope= it.submenu;
     asked += 1;
     int mine= asked;
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       var m= CMenu.build(scope);
-      frame.onEdtAndWait(() -> sub(mine, parent, i, m));
+      frame.onEdtAndWait(() -> sub(mine, i, m));
       return Void$o$0.instance;
     }});
   }
 
-  private void sub(int mine, CMenu parent, int i, CMenu m){
-    if (mine != asked || m.empty() || open.getLast().menu() != parent){ return; }
+  private void sub(int mine, int i, CMenu m){
+    if (mine != asked || m.empty()){ return; }
     var o= open.getLast();
     add(m, new Rectangle(o.box().x, o.box().y + o.tops()[i] - 4 - o.scroll()[0], o.box().width, o.height(i)), true, i);
   }
