@@ -11,6 +11,7 @@ InfoValidators: Sealed {
 /// ``.where`` groups a sub expression evaluated from the current position:
 /// ``:: > "a" .isMsg | > "b" .where{:: > 0 .isMsg & > 1 .isMsg}`` reads as ``a or (b.0 and b.1)``.
 /// `.not` negates only the current validator, not the whole chain.
+/// `.not` is the last step of the current validator: after `.not` come only `&`, `|` and `.isValid`.
 /// ``::`` alone holds for any `Info`, so ``:: & ...`` is a neutral start, while ``:: | ...`` always holds.
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
@@ -33,13 +34,10 @@ InfoValidators: Sealed {
 //>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
-InfoValidator: Sealed {
-  .close: Info;
-  .isValid: Bool;
-
+InfoValidator: InfoCheck {
   >(key: InfoKey): InfoValidator;
 
-  .where(f: read F[InfoValidator, InfoValidator]): InfoValidator;
+  .where(f: read F[InfoValidator, InfoCheck]): InfoValidator;
   .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> this.isValid.if{
     .then -> this.close.extract f;
     .else -> {}
@@ -54,7 +52,13 @@ InfoValidator: Sealed {
   .isMap: InfoValidator -> this.isMap{_ -> True};
   .isEmpty: InfoValidator;
 
-  .not: InfoValidator;
+  .not: InfoCheck -> _SettledInfoValidator {.close -> this.close; .isValid -> this.isValid.not};
+  }
+
+/// `InfoCheck` is what `.not` returns, and what `Info.validate` and ``.where`` accept.
+InfoCheck: Sealed {
+  .close: Info;
+  .isValid: Bool;
 
   &: InfoValidator -> this.isValid.if {
     .then -> InfoValidators#(this.close);
@@ -87,14 +91,13 @@ _SuccessfulInfoValidator: InfoValidator {
   /// Is an opt as the matchers produced by InfoExtractors may not have an info in them.
   .close: Info;
 
-  .negated: Bool -> False;
-  .isValid: Bool -> this.negated.not;
+  .isValid: Bool -> True;
   /// The info we are matching against - how far we have "descended" into info.
   .matchLevel: Info -> this.close;
-  .fail: InfoValidator -> _FailedInfoValidator {.close -> this.close; .negated -> this.negated};
+  .fail: InfoValidator -> _FailedInfoValidator {this.close};
 
   > key -> key.indexInto(this.matchLevel).match {
-    .some info -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> info; .negated -> this.negated };
+    .some info -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> info; };
     .empty -> this.fail;
     };
 
@@ -131,15 +134,12 @@ _SuccessfulInfoValidator: InfoValidator {
     .empty -> this;
     .default -> this.fail;
     };
-
-  .not -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> this.matchLevel; .negated -> this.negated.not };
   }
 
 _FailedInfoValidator: InfoValidator {
   .close: Info;
 
-  .negated: Bool -> False;
-  .isValid -> this.negated;
+  .isValid -> False;
 
   > _ -> this;
   .where _ -> this;
@@ -148,6 +148,4 @@ _FailedInfoValidator: InfoValidator {
   .isList _ -> this;
   .isMap _ -> this;
   .isEmpty -> this;
-
-  .not -> _FailedInfoValidator {.close -> this.close; .negated -> this.negated.not};
   }

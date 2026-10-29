@@ -5,7 +5,7 @@ Extractor[T:*]: Sealed {
   }
 
 Extractor[T:*, Self]: Extractor[T] {
-  .where(f: read F[InfoValidator, InfoValidator]): Self;
+  .where(f: read F[InfoValidator, InfoCheck]): Self;
   }
 
 /// `InfoExtractor` is a utility class to help extract values from an info.
