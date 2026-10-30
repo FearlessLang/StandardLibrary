@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -172,16 +173,35 @@ public final class Util{
     if (m != null){ System.out.print(m+"\n"); }
   }
   public static void printInfo(Info$o$0 i, Throwable d){
-    printInfoMsg("", "", i);
-    var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
-    map.entrySet().stream()
-      .filter(e -> is(e.getKey(), "msg")).forEach(e -> printInfoMsg("", "", (Info$o$0)e.getValue()));
+    printPart(i);
     //map.entrySet().stream()
     //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
     for (var e : d.getStackTrace()){
       var f= _Throw$1c$0.frameData(e);
       if (f != null){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
     }
+  }
+  private static void printPart(Info$o$0 i){
+    var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
+    var list= List$o$1Instance.asJava(i.imm$softList$0());
+    if (map.isEmpty() && list.isEmpty()){ printInfoMsg("", "", i); return; }
+    list.forEach(e -> printElement((Info$o$0)e));
+    map.forEach(Util::printEntry);
+  }
+  private static void printEntry(MapKey k, Object v){
+    if (is(k, "msg")){ printPart((Info$o$0)v); return; }
+    if (is(k, "list")){ List$o$1Instance.asJava(((Info$o$0)v).imm$softList$0()).forEach(e -> printElement((Info$o$0)e)); return; }
+    System.err.print(toS(k.key)+": "+toS(v)+"\n");
+  }
+  private static void printElement(Info$o$0 e){
+    var m= ((Map$c$2Instance)e.imm$softMap$0()).elems();
+    var frame= m.size() == 4 && m.keySet().stream().allMatch(k -> is(k, "fileName") || is(k, "typeName") || is(k, "methodName") || is(k, "lineNumber"));
+    if (frame){ System.err.print(_Throw$1c$0.fmtFrame(entry(m, "fileName"), entry(m, "typeName"), entry(m, "methodName"), entry(m, "lineNumber"))+"\n"); return; }
+    if (m.isEmpty() && List$o$1Instance.asJava(e.imm$softList$0()).isEmpty()){ printInfoMsg("", "", e); return; }
+    System.err.print(toS(e)+"\n");
+  }
+  private static String entry(Map<MapKey,Object> m, String label){
+    return ((Str$c$0Instance)((Info$o$0)m.entrySet().stream().filter(e -> is(e.getKey(), label)).findFirst().orElseThrow().getValue()).imm$softMsg$0()).val();
   }
   public static boolean is(MapKey k, String label){
     return k.key instanceof Str$c$0Instance s && s.val().equals(label);
