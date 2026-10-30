@@ -12,6 +12,8 @@ public interface Norm$o$1 extends _base.Sealed$2o$0{
   }
   default Object read$as$1(Object p0){ return this; }
   default Object imm$as$1(Object p0){ return this; }
+  static Norm$o$1 of(Object o){ return new Norm(o); }
+  interface Own{ Object _norm(); }
 }
 final class Norm implements Norm$o$1{
   final Object get;//fearless will guarantee that T is always deeply immutable

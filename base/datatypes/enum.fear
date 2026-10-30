@@ -1,7 +1,7 @@
 /// Support for closed sets of named singleton values (enumerations).
 /// A family with a few named values is declared by implementing `Enum` and
 /// `Enums`: the family type binds every value to its list via `.enums` and
-/// gives ``read .close`` once (`.cmp`/`.hash`/`.index` come for free from that;
+/// gives ``read .close`` and ``.norm`` once (`.cmp`/`.hash`/`.index` come for free from that;
 /// ``mut .close`` stays abstract, since a `CaptureFree` value is never mut);
 /// each value then gets `.imm` from `.close`, and `.str` from its simple name.
 ///
@@ -12,7 +12,7 @@
 ///   }
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
-///   read .close->this; .close->::;
+///   read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
 ///   }
 /// North: Direction{}
 /// East:  Direction{}
@@ -32,7 +32,7 @@
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
 ///   read .match[R:**](m: mut DirectionMatch[R]): R;
-///   read .close->this; .close->::;
+///   read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
 ///   }
 /// North: Direction{::.north}
 /// East:  Direction{::.east}
@@ -45,7 +45,7 @@
 ///
 /// Or, declaring the family and the values inside the family type:
 /// ```
-/// Direction: Enum[Direction]{ read .close->this; .close->::;
+/// Direction: Enum[Direction]{ read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
 ///   Directions: Enums[Direction]{Lists#(
 ///     North: Direction{},
 ///     East: Direction{},
@@ -62,16 +62,16 @@ Enums[E]: FromInfo[E], CaptureFree{
   .enumList: List[Enum[E]];
   /// every value, in declaration order.
   /// ``Directions.list`` is ``Lists#(North,East,South,West)``.
-  .list: List[E] -> this.enumList.flow.map{::.imm}.list;
+  .list: List[E] -> Cache#(Cache.normCaptureFree[Enums[E]](this,{::}), {es -> es.get.enumList.flow.map{::.imm}.list});
   /// looks a value up by its `.str`.
   /// `` Directions.map.get`North` `` is ``North``.
-  .map: Map[Str,E] -> this.enumList.flow.mapping({::},{.key e->e.str; .elem e->e.imm;});
+  .map: Map[Str,E] -> Cache#(Cache.normCaptureFree[Enums[E]](this,{::}), {es -> es.get.enumList.flow.mapping({::},{.key e->e.str; .elem e->e.imm;})});
   /// declaration index of every value's `.str`.
   /// `` Directions.indexMap.get`West` `` is ``3``.
-  .indexMap: Map[Str,Nat] -> this.enumList.flow.fold(
+  .indexMap: Map[Str,Nat] -> Cache#(Cache.normCaptureFree[Enums[E]](this,{::}), {es -> es.get.enumList.flow.fold(
     {Maps#[Str,Str,Nat]{::}},
     {acc,e->acc.with(e.str,acc.size)}
-    );
+    )});
   /// looks a value up by its `.info`, the inverse of `Enum.info`.
   /// ``Directions.fromInfo(North.info)`` is ``North``.
   .fromInfo i -> this.map.get(i.getMsg);
@@ -102,6 +102,8 @@ Enum[E]: DataType[E,E], Named, CaptureFree{
   /// narrows ``DataType[E,E].close`` to ``Enum[E]`` (still given by the family,
   /// not here) so that `.cmp` below can call `.index` on its arguments.
   read .close(t: read E): read Enum[E];
+  /// this value as a ``Norm[E]``, given by the family as ``.norm->Cache.normCaptureFree(this,{::})``.
+  .norm: Norm[E];
   .cmp t0,t1 -> this.close(t0).index <=> (this.close(t1).index);
   .hash -> this.index;
   }
