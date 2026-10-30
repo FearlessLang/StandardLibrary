@@ -42,8 +42,8 @@ DataProjectReadErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == `The path "todo" of "data.Pub" names a folder, not a resource.`}}, {t -> t.dataRead(Pub).read(L#("todo"))})
   .checkDetErrWithSys({::.isMsg{:: == `The path "" of "data.Pub" names the root folder, not a resource.`}}, {t -> t.dataRead(Pub).read({})})
   .checkDetErrWithSys({::.isMsg{:: == `The path "data.fearless" of "data.Pub" is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`}}, {t -> t.dataRead(Pub).read(L#("data.fearless"))})
-  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No data project is mounted on "data.Nope".`}}, {t -> t.dataRead(Nope).paths({})})
-  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).read(L#("readme"))})
+  .checkNonDetErrWithSys({::.isMsg{:: == `No data project is mounted on "data.Nope".`}}, {t -> t.dataRead(Nope).paths({})})
+  .checkNonDetErrWithSys({::.isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).read(L#("readme"))})
   }
 
 DataProjectWrites: Test{::
@@ -96,7 +96,7 @@ DataProjectWriteErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == `The path "readme/x.txt" of "data.Notes" is not valid: "readme" is a resource, not a folder.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme", "x.txt"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == `The path "readme.md" of "data.Notes" is not written: its folder holds "readme", and a resource without extension cannot share its name with a resource with an extension.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme.md"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == `The path "todo" of "data.Notes" names a folder, not a resource.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("todo"), "no")})
-  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).writeStrUtf8(L#("x.txt"), "no")})
+  .checkNonDetErrWithSys({::.isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).writeStrUtf8(L#("x.txt"), "no")})
   }
 
 DataProjectDeletes: Test{::
@@ -115,10 +115,10 @@ DataProjectDeletes: Test{::
 DataProjectDeleteErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == `The path "d5/b.txt" of "data.Notes" names no resource.`}}, {t -> t.dataEdit(Notes).delete(L#("d5", "b.txt"))})
   .checkDetErrWithSys({::.isMsg{:: == `The path "data.fearless" of "data.Notes" is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`}}, {t -> t.dataEdit(Notes).delete(L#("data.fearless"))})
-  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).delete(L#("readme"))})
+  .checkNonDetErrWithSys({::.isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).delete(L#("readme"))})
   }
 
 DataProjectsNotReachable: Test{::
-  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `The root folder of the data project mounted on "data.Gone" cannot be reached.`}}, {t -> t.dataRead(Gone).paths({})})
-  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `The folder at the path "notes" of "data.Broken" holds "Bad.txt", which is not a valid resource or folder name: the data project changed while this program runs.`}}, {t -> t.dataRead(Broken).paths(L#("notes"))})
+  .checkNonDetErrWithSys({::.isMsg{:: == `The root folder of the data project mounted on "data.Gone" cannot be reached.`}}, {t -> t.dataRead(Gone).paths({})})
+  .checkNonDetErrWithSys({::.isMsg{:: == `The folder at the path "notes" of "data.Broken" holds "Bad.txt", which is not a valid resource or folder name: the data project changed while this program runs.`}}, {t -> t.dataRead(Broken).paths(L#("notes"))})
   }
