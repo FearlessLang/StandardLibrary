@@ -1,0 +1,142 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Block as Block;
+use base.Try as Try;
+use base.Lists as L;
+
+Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+Pub: base.DataRead{}
+Notes: base.DataEdit{}
+Self: base.DataEdit{}
+Columns: { #(g: mut base.Graphics, x: base.Nat, step: base.Nat, end: base.Nat, h: base.Nat): mut base.Graphics -> (x >= end) ? {
+  .then -> g;
+  .else -> Columns#(g.position(base.XInt#(x.getInt), base.YInt#(+0)).rect(base.WidthNat#1, base.HeightNat#h), x + step, step, end, h);
+  } }
+
+ResourceReadTests: UnitTests{::
+  .test ImagesThatCanNotBeDecoded
+  .test ImagesTooLarge
+  .test ImagesWithMorePixelsThanMaxPixels
+  .test ResourcesThatCanNotBeRead
+  .test ImagesWritten
+  }
+
+ImagesThatCanNotBeDecoded: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Resource with path img.Pub/text.png`
+    |`can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)`
+    )}}, {t -> t.dataRead(Pub).read(L#("text.png")).readImage(1000000)})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Resource with path img.Pub/cut.png`
+    |`can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)`
+    )}}, {t -> t.dataRead(Pub).read(L#("cut.png")).readImage(1000000)})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Resource with path /_img/junk.png`
+    |`can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)`
+    )}}, {t -> Junk.readImage(t.assetRead, 1000000)})
+  .checkWithSys{s -> Block#
+    .let path= {s.dataRead(Pub).read(L#("in_path.txt")).readStrUtf8 Recover}
+    .return{Try#(s.iso.close, {t -> t.inputCursor#.match{.some n -> n.readImage(1000000); .empty -> base.Error.msg "no opened file"}}).assertInfo{::.isMsg{:: == (
+       "File with absolute path "+path
+      |`can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let url= {s.dataRead(Pub).read(L#("url.txt")).readStrUtf8 Recover}
+    .return{Try#(s.iso.close, {t -> t.download.downloadImage(url, 1000, 1000000)}).assertInfo{::.isMsg{:: == (
+       "Resource with url "+url
+      |`can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)`
+      )}}}
+    }
+  }
+
+ImagesTooLarge: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Resource with path img.Pub/wide.png`
+    |`is an image of 32768 x 1, which is too large.`
+    |`Height must be strictly less than 32768.`
+    |`Width must be strictly less than 32768.`
+    |`Height * Width must be strictly less than 268435457.`
+    )}}, {t -> t.dataRead(Pub).read(L#("wide.png")).readImage(1000000)})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Resource with path img.Pub/big.png`
+    |`is an image of 20000 x 20000, which is too large.`
+    |`Height must be strictly less than 32768.`
+    |`Width must be strictly less than 32768.`
+    |`Height * Width must be strictly less than 268435457.`
+    )}}, {t -> t.dataRead(Pub).read(L#("big.png")).readImage(1000000)})
+  }
+
+ImagesWithMorePixelsThanMaxPixels: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Resource with path img.Pub/pic.png`
+    |`is an image of 2 x 3 = 6 pixels, more than maxPixels 5`
+    )}}, {t -> t.dataRead(Pub).read(L#("pic.png")).readImage(5)})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Resource with path /_base/icons/conflict.png`
+    |`is an image of 256 x 256 = 65536 pixels, more than maxPixels 1`
+    )}}, {t -> base.IconsConflict.readImage(t.assetRead, 1)})
+  }
+
+ResourcesThatCanNotBeRead: Test{::
+  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+     `Resource with path img.Notes/gone.txt`
+    |`can not be read as bytes`
+    )}}, {t -> Block#
+      .openIso s = t
+      .let n= {s.dataEdit(Notes).read(L#("gone.txt"))}
+      .do{s.dataEdit(Notes).delete(L#("gone.txt"))}
+      .return{n.readStrUtf8 Recover}
+      })
+  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+     `Resource with path img.Notes/gone.png`
+    |`can not be read as bytes`
+    )}}, {t -> Block#
+      .openIso s = t
+      .let n= {s.dataEdit(Notes).read(L#("gone.png"))}
+      .do{s.dataEdit(Notes).delete(L#("gone.png"))}
+      .return{n.readImage(1000)}
+      })
+  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+     `Resource with path /_img/note.txt`
+    |`can not be read as bytes`
+    )}}, {t -> Block#
+      .openIso s = t
+      .do{s.dataEdit(Self).delete(L#("_img", "note.txt"))}
+      .return{Note.readStrUtf8(s.assetRead, Recover)}
+      })
+  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+     `Resource with path /_img/pics/one.txt`
+    |`can not be read as bytes`
+    )}}, {t -> Block#
+      .openIso s = t
+      .do{s.dataEdit(Self).delete(L#("_img", "pics", "one.txt"))}
+      .return{PicsOne.readStrUtf8(s.assetRead, Recover)}
+      })
+  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+     `Resource with path /_img/box/three.txt`
+    |`can not be read as bytes`
+    )}}, {t -> Block#
+      .openIso s = t
+      .do{s.dataEdit(Self).delete(L#("_img", "box", "three.txt"))}
+      .return{BoxThree.readStrUtf8(s.assetRead, Recover)}
+      })
+  }
+
+ImagesWritten: Test{::
+  .checkWithSys{s -> s.dataEdit(Notes).writeImagePng(L#("copy.png"), s.dataRead(Pub).read(L#("pic.png")).readImage(1000))}
+  .checkWithSys{s -> s.dataEdit(Notes).writeImagePng(L#("painted.png"), base.Images#(base.WidthNat#4, base.HeightNat#3, base.Color.rgb(0, 0, 255))
+    .paint{g -> g.color(base.Color.rgb(255, 0, 0)).position(base.XInt#(+1), base.YInt#(+1)).rect(base.WidthNat#2, base.HeightNat#5)})}
+  .checkWithSys{s -> Block#
+    .let img= {base.Images#(base.WidthNat#5, base.HeightNat#1, base.Color.rgb(0, 0, 0)).paint{g -> g
+      .color(base.Color.rgb(255, 255, 255)).position(base.XInt#(+1), base.YInt#(+0)).rect(base.WidthNat#1, base.HeightNat#1)
+      .color(base.Color.rgb(255, 0, 0)).position(base.XInt#(+3), base.YInt#(+0)).rect(base.WidthNat#1, base.HeightNat#1)}}
+    .return{s.dataEdit(Notes).writeImagePng(L#("same.png"), img.scale(img.width, img.height))}
+    }
+  .checkWithSys{s -> Block#
+    .let img= {base.Images#(base.WidthNat#1024, base.HeightNat#16, base.Color.rgb(0, 0, 0)).paint{g -> Columns#(g.color(base.Color.rgb(255, 255, 255)), 0, 8, 1024, 16)}}
+    .return{s.dataEdit(Notes).writeImagePng(L#("thin.png"), img.scale(base.WidthNat#8, base.HeightNat#16))}
+    }
+  .checkWithSys{s -> s.dataEdit(Notes).writeImagePng(L#("upright.png"), s.dataRead(Pub).read(L#("turned.jpg")).readImage(1000))}
+  .checkWithSys{s -> s.dataEdit(Notes).writeImagePng(L#("srgb.png"), s.dataRead(Pub).read(L#("linear.jpg")).readImage(1000))}
+  }
