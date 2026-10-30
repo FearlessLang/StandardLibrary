@@ -3,12 +3,12 @@
 Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.succ` returns ``this + +1``. Overflows if ``this == 9_223_372_036_854_775_807``.
   //>   .check{+5 .succ .assertEq +6}
-  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.succ:"}}, {(Math.maxInt) .succ})
+  //>   .checkNonDetErr({::.isMsg{::.startsWith "Int.succ:"}}, {(Math.maxInt) .succ})
   .succ: Int;
 
   /// `this.pred` returns ``this - +1``. Underflows if ``this == -9_223_372_036_854_775_808``.
   //>   .check{+5 .pred .assertEq +4}
-  //>   .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.pred"}}, {(Math.minInt) .pred})
+  //>   .checkNonDetErr({::.isMsg{::.startsWith "Int.pred"}}, {(Math.minInt) .pred})
   .pred: Int;
 
   /// ``this + x`` returns the checked sum of `this` and ``x``.

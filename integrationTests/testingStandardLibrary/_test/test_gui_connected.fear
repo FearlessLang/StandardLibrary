@@ -7,7 +7,7 @@ GuiConnectedTests: Test {::
     .return{Block#(l!.text "b", Void)}
     }}).run{
       .ok _ -> Error.msg "Changing a removed widget always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
@@ -18,7 +18,7 @@ GuiConnectedTests: Test {::
     .return{Error.msg(l!.text)}
     }}).run{
       .ok _ -> Error.msg "The label text always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "b"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "b"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
@@ -29,7 +29,7 @@ GuiConnectedTests: Test {::
     .return{Block#(l!.text "c", Void)}
     }}).run{
       .ok _ -> Error.msg "Changing a removed widget after .changeDetached always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Pane]] outer = {Slots#[mut Pane]}
@@ -41,7 +41,7 @@ GuiConnectedTests: Test {::
     .return{Error.msg(l!.text)}
     }}).run{
       .ok _ -> Error.msg "The label text always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "d"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "d"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
@@ -50,7 +50,7 @@ GuiConnectedTests: Test {::
     .return{Block#(l!.text "b", Void)}
     }}).run{
       .ok _ -> Error.msg "Changing a widget of a replaced content always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Label is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Mouse]] m = {Slots#[mut Mouse]}
@@ -58,7 +58,7 @@ GuiConnectedTests: Test {::
     .return{Block#(m!.clicked{_, _, _, _, _ -> Void}, Void)}
     }}).run{
       .ok _ -> Error.msg "Changing a replaced Mouse always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .let[mut Slot[mut Keys]] k = {Slots#[mut Keys]}
@@ -67,23 +67,23 @@ GuiConnectedTests: Test {::
     .return{f.content.pane{::}}
     }}).run{
       .ok _ -> Error.msg "Changing a replaced Keys always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Keys was replaced by a later .onKey, so a key action added now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Keys was replaced by a later .onKey, so a key action added now would never run"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedLabel#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a widget of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Label is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Label is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedMouse#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a Mouse of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedKeys#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a Keys of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This Keys belongs to a closed window: the CapGui.run that showed the window has returned, so a key action added now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Keys belongs to a closed window: the CapGui.run that showed the window has returned, so a key action added now would never run"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedModelFps#(s.gui)}).run{
       .ok _ -> Error.msg "Changing a ModelFps of a closed window always fails";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"}}.assertTrue{i};
       }}
   }
 ClosedLabel: {#(gui: mut base.CapGui): Void -> Block#

@@ -11,7 +11,7 @@ GuiExtentTests: Test {::
       .panelWidth.str)}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[300]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[300]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .pane{::
@@ -31,66 +31,66 @@ GuiExtentTests: Test {::
     .pane{:: .width 12 .height 12 .paint{g -> Error.msg "painted after the big widgets"} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "painted after the big widgets"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "painted after the big widgets"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .pane{:: .width 32768 }}}}).run{
       .ok _ -> Error.msg "A width over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "width 32768 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "width 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .pane{:: .width 10 }}}}).run{
       .ok _ -> Error.msg "A width smaller than the insets always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "width 10 would make the insets of this Pane larger than the Pane: leftInset 6 + rightInset 6 is more than width 10"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "width 10 would make the insets of this Pane larger than the Pane: leftInset 6 + rightInset 6 is more than width 10"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{:: .bottomInset 20 }}}}).run{
       .ok _ -> Error.msg "Insets larger than the widget always stop the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "bottomInset 20 would make the insets of this Label larger than the Label: topInset 6 + bottomInset 20 is more than height 24"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "bottomInset 20 would make the insets of this Label larger than the Label: topInset 6 + bottomInset 20 is more than height 24"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .pane{:: .radius 18446744073709551615 } .paint{g -> Error.msg "A radius over the limit was accepted"} }}}).run{
       .ok _ -> Error.msg "A radius over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "radius 18446744073709551615 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "radius 18446744073709551615 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{:: .textHeight 32768 } .paint{g -> Error.msg "A text height over the limit was accepted"} }}}).run{
       .ok _ -> Error.msg "A text height over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "text height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "text height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .minPerLine 0 .paint{g -> Error.msg "A minPerLine of 0 was accepted"} }}}).run{
       .ok _ -> Error.msg "A minPerLine of 0 always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "minPerLine 0 is too small; it must be >= 1: every line holds at least one child"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "minPerLine 0 is too small; it must be >= 1: every line holds at least one child"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .maxPerLine 0 .paint{g -> Error.msg "A maxPerLine of 0 was accepted"} }}}).run{
       .ok _ -> Error.msg "A maxPerLine of 0 always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "maxPerLine 0 is too small; it must be >= 1: every line holds at least one child"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "maxPerLine 0 is too small; it must be >= 1: every line holds at least one child"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .maxPerLine 2 .minPerLine 3 .paint{g -> Error.msg "A minPerLine more than the maxPerLine was accepted"} }}}).run{
       .ok _ -> Error.msg "A minPerLine more than the maxPerLine always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "minPerLine 3 is more than maxPerLine 2 of this Pane: no line can hold at least 3 children and at most 2"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "minPerLine 3 is more than maxPerLine 2 of this Pane: no line can hold at least 3 children and at most 2"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .minPerLine 3 .maxPerLine 2 .paint{g -> Error.msg "A maxPerLine less than the minPerLine was accepted"} }}}).run{
       .ok _ -> Error.msg "A maxPerLine less than the minPerLine always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "maxPerLine 2 is less than minPerLine 3 of this Pane: no line can hold at least 3 children and at most 2"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "maxPerLine 2 is less than minPerLine 3 of this Pane: no line can hold at least 3 children and at most 2"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> g.rect(Width#3000000000, Height#1)}
     }}}).run{
       .ok _ -> Error.msg "A rect width over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "rect width 3000000000 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "rect width 3000000000 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> Error.msg(g.oval(Width#10, Height#32768).panelWidth.str + " An oval height over the limit was accepted")}
     }}}).run{
       .ok _ -> Error.msg "An oval height over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "oval height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "oval height 32768 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> Error.msg(g.position(X#(+32768), Y#(+0)).panelWidth.str + " A position over the limit was accepted")}
     }}}).run{
       .ok _ -> Error.msg "A position over the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "position x 32768 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "position x 32768 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#300, Height#80).content.pane{::
     .paint{g -> Error.msg(g.line(X#(+0), Y#(-32769)).panelWidth.str + " A line end under the limit was accepted")}
     }}}).run{
       .ok _ -> Error.msg "A line end under the limit always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "line y -32769 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "line y -32769 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
       }}
   }

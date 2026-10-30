@@ -1,6 +1,8 @@
 package _base;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 public interface _Throw$1c$0{
@@ -17,26 +19,47 @@ public interface _Throw$1c$0{
   default Object imm$stackTrace$0(){
     var st= new Throwable().getStackTrace();
     var al= new ArrayList<>();
-    for (int i= 2; i < st.length; i += 1){
-      var f= frameData(st[i]);
-      if (f == null){ continue; }
-      al.add(new Str$c$0Instance(fmtFrame(f)));
-    }
+    for (var f : frames(Arrays.copyOfRange(st, 2, st.length))){ al.add(new Str$c$0Instance(fmtFrame(f))); }
     var list= new List$o$1Instance(al);
     var dtId= new DataTypeBy$17m$3(){ @Override public Object imm$$hash$1(Object p0){ return p0; } };
     return list.read$info$1(dtId);
   }
   static Set<String> machinery= Set.of("errors.fear", "action.fear", "attenuation.fear");
   static Set<String> rcs= Set.of("imm", "mut", "read", "iso", "readH", "mutH");
+  static List<StackFrame$174$0> frames(StackTraceElement[] st){
+    var res= new ArrayList<StackFrame$174$0>();
+    var literal= false;
+    for (var e : st){
+      var f= frameData(e);
+      if (f == null){ continue; }
+      if (literal && fmtFrame(res.getLast()).equals(fmtFrame(f))){ res.removeLast(); }
+      res.add(f);
+      literal= load(e.getClassName()).isAnonymousClass();
+    }
+    return res;
+  }
+  static Class<?> load(String cn){
+    try{ return Class.forName(cn, false, _Throw$1c$0.class.getClassLoader()); }
+    catch (ClassNotFoundException ex){ throw new Error(ex); }
+  }
   static StackFrame$174$0 frameData(StackTraceElement e){
     var cn= e.getClassName();
     int dot= cn.indexOf('.');
     if (dot < 0 || cn.indexOf('.', dot + 1) != -1 || e.getFileName() == null || e.getFileName().endsWith(".java") || machinery.contains(e.getFileName())){ return null; }
-    var ty= cn.substring(dot + 1).split("\\$");
-    var meth= fmtMethodName(e.getMethodName());
-    if (ty.length < 3 || meth == null){ return null; }
-    for (int i= 2; i < ty.length; i += 1){ if (!digits(ty[i])){ return null; } }
-    var type= ty[0] + holes('[', ']', Integer.parseInt(ty[2]));
+    var c= load(cn);
+    var m= e.getMethodName();
+    while (c.isAnonymousClass()){
+      var em= c.getEnclosingMethod();
+      if (em == null){ return null; }
+      m = em.getName();
+      c = c.getEnclosingClass();
+    }
+    if (InferredName.class.isAssignableFrom(c)){ return null; }
+    var ty= c.getName().substring(dot + 1).split("\\$");
+    var meth= fmtMethodName(m);
+    var primed= ty.length == 4 && primes(ty[1]) >= 0;
+    if (meth == null || ty.length != (primed ? 4 : 3) || !digits(ty[ty.length - 1])){ return null; }
+    var type= ty[0] + "'".repeat(primed ? primes(ty[1]) : 0) + holes('[', ']', Integer.parseInt(ty[ty.length - 1]));
     return (StackFrame$174$0)StackFrames$2e8$0.instance.read$$hash$4(
       new Str$c$0Instance(e.getFileName()),
       new Str$c$0Instance(type),
@@ -54,6 +77,7 @@ public interface _Throw$1c$0{
     return meth+" error line: "+ln+" in file "+fn;
   }
   static boolean digits(String s){ return !s.isEmpty() && s.chars().allMatch(c -> c >= '0' && c <= '9'); }
+  static int primes(String s){ return s.startsWith("p") && digits(s.substring(1)) ? Integer.parseInt(s.substring(1)) : -1; }
   static String fmtMethodName(String m){
     int a= m.indexOf('$');
     int b= m.lastIndexOf('$');
@@ -62,6 +86,8 @@ public interface _Throw$1c$0{
     var rc= m.substring(0, a);
     var mid= m.substring(a + 1, b);
     if (mid.charAt(0) == '$'){ return rc+" "+decodeOp(mid.substring(1))+holes('(', ')', n); }
+    int p= mid.lastIndexOf('$');
+    if (p > 0){ mid = mid.substring(0, p)+"'".repeat(primes(mid.substring(p + 1))); }
     return rc+" ."+mid+holes('(', ')', n);
   }
   static String holes(char open, char close, int n){
