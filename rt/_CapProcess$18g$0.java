@@ -100,6 +100,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(_CapProcess$18g$0::inherited).forEach(cmd::add);
     if (!names.isEmpty()){ cmd.add("-D"+namesKey+"="+names); }
     cmd.add("-D"+markerKey+"="+marker);
+    cmd.add("-D"+AppLog.childKey+"=true");
     cmd.add("-cp");
     cmd.add(System.getProperty("java.class.path"));
     cmd.add(_CapProcess$18g$0.class.getClassLoader().getClass().getName());
@@ -108,7 +109,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     return cmd;
   }
   private static boolean inherited(String arg){
-    return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+markerKey+"=") && !arg.startsWith("-Dfearless.endMarker=");
+    return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+markerKey+"=") && !arg.startsWith("-Dfearless.endMarker=") && !arg.startsWith("-D"+AppLog.childKey+"=");
   }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }

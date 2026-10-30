@@ -28,13 +28,15 @@ public final class AppLog{
   private static final ConcurrentLinkedQueue<AppLog> all= new ConcurrentLinkedQueue<>();
   private static final AtomicBoolean closing= new AtomicBoolean();
   public static final Path errPath= Util.pathProperty("fearlessUser.dir").resolve(".out", "logs", "err.log");
+  public static final String childKey= "fearlessChild";
+  static final boolean child= Boolean.getBoolean(childKey);
   static{
-    startupFor(errPath, keepErrLogs);
+    if (!child){ startupFor(errPath, keepErrLogs); }
     Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown, "AppLog-shutdown"));
   }
   public static AppLog open(Path path, boolean raw){
     var p= Util.pathProperty("fearlessUser.dir").resolve(path).normalize();
-    startupFor(p, keepLogs);
+    if (!child){ startupFor(p, keepLogs); }
     var log= new AppLog(p, raw);
     all.add(log);
     return log;
@@ -45,6 +47,7 @@ public final class AppLog{
       try{ log.closeAndRotateQuiet(); }
       catch (Throwable t){ err("closing and log rotation crashed: "+log.path, t); }
     }
+    if (child){ return; }
     try{ rotateOnCloseQuiet(errPath, keepErrLogs, true); }
     catch (Throwable t){
       System.err.print(stampNow()+" rotate err.log crashed: "+errPath+"\n");
@@ -58,7 +61,7 @@ public final class AppLog{
   private AppLog(Path path, boolean raw){
     this.path= path;
     this.raw= raw;
-    this.out= openWriterTruncate(path);
+    this.out= openWriterAppend(path);
   }
   public void append(String msg){
     var line= raw ? msg : stampNow()+" "+msg+"\n";
@@ -76,7 +79,7 @@ public final class AppLog{
       try{ out.close(); }
       catch (IOException e){ err("close failed: "+path, e); return; }
     }
-    rotateOnCloseQuiet(path, keepLogs, false);
+    if (!child){ rotateOnCloseQuiet(path, keepLogs, false); }
   }
   private static void startupFor(Path p, int keep){
     createDirsOrThrow(p);
@@ -99,10 +102,10 @@ public final class AppLog{
       e.printStackTrace(System.err);
     }
   }
-  private static BufferedWriter openWriterTruncate(Path p){
+  private static BufferedWriter openWriterAppend(Path p){
     try{
       createDirsOrThrow(p);
-      return Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, TRUNCATE_EXISTING);
+      return Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, APPEND);
     }
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
