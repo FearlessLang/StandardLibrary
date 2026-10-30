@@ -1,0 +1,2 @@
+use base.Str as Str;
+Report:{ .summary: Str -> log.Log.line(text.Text.title("monthly report")) }

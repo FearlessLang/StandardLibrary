@@ -1,0 +1,4 @@
+use base.Str as Str;
+map text as _text_v1 in _invoice;
+map log as _log_v1 in _invoice;
+Invoice:{ .header: Str -> log.Log.line(text.Text.title("invoice 42")) }

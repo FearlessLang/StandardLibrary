@@ -1,0 +1,2 @@
+use base.Str as Str;
+Log:{ .line(s: Str): Str -> "[log1] "+s }

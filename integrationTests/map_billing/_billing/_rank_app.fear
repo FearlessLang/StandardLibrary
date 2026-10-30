@@ -1,0 +1,10 @@
+use base.Main as Main;
+map text as _text_v2 in _billing;
+map log as _log_v2 in _billing;
+map text as _text_v2 in _report;
+map log as _log_v2 in _report;
+map log as _log_v2 in _invoice instead of _log_v1;
+Billing:Main{s->base.Block#(
+  base.Debug#(log.Log.line(text.Text.title("billing"))),
+  base.Debug#(report.Report.summary),
+  base.Debug#(invoice.Invoice.header))}
