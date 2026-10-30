@@ -95,11 +95,11 @@ final class DataFiles{
     catch (UncheckedIOException e){ throw failed(root.name(), p, write, e.getCause()); }
   }
   private static Error failed(String name, List<String> path, boolean write, IOException e){
-    return lost("The "+at(name, path)+" could not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName(), e);
+    return lost("The "+at(name, path)+"\ncould not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName(), e);
   }
-  private static String at(String name, List<String> path){ return "path \""+String.join("/", path)+"\" of \""+name+"\""; }
-  private static Error refused(String name, List<String> path, String why){ return detErr("The "+at(name, path)+" "+why); }
-  private static Error invalid(String name, List<String> path, String why){ return detErr("The "+at(name, path)+" is not valid: "+why); }
+  private static String at(String name, List<String> path){ return "path "+name+"/"+String.join("/", path); }
+  private static Error refused(String name, List<String> path, String why){ return detErr("The "+at(name, path)+"\n"+why); }
+  private static Error invalid(String name, List<String> path, String why){ return detErr("The "+at(name, path)+"\nis not valid: "+why); }
   private static boolean atom(String s){ return s.matches("[a-z_][a-z0-9_]*") && !reserved.contains(s); }
   private static boolean fileName(String s){
     var dot= s.indexOf('.');
@@ -129,7 +129,7 @@ final class DataFiles{
     if (at.get() instanceof Resource){ throw refused(name, path, "names a resource, not a folder."); }
     var names= names(at.get());
     if (path.isEmpty()){ names.removeIf(n -> n.endsWith(".fearless")); }
-    names.stream().filter(n -> !atom(n) && !fileName(n)).findFirst().ifPresent(n -> { throw nonDetErr("The folder at the "+at(name, path)+" holds \""+n+"\", which is not a valid resource or folder name: the data project changed while this program runs."); });
+    names.stream().filter(n -> !atom(n) && !fileName(n)).findFirst().ifPresent(n -> { throw nonDetErr("The folder at the "+at(name, path)+"\nholds \""+n+"\", which is not a valid resource or folder name: the data project changed while this program runs."); });
     return List$o$1Instance.wrap(names.stream().<Object>map(Str$c$0Instance::instance).toList());
   }
   private static Object open(String name, Path root, List<String> path) throws IOException{
