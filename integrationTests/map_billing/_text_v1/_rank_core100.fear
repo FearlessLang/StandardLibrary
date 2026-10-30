@@ -1,0 +1,2 @@
+use base.Str as Str;
+Text:{ .title(s: Str): Str -> "== "+s+" ==" }

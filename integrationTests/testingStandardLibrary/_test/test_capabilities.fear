@@ -3,6 +3,6 @@ _CapFails: base.InfoMain{sys, arg -> Error.msg "the child fails"}
 TestCapabilities: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> Block#(s.dataRead(_CapNoMount), Void)})
     .run{.ok _ -> ""; .info i -> i.str}.contains(".java").assertFalse}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.process.run(_CapFails, base.Infos.msg "", {})})
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.process.run(_CapFails, Infos.msg "", {})})
     .run{.ok _ -> ""; .info i -> i.str}.contains(".java").assertFalse}
   }

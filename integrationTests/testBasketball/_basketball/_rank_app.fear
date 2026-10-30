@@ -45,7 +45,7 @@ use base.Rect as Rect;
 use base.Rects as Rects;
 use base.Cache as Cache;
 
-Presentation2: base.Main { sys -> Block#
+Presentation2: Main { sys -> Block#
   .let height = { 500 }
   .let width  = { (height * 5).aluDiv 2 }
   .let model  = { Slots#[mut Model] }

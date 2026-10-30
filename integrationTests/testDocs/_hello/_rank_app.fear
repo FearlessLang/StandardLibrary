@@ -56,10 +56,10 @@ NameShortening:{
   .v:Voider;
 
   ///Should print List, Str, Nat if the hardcoded base map applies.
-  .list:base.List[base.Str];
+  .list:base.List[Stringer];
 
   ///Should print Map, Str, Nat if the hardcoded base map applies.
-  .map:base.Map[base.Str,base.Nat];
+  .map:base.Map[Stringer,base.Nat];
 
   ///Should print F and Bool without base.
   .f:base.F[base.Bool,base.Bool];
