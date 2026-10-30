@@ -70,7 +70,7 @@ final class AssetImageRead{
   static void checkSize(String subject, int w, int h, long maxPixels){
     assert w > 0 && h > 0;
     var pixels= Math.multiplyExact((long)w, h);
-    if (w > Scopes.maxExtent || h > Scopes.maxExtent || pixels > Scopes.maxImagePixels){ throw detErr(subject+" is an image of "+w+" x "+h+", which is too large.\nHeight must be at most "+Scopes.maxExtent+".\nWidth must be at most "+Scopes.maxExtent+".\nHeight * Width must be at most "+Scopes.maxImagePixels+"."); }
+    if (w > Scopes.maxExtent || h > Scopes.maxExtent || pixels > Scopes.maxImagePixels){ throw detErr(subject+" is an image of "+w+" x "+h+", which is too large.\nHeight must be strictly less than "+(Scopes.maxExtent+1)+".\nWidth must be strictly less than "+(Scopes.maxExtent+1)+".\nHeight * Width must be strictly less than "+(Scopes.maxImagePixels+1)+"."); }
     if (Long.compareUnsigned(maxPixels, pixels) >= 0){ return; }
     throw detErr(subject+" is an image of "+w+" x "+h+" = "+pixels+" pixels, more than maxPixels "+Long.toUnsignedString(maxPixels));
   }
