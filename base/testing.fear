@@ -130,6 +130,27 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
          }
        }
      };
+  mut .checkDetErrWithSys[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[iso System, T]): mut TestCap -> this.checkWithSys{
+    sys -> Try#(sys.iso.close, f).run {
+     .ok _ -> Error.msg "Expected error but got success";
+     .info i -> i.validate errorMatch .match {
+       .true -> Void;
+       .false -> Error.msg("Error did not match expected: " + (i.str));
+       }
+     }
+    };
+  mut .checkNonDetErrWithSys[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[iso System, T]): mut TestCap -> this.checkWithSys{
+    sys -> sys.try#(sys.iso.close, {s -> Try#(s, f).run {
+      .ok _ -> "Expected error but got success";
+      .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
+    }}).run {
+       .ok errMsg -> Error.msg errMsg;
+       .info i -> i.validate errorMatch .match {
+         .true -> Void;
+         .false -> Error.msg("Error did not match expected: " + (i.str));
+         }
+       }
+     };
   }
 
 TestCont[T]: { #(t: T, self: mut TestCap): mut TestCap }

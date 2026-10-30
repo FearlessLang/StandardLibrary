@@ -1,0 +1,124 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Block as Block;
+use base.Lists as L;
+
+Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+Q: base.UnencodableRecover{ scalar, index -> L#(63.getByte) }
+Pub: base.DataRead{}
+Notes: base.DataEdit{}
+Broken: base.DataRead{}
+Gone: base.DataRead{}
+Nope: base.DataEdit{}
+
+DataProjectTests: UnitTests{::
+  .test DataProjectReads
+  .test DataProjectReadErrors
+  .test DataProjectWrites
+  .test DataProjectWriteErrors
+  .test DataProjectDeletes
+  .test DataProjectDeleteErrors
+  .test DataProjectsNotReachable
+  }
+
+DataProjectReads: Test{::
+  .checkWithSys{s -> s.dataRead(Pub).paths({}).assertEq({::}, L#("notes", "pics", "readme", "todo"))}
+  .checkWithSys{s -> s.dataRead(Pub).paths(L#("pics")).assertEq({::}, L#("deep", "inner", "one.txt"))}
+  .checkWithSys{s -> s.dataRead(Pub).paths(L#("pics", "inner")).assertEq({::}, L#("three.txt"))}
+  .checkWithSys{s -> s.dataRead(Pub).read(L#("readme")).label.assertEq "data.Pub/readme"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("readme")).readStrUtf8 Recover).assertEq "hi"}
+  .checkWithSys{s -> s.dataRead(Pub).read(L#("readme")).readBytes.size.assertEq 2}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("notes", "a.txt")).readStrUtf8 Recover).assertEq "first"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "deep", "two.txt")).readStrUtf8 Recover).assertEq "deeper"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "inner", "three.txt")).readStrUtf8 Recover).assertEq "nested"}
+  .checkWithSys{s -> (s.dataRead(Notes).read(L#("readme")).readStrUtf8 Recover).assertEq "hi"}
+  }
+
+DataProjectReadErrors: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == `The path "readme" of "data.Pub" names a resource, not a folder.`}}, {t -> t.dataRead(Pub).paths(L#("readme"))})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "none" of "data.Pub" names no folder.`}}, {t -> t.dataRead(Pub).paths(L#("none"))})
+  .checkDetErrWithSys({::.isMsg{:: == `The path ".hidden" of "data.Pub" is not valid: ".hidden" is not a valid folder name. A folder name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`}}, {t -> t.dataRead(Pub).paths(L#(".hidden"))})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "notes/b.txt" of "data.Pub" names no resource.`}}, {t -> t.dataRead(Pub).read(L#("notes", "b.txt"))})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "todo" of "data.Pub" names a folder, not a resource.`}}, {t -> t.dataRead(Pub).read(L#("todo"))})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "" of "data.Pub" names the root folder, not a resource.`}}, {t -> t.dataRead(Pub).read({})})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "data.fearless" of "data.Pub" is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`}}, {t -> t.dataRead(Pub).read(L#("data.fearless"))})
+  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No data project is mounted on "data.Nope".`}}, {t -> t.dataRead(Nope).paths({})})
+  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).read(L#("readme"))})
+  }
+
+DataProjectWrites: Test{::
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeStrUtf8(L#("w1", "b.txt"), "second")}
+    .return{(s.dataEdit(Notes).read(L#("w1", "b.txt")).readStrUtf8 Recover).assertEq "second"}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeStrAscii(L#("fresh", "deeper", "c.txt"), "third")}
+    .return{(s.dataEdit(Notes).read(L#("fresh", "deeper", "c.txt")).readStrUtf8 Recover).assertEq "third"}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeStrLatin1(L#("wz", "deep", "four.txt"), "zipped")}
+    .return{s.dataEdit(Notes).paths(L#("wz", "deep")).assertEq({::}, L#("four.txt", "two.txt"))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeStrUtf8(L#("wn", "inner", "three.txt"), "renested")}
+    .return{(s.dataEdit(Notes).read(L#("wn", "inner", "three.txt")).readStrUtf8 Recover).assertEq "renested"}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeStrUtf8(L#("wf", "new", "five.txt"), "in a new folder of a zip")}
+    .return{s.dataEdit(Notes).paths(L#("wf")).assertEq({::}, L#("new", "one.txt"))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeUStrUtf16Le(L#("u16.txt"), "caf".u("00E9"))}
+    .return{s.dataEdit(Notes).read(L#("u16.txt")).readBytes.assertEq({::}, L#(99.getByte, 0.getByte, 97.getByte, 0.getByte, 102.getByte, 0.getByte, 233.getByte, 0.getByte))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeBytes(L#("raw.bin"), L#(72.getByte, 105.getByte))}
+    .return{(s.dataEdit(Notes).read(L#("raw.bin")).readStrUtf8 Recover).assertEq "Hi"}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeStrUtf32Be(L#("u32.txt"), "A")}
+    .return{s.dataEdit(Notes).read(L#("u32.txt")).readBytes.assertEq({::}, L#(0.getByte, 0.getByte, 0.getByte, 65.getByte))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeUStrAscii(L#("ascii.txt"), "caf".u("00E9"), Q)}
+    .return{(s.dataEdit(Notes).read(L#("ascii.txt")).readStrUtf8 Recover).assertEq "caf?"}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).writeUStrLatin1(L#("latin1.txt"), "caf".u("00E9 1F600"), Q)}
+    .return{s.dataEdit(Notes).read(L#("latin1.txt")).readBytes.assertEq({::}, L#(99.getByte, 97.getByte, 102.getByte, 233.getByte, 63.getByte))}
+    }
+  }
+
+DataProjectWriteErrors: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == `The path "Bad.txt" of "data.Notes" is not valid: "Bad.txt" is not a valid resource name. A resource name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip" (a zip is a folder); a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("Bad.txt"), "no")})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "wz/x.zip" of "data.Notes" is not valid: "x.zip" is not a valid resource name. A resource name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip" (a zip is a folder); a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("wz", "x.zip"), "no")})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "other.fearless" of "data.Notes" is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("other.fearless"), "no")})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "readme/x.txt" of "data.Notes" is not valid: "readme" is a resource, not a folder.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme", "x.txt"), "no")})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "readme.md" of "data.Notes" is not written: its folder holds "readme", and a resource without extension cannot share its name with a resource with an extension.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme.md"), "no")})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "todo" of "data.Notes" names a folder, not a resource.`}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("todo"), "no")})
+  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).writeStrUtf8(L#("x.txt"), "no")})
+  }
+
+DataProjectDeletes: Test{::
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("d1", "inner", "three.txt"))}
+    .return{s.dataEdit(Notes).paths(L#("d1")).assertEq({::}, L#("keep.txt"))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("d2", "one.txt"))}
+    .return{s.dataEdit(Notes).paths(L#("d2")).assertEq({::}, L#("two.txt"))}
+    }
+  .checkWithSys{s -> s.dataEdit(Notes).delete(L#("d3", "one.txt"))}
+  .checkWithSys{s -> s.dataEdit(Notes).delete(L#("d4", "a.txt"))}
+  }
+
+DataProjectDeleteErrors: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == `The path "d5/b.txt" of "data.Notes" names no resource.`}}, {t -> t.dataEdit(Notes).delete(L#("d5", "b.txt"))})
+  .checkDetErrWithSys({::.isMsg{:: == `The path "data.fearless" of "data.Notes" is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`}}, {t -> t.dataEdit(Notes).delete(L#("data.fearless"))})
+  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `No dataEdit project is mounted on "data.Nope".`}}, {t -> t.dataEdit(Nope).delete(L#("readme"))})
+  }
+
+DataProjectsNotReachable: Test{::
+  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `The root folder of the data project mounted on "data.Gone" cannot be reached.`}}, {t -> t.dataRead(Gone).paths({})})
+  .checkNonDetErrWithSys({:: > "msg" .isMsg{:: == `The folder at the path "notes" of "data.Broken" holds "Bad.txt", which is not a valid resource or folder name: the data project changed while this program runs.`}}, {t -> t.dataRead(Broken).paths(L#("notes"))})
+  }
