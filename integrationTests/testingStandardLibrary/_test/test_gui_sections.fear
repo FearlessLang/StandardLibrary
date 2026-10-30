@@ -9,7 +9,7 @@ GuiSectionsTests: Test {::
       )}
     }}}).run{
       .ok _ -> Error.msg "The sections always stop the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "3 False True 2 True"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "3 False True 2 True"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{x -> Block#(x
@@ -21,55 +21,55 @@ GuiSectionsTests: Test {::
       )}
     }}}).run{
       .ok _ -> Error.msg "The sections always stop the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "TrueFalseFalse FalseTrue False"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "TrueFalseFalse FalseTrue False"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{:: .section.pane{::}.and.pane{::} .section.pane{::}.and.pane{::} .expand 2 .paint{g -> Error.msg "Expanding a missing section was accepted"}}
     }}}).run{
       .ok _ -> Error.msg "Expanding a missing section always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "There is no section at index 2 in this Sections: it has 2 sections, so the index is at most 1"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "There is no section at index 2 in this Sections: it has 2 sections, so the index is at most 1"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{:: .section.pane{::}.and.pane{::} .expand 1 .paint{g -> Error.msg "Expanding a missing section was accepted"}}
     }}}).run{
       .ok _ -> Error.msg "Expanding a missing section always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "There is no section at index 1 in this Sections: it has 1 section, so the index is at most 0"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "There is no section at index 1 in this Sections: it has 1 section, so the index is at most 0"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{:: .remove 0 .paint{g -> Error.msg "Removing from an empty Sections was accepted"}}
     }}}).run{
       .ok _ -> Error.msg "Removing from an empty Sections always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "There is no section at index 0 in this Sections: it has no sections"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "There is no section at index 0 in this Sections: it has no sections"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{x -> Error.msg(x.section.pane{::}.and.pane{:: .width 100 .height 40}.section.pane{::}.and.pane{:: .width 60 .height 30}.width.str + " " + (x.height.str) + " " + (x.pack.width.str) + " " + (x.height.str) + " " + (x.tabs(True).pack.width.str) + " " + (x.height.str))}
     }}}).run{
       .ok _ -> Error.msg "The sections always stop the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[112] Height[82] Width[112] Height[112] Width[112] Height[82]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[112] Height[82] Width[112] Height[112] Width[112] Height[82]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
     .sections{:: .width 300 .height 200 .tabs(True) .section.pane{:: .width 50 .height 30}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}} .expand 0}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[288] Height[152]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[288] Height[152]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
     .sections{:: .width 300 .height 200 .section.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}} .expand 0}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[288] Height[24]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[288] Height[24]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
     .sections{:: .width 300 .height 200 .section.pane{::}.and.pane{:: .paint{g -> Error.msg "A replaced content was drawn"}} .expand 0 .content(0).pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))}}}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[288] Height[24]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[288] Height[24]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
     .sections{:: .section.pane{:: .paint{g -> Error.msg "A replaced title was drawn"}}.and.pane{::} .title(0).pane{:: .paint{g -> Error.msg "The new title was drawn"}}}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new title was drawn"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new title was drawn"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
     .sections{:: .onTitleClick{x, n -> Error.msg "A program call ran onTitleClick"}
@@ -79,6 +79,6 @@ GuiSectionsTests: Test {::
     .pane{:: .paint{g -> Error.msg "Only the expanded content was drawn"}}
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Only the expanded content was drawn"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Only the expanded content was drawn"}}.assertTrue{i};
       }}
   }

@@ -1,58 +1,58 @@
 GuiTextTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.text("a" | "b")}}}}).run{
       .ok _ -> Error.msg "A newline in the text of a TextField always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new text of this TextField has a line break (U+000A) at offset 1: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this TextField has a line break (U+000A) at offset 1: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.uText("ab".u "2028")}}}}).run{
       .ok _ -> Error.msg "A line separator in the text of a TextField always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new text of this TextField has a line break (U+2028) at offset 2: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this TextField has a line break (U+2028) at offset 2: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> l.text("a" | "b")}}}}).run{
       .ok _ -> Error.msg "A newline in the text of a Label always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new text of this Label has a line break (U+000A) at offset 1: the text of a Label is one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a line break (U+000A) at offset 1: the text of a Label is one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> l.uText("".u "0085")}}}}).run{
       .ok _ -> Error.msg "A next line character in the text of a Label always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new text of this Label has a line break (U+0085) at offset 0: the text of a Label is one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a line break (U+0085) at offset 0: the text of a Label is one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .button{b -> b.uText("ok".u "000D 000A")}}}}).run{
       .ok _ -> Error.msg "A carriage return in the text of a Button always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The new text of this Button has a line break (U+000D) at offset 2: the text of a Button is one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Button has a line break (U+000D) at offset 2: the text of a Button is one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg("["+(t.text)+"]")}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "[]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.text "a b" .text)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "a b"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "a b"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.text("ab" | "c").append "d" .append("" | "e") .text)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == ("ab" | "cd" | "e")}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == ("ab" | "cd" | "e")}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.editable.str + " " + (t.textClearsUndo.str))}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "True True"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "True True"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.editable(False).textClearsUndo(False).wrap.str + " " + (a.editable.str) + " " + (a.textClearsUndo.str) + " " + (a.wrap(False).wrap.str))}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "True False False False"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "True False False False"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.width 50 .height 30 .text "a text longer than fifty virtual pixels" .width.str + " " + (t.height.str))}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[50] Height[30]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[50] Height[30]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.uText("a".u("00E9")).uText.size.str)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "2"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "2"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.text "Latin" .pack .height.str + " " + (t.uText("".u "005A 030D 030D 030D 0316 0316 0316").pack.height.str))}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[35] Height[45]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Height[35] Height[45]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.uText("Latin".u "000A 005A 030D 030D 030D 0316 0316 0316").pack.height.str)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Height[58]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Height[58]"}}.assertTrue{i};
       }}
   }

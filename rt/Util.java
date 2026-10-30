@@ -176,33 +176,36 @@ public final class Util{
     printPart(i);
     //map.entrySet().stream()
     //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
-    for (var e : d.getStackTrace()){
-      var f= _Throw$1c$0.frameData(e);
-      if (f != null){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
-    }
+    for (var f : _Throw$1c$0.frames(d.getStackTrace())){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
   }
   private static void printPart(Info$o$0 i){
     var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
     var list= List$o$1Instance.asJava(i.imm$softList$0());
     if (map.isEmpty() && list.isEmpty()){ printInfoMsg("", "", i); return; }
+    var caught= map.size() == 2 && map.keySet().stream().allMatch(k -> is(k, "info") || is(k, "stack"));
+    if (caught){
+      printPart((Info$o$0)entry(map, "info"));
+      List$o$1Instance.asJava(((Info$o$0)entry(map, "stack")).imm$softList$0()).forEach(f -> printFrame((Info$o$0)f));
+      return;
+    }
     list.forEach(e -> printElement((Info$o$0)e));
     map.forEach(Util::printEntry);
   }
   private static void printEntry(MapKey k, Object v){
     if (is(k, "msg")){ printPart((Info$o$0)v); return; }
-    if (is(k, "list")){ List$o$1Instance.asJava(((Info$o$0)v).imm$softList$0()).forEach(e -> printElement((Info$o$0)e)); return; }
     System.err.print(toS(k.key)+": "+toS(v)+"\n");
   }
   private static void printElement(Info$o$0 e){
-    var m= ((Map$c$2Instance)e.imm$softMap$0()).elems();
-    var frame= m.size() == 4 && m.keySet().stream().allMatch(k -> is(k, "fileName") || is(k, "typeName") || is(k, "methodName") || is(k, "lineNumber"));
-    if (frame){ System.err.print(_Throw$1c$0.fmtFrame(entry(m, "fileName"), entry(m, "typeName"), entry(m, "methodName"), entry(m, "lineNumber"))+"\n"); return; }
-    if (m.isEmpty() && List$o$1Instance.asJava(e.imm$softList$0()).isEmpty()){ printInfoMsg("", "", e); return; }
+    var plain= ((Map$c$2Instance)e.imm$softMap$0()).elems().isEmpty() && List$o$1Instance.asJava(e.imm$softList$0()).isEmpty();
+    if (plain){ printInfoMsg("", "", e); return; }
     System.err.print(toS(e)+"\n");
   }
-  private static String entry(Map<MapKey,Object> m, String label){
-    return ((Str$c$0Instance)((Info$o$0)m.entrySet().stream().filter(e -> is(e.getKey(), label)).findFirst().orElseThrow().getValue()).imm$softMsg$0()).val();
+  private static void printFrame(Info$o$0 f){
+    var m= ((Map$c$2Instance)f.imm$softMap$0()).elems();
+    System.err.print(_Throw$1c$0.fmtFrame(msg(m, "fileName"), msg(m, "typeName"), msg(m, "methodName"), msg(m, "lineNumber"))+"\n");
   }
+  private static Object entry(Map<MapKey,Object> m, String label){ return m.entrySet().stream().filter(e -> is(e.getKey(), label)).findFirst().orElseThrow().getValue(); }
+  private static String msg(Map<MapKey,Object> m, String label){ return ((Str$c$0Instance)((Info$o$0)entry(m, label)).imm$softMsg$0()).val(); }
   public static boolean is(MapKey k, String label){
     return k.key instanceof Str$c$0Instance s && s.val().equals(label);
     }

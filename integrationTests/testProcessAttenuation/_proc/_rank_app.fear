@@ -47,15 +47,15 @@ Parent: Main { sys -> Block#
     }}
   .do{ sys.try#(sys.iso.close, {s -> s.process.run(Child, {})}).run{
     .ok _ -> sys.out.println "parent: child ok";
-    .info i -> sys.out.println("parent: child failed: "+((i.getMap.get "msg").getMsg));
+    .info i -> sys.out.println("parent: child failed: "+((i.getMap.get "info").getMap.get "info" .getMsg));
     }}
   .do{ sys.try#(sys.iso.close, {s -> s.process.run(Child, Lists#[SystemAttenuator](NoDownload))}).run{
     .ok _ -> sys.out.println "parent: child ok";
-    .info i -> sys.out.println("parent: child failed: "+((i.getMap.get "msg").getMsg));
+    .info i -> sys.out.println("parent: child failed: "+((i.getMap.get "info").getMap.get "info" .getMsg));
     }}
   .do{ sys.try#(sys.iso.close, {s -> s.process.run(Failing, {})}).run{
     .ok _ -> sys.out.println "parent: failing ok";
-    .info i -> sys.out.println("parent: failing failed: "+((i.getMap.get "msg").getMsg));
+    .info i -> sys.out.println("parent: failing failed: "+((i.getMap.get "info").getMap.get "info" .getMsg));
     }}
   .return{ sys.out.println "parent ends" }
   }
@@ -68,7 +68,8 @@ Spin: Main { sys -> Block#
 Twice: InfoMain { sys, arg -> Infos.list(arg, arg) }
 FailingInfo: InfoMain { sys, arg -> Error.msg "the failing info main throws" }
 SpinInfo: InfoMain { sys, arg -> Block#.do{ Spin.main(sys) }.return{ arg } }
-Caught: { #(a: mut Action[Void]): Str -> a.run{.ok _ -> "ok"; .info i -> (i.getMap.get "msg").getMsg} }
+Caught: { #(a: mut Action[Void]): Str -> a.run{.ok _ -> "ok"; .info i -> (i.getMap.get "info").getMsg} }
+ChildFailed: { #(a: mut Action[Void]): Str -> a.run{.ok _ -> "ok"; .info i -> (i.getMap.get "info").getMap.get "info" .getMsg} }
 ///Starts processes and waits for them, ends them, and calls them again once surely terminated.
 Starter: Main { sys -> Block#
   .do{ sys.out.println "starter starts" }
@@ -80,7 +81,7 @@ Starter: Main { sys -> Block#
   .do{ sys.out.println("twice awaited: "+((twice.awaitUpTo(Duration.seconds 60)).str{::})) }
   .do{ sys.try#(sys.iso.close, {s -> s.process.run(FailingInfo, Infos.msg "x", {})}).run{
     .ok _ -> sys.out.println "failing info ok";
-    .info i -> sys.out.println("failing info failed: "+((i.getMap.get "msg").getMsg));
+    .info i -> sys.out.println("failing info failed: "+((i.getMap.get "info").getMap.get "info" .getMsg));
     }}
   .let[mut CapRunningMain[Info]] spinInfo= {sys.process.start(SpinInfo, Infos.msg "x", {})}
   .do{ spinInfo.terminate }
@@ -92,6 +93,6 @@ Starter: Main { sys -> Block#
   .do{ sys.out.println("spin again: "+(Caught#(sys.try#(spin.iso.close, {r -> Block#.openIso m = r .return{m.terminate}})))) }
   .let[mut CapRunningMain[Void]] failing= {sys.process.start(Failing, {})}
   .do{ sys.process.run(Spin, {}) }
-  .do{ sys.out.println("failing terminated: "+(Caught#(sys.try#(failing.iso.close, {r -> Block#.openIso m = r .return{m.terminate}})))) }
+  .do{ sys.out.println("failing terminated: "+(ChildFailed#(sys.try#(failing.iso.close, {r -> Block#.openIso m = r .return{m.terminate}})))) }
   .return{ sys.out.println "starter ends" }
   }

@@ -6,7 +6,7 @@ TestTryErrors: Test {::
     .let[mut base.Action[Nat]] a= {RevokableSystem#(root, real).try#{Error.nonDeterministic[Nat] "not revoked"}}
     .do{root.revoke}
     .return{a!}
-    }).assertInfo{:: > "msg" .isMsg{::.contains "Revocation.revoke was called."}}}
+    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> Block#
     .let[mut CapRevocationRoot] root= {sys.revocation}
     .do{root.start}

@@ -124,7 +124,7 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
       .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
     }}).run {
        .ok errMsg -> Error.msg errMsg;
-       .info i -> i.validate errorMatch .match {
+       .info i -> i.getMap.get "info" .validate errorMatch .match {
          .true -> Void;
          .false -> Error.msg("Error did not match expected: " + (i.str));
          }
@@ -212,7 +212,7 @@ _AddToLog: {
     }};
   }
 
-_FailureText: { #(i: Info): Str -> _FailureMsg#i | (_FailureList#i) }
+_FailureText: { #(i: Info): Str -> _FailureMsg#(i.getMap.get "info") | (_FailureList#i) }
 
 _FailureMsg: {
   #(i: Info): Str ->
@@ -253,7 +253,7 @@ _FailureActual: {
 
 _FailureList: {
   #(i: Info): Str ->
-    i.extract{:: > "list" .extractList}
+    i.extract{:: > "stack" .extractList}
       .mapSome{::.flow.filter{_IsUserFile#(_FrameField#(::, "fileName"))}.map {_FailureTrace#::}.join ("" |)}
       .orValue ""
   }
@@ -261,8 +261,8 @@ _FailureList: {
 _FormatFailure: {
   #(i: Info): Str ->
     "<failure>"
-    | (_FailureExpected#i)
-    + (_FailureActual#i)
+    | (_FailureExpected#(i.getMap.get "info"))
+    + (_FailureActual#(i.getMap.get "info"))
     + (_XmlEscape#(_FailureText#i))
     | "</failure>";
   }

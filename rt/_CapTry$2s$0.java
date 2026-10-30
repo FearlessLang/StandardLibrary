@@ -25,7 +25,7 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
     };
   }
    static Object addStackInfo(Object info, Throwable t){
-    return ((Info$o$0)info).imm$$plus$1(stackTraceOf(aboveHere(t.getStackTrace())).read$info$1(dtId));
+    return Infos$1c$0.instance.imm$map$4(new Str$c$0Instance("info"), info, new Str$c$0Instance("stack"), stackTraceOf(aboveHere(t.getStackTrace())).read$info$1(dtId));
   }
   private static StackTraceElement[] aboveHere(StackTraceElement[] st){
     var here= new Throwable().getStackTrace();
@@ -39,12 +39,6 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
   };
   @Override public Object mut$currentStackTrace$0(){ return stackTraceOf(new Throwable().getStackTrace()); }
   public static List$o$1Instance stackTraceOf(StackTraceElement[] st){
-    var al= new ArrayList<>();
-    for (var e : st){
-      var s= _base._Throw$1c$0.frameData(e);
-      if (s == null){ continue; }
-      al.add(s);
-    }
-    return new List$o$1Instance(al);
+    return new List$o$1Instance(new ArrayList<>(_Throw$1c$0.frames(st)));
   }
 }

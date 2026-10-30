@@ -1298,7 +1298,7 @@ _Int_Examples: Test {::
   }
   .test Test{::
   .check{+5 .pred .assertEq +4}
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.pred"}}, {(Math.minInt) .pred})
+  .checkNonDetErr({::.isMsg{::.startsWith "Int.pred"}}, {(Math.minInt) .pred})
   }
   .test Test{::
   .check{+7 .rem 2 .assertEq({::}, Opts# +1)}
@@ -1323,7 +1323,7 @@ _Int_Examples: Test {::
   }
   .test Test{::
   .check{+5 .succ .assertEq +6}
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Int.succ:"}}, {(Math.maxInt) .succ})
+  .checkNonDetErr({::.isMsg{::.startsWith "Int.succ:"}}, {(Math.maxInt) .succ})
   }
   .test Test{::
   .check{+6 .truncDiv(2) .assertEq({::}, Opts# +3)}
@@ -1448,7 +1448,7 @@ _Nat_Examples: Test {::
   .test Test{::
   .checkEq(5, {2 + 3})
   .checkNonDetErr(
-    {:: > "msg" .isMsg{::.startsWith "Nat+:" & (::.contains "overflow")}},
+    {::.isMsg{::.startsWith "Nat+:" & (::.contains "overflow")}},
     {(Math.maxNat - 1) + 2}
     )
   }
@@ -1565,7 +1565,7 @@ _Nat_Examples: Test {::
   }
   .test Test{::
   .check{5 .pred .assertEq 4}
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.pred"}}, {0 .pred})
+  .checkNonDetErr({::.isMsg{::.startsWith "Nat.pred"}}, {0 .pred})
   }
   .test Test{::
   .check{7 .rem 2 .assertEq({::}, Opts# 1)}
@@ -1588,7 +1588,7 @@ _Nat_Examples: Test {::
   }
   .test Test{::
   .check{5 .succ .assertEq 6}
-  .checkNonDetErr({:: > "msg" .isMsg{::.startsWith "Nat.succ"}}, {(Math.maxNat) .succ})
+  .checkNonDetErr({::.isMsg{::.startsWith "Nat.succ"}}, {(Math.maxNat) .succ})
   }
   .test Test{::
   .check{7 .truncDiv 2 .assertEq({::}, Opts# (3))}
