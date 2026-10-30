@@ -57,6 +57,6 @@ public final class _CapDownload$2gw$0 implements CapDownload$2gw$0{
   @Override public Object mut$downloadImage$3(Object url, Object maxBytes, Object maxPixels){
     var u= AssetBytesRead.str(url);
     var bs= DownloadFetch.bytes(u, AssetBytesRead.nat(maxBytes));
-    return new Image$1c$0Instance(AssetImageRead.decode("Resource with url "+u, bs, AssetBytesRead.nat(maxPixels), Util::detErr));
+    return new Image$1c$0Instance(AssetImageRead.decode("Resource with url "+u, bs, AssetBytesRead.nat(maxPixels)));
   }
 }

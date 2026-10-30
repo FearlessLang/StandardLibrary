@@ -35,7 +35,7 @@ import io.github.humbleui.types.Rect;
 
 final class Stage extends MouseAdapter{
   enum Mode{ decorated, fearless, fullScreen }
-  static final Image cornerIcon= AssetImageRead.decode("Resource with path /_base/icons/fearless.png", _FluentGUI.iconBytes(IconsFearless$9kw$0.instance), Scopes.maxImagePixels, Util::nonDetErr);
+  static final Image cornerIcon= AssetImageRead.decode("Resource with path /_base/icons/fearless.png", _FluentGUI.iconBytes(IconsFearless$9kw$0.instance), Scopes.maxImagePixels);
   final _Frame owner;
   final _FluentGUI gui;
   final GraphicsDevice device= GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
