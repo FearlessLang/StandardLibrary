@@ -65,13 +65,13 @@ final class AssetImageRead{
       default -> false;
     };
   }
-  static Error undecodable(String subject){ return detErr(subject+" can not be decoded as an image according to standards "+standards); }
+  static Error undecodable(String subject){ return detErr(subject+"\ncan not be decoded as an image according to standards "+standards); }
 
   static void checkSize(String subject, int w, int h, long maxPixels){
     assert w > 0 && h > 0;
     var pixels= Math.multiplyExact((long)w, h);
-    if (w > Scopes.maxExtent || h > Scopes.maxExtent || pixels > Scopes.maxImagePixels){ throw detErr(subject+" is an image of "+w+" x "+h+", which is too large.\nHeight must be strictly less than "+(Scopes.maxExtent+1)+".\nWidth must be strictly less than "+(Scopes.maxExtent+1)+".\nHeight * Width must be strictly less than "+(Scopes.maxImagePixels+1)+"."); }
+    if (w > Scopes.maxExtent || h > Scopes.maxExtent || pixels > Scopes.maxImagePixels){ throw detErr(subject+"\nis an image of "+w+" x "+h+", which is too large.\nHeight must be strictly less than "+(Scopes.maxExtent+1)+".\nWidth must be strictly less than "+(Scopes.maxExtent+1)+".\nHeight * Width must be strictly less than "+(Scopes.maxImagePixels+1)+"."); }
     if (Long.compareUnsigned(maxPixels, pixels) >= 0){ return; }
-    throw detErr(subject+" is an image of "+w+" x "+h+" = "+pixels+" pixels, more than maxPixels "+Long.toUnsignedString(maxPixels));
+    throw detErr(subject+"\nis an image of "+w+" x "+h+" = "+pixels+" pixels, more than maxPixels "+Long.toUnsignedString(maxPixels));
   }
 }

@@ -65,7 +65,7 @@ final class AssetBytesRead{
     }
     catch (IOException|UncheckedIOException _){ throw unreadable(path); }
   }
-  static Error unreadable(String path){ return nonDetErr("Resource with path "+path.substring("fear:".length())+" can not be read as bytes"); }
+  static Error unreadable(String path){ return nonDetErr("Resource with path "+path.substring("fear:".length())+"\ncan not be read as bytes"); }
 
   static final ConcurrentHashMap<String,List<List<String>>> autoloadCache= new ConcurrentHashMap<>();
 

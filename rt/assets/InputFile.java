@@ -22,7 +22,7 @@ record InputFile(Optional<DataFiles.Root> root, String label, Path path, List<St
   byte[] bytes(){
     root.ifPresent(DataFiles::reachable);
     try{ return DataFiles.bytes(path, zipSteps, zipEntry); }
-    catch (IOException _){ throw nonDetErr(subject()+" can not be read as bytes"); }
+    catch (IOException _){ throw nonDetErr(subject()+"\ncan not be read as bytes"); }
   }
   Object str(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.str(bytes(), recover, decoder); }
   Object uStr(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.uStr(bytes(), recover, decoder); }
