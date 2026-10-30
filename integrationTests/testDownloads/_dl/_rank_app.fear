@@ -1,0 +1,118 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Block as Block;
+use base.Try as Try;
+use base.Lists as L;
+
+Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+NeverRecovers: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "should not happen" }
+NeverRecoversU: base.BadUStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "should not happen".u }
+Pub: base.DataRead{}
+Base: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("base.txt")).readStrUtf8 Recover }
+LenUrl: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("len.txt")).readStrUtf8 Recover }
+
+DownloadTests: UnitTests{::
+  .test DownloadsThatSucceed
+  .test DownloadsRefusedByTheirUrl
+  .test DownloadsThatFail
+  }
+
+DownloadsThatSucceed: Test{::
+  .checkWithSys{s -> s.download.downloadStrUtf8(Base#s+"/ok", 1000, NeverRecovers).assertEq "hello download"}
+  .checkWithSys{s -> s.download.downloadBytes(Base#s+"/bytes", 1000).assertEq({::}, L#(65.getByte, 66.getByte, 67.getByte))}
+  .checkWithSys{s -> s.download.downloadStrUtf8(Base#s+"/start", 1000, NeverRecovers).assertEq "landed"}
+  .checkWithSys{s -> s.download.downloadStrUtf8(Base#s+"/accent", 1000, Recover).assertEq "caf?"}
+  .checkWithSys{s -> s.download.downloadUStrUtf8(Base#s+"/accent", 1000, NeverRecoversU).size.assertEq 4}
+  .checkWithSys{s -> s.download.downloadImage(Base#s+"/img.png", 100000, 1000000).width.get.assertEq 3}
+  }
+
+DownloadsRefusedByTheirUrl: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Invalid URL descriptor.`
+    |`unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/x`
+    )}}, {t -> t.download.downloadStrUtf8("ftp://127.0.0.1/x", 1000, NeverRecovers)})
+  .checkDetErrWithSys({::.isMsg{::.startsWith(
+     `Invalid URL descriptor.`
+    |``
+    )}}, {t -> t.download.downloadStrUtf8("not a url", 1000, NeverRecovers)})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `Invalid URL descriptor.`
+    |`port out of range: 99999`
+    |`url: http://127.0.0.1:99999/x`
+    )}}, {t -> t.download.downloadStrUtf8("http://127.0.0.1:99999/x", 1000, NeverRecovers)})
+  }
+
+DownloadsThatFail: Test{::
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(b+"/big", 4)}).assertInfo{::.isMsg{:: == (
+       `Download exceeds maxBytes.`
+      |`url: `+b+`/big`
+      |`contentLength: 10`
+      |`maxBytes: 4`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(b+"/chunked", 4)}).assertInfo{::.isMsg{:: == (
+       `Download exceeds maxBytes.`
+      |`url: `+b+`/chunked`
+      |`bytesRead: 10`
+      |`maxBytes: 4`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/loop", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+       `Download failed.`
+      |`url: `+b+`/loop`
+      |`too many redirects`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/file", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+       `Invalid URL descriptor.`
+      |`unsupported scheme (only http/https allowed): file in file:///etc/passwd`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/missing", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+       `Download failed.`
+      |`url: `+b+`/missing`
+      |`HTTP status: 404`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/back", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+       `Download failed.`
+      |`url: `+b+`/missing`
+      |`HTTP status: 404`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/space", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+       `Download failed.`
+      |`url: `+b+`/space`
+      |`redirect to a malformed Location: /a b`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/ftp", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+       `Invalid URL descriptor.`
+      |`unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/caf%C3%A9`
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let u= {LenUrl#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(u, 1000)}).assertInfo{::.isMsg{::.startsWith(
+       `Download failed.`
+      |`url: `+u
+      |`malformed response: `
+      )}}}
+    }
+  }
