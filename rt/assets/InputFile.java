@@ -47,7 +47,9 @@ record InputFile(Optional<DataFiles.Root> root, String label, Path path, List<St
     for (var b : bs){ l.add(Byte$o$0Instance.instance(b)); }
     return List$o$1Instance.wrap(l);
   }
+  //TODO: we will need to have System or something have some callback to do masking on the paths if the user wants to prevent the program to see OS paths
   @Override public Object mut$readImage$1(Object maxPixels){
-    return new Image$1c$0Instance(AssetImageRead.decode(label, bytes(), AssetBytesRead.nat(maxPixels), Util::detErr));
+    var subject= root.isPresent() ? "Resource with path "+label : "File with absolute path "+portable(path.toAbsolutePath().toString());
+    return new Image$1c$0Instance(AssetImageRead.decode(subject, bytes(), AssetBytesRead.nat(maxPixels), Util::detErr));
   }
 }
