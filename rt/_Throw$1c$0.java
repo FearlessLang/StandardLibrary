@@ -45,10 +45,9 @@ public interface _Throw$1c$0{
     );
   }
   static String fmtFrame(StackFrame$174$0 f){
-    var fn= Util.toS(f.imm$fileName$0());
-    var tn= Util.toS(f.imm$typeName$0());
-    var mn= Util.toS(f.imm$methodName$0());
-    var ln= Util.toS(f.imm$lineNumber$0());
+    return fmtFrame(Util.toS(f.imm$fileName$0()), Util.toS(f.imm$typeName$0()), Util.toS(f.imm$methodName$0()), Util.toS(f.imm$lineNumber$0()));
+  }
+  static String fmtFrame(String fn, String tn, String mn, String ln){
     int sp= mn.indexOf(' ');
     assert sp > 0;
     var meth= mn.substring(0, sp+1)+tn+mn.substring(sp+1);
