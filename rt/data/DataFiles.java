@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,17 +96,17 @@ final class DataFiles{
     catch (UncheckedIOException e){ throw failed(root.name(), p, write, e.getCause()); }
   }
   private static Error failed(String name, List<String> path, boolean write, IOException e){
-    return lost("The "+at(name, path)+" could not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName(), e);
+    return lost("The "+at(name, path)+"\ncould not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName(), e);
   }
-  private static String at(String name, List<String> path){ return "path \""+String.join("/", path)+"\" of \""+name+"\""; }
-  private static Error refused(String name, List<String> path, String why){ return detErr("The "+at(name, path)+" "+why); }
-  private static Error invalid(String name, List<String> path, String why){ return detErr("The "+at(name, path)+" is not valid: "+why); }
+  private static String at(String name, List<String> path){ return "path "+name+"/"+String.join("/", path); }
+  private static Error refused(String name, List<String> path, String why){ return detErr("The "+at(name, path)+"\n"+why); }
+  private static Error invalid(String name, List<String> path, String why){ return detErr("The "+at(name, path)+"\nis not valid: "+why); }
   private static boolean atom(String s){ return s.matches("[a-z_][a-z0-9_]*") && !reserved.contains(s); }
   private static boolean fileName(String s){
     var dot= s.indexOf('.');
     if (dot < 0){ return noExt.contains(s); }
     var ext= s.substring(dot+1);
-    return atom(s.substring(0, dot)) && !ext.equals("zip") && (multiDot.contains(ext) || ext.matches("[a-z0-9]{1,16}"));
+    return atom(s.substring(0, dot)) && !ext.equals("zip") && !ext.equals("fearless") && (multiDot.contains(ext) || ext.matches("[a-z0-9]{1,16}"));
   }
   private static void folders(String name, List<String> path, List<String> folders){
     for (var s : folders){
@@ -113,11 +114,18 @@ final class DataFiles{
     }
   }
   private static void resource(String name, List<String> path){
-    if (path.isEmpty()){ throw refused(name, path, "names the root folder, not a resource."); }
+    if (path.isEmpty()){ throw refused(name, path, "names the root folder, not a file."); }
     folders(name, path, path.subList(0, path.size()-1));
-    if (path.size() == 1 && path.getFirst().endsWith(".fearless")){ throw invalid(name, path, "the top of a data project holds no resource with the extension \"fearless\": that is the place of the marker of the project, which is not part of the data project."); }
-    if (!fileName(path.getLast())){ throw invalid(name, path, "\""+path.getLast()+"\" is not a valid resource name. A resource name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than \"zip\" (a zip is a folder); a few well known names, like \"readme\", have no extension, and a few well known extensions, like \"tar.gz\", have two parts."); }
+    if (!fileName(path.getLast())){ throw notFileName(name, path); }
   }
+  private static Error notFileName(String name, List<String> path){
+    return invalid(name, path, "\""+path.getLast()+"\" is not a valid file name.\n"
+      +"A file name is a name, a dot and an extension.\n"
+      +"The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not \"con\", \"prn\", \"aux\", \"nul\", \"com1\" to \"com9\" or \"lpt1\" to \"lpt9\".\n"
+      +"The extension is 1 to 16 lowercase letters or digits, other than \"zip\" and \"fearless\", or one of "+quoted(multiDot)+".\n"
+      +"A file name can also be one of "+quoted(noExt)+", with no extension.");
+  }
+  private static String quoted(Set<String> names){ return String.join(", ", names.stream().sorted().map(n -> "\""+n+"\"").toList()); }
   private static void writable(String name, List<String> path){
     resource(name, path);
     if (String.join("/", path).length() > 200){ throw invalid(name, path, "a path is at most 200 characters long."); }
@@ -125,17 +133,17 @@ final class DataFiles{
   private static Object list(String name, Path root, List<String> path) throws IOException{
     folders(name, path, path);
     var at= resolve(root, path);
-    if (at.isEmpty()){ throw refused(name, path, "names no folder."); }
-    if (at.get() instanceof Resource){ throw refused(name, path, "names a resource, not a folder."); }
+    if (at.isEmpty()){ throw refused(name, path, "names no resource."); }
+    if (at.get() instanceof Resource){ throw refused(name, path, "names a file, not a folder."); }
     var names= names(at.get());
     if (path.isEmpty()){ names.removeIf(n -> n.endsWith(".fearless")); }
-    names.stream().filter(n -> !atom(n) && !fileName(n)).findFirst().ifPresent(n -> { throw nonDetErr("The folder at the "+at(name, path)+" holds \""+n+"\", which is not a valid resource or folder name: the data project changed while this program runs."); });
+    names.stream().filter(n -> !atom(n) && !fileName(n)).findFirst().ifPresent(n -> { throw nonDetErr("The folder at the "+at(name, path)+"\nholds \""+n+"\", which is not a valid resource name: the data project changed while this program runs."); });
     return List$o$1Instance.wrap(names.stream().<Object>map(Str$c$0Instance::instance).toList());
   }
   private static Object open(String name, Path root, List<String> path) throws IOException{
     resource(name, path);
     var at= resolve(root, path);
-    if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a resource."); }
+    if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
     return new InputFile(Optional.of(new Root(name, root)), name+"/"+String.join("/", path), f.path(), f.steps(), f.entry());
   }
   private static Object write(String name, Path root, List<String> path, byte[] bytes) throws IOException{
@@ -146,7 +154,7 @@ final class DataFiles{
       for (; i < path.size()-1; i += 1){
         var next= child(at, path.get(i));
         if (next.isEmpty()){ break; }
-        if (next.get() instanceof Resource){ throw refused(name, path, "is not valid: \""+path.get(i)+"\" is a resource, not a folder."); }
+        if (next.get() instanceof Resource){ throw refused(name, path, "is not valid: \""+path.get(i)+"\" is a file, not a folder."); }
         at = next.get();
       }
       if (i == path.size()-1){ clash(name, path, at); }
@@ -156,14 +164,14 @@ final class DataFiles{
   }
   private static void clash(String name, List<String> path, Node at) throws IOException{
     var last= path.getLast();
-    if (child(at, last).filter(n -> !(n instanceof Resource)).isPresent()){ throw refused(name, path, "names a folder, not a resource."); }
+    if (child(at, last).filter(n -> !(n instanceof Resource)).isPresent()){ throw refused(name, path, "names a folder, not a file."); }
     var dot= last.indexOf('.');
     var base= dot < 0 ? last : last.substring(0, dot);
     if (!noExt.contains(base)){ return; }
     var other= dot < 0
       ? names(at).stream().filter(n -> n.startsWith(last+".")).findFirst()
       : child(at, base).filter(Resource.class::isInstance).map(_ -> base);
-    other.ifPresent(o -> { throw refused(name, path, "is not written: its folder holds \""+o+"\", and a resource without extension cannot share its name with a resource with an extension."); });
+    other.ifPresent(o -> { throw refused(name, path, "is not written: its folder holds \""+o+"\", and a file without extension cannot share its name with a file with an extension."); });
   }
   private static void put(Node at, List<String> rest, byte[] bytes, Path root) throws IOException{
     switch (at){
@@ -178,14 +186,27 @@ final class DataFiles{
     }
   }
   private static Object delete(String name, Path root, List<String> path) throws IOException{
-    writable(name, path);
+    if (path.isEmpty()){ throw refused(name, path, "names the root folder, which can not be deleted."); }
+    if (atom(path.getLast())){ folders(name, path, path); }
+    else{ writable(name, path); }
     synchronized (lock){
       var at= resolve(root, path);
-      if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a resource."); }
-      if (!f.entry().isEmpty()){ editZip(f.path(), f.steps(), m -> m.remove(f.entry()), root); }
-      else{ Files.delete(f.path()); prune(f.path().getParent(), root); }
+      if (at.isEmpty()){ throw refused(name, path, "names no resource."); }
+      switch (at.get()){
+        case Resource f when f.entry().isEmpty() -> { Files.delete(f.path()); prune(f.path().getParent(), root); }
+        case Resource f -> editZip(f.path(), f.steps(), m -> m.remove(f.entry()), root);
+        case Dir d -> { deleteTree(d.path()); prune(d.path().getParent(), root); }
+        case ZipDir z when !z.prefix().isEmpty() -> editZip(z.zip(), z.steps(), m -> m.keySet().removeIf(k -> k.startsWith(z.prefix())), root);
+        case ZipDir z when z.steps().isEmpty() -> { Files.delete(z.zip()); prune(z.zip().getParent(), root); }
+        case ZipDir z -> editZip(z.zip(), z.steps().subList(0, z.steps().size()-1), m -> m.remove(z.steps().getLast()), root);
+      }
     }
     return Void$o$0.instance;
+  }
+  private static void deleteTree(Path dir) throws IOException{
+    try (var s= Files.walk(dir)){
+      for (var p : s.sorted(Comparator.reverseOrder()).toList()){ Files.delete(p); }
+    }
   }
   private static Optional<Node> resolve(Path root, List<String> path) throws IOException{
     Optional<Node> at= Optional.of(new Dir(root));
