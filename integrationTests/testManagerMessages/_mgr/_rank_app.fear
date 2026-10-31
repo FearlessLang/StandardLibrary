@@ -27,7 +27,7 @@ ManagerMessages: Test{::
 
 ManagerMessagesRefused: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The manager refuses to forget nope.`
+     "The manager refuses to forget nope."
     )}}, {t -> t.manager.forget "nope"})
   .checkDetErrWithSys({::.isMsg{:: == (
      `The path "relative" of the message "Register" is not an absolute path of this system.`
