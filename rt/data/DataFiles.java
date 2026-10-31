@@ -106,7 +106,7 @@ final class DataFiles{
     var dot= s.indexOf('.');
     if (dot < 0){ return noExt.contains(s); }
     var ext= s.substring(dot+1);
-    return atom(s.substring(0, dot)) && !ext.equals("zip") && (multiDot.contains(ext) || ext.matches("[a-z0-9]{1,16}"));
+    return atom(s.substring(0, dot)) && !ext.equals("zip") && !ext.equals("fearless") && (multiDot.contains(ext) || ext.matches("[a-z0-9]{1,16}"));
   }
   private static void folders(String name, List<String> path, List<String> folders){
     for (var s : folders){
@@ -118,13 +118,16 @@ final class DataFiles{
     folders(name, path, path.subList(0, path.size()-1));
     if (!fileName(path.getLast())){ throw notFileName(name, path); }
   }
-  private static boolean marker(List<String> path){ return path.size() == 1 && path.getFirst().endsWith(".fearless"); }
   private static Error notFileName(String name, List<String> path){
-    return invalid(name, path, "\""+path.getLast()+"\" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than \"zip\", and other than \"fearless\" in the root folder; a few well known names, like \"readme\", have no extension, and a few well known extensions, like \"tar.gz\", have two parts.");
+    return invalid(name, path, "\""+path.getLast()+"\" is not a valid file name.\n"
+      +"A file name is a name, a dot and an extension.\n"
+      +"The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not \"con\", \"prn\", \"aux\", \"nul\", \"com1\" to \"com9\" or \"lpt1\" to \"lpt9\".\n"
+      +"The extension is 1 to 16 lowercase letters or digits, other than \"zip\" and \"fearless\", or one of "+quoted(multiDot)+".\n"
+      +"A file name can also be one of "+quoted(noExt)+", with no extension.");
   }
+  private static String quoted(Set<String> names){ return String.join(", ", names.stream().sorted().map(n -> "\""+n+"\"").toList()); }
   private static void writable(String name, List<String> path){
     resource(name, path);
-    if (marker(path)){ throw notFileName(name, path); }
     if (String.join("/", path).length() > 200){ throw invalid(name, path, "a path is at most 200 characters long."); }
   }
   private static Object list(String name, Path root, List<String> path) throws IOException{
@@ -139,7 +142,6 @@ final class DataFiles{
   }
   private static Object open(String name, Path root, List<String> path) throws IOException{
     resource(name, path);
-    if (marker(path)){ throw refused(name, path, "names no resource."); }
     var at= resolve(root, path);
     if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
     return new InputFile(Optional.of(new Root(name, root)), name+"/"+String.join("/", path), f.path(), f.steps(), f.entry());

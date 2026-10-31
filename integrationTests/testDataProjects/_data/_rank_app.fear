@@ -63,7 +63,11 @@ DataProjectReadErrors: Test{::
     )}}, {t -> t.dataRead(Pub).read({})})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Pub/data.fearless"
-    |"names no resource."
+    |`is not valid: "data.fearless" is not a valid file name.`
+    |"A file name is a name, a dot and an extension."
+    |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
+    |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
+    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataRead(Pub).read(L#("data.fearless"))})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No data project is mounted on "data.Nope".`
@@ -119,15 +123,27 @@ DataProjectWrites: Test{::
 DataProjectWriteErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/Bad.txt"
-    |`is not valid: "Bad.txt" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip", and other than "fearless" in the root folder; a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
+    |`is not valid: "Bad.txt" is not a valid file name.`
+    |"A file name is a name, a dot and an extension."
+    |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
+    |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
+    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("Bad.txt"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/wz/x.zip"
-    |`is not valid: "x.zip" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip", and other than "fearless" in the root folder; a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
+    |`is not valid: "x.zip" is not a valid file name.`
+    |"A file name is a name, a dot and an extension."
+    |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
+    |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
+    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("wz", "x.zip"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/other.fearless"
-    |`is not valid: "other.fearless" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip", and other than "fearless" in the root folder; a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
+    |`is not valid: "other.fearless" is not a valid file name.`
+    |"A file name is a name, a dot and an extension."
+    |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
+    |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
+    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("other.fearless"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/readme/x.txt"
@@ -209,7 +225,11 @@ DataProjectDeleteErrors: Test{::
     )}}, {t -> t.dataEdit(Notes).delete(L#("d5", "b.txt"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/data.fearless"
-    |`is not valid: "data.fearless" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip", and other than "fearless" in the root folder; a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
+    |`is not valid: "data.fearless" is not a valid file name.`
+    |"A file name is a name, a dot and an extension."
+    |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
+    |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
+    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).delete(L#("data.fearless"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/"
