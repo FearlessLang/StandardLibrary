@@ -125,17 +125,17 @@ final class DataFiles{
   private static Object list(String name, Path root, List<String> path) throws IOException{
     folders(name, path, path);
     var at= resolve(root, path);
-    if (at.isEmpty()){ throw refused(name, path, "names no folder."); }
+    if (at.isEmpty()){ throw refused(name, path, "names no resource."); }
     if (at.get() instanceof Resource){ throw refused(name, path, "names a file, not a folder."); }
     var names= names(at.get());
     if (path.isEmpty()){ names.removeIf(n -> n.endsWith(".fearless")); }
-    names.stream().filter(n -> !atom(n) && !fileName(n)).findFirst().ifPresent(n -> { throw nonDetErr("The folder at the "+at(name, path)+"\nholds \""+n+"\", which is not a valid file or folder name: the data project changed while this program runs."); });
+    names.stream().filter(n -> !atom(n) && !fileName(n)).findFirst().ifPresent(n -> { throw nonDetErr("The folder at the "+at(name, path)+"\nholds \""+n+"\", which is not a valid resource name: the data project changed while this program runs."); });
     return List$o$1Instance.wrap(names.stream().<Object>map(Str$c$0Instance::instance).toList());
   }
   private static Object open(String name, Path root, List<String> path) throws IOException{
     resource(name, path);
     var at= resolve(root, path);
-    if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no file." : "names a folder, not a file."); }
+    if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
     return new InputFile(Optional.of(new Root(name, root)), name+"/"+String.join("/", path), f.path(), f.steps(), f.entry());
   }
   private static Object write(String name, Path root, List<String> path, byte[] bytes) throws IOException{
@@ -181,7 +181,7 @@ final class DataFiles{
     writable(name, path);
     synchronized (lock){
       var at= resolve(root, path);
-      if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no file." : "names a folder, not a file."); }
+      if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
       if (!f.entry().isEmpty()){ editZip(f.path(), f.steps(), m -> m.remove(f.entry()), root); }
       else{ Files.delete(f.path()); prune(f.path().getParent(), root); }
     }

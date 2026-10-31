@@ -41,7 +41,7 @@ DataProjectReadErrors: Test{::
     )}}, {t -> t.dataRead(Pub).paths(L#("readme"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Pub/none"
-    |"names no folder."
+    |"names no resource."
     )}}, {t -> t.dataRead(Pub).paths(L#("none"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Pub/.hidden"
@@ -49,7 +49,7 @@ DataProjectReadErrors: Test{::
     )}}, {t -> t.dataRead(Pub).paths(L#(".hidden"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Pub/notes/b.txt"
-    |"names no file."
+    |"names no resource."
     )}}, {t -> t.dataRead(Pub).read(L#("notes", "b.txt"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Pub/todo"
@@ -160,7 +160,7 @@ DataProjectDeletes: Test{::
 DataProjectDeleteErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/d5/b.txt"
-    |"names no file."
+    |"names no resource."
     )}}, {t -> t.dataEdit(Notes).delete(L#("d5", "b.txt"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/data.fearless"
@@ -177,6 +177,6 @@ DataProjectsNotReachable: Test{::
     )}}, {t -> t.dataRead(Gone).paths({})})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "The folder at the path data.Broken/notes"
-    |`holds "Bad.txt", which is not a valid file or folder name: the data project changed while this program runs.`
+    |`holds "Bad.txt", which is not a valid resource name: the data project changed while this program runs.`
     )}}, {t -> t.dataRead(Broken).paths(L#("notes"))})
   }
