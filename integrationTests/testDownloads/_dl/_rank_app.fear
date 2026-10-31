@@ -28,17 +28,17 @@ DownloadsThatSucceed: Test{::
 
 DownloadsRefusedByTheirUrl: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
-     `Invalid URL descriptor.`
-    |`unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/x`
+     "Invalid URL descriptor."
+    |"unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/x"
     )}}, {t -> t.download.downloadStrUtf8("ftp://127.0.0.1/x", 1000, NeverRecovers)})
   .checkDetErrWithSys({::.isMsg{::.startsWith(
-     `Invalid URL descriptor.`
-    |``
+     "Invalid URL descriptor."
+    |""
     )}}, {t -> t.download.downloadStrUtf8("not a url", 1000, NeverRecovers)})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `Invalid URL descriptor.`
-    |`port out of range: 99999`
-    |`url: http://127.0.0.1:99999/x`
+     "Invalid URL descriptor."
+    |"port out of range: 99999"
+    |"url: http://127.0.0.1:99999/x"
     )}}, {t -> t.download.downloadStrUtf8("http://127.0.0.1:99999/x", 1000, NeverRecovers)})
   }
 
@@ -46,73 +46,73 @@ DownloadsThatFail: Test{::
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadBytes(b+"/big", 4)}).assertInfo{::.isMsg{:: == (
-       `Download exceeds maxBytes.`
-      |`url: `+b+`/big`
-      |`contentLength: 10`
-      |`maxBytes: 4`
+       "Download exceeds maxBytes."
+      |"url: "+b+"/big"
+      |"contentLength: 10"
+      |"maxBytes: 4"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadBytes(b+"/chunked", 4)}).assertInfo{::.isMsg{:: == (
-       `Download exceeds maxBytes.`
-      |`url: `+b+`/chunked`
-      |`bytesRead: 10`
-      |`maxBytes: 4`
+       "Download exceeds maxBytes."
+      |"url: "+b+"/chunked"
+      |"bytesRead: 10"
+      |"maxBytes: 4"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/loop", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
-       `Download failed.`
-      |`url: `+b+`/loop`
-      |`too many redirects`
+       "Download failed."
+      |"url: "+b+"/loop"
+      |"too many redirects"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/file", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
-       `Invalid URL descriptor.`
-      |`unsupported scheme (only http/https allowed): file in file:///etc/passwd`
+       "Invalid URL descriptor."
+      |"unsupported scheme (only http/https allowed): file in file:///etc/passwd"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/missing", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
-       `Download failed.`
-      |`url: `+b+`/missing`
-      |`HTTP status: 404`
+       "Download failed."
+      |"url: "+b+"/missing"
+      |"HTTP status: 404"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/back", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
-       `Download failed.`
-      |`url: `+b+`/missing`
-      |`HTTP status: 404`
+       "Download failed."
+      |"url: "+b+"/missing"
+      |"HTTP status: 404"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/space", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
-       `Download failed.`
-      |`url: `+b+`/space`
-      |`redirect to a malformed Location: /a b`
+       "Download failed."
+      |"url: "+b+"/space"
+      |"redirect to a malformed Location: /a b"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/ftp", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
-       `Invalid URL descriptor.`
-      |`unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/caf%C3%A9`
+       "Invalid URL descriptor."
+      |"unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/caf%C3%A9"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let u= {LenUrl#s}
     .return{Try#(s.iso.close, {t -> t.download.downloadBytes(u, 1000)}).assertInfo{::.isMsg{::.startsWith(
-       `Download failed.`
-      |`url: `+u
-      |`malformed response: `
+       "Download failed."
+      |"url: "+u
+      |"malformed response: "
       )}}}
     }
   }
