@@ -1,6 +1,5 @@
 package _base;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_16BE;
 import static java.nio.charset.StandardCharsets.UTF_16LE;
@@ -20,9 +19,7 @@ public final class _CapDataEdit$2h4$0 implements CapDataEdit$2h4$0{
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$paths$1(Object path){ return DataFiles.paths(root, path); }
   @Override public Object mut$read$1(Object path){ return DataFiles.read(root, path); }
-  @Override public Object mut$writeStrUtf8$2(Object path, Object content){ return str(path, content, UTF_8); }
-  @Override public Object mut$writeStrAscii$2(Object path, Object content){ return str(path, content, US_ASCII); }
-  @Override public Object mut$writeStrLatin1$2(Object path, Object content){ return str(path, content, ISO_8859_1); }
+  @Override public Object mut$writeStrAsciiUtf8Latin1$2(Object path, Object content){ return str(path, content, US_ASCII); }
   @Override public Object mut$writeStrUtf16Le$2(Object path, Object content){ return str(path, content, UTF_16LE); }
   @Override public Object mut$writeStrUtf16Be$2(Object path, Object content){ return str(path, content, UTF_16BE); }
   @Override public Object mut$writeStrUtf32Le$2(Object path, Object content){ return str(path, content, utf32le); }
