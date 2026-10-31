@@ -1,0 +1,161 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Block as Block;
+use base.Lists as L;
+use base.Nat as Nat;
+use base.Void as Void;
+
+Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+Pub: base.DataRead{}
+Zips: base.DataRead{}
+Url: { #(s: mut base.System, name: base.Str): base.Str -> s.dataRead(Pub).read(L#(name)).readStrUtf8 Recover }
+Deep: { #(n: Nat): Nat -> this#(n + 1) + 1 }
+DeepChild: base.InfoMain{sys, arg -> Block#((Deep#0).str, arg)}
+Lg: base.FileLog{}
+Bad: base.OrderBy[Nat]{a, b -> ((a.imm * 7 + (b.imm * 13)).getRem 3) <=> 1}
+Same: base.OrderHashBy[Nat]{ .cmp(a, b) -> 0 <=> 0; .hash t -> t.imm; .str t -> t.imm.str }
+Forged: base.TxtFile{
+  .path: base.Str -> "fear:/_nosuch/x.dat";
+  .diskPath: base.Str -> "_nosuch/x.dat";
+  .zipSteps: base.Str -> "";
+  .zipEntry: base.Str -> "";
+  .originalFileName: base.Str -> "x.dat";
+  }
+
+JavaLeakTests: UnitTests, base.PreLoadIcon[Junk]{::
+  .test Downloads
+  .test StackSpace
+  .test Memory
+  .test ELists
+  .test Sets
+  .test BiFlows
+  .test KeyStrokes
+  .test Assets
+  .test GuiIcons
+  .test Logs
+  .test DataZips
+  .test Manager
+  }
+
+Downloads: Test{::
+  .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith(
+       "Download failed."
+      |"url: http://127.0.0.1:"
+      )) && {m.endsWith(
+       "/x"
+      |"the connection to the host could not be opened"
+      )}}}, {t -> Block#
+      .openIso s = t
+      .return{s.download.downloadStrUtf8(Url#(s, "refused.txt")+"/x", 1000, Recover)}
+      })
+  .checkDetErrWithSys({::.isMsg{:: == (
+     "Invalid URL descriptor."
+    |"not a valid URI according to RFC 2396 and RFC 2732"
+    |"url: http://a b/"
+    )}}, {t -> t.download.downloadStrUtf8("http://a b/", 1000, Recover)})
+  .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith(
+       "Download failed."
+      |"url: http://127.0.0.1:"
+      )) && {m.endsWith(
+       "/bad"
+      |"the host did not answer with a valid HTTP response"
+      )}}}, {t -> Block#
+      .openIso s = t
+      .return{s.download.downloadStrUtf8(Url#(s, "base.txt")+"/bad", 1000, Recover)}
+      })
+  .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith(
+       "Download failed."
+      |"url: http://127.0.0.1:"
+      )) && {m.endsWith(
+       "/cut"
+      |"the connection ended before the whole response arrived"
+      )}}}, {t -> Block#
+      .openIso s = t
+      .return{s.download.downloadStrUtf8(Url#(s, "base.txt")+"/cut", 1000, Recover)}
+      })
+  .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith(
+       "Download failed."
+      |"url: http://127.0.0.1:"
+      )) && {m.endsWith(
+       "/len"
+      |"the Content-Length of the answer is not a number"
+      )}}}, {t -> Block#
+      .openIso s = t
+      .return{s.download.downloadStrUtf8(Url#(s, "base.txt")+"/len", 1000, Recover)}
+      })
+  }
+
+StackSpace: Test{::
+  .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {_ -> (Deep#0).str})
+  .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.process.run(DeepChild, base.Infos.msg "", {})})
+  .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.gui.run{f -> Block#((Deep#0).str, Void)}})
+  .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.gui.run{f -> Block#(f.modelFps(10, {m -> m.action{Block#((Deep#0).str, Void)}}), Void)}})
+  .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.gui.run{f -> f.content.pane{p -> p.paint{g -> Block#((Deep#0).str, g)}}}})
+  }
+
+Memory: Test{::
+  .checkNonDetErr({::.isMsg{:: == "The program ran out of memory"}}, {base.ELists.withCapacity[Nat](2147483646).list.size})
+  .checkNonDetErr({::.isMsg{:: == "The program ran out of memory"}}, {"a".repeat 2147483647})
+  }
+
+ELists: Test{::
+  .checkDetErr({::.isMsg{:: == "EList.removeIf: the function changed the EList while removeIf was running"}}, {Block#
+    .let l= {base.ELists#[Nat](1, 2)}
+    .return{l.removeIf{e -> Block#(l.add e, base.True)}.list.size}
+    })
+  .checkDetErr({::.isMsg{:: == "EList.sort: the OrderBy does not give a consistent order to the elements"}}, {base.ELists#[Nat].add(0).add(1).add(2).add(3).add(4).add(5).add(6).add(7).add(8).add(9).add(10).add(11).add(12).add(13).add(14).add(15).add(16).add(17).add(18).add(19).add(20).add(21).add(22).add(23).add(24).add(25).add(26).add(27).add(28).add(29).add(30).add(31).add(32).add(33).add(34).add(35).add(36).add(37).add(38).add(39).add(40).add(41).add(42).add(43).add(44).add(45).add(46).add(47).add(48).add(49).add(50).add(51).add(52).add(53).add(54).add(55).add(56).add(57).add(58).add(59).add(60).sort(Bad).list.size})
+  }
+
+Sets: Test{::
+  .checkDetErr({::.isMsg{:: == "Set.+: the OrderHash does not give a consistent order and hash to the elements"}}, {(base.Sets#(Same, 1) + 2).size})
+  }
+
+BiFlows: Test{::
+  .check{base.Flows#(1, 2).with(base.Flows#(10, 20)).limit(base.Math.maxNat).getMerge{a, b -> a + b}.list.size.assertEq 2}
+  }
+
+KeyStrokes: Test{::
+  .checkDetErr({::.isMsg{:: == `KeyStroke#"NOPE" is not a key name. Key names are listed in the documentation of KeyStroke, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}}, {(base.KeyStroke#"NOPE").get})
+  }
+
+Assets: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     "Invalid asset descriptor."
+    |"This file was not recognized by the compiler as auto-imported."
+    |"package: _nosuch"
+    |"diskPath: _nosuch/x.dat"
+    )}}, {t -> Forged.readStrUtf8(t.assetRead, Recover)})
+  }
+
+GuiIcons: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     "Resource with path /_leak/junk.png"
+    |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
+    )}}, {t -> t.gui.icon(Junk).run{f -> Block#(f.modelFps(10, {m -> m.action{f.close}}), Void)}})
+  }
+
+Logs: Test{::
+  .checkNonDetErr({::.isMsg{:: == (
+     "The log file .out/logs/_leak/lg.log"
+    |"can not be written"
+    )}}, {Lg.log "a"})
+  }
+
+DataZips: Test{::
+  .checkNonDetErrWithSys({::.isMsg{:: == (
+     "The path leak.Zips/bad"
+    |"can not be read."
+    )}}, {t -> t.dataRead(Zips).paths(L#("bad"))})
+  .checkNonDetErrWithSys({::.isMsg{:: == (
+     "The path leak.Zips/cut"
+    |"can not be read."
+    )}}, {t -> t.dataRead(Zips).paths(L#("cut"))})
+  .checkNonDetErrWithSys({::.isMsg{:: == (
+     "The path leak.Zips/latin"
+    |"can not be read."
+    )}}, {t -> t.dataRead(Zips).paths(L#("latin"))})
+  }
+
+Manager: Test{::
+  .checkNonDetErrWithSys({::.isMsg{:: == `The message "Show" could not reach the Fearless manager: the manager program could not be started.`}}, {t -> t.manager.show})
+  }
