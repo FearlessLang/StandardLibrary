@@ -1,0 +1,32 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Lists as L;
+
+Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+Name: base.F[base.BadTextReason,base.Str]{ ::.match{
+  .malformedEncoding -> "malformedEncoding";
+  .truncatedEncoding -> "truncatedEncoding";
+  .notScalar -> "notScalar";
+  .notInStr -> "notInStr";
+  }}
+Show: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
+  "["+(Name#reason)+":"+byteOffset+":"+byteLength+":"+rejectedValue+"]"
+  }
+Pub: base.DataRead{}
+
+OpenedFileTests: UnitTests{::
+  .test TheOpenedFile
+  .test TextCutByTheEndOfTheBytes
+  }
+
+TheOpenedFile: Test{::
+  .checkWithSys{s -> s.inputCursor#.isSome.assertTrue}
+  .checkWithSys{s -> s.inputCursor#.match{.some n -> n.label; .empty -> "none"}.assertEq "not?s.txt"}
+  .checkWithSys{s -> s.inputCursor#.match{.some n -> n.readStrUtf8 Recover; .empty -> "none"}.assertEq "caf? time"}
+  .checkWithSys{s -> s.inputCursor.next#.isSome.assertFalse}
+  }
+
+TextCutByTheEndOfTheBytes: Test{::
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut8.bin")).readStrUtf8 Show).assertEq "a[truncatedEncoding:1:2:226]"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut16.bin")).readStrUtf16Le Show).assertEq "a[truncatedEncoding:2:2:55357]"}
+  }
