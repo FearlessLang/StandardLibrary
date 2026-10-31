@@ -1,0 +1,11 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+
+NoOpenedFileTests: UnitTests{::
+  .test NoOpenedFile
+  }
+
+NoOpenedFile: Test{::
+  .checkWithSys{s -> s.inputCursor#.isSome.assertFalse}
+  .checkWithSys{s -> s.inputCursor.next#.isSome.assertFalse}
+  }
