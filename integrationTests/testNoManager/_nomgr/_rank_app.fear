@@ -1,0 +1,21 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Lists as L;
+
+Pub: base.DataRead{}
+
+NoManagerTests: UnitTests{::
+  .test NoManagerMessages
+  }
+
+NoManagerMessages: Test{::
+  .checkNonDetErrWithSys({::.isMsg{:: == (
+     `The message "Show" is not sent: this program was not started by the Fearless manager.`
+    )}}, {t -> t.manager.show})
+  .checkNonDetErrWithSys({::.isMsg{:: == (
+     `The message "Register" is not sent: this program was not started by the Fearless manager.`
+    )}}, {t -> base.Block#
+      .openIso s = t
+      .return{s.manager.register(s.dataRead(Pub).read(L#("path.bin")).readBytes)}
+      })
+  }
