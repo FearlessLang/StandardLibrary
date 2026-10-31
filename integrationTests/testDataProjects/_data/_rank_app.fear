@@ -79,23 +79,23 @@ DataProjectReadErrors: Test{::
 
 DataProjectWrites: Test{::
   .checkWithSys{s -> Block#
-    .do{s.dataEdit(Notes).writeStrUtf8(L#("w1", "b.txt"), "second")}
+    .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("w1", "b.txt"), "second")}
     .return{(s.dataEdit(Notes).read(L#("w1", "b.txt")).readStrUtf8 Recover).assertEq "second"}
     }
   .checkWithSys{s -> Block#
-    .do{s.dataEdit(Notes).writeStrAscii(L#("fresh", "deeper", "c.txt"), "third")}
+    .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("fresh", "deeper", "c.txt"), "third")}
     .return{(s.dataEdit(Notes).read(L#("fresh", "deeper", "c.txt")).readStrUtf8 Recover).assertEq "third"}
     }
   .checkWithSys{s -> Block#
-    .do{s.dataEdit(Notes).writeStrLatin1(L#("wz", "deep", "four.txt"), "zipped")}
+    .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wz", "deep", "four.txt"), "zipped")}
     .return{s.dataEdit(Notes).paths(L#("wz", "deep")).assertEq({::}, L#("four.txt", "two.txt"))}
     }
   .checkWithSys{s -> Block#
-    .do{s.dataEdit(Notes).writeStrUtf8(L#("wn", "inner", "three.txt"), "renested")}
+    .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wn", "inner", "three.txt"), "renested")}
     .return{(s.dataEdit(Notes).read(L#("wn", "inner", "three.txt")).readStrUtf8 Recover).assertEq "renested"}
     }
   .checkWithSys{s -> Block#
-    .do{s.dataEdit(Notes).writeStrUtf8(L#("wf", "new", "five.txt"), "in a new folder of a zip")}
+    .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wf", "new", "five.txt"), "in a new folder of a zip")}
     .return{s.dataEdit(Notes).paths(L#("wf")).assertEq({::}, L#("new", "one.txt"))}
     }
   .checkWithSys{s -> Block#
@@ -128,7 +128,7 @@ DataProjectWriteErrors: Test{::
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
     |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
-    )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("Bad.txt"), "no")})
+    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("Bad.txt"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/wz/x.zip"
     |`is not valid: "x.zip" is not a valid file name.`
@@ -136,7 +136,7 @@ DataProjectWriteErrors: Test{::
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
     |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
-    )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("wz", "x.zip"), "no")})
+    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wz", "x.zip"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/other.fearless"
     |`is not valid: "other.fearless" is not a valid file name.`
@@ -144,22 +144,22 @@ DataProjectWriteErrors: Test{::
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
     |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
-    )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("other.fearless"), "no")})
+    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("other.fearless"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/readme/x.txt"
     |`is not valid: "readme" is a file, not a folder.`
-    )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme", "x.txt"), "no")})
+    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("readme", "x.txt"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/readme.md"
     |`is not written: its folder holds "readme", and a file without extension cannot share its name with a file with an extension.`
-    )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme.md"), "no")})
+    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("readme.md"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/todo"
     |"names a folder, not a file."
-    )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("todo"), "no")})
+    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("todo"), "no")})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`
-    )}}, {t -> t.dataEdit(Nope).writeStrUtf8(L#("x.txt"), "no")})
+    )}}, {t -> t.dataEdit(Nope).writeStrAsciiUtf8Latin1(L#("x.txt"), "no")})
   }
 
 DataProjectDeletes: Test{::

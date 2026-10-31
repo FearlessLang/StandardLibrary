@@ -9,7 +9,7 @@ CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
 CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .paths(path: List[Str]): List[Str];
   mut .read(path: List[Str]): mut CapInputCursorNode;
-  mut .writeStrUtf8(path: List[Str], content: Str): Void;
+  mut .writeStrAsciiUtf8Latin1(path: List[Str], content: Str): Void;
   mut .writeUStrUtf8(path: List[Str], content: UStr): Void;
   mut .writeStrUtf16Le(path: List[Str], content: Str): Void;
   mut .writeUStrUtf16Le(path: List[Str], content: UStr): Void;
@@ -19,9 +19,7 @@ CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .writeUStrUtf16Be(path: List[Str], content: UStr): Void;
   mut .writeStrUtf32Be(path: List[Str], content: Str): Void;
   mut .writeUStrUtf32Be(path: List[Str], content: UStr): Void;
-  mut .writeStrAscii(path: List[Str], content: Str): Void;
   mut .writeUStrAscii(path: List[Str], content: UStr, recover: mut UnencodableRecover): Void;
-  mut .writeStrLatin1(path: List[Str], content: Str): Void;
   mut .writeUStrLatin1(path: List[Str], content: UStr, recover: mut UnencodableRecover): Void;
   mut .writeBytes(path: List[Str], content: List[Byte]): Void;
   mut .writeImagePng(path: List[Str], content: Image): Void;

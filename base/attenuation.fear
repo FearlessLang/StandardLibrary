@@ -193,7 +193,7 @@ RevokableDataRead: { #(r: mut Revocation, u: mut CapDataRead): mut CapDataRead -
 RevokableDataEdit: { #(r: mut Revocation, u: mut CapDataEdit): mut CapDataEdit -> {'s
   .paths(p) -> Block#(r#, u.paths(p));
   .read(p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(p)));
-  .writeStrUtf8(p, c) -> Block#(r#, u.writeStrUtf8(p, c));
+  .writeStrAsciiUtf8Latin1(p, c) -> Block#(r#, u.writeStrAsciiUtf8Latin1(p, c));
   .writeUStrUtf8(p, c) -> Block#(r#, u.writeUStrUtf8(p, c));
   .writeStrUtf16Le(p, c) -> Block#(r#, u.writeStrUtf16Le(p, c));
   .writeUStrUtf16Le(p, c) -> Block#(r#, u.writeUStrUtf16Le(p, c));
@@ -203,9 +203,7 @@ RevokableDataEdit: { #(r: mut Revocation, u: mut CapDataEdit): mut CapDataEdit -
   .writeUStrUtf16Be(p, c) -> Block#(r#, u.writeUStrUtf16Be(p, c));
   .writeStrUtf32Be(p, c) -> Block#(r#, u.writeStrUtf32Be(p, c));
   .writeUStrUtf32Be(p, c) -> Block#(r#, u.writeUStrUtf32Be(p, c));
-  .writeStrAscii(p, c) -> Block#(r#, u.writeStrAscii(p, c));
   .writeUStrAscii(p, c, rec) -> Block#(r#, u.writeUStrAscii(p, c, rec));
-  .writeStrLatin1(p, c) -> Block#(r#, u.writeStrLatin1(p, c));
   .writeUStrLatin1(p, c, rec) -> Block#(r#, u.writeUStrLatin1(p, c, rec));
   .writeBytes(p, c) -> Block#(r#, u.writeBytes(p, c));
   .writeImagePng(p, c) -> Block#(r#, u.writeImagePng(p, c));
