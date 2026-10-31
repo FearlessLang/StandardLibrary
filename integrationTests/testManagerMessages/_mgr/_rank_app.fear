@@ -1,0 +1,38 @@
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Lists as L;
+
+Pub: base.DataRead{}
+Path: { #(s: mut base.System): base.List[base.Byte] -> s.dataRead(Pub).read(L#("path.bin")).readBytes }
+Relative: { #(s: mut base.System): base.List[base.Byte] -> s.dataRead(Pub).read(L#("relative.bin")).readBytes }
+
+ManagerMessageTests: UnitTests{::
+  .test ManagerMessages
+  .test ManagerMessagesRefused
+  }
+
+ManagerMessages: Test{::
+  .checkWithSys{s -> s.manager.register(Path#s)}
+  .checkWithSys{s -> s.manager.show}
+  .checkWithSys{s -> s.manager.show "hello"}
+  .checkWithSys{s -> s.manager.run("hello", L#("hello.A", "hello.B")).getStr.assertEq "Output of FearlessCommandRun"}
+  .checkWithSys{s -> s.manager.compile "hello" .getStr.assertEq "Output of FearlessCommandCompile"}
+  .checkWithSys{s -> s.manager.kindDataRead "hello"}
+  .checkWithSys{s -> s.manager.mount("hello", "hello.Notes", "notes")}
+  .checkWithSys{s -> s.manager.unmount("hello", "hello.Pub")}
+  .checkWithSys{s -> s.manager.attenuate("hello", "hello.A", L#("base.NoManagerQuit", "hello.NoGui"))}
+  .checkWithSys{s -> s.manager.attenuate("hello", "hello.B", {})}
+  .checkWithSys{s -> s.manager.openWithOrShortcut(Path#s, "hello", "hello.A")}
+  }
+
+ManagerMessagesRefused: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     "The manager refuses to forget nope."
+    )}}, {t -> t.manager.forget "nope"})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The path "relative" of the message "Register" is not an absolute path of this system.`
+    )}}, {t -> base.Block#
+      .openIso s = t
+      .return{s.manager.register(Relative#s)}
+      })
+  }
