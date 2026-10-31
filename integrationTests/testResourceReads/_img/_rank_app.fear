@@ -79,7 +79,7 @@ ImagesWithMorePixelsThanMaxPixels: Test{::
   }
 
 ResourcesThatCanNotBeRead: Test{::
-  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+  .checkNonDetErrWithSys({::.isMsg{:: == (
      `Resource with path img.Notes/gone.txt`
     |`can not be read as bytes`
     )}}, {t -> Block#
@@ -88,7 +88,7 @@ ResourcesThatCanNotBeRead: Test{::
       .do{s.dataEdit(Notes).delete(L#("gone.txt"))}
       .return{n.readStrUtf8 Recover}
       })
-  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+  .checkNonDetErrWithSys({::.isMsg{:: == (
      `Resource with path img.Notes/gone.png`
     |`can not be read as bytes`
     )}}, {t -> Block#
@@ -97,7 +97,7 @@ ResourcesThatCanNotBeRead: Test{::
       .do{s.dataEdit(Notes).delete(L#("gone.png"))}
       .return{n.readImage(1000)}
       })
-  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+  .checkNonDetErrWithSys({::.isMsg{:: == (
      `Resource with path /_img/note.txt`
     |`can not be read as bytes`
     )}}, {t -> Block#
@@ -105,7 +105,7 @@ ResourcesThatCanNotBeRead: Test{::
       .do{s.dataEdit(Self).delete(L#("_img", "note.txt"))}
       .return{Note.readStrUtf8(s.assetRead, Recover)}
       })
-  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+  .checkNonDetErrWithSys({::.isMsg{:: == (
      `Resource with path /_img/pics/one.txt`
     |`can not be read as bytes`
     )}}, {t -> Block#
@@ -113,7 +113,7 @@ ResourcesThatCanNotBeRead: Test{::
       .do{s.dataEdit(Self).delete(L#("_img", "pics", "one.txt"))}
       .return{PicsOne.readStrUtf8(s.assetRead, Recover)}
       })
-  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+  .checkNonDetErrWithSys({::.isMsg{:: == (
      `Resource with path /_img/box/three.txt`
     |`can not be read as bytes`
     )}}, {t -> Block#
