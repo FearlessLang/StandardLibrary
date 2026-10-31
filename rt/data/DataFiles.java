@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,14 +179,27 @@ final class DataFiles{
     }
   }
   private static Object delete(String name, Path root, List<String> path) throws IOException{
-    writable(name, path);
+    if (path.isEmpty()){ throw refused(name, path, "names the root folder, which can not be deleted."); }
+    if (atom(path.getLast())){ folders(name, path, path); }
+    else{ writable(name, path); }
     synchronized (lock){
       var at= resolve(root, path);
-      if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
-      if (!f.entry().isEmpty()){ editZip(f.path(), f.steps(), m -> m.remove(f.entry()), root); }
-      else{ Files.delete(f.path()); prune(f.path().getParent(), root); }
+      if (at.isEmpty()){ throw refused(name, path, "names no resource."); }
+      switch (at.get()){
+        case Resource f when f.entry().isEmpty() -> { Files.delete(f.path()); prune(f.path().getParent(), root); }
+        case Resource f -> editZip(f.path(), f.steps(), m -> m.remove(f.entry()), root);
+        case Dir d -> { deleteTree(d.path()); prune(d.path().getParent(), root); }
+        case ZipDir z when !z.prefix().isEmpty() -> editZip(z.zip(), z.steps(), m -> m.keySet().removeIf(k -> k.startsWith(z.prefix())), root);
+        case ZipDir z when z.steps().isEmpty() -> { Files.delete(z.zip()); prune(z.zip().getParent(), root); }
+        case ZipDir z -> editZip(z.zip(), z.steps().subList(0, z.steps().size()-1), m -> m.remove(z.steps().getLast()), root);
+      }
     }
     return Void$o$0.instance;
+  }
+  private static void deleteTree(Path dir) throws IOException{
+    try (var s= Files.walk(dir)){
+      for (var p : s.sorted(Comparator.reverseOrder()).toList()){ Files.delete(p); }
+    }
   }
   private static Optional<Node> resolve(Path root, List<String> path) throws IOException{
     Optional<Node> at= Optional.of(new Dir(root));

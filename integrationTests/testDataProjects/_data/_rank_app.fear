@@ -1,6 +1,7 @@
 use base.UnitTests as UnitTests;
 use base.Test as Test;
 use base.Block as Block;
+use base.Try as Try;
 use base.Lists as L;
 
 Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
@@ -17,6 +18,7 @@ DataProjectTests: UnitTests{::
   .test DataProjectWrites
   .test DataProjectWriteErrors
   .test DataProjectDeletes
+  .test DataProjectFolderDeletes
   .test DataProjectDeleteErrors
   .test DataProjectsNotReachable
   }
@@ -157,6 +159,49 @@ DataProjectDeletes: Test{::
   .checkWithSys{s -> s.dataEdit(Notes).delete(L#("d4", "a.txt"))}
   }
 
+DataProjectFolderDeletes: Test{::
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("of", "sub"))}
+    .return{s.dataEdit(Notes).paths(L#("of")).assertEq({::}, L#("keep.txt"))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("zf", "sub"))}
+    .return{s.dataEdit(Notes).paths(L#("zf")).assertEq({::}, L#("keep.txt"))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("zn", "inner"))}
+    .return{s.dataEdit(Notes).paths(L#("zn")).assertEq({::}, L#("keep.txt"))}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("ow"))}
+    .return{Try#(s.iso.close, {t -> t.dataEdit(Notes).paths(L#("ow"))}).assertInfo{::.isMsg{:: == (
+       "The path data.Notes/ow"
+      |"names no resource."
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("zw"))}
+    .return{Try#(s.iso.close, {t -> t.dataEdit(Notes).paths(L#("zw"))}).assertInfo{::.isMsg{:: == (
+       "The path data.Notes/zw"
+      |"names no resource."
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("op", "sub"))}
+    .return{Try#(s.iso.close, {t -> t.dataEdit(Notes).paths(L#("op"))}).assertInfo{::.isMsg{:: == (
+       "The path data.Notes/op"
+      |"names no resource."
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .do{s.dataEdit(Notes).delete(L#("zp", "sub"))}
+    .return{Try#(s.iso.close, {t -> t.dataEdit(Notes).paths(L#("zp"))}).assertInfo{::.isMsg{:: == (
+       "The path data.Notes/zp"
+      |"names no resource."
+      )}}}
+    }
+  }
+
 DataProjectDeleteErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/d5/b.txt"
@@ -166,6 +211,10 @@ DataProjectDeleteErrors: Test{::
      "The path data.Notes/data.fearless"
     |`is not valid: the top of a data project holds no file with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`
     )}}, {t -> t.dataEdit(Notes).delete(L#("data.fearless"))})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     "The path data.Notes/"
+    |"names the root folder, which can not be deleted."
+    )}}, {t -> t.dataEdit(Notes).delete({})})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`
     )}}, {t -> t.dataEdit(Nope).delete(L#("readme"))})

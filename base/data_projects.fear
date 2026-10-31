@@ -53,8 +53,8 @@ CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .writeBytes(path: List[Str], content: List[Byte]): Void;
   ///Writes ``content`` as a PNG image.
   mut .writeImagePng(path: List[Str], content: Image): Void;
-  ///Deletes the file at ``path``, then every folder that deleting it left empty:
-  ///a zip left with no file is deleted too.
+  ///Deletes the resource at ``path``: a file, or a folder with every resource in it; a zip is a folder.
+  ///Then deletes every folder that the delete left empty: a zip left with no file is deleted too.
   mut .delete(path: List[Str]): Void;
   }
 
