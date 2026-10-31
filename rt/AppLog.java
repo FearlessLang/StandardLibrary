@@ -23,26 +23,23 @@ public final class AppLog{
   public static final int keepLogs= 10;
   public static final int keepErrLogs= 100;
   public static final int maxStampRetries= 10;
-  public static Path errPath;
   public static final String stampPattern= "yyyyMMdd_HHmmss_SSS'Z'";
   private static final DateTimeFormatter stampFmt= DateTimeFormatter.ofPattern(stampPattern).withZone(ZoneOffset.UTC);
   private static final ConcurrentLinkedQueue<AppLog> all= new ConcurrentLinkedQueue<>();
-  private static final AtomicBoolean hookInstalled= new AtomicBoolean();
   private static final AtomicBoolean closing= new AtomicBoolean();
+  public static final Path errPath= Util.pathProperty("fearlessUser.dir").resolve(".out", "logs", "err.log");
+  public static final String childKey= "fearlessChild";
+  static final boolean child= Boolean.getBoolean(childKey);
+  static{
+    if (!child){ startupFor(errPath, keepErrLogs); }
+    Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown, "AppLog-shutdown"));
+  }
   public static AppLog open(Path path, boolean raw){
-    var root= Util.pathProperty("fearlessUser.dir");
-    errPath = root.resolve(".out", "logs", "err.log");
-    var p= root.resolve(path).normalize();
-    startupFor(errPath, keepErrLogs);
-    startupFor(p, keepLogs);
-    installHook();
+    var p= Util.pathProperty("fearlessUser.dir").resolve(path).normalize();
+    if (!child){ startupFor(p, keepLogs); }
     var log= new AppLog(p, raw);
     all.add(log);
     return log;
-  }
-  private static void installHook(){
-    if (!hookInstalled.compareAndSet(false, true)){ return; }
-    Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown, "AppLog-shutdown"));
   }
   private static void shutdown(){
     closing.set(true);
@@ -50,6 +47,7 @@ public final class AppLog{
       try{ log.closeAndRotateQuiet(); }
       catch (Throwable t){ err("closing and log rotation crashed: "+log.path, t); }
     }
+    if (child){ return; }
     try{ rotateOnCloseQuiet(errPath, keepErrLogs, true); }
     catch (Throwable t){
       System.err.print(stampNow()+" rotate err.log crashed: "+errPath+"\n");
@@ -63,7 +61,7 @@ public final class AppLog{
   private AppLog(Path path, boolean raw){
     this.path= path;
     this.raw= raw;
-    this.out= openWriterTruncate(path);
+    this.out= openWriterAppend(path);
   }
   public void append(String msg){
     var line= raw ? msg : stampNow()+" "+msg+"\n";
@@ -81,7 +79,7 @@ public final class AppLog{
       try{ out.close(); }
       catch (IOException e){ err("close failed: "+path, e); return; }
     }
-    rotateOnCloseQuiet(path, keepLogs, false);
+    if (!child){ rotateOnCloseQuiet(path, keepLogs, false); }
   }
   private static void startupFor(Path p, int keep){
     createDirsOrThrow(p);
@@ -104,10 +102,10 @@ public final class AppLog{
       e.printStackTrace(System.err);
     }
   }
-  private static BufferedWriter openWriterTruncate(Path p){
+  private static BufferedWriter openWriterAppend(Path p){
     try{
       createDirsOrThrow(p);
-      return Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, TRUNCATE_EXISTING);
+      return Files.newBufferedWriter(p, UTF_8, CREATE, WRITE, APPEND);
     }
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
