@@ -1,19 +1,13 @@
-///A type naming a data project the code needs: the user of the Fearless manager mounts a data project on it.
 DataRead: CaptureFree, Named{}
 ///A DataRead type naming a data project the code also writes.
 DataEdit: DataRead{}
 
-///Reads the data project mounted on a DataRead type; a ``path`` lists the folder names, then the resource name.
-///A ``path`` that is not valid, or that the resources of the data project do not allow, is a deterministic error;
-///a data project that can not be reached, or a resource that can not be read or that holds a name that is not valid, is a non deterministic error.
 CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
-  ///The names of the resources in the folder at ``path``, sorted; an empty ``path`` is the root folder.
   mut .paths(path: List[Str]): List[Str];
   ///The file at ``path``, read again at every read.
   mut .read(path: List[Str]): mut CapInputCursorNode;
   }
 
-///Reads as `CapDataRead` and writes the data project mounted on a DataEdit type; a resource that can not be changed is a non deterministic error.
 CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .paths(path: List[Str]): List[Str];
   mut .read(path: List[Str]): mut CapInputCursorNode;
@@ -36,11 +30,9 @@ CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .writeBytes(path: List[Str], content: List[Byte]): Void;
   ///Writes ``content`` as a PNG image.
   mut .writeImagePng(path: List[Str], content: Image): Void;
-  ///Deletes the resource at ``path``, with every resource in it, then every folder left empty.
   mut .delete(path: List[Str]): Void;
   }
 
-///The bytes to write in place of a character that the encoding of a write does not encode; it can throw, to make the write fail.
 UnencodableRecover:{
   mut #(scalar: Nat, index: Nat): List[Byte]
   }
