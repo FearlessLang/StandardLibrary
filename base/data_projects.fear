@@ -6,29 +6,29 @@ DataRead: CaptureFree, Named{}
 DataEdit: DataRead{}
 
 ///The object capability to read the data project mounted on a DataRead type, given by ``System.dataRead``.
-///``path`` is the list of the folder names, then the resource name, from the root folder of the data project.
+///``path`` is the list of the folder names, then the file name, from the root folder of the data project.
 ///A zip is a folder named without ".zip": a path enters it as it enters any other folder.
-///A resource or folder whose name starts with "." is not part of the data project, and neither is the marker of the
-///data project, the resource with the extension ".fearless" at its top: a path naming them is not valid.
+///A file or folder whose name starts with "." is not part of the data project, and neither is the marker of the
+///data project, the file with the extension ".fearless" at its top: a path naming them is not valid.
 ///A ``path`` that is not valid is a deterministic error.
-///A request that the resources and folders of the data project do not allow, like a ``path`` naming no resource, is a deterministic error.
-///A root folder of the data project that cannot be reached, a resource or folder that exists but cannot be read or changed,
+///A request that the files and folders of the data project do not allow, like a ``path`` naming no file, is a deterministic error.
+///A root folder of the data project that cannot be reached, a file or folder that exists but cannot be read or changed,
 ///and a folder holding a name that is not valid are non deterministic errors.
 CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
-  ///The names of the resources and folders in the folder at ``path``, sorted; a zip is named without ".zip".
+  ///The names of the files and folders in the folder at ``path``, sorted; a zip is named without ".zip".
   ///An empty ``path`` is the root folder.
   mut .paths(path: List[Str]): List[Str];
-  ///The resource at ``path``, read again at every read.
+  ///The file at ``path``, read again at every read.
   mut .read(path: List[Str]): mut CapInputCursorNode;
   }
 
 ///The object capability to read and write the data project mounted on a DataEdit type, given by ``System.dataEdit``.
 ///It reads as `CapDataRead` does.
-///A write replaces the resource at ``path``, or creates it together with the missing folders of ``path``;
-///a resource inside a zip is written by rewriting that zip.
+///A write replaces the file at ``path``, or creates it together with the missing folders of ``path``;
+///a file inside a zip is written by rewriting that zip.
 ///A written path keeps the data project valid: each folder name uses only lowercase letters,
 ///digits and underscores, and starts with a letter or an underscore;
-///the resource name is such a name, a dot and an extension, other than ".zip".
+///the file name is such a name, a dot and an extension, other than ".zip".
 ///The write methods mirror the read methods of `CapInputCursorNode`, and every text is written with no byte order mark.
 ///A `Str` holds only ASCII characters, so ``.writeStrUtf8``, ``.writeStrAscii`` and ``.writeStrLatin1`` write the same bytes.
 CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
@@ -53,8 +53,8 @@ CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .writeBytes(path: List[Str], content: List[Byte]): Void;
   ///Writes ``content`` as a PNG image.
   mut .writeImagePng(path: List[Str], content: Image): Void;
-  ///Deletes the resource at ``path``, then every folder that deleting it left empty:
-  ///a zip left with no resource is deleted too.
+  ///Deletes the file at ``path``, then every folder that deleting it left empty:
+  ///a zip left with no file is deleted too.
   mut .delete(path: List[Str]): Void;
   }
 

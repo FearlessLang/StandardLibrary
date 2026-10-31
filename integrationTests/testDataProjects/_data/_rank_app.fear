@@ -36,32 +36,32 @@ DataProjectReads: Test{::
 
 DataProjectReadErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Pub/readme`
-    |`names a resource, not a folder.`
+     "The path data.Pub/readme"
+    |"names a file, not a folder."
     )}}, {t -> t.dataRead(Pub).paths(L#("readme"))})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Pub/none`
-    |`names no folder.`
+     "The path data.Pub/none"
+    |"names no folder."
     )}}, {t -> t.dataRead(Pub).paths(L#("none"))})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Pub/.hidden`
+     "The path data.Pub/.hidden"
     |`is not valid: ".hidden" is not a valid folder name. A folder name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     )}}, {t -> t.dataRead(Pub).paths(L#(".hidden"))})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Pub/notes/b.txt`
-    |`names no resource.`
+     "The path data.Pub/notes/b.txt"
+    |"names no file."
     )}}, {t -> t.dataRead(Pub).read(L#("notes", "b.txt"))})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Pub/todo`
-    |`names a folder, not a resource.`
+     "The path data.Pub/todo"
+    |"names a folder, not a file."
     )}}, {t -> t.dataRead(Pub).read(L#("todo"))})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Pub/`
-    |`names the root folder, not a resource.`
+     "The path data.Pub/"
+    |"names the root folder, not a file."
     )}}, {t -> t.dataRead(Pub).read({})})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Pub/data.fearless`
-    |`is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`
+     "The path data.Pub/data.fearless"
+    |`is not valid: the top of a data project holds no file with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`
     )}}, {t -> t.dataRead(Pub).read(L#("data.fearless"))})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No data project is mounted on "data.Nope".`
@@ -116,28 +116,28 @@ DataProjectWrites: Test{::
 
 DataProjectWriteErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/Bad.txt`
-    |`is not valid: "Bad.txt" is not a valid resource name. A resource name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip" (a zip is a folder); a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
+     "The path data.Notes/Bad.txt"
+    |`is not valid: "Bad.txt" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip" (a zip is a folder); a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("Bad.txt"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/wz/x.zip`
-    |`is not valid: "x.zip" is not a valid resource name. A resource name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip" (a zip is a folder); a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
+     "The path data.Notes/wz/x.zip"
+    |`is not valid: "x.zip" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than "zip" (a zip is a folder); a few well known names, like "readme", have no extension, and a few well known extensions, like "tar.gz", have two parts.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("wz", "x.zip"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/other.fearless`
-    |`is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`
+     "The path data.Notes/other.fearless"
+    |`is not valid: the top of a data project holds no file with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("other.fearless"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/readme/x.txt`
-    |`is not valid: "readme" is a resource, not a folder.`
+     "The path data.Notes/readme/x.txt"
+    |`is not valid: "readme" is a file, not a folder.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme", "x.txt"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/readme.md`
-    |`is not written: its folder holds "readme", and a resource without extension cannot share its name with a resource with an extension.`
+     "The path data.Notes/readme.md"
+    |`is not written: its folder holds "readme", and a file without extension cannot share its name with a file with an extension.`
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("readme.md"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/todo`
-    |`names a folder, not a resource.`
+     "The path data.Notes/todo"
+    |"names a folder, not a file."
     )}}, {t -> t.dataEdit(Notes).writeStrUtf8(L#("todo"), "no")})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`
@@ -159,12 +159,12 @@ DataProjectDeletes: Test{::
 
 DataProjectDeleteErrors: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/d5/b.txt`
-    |`names no resource.`
+     "The path data.Notes/d5/b.txt"
+    |"names no file."
     )}}, {t -> t.dataEdit(Notes).delete(L#("d5", "b.txt"))})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path data.Notes/data.fearless`
-    |`is not valid: the top of a data project holds no resource with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`
+     "The path data.Notes/data.fearless"
+    |`is not valid: the top of a data project holds no file with the extension "fearless": that is the place of the marker of the project, which is not part of the data project.`
     )}}, {t -> t.dataEdit(Notes).delete(L#("data.fearless"))})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`
@@ -176,7 +176,7 @@ DataProjectsNotReachable: Test{::
      `The root folder of the data project mounted on "data.Gone" cannot be reached.`
     )}}, {t -> t.dataRead(Gone).paths({})})
   .checkNonDetErrWithSys({::.isMsg{:: == (
-     `The folder at the path data.Broken/notes`
-    |`holds "Bad.txt", which is not a valid resource or folder name: the data project changed while this program runs.`
+     "The folder at the path data.Broken/notes"
+    |`holds "Bad.txt", which is not a valid file or folder name: the data project changed while this program runs.`
     )}}, {t -> t.dataRead(Broken).paths(L#("notes"))})
   }
