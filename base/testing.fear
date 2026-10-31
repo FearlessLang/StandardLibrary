@@ -145,7 +145,7 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
       .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
     }}).run {
        .ok errMsg -> Error.msg errMsg;
-       .info i -> i.validate errorMatch .match {
+       .info i -> i.getMap.get "info" .validate errorMatch .match {
          .true -> Void;
          .false -> Error.msg("Error did not match expected: " + (i.str));
          }
