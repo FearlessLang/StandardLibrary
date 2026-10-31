@@ -116,11 +116,15 @@ final class DataFiles{
   private static void resource(String name, List<String> path){
     if (path.isEmpty()){ throw refused(name, path, "names the root folder, not a file."); }
     folders(name, path, path.subList(0, path.size()-1));
-    if (path.size() == 1 && path.getFirst().endsWith(".fearless")){ throw invalid(name, path, "the top of a data project holds no file with the extension \"fearless\": that is the place of the marker of the project, which is not part of the data project."); }
-    if (!fileName(path.getLast())){ throw invalid(name, path, "\""+path.getLast()+"\" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than \"zip\" (a zip is a folder); a few well known names, like \"readme\", have no extension, and a few well known extensions, like \"tar.gz\", have two parts."); }
+    if (!fileName(path.getLast())){ throw notFileName(name, path); }
+  }
+  private static boolean marker(List<String> path){ return path.size() == 1 && path.getFirst().endsWith(".fearless"); }
+  private static Error notFileName(String name, List<String> path){
+    return invalid(name, path, "\""+path.getLast()+"\" is not a valid file name. A file name is a valid folder name, a dot and an extension of 1 to 16 lowercase letters or digits, other than \"zip\", and other than \"fearless\" in the root folder; a few well known names, like \"readme\", have no extension, and a few well known extensions, like \"tar.gz\", have two parts.");
   }
   private static void writable(String name, List<String> path){
     resource(name, path);
+    if (marker(path)){ throw notFileName(name, path); }
     if (String.join("/", path).length() > 200){ throw invalid(name, path, "a path is at most 200 characters long."); }
   }
   private static Object list(String name, Path root, List<String> path) throws IOException{
@@ -135,6 +139,7 @@ final class DataFiles{
   }
   private static Object open(String name, Path root, List<String> path) throws IOException{
     resource(name, path);
+    if (marker(path)){ throw refused(name, path, "names no resource."); }
     var at= resolve(root, path);
     if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
     return new InputFile(Optional.of(new Root(name, root)), name+"/"+String.join("/", path), f.path(), f.steps(), f.entry());
