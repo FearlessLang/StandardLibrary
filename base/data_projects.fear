@@ -1,10 +1,8 @@
 DataRead: CaptureFree, Named{}
-///A DataRead type naming a data project the code also writes.
 DataEdit: DataRead{}
 
 CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
   mut .paths(path: List[Str]): List[Str];
-  ///The file at ``path``, read again at every read.
   mut .read(path: List[Str]): mut CapInputCursorNode;
   }
 
@@ -22,13 +20,10 @@ CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .writeStrUtf32Be(path: List[Str], content: Str): Void;
   mut .writeUStrUtf32Be(path: List[Str], content: UStr): Void;
   mut .writeStrAscii(path: List[Str], content: Str): Void;
-  ///A character above U+007F is written as the bytes ``recover`` gives for it.
   mut .writeUStrAscii(path: List[Str], content: UStr, recover: mut UnencodableRecover): Void;
   mut .writeStrLatin1(path: List[Str], content: Str): Void;
-  ///A character above U+00FF is written as the bytes ``recover`` gives for it.
   mut .writeUStrLatin1(path: List[Str], content: UStr, recover: mut UnencodableRecover): Void;
   mut .writeBytes(path: List[Str], content: List[Byte]): Void;
-  ///Writes ``content`` as a PNG image.
   mut .writeImagePng(path: List[Str], content: Image): Void;
   mut .delete(path: List[Str]): Void;
   }
