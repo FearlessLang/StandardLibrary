@@ -16,7 +16,7 @@ System: ToIso[System],WidenTo[System] {
   mut .assetRead: mut CapAssetRead;//TODO: complete real system and the inherited metods returning 'this'
   mut .download: mut CapDownload;
   ///The capability to read the data project mounted on ``data``.
-  ///A ``data`` with no data project mounted is a non deterministic error: a program started by the portable Fearless has no mount.
+  ///A ``data`` with no data project mounted is a non deterministic error.
   mut .dataRead(data: DataRead): mut CapDataRead;
   ///The capability to read and write the data project mounted on ``data``.
   ///A ``data`` with no data project mounted for editing is a non deterministic error.
