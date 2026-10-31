@@ -9,10 +9,10 @@ NoManagerTests: UnitTests{::
   }
 
 NoManagerMessages: Test{::
-  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+  .checkNonDetErrWithSys({::.isMsg{:: == (
      `The message "Show" is not sent: this program was not started by the Fearless manager.`
     )}}, {t -> t.manager.show})
-  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == (
+  .checkNonDetErrWithSys({::.isMsg{:: == (
      `The message "Register" is not sent: this program was not started by the Fearless manager.`
     )}}, {t -> base.Block#
       .openIso s = t
