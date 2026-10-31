@@ -1,6 +1,7 @@
 package _base;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,7 +50,7 @@ final class AssetBytesRead{
     if (entry.isEmpty() && !steps.isEmpty()){ throw invalidAssetDescriptor("zipSteps without zipEntry: "+zipSteps); }
     try{
       if (entry.isEmpty()){ return Files.readAllBytes(full); }
-      return new ReadZip(
+      var res= new ReadZip(
         n -> { throw nonDetErr("Files under project root has been altered.\nBad zip entry name: "+n); },
         n -> { throw nonDetErr("Files under project root has been altered.\nDuplicate zip entry name: "+n); },
         n -> { throw nonDetErr("Files under project root has been altered.\nZip entry too large: "+n); }
@@ -59,11 +60,12 @@ final class AssetBytesRead{
           entry,
           StandardCharsets.UTF_8
           );
+      if (res == null){ throw unreadable(path); }
+      return res;
     }
-    catch (IOException ioe){
-      throw nonDetErr("Files under project root has been altered.\nFile not found in "+path+" "+ioe);
-    }
+    catch (IOException|UncheckedIOException _){ throw unreadable(path); }
   }
+  static Error unreadable(String path){ return nonDetErr("Resource with path "+path.substring("fear:".length())+"\ncan not be read as bytes"); }
 
   static final ConcurrentHashMap<String,List<List<String>>> autoloadCache= new ConcurrentHashMap<>();
 
