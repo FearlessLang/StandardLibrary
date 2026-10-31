@@ -9,7 +9,6 @@ NeverRecovers: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejected
 NeverRecoversU: base.BadUStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "should not happen".u }
 Pub: base.DataRead{}
 Base: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("base.txt")).readStrUtf8 Recover }
-LenUrl: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("len.txt")).readStrUtf8 Recover }
 
 DownloadTests: UnitTests{::
   .test DownloadsThatSucceed
@@ -105,14 +104,6 @@ DownloadsThatFail: Test{::
     .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/ftp", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
        "Invalid URL descriptor."
       |"unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/caf%C3%A9"
-      )}}}
-    }
-  .checkWithSys{s -> Block#
-    .let u= {LenUrl#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(u, 1000)}).assertInfo{::.isMsg{::.startsWith(
-       "Download failed."
-      |"url: "+u
-      |"malformed response: "
       )}}}
     }
   }

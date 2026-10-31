@@ -100,7 +100,7 @@ public final class Set$c$1Instance implements Set$c$1{
     => insertion_point = -(i+1)
      */
     int index= Collections.binarySearch(list, t, comparator);
-    assert index <= 0 : "Element should be not in the list";
+    if (index >= 0){ throw Util.detErr("Set.+: the OrderHash does not give a consistent order and hash to the elements"); }
     return -(index+1);
   }
   @Override public Object imm$$dash$1(Object p0){

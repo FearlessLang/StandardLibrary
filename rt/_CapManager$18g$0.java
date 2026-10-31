@@ -24,11 +24,15 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static String message(String verb, List<String> args){
     try (var server= new ServerSocket(0, 1, InetAddress.getLoopbackAddress())){
       var cmd= Stream.of(List.of(launcher, "FearlessCommand"+verb), args, List.of("Port:"+server.getLocalPort())).flatMap(List::stream).toList();
-      var exit= new ProcessBuilder(cmd).redirectOutput(Redirect.DISCARD).redirectError(Redirect.DISCARD).start().waitFor();
+      var exit= start(verb, cmd).waitFor();
       if (exit != 0){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: the manager program ended with "+exit+"."); }
       try (var s= server.accept()){ return new String(s.getInputStream().readAllBytes(), UTF_8); }
     }
     catch (IOException|InterruptedException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: "+e.getClass().getSimpleName()); }
+  }
+  private static Process start(String verb, List<String> cmd){
+    try{ return new ProcessBuilder(cmd).redirectOutput(Redirect.DISCARD).redirectError(Redirect.DISCARD).start(); }
+    catch (IOException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: the manager program could not be started."); }
   }
   private static Object send(String verb, Stream<String> args, Function<String,Object> result){
     if (launcher == null){ throw nonDetErr("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }

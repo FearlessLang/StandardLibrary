@@ -3,6 +3,8 @@ package _base;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
+import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -46,7 +48,7 @@ final class DownloadFetch{
       }
       checkContentLength(url, resp, maxBytes);
       try (var in= resp.body()){ return readBounded(url, in, maxBytes); }
-      catch (IOException e){ throw downloadFailed(url, e.toString()); }
+      catch (IOException e){ throw networkFailed(url, "the connection ended before the whole response arrived"); }
     }
   }
 
@@ -59,8 +61,10 @@ final class DownloadFetch{
     var req= HttpRequest.newBuilder(uri).timeout(responseTimeout).GET().build();
     try{ return client.send(req, HttpResponse.BodyHandlers.ofInputStream()); }
     catch (HttpTimeoutException e){ throw downloadTimedOut(url, responseTimeout.toMillis()); }
-    catch (IOException e){ throw downloadFailed(url, e.toString()); }
-    catch (IllegalArgumentException e){ throw downloadFailed(url, "malformed response: "+e.getMessage()); }
+    catch (ConnectException e){ throw networkFailed(url, "the connection to the host could not be opened"); }
+    catch (ProtocolException e){ throw networkFailed(url, "the host did not answer with a valid HTTP response"); }
+    catch (IOException e){ throw networkFailed(url, "the connection ended before the whole response arrived"); }
+    catch (IllegalArgumentException e){ throw networkFailed(url, "the Content-Length of the answer is not a number"); }
     catch (InterruptedException e){
       Thread.currentThread().interrupt();
       throw downloadFailed(url, e.toString());
@@ -96,7 +100,7 @@ final class DownloadFetch{
   static URI validate(String url){
     URI uri;
     try{ uri= new URI(url); }
-    catch (URISyntaxException e){ throw invalidUrl(url, e.getReason()); }
+    catch (URISyntaxException e){ throw invalidUrl(url, "not a valid URI according to RFC 2396 and RFC 2732"); }
     if (!uri.isAbsolute()){ throw invalidUrl(url, "not an absolute URI (missing scheme)"); }
     var scheme= uri.getScheme().toLowerCase(Locale.ROOT);
     if (!scheme.equals("http") && !scheme.equals("https")){ throw badScheme(url, uri.getScheme()); }
@@ -113,6 +117,9 @@ final class DownloadFetch{
   }
   static RuntimeException downloadFailed(String url, String reason){
     throw detErr("Download failed.\nurl: "+url+"\n"+reason);
+  }
+  static RuntimeException networkFailed(String url, String reason){
+    throw nonDetErr("Download failed.\nurl: "+url+"\n"+reason);
   }
   static RuntimeException downloadTimedOut(String url, long timeoutMs){
     throw detErr("Download timed out.\nurl: "+url+"\ntimeoutMs: "+timeoutMs);

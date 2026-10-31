@@ -105,6 +105,7 @@ final class AssetBytesRead{
       for (var row : rows){ res.add(List.of(row)); }
       return List.copyOf(res);
     }
+    catch (ClassNotFoundException e){ return List.of(); }
     catch (ReflectiveOperationException|ClassCastException e){
       throw invalidAssetDescriptor("Cannot resolve auto-imported assets for package \""+javaPkg+"\": "+e);
     }

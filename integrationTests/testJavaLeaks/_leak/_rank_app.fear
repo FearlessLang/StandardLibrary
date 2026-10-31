@@ -87,7 +87,7 @@ Downloads: Test{::
 
 StackSpace: Test{::
   .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {_ -> (Deep#0).str})
-  .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.process.run(DeepChild, base.Infos.msg "", {})})
+  .checkNonDetErrWithSys({:: > "info" .isMsg{:: == "The program ran out of stack space"}}, {t -> t.process.run(DeepChild, base.Infos.msg "", {})})
   .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.gui.run{f -> Block#((Deep#0).str, Void)}})
   .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.gui.run{f -> Block#(f.modelFps(10, {m -> m.action{Block#((Deep#0).str, Void)}}), Void)}})
   .checkNonDetErrWithSys({::.isMsg{:: == "The program ran out of stack space"}}, {t -> t.gui.run{f -> f.content.pane{p -> p.paint{g -> Block#((Deep#0).str, g)}}}})
