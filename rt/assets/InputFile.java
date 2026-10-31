@@ -17,13 +17,12 @@ record InputFile(Optional<DataFiles.Root> root, String label, Path path, List<St
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$label$0(){ return Str$c$0Instance.instance(label); }
+  //TODO: we will need to have System or something have some callback to do masking on the paths if the user wants to prevent the program to see OS paths
+  String subject(){ return root.isPresent() ? "Resource with path "+label : "File with absolute path "+portable(path.toAbsolutePath().toString()); }
   byte[] bytes(){
     root.ifPresent(DataFiles::reachable);
     try{ return DataFiles.bytes(path, zipSteps, zipEntry); }
-    catch (IOException e){
-      var msg= "The "+(root.isPresent() ? "resource" : "input file")+" \""+label+"\" could not be read: "+e.getClass().getSimpleName();
-      throw root.isPresent() ? DataFiles.lost(msg, e) : detErr(msg);
-    }
+    catch (IOException _){ throw nonDetErr(subject()+"\ncan not be read as bytes"); }
   }
   Object str(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.str(bytes(), recover, decoder); }
   Object uStr(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.uStr(bytes(), recover, decoder); }
@@ -48,6 +47,6 @@ record InputFile(Optional<DataFiles.Root> root, String label, Path path, List<St
     return List$o$1Instance.wrap(l);
   }
   @Override public Object mut$readImage$1(Object maxPixels){
-    return new Image$1c$0Instance(AssetImageRead.decode(label, bytes(), AssetBytesRead.nat(maxPixels), Util::detErr));
+    return new Image$1c$0Instance(AssetImageRead.decode(subject(), bytes(), AssetBytesRead.nat(maxPixels)));
   }
 }
