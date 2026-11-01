@@ -200,7 +200,12 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   @Override public Object mut$title$1(Object i){ return replacer(Util.natToLong(i), true); }
   @Override public Object mut$content$1(Object i){ return replacer(Util.natToLong(i), false); }
   @Override public Object mut$onTitleClick$1(Object h){ return onEdt(() -> onTitleClick = (SectionHandler$j0g$0) h); }
-  @Override public Object mut$onClose$1(Object h){ return reStyle(() -> onClose = (SectionHandler$j0g$0) h); }
+  @Override public Object mut$onClose$1(Object h){
+    return reStyle(() -> {
+      onClose = (SectionHandler$j0g$0) h;
+      sections.forEach(this::grow);
+    });
+  }
   @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }
   @Override public Object read$isExpanded$1(Object i){
     long k= Util.natToLong(i);
