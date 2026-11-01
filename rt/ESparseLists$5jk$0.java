@@ -245,7 +245,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     return this;
   }
   @Override public Object mut$mapInPlace$1(Object p0){
-    for (long i : s.present()){ s.put(i, callMF$2(p0, s.at(i))); }
+    for (long i : s.present()){ s.put(i, callF$2(p0, s.at(i))); }
     return this;
   }
   @Override public Object mut$shallowClone$0(){ return new ESparseList$2rs$1Instance(s.copy()); }
@@ -262,13 +262,13 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   }
   @Override public Object mut$fillHoles$1(Object p0){
     for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0 && holes() != 0; i += 1){
-      if (s.at(i) == null){ s.put(i, callMF$2(p0, nat(i))); }
+      if (s.at(i) == null){ s.put(i, callF$2(p0, nat(i))); }
     }
     return this;
   }
   @Override public Object mut$mapOpts$1(Object p0){
     for (long i= 0; Long.compareUnsigned(i, s.cap()) < 0; i += 1){
-      var o= (Opt$c$1)callMF$3(p0, nat(i), opt(s.at(i)));
+      var o= (Opt$c$1)callF$3(p0, nat(i), opt(s.at(i)));
       s.put(i, isTrue(o.read$isSome$0()) ? o.mut$$bang$0() : null);
     }
     return this;
