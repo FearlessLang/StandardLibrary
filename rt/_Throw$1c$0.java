@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public interface _Throw$1c$0{
   default Object imm$deterministic$1(Object p0){
@@ -25,6 +26,7 @@ public interface _Throw$1c$0{
     return list.read$info$1(dtId);
   }
   static Set<String> machinery= Set.of("errors.fear", "action.fear", "attenuation.fear");
+  static Pattern exampleSuite= Pattern.compile("_.+_Examples(_[0-9]+)?");
   static Set<String> rcs= Set.of("imm", "mut", "read", "iso", "readH", "mutH");
   static List<StackFrame$174$0> frames(StackTraceElement[] st){
     var res= new ArrayList<StackFrame$174$0>();
@@ -45,7 +47,7 @@ public interface _Throw$1c$0{
   static StackFrame$174$0 frameData(StackTraceElement e){
     var cn= e.getClassName();
     int dot= cn.indexOf('.');
-    if (dot < 0 || cn.indexOf('.', dot + 1) != -1 || e.getFileName() == null || e.getFileName().endsWith(".java") || machinery.contains(e.getFileName())){ return null; }
+    if (dot < 0 || cn.indexOf('.', dot + 1) != -1 || e.getFileName() == null || e.getFileName().endsWith(".java")){ return null; }
     var c= load(cn);
     var m= e.getMethodName();
     while (c.isAnonymousClass()){
@@ -56,6 +58,7 @@ public interface _Throw$1c$0{
     }
     if (InferredName.class.isAssignableFrom(c)){ return null; }
     var ty= c.getName().substring(dot + 1).split("\\$");
+    if (machinery.contains(e.getFileName()) && !exampleSuite.matcher(ty[0]).matches()){ return null; }
     var meth= fmtMethodName(m);
     var primed= ty.length == 4 && primes(ty[1]) >= 0;
     if (meth == null || ty.length != (primed ? 4 : 3) || !digits(ty[ty.length - 1])){ return null; }
