@@ -493,6 +493,9 @@ abstract class AWidget implements Widget$2o$1{
       if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
       if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
       if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a replaced Border slot or a new .content removed it, or the scope that adds it has not returned"); }
+      for (Component k= component; k != frame.top.component; k = k.getParent()){
+        if (((SkComponent)k.getParent()).w.hides(k)){ throw Util.detErr("This " + kind() + " is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"); }
+      }
       var at= SwingUtilities.convertPoint(component, 0, 0, frame.top.component);
       frame.menus.show(m, new Rectangle(at.x, at.y, component.getWidth(), component.getHeight()));
     });
