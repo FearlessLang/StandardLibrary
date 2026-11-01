@@ -172,23 +172,23 @@ EList[E:*]: _EditableList[E, EList[E]] {
   /// ``this.removeIf(f)`` removes every element for which ``f`` returns `True`, returning ``this``;
   /// the remaining elements keep their order.
   //> .check{ELists#(1, 2, 3, 4).removeIf{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3))}
-  mut .removeIf(mut MF[E, Bool]): mut EList[E];
+  mut .removeIf(read F[E, Bool]): mut EList[E];
 
   /// ``this.retainIf(f)`` removes every element for which ``f`` returns `False`, returning ``this``.
   /// Equivalent to: ``this.removeIf{e -> f#e .not}``
   //> .check{ELists#(1, 2, 3, 4).retainIf{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(2, 4))}
-  mut .retainIf(f: mut MF[E, Bool]): mut EList[E] -> this.removeIf{f#:: .not};
+  mut .retainIf(f: read F[E, Bool]): mut EList[E] -> this.removeIf{f#:: .not};
 
   /// ``this.removeFirstWhere(f)`` removes the first element for which ``f`` returns `True`, returning ``this``.
   /// Does nothing if no such element exists.
   //> .check{ELists#(1, 2, 3, 4).removeFirstWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3, 4))}
-  mut .removeFirstWhere(mut MF[E, Bool]): mut EList[E];
+  mut .removeFirstWhere(read F[E, Bool]): mut EList[E];
 
   /// ``this.removeLastWhere(f)`` removes the last element for which ``f`` returns `True`, returning ``this``.
   /// Does nothing if no such element exists.
   //> .check{ELists#(1, 2, 3, 4).removeLastWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 2, 3))}
   //> .check{ELists#(1, 3).removeLastWhere{e -> (e.getRem 2) == 0}.list .assertEq({::}, Lists#(1, 3))}
-  mut .removeLastWhere(mut MF[E, Bool]): mut EList[E];
+  mut .removeLastWhere(read F[E, Bool]): mut EList[E];
 
   /// ``this.trimTo(start, end)`` keeps only the elements at indices ``[start, end)``, returning ``this``;
   /// the element at ``start`` moves to index ``0``.

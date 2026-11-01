@@ -2,7 +2,6 @@ package _base;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -56,7 +55,7 @@ final class EList$1k$1Instance implements EList$1k$1{
     if (s > e){ throw detErr("EList."+m+": start "+s+" is greater than end "+e); }
     return s;
   }
-  private boolean test(Object f, Object e){ return isTrue(callMF$2(f, e)); }
+  private boolean test(Object f, Object e){ return isTrue(callF$2(f, e)); }
   private int firstWhere(Object f){
     for (int i= 0; i < xs.size(); i += 1){ if (test(f, xs.get(i))){ return i; } }
     return -1;
@@ -83,11 +82,7 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$swap$2(Object p0, Object p1){ Collections.swap(xs, idx("swap", p0), idx("swap", p1)); return this; }
   @Override public Object mut$clear$0(){ xs.clear(); return this; }
   @Override public Object mut$remove$1(Object p0){ xs.remove(idx("remove", p0)); return this; }
-  @Override public Object mut$removeIf$1(Object p0){
-    try{ xs.removeIf(e -> test(p0, e)); }
-    catch (ConcurrentModificationException e){ throw detErr("EList.removeIf: the function changed the EList while removeIf was running"); }
-    return this;
-  }
+  @Override public Object mut$removeIf$1(Object p0){ xs.removeIf(e -> test(p0, e)); return this; }
   @Override public Object mut$removeFirstWhere$1(Object p0){
     int i= firstWhere(p0);
     if (i != -1){ xs.remove(i); }
@@ -176,12 +171,12 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size() && !test(p2, acc); i += 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size() && !isTrue(callMF$2(p2, acc)); i += 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRightUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0 && !test(p2, acc); i -= 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0 && !isTrue(callMF$2(p2, acc)); i -= 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$accumulateInPlace$1(Object p0){

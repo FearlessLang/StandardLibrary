@@ -141,11 +141,11 @@ ESet[E]: Pipe[ESet[E]] {
     };
 
   /// ``this.removeIf(f)`` removes all elements for which ``f`` returns `True`, returning `this`.
-  mut .removeIf(mut MF[E, Bool]): mut ESet[E];
+  mut .removeIf(read F[E, Bool]): mut ESet[E];
 
   /// ``this.retainIf(f)`` removes all elements for which `f` returns `False`, returning `this`.
   /// Equivalent to: ``this.removeIf{e -> f#e .not}``
-  mut .retainIf(f: mut MF[E, Bool]): mut ESet[E] -> this.removeIf{f#:: .not};
+  mut .retainIf(f: read F[E, Bool]): mut ESet[E] -> this.removeIf{f#:: .not};
 
   /// ``this.distinctBy(by)`` replaces the orderHash of this with ``by`` and returns `this`.
   /// This may cause elements in this to be removed if they are equal under ``by``.
