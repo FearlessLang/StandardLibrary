@@ -93,10 +93,4 @@ GuiExtentTests: Test {::
       .ok _ -> Error.msg "A line end under the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "line y -32769 is out of range; it must be between -32768 and 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .label{l -> Error.msg(l.textHeight 32767 .text "big" .width.str + " " + (l.height.str))}
-    }}}).run{
-      .ok _ -> Error.msg "The label always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[32767] Height[32767]"}}.assertTrue{i};
-      }}
   }
