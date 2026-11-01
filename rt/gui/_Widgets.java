@@ -409,8 +409,8 @@ abstract class AWidget implements Widget$2o$1{
   void skOver(Canvas cv){}
   Dimension own(){ return new Dimension(width, height); }
   void grow(int w, int h){
-    width = Math.max(width, w);
-    height = Math.max(height, h);
+    width = Math.min(maxExtent, Math.max(width, w));
+    height = Math.min(maxExtent, Math.max(height, h));
   }
   void insetsFit(String setter, int l, int r, int t, int b, int w, int h){
     if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": leftInset " + l + " + rightInset " + r + " is more than width " + w); }
@@ -456,8 +456,8 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$pack$0(){
     return reStyle(() -> {
       var n= need();
-      width = n.width;
-      height = n.height;
+      width = Math.min(maxExtent, n.width);
+      height = Math.min(maxExtent, n.height);
     });
   }
   @Override public Object mut$fill$0(){ return reStyle(() -> fill = true); }
