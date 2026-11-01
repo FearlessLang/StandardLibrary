@@ -10,8 +10,8 @@ import java.util.List;
 
 final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.FocusListener{
   final _Frame frame;
-  final ArrayList<KeyAction$m8$0> pressed= new ArrayList<>();
-  final ArrayList<KeyAction$m8$0> released= new ArrayList<>();
+  final ArrayList<CKeyAction> pressed= new ArrayList<>();
+  final ArrayList<CKeyAction> released= new ArrayList<>();
   // Keys currently down, tracked so a lost window focus (alt-tab, OS focus
   // switch) can synthesize the releases AWT will otherwise never deliver:
   // without this, a key held during a focus switch leaves any state the
@@ -37,7 +37,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
   }
   @Override public void focusGained(java.awt.event.FocusEvent e){}
 
-  private MF$7$1 task(int eventKey, List<KeyAction$m8$0> keyActions){
+  private MF$7$1 task(int eventKey, List<CKeyAction> keyActions){
     var elapsed= frame.elapsed;
     var panelWidth= w(frame.top.component.getWidth());
     var panelHeight= h(frame.top.component.getHeight());
@@ -47,10 +47,10 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
         var actions= new ArrayList<Consumer$ao$1>();
         KeyStroke$m8$0 key= null;
         for (var ka : keyActions){
-          var k= matchingKey((EList$1k$1)ka.mut$match$0(), eventKey);
+          var k= ka.match.stream().filter(m -> _KeyNames$b4$0.codes.get(((Str$c$0Instance)m.read$get$0()).val()) == eventKey).findFirst().orElse(null);
           if (k == null){ continue; }
           if (key == null){ key = k; }
-          copyActions((EList$1k$1)ka.mut$actions$0(), actions);
+          actions.addAll(ka.actions);
         }
         var ctx= new CKeyCtx(elapsed, frame, panelWidth, panelHeight, key);
         for (var a : actions){ a.mut$accept$1(ctx); }
@@ -59,37 +59,34 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
     };
   }
 
-  private static KeyStroke$m8$0 matchingKey(EList$1k$1 match, int eventKey){
-    int size= natToInt(match.read$size$0());
-    for (long i= 0;i < size;i += 1){
-      var k= (KeyStroke$m8$0)match.mut$get$1(n(i));
-      if (_KeyNames$b4$0.codes.get(((Str$c$0Instance)k.read$get$0()).val()) == eventKey){ return k; }
-    }
-    return null;
-  }
-
-  private static void copyActions(EList$1k$1 from, List<Consumer$ao$1> to){
-    long size= natToLong(from.read$size$0());
-    for (long i= 0;i < size;i += 1){
-      to.add((Consumer$ao$1)from.mut$get$1(n(i)));
-    }
-  }
-
   @Override public Object mut$pressed$1(Object scope){ return addKeyAction(scope, pressed); }
   @Override public Object mut$released$1(Object scope){ return addKeyAction(scope, released); }
 
-  private Object addKeyAction(Object scope, List<KeyAction$m8$0> list){
+  void check(String closed, String replaced){
     frame.onEdtAndWait(() -> {
-      if (frame.frame.completed()){ throw Util.detErr("This Keys belongs to a closed window: the CapGui.run that showed the window has returned, so a key action added now would never run"); }
-      if (!changeable &&!List.of(frame.surface.getKeyListeners()).contains(this)){
-        throw Util.detErr("This Keys was replaced by a later .onKey, so a key action added now would never run");
-      }
+      if (frame.frame.completed()){ throw Util.detErr(closed); }
+      if (!changeable &&!List.of(frame.surface.getKeyListeners()).contains(this)){ throw Util.detErr(replaced); }
     });
-    var keyAction= (KeyAction$m8$0)KeyActions$18g$0.instance.imm$$hash$0();
+  }
+  private Object addKeyAction(Object scope, List<CKeyAction> list){
+    check("This Keys belongs to a closed window: the CapGui.run that showed the window has returned, so a key action added now would never run", "This Keys was replaced by a later .onKey, so a key action added now would never run");
+    var keyAction= new CKeyAction(this);
     ((Scope$1c$1)scope).mut$run$1(keyAction);
     list.add(keyAction);
     return this;
   }
+}
+
+final class CKeyAction implements KeyAction$m8$0{
+  final CKeyManager keys;
+  final ArrayList<KeyStroke$m8$0> match= new ArrayList<>();
+  final ArrayList<Consumer$ao$1> actions= new ArrayList<>();
+  CKeyAction(CKeyManager keys){ this.keys= keys; }
+  private void check(){ keys.check("This KeyAction belongs to a closed window: the CapGui.run that showed the window has returned, so a key or an action added now would never run", "This KeyAction belongs to a Keys replaced by a later .onKey, so a key or an action added now would never run"); }
+  @Override public Object mut$matchOnly$1(Object k){ check(); match.clear(); match.add((KeyStroke$m8$0)k); return this; }
+  @Override public Object mut$matchAlso$1(Object k){ check(); match.add((KeyStroke$m8$0)k); return this; }
+  @Override public Object mut$doOnly$1(Object c){ check(); actions.clear(); actions.add((Consumer$ao$1)c); return this; }
+  @Override public Object mut$doAlso$1(Object c){ check(); actions.add((Consumer$ao$1)c); return this; }
 }
 
 record CKeyCtx(
