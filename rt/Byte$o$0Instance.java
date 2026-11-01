@@ -126,6 +126,17 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$int$0(){ return Int$c$0Instance.instance(u8(val)); }
   @Override public Object imm$float$0(){ return Float$1c$0Instance.instance((double)u8(val)); }
   @Override public Object imm$num$0(){ return Num$c$0Instance.instance(BigInteger.valueOf(u8(val)), BigInteger.ONE); }
+  @Override public Object imm$size1Str$0(){
+    var s= Str$c$0Instance.size1(u8(val));
+    return s == null ? optEmpty() : optSome(s);
+  }
+  @Override public Object imm$tryGetSize1Str$0(){
+    var s= Str$c$0Instance.size1(u8(val));
+    if (s == null){ return fail("Byte.getSize1Str: "+u8(val)+" is not the scalar value of a character of Str; the characters of Str have the scalar values 10 and 32 to 126"); }
+    return ok(s);
+  }
+  @Override public Object imm$size1UStr$0(){ return optSome(UStr$s$0Instance.size1(u8(val))); }
+  @Override public Object imm$tryGetSize1UStr$0(){ return ok(UStr$s$0Instance.size1(u8(val))); }
   @Override public Object read$str$0(){ return Str$c$0Instance.instance(Integer.toString(u8(val))); }
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this.read$str$0());}
   @Override public Object read$imm$0(){ return this; }

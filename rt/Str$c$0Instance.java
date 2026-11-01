@@ -6,11 +6,22 @@ import java.math.BigInteger;
 import java.util.regex.Pattern;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
-  public static Str$c$0 instance(String val){ return new Str$c$0Instance(val); }
+  private static final Str$c$0Instance empty= new Str$c$0Instance("");
+  private static final Str$c$0Instance[] size1= IntStream.range(0, 128)
+    .mapToObj(c -> UStr$s$0Instance.isStrScalar(c) ? new Str$c$0Instance(String.valueOf((char) c)) : null)
+    .toArray(Str$c$0Instance[]::new);
+  public static Str$c$0 instance(String val){
+    if (val.isEmpty()){ return empty; }
+    if (val.length() == 1){ return Objects.requireNonNull(size1[val.charAt(0)]); }
+    return new Str$c$0Instance(val);
+  }
+  static Str$c$0Instance size1(int c){ return c < size1.length ? size1[c] : null; }
   @Override public String toString(){ return toS(this); }
   private static String s(Object o){ return ((Str$c$0Instance)o).val; }
   @Override public Object read$imm$0(){ return this; }
