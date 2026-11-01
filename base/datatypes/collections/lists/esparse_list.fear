@@ -90,19 +90,19 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.removeIf(f)`` makes a hole of every index whose element ``f`` returns `True` for, returning ``this``.
   //> .check{ESparseLists.backedWithArray[Nat] 3 .fillHoles{i -> i}.removeIf{e -> e > 0}.flatSeqFlow.list .assertEq({::}, Lists#(0))}
-  mut .removeIf(mut MF[E, Bool]): mut ESparseList[E];
+  mut .removeIf(read F[E, Bool]): mut ESparseList[E];
 
   /// ``this.retainIf(f)`` makes a hole of every index whose element ``f`` returns `False` for, returning ``this``.
   /// Equivalent to: ``this.removeIf{e -> f#e .not}``
-  mut .retainIf(f: mut MF[E, Bool]): mut ESparseList[E] -> this.removeIf{f#:: .not};
+  mut .retainIf(f: read F[E, Bool]): mut ESparseList[E] -> this.removeIf{f#:: .not};
 
   /// ``this.removeFirstWhere(f)`` makes a hole of the lowest index whose element ``f`` returns `True` for, returning ``this``.
   /// Does nothing if no such element exists.
-  mut .removeFirstWhere(mut MF[E, Bool]): mut ESparseList[E];
+  mut .removeFirstWhere(read F[E, Bool]): mut ESparseList[E];
 
   /// ``this.removeLastWhere(f)`` makes a hole of the highest index whose element ``f`` returns `True` for, returning ``this``.
   /// Does nothing if no such element exists.
-  mut .removeLastWhere(mut MF[E, Bool]): mut ESparseList[E];
+  mut .removeLastWhere(read F[E, Bool]): mut ESparseList[E];
 
   /// ``this.trimTo(start, end)`` keeps only the indices ``[start, end)``, elements and holes, returning ``this``;
   /// index ``start`` moves to index ``0``, and the capacity becomes ``end - start``.

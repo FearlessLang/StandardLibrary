@@ -157,7 +157,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     if (Long.compareUnsigned(i, s.cap()) >= 0){ throw detErr("ESparseList."+m+": Index "+Long.toUnsignedString(i)+" out of bounds for ESparseList of capacity "+Long.toUnsignedString(s.cap())); }
     return i;
   }
-  private boolean test(Object f, long i){ return isTrue(callMF$2(f, s.at(i))); }
+  private boolean test(Object f, long i){ return isTrue(callF$2(f, s.at(i))); }
   private LongStream where(Object f){ return Arrays.stream(s.present()).filter(i -> test(f, i)); }
   private long lastWhere(Object f){
     var is= s.present();
