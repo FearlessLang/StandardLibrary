@@ -4,4 +4,25 @@ GuiKeyTests: Test {::
   .checkDetErr({::.isMsg{:: == `KeyStroke#"ESC" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}}, {Key#"ESC"})
   .check{Key#"SEPARATOR" .assertEq(Key#"SEPARATOR")}
   .check{Key#"SEPARATER" .assertEq(Key#"SEPARATER")}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut base.KeyAction]] a = {Slots#[mut base.KeyAction]}
+    .do{Block#(f.modelFps(100, {:: .action{f.close}}).onKey{:: .pressed{:: .save a}}.onKey{::}, Void)}
+    .do{Block#(a!.matchAlso(Key#"A"), Void)}
+    .return{f.content.pane{::}}
+    }}).run{
+      .ok _ -> Error.msg "Changing a KeyAction of a replaced Keys always fails";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This KeyAction belongs to a Keys replaced by a later .onKey, so a key or an action added now would never run"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedKeyAction#(s.gui)}).run{
+      .ok _ -> Error.msg "Changing a KeyAction of a closed window always fails";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This KeyAction belongs to a closed window: the CapGui.run that showed the window has returned, so a key or an action added now would never run"}}.assertTrue{i};
+      }}
+  }
+ClosedKeyAction: {#(gui: mut base.CapGui): Void -> Block#
+  .let[mut Slot[mut base.KeyAction]] a = {Slots#[mut base.KeyAction]}
+  .do{gui.run{f -> Block#
+    .do{Block#(f.modelFps(100, {:: .action{f.close}}).onKey{:: .pressed{:: .save a}}, Void)}
+    .return{f.content.pane{::}}
+    }}
+  .return{Block#(a!.matchAlso(Key#"A"), Void)}
   }

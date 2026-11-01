@@ -552,22 +552,12 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
 KeyEvent:ScreenContext{
   read .keyStroke:KeyStroke;
 }
-KeyActions:{#:mut KeyAction->Block#
-  .let[mut EList[KeyStroke]] match= {ELists#}
-  .let[mut EList[mut Consumer[KeyEvent]]] actions= {ELists#}
-  .return{mut KeyAction:_Styled[KeyAction]{'self .self->self;
-    mut .match: mut EList[KeyStroke]->match;
-    mut .actions: mut EList[mut Consumer[KeyEvent]]->actions;
-    mut .matchOnly(k: KeyStroke): mut KeyAction ->
-      Block#(match.clear,self.matchAlso(k));
-    mut .matchAlso(k: KeyStroke): mut KeyAction ->
-      Block#(match.add(k),self);
-    mut .doOnly(c: mut Consumer[KeyEvent]): mut KeyAction ->
-      Block#(actions.clear,self.doAlso(c));
-    mut .doAlso(c: mut Consumer[KeyEvent]): mut KeyAction ->
-      Block#(actions.add(c),self);
-  }}
-}
+KeyAction:_Styled[KeyAction]{ .self->this;
+  mut .matchOnly(KeyStroke):mut KeyAction;
+  mut .matchAlso(KeyStroke):mut KeyAction;
+  mut .doOnly(mut Consumer[KeyEvent]):mut KeyAction;
+  mut .doAlso(mut Consumer[KeyEvent]):mut KeyAction;
+  }
 Keys:_Styled[Keys]{ .self->this;
   mut .pressed(mut Scope[KeyAction]):mut Keys;
   mut .released(mut Scope[KeyAction]):mut Keys;
