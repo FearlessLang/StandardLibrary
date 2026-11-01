@@ -124,7 +124,7 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   //> .check{ESparseLists.backedWithArray[Nat] 3 .set(1, 7).fillHoles{i -> i}.getEList.list
   //>   .assertEq({::}, Lists#(0,7,2))}
-  mut .fillHoles(mut MF[Nat, E]): mut ESparseList[E];
+  mut .fillHoles(read F[Nat, E]): mut ESparseList[E];
 
   /// ``this.mapOpts f`` returns ``this`` after replacing every index ``i``, in ascending order, with ``f#(i, old)``:
   /// ``old`` is ``.some`` of the element at ``i`` or ``.empty`` for a hole; a ``.some`` result puts its element at ``i``, an ``.empty`` result makes ``i`` a hole.
@@ -132,7 +132,7 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   //> .check{ESparseLists.backedWithArray[Nat] 3 .set(0, 5).set(1, 6)
   //>   .mapOpts{i, e -> (i == 0).if{ .then -> {}; .else -> Opts#(i)}}.flowOpts(ParImm#).map{o -> o.isSome}.list
   //>   .assertEq({::}, Lists#(False, True, True))}
-  mut .mapOpts(mut MF[Nat, mut Opt[E], mut Opt[E]]): mut ESparseList[E];
+  mut .mapOpts(read F[Nat, mut Opt[E], mut Opt[E]]): mut ESparseList[E];
 
   /// ``this.fillFrom list`` returns ``this`` after filling the holes, in ascending order, with the elements of ``list`` in order,
   /// until there are no more holes or no more elements. ``list`` is left unchanged.

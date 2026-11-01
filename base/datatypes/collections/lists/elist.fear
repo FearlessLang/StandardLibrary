@@ -245,7 +245,7 @@ EList[E:*]: _EditableList[E, EList[E]] {
   //>   .do{l.fold({0}, {a,_,b -> a+b}) .assertEq 15}
   //>   .do{l.fold({1}, {a,_,b -> a*b}) .assertEq 120}
   //>   .done}
-  mut .fold[R:*](acc: iso MF[R], f: mut MF[R, Nat, E, R]): R;
+  mut .fold[R:*](acc: iso MF[R], f: read F[R, Nat, E, R]): R;
 
   /// ``this.foldRight(acc, f)`` folds this collection from right to left,
   /// starting with the given accumulator and applying ``f`` to the accumulator, the index of each element and the element.
@@ -254,7 +254,7 @@ EList[E:*]: _EditableList[E, EList[E]] {
   //>   .do{l.foldRight({List[Nat]}, {a,_,b -> a +> b}) .assertEq({::}, Lists#(5,4,3,2,1))}
   //>   .do{l.foldRight({1}, {a,_,b -> a*b}) .assertEq 120}
   //>   .done}
-  mut .foldRight[R:*](acc: iso MF[R], f: mut MF[R, Nat, E, R]): R;
+  mut .foldRight[R:*](acc: iso MF[R], f: read F[R, Nat, E, R]): R;
 
   /// ``this.foldUntil(acc, f, pred)`` folds this collection from left to right as `EList.fold` does,
   /// stopping as soon as ``pred`` returns `True` for the accumulator.
@@ -266,8 +266,8 @@ EList[E:*]: _EditableList[E, EList[E]] {
   //>   .done}
   mut .foldUntil[R:*](
     acc: iso MF[R],
-    f: mut MF[R, Nat, E, R],
-    pred: mut MF[R, Bool]
+    f: read F[R, Nat, E, R],
+    pred: read F[R, Bool]
     ): R;
 
   /// ``this.foldRightUntil(acc, f, pred)`` folds this collection from right to left as `EList.foldRight` does,
@@ -276,19 +276,19 @@ EList[E:*]: _EditableList[E, EList[E]] {
   //> .check{ELists#(1,2,3,4,5).foldRightUntil({0}, {a,_,b -> a+b}, {a -> a >= 9}) .assertEq 9}
   mut .foldRightUntil[R:*](
     acc: iso MF[R],
-    f: mut MF[R, Nat, E, R],
-    pred: mut MF[R, Bool]
+    f: read F[R, Nat, E, R],
+    pred: read F[R, Bool]
     ): R;
 
   /// ``this.accumulateInPlace f`` replaces each element, from left to right, with ``f`` applied to the (already replaced) previous element and the current element.
   /// Time Complexity: T(``this``, ``f``) * O(n), where T(l, f) is the maximum time complexity of ``f`` applied to any element of ``this`` and the accumulator.
   //> .check{ELists#(1,2,3,4,5).accumulateInPlace{acc, e -> acc + e}.list.assertEq({::}, Lists#(1, 3, 6, 10, 15))}
-  mut .accumulateInPlace(mut MF[E,E,E]): mut EList[E];
+  mut .accumulateInPlace(read F[E,E,E]): mut EList[E];
 
   /// ``this.accumulateRightInPlace f`` replaces each element, from right to left, with ``f`` applied to the (already replaced) next element and the current element.
   /// Time Complexity: T(``this``, ``f``) * O(n), where T(l, f) is the maximum time complexity of ``f`` applied to any element of ``this`` and the accumulator.
   //> .check{ELists#(1,2,3,4,5).accumulateRightInPlace{acc, e -> acc + e}.list.assertEq({::}, Lists#(15, 14, 12, 9, 5))}
-  mut .accumulateRightInPlace(mut MF[E,E,E]): mut EList[E];
+  mut .accumulateRightInPlace(read F[E,E,E]): mut EList[E];
 
   /// ``this.seqFlow`` drains ``this`` and returns a sequential `Flow` of all the elements of this.
   //> .check{Block#

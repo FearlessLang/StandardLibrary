@@ -112,7 +112,7 @@ final class EList$1k$1Instance implements EList$1k$1{
     return new EList$1k$1Instance(xs.subList(s, idx("eView", p1, xs.size() + 1)));
   }
   @Override public Object mut$reverse$0(){ Collections.reverse(xs); return this; }
-  @Override public Object mut$mapInPlace$1(Object p0){ xs.replaceAll(e -> callMF$2(p0, e)); return this; }
+  @Override public Object mut$mapInPlace$1(Object p0){ xs.replaceAll(e -> callF$2(p0, e)); return this; }
   @Override public Object mut$shallowClone$0(){ return new EList$1k$1Instance(new ArrayList<>(xs)); }
   @Override public Object mut$all$1(Object p0){ return bool(xs.stream().allMatch(e -> test(p0, e))); }
   @Override public Object mut$any$1(Object p0){ return bool(xs.stream().anyMatch(e -> test(p0, e))); }
@@ -161,30 +161,30 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$fold$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size(); i += 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size(); i += 1){ acc = callF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRight$2(Object p0, Object p1){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0; i -= 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0; i -= 1){ acc = callF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= 0; i < xs.size() && !isTrue(callMF$2(p2, acc)); i += 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= 0; i < xs.size() && !isTrue(callF$2(p2, acc)); i += 1){ acc = callF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$foldRightUntil$3(Object p0, Object p1, Object p2){
     var acc= callMF$1(p0);
-    for (int i= xs.size() - 1; i >= 0 && !isTrue(callMF$2(p2, acc)); i -= 1){ acc = callMF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
+    for (int i= xs.size() - 1; i >= 0 && !isTrue(callF$2(p2, acc)); i -= 1){ acc = callF$4(p1, acc, Nat$c$0Instance.instance(i), xs.get(i)); }
     return acc;
   }
   @Override public Object mut$accumulateInPlace$1(Object p0){
-    for (int i= 1; i < xs.size(); i += 1){ xs.set(i, callMF$3(p0, xs.get(i - 1), xs.get(i))); }
+    for (int i= 1; i < xs.size(); i += 1){ xs.set(i, callF$3(p0, xs.get(i - 1), xs.get(i))); }
     return this;
   }
   @Override public Object mut$accumulateRightInPlace$1(Object p0){
-    for (int i= xs.size() - 2; i >= 0; i -= 1){ xs.set(i, callMF$3(p0, xs.get(i + 1), xs.get(i))); }
+    for (int i= xs.size() - 2; i >= 0; i -= 1){ xs.set(i, callF$3(p0, xs.get(i + 1), xs.get(i))); }
     return this;
   }
   @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain(), FlowMode.Seq); }

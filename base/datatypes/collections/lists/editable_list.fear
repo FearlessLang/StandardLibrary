@@ -41,7 +41,7 @@ _EditableList[E:*, Self]: Pipe[Self] {
   /// ``this.mapInPlace(f)`` applies ``f`` to each element of this, replacing each element with the result,
   /// returning ``this``.
   //> .check{ELists#(1, 2, 3).mapInPlace{e -> e * 10}.list .assertEq({::}, Lists#(10, 20, 30))}
-  mut .mapInPlace(mut MF[E, E]): mut Self;
+  mut .mapInPlace(read F[E, E]): mut Self;
 
   /// ``this.shallowClone`` returns a shallow clone of this collection.
   /// The main use of this is to allow holding onto an identical editable list after this one has been drained.
