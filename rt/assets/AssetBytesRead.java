@@ -86,7 +86,7 @@ final class AssetBytesRead{
 
   static String autoloadJavaPackage(String path){
     var prefix= "fear:/";
-    if (!path.startsWith(prefix)){ throw invalidAssetDescriptor("path does not start with "+prefix+": "+path); }
+    if (!path.startsWith(prefix)){ throw invalidAssetDescriptor("path does not start with "+prefix+"\npath: "+path); }
     var rest= path.substring(prefix.length());
     var slash= rest.indexOf('/');
     var folder= slash < 0 ? rest : rest.substring(0, slash);
@@ -164,7 +164,7 @@ final class AssetBytesRead{
       || s.startsWith(".")
       || s.indexOf('\\') >= 0
       || s.indexOf(';') >= 0
-      ){ throw invalidAssetDescriptor("bad "+field+" segment in "+path+": "+s); }
+      ){ throw invalidAssetDescriptor("bad "+field+" segment in "+path+"\nsegment: "+s); }
   }
   static RuntimeException invalidAssetDescriptor(String msg){
     throw detErr("Invalid asset descriptor.\n"+msg);

@@ -63,7 +63,7 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
   @Override public Object mut$icon$1(Object i){
     if (preloaded.containsKey(i)){ return set(g -> g.icon = i); }
     var path= AssetBytesRead.str(((ImageFile$lk$0) i).imm$path$0());
-    throw Util.detErr("CapGui.icon is given the image \""+path+"\", but the main running this CapGui preloads only the icons "+String.join(", ", preloaded.values())+".\n"
+    throw Util.detErr("CapGui.icon is given the image \""+path+"\",\nbut the main running this CapGui preloads only the icons "+String.join(", ", preloaded.values())+".\n"
       +"A window shows only an icon its main preloads: the I of each Shortcut[I], OpenWith[I] and PreLoadIcon[I] of the main, and base.IconsFearless.\n"
       +"Add PreLoadIcon[I] to the main, with I the icon type of \""+path+"\".");
   }
