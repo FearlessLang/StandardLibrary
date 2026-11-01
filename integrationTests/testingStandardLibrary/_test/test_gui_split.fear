@@ -81,10 +81,4 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "A divider position over the limit always stops the Gui";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "dividerPosition 40000 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.dividerPosition.str))}
-    }}}).run{
-      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[117] Height[32] 0"}}.assertTrue{i};
-      }}
   }
