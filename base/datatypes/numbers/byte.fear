@@ -124,7 +124,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.getSize1Str` returns the Str of `this.size1Str`. Throws iff `this.size1Str` is `.empty`.
   //>   .check{126.getByte .getSize1Str .assertEq "~"}
   //>   .checkDetErr({::}, {200.getByte .getSize1Str})
-  .getSize1Str: Str -> this.tryGetSize1Str!;
+  .getSize1Str: Str;
 
   /// `this.tryGetSize1Str` returns `.ok` of `this.getSize1Str`, or the error info of `this.getSize1Str` iff `this.size1Str` is `.empty`.
   //>   .check{(32.getByte .tryGetSize1Str).ok.assertEq({::}, Opts# " ")}
@@ -138,7 +138,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
 
   /// `this.getSize1UStr` returns the UStr of `this.size1UStr`.
   //>   .check{0.getByte .getSize1UStr .scalarHex .assertEq "0000"}
-  .getSize1UStr: UStr -> this.tryGetSize1UStr!;
+  .getSize1UStr: UStr;
 
   /// `this.tryGetSize1UStr` returns `.ok` of `this.getSize1UStr`.
   //>   .check{(255.getByte .tryGetSize1UStr).ok! .scalarHex .assertEq "00FF"}
