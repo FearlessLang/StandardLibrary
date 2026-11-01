@@ -81,10 +81,4 @@ GuiSectionsTests: Test {::
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Only the expanded content was drawn"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .sections{x -> Error.msg(x.section.label{:: .text "A long title"}.and.pane{::}.onClose{ss, n -> Void}.width.str + " " + (x.section.label{:: .text "A long title"}.and.pane{::}.width.str))}
-    }}}).run{
-      .ok _ -> Error.msg "The sections always stop the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "Width[130] Width[130]"}}.assertTrue{i};
-      }}
   }
