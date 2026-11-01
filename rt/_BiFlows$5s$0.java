@@ -92,7 +92,7 @@ abstract class MultiFlow{
     live();
     long n= Nat$c$0Instance.unwrap(p0);
     if (n == 0){ throw detErr(name()+".limit: .limit 0 asks for no elements of every channel. When the count can be 0, test it with .if before building the "+name()+"."); }
-    cs.forEach(c -> c.subList((int) Math.min(n, c.size()), c.size()).clear());
+    cs.forEach(c -> c.subList(Long.compareUnsigned(n, c.size()) < 0 ? (int) n : c.size(), c.size()).clear());
     return this;
   }
 }

@@ -35,9 +35,7 @@ public final class AppLog{
     Runtime.getRuntime().addShutdownHook(new Thread(AppLog::shutdown, "AppLog-shutdown"));
   }
   public static AppLog open(Path path, boolean raw){
-    var p= Util.pathProperty("fearlessUser.dir").resolve(path).normalize();
-    if (!child){ startupFor(p, keepLogs); }
-    var log= new AppLog(p, raw);
+    var log= new AppLog(path, raw);
     all.add(log);
     return log;
   }
@@ -54,28 +52,35 @@ public final class AppLog{
       t.printStackTrace(System.err);
     }
   }
+  private final Path name;
   private final Path path;
   private final Object lock= new Object();
-  private final BufferedWriter out;
+  private BufferedWriter out;
   private final boolean raw;
-  private AppLog(Path path, boolean raw){
-    this.path= path;
+  private AppLog(Path name, boolean raw){
+    this.name= name;
+    this.path= Util.pathProperty("fearlessUser.dir").resolve(name).normalize();
     this.raw= raw;
-    this.out= openWriterAppend(path);
   }
   public void append(String msg){
     var line= raw ? msg : stampNow()+" "+msg+"\n";
     synchronized (lock){
       if (closing.get()){ err("append during shutdown for "+path+": "+msg, null); return; }
       try{
+        if (out == null){ out = start(); }
         out.write(line);
         out.flush();
       }
-      catch (IOException e){ throw new UncheckedIOException(e); }
+      catch (IOException|UncheckedIOException e){ throw Util.nonDetErr("The log file "+name.toString().replace('\\', '/')+"\ncan not be written"); }
     }
+  }
+  private BufferedWriter start(){
+    if (!child){ startupFor(path, keepLogs); }
+    return openWriterAppend(path);
   }
   private void closeAndRotateQuiet(){
     synchronized (lock){
+      if (out == null){ return; }
       try{ out.close(); }
       catch (IOException e){ err("close failed: "+path, e); return; }
     }

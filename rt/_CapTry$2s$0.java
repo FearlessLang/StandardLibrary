@@ -16,7 +16,8 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
         Object res; try{ res= s.get(); }
         catch (Deterministic d){ return m.mut$info$1(addStackInfo(d.i, d)); }
         catch (NonDeterministic d){ return m.mut$info$1(addStackInfo(d.i, d)); }
-        catch (Throwable t){ 
+        catch (StackOverflowError|OutOfMemoryError t){ return m.mut$info$1(addStackInfo(new Str$c$0Instance(javaErrMsg(t)).read$info$0(), t)); }
+        catch (Throwable t){
           var msg= t.getClass().getSimpleName()+"\n"+t.getMessage();
           return m.mut$info$1(addStackInfo(new Str$c$0Instance(msg).read$info$0(), t));
         }

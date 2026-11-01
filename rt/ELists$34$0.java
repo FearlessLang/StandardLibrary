@@ -2,6 +2,7 @@ package _base;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -82,7 +83,11 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$swap$2(Object p0, Object p1){ Collections.swap(xs, idx("swap", p0), idx("swap", p1)); return this; }
   @Override public Object mut$clear$0(){ xs.clear(); return this; }
   @Override public Object mut$remove$1(Object p0){ xs.remove(idx("remove", p0)); return this; }
-  @Override public Object mut$removeIf$1(Object p0){ xs.removeIf(e -> test(p0, e)); return this; }
+  @Override public Object mut$removeIf$1(Object p0){
+    try{ xs.removeIf(e -> test(p0, e)); }
+    catch (ConcurrentModificationException e){ throw detErr("EList.removeIf: the function changed the EList while removeIf was running"); }
+    return this;
+  }
   @Override public Object mut$removeFirstWhere$1(Object p0){
     int i= firstWhere(p0);
     if (i != -1){ xs.remove(i); }
@@ -125,8 +130,7 @@ final class EList$1k$1Instance implements EList$1k$1{
     return Flow$o$1Instance.of(res, FlowMode.ParImm);
   }
   @Override public Object mut$sort$1(Object p0){
-    var by= (OrderBy$5e$2)p0;
-    xs.sort((a,b) -> cmp(by, a, b));
+    sortBy((OrderBy$5e$2)p0, "sort");
     return this;
   }
   @Override public Object mut$distinct$1(Object p0){
@@ -138,13 +142,17 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$sortDistinct$1(Object p0){
     if (xs.size() < 2){ return this; }
     var by= (OrderBy$5e$2)p0;
-    xs.sort((a,b) -> cmp(by, a, b));
+    sortBy(by, "sortDistinct");
     int w= 1;
     for (int i= 1; i < xs.size(); i += 1){
       if (cmp(by, xs.get(w-1), xs.get(i)) != 0){ xs.set(w++, xs.get(i)); }
     }
     xs.subList(w, xs.size()).clear();
     return this;
+  }
+  private void sortBy(OrderBy$5e$2 by, String m){
+    try{ xs.sort((a,b) -> cmp(by, a, b)); }
+    catch (IllegalArgumentException e){ throw detErr("EList."+m+": the OrderBy does not give a consistent order to the elements"); }
   }
   @Override public Object mut$trimToSize$0(){
     if (xs instanceof ArrayList<Object> a){ a.trimToSize(); }

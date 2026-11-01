@@ -2,15 +2,18 @@ package _base;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.awt.image.DataBufferInt;
+import java.nio.ByteOrder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
+
+import io.github.humbleui.skija.Bitmap;
+import io.github.humbleui.skija.ColorAlphaType;
+import io.github.humbleui.skija.ColorType;
+import io.github.humbleui.skija.ImageInfo;
 
 public final class _FluentGUI implements CapGui$2s$0, Cloneable{
   static final LinkedHashMap<Object,String> preloaded= new LinkedHashMap<>(Map.of(IconsFearless$9kw$0.instance, "base.IconsFearless"));
@@ -100,8 +103,7 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
     var shown= icon != null ? icon : preloaded.firstEntry().getKey();
     var g= copy();
     g.iconName = preloaded.get(shown);
-    try{ g.awtIcon = ImageIO.read(new ByteArrayInputStream(iconBytes(shown))); }
-    catch (IOException e){ throw new UncheckedIOException(e); }
+    g.awtIcon = awtIcon(shown);
     var done= new CompletableFuture<Void>();
     var fb= new _Frame(done, g);
     try{
@@ -116,6 +118,16 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
   public static void preload(Object... namesAndIcons){
     preloaded.clear();
     for (int i= 0; i < namesAndIcons.length; i += 2){ preloaded.put(namesAndIcons[i+1], (String) namesAndIcons[i]); }
+  }
+  static BufferedImage awtIcon(Object i){
+    var subject= "Resource with path "+AssetBytesRead.str(((ImageFile$lk$0) i).imm$path$0()).substring("fear:".length());
+    try (var image= AssetImageRead.decode(subject, iconBytes(i), -1L); var bm= new Bitmap()){
+      bm.allocPixels(new ImageInfo(image.getWidth(), image.getHeight(), ColorType.BGRA_8888, ColorAlphaType.PREMUL));
+      image.readPixels(bm);
+      var res= new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
+      bm.peekPixels().getBuffer().order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(((DataBufferInt) res.getRaster().getDataBuffer()).getData());
+      return res;
+    }
   }
   static byte[] iconBytes(Object i){
     var f= (ImageFile$lk$0) i;

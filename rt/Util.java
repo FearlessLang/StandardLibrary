@@ -231,7 +231,11 @@ public final class Util{
     }
     return nonDeterministic((Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t))));
 }
-  private static String javaErrMsg(Throwable t){
+  static String javaErrMsg(Throwable t){
+    for (var c= t; c != null; c = c.getCause()){
+      if (c instanceof StackOverflowError){ return "The program ran out of stack space"; }
+      if (c instanceof OutOfMemoryError){ return "The program ran out of memory"; }
+    }
     var msg= t.getMessage();
     if (msg == null || msg.isBlank()){ return "Backend exception: "+t.getClass().getName(); }
     return "Backend exception: "+t.getClass().getName()+": "+msg;

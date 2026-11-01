@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -96,7 +97,7 @@ final class DataFiles{
     catch (UncheckedIOException e){ throw failed(root.name(), p, write, e.getCause()); }
   }
   private static Error failed(String name, List<String> path, boolean write, IOException e){
-    return lost("The "+at(name, path)+"\ncould not be "+(write ? "changed" : "read")+": "+e.getClass().getSimpleName(), e);
+    return lost("The "+at(name, path)+"\ncan not be "+(write ? "changed" : "read")+".", e);
   }
   private static String at(String name, List<String> path){ return "path "+name+"/"+String.join("/", path); }
   private static Error refused(String name, List<String> path, String why){ return detErr("The "+at(name, path)+"\n"+why); }
@@ -265,7 +266,10 @@ final class DataFiles{
   private static LinkedHashMap<String,Item> items(byte[] zip) throws IOException{
     var res= new LinkedHashMap<String,Item>();
     try (var in= new ZipInputStream(new ByteArrayInputStream(zip), UTF_8)){
-      for (var e= in.getNextEntry(); e != null; e = in.getNextEntry()){
+      var first= in.getNextEntry();
+      var emptyZip= zip.length >= 4 && zip[0] == 'P' && zip[1] == 'K' && zip[2] == 5 && zip[3] == 6;
+      if (first == null && !emptyZip){ throw new ZipException("not a zip"); }
+      for (var e= first; e != null; e = in.getNextEntry()){
         if (!e.isDirectory()){ res.put(e.getName(), new Item(e.getTime(), in.readAllBytes())); }
       }
     }
