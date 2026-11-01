@@ -176,8 +176,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     s.expanded = expanded;
     if (!expanded){ frame.mouse.detached(s.content.component); }
   }
-  @Override public Object mut$section$0(){ return new _RegionFiller(frame, (s, make) -> titled(build(s, make))); }
-  Object titled(AWidget title){ return _RegionFiller.and(frame, (s, make) -> add(title, build(s, make))); }
+  @Override public Object mut$section$0(){ return new _RegionFiller(frame, (t, mt) -> _RegionFiller.and(frame, (s, make) -> add(build(t, mt), build(s, make)))); }
   @Override public Object mut$tabs$1(Object b){ return reStyle(() -> tabs = Util.isTrue(b)); }
   @Override public Object mut$expand$1(Object i){
     long k= Util.natToLong(i);
