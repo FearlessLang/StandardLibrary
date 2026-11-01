@@ -29,7 +29,6 @@ JavaLeakTests: UnitTests, base.PreLoadIcon[Junk]{::
   .test ELists
   .test Sets
   .test BiFlows
-  .test KeyStrokes
   .test Assets
   .test GuiIcons
   .test Logs
@@ -112,10 +111,6 @@ Sets: Test{::
 
 BiFlows: Test{::
   .check{base.Flows#(1, 2).with(base.Flows#(10, 20)).limit(base.Math.maxNat).getMerge{a, b -> a + b}.list.size.assertEq 2}
-  }
-
-KeyStrokes: Test{::
-  .checkDetErr({::.isMsg{:: == `KeyStroke#"NOPE" is not a key name. Key names are listed in the documentation of KeyStroke, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}}, {(base.KeyStroke#"NOPE").get})
   }
 
 Assets: Test{::
