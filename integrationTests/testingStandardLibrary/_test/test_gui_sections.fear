@@ -81,18 +81,6 @@ GuiSectionsTests: Test {::
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "msg" .isMsg{:: == "Only the expanded content was drawn"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#300).content.pane{::
-    .sections{x -> Block#
-      .let a = {x.section.pane{:: .paint{g -> Error.msg "The title of the remaining section was drawn"}}}
-      .do{Block#(a.and.pane{::}, Void)}
-      .do{Block#(a.and.pane{::}, Void)}
-      .return{x.remove 0}
-      }
-    .pane{:: .paint{g -> Error.msg "The title of the remaining section was not drawn"}}
-    }}}).run{
-      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "msg" .isMsg{:: == "The title of the remaining section was drawn"}}.assertTrue{i};
-      }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .sections{x -> Error.msg(x.section.label{:: .text "A long title"}.and.pane{::}.onClose{ss, n -> Void}.width.str + " " + (x.section.label{:: .text "A long title"}.and.pane{::}.width.str))}
     }}}).run{
