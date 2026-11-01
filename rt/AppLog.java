@@ -65,7 +65,7 @@ public final class AppLog{
   public void append(String msg){
     var line= raw ? msg : stampNow()+" "+msg+"\n";
     synchronized (lock){
-      if (closing.get()){ err("append during shutdown for "+path+": "+msg, null); return; }
+      if (closing.get()){ err("append during shutdown for "+path+"\n"+msg, null); return; }
       try{
         if (out == null){ out = start(); }
         out.write(line);

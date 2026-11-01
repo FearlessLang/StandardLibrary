@@ -51,7 +51,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     var bytes= new byte[bs.size()];
     for (var i= 0; i < bytes.length; i += 1){ bytes[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
     var text= new String(bytes, pathCharset);
-    if (!absolute(text)){ throw detErr("The path \""+InputFile.portable(text)+"\" of the message \""+verb+"\" is not an absolute path of this system."); }
+    if (!absolute(text)){ throw detErr("The path \""+InputFile.portable(text)+"\"\nof the message \""+verb+"\" is not an absolute path of this system."); }
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)));
   }
   private static boolean absolute(String path){

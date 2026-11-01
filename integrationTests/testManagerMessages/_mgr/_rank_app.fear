@@ -30,7 +30,8 @@ ManagerMessagesRefused: Test{::
      "The manager refuses to forget nope."
     )}}, {t -> t.manager.forget "nope"})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path "relative" of the message "Register" is not an absolute path of this system.`
+     `The path "relative"`
+    |`of the message "Register" is not an absolute path of this system.`
     )}}, {t -> base.Block#
       .openIso s = t
       .return{s.manager.register(Relative#s)}
