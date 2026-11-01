@@ -252,8 +252,15 @@ final class _Split extends AContainer implements Split$1c$0{
     return super.mut$pack$0();
   }
   @Override void skOver(Canvas cv){ Sk.divider(cv, this); }
-  @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
-  @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
+  @Override void growFor(AWidget k){ grow(k.width + edgeW() + (vertical ? 0 : bar), k.height + edgeH() + (vertical ? bar : 0)); }
+  Object axis(boolean v){
+    return reStyle(() -> {
+      vertical = v;
+      for (var c : component.getComponents()){ growFor(((SkComponent) c).w); }
+    });
+  }
+  @Override public Object mut$horizontal$0(){ return axis(false); }
+  @Override public Object mut$vertical$0(){ return axis(true); }
   @Override public Object mut$dividerPosition$1(Object n){ return reStyle(extent(n, "dividerPosition"), v -> position = v); }
   @Override public Object read$dividerPosition$0(){ return n(frame.onEdtAndWait(() -> position)); }
   @Override public Object mut$draggable$1(Object b){ return reStyle(() -> draggable = Util.isTrue(b)); }
@@ -412,6 +419,7 @@ abstract class AWidget implements Widget$2o$1{
     width = Math.min(maxExtent, Math.max(width, w));
     height = Math.min(maxExtent, Math.max(height, h));
   }
+  void growFor(AWidget k){ grow(k.width + edgeW(), k.height + edgeH()); }
   void insetsFit(String setter, int l, int r, int t, int b, int w, int h){
     if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": leftInset " + l + " + rightInset " + r + " is more than width " + w); }
     if (t + b > h){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": topInset " + t + " + bottomInset " + b + " is more than height " + h); }
@@ -657,7 +665,7 @@ final class _Frame implements Frame$1c$0{
         parent.remove(old);
       }
       parent.add(b.component, where);
-      into.grow(b.width + into.edgeW(), b.height + into.edgeH());
+      into.growFor(b);
       b.changeable = false;
     });
     markLayoutDirty();

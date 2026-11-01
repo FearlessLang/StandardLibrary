@@ -3,7 +3,7 @@ GuiSplitTests: Test {::
     .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.with{:: .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[112] Height[52]"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[117] Height[52]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.with{sp -> Error.msg(sp.pack .width.str + " " + (sp.height.str) + " " + (sp.dividerPosition.str))}
@@ -80,5 +80,17 @@ GuiSplitTests: Test {::
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPosition 40000 } }}}).run{
       .ok _ -> Error.msg "A divider position over the limit always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPosition 40000 is too large; it must be <= 32767"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.dividerPosition.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[117] Height[32] 0"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.vertical.width.str + " " + (sp.height.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[117] Height[37]"}}.assertTrue{i};
       }}
   }
