@@ -80,15 +80,20 @@ InfoValidatorTests: Test {::
     & > 0 > "name" .isMsg{:: == "Bob"}
     | > 1 > "name" .isMsg{:: == "Alice"}
     & > 2 > "name" .isMsg{:: == "David"}}}}
-  .checkFalse{info.validate{:: > "friends" > 1 > "name" .isMsg{:: == "Alice"} .not}}
+  .checkFalse{info.validate{:: > "friends" > 1 > "name" .whereNot{::.isMsg{:: == "Alice"}}}}
   .checkTrue{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "Alice"}}}.isSome}
   .checkTrue{info.extract{:: > "friends" .extractList .where{:: > 1 > "name" .isMsg{:: == "David"}}}.isEmpty}
   .checkTrue{info.extract{:: .extractMap .where{:: > "friends" .isList}}.isSome}
   .checkTrue{info.extract{:: .extractMap .where{:: > "enemies" .isList}}.isEmpty}
   .checkDetErr({::.isMsg{::.startsWith "Info.getList:"}}, {Infos.msg "hi" .getList})
   .check{Infos.msg "hi" .tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
-  .checkFalse{Infos.msg "A".validate{:: .isList & .isList .not}}
-  .checkFalse{info.validate{:: > "enemies" .isList & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
+  .checkFalse{Infos.msg "A".validate{:: .isList & .whereNot{::.isList}}}
+  .checkFalse{info.validate{:: > "enemies" .isList & > "friends" > 1 > "name" .whereNot{::.isMsg{:: == "David"}}}}
+  .checkFalse{info.validate{:: > "enemies" .whereNot{::.isList}}}
+  .checkTrue{info.validate{:: .whereNot{:: > "enemies" .isList}}}
+  .checkTrue{info.validate{:: > "friends" .whereNot{:: > 0 .isMap & > 2 .isMap}}}
+  .checkFalse{info.validate{:: > "friends" .whereNot{:: > 0 .isMap | > 2 .isMap}}}
+  .checkTrue{info.validate{:: .whereNot{:: .whereNot{:: > "friends" .isList}}}}
   }
 
 InfoExtractorTests: Test {::
