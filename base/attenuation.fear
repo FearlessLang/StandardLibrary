@@ -257,7 +257,7 @@ RevokableRunningMain: { #[R](r: mut Revocation, u: mut CapRunningMain[R]): mut C
 RevokableLogReader: { #[T](r: mut Revocation, u: mut CapLogReader[T]): mut CapLogReader[T] -> {'s
   .read -> Block#(r#, u.read);
   .consume -> Block#(r#, u.consume);
-  .logName -> Block#(r#, u.logName);
+  .logName -> u.logName;
   .iso -> RevokableLogReader#(r.iso.close, u.iso.close);
   .close -> s;
   }}
