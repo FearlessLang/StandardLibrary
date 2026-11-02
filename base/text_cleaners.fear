@@ -15,7 +15,7 @@ UStrScalarCleaner:{ mut .nextScalar(n: Nat): UStr; mut .end: UStr; }
 StrScalarCleaner:{ mut .nextScalar(n: Nat): Str; mut .end: Str; }
 ///The text in place of a bad unit: a part of the input that the encoding rejects.
 ///``byteOffset`` counts the bytes the cleaner received before the bad unit.
-///``rejectedValue`` is the value that the bad unit encodes; when it encodes none, it is its first byte (UTF-8, ASCII), its first unit, or its only byte (UTF-16), or the value of its bytes (UTF-32).
+///For ``.notScalar`` and ``.notInStr``, ``rejectedValue`` is the value that the bad unit encodes; for ``.malformedEncoding`` and ``.truncatedEncoding``, it is its first byte (UTF-8, ASCII), its first unit or its only byte (UTF-16), or the value of its bytes (UTF-32).
 UStrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr }
 ///A `UStrFixer` that gives a Str.
 StrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str }
@@ -39,7 +39,8 @@ BadTextReasonMatch[R:**]:{
 ///``.utf8`` decodes UTF-8; a bad unit is a deterministic error holding the reason, the byte offset and the bytes of the bad unit.
 ///``.utf8OrElse(fixer)`` decodes UTF-8; each bad unit gives the result of the fixer of the cleaner, made by ``fixer`` once for each cleaner.
 ///``.utf16LeOrElse``, ``.utf16BeOrElse``, ``.utf32LeOrElse``, ``.utf32BeOrElse``, ``.asciiOrElse`` and ``.latin1OrElse`` do the same with their encodings.
-///An encoding cleaner returns its starting text as it is; ``.text`` and ``.line`` normalize their starting text followed by the text they decode.
+///An encoding cleaner returns its starting text as it is, in front of the first character or bad unit it decodes, or at its ``.end``; ``.text`` and ``.line`` normalize their starting text followed by the text they decode.
+///The cleaners of the library return text only when they hold no byte of an unfinished sequence, so a cleaner that ends at a newline drops no byte.
 ///``.utf8Then(cleaner)`` decodes UTF-8 and calls a fresh scalar cleaner made by ``cleaner`` with each scalar value of the starting text, then with each scalar value it decodes, and calls its ``.end`` at the end; a bad unit gives U+FFFD; the results of the scalar cleaner are the result.
 UStrCleaners:{
   .text: F[UStr, mut UStrCleaner] -> _Magic!;

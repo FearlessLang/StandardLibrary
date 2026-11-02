@@ -19,6 +19,9 @@ TextCleanerTests: Test {::
   .check{ClFeedS#(base.StrCleaners.utf16BeOrElse{ClShow}#(""), 216, 61, 0, 97).assertEq "[notScalar:0:2:55357]a"}
   .check{ClFeedS#(base.StrCleaners.utf32BeOrElse{ClShow}#(""), 0, 17, 0, 0).assertEq "[notScalar:0:4:1114112]"}
   .check{ClFeedS#(base.StrCleaners.utf32LeOrElse{ClShow}#(""), 0, 216, 0, 0).assertEq "[notScalar:0:4:55296]"}
+  .check{ClFeedS#(base.StrCleaners.utf16LeOrElse{ClShow}#(""), 97).assertEq "[truncatedEncoding:0:1:97]"}
+  .check{ClFeedS#(base.StrCleaners.utf16BeOrElse{ClShow}#(""), 216, 61, 222).assertEq "[truncatedEncoding:0:3:55357]"}
+  .check{ClFeedS#(base.StrCleaners.utf32BeOrElse{ClShow}#(""), 0, 0, 97).assertEq "[truncatedEncoding:0:3:97]"}
   .check{ClFeedS#(base.StrCleaners.asciiOrElse{ClShow}#(""), 128, 97).assertEq "[malformedEncoding:0:1:128]a"}
   .check{ClFeedS#(base.StrCleaners.latin1OrElse{ClShow}#(""), 233).assertEq "[notInStr:0:1:233]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 192, 128).assertEq "[malformedEncoding:0:2:192]"}

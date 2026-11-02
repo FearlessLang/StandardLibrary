@@ -367,7 +367,7 @@ Graphics:ScreenContext{
   read .uTextRoom(text: UStr): TextRoom;
   read .textLines(text: Str, width: WidthNat): List[Str] -> this.uTextLines(text.u, width).flow.map{::.getStr}.list;
   ///``text`` broken into lines whose rooms are at most ``width`` wide, with the current text settings, as a ``TextArea`` wraps its text.
-  ///A newline of ``text`` ends a line.
+  ///Only a newline of ``text`` ends a line: a carriage return, U+2028 and U+2029 are characters of their line.
   ///A line breaks after a word; a word wider than ``width`` breaks between characters; a single character (a grapheme cluster) wider than ``width`` is a line alone.
   ///The spaces where a line breaks are not part of the line.
   read .uTextLines(text: UStr, width: WidthNat): List[UStr];
