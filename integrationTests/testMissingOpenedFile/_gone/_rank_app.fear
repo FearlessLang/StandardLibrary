@@ -1,7 +1,7 @@
 use base.UnitTests as UnitTests;
 use base.Test as Test;
 
-Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+Recover: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> "?" }
 
 MissingOpenedFileTests: UnitTests{::
   .test MissingOpenedFile
@@ -11,5 +11,5 @@ MissingOpenedFile: Test{::
   .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith "File with absolute path ") && {m.endsWith(
      "gone.txt"
     |"can not be read as bytes"
-    )}}}, {s -> s.inputCursor#.match{.some n -> n.readStrUtf8 Recover; .empty -> "none"}})
+    )}}}, {s -> s.inputCursor#.match{.some n -> n.readStr(base.StrCleaners.utf8OrElse{Recover}); .empty -> "none"}})
   }

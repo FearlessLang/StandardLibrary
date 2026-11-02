@@ -59,7 +59,7 @@ final class CMenuItem implements MenuItem$aw$0{
   @Override public Object mut$uText$1(Object t){
     open();
     var s= ustr(t);
-    var b= lineBreak(s);
+    var b= newline(s);
     if (b != null){ throw Util.detErr("The new text of this MenuItem has " + b + ": the text of a MenuItem is one line"); }
     text = s;
     return this;

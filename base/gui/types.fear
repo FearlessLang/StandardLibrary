@@ -422,7 +422,7 @@ _EditText[S]: Widget[S]{
   read .editable:Bool;
   mut .textClearsUndo(Bool):mut S;
   read .textClearsUndo:Bool;
-  mut .onInput(mut MF[UStr,UStr]):mut S;
+  mut .cleaner(F[UStr, mut UStrCleaner]):mut S;
   mut .onEdit(mut Consumer[TextEvent]):mut S;
   mut .onCommit(mut Consumer[TextEvent]):mut S;
   mut .caret(CaretPainter):mut S;

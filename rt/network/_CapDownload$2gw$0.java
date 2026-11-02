@@ -11,49 +11,12 @@ public final class _CapDownload$2gw$0 implements CapDownload$2gw$0{
     return List$o$1Instance.wrap(l);
   }
 
-  @Override public Object mut$downloadStrUtf8$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.str(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf8);
+  @Override public Object mut$downloadStr$3(Object url, Object maxBytes, Object cleaner){
+    return TextCleaning.str(cleaner, DownloadFetch.bytes(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes)));
   }
-  @Override public Object mut$downloadUStrUtf8$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.uStr(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf8);
+  @Override public Object mut$downloadUStr$3(Object url, Object maxBytes, Object cleaner){
+    return TextCleaning.uStr(cleaner, DownloadFetch.bytes(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes)));
   }
-  @Override public Object mut$downloadStrUtf16Le$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.str(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf16le);
-  }
-  @Override public Object mut$downloadUStrUtf16Le$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.uStr(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf16le);
-  }
-  @Override public Object mut$downloadStrUtf16Be$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.str(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf16be);
-  }
-  @Override public Object mut$downloadUStrUtf16Be$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.uStr(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf16be);
-  }
-  @Override public Object mut$downloadStrUtf32Le$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.str(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf32le);
-  }
-  @Override public Object mut$downloadUStrUtf32Le$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.uStr(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf32le);
-  }
-  @Override public Object mut$downloadStrUtf32Be$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.str(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf32be);
-  }
-  @Override public Object mut$downloadUStrUtf32Be$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.uStr(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::utf32be);
-  }
-  @Override public Object mut$downloadStrAscii$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.str(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::ascii);
-  }
-  @Override public Object mut$downloadUStrAscii$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.uStr(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::ascii);
-  }
-  @Override public Object mut$downloadStrLatin1$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.str(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::latin1);
-  }
-  @Override public Object mut$downloadUStrLatin1$3(Object url, Object maxBytes, Object recover){
-    return DownloadText.uStr(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes), recover, TextEncoding::latin1);
-  }
-
   @Override public Object mut$downloadImage$3(Object url, Object maxBytes, Object maxPixels){
     var u= AssetBytesRead.str(url);
     var bs= DownloadFetch.bytes(u, AssetBytesRead.nat(maxBytes));

@@ -4,11 +4,11 @@ use base.Block as Block;
 use base.Try as Try;
 use base.Lists as L;
 
-Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
-NeverRecovers: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "should not happen" }
-NeverRecoversU: base.BadUStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "should not happen".u }
+Recover: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> "?" }
+NeverRecovers: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> "should not happen" }
+NeverRecoversU: base.UStrFixer { reason, byteOffset, byteLength, rejectedValue -> "should not happen".u }
 Pub: base.DataRead{}
-Base: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("base.txt")).readStrUtf8 Recover }
+Base: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("base.txt")).readStr(base.StrCleaners.utf8OrElse{Recover}) }
 
 DownloadTests: UnitTests{::
   .test DownloadsThatSucceed
@@ -17,11 +17,11 @@ DownloadTests: UnitTests{::
   }
 
 DownloadsThatSucceed: Test{::
-  .checkWithSys{s -> s.download.downloadStrUtf8(Base#s+"/ok", 1000, NeverRecovers).assertEq "hello download"}
+  .checkWithSys{s -> s.download.downloadStr(Base#s+"/ok", 1000, base.StrCleaners.utf8OrElse{NeverRecovers}).assertEq "hello download"}
   .checkWithSys{s -> s.download.downloadBytes(Base#s+"/bytes", 1000).assertEq({::}, L#(65.getByte, 66.getByte, 67.getByte))}
-  .checkWithSys{s -> s.download.downloadStrUtf8(Base#s+"/start", 1000, NeverRecovers).assertEq "landed"}
-  .checkWithSys{s -> s.download.downloadStrUtf8(Base#s+"/accent", 1000, Recover).assertEq "caf?"}
-  .checkWithSys{s -> s.download.downloadUStrUtf8(Base#s+"/accent", 1000, NeverRecoversU).size.assertEq 4}
+  .checkWithSys{s -> s.download.downloadStr(Base#s+"/start", 1000, base.StrCleaners.utf8OrElse{NeverRecovers}).assertEq "landed"}
+  .checkWithSys{s -> s.download.downloadStr(Base#s+"/accent", 1000, base.StrCleaners.utf8OrElse{Recover}).assertEq "caf?"}
+  .checkWithSys{s -> s.download.downloadUStr(Base#s+"/accent", 1000, base.UStrCleaners.utf8OrElse{NeverRecoversU}).size.assertEq 4}
   .checkWithSys{s -> s.download.downloadImage(Base#s+"/img.png", 100000, 1000000).width.get.assertEq 3}
   }
 
@@ -29,16 +29,16 @@ DownloadsRefusedByTheirUrl: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
      "Invalid URL descriptor."
     |"unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/x"
-    )}}, {t -> t.download.downloadStrUtf8("ftp://127.0.0.1/x", 1000, NeverRecovers)})
+    )}}, {t -> t.download.downloadStr("ftp://127.0.0.1/x", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})})
   .checkDetErrWithSys({::.isMsg{::.startsWith(
      "Invalid URL descriptor."
     |""
-    )}}, {t -> t.download.downloadStrUtf8("not a url", 1000, NeverRecovers)})
+    )}}, {t -> t.download.downloadStr("not a url", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})})
   .checkDetErrWithSys({::.isMsg{:: == (
      "Invalid URL descriptor."
     |"port out of range: 99999"
     |"url: http://127.0.0.1:99999/x"
-    )}}, {t -> t.download.downloadStrUtf8("http://127.0.0.1:99999/x", 1000, NeverRecovers)})
+    )}}, {t -> t.download.downloadStr("http://127.0.0.1:99999/x", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})})
   }
 
 DownloadsThatFail: Test{::
@@ -62,7 +62,7 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/loop", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/loop", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})}).assertInfo{::.isMsg{:: == (
        "Download failed."
       |"url: "+b+"/loop"
       |"too many redirects"
@@ -70,14 +70,14 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/file", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/file", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})}).assertInfo{::.isMsg{:: == (
        "Invalid URL descriptor."
       |"unsupported scheme (only http/https allowed): file in file:///etc/passwd"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/missing", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/missing", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})}).assertInfo{::.isMsg{:: == (
        "Download failed."
       |"url: "+b+"/missing"
       |"HTTP status: 404"
@@ -85,7 +85,7 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/back", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/back", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})}).assertInfo{::.isMsg{:: == (
        "Download failed."
       |"url: "+b+"/missing"
       |"HTTP status: 404"
@@ -93,7 +93,7 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/space", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/space", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})}).assertInfo{::.isMsg{:: == (
        "Download failed."
       |"url: "+b+"/space"
       |"redirect to a malformed Location: /a b"
@@ -101,7 +101,7 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStrUtf8(b+"/ftp", 1000, NeverRecovers)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/ftp", 1000, base.StrCleaners.utf8OrElse{NeverRecovers})}).assertInfo{::.isMsg{:: == (
        "Invalid URL descriptor."
       |"unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/caf%C3%A9"
       )}}}

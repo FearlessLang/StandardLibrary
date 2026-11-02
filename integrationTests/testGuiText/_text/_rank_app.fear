@@ -30,7 +30,6 @@ TextDemo: Main { sys -> sys.gui.run{f -> Block#
         .onCommit{e -> Log#(log!, "field commit", e)}
         }
       .textField{:: .width 760 .height 34 .text "any unicode, red caret"
-        .onInput{u -> u}
         .caret{g -> g.color(Color.dangerTomato).rect(WidthNat#4, g.lineHeight)}
         .onEdit{e -> Log#(log!, "unicode edit", e)}
         .onCommit{e -> Log#(log!, "unicode commit", e)}
