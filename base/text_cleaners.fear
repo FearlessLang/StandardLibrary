@@ -1,6 +1,6 @@
 ///A cleaner turns bytes into text, one byte at a time: ``.nextByte`` returns the text that ``b`` adds, and ``.end`` returns the text that is left.
 ///A cleaner maker, ``imm F[UStr, mut UStrCleaner]``, makes a fresh cleaner from a starting text, the text that the cleaner sees before its first byte.
-///A run of a cleaner maker on some bytes calls ``.nextByte`` of the current cleaner with each byte, and ``.end`` at the end.
+///A run of a cleaner maker on some bytes makes the first cleaner with the empty starting text, calls ``.nextByte`` of the current cleaner with each byte, and ``.end`` at the end.
 ///When a result holds a newline, the result up to its first newline goes to the result of the run, the current cleaner is over, and the cleaner maker makes the next cleaner with the rest of that result as starting text.
 ///A cleaner with the empty starting text that receives no byte gets no ``.end``.
 UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
@@ -46,7 +46,7 @@ UStrCleaners:{
   .utf8Then(cleaner: F[mut UStrScalarCleaner]): F[UStr, mut UStrCleaner] -> _Magic!;
   }
 ///The cleaner makers of `UStrCleaners`, giving a Str.
-///A scalar value that is not a character of Str is a bad unit with reason ``.notInStr``.
+///For the encoding cleaners, a scalar value that is not a character of Str is a bad unit with reason ``.notInStr``.
 ///``.text`` and ``.line`` give ? for a bad unit, and then turn tab into space, decompose each scalar value (NFKD), so an accented letter becomes its letter, and drop what is still not in Str.
 StrCleaners:{
   .text: F[Str, mut StrCleaner] -> _Magic!;

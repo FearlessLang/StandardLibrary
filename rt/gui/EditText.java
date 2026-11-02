@@ -73,8 +73,6 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   record Fire(Consumer$ao$1 handler, TextEvent$ls$0 event){}
   record Req(int a, int b, String s){}
   record Change(int start, int stop, String text, int caret){}
-  static final Object textMaker= UStrCleaners$5mo$0.instance.imm$text$0();
-  static final Object lineMaker= UStrCleaners$5mo$0.instance.imm$line$0();
   static final Paint stroke= new Paint().setAntiAlias(true).setMode(PaintMode.STROKE);
   final StringBuilder buf= new StringBuilder();
   int caret;
@@ -86,7 +84,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   boolean wrap;
   final ArrayList<Step> undo= new ArrayList<>();
   final ArrayList<Step> redo= new ArrayList<>();
-  Object cleaner;
+  Object cleaner= oneLine() ? UStrCleaners$5mo$0.instance.imm$line$0() : UStrCleaners$5mo$0.instance.imm$text$0();
   Consumer$ao$1 onEdit;
   Consumer$ao$1 onCommit;
   CaretPainter$4sg$0 caretPainter;
@@ -304,7 +302,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   }
 
   Change clean(int a, int b, String s){
-    var r= new TextCleaning.Run(true, cleaner != null ? cleaner : oneLine() ? lineMaker : textMaker);
+    var r= new TextCleaning.Run(true, cleaner);
     int start= lineStart(a);
     TextCleaning.feed(r, buf, start, a);
     TextCleaning.feed(r, s, 0, s.length());
@@ -399,7 +397,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
       var q= frame.onEdtAndWait(() -> canChange() && editable ? onEdt.get() : null);
       if (q == null){ return Void$o$0.instance; }
       var ch= clean(q.a(), q.b(), q.s());
-      fire(frame.onEdtAndWait(() -> fired(edit(ch))));
+      fire(frame.onEdtAndWait(() -> { layout(); return fired(edit(ch)); }));
       return Void$o$0.instance;
     }});
   }
@@ -589,8 +587,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     if (t == null || reservedDown || Character.isISOControl(c) || !typesWith(e)){ return; }
     e.consume();
     if (Character.isHighSurrogate(c)){ high = c; return; }
-    if (Character.isLowSurrogate(c) && high == 0){ return; }
-    var s= Character.isLowSurrogate(c) ? "" + high + c : "" + c;
+    var s= high == 0 ? "" + c : "" + high + c;
     high = 0;
     t.input(s);
   }

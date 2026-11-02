@@ -45,8 +45,6 @@ final class TextCleaning{
     Object cur;
     boolean fresh;
     final StringBuilder chars= new StringBuilder();
-    int[] scalars= new int[16];
-    int size;
     Run(boolean u, Object maker){
       this.u= u;
       this.maker= (F$3$2) maker;
@@ -74,21 +72,14 @@ final class TextCleaning{
         return true;
       }
       var v= ((UStr$s$0Instance) r).val();
-      int i= 0;
-      while (i < v.length && v[i] != '\n'){ i += 1; }
-      if (i == v.length){ add(v, v.length); return false; }
-      add(v, i + 1);
-      start(UStr$s$0Instance.instance(Arrays.copyOfRange(v, i + 1, v.length)));
-      return true;
+      for (int i= 0; i < v.length; i += 1){
+        chars.appendCodePoint(v[i]);
+        if (v[i] == '\n'){ start(UStr$s$0Instance.instance(Arrays.copyOfRange(v, i + 1, v.length))); return true; }
+      }
+      return false;
     }
-    void add(int[] v, int len){
-      if (size + len > scalars.length){ scalars = Arrays.copyOf(scalars, Math.max(Math.multiplyExact(scalars.length, 2), size + len)); }
-      if (len == 1){ scalars[size++] = v[0]; return; }
-      System.arraycopy(v, 0, scalars, size, len);
-      size += len;
-    }
-    Object result(){ return u ? UStr$s$0Instance.instance(Arrays.copyOf(scalars, size)) : Str$c$0Instance.instance(chars.toString()); }
-    String javaText(){ return u ? new String(scalars, 0, size) : chars.toString(); }
+    Object result(){ return u ? UStr$s$0Instance.instance(chars.toString()) : Str$c$0Instance.instance(chars.toString()); }
+    String javaText(){ return chars.toString(); }
   }
 
   static void feed(Run r, CharSequence s, int from, int to){
@@ -249,12 +240,10 @@ final class TextCleaning{
     final boolean u;
     final Decoder d;
     final Object fixer;
-    final String strict;
     final StringBuilder out= new StringBuilder();
-    Encoding(boolean u, Decoder d, Object fixerMaker, String strict, Object start){
+    Encoding(boolean u, Decoder d, Object fixerMaker, Object start){
       this.u= u;
       this.d= d;
-      this.strict= strict;
       fixer = fixerMaker == null ? null : ((F$3$1) fixerMaker).read$$hash$0();
       d.out = this;
       add(out, start);
@@ -272,7 +261,7 @@ final class TextCleaning{
       bad(notInStr, at, len, cp);
     }
     @Override public void bad(int reason, long at, int len, long rejected){
-      if (fixer == null){ throw Util.detErr(strict + ": " + reasonNames[reason] + ": " + badUnit(reason, at, len, rejected)); }
+      if (fixer == null){ throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: "+ reasonNames[reason] + ": " + badUnit(reason, at, len, rejected)); }
       var args= new Object[]{reasons[reason], nat(at), nat(len), nat(rejected)};
       add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(args[0], args[1], args[2], args[3]) : ((StrFixer$b4$0) fixer).mut$$hash$4(args[0], args[1], args[2], args[3]));
     }
@@ -283,7 +272,7 @@ final class TextCleaning{
       var value= String.format(Locale.ROOT, "%04X", rejected);
       return switch (reason){
         case malformedEncoding -> where + " are not UTF-8";
-        case truncatedEncoding -> "the line ends in the middle of the UTF-8 sequence " + bytes + " at byte offset " + at;
+        case truncatedEncoding -> "the input ends in the middle of the UTF-8 sequence " + bytes + " at byte offset " + at + " of the line";
         case notScalar -> where + " encode " + value + ", which is not a unicode scalar value";
         default -> where + " encode " + value + ", which is not a character of Str; the characters of Str have the scalar values 10 and 32 to 126";
         };
@@ -371,8 +360,7 @@ final class TextCleaning{
     }
   }
 
-  static Object encoding(boolean u, Supplier<Decoder> decoder, Object fixer){ return maker(s -> new Encoding(u, decoder.get(), fixer, null, s)); }
-  static Object strictUtf8(boolean u){ return maker(s -> new Encoding(u, new Utf8(), null, u ? "UStrCleaners.utf8" : "StrCleaners.utf8", s)); }
+  static Object encoding(boolean u, Supplier<Decoder> decoder, Object fixer){ return maker(s -> new Encoding(u, decoder.get(), fixer, s)); }
   static Object clean(boolean u, boolean oneLine){ return maker(s -> new Clean(u, oneLine, s)); }
   static Object then(boolean u, Object scalarMaker){ return maker(s -> new Then(u, scalarMaker, s)); }
 }
