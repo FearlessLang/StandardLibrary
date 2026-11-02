@@ -271,12 +271,12 @@ final class TextCleaning{
       var bytes= new StringBuilder();
       for (int i= 0; i < len; i += 1){ bytes.append(i == 0 ? "" : " ").append(String.format(Locale.ROOT, "%02X", d.p[i])); }
       var where= "the byte sequence " + bytes + " at byte offset " + at + " of the line";
-      var value= String.format(Locale.ROOT, "%04X", rejected);
+      var value= String.format(Locale.ROOT, "U+%04X", rejected);
       return switch (reason){
         case malformedEncoding -> where + " is not UTF-8";
         case truncatedEncoding -> "the input ends in the middle of the UTF-8 sequence " + bytes + " at byte offset " + at + " of the line";
         case notScalar -> where + " encodes " + value + ", which is not a unicode scalar value";
-        default -> where + " encodes " + value + ", which is not a character of Str; the characters of Str have the scalar values 10 and 32 to 126";
+        default -> where + " encodes " + value + ", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E";
         };
     }
   }

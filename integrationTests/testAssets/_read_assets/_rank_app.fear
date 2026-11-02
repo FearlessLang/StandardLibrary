@@ -19,14 +19,14 @@ AssetTextReadAsciiTests: UnitTests { ::
 AssetTextReadAsciiPlainFiles: Test { ::
   .checkWithSys { s->
     AutoLoadTestText
-      .readStr(s.assetRead, base.StrCleaners.utf8OrElse{UnexpectedBadStr})
+      .readStr(s.assetRead, base.StrCleaners.utf8)
       .assertEq "Hello! We are automatically reading this file!"
     }
   .checkWithSys { s->
-    GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8OrElse{UnexpectedBadStr}))
+    GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8))
     }
   .checkWithSys { s->
-    GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8OrElse{UnexpectedBadUStr}))
+    GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8))
     }
   .checkWithSys { s->
     GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.asciiOrElse{UnexpectedBadStr}))
@@ -42,43 +42,43 @@ AssetTextReadAsciiPlainFiles: Test { ::
     }
   .checkWithSys { s->
     AutoZipLoadSubTestTextInZip
-      .readStr(s.assetRead, base.StrCleaners.utf8OrElse{UnexpectedBadStr})
+      .readStr(s.assetRead, base.StrCleaners.utf8)
       .assertEq "Hello! We are automatically reading this file from a zip!"
     }
   }
 
 AssetTextReadAsciiRepeatedRead: Test { ::
   .checkWithSys { s-> Block#
-    .do { GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8OrElse{UnexpectedBadStr})) }
-    .do { GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8OrElse{UnexpectedBadStr})) }
-    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8OrElse{UnexpectedBadUStr})) }
-    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8OrElse{UnexpectedBadUStr})) }
+    .do { GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8)) }
+    .do { GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8)) }
+    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8)) }
+    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8)) }
     .done
     }
   }
 
 AssetTextReadAsciiConsumeProtocol: Test { ::
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-1", base.StrCleaners.utf8OrElse{UnexpectedBadStr}))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-1", base.StrCleaners.utf8))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-2", base.StrCleaners.utf8OrElse{UnexpectedBadStr})),
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-2", base.StrCleaners.utf8)),
     sys.try#{
-      AssetTextGoodAscii.consumeStr("ascii-consume-2", base.StrCleaners.utf8OrElse{UnexpectedBadStr})
+      AssetTextGoodAscii.consumeStr("ascii-consume-2", base.StrCleaners.utf8)
       }.assertInfo)}
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-3a", base.StrCleaners.utf8OrElse{UnexpectedBadStr}))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-3a", base.StrCleaners.utf8))
     }
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-3b", base.StrCleaners.utf8OrElse{UnexpectedBadStr}))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-3b", base.StrCleaners.utf8))
     }
   .check {
-    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStr("ascii-consume-4", base.UStrCleaners.utf8OrElse{UnexpectedBadUStr}))
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStr("ascii-consume-4", base.UStrCleaners.utf8))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStr("ascii-consume-5", base.UStrCleaners.utf8OrElse{UnexpectedBadUStr})),
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStr("ascii-consume-5", base.UStrCleaners.utf8)),
     sys.try#{
-      AssetTextGoodAscii.consumeUStr("ascii-consume-5", base.UStrCleaners.utf8OrElse{UnexpectedBadUStr})
+      AssetTextGoodAscii.consumeUStr("ascii-consume-5", base.UStrCleaners.utf8)
       }.assertInfo)}
   }
 

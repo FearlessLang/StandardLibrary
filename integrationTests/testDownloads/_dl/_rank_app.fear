@@ -6,7 +6,7 @@ use base.Lists as L;
 
 Recover: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> "?" }
 Pub: base.DataRead{}
-Base: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("base.txt")).readStr(base.StrCleaners.utf8OrElse{Recover}) }
+Base: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("base.txt")).readStr(base.StrCleaners.utf8) }
 
 DownloadTests: UnitTests{::
   .test DownloadsThatSucceed
