@@ -3,6 +3,7 @@ ClFeed: {
   #(c: mut base.UStrCleaner, a: Nat, b: Nat): base.UStr -> c.nextByte(a.getByte) + (this#(c, b));
   #(c: mut base.UStrCleaner, a: Nat, b: Nat, d: Nat): base.UStr -> c.nextByte(a.getByte) + (this#(c, b, d));
   #(c: mut base.UStrCleaner, a: Nat, b: Nat, d: Nat, e: Nat): base.UStr -> c.nextByte(a.getByte) + (this#(c, b, d, e));
+  #(c: mut base.UStrCleaner, a: Nat, b: Nat, d: Nat, e: Nat, g: Nat): base.UStr -> c.nextByte(a.getByte) + (this#(c, b, d, e, g));
   }
 ClFeedS: {
   #(c: mut base.StrCleaner, a: Nat): Str -> c.nextByte(a.getByte) + (c.end);
@@ -41,6 +42,7 @@ TextCleanerTests: Test {::
   .check{ClFeed#(base.UStrCleaners.text#("".u), 97, 13).scalarHex.assertEq "0061 000A"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 13, 195, 169).scalarHex.assertEq "000A 00E9"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 11, 12, 194, 133).scalarHex.assertEq "000A 000A 000A"}
+  .check{ClFeed#(base.UStrCleaners.text#("".u), 13, 239, 187, 191, 10).scalarHex.assertEq "000A"}
   .check{ClFeedS#(base.StrCleaners.text#(""), 9, 239, 172, 129).assertEq " fi"}
   .check{ClFeedS#(base.StrCleaners.text#(""), 230, 151, 165).assertEq ""}
   .check{ClFeedS#(base.StrCleaners.utf8Then{mut base.StrScalarCleaner{.nextScalar n -> "<"+(n.str)+">"; .end -> "!"}}#("xy"), 97).assertEq "<120><121><97>!"}

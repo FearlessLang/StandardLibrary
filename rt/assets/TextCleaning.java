@@ -236,21 +236,24 @@ final class TextCleaning{
     @Override void feed(int b){ push(b); scalar(b, 1); }
   }
 
-  static final class Encoding implements UStrCleaner$2tc$0, StrCleaner$18g$0, Sink{
+  abstract static class Cleaner implements UStrCleaner$2tc$0, StrCleaner$18g$0, Sink{
     final boolean u;
     final Decoder d;
-    final Object fixer;
     final StringBuilder out= new StringBuilder();
-    Encoding(boolean u, Decoder d, Object fixerMaker, Object start){
-      this.u= u;
-      this.d= d;
-      fixer = fixerMaker == null ? null : ((F$3$1) fixerMaker).read$$hash$0();
-      d.out = this;
-      add(out, start);
-    }
+    Cleaner(boolean u, Decoder d){ this.u= u; this.d= d; d.out = this; }
+    @Override public abstract Object mut$end$0();
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
       return d.n != 0 ? empty(u) : text(out, u);
+    }
+  }
+
+  static final class Encoding extends Cleaner{
+    final Object fixer;
+    Encoding(boolean u, Decoder d, Object fixerMaker, Object start){
+      super(u, d);
+      fixer = fixerMaker == null ? null : ((F$3$1) fixerMaker).read$$hash$0();
+      add(out, start);
     }
     @Override public Object mut$end$0(){
       d.end();
@@ -278,22 +281,18 @@ final class TextCleaning{
     }
   }
 
-  static final class Clean implements UStrCleaner$2tc$0, StrCleaner$18g$0, Sink{
-    final boolean u;
+  static final class Clean extends Cleaner{
     final boolean oneLine;
-    final Decoder d= new Utf8();
     final StringBuilder line= new StringBuilder();
-    final StringBuilder ready= new StringBuilder();
     boolean cr;
     Clean(boolean u, boolean oneLine, Object start){
-      this.u= u;
+      super(u, new Utf8());
       this.oneLine= oneLine;
-      d.out = this;
       for (int c : scalars(start)){ put(c); }
     }
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
-      return ready.isEmpty() || d.n != 0 || cr ? empty(u) : flush();
+      return out.isEmpty() || d.n != 0 || cr ? empty(u) : flush();
     }
     @Override public Object mut$end$0(){
       d.end();
@@ -301,13 +300,14 @@ final class TextCleaning{
       return flush();
     }
     Object flush(){
-      ready.append(norm(line));
+      out.append(norm(line));
       line.setLength(0);
-      return text(ready, u);
+      return text(out, u);
     }
     @Override public void scalar(int cp, long at, int len){ put(cp); }
     @Override public void bad(int reason, long at, int len, long rejected){ put(u ? 0xFFFD : '?'); }
     void put(int cp){
+      if (cp == 0xFEFF){ return; }
       if (cr){
         cr = false;
         newline();
@@ -316,11 +316,11 @@ final class TextCleaning{
       if (cp == '\r'){ cr = true; return; }
       boolean breaks= cp == '\n' || cp == 0x0B || cp == 0x0C || cp == 0x85 || cp == 0x2028 || cp == 0x2029;
       if (breaks){ newline(); return; }
-      if (cp != 0xFEFF){ line.appendCodePoint(cp); }
+      line.appendCodePoint(cp);
     }
     void newline(){
       if (oneLine){ line.append(' '); return; }
-      ready.append(norm(line)).append('\n');
+      out.append(norm(line)).append('\n');
       line.setLength(0);
     }
     String norm(CharSequence s){
@@ -331,20 +331,12 @@ final class TextCleaning{
     }
   }
 
-  static final class Then implements UStrCleaner$2tc$0, StrCleaner$18g$0, Sink{
-    final boolean u;
-    final Decoder d= new Utf8();
+  static final class Then extends Cleaner{
     final Object scalars;
-    final StringBuilder out= new StringBuilder();
     Then(boolean u, Object maker, Object start){
-      this.u= u;
+      super(u, new Utf8());
       scalars = ((F$3$1) maker).read$$hash$0();
-      d.out = this;
       for (int c : scalars(start)){ put(c); }
-    }
-    @Override public Object mut$nextByte$1(Object b){
-      d.feed(u8(b));
-      return d.n != 0 ? empty(u) : text(out, u);
     }
     @Override public Object mut$end$0(){
       d.end();
