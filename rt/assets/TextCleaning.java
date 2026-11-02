@@ -24,19 +24,18 @@ final class TextCleaning{
           case 0 -> m.mut$malformedEncoding$0();
           case 1 -> m.mut$truncatedEncoding$0();
           case 2 -> m.mut$notScalar$0();
-          case 3 -> m.mut$notInStr$0();
-          default -> throw new AssertionError(id);
+          default -> m.mut$notInStr$0();
           };
       }
     };
   }
 
-  static Object uStr(Object maker, byte[] bs){ return run(new Run(true, maker), bs); }
-  static Object str(Object maker, byte[] bs){ return run(new Run(false, maker), bs); }
-  static Object run(Run r, byte[] bs){
+  static Object run(boolean u, Object maker, byte[] bs){
+    var r= new Run(u, maker);
     for (var b : bs){ r.next(b & 0xFF); }
     r.finish();
-    return r.result();
+    var s= r.chars.toString();
+    return u ? UStr$s$0Instance.instance(s) : Str$c$0Instance.instance(s);
   }
 
   static final class Run{
@@ -78,8 +77,6 @@ final class TextCleaning{
       }
       return false;
     }
-    Object result(){ return u ? UStr$s$0Instance.instance(chars.toString()) : Str$c$0Instance.instance(chars.toString()); }
-    String javaText(){ return chars.toString(); }
   }
 
   static void feed(Run r, CharSequence s, int from, int to){
@@ -268,13 +265,13 @@ final class TextCleaning{
     String badUnit(int reason, long at, int len, long rejected){
       var bytes= new StringBuilder();
       for (int i= 0; i < len; i += 1){ bytes.append(i == 0 ? "" : " ").append(String.format(Locale.ROOT, "%02X", d.p[i])); }
-      var where= "the bytes " + bytes + " at byte offset " + at + " of the line";
+      var where= "the byte sequence " + bytes + " at byte offset " + at + " of the line";
       var value= String.format(Locale.ROOT, "%04X", rejected);
       return switch (reason){
-        case malformedEncoding -> where + " are not UTF-8";
+        case malformedEncoding -> where + " is not UTF-8";
         case truncatedEncoding -> "the input ends in the middle of the UTF-8 sequence " + bytes + " at byte offset " + at + " of the line";
-        case notScalar -> where + " encode " + value + ", which is not a unicode scalar value";
-        default -> where + " encode " + value + ", which is not a character of Str; the characters of Str have the scalar values 10 and 32 to 126";
+        case notScalar -> where + " encodes " + value + ", which is not a unicode scalar value";
+        default -> where + " encodes " + value + ", which is not a character of Str; the characters of Str have the scalar values 10 and 32 to 126";
         };
     }
   }
@@ -294,14 +291,14 @@ final class TextCleaning{
     }
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
-      if (ready.isEmpty() || d.partial() || cr){ return empty(u); }
-      ready.append(norm(line));
-      line.setLength(0);
-      return text(ready, u);
+      return ready.isEmpty() || d.partial() || cr ? empty(u) : flush();
     }
     @Override public Object mut$end$0(){
       d.end();
       if (cr){ cr = false; newline(); }
+      return flush();
+    }
+    Object flush(){
       ready.append(norm(line));
       line.setLength(0);
       return text(ready, u);
@@ -341,7 +338,7 @@ final class TextCleaning{
       this.u= u;
       scalars = ((F$3$1) maker).read$$hash$0();
       d.out = this;
-      for (int c : TextCleaning.scalars(start)){ put(c); }
+      for (int c : scalars(start)){ put(c); }
     }
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));

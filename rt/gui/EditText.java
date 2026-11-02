@@ -307,19 +307,15 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     TextCleaning.feed(r, buf, start, a);
     TextCleaning.feed(r, s, 0, s.length());
     int stop= b;
-    while (true){
-      int e= buf.indexOf("\n", stop);
-      if (e < 0){
-        TextCleaning.feed(r, buf, stop, buf.length());
-        stop = buf.length();
-        r.finish();
-        break;
-      }
-      TextCleaning.feed(r, buf, stop, e + 1);
-      stop = e + 1;
-      if (r.fresh){ break; }
-    }
-    var res= r.javaText();
+    int e;
+    do{
+      e= buf.indexOf("\n", stop);
+      int to= e < 0 ? buf.length() : e + 1;
+      TextCleaning.feed(r, buf, stop, to);
+      stop = to;
+    } while (e >= 0 && !r.fresh);
+    if (e < 0){ r.finish(); }
+    var res= r.chars.toString();
     int nl= res.indexOf('\n');
     if (oneLine() && nl >= 0){ throw Util.detErr("The cleaner of this TextField gave a text with a newline at offset " + res.codePointCount(0, nl) + ": the text of a TextField is one line; UStrCleaners.line turns each newline into a space"); }
     return new Change(start, stop, res, Math.max(start, start + res.length() - (stop - b)));

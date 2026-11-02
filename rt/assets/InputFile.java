@@ -24,8 +24,8 @@ record InputFile(Optional<DataFiles.Root> root, String label, Path path, List<St
     try{ return DataFiles.bytes(path, zipSteps, zipEntry); }
     catch (IOException _){ throw nonDetErr(subject()+"\ncan not be read as bytes"); }
   }
-  @Override public Object mut$readStr$1(Object cleaner){ return TextCleaning.str(cleaner, bytes()); }
-  @Override public Object mut$readUStr$1(Object cleaner){ return TextCleaning.uStr(cleaner, bytes()); }
+  @Override public Object mut$readStr$1(Object cleaner){ return TextCleaning.run(false, cleaner, bytes()); }
+  @Override public Object mut$readUStr$1(Object cleaner){ return TextCleaning.run(true, cleaner, bytes()); }
   @Override public Object mut$readBytes$0(){
     var bs= bytes();
     var l= new java.util.ArrayList<Object>(bs.length);

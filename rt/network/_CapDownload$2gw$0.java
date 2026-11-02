@@ -12,10 +12,10 @@ public final class _CapDownload$2gw$0 implements CapDownload$2gw$0{
   }
 
   @Override public Object mut$downloadStr$3(Object url, Object maxBytes, Object cleaner){
-    return TextCleaning.str(cleaner, DownloadFetch.bytes(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes)));
+    return TextCleaning.run(false, cleaner, DownloadFetch.bytes(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes)));
   }
   @Override public Object mut$downloadUStr$3(Object url, Object maxBytes, Object cleaner){
-    return TextCleaning.uStr(cleaner, DownloadFetch.bytes(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes)));
+    return TextCleaning.run(true, cleaner, DownloadFetch.bytes(AssetBytesRead.str(url), AssetBytesRead.nat(maxBytes)));
   }
   @Override public Object mut$downloadImage$3(Object url, Object maxBytes, Object maxPixels){
     var u= AssetBytesRead.str(url);
