@@ -1,5 +1,6 @@
 package _base;
 
+import static _base.TextCleaning.Reason.*;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.Locale;
@@ -7,27 +8,20 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 final class TextCleaning{
-  static final Object[] reasons= {reason(0), reason(1), reason(2), reason(3)};
-  static final String[] reasonNames= {"malformedEncoding", "truncatedEncoding", "notScalar", "notInStr"};
-  static final int malformedEncoding= 0;
-  static final int truncatedEncoding= 1;
-  static final int notScalar= 2;
-  static final int notInStr= 3;
   static final Object emptyUStr= UStr$s$0Instance.instance(new int[0]);
   static final Object emptyStr= Str$c$0Instance.instance("");
 
-  static Object reason(int id){
-    return new BadTextReason$9wg$0(){
-      @Override public Object imm$match$1(Object p0){
-        var m= (BadTextReasonMatch$8suo$1)p0;
-        return switch (id){
-          case 0 -> m.mut$malformedEncoding$0();
-          case 1 -> m.mut$truncatedEncoding$0();
-          case 2 -> m.mut$notScalar$0();
-          default -> m.mut$notInStr$0();
-          };
-      }
-    };
+  enum Reason{
+    malformedEncoding, truncatedEncoding, notScalar, notInStr;
+    final Object fear= new BadTextReason$9wg$0(){ @Override public Object imm$match$1(Object p0){
+      var m= (BadTextReasonMatch$8suo$1) p0;
+      return switch (Reason.this){
+        case malformedEncoding -> m.mut$malformedEncoding$0();
+        case truncatedEncoding -> m.mut$truncatedEncoding$0();
+        case notScalar -> m.mut$notScalar$0();
+        case notInStr -> m.mut$notInStr$0();
+        };
+    }};
   }
 
   static Object run(boolean u, Object maker, byte[] bs){
@@ -144,7 +138,7 @@ final class TextCleaning{
     void end(){}
     void push(int b){ p[n++] = b; }
     void scalar(int cp, int len){ out.scalar(cp, at, len); drop(len); }
-    void bad(int reason, int len, long rejected){ out.bad(reason, at, len, rejected); drop(len); }
+    void bad(Reason reason, int len, long rejected){ out.bad(reason, at, len, rejected); drop(len); }
     void drop(int len){
       System.arraycopy(p, len, p, 0, n - len);
       n -= len;
@@ -249,7 +243,7 @@ final class TextCleaning{
     Cleaner(boolean u, Decoder d){ this.u= u; this.d= d; d.out = this; }
     @Override public abstract Object mut$end$0();
     abstract void scalar(int cp, long at, int len);
-    abstract void bad(int reason, long at, int len, long rejected);
+    abstract void bad(Reason reason, long at, int len, long rejected);
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
       return d.n != 0 ? empty(u) : text(out, u);
@@ -271,11 +265,11 @@ final class TextCleaning{
       if (u || UStr$s$0Instance.isStrScalar(cp)){ out.appendCodePoint(cp); return; }
       bad(notInStr, at, len, cp);
     }
-    @Override void bad(int reason, long at, int len, long rejected){
-      if (fixer == null){ throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: "+ reasonNames[reason] + ": " + badUnit(reason, at, len, rejected)); }
-      add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reasons[reason], nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reasons[reason], nat(at), nat(len), nat(rejected)));
+    @Override void bad(Reason reason, long at, int len, long rejected){
+      if (fixer == null){ throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: "+ reason.name() + ": " + badUnit(reason, at, len, rejected)); }
+      add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reason.fear, nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reason.fear, nat(at), nat(len), nat(rejected)));
     }
-    String badUnit(int reason, long at, int len, long rejected){
+    String badUnit(Reason reason, long at, int len, long rejected){
       var bytes= new StringBuilder();
       for (int i= 0; i < len; i += 1){ bytes.append(i == 0 ? "" : " ").append(String.format(Locale.ROOT, "%02X", d.p[i])); }
       var where= bytes + " at byte offset " + at + " of the line";
@@ -284,7 +278,7 @@ final class TextCleaning{
         case malformedEncoding -> "the byte sequence " + where + " is not UTF-8";
         case truncatedEncoding -> "the input ends in the middle of the UTF-8 sequence " + where;
         case notScalar -> "the byte sequence " + where + " encodes " + value + ", which is not a unicode scalar value";
-        default -> "the byte sequence " + where + " encodes " + value + ", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E";
+        case notInStr -> "the byte sequence " + where + " encodes " + value + ", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E";
         };
     }
   }
@@ -313,7 +307,7 @@ final class TextCleaning{
       return text(out, u);
     }
     @Override void scalar(int cp, long at, int len){ put(cp); }
-    @Override void bad(int reason, long at, int len, long rejected){ put(u ? 0xFFFD : '?'); }
+    @Override void bad(Reason reason, long at, int len, long rejected){ put(u ? 0xFFFD : '?'); }
     void put(int cp){
       if (cp == 0xFEFF){ return; }
       if (cr){
@@ -352,7 +346,7 @@ final class TextCleaning{
       return text(out, u);
     }
     @Override void scalar(int cp, long at, int len){ put(cp); }
-    @Override void bad(int reason, long at, int len, long rejected){ put(0xFFFD); }
+    @Override void bad(Reason reason, long at, int len, long rejected){ put(0xFFFD); }
     void put(int cp){
       var n= nat(cp);
       add(out, u ? ((UStrScalarCleaner$5074$0) scalars).mut$nextScalar$1(n) : ((StrScalarCleaner$2728$0) scalars).mut$nextScalar$1(n));
