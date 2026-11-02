@@ -10,8 +10,9 @@ InfoValidators: Sealed {
 /// ``:: > "a" .isMsg | > "b" .isMsg & > "c" .isMsg`` reads as ``(a or b) and c``.
 /// ``.where`` groups a sub expression evaluated from the current position:
 /// ``:: > "a" .isMsg | > "b" .where{:: > 0 .isMsg & > 1 .isMsg}`` reads as ``a or (b.0 and b.1)``.
-/// `.not` negates only the current validator, not the whole chain.
-/// `.not` is the last step of the current validator: after `.not` come only `&`, `|` and `.isValid`.
+/// ``.whereNot`` is ``.where`` with the sub expression negated:
+/// ``:: > "b" .whereNot{:: > 0 .isMsg & > 1 .isMsg}`` reads as ``b exists and not (b.0 and b.1)``.
+/// `.isMsg`, `.isList`, `.isMap`, `.isEmpty`, ``.where`` and ``.whereNot`` are the last step of the current validator: after them come only `&`, `|` and `.isValid`.
 /// ``::`` alone holds for any `Info`, so ``:: & ...`` is a neutral start, while ``:: | ...`` always holds.
 //>   // info := {"friends": [{"name": "Bob"}, {"name": "Alice"}]}
 //>   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
@@ -33,29 +34,28 @@ InfoValidators: Sealed {
 //>       & > 2 > "name" .isMsg{:: == "David"}}}}
 //>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
-//>     & > "friends" > 1 > "name" .isMsg{:: == "David"} .not}}
+//>     & > "friends" > 1 > "name" .whereNot{::.isMsg{:: == "David"}}}}
 InfoValidator: InfoCheck {
   >(key: InfoKey): InfoValidator;
 
-  .where(f: read F[InfoValidator, InfoCheck]): InfoValidator;
+  .where(f: read F[InfoValidator, InfoCheck]): InfoCheck;
+  .whereNot(f: read F[InfoValidator, InfoCheck]): InfoCheck;
   .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> this.isValid.if{
     .then -> this.close.extract f;
     .else -> {}
   };
 
-  .isMsg(F[Str, Bool]): InfoValidator;
-  .isList(fn: F[List[Info], Bool]): InfoValidator;
-  .isMap(fn: F[Map[Str,Info], Bool]): InfoValidator;
+  .isMsg(F[Str, Bool]): InfoCheck;
+  .isList(fn: F[List[Info], Bool]): InfoCheck;
+  .isMap(fn: F[Map[Str,Info], Bool]): InfoCheck;
 
-  .isMsg: InfoValidator -> this.isMsg{_ -> True};
-  .isList: InfoValidator -> this.isList{_ -> True};
-  .isMap: InfoValidator -> this.isMap{_ -> True};
-  .isEmpty: InfoValidator;
-
-  .not: InfoCheck -> _SettledInfoValidator {.close -> this.close; .isValid -> this.isValid.not};
+  .isMsg: InfoCheck -> this.isMsg{_ -> True};
+  .isList: InfoCheck -> this.isList{_ -> True};
+  .isMap: InfoCheck -> this.isMap{_ -> True};
+  .isEmpty: InfoCheck;
   }
 
-/// `InfoCheck` is what `.not` returns, and what `Info.validate` and ``.where`` accept.
+/// `InfoCheck` is what the last step of a validator returns, and what `Info.validate` and ``.where`` accept.
 InfoCheck: Sealed {
   .close: Info;
   .isValid: Bool;
@@ -77,13 +77,12 @@ _SettledInfoValidator: InfoValidator {
 
   > _ -> this;
   .where _ -> this;
+  .whereNot _ -> this;
 
   .isMsg _ -> this;
   .isList _ -> this;
   .isMap _ -> this;
   .isEmpty -> this;
-
-  .not -> this;
   }
 
 _SuccessfulInfoValidator: InfoValidator {
@@ -94,7 +93,7 @@ _SuccessfulInfoValidator: InfoValidator {
   .isValid: Bool -> True;
   /// The info we are matching against - how far we have "descended" into info.
   .matchLevel: Info -> this.close;
-  .fail: InfoValidator -> _FailedInfoValidator {this.close};
+  .fail: InfoValidator -> _SettledInfoValidator {.close -> this.close; .isValid -> False};
 
   > key -> key.indexInto(this.matchLevel).match {
     .some info -> _SuccessfulInfoValidator { .close -> this.close; .matchLevel -> info; };
@@ -104,6 +103,10 @@ _SuccessfulInfoValidator: InfoValidator {
   .where f -> this.matchLevel.validate f .match {
     .true -> this;
     .false -> this.fail
+    };
+  .whereNot f -> this.matchLevel.validate f .match {
+    .true -> this.fail;
+    .false -> this
     };
 
   .isMsg fn -> this.matchLevel.matchWithDefault {
@@ -134,18 +137,4 @@ _SuccessfulInfoValidator: InfoValidator {
     .empty -> this;
     .default -> this.fail;
     };
-  }
-
-_FailedInfoValidator: InfoValidator {
-  .close: Info;
-
-  .isValid -> False;
-
-  > _ -> this;
-  .where _ -> this;
-
-  .isMsg _ -> this;
-  .isList _ -> this;
-  .isMap _ -> this;
-  .isEmpty -> this;
   }
