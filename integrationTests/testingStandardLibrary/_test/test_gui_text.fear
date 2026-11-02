@@ -87,4 +87,20 @@ GuiTextTests: Test {::
       .ok _ -> Error.msg "A cleaner that fails always stops the Gui";
       .info i -> i.validate{:: > "info" .where{:: > "msg" .isMsg{:: == "no"} & .where{:: > "line" .isMsg{:: == "2"}} & .where{:: > "col" .isMsg{:: == "1"}}}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.textField{t -> Error.msg(t.cleaner{start -> {.nextByte b -> "Z"; .end -> ""}}.text("ab").text)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "ZZ"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.textArea{a -> Error.msg(a.cleaner{start -> {.nextByte b -> "Z"; .end -> ""}}.text("ab").text)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "ZZ"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.uTextField{t -> Error.msg(t.uText("".u "00E9").uText.scalarHex)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "00E9"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.uTextArea{a -> Error.msg(a.uText("".u "00E9").uText.scalarHex)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "00E9"}}.assertTrue{i};
+      }}
   }

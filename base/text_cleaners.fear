@@ -5,7 +5,7 @@
 ///The result of ``.end`` is cut in the same way, and each cleaner made from the rest of a result of ``.end`` gets ``.end`` at once.
 ///A cleaner with the empty starting text that receives no byte gets no ``.end``.
 ///A deterministic error raised during a run gets the entries ``"line"`` and ``"col"`` added to its info: ``"line"`` is the number of the line of the result that the run is making, counting from 1; ``"col"`` is one more than the number of bytes that the current cleaner, or the cleaner being made, received before the error.
-///In a run of a ``TextField`` or a ``TextArea``, ``"line"`` counts from the first line of its text.
+///In a run of a ``TextField``, a ``TextArea``, a ``UTextField`` or a ``UTextArea``, ``"line"`` counts from the first line of its text.
 UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
 ///A `UStrCleaner` that gives a Str.
 StrCleaner:{ mut .nextByte(b: Byte): Str; mut .end: Str; }

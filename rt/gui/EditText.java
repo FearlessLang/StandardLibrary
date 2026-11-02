@@ -39,14 +39,10 @@ import io.github.humbleui.types.Rect;
 
 final class _TextField extends AEditText implements TextField$ls$0{
   _TextField(_Frame frame){ super(frame, false); }
-  @Override boolean oneLine(){ return true; }
-  @Override boolean barBottom(){ return true; }
 }
 
 final class _UTextField extends AEditText implements UTextField$1e8$0{
   _UTextField(_Frame frame){ super(frame, true); }
-  @Override boolean oneLine(){ return true; }
-  @Override boolean barBottom(){ return true; }
 }
 
 final class _TextArea extends ATextArea implements TextArea$aw$0{
@@ -64,7 +60,6 @@ abstract class ATextArea extends AEditText{
   }
   @Override boolean oneLine(){ return false; }
   @Override boolean barRight(){ return true; }
-  @Override boolean barBottom(){ return !wrap; }
   public Object mut$append$1(Object t){ return append(((Str$c$0Instance) t).val()); }
   public Object mut$uAppend$1(Object t){ return append(ustr(t)); }
   Object append(String s){
@@ -119,10 +114,10 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   AEditText(_Frame frame, boolean u){
     super(frame);
     this.u= u;
-    cleaner = u ? (oneLine() ? UStrCleaners$5mo$0.instance.imm$line$0() : UStrCleaners$5mo$0.instance.imm$text$0())
-      : oneLine() ? StrCleaners$2gw$0.instance.imm$line$0() : StrCleaners$2gw$0.instance.imm$text$0();
+    cleaner = TextCleaning.clean(u, oneLine());
   }
-  abstract boolean oneLine();
+  boolean oneLine(){ return true; }
+  @Override boolean barBottom(){ return !wrap; }
 
   @Override Dimension need(){
     int w= 0;
