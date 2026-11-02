@@ -37,6 +37,7 @@ TextCleanerTests: Test {::
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 244, 144, 128, 128).assertEq "[notScalar:0:4:1114112]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 97, 226, 130).assertEq "a[truncatedEncoding:1:2:226]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#("xy"), 97).assertEq "xya"}
+  .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#("xy"), 255).assertEq "xy[malformedEncoding:0:1:255]"}
   .check{ClTwo#(base.UStrCleaners.utf8OrElse{{_, _, _, _ -> "?".u}}#("x".u), 195, 226).isEmpty.assertTrue}
   .check{ClFeed#(base.UStrCleaners.text#("e".u), 204, 129).scalarHex.assertEq "00E9"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 97, 13).scalarHex.assertEq "0061 000A"}
