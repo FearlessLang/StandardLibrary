@@ -41,6 +41,10 @@ TextCleanerTests: Test {::
   .check{ClTwo#(base.UStrCleaners.utf8OrElse{{_, _, _, _ -> "?".u}}#("x".u), 195, 226).isEmpty.assertTrue}
   .check{ClFeed#(base.UStrCleaners.text#("e".u), 204, 129).scalarHex.assertEq "00E9"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 97, 13).scalarHex.assertEq "0061 000A"}
+  .check{ClTwo#(base.UStrCleaners.text#("".u), 13, 13).isEmpty.assertTrue}
+  .check{ClTwo#(base.UStrCleaners.text#("".u "000D"), 195, 226).isEmpty.assertTrue}
+  .check{ClFeed#(base.UStrCleaners.text#("".u), 97, 226).scalarHex.assertEq "0061 FFFD"}
+  .check{ClFeedS#(base.StrCleaners.text#(""), 97, 226).assertEq "a?"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 13, 195, 169).scalarHex.assertEq "000A 00E9"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 11, 12, 194, 133).scalarHex.assertEq "000A 000A 000A"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 13, 239, 187, 191, 10).scalarHex.assertEq "000A"}

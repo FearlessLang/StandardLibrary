@@ -26,7 +26,7 @@ final class TextCleaning{
 
   static Object run(boolean u, Object maker, byte[] bs){
     var r= new Run(u, maker, 0);
-    for (var b : bs){ r.next(b & 0xFF); }
+    for (var b : bs){ r.next(b); }
     r.finish();
     var s= r.chars.toString();
     return u ? UStr$s$0Instance.instance(s) : Str$c$0Instance.instance(s);

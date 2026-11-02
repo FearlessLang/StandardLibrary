@@ -135,4 +135,8 @@ GuiTextTests: Test {::
       .ok _ -> Error.msg "A cleaner whose .end always gives a newline followed by more text always stops the Gui";
       .info i -> i.validate{:: > "info" .where{:: > "msg" .isMsg{:: == `At the end of the input, the .end of a cleaner that received no byte, made from the starting text "y", left "y" after its first newline; that text must be shorter than "y", so that the run ends`} & > "line" .isMsg{:: == "3"} & > "col" .isMsg{:: == "1"}}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg("[" + (a.text("abc").cleaner{start -> {.nextByte b -> ""; .end -> ""}}.append "d" .text) + "]")}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[]"}}.assertTrue{i};
+      }}
   }
