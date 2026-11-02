@@ -4,7 +4,7 @@
 ///When a result holds a newline, the result up to its first newline goes to the result of the run, the current cleaner is over, and the cleaner maker makes the next cleaner with the rest of that result as starting text.
 ///The result of ``.end`` is cut in the same way, and each cleaner made from the rest of a result of ``.end`` gets ``.end`` at once.
 ///A cleaner with the empty starting text that receives no byte gets no ``.end``.
-///A deterministic error raised during a run gets the entries ``"line"`` and ``"col"`` added to its info: ``"line"`` is the number of the line of the result that the run is making, counting from 1; ``"col"`` counts the bytes that the current cleaner received, the byte of the failing ``.nextByte`` included, or is one more than those bytes for a failing ``.end``.
+///A deterministic error raised during a run gets the entries ``"line"`` and ``"col"`` added to its info: ``"line"`` is the number of the line of the result that the run is making, counting from 1; ``"col"`` is one more than the number of bytes that the current cleaner, or the cleaner being made, received before the error.
 UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
 ///A `UStrCleaner` that gives a Str.
 StrCleaner:{ mut .nextByte(b: Byte): Str; mut .end: Str; }
@@ -14,7 +14,7 @@ UStrScalarCleaner:{ mut .nextScalar(n: Nat): UStr; mut .end: UStr; }
 StrScalarCleaner:{ mut .nextScalar(n: Nat): Str; mut .end: Str; }
 ///The text in place of a bad unit: a part of the input that the encoding rejects.
 ///``byteOffset`` counts the bytes the cleaner received before the bad unit.
-///``rejectedValue`` is the value that the bad unit encodes; when it encodes none, it is its first byte (UTF-8, ASCII), its first unit (UTF-16) or the value of its bytes (UTF-32).
+///``rejectedValue`` is the value that the bad unit encodes; when it encodes none, it is its first byte (UTF-8, ASCII), its first unit, or its only byte (UTF-16), or the value of its bytes (UTF-32).
 UStrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr }
 ///A `UStrFixer` that gives a Str.
 StrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str }

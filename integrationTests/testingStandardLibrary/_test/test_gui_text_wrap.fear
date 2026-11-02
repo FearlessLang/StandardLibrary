@@ -12,4 +12,8 @@ GuiTextWrapTests: Test {::
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[27] Width[27]"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg((a.cleaner(base.UStrCleaners.utf8).uText("a".u "2028 000D 0062").pack.height.str == (a.text("ab").pack.height.str)).str)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "True"}}.assertTrue{i};
+      }}
   }

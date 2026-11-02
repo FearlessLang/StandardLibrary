@@ -12,6 +12,7 @@ Name: base.F[base.BadTextReason,base.Str]{ ::.match{
 Show: base.StrFixer { reason, byteOffset, byteLength, rejectedValue ->
   "["+(Name#reason)+":"+byteOffset+":"+byteLength+":"+rejectedValue+"]"
   }
+Fails: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> base.Error.msg "x" }
 Pub: base.DataRead{}
 
 OpenedFileTests: UnitTests{::
@@ -40,5 +41,8 @@ TheCleaners: Test{::
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.line)).assertEq "a b c de? "}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8OrElse{Show})).assertEq("a[notInStr:1:1:13]" | "b[notInStr:1:1:13]c[notInStr:3:3:8232]d[notInStr:7:3:65279]e[notInStr:11:2:769][malformedEncoding:13:1:255]" | "")}
   .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "UStrCleaners.utf8: truncatedEncoding: the input ends in the middle of the UTF-8 sequence E2 82 at byte offset 1 of the line"}} & .where{:: > "line" .isMsg{:: == "1"}} & .where{:: > "col" .isMsg{:: == "4"}}}, {s -> s.dataRead(Pub).read(L#("cut8.bin")).readUStr(base.UStrCleaners.utf8)})
+  .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "x"}} & .where{:: > "line" .isMsg{:: == "1"}} & .where{:: > "col" .isMsg{:: == "2"}}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8OrElse{Fails})})
+  .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "x"}} & .where{:: > "line" .isMsg{:: == "1"}} & .where{:: > "col" .isMsg{:: == "1"}}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readUStr{_ -> base.Error.msg "x"}})
+  .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "StrCleaners.utf8: notInStr: the byte sequence 0D at byte offset 1 of the line encodes 000D, which is not a character of Str; the characters of Str have the scalar values 10 and 32 to 126"}} & .where{:: > "line" .isMsg{:: == "1"}} & .where{:: > "col" .isMsg{:: == "2"}}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8)})
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut8.bin")).readStr(base.StrCleaners.utf8Then{mut base.StrScalarCleaner{.nextScalar n -> "<"+(n.str)+">"; .end -> "!"}})).assertEq "<97><65533>!"}
   }
