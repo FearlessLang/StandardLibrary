@@ -10,7 +10,7 @@
 ///on the other systems the bytes of the path, most often its UTF-8 encoding (`UStr.utf8`).
 ///Arguments that do not make a call are a non deterministic error, and no message is sent:
 ///a ``path`` that is not absolute or is the root of a drive, a ``name`` that is not a project name,
-///a main, a type or an attenuator that is not a qualified type name, `.run` with no main or with two equal mains.
+///a main, a type or an attenuator that is not a qualified type name, `.selectMains` with two equal mains.
 CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Shows the manager window.
   mut .show: Void;
@@ -31,9 +31,9 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   mut .openWithOrShortcut(path: List[Byte]): Void;
   ///Opens the file at ``path`` with the main ``main`` of the project ``name``, one of the mains claiming its extension.
   mut .openWithOrShortcut(path: List[Byte], name: Str, main: Str): Void;
-  ///Selects the project ``name`` and runs ``mains``, in the order of the mains of the project.
+  ///Selects the project ``name`` and runs the selected mains of the project, in the order of the selected mains.
   ///Returns the Output of those mains.
-  mut .run(name: Str, mains: List[Str]): UStr;
+  mut .run(name: Str): UStr;
   ///Selects the project ``name`` and compiles it if it needs compiling.
   ///Returns the Output of that compilation, empty when no compilation starts.
   mut .compile(name: Str): UStr;
@@ -61,4 +61,7 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Sets the attenuators the manager applies to the main ``main`` of the project ``name`` to ``attenuators``, in that order.
   ///No attenuator removes them all.
   mut .attenuate(name: Str, main: Str, attenuators: List[Str]): Void;
+  ///Sets the selected mains of the project ``name`` to ``mains``, in that order.
+  ///No main removes the selected mains.
+  mut .selectMains(name: Str, mains: List[Str]): Void;
   }
