@@ -8,8 +8,15 @@ import static _base.Util.*;
 final class ByteCache{
   final static int max= 255;
   final static Byte$o$0Instance[] byteArray= IntStream.rangeClosed(0, max)
-          .mapToObj(b -> new Byte$o$0Instance((byte) b))
+          .mapToObj(ByteCache::of)
           .toArray(Byte$o$0Instance[]::new);
+  private static Byte$o$0Instance of(int b){
+    var s= Str$c$0Instance.size1(b);
+    var u= UStr$s$0Instance.size1(b);
+    var optS= s == null ? optEmpty() : optSome(s);
+    var tryS= s == null ? fail(Byte$o$0Instance.noSize1Str(b)) : ok(s);
+    return new Byte$o$0Instance((byte) b, s, u, optS, optSome(u), tryS, ok(u));
+  }
 
   static Byte$o$0Instance getByte(byte b){
     // All bytes are cached :), we do have to say our bytes are unsigned though
@@ -17,11 +24,14 @@ final class ByteCache{
   }
 }
 
-public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
+public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Object optSize1Str, Object optSize1UStr, Object trySize1Str, Object trySize1UStr) implements Byte$o$0,Norm$o$1{
   private static final byte MAX_VALUE= (byte) 255;
   private static final long MAX_VALUE_LONG= 255;
 
   public static Byte$o$0 instance(byte val){ return ByteCache.getByte(val); }
+  @Override public boolean equals(Object o){ return this == o; }
+  @Override public int hashCode(){ return u8(val); }
+  @Override public String toString(){ return "Byte["+u8(val)+"]"; }
 
   private static byte clampToByte(Object o){
     return (byte) (((Byte$o$0Instance)o).val & 255);
@@ -126,6 +136,16 @@ public record Byte$o$0Instance(byte val) implements Byte$o$0,Norm$o$1{
   @Override public Object imm$int$0(){ return Int$c$0Instance.instance(u8(val)); }
   @Override public Object imm$float$0(){ return Float$1c$0Instance.instance((double)u8(val)); }
   @Override public Object imm$num$0(){ return Num$c$0Instance.instance(BigInteger.valueOf(u8(val)), BigInteger.ONE); }
+  static String noSize1Str(int b){ return "Byte.getSize1Str: "+b+" is not the scalar value of a character of Str; the characters of Str have the scalar values 10 and 32 to 126"; }
+  @Override public Object imm$size1Str$0(){ return optSize1Str; }
+  @Override public Object imm$getSize1Str$0(){
+    if (size1Str == null){ throw detErr(noSize1Str(u8(val))); }
+    return size1Str;
+  }
+  @Override public Object imm$tryGetSize1Str$0(){ return trySize1Str; }
+  @Override public Object imm$size1UStr$0(){ return optSize1UStr; }
+  @Override public Object imm$getSize1UStr$0(){ return size1UStr; }
+  @Override public Object imm$tryGetSize1UStr$0(){ return trySize1UStr; }
   @Override public Object read$str$0(){ return Str$c$0Instance.instance(Integer.toString(u8(val))); }
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this.read$str$0());}
   @Override public Object read$imm$0(){ return this; }

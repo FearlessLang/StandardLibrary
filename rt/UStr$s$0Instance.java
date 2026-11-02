@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   private static final Pattern uCodeText= Pattern.compile("[0-9A-F]{1,6}(?: [0-9A-F]{1,6})*");
@@ -20,8 +21,17 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   private static final String strChars=
     "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'\"!?@#$%^&_|~\\ \n";
 
-  public static UStr$s$0 instance(int[] val){ return new UStr$s$0Instance(val); }
-  public static UStr$s$0 instance(String val){ return new UStr$s$0Instance(val.codePoints().toArray()); }
+  private static final UStr$s$0Instance emptyUStr= new UStr$s$0Instance(empty);
+  private static final UStr$s$0Instance[] size1= IntStream.range(0, 256)
+    .mapToObj(c -> new UStr$s$0Instance(new int[]{ c }))
+    .toArray(UStr$s$0Instance[]::new);
+  public static UStr$s$0 instance(int[] val){
+    if (val.length == 0){ return emptyUStr; }
+    if (val.length == 1 && val[0] < size1.length){ return size1[val[0]]; }
+    return new UStr$s$0Instance(val);
+  }
+  public static UStr$s$0 instance(String val){ return instance(val.codePoints().toArray()); }
+  static UStr$s$0Instance size1(int c){ return size1[c]; }
 
   @Override public String toString(){ return "UStr["+strUCode(val)+"]"; }
 
