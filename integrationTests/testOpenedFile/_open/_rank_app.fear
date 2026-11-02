@@ -36,9 +36,9 @@ TheCleaners: Test{::
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.text)).scalarHex.assertEq "0061 000A 0062 000A 0063 000A 0064 00E9 FFFD 000A"}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.text)).assertEq("a" | "b" | "c" | "de?" | "")}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.line)).scalarHex.assertEq "0061 0020 0062 0020 0063 0020 0064 00E9 FFFD 0020"}
-  .checkDetErrWithSys({::.isMsg{:: == "UStrCleaners.utf8: malformedEncoding: the byte sequence FF at byte offset 13 of the line is not UTF-8"}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.utf8)})
+  .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "UStrCleaners.utf8: malformedEncoding: the byte sequence FF at byte offset 13 of the line is not UTF-8"}} & .where{:: > "line" .isMsg{:: == "2"}} & .where{:: > "col" .isMsg{:: == "14"}}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.utf8)})
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.line)).assertEq "a b c de? "}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8OrElse{Show})).assertEq("a[notInStr:1:1:13]" | "b[notInStr:1:1:13]c[notInStr:3:3:8232]d[notInStr:7:3:65279]e[notInStr:11:2:769][malformedEncoding:13:1:255]" | "")}
-  .checkDetErrWithSys({::.isMsg{:: == "UStrCleaners.utf8: truncatedEncoding: the input ends in the middle of the UTF-8 sequence E2 82 at byte offset 1 of the line"}}, {s -> s.dataRead(Pub).read(L#("cut8.bin")).readUStr(base.UStrCleaners.utf8)})
+  .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "UStrCleaners.utf8: truncatedEncoding: the input ends in the middle of the UTF-8 sequence E2 82 at byte offset 1 of the line"}} & .where{:: > "line" .isMsg{:: == "1"}} & .where{:: > "col" .isMsg{:: == "4"}}}, {s -> s.dataRead(Pub).read(L#("cut8.bin")).readUStr(base.UStrCleaners.utf8)})
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut8.bin")).readStr(base.StrCleaners.utf8Then{mut base.StrScalarCleaner{.nextScalar n -> "<"+(n.str)+">"; .end -> "!"}})).assertEq "<97><65533>!"}
   }

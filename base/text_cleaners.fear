@@ -4,6 +4,7 @@
 ///When a result holds a newline, the result up to its first newline goes to the result of the run, the current cleaner is over, and the cleaner maker makes the next cleaner with the rest of that result as starting text.
 ///The result of ``.end`` is cut in the same way, and each cleaner made from the rest of a result of ``.end`` gets ``.end`` at once.
 ///A cleaner with the empty starting text that receives no byte gets no ``.end``.
+///A deterministic error raised during a run gets the entries ``"line"`` and ``"col"`` added to its info: ``"line"`` is the number of the line of the result that the run is making, counting from 1; ``"col"`` counts the bytes that the current cleaner received, the byte of the failing ``.nextByte`` included, or is one more than those bytes for a failing ``.end``.
 UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
 ///A `UStrCleaner` that gives a Str.
 StrCleaner:{ mut .nextByte(b: Byte): Str; mut .end: Str; }

@@ -304,6 +304,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   Change clean(int a, int b, String s){
     var r= new TextCleaning.Run(true, cleaner);
     int start= lineStart(a);
+    r.line += buf.substring(0, start).chars().filter(c -> c == '\n').count();
     TextCleaning.feed(r, buf, start, a);
     TextCleaning.feed(r, s, 0, s.length());
     int stop= b;

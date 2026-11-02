@@ -43,6 +43,8 @@ final class TextCleaning{
     final F$3$2 maker;
     Object cur;
     boolean fresh;
+    long line;
+    long col;
     final StringBuilder chars= new StringBuilder();
     Run(boolean u, Object maker){
       this.u= u;
@@ -52,14 +54,23 @@ final class TextCleaning{
     void start(Object text){
       cur = maker.read$$hash$1(text);
       fresh = isEmpty(text);
+      line += 1;
+      col = 0;
     }
     void next(int b){
       fresh = false;
+      col += 1;
       var bb= Byte$o$0Instance.instance((byte) b);
-      cut(u ? ((UStrCleaner$2tc$0) cur).mut$nextByte$1(bb) : ((StrCleaner$18g$0) cur).mut$nextByte$1(bb));
+      try{ cut(u ? ((UStrCleaner$2tc$0) cur).mut$nextByte$1(bb) : ((StrCleaner$18g$0) cur).mut$nextByte$1(bb)); }
+      catch (Deterministic d){ throw at(d, col); }
     }
     void finish(){
-      while (!fresh && cut(u ? ((UStrCleaner$2tc$0) cur).mut$end$0() : ((StrCleaner$18g$0) cur).mut$end$0())){}
+      try{ while (!fresh && cut(u ? ((UStrCleaner$2tc$0) cur).mut$end$0() : ((StrCleaner$18g$0) cur).mut$end$0())){} }
+      catch (Deterministic d){ throw at(d, col + 1); }
+    }
+    Deterministic at(Deterministic d, long c){
+      var pos= Infos$1c$0.instance.imm$map$4(Str$c$0Instance.instance("line"), nat(line), Str$c$0Instance.instance("col"), nat(c));
+      return Util.deterministic((Info$o$0) d.i.imm$$plus$1(pos));
     }
     boolean cut(Object r){
       if (!u){
