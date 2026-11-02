@@ -98,12 +98,9 @@ final class TextCleaning{
   static void feed(Run r, CharSequence s){ s.codePoints().forEach(c -> utf8(r, c)); }
   static void utf8(Run r, int c){
     if (c < 0x80){ r.next(c); return; }
-    if (c < 0x800){ r.next(0xC0 | c >> 6); r.next(0x80 | c & 0x3F); return; }
-    if (c < 0x10000){ r.next(0xE0 | c >> 12); r.next(0x80 | c >> 6 & 0x3F); r.next(0x80 | c & 0x3F); return; }
-    r.next(0xF0 | c >> 18);
-    r.next(0x80 | c >> 12 & 0x3F);
-    r.next(0x80 | c >> 6 & 0x3F);
-    r.next(0x80 | c & 0x3F);
+    int n= c < 0x800 ? 1 : c < 0x10000 ? 2 : 3;
+    r.next(0xF00 >> n + 1 & 0xFF | c >> 6 * n);
+    for (int i= n - 1; i >= 0; i -= 1){ r.next(0x80 | c >> 6 * i & 0x3F); }
   }
 
   static Object empty(boolean u){ return u ? emptyUStr : emptyStr; }

@@ -16,6 +16,10 @@ ClShow: base.StrFixer{ reason, byteOffset, byteLength, rejectedValue ->
   }
 TextCleanerTests: Test {::
   .check{ClFeed#(base.UStrCleaners.utf16BeOrElse{{_, _, _, _ -> "?".u}}#("".u), 216, 61, 222, 0).scalarHex.assertEq "1F600"}
+  .check{ClFeed#(base.UStrCleaners.utf16LeOrElse{{_, _, _, _ -> "?".u}}#("".u), 61, 216, 0, 222).scalarHex.assertEq "1F600"}
+  .check{ClFeed#(base.UStrCleaners.utf32LeOrElse{{_, _, _, _ -> "?".u}}#("".u), 0, 246, 1, 0).scalarHex.assertEq "1F600"}
+  .check{ClFeed#(base.UStrCleaners.utf32BeOrElse{{_, _, _, _ -> "?".u}}#("".u), 0, 1, 246, 0).scalarHex.assertEq "1F600"}
+  .check{ClFeed#(base.UStrCleaners.latin1OrElse{{_, _, _, _ -> "?".u}}#("".u), 233).scalarHex.assertEq "00E9"}
   .check{ClFeedS#(base.StrCleaners.utf16LeOrElse{ClShow}#(""), 0, 220, 97, 0).assertEq "[notScalar:0:2:56320]a"}
   .check{ClFeedS#(base.StrCleaners.utf16BeOrElse{ClShow}#(""), 216, 61, 0, 97).assertEq "[notScalar:0:2:55357]a"}
   .check{ClFeedS#(base.StrCleaners.utf32BeOrElse{ClShow}#(""), 0, 17, 0, 0).assertEq "[notScalar:0:4:1114112]"}
