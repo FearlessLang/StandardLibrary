@@ -54,10 +54,7 @@ final class _UTextArea extends ATextArea implements UTextArea$p4$0{
 }
 
 abstract class ATextArea extends AEditText{
-  ATextArea(_Frame frame, boolean u){
-    super(frame, u);
-    wrap = true;
-  }
+  ATextArea(_Frame frame, boolean u){ super(frame, u); }
   @Override boolean oneLine(){ return false; }
   @Override boolean barRight(){ return true; }
   public Object mut$append$1(Object t){ return append(((Str$c$0Instance) t).val()); }
@@ -115,6 +112,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     super(frame);
     this.u= u;
     cleaner = TextCleaning.clean(u, oneLine());
+    wrap = !oneLine();
   }
   boolean oneLine(){ return true; }
   @Override boolean barBottom(){ return !wrap; }
