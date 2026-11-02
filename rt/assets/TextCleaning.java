@@ -95,14 +95,7 @@ final class TextCleaning{
     }
   }
 
-  static void feed(Run r, CharSequence s, int from, int to){
-    for (int i= from; i < to; i += 1){
-      int c= s.charAt(i);
-      boolean pair= Character.isHighSurrogate((char) c) && i + 1 < to && Character.isLowSurrogate(s.charAt(i + 1));
-      if (pair){ c = Character.toCodePoint((char) c, s.charAt(i + 1)); i += 1; }
-      utf8(r, c);
-    }
-  }
+  static void feed(Run r, CharSequence s){ s.codePoints().forEach(c -> utf8(r, c)); }
   static void utf8(Run r, int c){
     if (c < 0x80){ r.next(c); return; }
     if (c < 0x800){ r.next(0xC0 | c >> 6); r.next(0x80 | c & 0x3F); return; }
@@ -272,8 +265,7 @@ final class TextCleaning{
     }
     @Override public void bad(int reason, long at, int len, long rejected){
       if (fixer == null){ throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: "+ reasonNames[reason] + ": " + badUnit(reason, at, len, rejected)); }
-      var args= new Object[]{reasons[reason], nat(at), nat(len), nat(rejected)};
-      add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(args[0], args[1], args[2], args[3]) : ((StrFixer$b4$0) fixer).mut$$hash$4(args[0], args[1], args[2], args[3]));
+      add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reasons[reason], nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reasons[reason], nat(at), nat(len), nat(rejected)));
     }
     String badUnit(int reason, long at, int len, long rejected){
       var bytes= new StringBuilder();

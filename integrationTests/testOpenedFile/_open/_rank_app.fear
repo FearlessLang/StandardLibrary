@@ -14,6 +14,7 @@ Show: base.StrFixer { reason, byteOffset, byteLength, rejectedValue ->
   }
 Fails: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> base.Error.msg "x" }
 Counting: {#(c: mut base.Count[base.Nat]): mut base.StrFixer -> {_, _, _, _ -> base.Block#(c.set(c.get + 1), c.get.str)}}
+CountingScalars: {#(c: mut base.Count[base.Nat]): mut base.StrScalarCleaner -> {.nextScalar n -> (n == 10)?{.then -> "" | ""; .else -> base.Block#(c.set(c.get + 1), c.get.str)}; .end -> ""}}
 Pub: base.DataRead{}
 
 OpenedFileTests: UnitTests{::
@@ -47,5 +48,6 @@ TheCleaners: Test{::
   .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "StrCleaners.utf8: notInStr: the byte sequence 0D at byte offset 1 of the line encodes 000D, which is not a character of Str; the characters of Str have the scalar values 10 and 32 to 126"}} & .where{:: > "line" .isMsg{:: == "1"}} & .where{:: > "col" .isMsg{:: == "2"}}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8)})
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8OrElse{Counting#(base.Count.nat 0)})).assertEq("a1" | "b1c2d3e45" | "")}
   .checkDetErrWithSys({:: .where{:: > "msg" .isMsg{:: == "m"}} & .where{:: > "line" .isMsg{:: == "2"}} & .where{:: > "col" .isMsg{:: == "1"}}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readUStr{start -> start.isEmpty?{.then -> mut base.UStrCleaner{.nextByte b -> ("a" | "x").u; .end -> "".u}; .else -> base.Error.msg "m"}}})
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8Then{CountingScalars#(base.Count.nat 0)})).assertEq("12" | "123456789" | "")}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut8.bin")).readStr(base.StrCleaners.utf8Then{mut base.StrScalarCleaner{.nextScalar n -> "<"+(n.str)+">"; .end -> "!"}})).assertEq "<97><65533>!"}
   }
