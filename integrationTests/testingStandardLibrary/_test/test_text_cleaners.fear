@@ -10,6 +10,7 @@ ClFeedS: {
   #(c: mut base.StrCleaner, a: Nat, b: Nat, d: Nat): Str -> c.nextByte(a.getByte) + (this#(c, b, d));
   #(c: mut base.StrCleaner, a: Nat, b: Nat, d: Nat, e: Nat): Str -> c.nextByte(a.getByte) + (this#(c, b, d, e));
   }
+ClTwo: { #(c: mut base.UStrCleaner, a: Nat, b: Nat): base.UStr -> Block#(c.nextByte(a.getByte), c.nextByte(b.getByte)) }
 ClShow: base.StrFixer{ reason, byteOffset, byteLength, rejectedValue ->
   "["+(reason.match{.malformedEncoding -> "malformedEncoding"; .truncatedEncoding -> "truncatedEncoding"; .notScalar -> "notScalar"; .notInStr -> "notInStr"})+":"+byteOffset+":"+byteLength+":"+rejectedValue+"]"
   }
@@ -31,6 +32,7 @@ TextCleanerTests: Test {::
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 244, 144, 128, 128).assertEq "[notScalar:0:4:1114112]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 97, 226, 130).assertEq "a[truncatedEncoding:1:2:226]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#("xy"), 97).assertEq "xya"}
+  .check{ClTwo#(base.UStrCleaners.utf8OrElse{{_, _, _, _ -> "?".u}}#("x".u), 195, 226).isEmpty.assertTrue}
   .check{ClFeed#(base.UStrCleaners.text#("e".u), 204, 129).scalarHex.assertEq "00E9"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 97, 13).scalarHex.assertEq "0061 000A"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 13, 195, 169).scalarHex.assertEq "000A 00E9"}
