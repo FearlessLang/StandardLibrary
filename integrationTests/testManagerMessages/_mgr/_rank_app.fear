@@ -31,20 +31,20 @@ ManagerMessagesRefused: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
      "The manager refuses to forget nope."
     )}}, {t -> t.manager.forget "nope"})
-  .checkNonDetErrWithSys({::.isMsg{:: == (
+  .checkDetErrWithSys({::.isMsg{:: == (
      `The message "Register" is not sent: the path "relative"`
     |`is not an absolute path of this system other than the root of a drive.`
     )}}, {t -> base.Block#
       .openIso s = t
       .return{s.manager.register(Relative#s)}
       })
-  .checkNonDetErrWithSys({::.isMsg{:: == (
+  .checkDetErrWithSys({::.isMsg{:: == (
      `The message "Show" is not sent: "Hello" is not a project name.`
     )}}, {t -> t.manager.show "Hello"})
-  .checkNonDetErrWithSys({::.isMsg{:: == (
+  .checkDetErrWithSys({::.isMsg{:: == (
      `The message "Unmount" is not sent: "Pub" is not a qualified type name, like "hello.Main".`
     )}}, {t -> t.manager.unmount("hello", "Pub")})
-  .checkNonDetErrWithSys({::.isMsg{:: == (
+  .checkDetErrWithSys({::.isMsg{:: == (
      `The message "SelectMains" is not sent: the mains are all different, and "hello.A" is named twice.`
     )}}, {t -> t.manager.selectMains("hello", L#("hello.A", "hello.A"))})
   }

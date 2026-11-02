@@ -8,7 +8,7 @@
 ///``path`` is the bytes naming an absolute path on this system:
 ///on Windows the UTF-16 code units of the path, little endian (`UStr.utf16Le`);
 ///on the other systems the bytes of the path, most often its UTF-8 encoding (`UStr.utf8`).
-///Arguments that do not make a call are a non deterministic error, and no message is sent:
+///Arguments that do not make a call are a deterministic error, and no message is sent:
 ///a ``path`` that is not absolute or is the root of a drive, a ``name`` that is not a project name,
 ///a main, a type or an attenuator that is not a qualified type name, `.selectMains` with two equal mains.
 CapManager: ToIso[CapManager], WidenTo[CapManager]{

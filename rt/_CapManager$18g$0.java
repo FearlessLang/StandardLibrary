@@ -56,8 +56,8 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     var bytes= new byte[bs.size()];
     for (var i= 0; i < bytes.length; i += 1){ bytes[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
     var text= new String(bytes, pathCharset);
-    if (pathCharset == UTF_16LE && bytes.length % 2 != 0){ throw nonDetErr("The message \""+verb+"\" is not sent: a path of Windows is 16 bit units, so its bytes are an even number."); }
-    if (!absolute(text)){ throw nonDetErr("The message \""+verb+"\" is not sent: the path \""+InputFile.portable(text)+"\"\nis not an absolute path of this system other than the root of a drive."); }
+    if (pathCharset == UTF_16LE && bytes.length % 2 != 0){ throw detErr("The message \""+verb+"\" is not sent: a path of Windows is 16 bit units, so its bytes are an even number."); }
+    if (!absolute(text)){ throw detErr("The message \""+verb+"\" is not sent: the path \""+InputFile.portable(text)+"\"\nis not an absolute path of this system other than the root of a drive."); }
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)));
   }
   private static boolean absolute(String path){
@@ -68,12 +68,12 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static String type(String verb, Object type){ return word(verb, AssetBytesRead.str(type), typeName, "a qualified type name, like \"hello.Main\""); }
   private static String word(String verb, String word, Pattern p, String what){
     if (p.matcher(word).matches()){ return word; }
-    throw nonDetErr("The message \""+verb+"\" is not sent: \""+InputFile.portable(word)+"\" is not "+what+".");
+    throw detErr("The message \""+verb+"\" is not sent: \""+InputFile.portable(word)+"\" is not "+what+".");
   }
   private static Stream<String> types(String verb, Object list){ return List$o$1Instance.asJava(list).stream().map(t -> type(verb, t)); }
   private static Stream<String> mains(Object list){
     var res= types("SelectMains", list).toList();
-    res.stream().filter(m -> res.indexOf(m) != res.lastIndexOf(m)).findFirst().ifPresent(m -> { throw nonDetErr("The message \"SelectMains\" is not sent: the mains are all different, and \""+m+"\" is named twice."); });
+    res.stream().filter(m -> res.indexOf(m) != res.lastIndexOf(m)).findFirst().ifPresent(m -> { throw detErr("The message \"SelectMains\" is not sent: the mains are all different, and \""+m+"\" is named twice."); });
     return res.stream();
   }
   @Override public Object mut$iso$0(){ return this; }
