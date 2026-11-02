@@ -56,6 +56,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     var bytes= new byte[bs.size()];
     for (var i= 0; i < bytes.length; i += 1){ bytes[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
     var text= new String(bytes, pathCharset);
+    if (pathCharset == UTF_16LE && bytes.length % 2 != 0){ throw nonDetErr("The message \""+verb+"\" is not sent: a path of Windows is 16 bit units, so its bytes are an even number."); }
     if (!absolute(text)){ throw nonDetErr("The message \""+verb+"\" is not sent: the path \""+InputFile.portable(text)+"\"\nis not an absolute path of this system other than the root of a drive."); }
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)));
   }
