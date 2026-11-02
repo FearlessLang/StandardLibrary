@@ -9,7 +9,7 @@ use base.Slots as Slots;
 use base.WidthNat as WidthNat;
 use base.HeightNat as HeightNat;
 use base.CapInputCursor as CapInputCursor;
-use base.BadStrUnitRecover as BadStrUnitRecover;
+use base.StrCleaners as StrCleaners;
 
 ShowInput: Main { sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Pane]] lines= {Slots#[mut Pane]}
@@ -28,8 +28,7 @@ ShowInput: Main { sys -> sys.gui.run{f -> Block#
 ShowFiles: {#(at: mut Var[mut CapInputCursor], lines: mut Pane): Void -> at.get#.match{
   .empty -> Void;
   .some file -> Block#
-    .do{(file.readStrUtf8 NoCr).split("" | "").flow.for{l -> Block#(lines.label{:: .text l .topInset 0 .bottomInset 0}, Void)}}
+    .do{(file.readStr(StrCleaners.text)).split("" | "").flow.for{l -> Block#(lines.label{:: .text l .topInset 0 .bottomInset 0}, Void)}}
     .do{at.set(at.get.next)}
     .return{this#(at, lines)}
   }}
-NoCr: BadStrUnitRecover{reason, byteOffset, byteLength, rejectedValue -> (rejectedValue == 13).if{.then -> ""; .else -> "?"}}

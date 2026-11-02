@@ -4,7 +4,7 @@ use base.Block as Block;
 use base.Try as Try;
 use base.Lists as L;
 
-Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+Recover: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> "?" }
 Q: base.UnencodableRecover{ scalar, index -> L#(63.getByte) }
 Pub: base.DataRead{}
 Notes: base.DataEdit{}
@@ -28,12 +28,12 @@ DataProjectReads: Test{::
   .checkWithSys{s -> s.dataRead(Pub).paths(L#("pics")).assertEq({::}, L#("deep", "inner", "one.txt"))}
   .checkWithSys{s -> s.dataRead(Pub).paths(L#("pics", "inner")).assertEq({::}, L#("three.txt"))}
   .checkWithSys{s -> s.dataRead(Pub).read(L#("readme")).label.assertEq "data.Pub/readme"}
-  .checkWithSys{s -> (s.dataRead(Pub).read(L#("readme")).readStrUtf8 Recover).assertEq "hi"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("readme")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "hi"}
   .checkWithSys{s -> s.dataRead(Pub).read(L#("readme")).readBytes.size.assertEq 2}
-  .checkWithSys{s -> (s.dataRead(Pub).read(L#("notes", "a.txt")).readStrUtf8 Recover).assertEq "first"}
-  .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "deep", "two.txt")).readStrUtf8 Recover).assertEq "deeper"}
-  .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "inner", "three.txt")).readStrUtf8 Recover).assertEq "nested"}
-  .checkWithSys{s -> (s.dataRead(Notes).read(L#("readme")).readStrUtf8 Recover).assertEq "hi"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("notes", "a.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "first"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "deep", "two.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "deeper"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "inner", "three.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "nested"}
+  .checkWithSys{s -> (s.dataRead(Notes).read(L#("readme")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "hi"}
   }
 
 DataProjectReadErrors: Test{::
@@ -80,11 +80,11 @@ DataProjectReadErrors: Test{::
 DataProjectWrites: Test{::
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("w1", "b.txt"), "second")}
-    .return{(s.dataEdit(Notes).read(L#("w1", "b.txt")).readStrUtf8 Recover).assertEq "second"}
+    .return{(s.dataEdit(Notes).read(L#("w1", "b.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "second"}
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("fresh", "deeper", "c.txt"), "third")}
-    .return{(s.dataEdit(Notes).read(L#("fresh", "deeper", "c.txt")).readStrUtf8 Recover).assertEq "third"}
+    .return{(s.dataEdit(Notes).read(L#("fresh", "deeper", "c.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "third"}
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wz", "deep", "four.txt"), "zipped")}
@@ -92,7 +92,7 @@ DataProjectWrites: Test{::
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wn", "inner", "three.txt"), "renested")}
-    .return{(s.dataEdit(Notes).read(L#("wn", "inner", "three.txt")).readStrUtf8 Recover).assertEq "renested"}
+    .return{(s.dataEdit(Notes).read(L#("wn", "inner", "three.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "renested"}
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wf", "new", "five.txt"), "in a new folder of a zip")}
@@ -104,7 +104,7 @@ DataProjectWrites: Test{::
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeBytes(L#("raw.bin"), L#(72.getByte, 105.getByte))}
-    .return{(s.dataEdit(Notes).read(L#("raw.bin")).readStrUtf8 Recover).assertEq "Hi"}
+    .return{(s.dataEdit(Notes).read(L#("raw.bin")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "Hi"}
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeStrUtf32Be(L#("u32.txt"), "A")}
@@ -112,7 +112,7 @@ DataProjectWrites: Test{::
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeUStrAscii(L#("ascii.txt"), "caf".u("00E9"), Q)}
-    .return{(s.dataEdit(Notes).read(L#("ascii.txt")).readStrUtf8 Recover).assertEq "caf?"}
+    .return{(s.dataEdit(Notes).read(L#("ascii.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})).assertEq "caf?"}
     }
   .checkWithSys{s -> Block#
     .do{s.dataEdit(Notes).writeUStrLatin1(L#("latin1.txt"), "caf".u("00E9 1F600"), Q)}

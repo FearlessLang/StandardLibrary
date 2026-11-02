@@ -482,7 +482,7 @@ abstract class AWidget implements Widget$2o$1{
   public Object read$belowBaseline$0(){ return ratio(below); }
   public Object mut$uText$1(Object t){
     var s= ustr(t);
-    var b= lineBreak(s);
+    var b= newline(s);
     if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
     return reText(() -> text = s);
   }
@@ -881,7 +881,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$uTitle$1(Object t){
     requireOpen();
     var s= ustr(t);
-    var b= lineBreak(s);
+    var b= newline(s);
     if (b != null){ throw Util.detErr("The new title of this Frame has " + b + ": the title bar shows the title on one line"); }
     title = s;
     if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }

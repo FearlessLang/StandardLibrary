@@ -15,20 +15,8 @@
 CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadBytes(url: Str, maxBytes: Nat): List[Byte];
 
-  mut .downloadStrUtf8(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
-  mut .downloadUStrUtf8(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
-  mut .downloadStrUtf16Le(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
-  mut .downloadUStrUtf16Le(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
-  mut .downloadStrUtf16Be(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
-  mut .downloadUStrUtf16Be(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
-  mut .downloadStrUtf32Le(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
-  mut .downloadUStrUtf32Le(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
-  mut .downloadStrUtf32Be(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
-  mut .downloadUStrUtf32Be(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
-  mut .downloadStrAscii(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
-  mut .downloadUStrAscii(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
-  mut .downloadStrLatin1(url: Str, maxBytes: Nat, recover: mut BadStrUnitRecover): Str;
-  mut .downloadUStrLatin1(url: Str, maxBytes: Nat, recover: mut BadUStrUnitRecover): UStr;
+  mut .downloadStr(url: Str, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str;
+  mut .downloadUStr(url: Str, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr;
 
   mut .downloadImage(url: Str, maxBytes: Nat, maxPixels: Nat): Image;
   }

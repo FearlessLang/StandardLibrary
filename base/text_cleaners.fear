@@ -1,0 +1,63 @@
+///A cleaner turns bytes into text, one byte at a time: ``.nextByte`` returns the text that ``b`` adds, and ``.end`` returns the text that is left.
+///A cleaner maker, ``imm F[UStr, mut UStrCleaner]``, makes a fresh cleaner from a starting text, the text that the cleaner sees before its first byte.
+///A run of a cleaner maker on some bytes calls ``.nextByte`` of the current cleaner with each byte, and ``.end`` at the end.
+///When a result holds a newline, the result up to its first newline goes to the result of the run, the current cleaner is over, and the cleaner maker makes the next cleaner with the rest of that result as starting text.
+///A cleaner with the empty starting text that receives no byte gets no ``.end``.
+UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
+///A `UStrCleaner` that gives a Str.
+StrCleaner:{ mut .nextByte(b: Byte): Str; mut .end: Str; }
+///A cleaner of scalar values: ``.nextScalar`` returns the text that the scalar value ``n`` adds, and ``.end`` returns the text that is left.
+UStrScalarCleaner:{ mut .nextScalar(n: Nat): UStr; mut .end: UStr; }
+///A `UStrScalarCleaner` that gives a Str.
+StrScalarCleaner:{ mut .nextScalar(n: Nat): Str; mut .end: Str; }
+///The text in place of a bad unit: a part of the input that the encoding rejects.
+///``byteOffset`` counts the bytes the cleaner received before the bad unit.
+UStrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr }
+///A `UStrFixer` that gives a Str.
+StrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str }
+BadTextReason:{
+  .match[R:**](mut BadTextReasonMatch[R]):R
+  }
+BadTextReasonMatch[R:**]:{
+  mut .malformedEncoding:R;
+  mut .truncatedEncoding:R;
+  mut .notScalar:R;
+  mut .notInStr:R;
+  }
+///The cleaner makers of the library; no cleaner depends on the locale.
+///``.text`` decodes UTF-8: a bad unit becomes U+FFFD, each U+FEFF is dropped, carriage return newline, carriage return, U+000B, U+000C, U+0085, U+2028 and U+2029 become newline, and the result is in NFC.
+///``.line`` does what ``.text`` does, then each newline becomes a space.
+///``.utf8`` decodes UTF-8; a bad unit is a deterministic error holding the reason, the byte offset and the bytes of the bad unit.
+///``.utf8OrElse(fixer)`` decodes UTF-8; each bad unit gives the result of the fixer of the cleaner, made by ``fixer`` once for each cleaner.
+///``.utf16LeOrElse``, ``.utf16BeOrElse``, ``.utf32LeOrElse``, ``.utf32BeOrElse``, ``.asciiOrElse`` and ``.latin1OrElse`` do the same with their encodings.
+///An encoding cleaner returns its starting text as it is; ``.text`` and ``.line`` normalize their starting text followed by the text they decode.
+///``.utf8Then(cleaner)`` decodes UTF-8 and calls a fresh scalar cleaner made by ``cleaner`` with each scalar value of the starting text and then with each scalar value it decodes; a bad unit gives U+FFFD.
+UStrCleaners:{
+  .text: F[UStr, mut UStrCleaner] -> _Magic!;
+  .line: F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf8: F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf8OrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf16LeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf16BeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf32LeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf32BeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .asciiOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .latin1OrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf8Then(cleaner: F[mut UStrScalarCleaner]): F[UStr, mut UStrCleaner] -> _Magic!;
+  }
+///The cleaner makers of `UStrCleaners`, giving a Str.
+///A scalar value that is not a character of Str is a bad unit with reason ``.notInStr``.
+///``.text`` and ``.line`` give ? for a bad unit, and then turn tab into space, decompose each scalar value (NFKD), so an accented letter becomes its letter, and drop what is still not in Str.
+StrCleaners:{
+  .text: F[Str, mut StrCleaner] -> _Magic!;
+  .line: F[Str, mut StrCleaner] -> _Magic!;
+  .utf8: F[Str, mut StrCleaner] -> _Magic!;
+  .utf8OrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf16LeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf16BeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf32LeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf32BeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .asciiOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .latin1OrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf8Then(cleaner: F[mut StrScalarCleaner]): F[Str, mut StrCleaner] -> _Magic!;
+  }

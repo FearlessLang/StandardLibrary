@@ -24,22 +24,8 @@ record InputFile(Optional<DataFiles.Root> root, String label, Path path, List<St
     try{ return DataFiles.bytes(path, zipSteps, zipEntry); }
     catch (IOException _){ throw nonDetErr(subject()+"\ncan not be read as bytes"); }
   }
-  Object str(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.str(bytes(), recover, decoder); }
-  Object uStr(Object recover, TextEncoding.Decoder decoder){ return TextEncoding.uStr(bytes(), recover, decoder); }
-  @Override public Object mut$readStrUtf8$1(Object recover){ return str(recover, TextEncoding::utf8); }
-  @Override public Object mut$readUStrUtf8$1(Object recover){ return uStr(recover, TextEncoding::utf8); }
-  @Override public Object mut$readStrUtf16Le$1(Object recover){ return str(recover, TextEncoding::utf16le); }
-  @Override public Object mut$readUStrUtf16Le$1(Object recover){ return uStr(recover, TextEncoding::utf16le); }
-  @Override public Object mut$readStrUtf32Le$1(Object recover){ return str(recover, TextEncoding::utf32le); }
-  @Override public Object mut$readUStrUtf32Le$1(Object recover){ return uStr(recover, TextEncoding::utf32le); }
-  @Override public Object mut$readStrUtf16Be$1(Object recover){ return str(recover, TextEncoding::utf16be); }
-  @Override public Object mut$readUStrUtf16Be$1(Object recover){ return uStr(recover, TextEncoding::utf16be); }
-  @Override public Object mut$readStrUtf32Be$1(Object recover){ return str(recover, TextEncoding::utf32be); }
-  @Override public Object mut$readUStrUtf32Be$1(Object recover){ return uStr(recover, TextEncoding::utf32be); }
-  @Override public Object mut$readStrAscii$1(Object recover){ return str(recover, TextEncoding::ascii); }
-  @Override public Object mut$readUStrAscii$1(Object recover){ return uStr(recover, TextEncoding::ascii); }
-  @Override public Object mut$readStrLatin1$1(Object recover){ return str(recover, TextEncoding::latin1); }
-  @Override public Object mut$readUStrLatin1$1(Object recover){ return uStr(recover, TextEncoding::latin1); }
+  @Override public Object mut$readStr$1(Object cleaner){ return TextCleaning.str(cleaner, bytes()); }
+  @Override public Object mut$readUStr$1(Object cleaner){ return TextCleaning.uStr(cleaner, bytes()); }
   @Override public Object mut$readBytes$0(){
     var bs= bytes();
     var l= new java.util.ArrayList<Object>(bs.length);

@@ -4,7 +4,7 @@ use base.Block as Block;
 use base.Try as Try;
 use base.Lists as L;
 
-Recover: base.BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue -> "?" }
+Recover: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> "?" }
 Pub: base.DataRead{}
 Notes: base.DataEdit{}
 Self: base.DataEdit{}
@@ -35,14 +35,14 @@ ImagesThatCanNotBeDecoded: Test{::
     |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
     )}}, {t -> Junk.readImage(t.assetRead, 1000000)})
   .checkWithSys{s -> Block#
-    .let path= {s.dataRead(Pub).read(L#("in_path.txt")).readStrUtf8 Recover}
+    .let path= {s.dataRead(Pub).read(L#("in_path.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})}
     .return{Try#(s.iso.close, {t -> t.inputCursor#.match{.some n -> n.readImage(1000000); .empty -> base.Error.msg "no opened file"}}).assertInfo{::.isMsg{:: == (
        "File with absolute path "+path
       |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
       )}}}
     }
   .checkWithSys{s -> Block#
-    .let url= {s.dataRead(Pub).read(L#("url.txt")).readStrUtf8 Recover}
+    .let url= {s.dataRead(Pub).read(L#("url.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})}
     .return{Try#(s.iso.close, {t -> t.download.downloadImage(url, 1000, 1000000)}).assertInfo{::.isMsg{:: == (
        "Resource with url "+url
       |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
@@ -86,7 +86,7 @@ ResourcesThatCanNotBeRead: Test{::
       .openIso s = t
       .let n= {s.dataEdit(Notes).read(L#("gone.txt"))}
       .do{s.dataEdit(Notes).delete(L#("gone.txt"))}
-      .return{n.readStrUtf8 Recover}
+      .return{n.readStr(base.StrCleaners.utf8OrElse{Recover})}
       })
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path img.Notes/gone.png"
@@ -103,7 +103,7 @@ ResourcesThatCanNotBeRead: Test{::
     )}}, {t -> Block#
       .openIso s = t
       .do{s.dataEdit(Self).delete(L#("_img", "note.txt"))}
-      .return{Note.readStrUtf8(s.assetRead, Recover)}
+      .return{Note.readStr(s.assetRead, base.StrCleaners.utf8OrElse{Recover})}
       })
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path /_img/pics/one.txt"
@@ -111,7 +111,7 @@ ResourcesThatCanNotBeRead: Test{::
     )}}, {t -> Block#
       .openIso s = t
       .do{s.dataEdit(Self).delete(L#("_img", "pics", "one.txt"))}
-      .return{PicsOne.readStrUtf8(s.assetRead, Recover)}
+      .return{PicsOne.readStr(s.assetRead, base.StrCleaners.utf8OrElse{Recover})}
       })
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path /_img/box/three.txt"
@@ -119,7 +119,7 @@ ResourcesThatCanNotBeRead: Test{::
     )}}, {t -> Block#
       .openIso s = t
       .do{s.dataEdit(Self).delete(L#("_img", "box", "three.txt"))}
-      .return{BoxThree.readStrUtf8(s.assetRead, Recover)}
+      .return{BoxThree.readStr(s.assetRead, base.StrCleaners.utf8OrElse{Recover})}
       })
   }
 

@@ -2,4 +2,12 @@ GuiTextWrapTests: Test {::
   .checkDetErr({::.isMsg{:: == "[0061 0061 0061 0061][0062 0062 0062 0062]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.uTextLines("aaaa".u "3000 0062 0062 0062 0062", Width#30).flow.map{l -> "["+(l.scalarHex)+"]"}.join "")}})
   .checkDetErr({::.isMsg{:: == "[0061 0061 0061 0061][0062 0062 0062 0062]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.uTextLines("aaaa".u "2002 0062 0062 0062 0062", Width#60).flow.map{l -> "["+(l.scalarHex)+"]"}.join "")}})
   .checkDetErr({::.isMsg{:: == "[a][b]"}}, {base.Images#(Width#30, Height#20, Color.ghostWhite).paint{g -> Error.msg(g.textLines("a b", Width#1).flow.map{l -> "["+l+"]"}.join "")}})
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.uText("a".u "2028 0062").pack.height.str + " " + (a.text("a" | "b").pack.height.str))}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Height[48] Height[48]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.uText("a".u "000D 000A 0062").pack.width.str + " " + (a.text("a" | "b").pack.width.str))}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[27] Width[27]"}}.assertTrue{i};
+      }}
   }

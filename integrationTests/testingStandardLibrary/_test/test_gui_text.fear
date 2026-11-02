@@ -1,23 +1,31 @@
 GuiTextTests: Test {::
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.text("a" | "b")}}}}).run{
-      .ok _ -> Error.msg "A newline in the text of a TextField always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this TextField has a line break (U+000A) at offset 1: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg("["+(t.text("a" | "b").text)+"]")}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[a b]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.uText("ab".u "2028")}}}}).run{
-      .ok _ -> Error.msg "A line separator in the text of a TextField always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this TextField has a line break (U+2028) at offset 2: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.uText("ab".u "2028 000D 000A 0063 FEFF 0065 0301").uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0061 0062 0020 0020 0063 00E9"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.uText("a".u "000D 0062 000D 000A 0063 2029 0064").uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0061 000A 0062 000A 0063 000A 0064"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.cleaner{start -> {.nextByte b -> ("x" | "y").u; .end -> "".u}} .text "a"}}}}).run{
+      .ok _ -> Error.msg "A newline from the cleaner of a TextField always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The cleaner of this TextField gave a text with a newline at offset 1: the text of a TextField is one line; UStrCleaners.line turns each newline into a space"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> l.text("a" | "b")}}}}).run{
       .ok _ -> Error.msg "A newline in the text of a Label always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a line break (U+000A) at offset 1: the text of a Label is one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a newline at offset 1: the text of a Label is one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> l.uText("".u "0085")}}}}).run{
-      .ok _ -> Error.msg "A next line character in the text of a Label always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a line break (U+0085) at offset 0: the text of a Label is one line"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> Error.msg(l.uText("".u "0085 2028").uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0085 2028"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .button{b -> b.uText("ok".u "000D 000A")}}}}).run{
-      .ok _ -> Error.msg "A carriage return in the text of a Button always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Button has a line break (U+000D) at offset 2: the text of a Button is one line"}}.assertTrue{i};
+      .ok _ -> Error.msg "A newline in the text of a Button always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Button has a newline at offset 3: the text of a Button is one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg("["+(t.text)+"]")}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";

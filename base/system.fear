@@ -65,20 +65,8 @@ CapInputCursor: ToIso[CapInputCursor],WidenTo[CapInputCursor] {
 ///An input file, read again at every read: a file that cannot be read is a deterministic error.
 CapInputCursorNode: ToIso[CapInputCursorNode],WidenTo[CapInputCursorNode] {
   mut .label: Str; ///best effort portable name to help debugging
-  mut .readStrUtf8(recover: mut BadStrUnitRecover): Str;
-  mut .readUStrUtf8(recover: mut BadUStrUnitRecover): UStr;
-  mut .readStrUtf16Le(recover: mut BadStrUnitRecover): Str;
-  mut .readUStrUtf16Le(recover: mut BadUStrUnitRecover): UStr;
-  mut .readStrUtf32Le(recover: mut BadStrUnitRecover): Str;
-  mut .readUStrUtf32Le(recover: mut BadUStrUnitRecover): UStr;
-  mut .readStrUtf16Be(recover: mut BadStrUnitRecover): Str;
-  mut .readUStrUtf16Be(recover: mut BadUStrUnitRecover): UStr;
-  mut .readStrUtf32Be(recover: mut BadStrUnitRecover): Str;
-  mut .readUStrUtf32Be(recover: mut BadUStrUnitRecover): UStr;
-  mut .readStrAscii(recover: mut BadStrUnitRecover): Str;
-  mut .readUStrAscii(recover: mut BadUStrUnitRecover): UStr;
-  mut .readStrLatin1(recover: mut BadStrUnitRecover): Str;
-  mut .readUStrLatin1(recover: mut BadUStrUnitRecover): UStr;
+  mut .readStr(cleaner: F[Str, mut StrCleaner]): Str;
+  mut .readUStr(cleaner: F[UStr, mut UStrCleaner]): UStr;
   mut .readBytes: List[Byte];
   mut .readImage(maxPixels: Nat): Image;
   }

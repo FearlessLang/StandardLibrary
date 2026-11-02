@@ -123,19 +123,19 @@ GuiFrameTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.name("a" | "b").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A newline in the name always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new name of this CapGui has a line break (U+000A) at offset 1: the name of a CapGui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new name of this CapGui has a newline at offset 1: the name of a CapGui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("ab".u "2028").run{f -> f.content.pane{::}}}).run{
-      .ok _ -> Error.msg "A line separator in the name always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new name of this CapGui has a line break (U+2028) at offset 2: the name of a CapGui is what the title bar, the taskbar and the task switcher show, on one line"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.uName("ab".u "2028").run{f -> Error.msg "A line separator is a character of a name"}}).run{
+      .ok _ -> Error.msg "The consumer always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "A line separator is a character of a name"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.title("a" | "b").content.pane{::}}}).run{
       .ok _ -> Error.msg "A newline in the title always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new title of this Frame has a line break (U+000A) at offset 1: the title bar shows the title on one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new title of this Frame has a newline at offset 1: the title bar shows the title on one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.uTitle("abc".u "0085").content.pane{::}}}).run{
-      .ok _ -> Error.msg "A next line character in the title always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new title of this Frame has a line break (U+0085) at offset 3: the title bar shows the title on one line"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Error.msg(f.uTitle("abc".u "0085").uTitle.scalarHex)}}).run{
+      .ok _ -> Error.msg "The consumer always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0061 0062 0063 0085"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"F11").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A close key equal to the full screen key always stops the Gui";
