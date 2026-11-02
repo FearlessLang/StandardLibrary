@@ -37,11 +37,11 @@ TextCleanerTests: Test {::
   .check{ClFeedS#(base.StrCleaners.utf8Then{mut base.StrScalarCleaner{.nextScalar n -> "<"+(n.str)+">"; .end -> "!"}}#("xy"), 97).assertEq "<120><121><97>!"}
   .check{ClFeed#(base.UStrCleaners.utf8Then{mut base.UStrScalarCleaner{.nextScalar n -> ("<"+(n.str)+">").u; .end -> "!".u}}#("".u), 195, 169).scalarHex.assertEq "003C 0032 0033 0033 003E 0021"}
   .checkDetErr({::.isMsg{:: == "UStrCleaners.utf8: notScalar: the byte sequence ED A0 80 at byte offset 0 of the line encodes U+D800, which is not a unicode scalar value"}}, {ClFeed#(base.UStrCleaners.utf8#("".u), 237, 160, 128)})
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg("["+(a.cleaner{start -> {.nextByte b -> "".u; .end -> "E".u}}.text("").text)+"]")}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg("["+(a.cleaner{start -> {.nextByte b -> ""; .end -> "E"}}.text("").text)+"]")}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "[]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.cleaner{start -> {.nextByte b -> "".u; .end -> start.isEmpty?{.then -> ("a" | "b").u; .else -> "(".u + start + (")".u)}}}.text("x").text)}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.cleaner{start -> {.nextByte b -> ""; .end -> start.isEmpty?{.then -> "a" | "b"; .else -> "(" + start + ")"}}}.text("x").text)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == ("a" | "(b)")}}.assertTrue{i};
       }}

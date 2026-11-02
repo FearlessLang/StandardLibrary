@@ -405,10 +405,6 @@ Label:_Caption[Label]{
   .self->this;
 }
 _EditText[S]: Widget[S]{
-  mut .text(s:Str):mut S->this.uText(s.u);
-  mut .uText(UStr):mut S;
-  read .text:Str->this.uText.getStr;
-  read .uText:UStr;
   mut .textHeight(n:Nat): mut S->this.textHeight'(HeightNat#n);
   mut .textHeight'(HeightNat):mut S;
   mut .aboveBaseline(f:Float):mut S->this.aboveBaseline'(TextRatio#f);
@@ -422,20 +418,38 @@ _EditText[S]: Widget[S]{
   read .editable:Bool;
   mut .textClearsUndo(Bool):mut S;
   read .textClearsUndo:Bool;
-  mut .cleaner(F[UStr, mut UStrCleaner]):mut S;
-  mut .onEdit(mut Consumer[TextEvent]):mut S;
-  mut .onCommit(mut Consumer[TextEvent]):mut S;
   mut .caret(CaretPainter):mut S;
   }
-TextField:_EditText[TextField]{ .self->this; }
-TextArea:_EditText[TextArea]{
+_StrEditText[S]: _EditText[S]{
+  mut .text(Str):mut S;
+  read .text:Str;
+  mut .cleaner(F[Str, mut StrCleaner]):mut S;
+  mut .onEdit(mut Consumer[TextEvent]):mut S;
+  mut .onCommit(mut Consumer[TextEvent]):mut S;
+  }
+_UStrEditText[S]: _EditText[S]{
+  mut .uText(UStr):mut S;
+  read .uText:UStr;
+  mut .cleaner(F[UStr, mut UStrCleaner]):mut S;
+  mut .onEdit(mut Consumer[UTextEvent]):mut S;
+  mut .onCommit(mut Consumer[UTextEvent]):mut S;
+  }
+TextField:_StrEditText[TextField]{ .self->this; }
+UTextField:_UStrEditText[UTextField]{ .self->this; }
+TextArea:_StrEditText[TextArea]{
   .self->this;
-  mut .append(s:Str):mut TextArea->this.uAppend(s.u);
-  mut .uAppend(UStr):mut TextArea;
+  mut .append(Str):mut TextArea;
   mut .wrap(Bool):mut TextArea;
   read .wrap:Bool;
   }
-TextEvent:ScreenContext{ read .text:UStr; read .caret:Nat; read .anchor:Nat; }
+UTextArea:_UStrEditText[UTextArea]{
+  .self->this;
+  mut .uAppend(UStr):mut UTextArea;
+  mut .wrap(Bool):mut UTextArea;
+  read .wrap:Bool;
+  }
+TextEvent:ScreenContext{ read .text:Str; read .caret:Nat; read .anchor:Nat; }
+UTextEvent:ScreenContext{ read .uText:UStr; read .caret:Nat; read .anchor:Nat; }
 CaretPainter:{ .run(mut CaretGraphics):mut Graphics; }
 CaretGraphics:Graphics{ read .sinceMove:Duration; read .lineHeight:HeightNat; }
 Picture:Widget[Picture]{
@@ -506,6 +520,8 @@ Pane:_Container[Pane]{
   mut .picture(mut Scope[Picture]):mut Pane;
   mut .textField(mut Scope[TextField]):mut Pane;
   mut .textArea(mut Scope[TextArea]):mut Pane;
+  mut .uTextField(mut Scope[UTextField]):mut Pane;
+  mut .uTextArea(mut Scope[UTextArea]):mut Pane;
   mut .clear:mut Pane;
   mut .horizontal: mut Pane;
   mut .vertical: mut Pane;
@@ -526,6 +542,8 @@ RegionFiller[S:*]:{
   mut .picture(mut Scope[Picture]): S;
   mut .textField(mut Scope[TextField]): S;
   mut .textArea(mut Scope[TextArea]): S;
+  mut .uTextField(mut Scope[UTextField]): S;
+  mut .uTextArea(mut Scope[UTextArea]): S;
   }
 And[T:*]:{ mut .and: mut RegionFiller[T]; }
 SplitWith[S:*]:{ mut .with(mut Scope[Split]): S; }
