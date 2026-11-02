@@ -45,7 +45,7 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
   }
   @Override public Object mut$terminate$0(){
     running("terminate");
-    if (!p.isAlive()){ return ended(); }
+    if (!p.isAlive()){ ended(); return Void$o$0.instance; }
     p.descendants().forEach(ProcessHandle::destroyForcibly);
     p.destroyForcibly();
     try{ p.waitFor(); }
