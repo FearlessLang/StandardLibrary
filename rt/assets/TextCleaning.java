@@ -53,7 +53,7 @@ final class TextCleaning{
       this.text= text;
       cur = maker.read$$hash$1(text);
     }
-    boolean fresh(){ return col == 0 && isEmpty(text); }
+    boolean fresh(){ return col == 0 && (text instanceof Str$c$0Instance s ? s.val().isEmpty() : ((UStr$s$0Instance) text).val().length == 0); }
     void next(int b){
       var bb= Byte$o$0Instance.instance((byte) b);
       try{
@@ -106,7 +106,6 @@ final class TextCleaning{
   }
 
   static Object empty(boolean u){ return u ? emptyUStr : emptyStr; }
-  static boolean isEmpty(Object t){ return t instanceof Str$c$0Instance s ? s.val().isEmpty() : ((UStr$s$0Instance) t).val().length == 0; }
   static String escape(Object t){ return ((Str$c$0Instance) (t instanceof Str$c$0Instance s ? s.imm$escape$0() : ((UStr$s$0Instance) t).imm$escape$0())).val(); }
   static int[] scalars(Object t){ return t instanceof Str$c$0Instance s ? s.val().codePoints().toArray() : ((UStr$s$0Instance) t).val(); }
   static void add(StringBuilder sb, Object t){
