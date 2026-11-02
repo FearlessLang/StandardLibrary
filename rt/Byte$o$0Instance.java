@@ -29,6 +29,9 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
   private static final long MAX_VALUE_LONG= 255;
 
   public static Byte$o$0 instance(byte val){ return ByteCache.getByte(val); }
+  @Override public boolean equals(Object o){ return this == o; }
+  @Override public int hashCode(){ return u8(val); }
+  @Override public String toString(){ return "Byte["+u8(val)+"]"; }
 
   private static byte clampToByte(Object o){
     return (byte) (((Byte$o$0Instance)o).val & 255);
