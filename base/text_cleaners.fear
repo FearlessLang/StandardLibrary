@@ -18,6 +18,11 @@ StrScalarCleaner:{ mut .nextScalar(n: Nat): Str; mut .end: Str; }
 UStrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr }
 ///A `UStrFixer` that gives a Str.
 StrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str }
+///Why an encoding rejects a bad unit.
+///``.malformedEncoding``: bytes that the encoding never produces, such as a UTF-8 overlong form or an ASCII byte of 128 or more.
+///``.truncatedEncoding``: the input ends inside a sequence.
+///``.notScalar``: the bytes encode a surrogate or a value above 10FFFF.
+///``.notInStr``: the bytes encode a scalar value that is not a character of Str; only the cleaners of `StrCleaners` give it.
 BadTextReason:{
   .match[R:**](mut BadTextReasonMatch[R]):R
   }

@@ -15,7 +15,9 @@
 CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadBytes(url: Str, maxBytes: Nat): List[Byte];
 
+  ///The run of ``cleaner`` on the bytes of the response body.
   mut .downloadStr(url: Str, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str;
+  ///The run of ``cleaner`` on the bytes of the response body.
   mut .downloadUStr(url: Str, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr;
 
   mut .downloadImage(url: Str, maxBytes: Nat, maxPixels: Nat): Image;

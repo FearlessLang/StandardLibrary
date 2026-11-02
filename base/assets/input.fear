@@ -5,12 +5,16 @@ TxtFile:{
   .zipEntry: Str;
   .originalFileName: Str;
 
+  ///The run of ``cleaner`` on the bytes of the file.
   .readStr(cap: mut CapAssetRead, cleaner: F[Str, mut StrCleaner]): Str ->
     cap.readStr(this.path,this.diskPath,this.zipSteps,this.zipEntry,cleaner);
+  ///The run of ``cleaner`` on the bytes of the file.
   .readUStr(cap: mut CapAssetRead, cleaner: F[UStr, mut UStrCleaner]): UStr ->
     cap.readUStr(this.path,this.diskPath,this.zipSteps,this.zipEntry,cleaner);
+  ///The run of ``cleaner`` on the bytes of the file.
   .consumeStr(requestId: Str, cleaner: F[Str, mut StrCleaner]): Str ->
     _TxtRead.consumeStr(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,cleaner);
+  ///The run of ``cleaner`` on the bytes of the file.
   .consumeUStr(requestId: Str, cleaner: F[UStr, mut UStrCleaner]): UStr ->
     _TxtRead.consumeUStr(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,cleaner);
 }

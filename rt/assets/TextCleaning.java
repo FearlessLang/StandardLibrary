@@ -144,9 +144,8 @@ final class TextCleaning{
     int n;
     long at;
     Sink out;
-    boolean partial(){ return n != 0; }
     abstract void feed(int b);
-    abstract void end();
+    void end(){}
     void push(int b){ p[n++] = b; }
     void scalar(int cp, int len){ out.scalar(cp, at, len); drop(len); }
     void bad(int reason, int len, long rejected){ out.bad(reason, at, len, rejected); drop(len); }
@@ -226,7 +225,7 @@ final class TextCleaning{
       push(b);
       if (n < 4){ return; }
       long cp= value();
-      if (cp <= 0x10FFFF && UStr$s$0Instance.isScalar((int) cp)){ scalar((int) cp, 4); return; }
+      if (UStr$s$0Instance.isScalar((int) cp)){ scalar((int) cp, 4); return; }
       bad(notScalar, 4, cp);
     }
     @Override void end(){
@@ -241,12 +240,10 @@ final class TextCleaning{
       if (b < 0x80){ scalar(b, 1); return; }
       bad(malformedEncoding, 1, b);
     }
-    @Override void end(){}
   }
 
   static final class Latin1 extends Decoder{
     @Override void feed(int b){ push(b); scalar(b, 1); }
-    @Override void end(){}
   }
 
   static final class Encoding implements UStrCleaner$2tc$0, StrCleaner$18g$0, Sink{
@@ -263,7 +260,7 @@ final class TextCleaning{
     }
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
-      return d.partial() ? empty(u) : text(out, u);
+      return d.n != 0 ? empty(u) : text(out, u);
     }
     @Override public Object mut$end$0(){
       d.end();
@@ -307,7 +304,7 @@ final class TextCleaning{
     }
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
-      return ready.isEmpty() || d.partial() || cr ? empty(u) : flush();
+      return ready.isEmpty() || d.n != 0 || cr ? empty(u) : flush();
     }
     @Override public Object mut$end$0(){
       d.end();
@@ -358,7 +355,7 @@ final class TextCleaning{
     }
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
-      return d.partial() ? empty(u) : text(out, u);
+      return d.n != 0 ? empty(u) : text(out, u);
     }
     @Override public Object mut$end$0(){
       d.end();

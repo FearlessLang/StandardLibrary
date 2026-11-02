@@ -52,9 +52,8 @@ final class _TextArea extends AEditText implements TextArea$aw$0{
   @Override boolean barRight(){ return true; }
   @Override boolean barBottom(){ return !wrap; }
   @Override public Object mut$uAppend$1(Object t){
-    int n= buf.length();
     frame.onEdtAndWait(() -> change());
-    var ch= clean(n, n, ustr(t));
+    var ch= clean(buf.length(), buf.length(), ustr(t));
     return reStyle(() -> {
       boolean last= follow || scrollY >= maxScrollY();
       program(ch.start(), ch.stop(), ch.text(), caret, anchor);
@@ -305,7 +304,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
 
   Change clean(int a, int b, String s){
     int start= lineStart(a);
-    var r= new TextCleaning.Run(true, cleaner, buf.substring(0, start).chars().filter(c -> c == '\n').count());
+    var r= new TextCleaning.Run(true, cleaner, buf.chars().limit(start).filter(c -> c == '\n').count());
     TextCleaning.feed(r, buf, start, a);
     TextCleaning.feed(r, s, 0, s.length());
     int stop= b;
