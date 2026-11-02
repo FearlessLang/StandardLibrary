@@ -28,6 +28,7 @@ AssetTextReadAsciiPlainFiles: Test { ::
   .checkWithSys { s->
     GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8))
     }
+  .checkWithSys{s -> AssetTextGoodAscii.readStr(s.assetRead, {_ -> mut base.StrCleaner{.nextByte b -> ""; .end -> "c"}}).assertEq "c"}
   .checkWithSys { s->
     GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.asciiOrElse{UnexpectedBadStr}))
     }
@@ -58,6 +59,7 @@ AssetTextReadAsciiRepeatedRead: Test { ::
   }
 
 AssetTextReadAsciiConsumeProtocol: Test { ::
+  .check{AssetTextGoodAscii.consumeStr("ascii-consume-cleaner", {_ -> mut base.StrCleaner{.nextByte b -> ""; .end -> "c"}}).assertEq "c"}
   .check {
     GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-1", base.StrCleaners.utf8))
     }

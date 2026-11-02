@@ -256,20 +256,17 @@ final class TextCleaning{
       bad(notInStr, at, len, cp);
     }
     @Override void bad(Reason reason, long at, int len, long rejected){
-      if (fixer == null){ throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: "+ reason.name() + ": " + badUnit(reason, at, len, rejected)); }
-      add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reason, nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reason, nat(at), nat(len), nat(rejected)));
-    }
-    String badUnit(Reason reason, long at, int len, long rejected){
+      if (fixer != null){ add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reason, nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reason, nat(at), nat(len), nat(rejected))); return; }
       var bytes= new StringBuilder();
       for (int i= 0; i < len; i += 1){ bytes.append(i == 0 ? "" : " ").append(String.format(Locale.ROOT, "%02X", d.p[i])); }
       var where= bytes + " at byte offset " + at + " of the line";
       var value= String.format(Locale.ROOT, "U+%04X", rejected);
-      return switch (reason){
+      throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: " + reason.name() + ": " + switch (reason){
         case malformedEncoding -> "the byte sequence " + where + " is not UTF-8";
         case truncatedEncoding -> "the input ends in the middle of the UTF-8 sequence " + where;
         case notScalar -> "the byte sequence " + where + " encodes " + value + ", which is not a unicode scalar value";
         case notInStr -> "the byte sequence " + where + " encodes " + value + ", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E";
-        };
+        });
     }
   }
 
