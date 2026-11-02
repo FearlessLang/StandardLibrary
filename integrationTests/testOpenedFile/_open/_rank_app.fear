@@ -50,5 +50,7 @@ TheCleaners: Test{::
   .checkDetErrWithSys({:: > "msg" .isMsg{:: == "m"} & > "line" .isMsg{:: == "2"} & > "col" .isMsg{:: == "1"}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readUStr{start -> start.isEmpty?{.then -> mut base.UStrCleaner{.nextByte b -> ("a" | "x").u; .end -> "".u}; .else -> base.Error.msg "m"}}})
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8Then{CountingScalars#(base.Count.nat 0)})).assertEq("12" | "123456789" | "")}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.utf8OrElse{{_, _, _, _ -> ("1" | "2" | "3").u}})).scalarHex.assertEq "0061 000D 000A 0062 000D 0063 2028 0064 FEFF 0065 0301 0031 000A 0032 000A 0033 000A"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut8.bin")).readStr(base.StrCleaners.utf8OrElse{{_, _, _, _ -> "1" | "2" | "3" | ""}})).assertEq("a1" | "2" | "3" | "")}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut8.bin")).readStr(base.StrCleaners.utf8OrElse{{_, _, _, _ -> "1" | "2" | "3"}})).assertEq("a1" | "2" | "3")}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("cut8.bin")).readStr(base.StrCleaners.utf8Then{mut base.StrScalarCleaner{.nextScalar n -> "<"+(n.str)+">"; .end -> "!"}})).assertEq "<97><65533>!"}
   }

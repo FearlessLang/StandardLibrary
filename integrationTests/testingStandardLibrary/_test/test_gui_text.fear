@@ -131,4 +131,8 @@ GuiTextTests: Test {::
       .ok _ -> Error.msg "A cleaner maker that fails always stops the Gui";
       .info i -> i.validate{:: > "info" .where{:: > "msg" .isMsg{:: == "m"} & > "line" .isMsg{:: == "2"} & > "col" .isMsg{:: == "1"}}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> a.cleaner{start -> {.nextByte b -> ""; .end -> "x" | "y"}}.text "a"}}}}).run{
+      .ok _ -> Error.msg "A cleaner whose .end always gives a newline followed by more text always stops the Gui";
+      .info i -> i.validate{:: > "info" .where{:: > "msg" .isMsg{:: == `At the end of the input, a cleaner made from the starting text "y" received no byte, and its .end left "y" after its first newline: at the end of the input, what such a cleaner leaves after its first newline must be shorter than its starting text, so that the run ends`} & > "line" .isMsg{:: == "3"} & > "col" .isMsg{:: == "1"}}}.assertTrue{i};
+      }}
   }

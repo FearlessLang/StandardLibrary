@@ -42,6 +42,7 @@ final class TextCleaning{
     final boolean u;
     final F$3$2 maker;
     Object cur;
+    Object text;
     boolean fresh;
     long line;
     long col;
@@ -56,6 +57,7 @@ final class TextCleaning{
     void start(Object text){
       line += 1;
       col = 0;
+      this.text= text;
       cur = maker.read$$hash$1(text);
       fresh = isEmpty(text);
     }
@@ -70,9 +72,17 @@ final class TextCleaning{
       catch (Deterministic d){ throw at(d); }
     }
     void finish(){
-      try{ while (!fresh && cut(u ? ((UStrCleaner$2tc$0) cur).mut$end$0() : ((StrCleaner$18g$0) cur).mut$end$0())){} }
+      try{
+        if (fresh || col != 0 && !cut(end())){ return; }
+        while (!fresh){
+          var was= text;
+          if (!cut(end())){ return; }
+          if (!fresh && scalars(text).length >= scalars(was).length){ throw Util.detErr("At the end of the input, a cleaner made from the starting text " + escape(was) + " received no byte, and its .end left " + escape(text) + " after its first newline: at the end of the input, what such a cleaner leaves after its first newline must be shorter than its starting text, so that the run ends"); }
+        }
+      }
       catch (Deterministic d){ throw at(d); }
     }
+    Object end(){ return u ? ((UStrCleaner$2tc$0) cur).mut$end$0() : ((StrCleaner$18g$0) cur).mut$end$0(); }
     Deterministic at(Deterministic d){
       d.i= (Info$o$0) d.i.imm$$plus$1(Infos$1c$0.instance.imm$map$4(Str$c$0Instance.instance("line"), nat(line), Str$c$0Instance.instance("col"), nat(col + 1)));
       return d;
@@ -105,6 +115,7 @@ final class TextCleaning{
 
   static Object empty(boolean u){ return u ? emptyUStr : emptyStr; }
   static boolean isEmpty(Object t){ return t instanceof Str$c$0Instance s ? s.val().isEmpty() : ((UStr$s$0Instance) t).val().length == 0; }
+  static String escape(Object t){ return ((Str$c$0Instance) (t instanceof Str$c$0Instance s ? s.imm$escape$0() : ((UStr$s$0Instance) t).imm$escape$0())).val(); }
   static int[] scalars(Object t){ return t instanceof Str$c$0Instance s ? s.val().codePoints().toArray() : ((UStr$s$0Instance) t).val(); }
   static void add(StringBuilder sb, Object t){
     if (t instanceof Str$c$0Instance s){ sb.append(s.val()); return; }
