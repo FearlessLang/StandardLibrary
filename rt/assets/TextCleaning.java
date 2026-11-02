@@ -146,15 +146,14 @@ final class TextCleaning{
 
   static final class Utf8 extends Decoder{
     int need;
-    boolean overlong;
     @Override void feed(int b){
       if (n == 0){ start(b); return; }
       if (b < 0x80 || b > 0xBF){ bad(malformedEncoding, n, p[0]); feed(b); return; }
       push(b);
-      if (n == 2 && (p[0] == 0xE0 && b < 0xA0 || p[0] == 0xF0 && b < 0x90)){ overlong = true; }
       if (n < need){ return; }
-      if (overlong){ bad(malformedEncoding, n, p[0]); return; }
-      int cp= decode();
+      if (overlong()){ bad(malformedEncoding, n, p[0]); return; }
+      int cp= p[0] & 0x7F >> need;
+      for (int i= 1; i < need; i += 1){ cp = cp << 6 | p[i] & 0x3F; }
       if (UStr$s$0Instance.isScalar(cp)){ scalar(cp, n); return; }
       bad(notScalar, n, cp);
     }
@@ -162,19 +161,12 @@ final class TextCleaning{
       push(b);
       if (b < 0x80){ scalar(b, 1); return; }
       if (b < 0xC0 || b > 0xF7){ bad(malformedEncoding, 1, b); return; }
-      overlong = b < 0xC2;
       need = b < 0xE0 ? 2 : b < 0xF0 ? 3 : 4;
     }
-    int decode(){
-      return switch (need){
-        case 2 -> (p[0] & 0x1F) << 6 | p[1] & 0x3F;
-        case 3 -> (p[0] & 0x0F) << 12 | (p[1] & 0x3F) << 6 | p[2] & 0x3F;
-        default -> (p[0] & 0x07) << 18 | (p[1] & 0x3F) << 12 | (p[2] & 0x3F) << 6 | p[3] & 0x3F;
-        };
-    }
+    boolean overlong(){ return p[0] < 0xC2 || n > 1 && (p[0] == 0xE0 && p[1] < 0xA0 || p[0] == 0xF0 && p[1] < 0x90); }
     @Override void end(){
       if (n == 0){ return; }
-      bad(overlong ? malformedEncoding : truncatedEncoding, n, p[0]);
+      bad(overlong() ? malformedEncoding : truncatedEncoding, n, p[0]);
     }
   }
 
