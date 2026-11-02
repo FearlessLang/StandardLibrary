@@ -124,16 +124,11 @@ final class TextCleaning{
     return new F$3$2(){ @Override public Object read$$hash$1(Object start){ return make.apply(start); } };
   }
 
-  interface Sink{
-    void scalar(int cp, long at, int len);
-    void bad(int reason, long at, int len, long rejected);
-  }
-
   abstract static class Decoder{
     final int[] p= new int[4];
     int n;
     long at;
-    Sink out;
+    Cleaner out;
     abstract void feed(int b);
     void end(){}
     void push(int b){ p[n++] = b; }
@@ -236,12 +231,14 @@ final class TextCleaning{
     @Override void feed(int b){ push(b); scalar(b, 1); }
   }
 
-  abstract static class Cleaner implements UStrCleaner$2tc$0, StrCleaner$18g$0, Sink{
+  abstract static class Cleaner implements UStrCleaner$2tc$0, StrCleaner$18g$0{
     final boolean u;
     final Decoder d;
     final StringBuilder out= new StringBuilder();
     Cleaner(boolean u, Decoder d){ this.u= u; this.d= d; d.out = this; }
     @Override public abstract Object mut$end$0();
+    abstract void scalar(int cp, long at, int len);
+    abstract void bad(int reason, long at, int len, long rejected);
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
       return d.n != 0 ? empty(u) : text(out, u);
@@ -259,11 +256,11 @@ final class TextCleaning{
       d.end();
       return text(out, u);
     }
-    @Override public void scalar(int cp, long at, int len){
+    @Override void scalar(int cp, long at, int len){
       if (u || UStr$s$0Instance.isStrScalar(cp)){ out.appendCodePoint(cp); return; }
       bad(notInStr, at, len, cp);
     }
-    @Override public void bad(int reason, long at, int len, long rejected){
+    @Override void bad(int reason, long at, int len, long rejected){
       if (fixer == null){ throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: "+ reasonNames[reason] + ": " + badUnit(reason, at, len, rejected)); }
       add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reasons[reason], nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reasons[reason], nat(at), nat(len), nat(rejected)));
     }
@@ -304,8 +301,8 @@ final class TextCleaning{
       line.setLength(0);
       return text(out, u);
     }
-    @Override public void scalar(int cp, long at, int len){ put(cp); }
-    @Override public void bad(int reason, long at, int len, long rejected){ put(u ? 0xFFFD : '?'); }
+    @Override void scalar(int cp, long at, int len){ put(cp); }
+    @Override void bad(int reason, long at, int len, long rejected){ put(u ? 0xFFFD : '?'); }
     void put(int cp){
       if (cp == 0xFEFF){ return; }
       if (cr){
@@ -343,8 +340,8 @@ final class TextCleaning{
       add(out, u ? ((UStrScalarCleaner$5074$0) scalars).mut$end$0() : ((StrScalarCleaner$2728$0) scalars).mut$end$0());
       return text(out, u);
     }
-    @Override public void scalar(int cp, long at, int len){ put(cp); }
-    @Override public void bad(int reason, long at, int len, long rejected){ put(0xFFFD); }
+    @Override void scalar(int cp, long at, int len){ put(cp); }
+    @Override void bad(int reason, long at, int len, long rejected){ put(0xFFFD); }
     void put(int cp){
       var n= nat(cp);
       add(out, u ? ((UStrScalarCleaner$5074$0) scalars).mut$nextScalar$1(n) : ((StrScalarCleaner$2728$0) scalars).mut$nextScalar$1(n));
