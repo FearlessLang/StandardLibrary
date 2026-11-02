@@ -332,7 +332,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       int to= Math.min(lineEnd(stop) + 1, buf.length());
       TextCleaning.feed(r, buf.subSequence(stop, to));
       stop = to;
-    } while (stop < buf.length() && !r.fresh);
+    } while (stop < buf.length() && !r.fresh());
     r.finish();
     var res= r.chars.toString();
     var nl= newline(res);

@@ -57,4 +57,8 @@ TextCleanerTests: Test {::
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == ("a" | "(b)")}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.cleaner{start -> {.nextByte b -> start.isEmpty?{.then -> "" | "s"; .else -> ""}; .end -> (start == "s")?{.then -> "" | "ss"; .else -> "(" + start + ")"}}}.text("ab").text)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == ("" | "" | "(ss)")}}.assertTrue{i};
+      }}
   }

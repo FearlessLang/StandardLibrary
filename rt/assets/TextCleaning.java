@@ -11,17 +11,17 @@ final class TextCleaning{
   static final Object emptyUStr= UStr$s$0Instance.instance(new int[0]);
   static final Object emptyStr= Str$c$0Instance.instance("");
 
-  enum Reason{
+  enum Reason implements BadTextReason$9wg$0{
     malformedEncoding, truncatedEncoding, notScalar, notInStr;
-    final Object fear= new BadTextReason$9wg$0(){ @Override public Object imm$match$1(Object p0){
+    @Override public Object imm$match$1(Object p0){
       var m= (BadTextReasonMatch$8suo$1) p0;
-      return switch (Reason.this){
+      return switch (this){
         case malformedEncoding -> m.mut$malformedEncoding$0();
         case truncatedEncoding -> m.mut$truncatedEncoding$0();
         case notScalar -> m.mut$notScalar$0();
         case notInStr -> m.mut$notInStr$0();
         };
-    }};
+    }
   }
 
   static Object run(boolean u, Object maker, byte[] bs){
@@ -37,7 +37,6 @@ final class TextCleaning{
     final F$3$2 maker;
     Object cur;
     Object text;
-    boolean fresh;
     long line;
     long col;
     final StringBuilder chars= new StringBuilder();
@@ -53,10 +52,9 @@ final class TextCleaning{
       col = 0;
       this.text= text;
       cur = maker.read$$hash$1(text);
-      fresh = isEmpty(text);
     }
+    boolean fresh(){ return col == 0 && isEmpty(text); }
     void next(int b){
-      fresh = false;
       var bb= Byte$o$0Instance.instance((byte) b);
       try{
         var r= u ? ((UStrCleaner$2tc$0) cur).mut$nextByte$1(bb) : ((StrCleaner$18g$0) cur).mut$nextByte$1(bb);
@@ -67,11 +65,11 @@ final class TextCleaning{
     }
     void finish(){
       try{
-        if (fresh || col != 0 && !cut(end())){ return; }
-        while (!fresh){
+        if (fresh() || col != 0 && !cut(end())){ return; }
+        while (!fresh()){
           var was= text;
           if (!cut(end())){ return; }
-          if (!fresh && scalars(text).length >= scalars(was).length){ throw Util.detErr("At the end of the input, a cleaner made from the starting text " + escape(was) + " received no byte, and its .end left " + escape(text) + " after its first newline: at the end of the input, what such a cleaner leaves after its first newline must be shorter than its starting text, so that the run ends"); }
+          if (scalars(text).length >= scalars(was).length){ throw Util.detErr("At the end of the input, the .end of a cleaner that received no byte, made from the starting text " + escape(was) + ", left " + escape(text) + " after its first newline; that text must be shorter than " + escape(was) + ", so that the run ends"); }
         }
       }
       catch (Deterministic d){ throw at(d); }
@@ -267,7 +265,7 @@ final class TextCleaning{
     }
     @Override void bad(Reason reason, long at, int len, long rejected){
       if (fixer == null){ throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: "+ reason.name() + ": " + badUnit(reason, at, len, rejected)); }
-      add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reason.fear, nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reason.fear, nat(at), nat(len), nat(rejected)));
+      add(out, u ? ((UStrFixer$pc$0) fixer).mut$$hash$4(reason, nat(at), nat(len), nat(rejected)) : ((StrFixer$b4$0) fixer).mut$$hash$4(reason, nat(at), nat(len), nat(rejected)));
     }
     String badUnit(Reason reason, long at, int len, long rejected){
       var bytes= new StringBuilder();
