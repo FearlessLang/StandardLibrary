@@ -65,7 +65,7 @@ final class TextCleaning{
     }
     void finish(){
       try{
-        if (fresh() || col != 0 && !cut(end())){ return; }
+        if (col != 0 && !cut(end())){ return; }
         while (!fresh()){
           var was= text;
           if (!cut(end())){ return; }
