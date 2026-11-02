@@ -35,11 +35,12 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Returns the Output of those mains.
   mut .run(name: Str): UStr;
   ///Selects the project ``name`` and compiles it if it needs compiling.
-  ///Returns the Output of that compilation, empty when no compilation starts.
+  ///Returns the Output of that compilation, or the line saying that the project was already up to date and compiled.
   mut .compile(name: Str): UStr;
   ///Selects the project ``name`` and reports in its Output why it is invalid or out of date, or that it is neither.
   mut .check(name: Str): Void;
-  ///Selects the project ``name`` and ends the main or the compilation of the project currently running, if any.
+  ///Selects the project ``name`` and ends the main of the project currently running, if any.
+  ///The manager refuses it while a compilation of the project runs.
   mut .terminate(name: Str): Void;
   ///Selects the project ``name`` and deletes its compilation cache.
   mut .deleteCache(name: Str): Void;
