@@ -13,11 +13,11 @@ GuiTextTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.cleaner{start -> {.nextByte b -> "x" | "y"; .end -> ""}} .text "a"}}}}).run{
       .ok _ -> Error.msg "A newline from the cleaner of a TextField always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The cleaner of this TextField gave a text with a newline at offset 1: the text of a TextField is one line; StrCleaners.line turns each newline into a space"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The run of the cleaner maker of this TextField gave a text with a newline at offset 1: the text of a TextField is one line; StrCleaners.line turns each newline into a space"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextField{t -> t.cleaner{start -> {.nextByte b -> ("x" | "y").u; .end -> "".u}} .uText("a".u)}}}}).run{
       .ok _ -> Error.msg "A newline from the cleaner of a UTextField always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The cleaner of this UTextField gave a text with a newline at offset 1: the text of a UTextField is one line; UStrCleaners.line turns each newline into a space"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The run of the cleaner maker of this UTextField gave a text with a newline at offset 1: the text of a UTextField is one line; UStrCleaners.line turns each newline into a space"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> l.text("a" | "b")}}}}).run{
       .ok _ -> Error.msg "A newline in the text of a Label always stops the Gui";

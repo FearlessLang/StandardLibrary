@@ -28,8 +28,7 @@ final class TextCleaning{
     var r= new Run(u, maker, 0);
     for (var b : bs){ r.next(b); }
     r.finish();
-    var s= r.chars.toString();
-    return u ? UStr$s$0Instance.instance(s) : Str$c$0Instance.instance(s);
+    return text(r.chars, u);
   }
 
   static final class Run{
@@ -284,7 +283,7 @@ final class TextCleaning{
     }
     @Override public Object mut$end$0(){
       d.end();
-      if (cr){ cr = false; newline(); }
+      if (cr){ newline(); }
       return flush();
     }
     Object flush(){

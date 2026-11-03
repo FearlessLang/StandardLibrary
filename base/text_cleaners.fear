@@ -42,7 +42,7 @@ BadTextReasonMatch[R:**]:{
 ///``.utf16LeOrElse``, ``.utf16BeOrElse``, ``.utf32LeOrElse``, ``.utf32BeOrElse``, ``.asciiOrElse`` and ``.latin1OrElse`` do the same with their encodings.
 ///An encoding cleaner returns its starting text as it is, in front of the first character or bad unit it decodes, or at its ``.end``; ``.text`` and ``.line`` normalize their starting text followed by the text they decode.
 ///The cleaners of the library return text only when they hold no byte of an unfinished sequence, so a cleaner that ends at a newline drops no byte.
-///``.utf8Then(cleaner)`` decodes UTF-8 and calls a fresh scalar cleaner made by ``cleaner`` with each scalar value of the starting text, then with each scalar value it decodes, and calls its ``.end`` at the end; a bad unit gives U+FFFD; the results of the scalar cleaner are the result.
+///``.utf8Then(cleaner)`` decodes UTF-8 and calls a fresh scalar cleaner made by ``cleaner`` with each scalar value of the starting text, then with each scalar value it decodes, and calls its ``.end`` at the end; a bad unit reaches the scalar cleaner as U+FFFD; the results of the scalar cleaner are the result.
 UStrCleaners:{
   .text: F[UStr, mut UStrCleaner] -> _Magic!;
   .line: F[UStr, mut UStrCleaner] -> _Magic!;
