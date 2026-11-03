@@ -212,4 +212,18 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "2"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPositions(Lists#32767).dividerPositions.str{::})} }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[32767]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#(5, 0)) } }}}).run{
+      .ok _ -> Error.msg "A wrong number of divider positions always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [5, 0]: 2 positions are given, but this Split has 1 divider: one position per divider"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 100 }.and.pane{:: .width 60 }.with{sp -> Error.msg(sp.leftInset 20 .pack .dividerPositions.str{::})}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[100]"}}.assertTrue{i};
+      }}
   }
