@@ -54,12 +54,12 @@ final class Desk{
   static void moveResize(Frame f, java.awt.Point at, int direction){ message(f, "_NET_WM_MOVERESIZE", at.x, at.y, direction, 1, 1); }
   static final Field peer= open(reflect(() -> Component.class.getDeclaredField("peer")));
   static final String deskId= System.getProperty("fearlessDesk.id");
-  static void identify(Frame f, String icon, String name){
+  static void identify(Frame f, String icon, String iconPath, String name){
     if (deskId == null || mac){ return; }
     var windowClass= deskId+"-"+icon;
     if (!windows){ call(X11.appClass, windowClass); return; }
     f.addNotify();
-    var ico= Util.pathProperty("fearlessDesk.icons").resolve(icon+".ico")+",0";
+    var ico= Util.pathProperty("fearlessDesk.icons").resolve(iconPath.substring(0, iconPath.lastIndexOf('.'))+".ico")+",0";
     Win.identify(hwnd(f), List.of(windowClass, System.getProperty("fearlessDesk.relaunch"), ico, name));
   }
   private static MemorySegment hwnd(Frame f){ return MemorySegment.ofAddress((long)reflect(() -> Win.hwnd.invoke(reflect(() -> peer.get(f))))); }
