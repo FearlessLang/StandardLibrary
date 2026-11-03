@@ -266,6 +266,7 @@ final class _Split extends AContainer implements Split$1c$0{
   }
   @Override public Object mut$pack$0(){
     reStyle(() -> {
+      frame.mouse.stopDividing(this);
       int at= 0;
       for (int i= 0; i < positions.length; i += 1){
         var o= ((SkComponent) component.getComponent(i)).w.own();
@@ -290,16 +291,14 @@ final class _Split extends AContainer implements Split$1c$0{
       for (var c : component.getComponents()){ growFor(((SkComponent) c).w); }
     });
   }
-  Object replace(long i, Object scope, Function<_Frame,? extends AWidget> make){
+  Object replace(int i, Object scope, Function<_Frame,? extends AWidget> make){
     var c= frame.onEdtAndWait(() -> make.apply(frame));
     ((Scope$1c$1) scope).mut$run$1(c);
     return reStyle(() -> {
-      int n= component.getComponentCount();
-      if (Long.compareUnsigned(i, n) >= 0){ throw Util.detErr("There is no region at index " + Long.toUnsignedString(i) + " in this Split: it has " + n + " regions, so the index is at most " + (n - 1)); }
-      var old= component.getComponent((int) i);
+      var old= component.getComponent(i);
       frame.mouse.detached((SkComponent) old);
       component.remove(old);
-      component.add(c.component, (int) i);
+      component.add(c.component, i);
       growFor(c);
       c.changeable = false;
     });
@@ -311,11 +310,12 @@ final class _Split extends AContainer implements Split$1c$0{
     var shown= "dividerPositions " + Arrays.stream(l).mapToObj(Long::toUnsignedString).collect(Collectors.joining(", ", "[", "]"));
     for (int i= 0; i < l.length; i += 1){
       if (Long.compareUnsigned(l[i], maxExtent) > 0){ throw Util.detErr(shown + ": the position " + Long.toUnsignedString(l[i]) + " at index " + i + " is too large; it must be <= " + maxExtent); }
-      if (i > 0 && l[i] < l[i - 1] + bar){ throw Util.detErr(shown + ": the divider at index " + i + ", at " + l[i] + ", overlaps the divider at index " + (i - 1) + ", which takes the " + bar + " virtual pixels from " + l[i - 1] + " to " + (l[i - 1] + bar) + "; each position must be at least " + bar + " more than the position before it"); }
+      if (i > 0 && l[i] < l[i - 1] + bar){ throw Util.detErr(shown + ": the position at index " + i + " is " + l[i] + ", but it must be at least " + (l[i - 1] + bar) + ": a divider is " + bar + " virtual pixels thick, so each position must be at least " + bar + " more than the position before it"); }
     }
+    if (l.length != positions.length){ throw Util.detErr(shown + ": " + l.length + (l.length == 1 ? " position is" : " positions are") + " given, but this Split has " + positions.length + (positions.length == 1 ? " divider" : " dividers") + ": one position per divider"); }
     int[] v= Arrays.stream(l).mapToInt(x -> (int) x).toArray();
     return reStyle(() -> {
-      if (v.length != positions.length){ throw Util.detErr(shown + ": " + v.length + (v.length == 1 ? " position is" : " positions are") + " given, but this Split has " + positions.length + (positions.length == 1 ? " divider" : " dividers") + ": one position per divider"); }
+      frame.mouse.stopDividing(this);
       positions = v;
     });
   }
@@ -329,9 +329,11 @@ final class _Split extends AContainer implements Split$1c$0{
   @Override public Object read$draggable$0(){ return Util.bool(draggable); }
   @Override public Object mut$region$1(Object i){
     long k= Util.natToLong(i);
-    return new _RegionFiller(frame, (s, make) -> replace(k, s, make));
+    int n= positions.length + 1;
+    if (Long.compareUnsigned(k, n) >= 0){ throw Util.detErr("There is no region at index " + Long.toUnsignedString(k) + " in this Split: it has " + n + " regions, so the index is at most " + (n - 1)); }
+    return new _RegionFiller(frame, (s, make) -> replace((int) k, s, make));
   }
-  @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(component.getComponentCount())); }
+  @Override public Object read$size$0(){ return n(positions.length + 1); }
 }
 
 final class _RegionFiller implements RegionFiller$4rk$1{
