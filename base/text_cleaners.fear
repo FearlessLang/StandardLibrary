@@ -27,8 +27,8 @@ UStrCleaners:{
   .utf8Then(cleaner: F[mut UStrScalarCleaner]): F[UStr, mut UStrCleaner] -> _Magic!;
   }
 StrCleaners:{
-  .text: F[Str, mut StrCleaner] -> _Magic!;
-  .line: F[Str, mut StrCleaner] -> _Magic!;
+  .softText: F[Str, mut StrCleaner] -> _Magic!;
+  .softLine: F[Str, mut StrCleaner] -> _Magic!;
   .utf8: F[Str, mut StrCleaner] -> _Magic!;
   .utf8OrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
   .utf16LeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
