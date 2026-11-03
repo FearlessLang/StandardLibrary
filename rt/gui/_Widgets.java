@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -217,7 +218,12 @@ final class _Split extends AContainer implements Split$1c$0{
   _Split(_Frame frame, int regions){
     super(frame);
     positions = IntStream.range(0, regions - 1).map(i -> i * bar).toArray();
-    component.setLayout(new BorderLayout(){ @Override public void layoutContainer(Container target){ layout(); } });
+    component.setLayout(new BorderLayout(){ @Override public void layoutContainer(Container target){
+      for (var k : component.getComponents()){
+        var r= region(k);
+        MutableBorderLayout.place(k, r.x, r.y, r.width, r.height, true, true);
+      }
+    }});
   }
   int span(){ return vertical ? viewH() : viewW(); }
   @Override Rectangle region(Component k){
@@ -228,7 +234,7 @@ final class _Split extends AContainer implements Split$1c$0{
   }
   Rectangle along(int from, int length){ return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH()); }
   Rectangle grip(int i){ return along(positions[i], bar).intersection(view()); }
-  int dividerAt(java.awt.Point p){ return IntStream.range(0, positions.length).filter(i -> grip(i).contains(p)).findFirst().orElse(-1); }
+  int dividerAt(Point p){ return IntStream.range(0, positions.length).filter(i -> grip(i).contains(p)).findFirst().orElse(-1); }
   void drag(int i, int[] from, int want){
     int m= from.length;
     int end= Math.max(span(), from[m - 1] + bar);
@@ -244,12 +250,6 @@ final class _Split extends AContainer implements Split$1c$0{
     frame.markLayoutDirty();
   }
   static int scale(int v, int to, int from){ return (int) Math.round((double) v * to / from); }
-  void layout(){
-    for (var k : component.getComponents()){
-      var r= region(k);
-      MutableBorderLayout.place(k, r.x, r.y, r.width, r.height, true, true);
-    }
-  }
   @Override Dimension need(){
     var a= new Dimension(0, 0);
     for (var c : component.getComponents()){
@@ -303,7 +303,7 @@ final class _Split extends AContainer implements Split$1c$0{
   @Override public Object mut$dividerPositions$1(Object ps){
     long[] l= List$o$1Instance.asJava(ps).stream().mapToLong(Util::natToLong).toArray();
     var shown= "dividerPositions " + Arrays.stream(l).mapToObj(Long::toUnsignedString).collect(Collectors.joining(", ", "[", "]"));
-    if (l.length != positions.length){ throw Util.detErr(shown + ": " + l.length + (l.length == 1 ? " position is" : " positions are") + " given, but this Split has " + positions.length + (positions.length == 1 ? " divider" : " dividers") + ": one position per divider"); }
+    if (l.length != positions.length){ throw Util.detErr(shown + ": this Split has " + positions.length + (positions.length == 1 ? " divider, so it needs 1 position, not " : " dividers, so it needs " + positions.length + " positions, not ") + l.length); }
     for (int i= 0; i < l.length; i += 1){
       if (Long.compareUnsigned(l[i], maxExtent) > 0){ throw Util.detErr(shown + ": the position at index " + i + " is " + Long.toUnsignedString(l[i]) + ", but it must be at most " + maxExtent); }
       if (i > 0 && l[i] < l[i - 1] + bar){ throw Util.detErr(shown + ": the position at index " + i + " is " + l[i] + ", but it must be at least " + (l[i - 1] + bar) + ": a divider is " + bar + " virtual pixels thick, so each position must be at least " + bar + " more than the position before it"); }
