@@ -287,9 +287,7 @@ final class _Split extends AContainer implements Split$1c$0{
       for (var c : component.getComponents()){ growFor(((SkComponent) c).w); }
     });
   }
-  Object replace(int i, Object scope, Function<_Frame,? extends AWidget> make){
-    var c= frame.onEdtAndWait(() -> make.apply(frame));
-    ((Scope$1c$1) scope).mut$run$1(c);
+  Object replace(int i, AWidget c){
     return reStyle(() -> {
       var old= component.getComponent(i);
       frame.mouse.detached((SkComponent) old);
@@ -327,7 +325,7 @@ final class _Split extends AContainer implements Split$1c$0{
     long k= Util.natToLong(i);
     int n= positions.length + 1;
     if (Long.compareUnsigned(k, n) >= 0){ throw Util.detErr("There is no region at index " + Long.toUnsignedString(k) + " in this Split: it has " + n + " regions, so the index is at most " + (n - 1)); }
-    return new _RegionFiller(frame, (s, make) -> replace((int) k, s, make));
+    return new _RegionFiller(frame, (s, make) -> replace((int) k, frame.build(s, make)));
   }
   @Override public Object read$size$0(){ return n(positions.length + 1); }
 }
@@ -717,10 +715,14 @@ final class _Frame implements Frame$1c$0{
   }
 
   Object region(AWidget into, String where){ return new _RegionFiller(this, (s, make) -> addTo(into, where, s, make)); }
+  AWidget build(Object scope, Function<_Frame,? extends AWidget> make){
+    var c= onEdtAndWait(() -> make.apply(this));
+    ((Scope$1c$1) scope).mut$run$1(c);
+    return c;
+  }
   Object addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
     var parent= into.component;
-    var b= onEdtAndWait(() -> make.apply(this));
-    ((Scope$1c$1) scope).mut$run$1(b);
+    var b= build(scope, make);
     onEdtAndWait(() -> {
       into.change();
       // Border slots are replaceable: a second .north evicts the first. The

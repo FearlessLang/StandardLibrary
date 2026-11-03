@@ -8,7 +8,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.types.Rect;
@@ -44,11 +43,6 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     throw Util.detErr("There is no section at index " + Long.toUnsignedString(i) + " in this Sections: "
       + (sections.isEmpty() ? "it has no sections" : "it has " + sections.size() + (sections.size() == 1 ? " section" : " sections") + ", so the index is at most " + (sections.size() - 1)));
   }
-  AWidget build(Object scope, Function<_Frame,? extends AWidget> make){
-    var c= frame.onEdtAndWait(() -> make.apply(frame));
-    ((Scope$1c$1) scope).mut$run$1(c);
-    return c;
-  }
   Object add(AWidget title, AWidget c){
     frame.onEdtAndWait(() -> {
       change();
@@ -68,7 +62,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     var k= s.content.own();
     grow(Math.max(lead() + t.width + trail(), k.width) + edgeW(), t.height + heightGap + k.height + edgeH());
   }
-  Object replacer(long i, boolean title){ return new _RegionFiller(frame, (s, make) -> replace(i, title, build(s, make))); }
+  Object replacer(long i, boolean title){ return new _RegionFiller(frame, (s, make) -> replace(i, title, frame.build(s, make))); }
   Object replace(long i, boolean title, AWidget w){
     return reStyle(() -> {
       var s= at(i);
@@ -176,7 +170,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     s.expanded = expanded;
     if (!expanded){ frame.mouse.detached(s.content.component); }
   }
-  @Override public Object mut$section$0(){ return new _RegionFiller(frame, (t, mt) -> _RegionFiller.and(frame, (s, make) -> add(build(t, mt), build(s, make)))); }
+  @Override public Object mut$section$0(){ return new _RegionFiller(frame, (t, mt) -> _RegionFiller.and(frame, (s, make) -> add(frame.build(t, mt), frame.build(s, make)))); }
   @Override public Object mut$tabs$1(Object b){ return reStyle(() -> tabs = Util.isTrue(b)); }
   @Override public Object mut$expand$1(Object i){
     long k= Util.natToLong(i);
