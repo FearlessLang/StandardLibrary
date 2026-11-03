@@ -6,16 +6,16 @@ GuiSplitTests: Test {::
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[117] Height[52]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.with{sp -> Error.msg(sp.pack .width.str + " " + (sp.height.str) + " " + (sp.dividerPosition.str))}
+    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.with{sp -> Error.msg(sp.pack .width.str + " " + (sp.height.str) + " " + (sp.dividerPositions.str{::}))}
     }}}).run{
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[177] Height[52] 100"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[177] Height[52] [100]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.with{sp -> Error.msg(sp.vertical .pack .width.str + " " + (sp.height.str) + " " + (sp.dividerPosition.str))}
+    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.with{sp -> Error.msg(sp.vertical .pack .width.str + " " + (sp.height.str) + " " + (sp.dividerPositions.str{::}))}
     }}}).run{
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[112] Height[87] 40"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[112] Height[87] [40]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
     .split.pane{:: .width 100 }.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 }
@@ -24,31 +24,31 @@ GuiSplitTests: Test {::
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[283] Height[68]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
-    .split.pane{:: .fill .width 100 .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{:: .fill }.with{:: .width 300 .height 80 .dividerPosition 150 }
+    .split.pane{:: .fill .width 100 .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{:: .fill }.with{:: .width 300 .height 80 .dividerPositions(Lists#150) }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[150] Height[68]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
-    .split.pane{:: .width 100 }.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 .dividerPosition 150 }
+    .split.pane{:: .width 100 }.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 .dividerPositions(Lists#150) }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[133] Height[68]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
-    .split.pane{:: .width 100 }.and.pane{:: .fill .width 60 .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 .dividerPosition 250 }
+    .split.pane{:: .width 100 }.and.pane{:: .fill .width 60 .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 .dividerPositions(Lists#250) }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[60] Height[68]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
-    .split.pane{:: .fill .width 100 .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .width 300 .height 80 .dividerPosition 10 }
+    .split.pane{:: .fill .width 100 .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#10) }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[100] Height[68]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
-    .split.pane{::}.and.pane{:: .width 200 .paint{g -> Error.msg "A replaced widget was drawn"}}.with{:: .width 300 .height 80 .dividerPosition 100 .second.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} } }
+    .split.pane{::}.and.pane{:: .width 200 .paint{g -> Error.msg "A replaced widget was drawn"}}.with{:: .width 300 .height 80 .dividerPositions(Lists#100) .region(1).pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} } }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[183] Height[68]"}}.assertTrue{i};
@@ -61,8 +61,8 @@ GuiSplitTests: Test {::
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[288] Height[68]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
-    .split.split.pane{:: .height 30 }.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .fill .vertical .dividerPosition 30 }
-      .and.pane{:: .width 50 }.with{:: .width 300 .height 120 .dividerPosition 100 }
+    .split.split.pane{:: .height 30 }.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .fill .vertical .dividerPositions(Lists#30) }
+      .and.pane{:: .width 50 }.with{:: .width 300 .height 120 .dividerPositions(Lists#100) }
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[88] Height[61]"}}.assertTrue{i};
@@ -73,24 +73,169 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[288] Height[68]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPosition.str + " " + (sp.draggable.str) + " " + (sp.dividerPosition(150).draggable(False).dividerPosition.str) + " " + (sp.draggable.str))} }}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPositions.str{::} + " " + (sp.draggable.str) + " " + (sp.dividerPositions(Lists#150).draggable(False).dividerPositions.str{::}) + " " + (sp.draggable.str))} }}}).run{
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "0 True 150 False"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[0] True [150] False"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPosition 40000 } }}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#40000) } }}}).run{
       .ok _ -> Error.msg "A divider position over the limit always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPosition 40000 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [40000]: the position at index 0 is 40000, but it must be at most 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
-    .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.dividerPosition.str))}
+    .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.dividerPositions.str{::}))}
     }}}).run{
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[117] Height[32] 0"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[117] Height[32] [0]"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.vertical.width.str + " " + (sp.height.str))}
     }}}).run{
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[117] Height[37]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.and.pane{:: .width 50 .height 20 }.with{sp -> Error.msg(sp.size.str + " " + (sp.dividerPositions.str{::}) + " " + (sp.pack .width.str) + " " + (sp.height.str) + " " + (sp.dividerPositions.str{::}))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "3 [0, 5] Width[232] Height[52] [100, 165]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.and.pane{:: .width 50 .height 20 }.with{sp -> Error.msg(sp.vertical .pack .width.str + " " + (sp.height.str) + " " + (sp.dividerPositions.str{::}))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[112] Height[112] [40, 75]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 .dividerPositions(Lists#(100, 200)) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[83] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{:: .width 200 .paint{g -> Error.msg "A replaced widget was drawn"}}.and.pane{::}.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#(100, 200)) .region(0).pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} } }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[100] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#100) } }}}).run{
+      .ok _ -> Error.msg "A wrong number of divider positions always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [100]: this Split has 2 dividers, so it needs 2 positions, not 1"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#(100, 104)) } }}}).run{
+      .ok _ -> Error.msg "Divider positions closer than a divider always stop the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [100, 104]: the position at index 1 is 104, but it must be at least 105: a divider is 5 virtual pixels thick, so each position must be at least 5 more than the position before it"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#400) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[288] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#400).content.pane{::
+    .split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .vertical .width 80 .height 300 .dividerPositions(Lists#(100, 200)) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[68] Height[95]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{::}.and.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPositions(Lists#(100, 200)).vertical .region(1).pane{::} .dividerPositions.str{::})}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[100, 200]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+    .do{f.content.pane{:: .split.label{:: .text "a" .save l}.and.pane{::}.with{:: .region(0).pane{::}}}}
+    .return{Block#(l!.text "b", Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a widget of a refilled region always fails";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Label is not in the window any more: .clear, a refilled region, a removed section or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.region(1).pane{:: .width 200 .height 90}.width.str + " " + (sp.height.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[217] Height[102]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.and.pane{:: .width 50 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.vertical.width.str) + " " + (sp.height.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[122] Height[52] Width[122] Height[62]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#(100, 400)) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[183] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[278] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.and.pane{::}.with{:: .region(3).pane{:: .width 40000} } }}}).run{
+      .ok _ -> Error.msg "A region index past the last region always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "There is no region at index 3 in this Split: it has 3 regions, so the index is at most 2"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPositions{} } }}}).run{
+      .ok _ -> Error.msg "A wrong number of divider positions always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions []: this Split has 1 divider, so it needs 1 position, not 0"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#100)
+      .region(1).split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .fill .dividerPositions(Lists#50) } }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[116] Height[56]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPositions(Lists#32767).dividerPositions.str{::})} }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[32767]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#(5, 0)) } }}}).run{
+      .ok _ -> Error.msg "A wrong number of divider positions always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [5, 0]: this Split has 1 divider, so it needs 1 position, not 2"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 100 }.and.pane{:: .width 60 }.with{sp -> Error.msg(sp.leftInset 20 .pack .dividerPositions.str{::})}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[100]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .width 300 .height 80 .leftInset 20 .dividerPositions(Lists#100) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[169] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#400).content.pane{::
+    .split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .vertical .width 80 .height 300 .topInset 20 .dividerPositions(Lists#100) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[68] Height[169]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPositions(Lists#(100, 105)).dividerPositions.str{::})} }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[100, 105]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.vertical .region(1).pane{:: .width 200 .height 90}.width.str + " " + (sp.height.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[212] Height[107]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{:: .width 200 .paint{g -> Error.msg "A replaced widget was drawn"}}.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#(100, 200)) .region(1).pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} } }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[95] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content
+    .split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .dividerPositions(Lists#100) }
+    }}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[283] Height[188]"}}.assertTrue{i};
       }}
   }

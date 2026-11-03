@@ -68,7 +68,7 @@ GuiMenuTests: Test {::
     .return{f.content.pane{:: .save root .pane{:: .save inner}}}
     }}).run{
       .ok _ -> Error.msg "Opening a menu below a removed widget always fails";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "This Pane is not in the window, so .openMenu has no place below it to open a menu: .clear, a replaced Border slot or a new .content removed it, or the scope that adds it has not returned"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Pane is not in the window, so .openMenu has no place below it to open a menu: .clear, a refilled region, a removed section or a new .content removed it, or the scope that adds it has not returned"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
     .var started = {False}

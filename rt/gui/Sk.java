@@ -11,7 +11,6 @@ import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.Surface;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
@@ -260,8 +259,7 @@ interface Sk{
     cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), paint);
   }
 
-  static void divider(Canvas cv, _Split s){
-    var d= s.grip();
+  static void divider(Canvas cv, _Split s, java.awt.Rectangle d){
     if (d.isEmpty()){ return; }
     paint.setColor(s.fg & 0xFFFFFF | 0x30000000);
     cv.drawRect(Rect.makeXYWH(d.x, d.y, d.width, d.height), paint);
@@ -337,7 +335,7 @@ interface Sk{
   static String regionClip(AWidget s, Component k, java.awt.Rectangle r){
     boolean inside= k.getX() >= r.x && k.getY() >= r.y && k.getX() + k.getWidth() <= r.x + r.width && k.getY() + k.getHeight() <= r.y + r.height;
     if (inside){ return null; }
-    var which= !(s instanceof _Split p) ? "content area" : k == p.side(BorderLayout.LINE_START) ? "first region" : "second region";
+    var which= s instanceof _Split ? "region at index " + s.component.getComponentZOrder(k) : "content area";
     return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in the " + which + " of its parent, " + s.describe() + ": the " + which + " is " + r.width + "x" + r.height + " at (" + r.x + ", " + r.y + "), and the part outside it is clipped";
   }
 

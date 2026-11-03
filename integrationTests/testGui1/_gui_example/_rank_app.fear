@@ -8,6 +8,7 @@ use base.Debug as Debug;
 use base.Color as Color;
 use base.KeyStroke as Key;
 use base.Label as Label;
+use base.Lists as Lists;
 use base.Slot as Slot;
 use base.Slots as Slots;
 use base.Pane as Pane;
@@ -616,8 +617,9 @@ Gui18:Consumer[mut Frame]{::
       .and.split
         .pane{:: .fill .width 200 .background (Color.moonCheese) .label{:: .text "The data of the selected tile" } }
         .and.pane{:: .fill .width 200 .background (Color.dustyRose) .label{:: .text "The output of the selected tile" } }
-        .with{:: .fill .vertical .dividerPosition 150}
-      .with{:: .fill .dividerPosition 200}
+        .with{:: .fill .vertical .dividerPositions(Lists#150)}
+      .and.pane{:: .fill .width 120 .background (Color.sleepyBlue) .label{:: .text "The notes of the project" } }
+      .with{:: .fill .dividerPositions(Lists#(200, 450))}
     }
   }
 Gui19:Consumer[mut Frame]{::
@@ -650,6 +652,6 @@ Gui20:Consumer[mut Frame]{::
         .section.label{:: .text "Logs" } .and.pane{:: .maxPerLine 1 .label{:: .text "log 1" } .label{:: .text "log 2" } .label{:: .text "log 3" } .pack}
         .expand 0
         }
-      .with{:: .fill .dividerPosition 140}
+      .with{:: .fill .dividerPositions(Lists#140)}
     }
   }
