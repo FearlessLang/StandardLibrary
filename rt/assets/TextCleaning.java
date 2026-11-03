@@ -119,7 +119,6 @@ final class TextCleaning{
     sb.setLength(0);
     return res;
   }
-  static int u8(Object b){ return Byte.toUnsignedInt(Byte$o$0Instance.unwrap(b)); }
   static Object nat(long n){ return Nat$c$0Instance.instance(n); }
   static F$3$2 maker(Function<Object,Object> make){
     return new F$3$2(){ @Override public Object read$$hash$1(Object start){ return make.apply(start); } };
@@ -234,7 +233,7 @@ final class TextCleaning{
     Object ready(){ return text(out, u); }
     Object rest(){ return text(out, u); }
     @Override public Object mut$nextByte$1(Object b){
-      d.feed(u8(b));
+      d.feed(Byte.toUnsignedInt(Byte$o$0Instance.unwrap(b)));
       return d.n != 0 ? empty(u) : ready();
     }
     @Override public Object mut$end$0(){ d.end(); return rest(); }
