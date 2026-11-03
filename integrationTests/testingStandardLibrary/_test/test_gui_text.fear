@@ -1,23 +1,35 @@
 GuiTextTests: Test {::
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.text("a" | "b")}}}}).run{
-      .ok _ -> Error.msg "A newline in the text of a TextField always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this TextField has a line break (U+000A) at offset 1: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg("["+(t.text("a" | "b").text)+"]")}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[a b]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.uText("ab".u "2028")}}}}).run{
-      .ok _ -> Error.msg "A line separator in the text of a TextField always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this TextField has a line break (U+2028) at offset 2: the text of a TextField is one line; a TextArea holds more lines"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextField{t -> Error.msg(t.uText("ab".u "2028 000D 000A 0063 FEFF 0065 0301").uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0061 0062 0020 0020 0063 00E9"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextArea{a -> Error.msg(a.uText("a".u "000D 0062 000D 000A 0063 2029 0064").uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0061 000A 0062 000A 0063 000A 0064"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> t.cleaner{start -> {.nextByte b -> "x" | "y"; .end -> ""}} .text "a"}}}}).run{
+      .ok _ -> Error.msg "A newline from the cleaner of a TextField always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The run of the cleaner maker of this TextField gave a text with a newline at offset 1: the text of a TextField is one line; StrCleaners.softLine turns each newline into a space"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextField{t -> t.cleaner{start -> {.nextByte b -> ("x" | "y").u; .end -> "".u}} .uText("a".u)}}}}).run{
+      .ok _ -> Error.msg "A newline from the cleaner of a UTextField always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The run of the cleaner maker of this UTextField gave a text with a newline at offset 1: the text of a UTextField is one line; UStrCleaners.line turns each newline into a space"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> l.text("a" | "b")}}}}).run{
       .ok _ -> Error.msg "A newline in the text of a Label always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a line break (U+000A) at offset 1: the text of a Label is one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a newline at offset 1: the text of a Label is one line"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> l.uText("".u "0085")}}}}).run{
-      .ok _ -> Error.msg "A next line character in the text of a Label always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Label has a line break (U+0085) at offset 0: the text of a Label is one line"}}.assertTrue{i};
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .label{l -> Error.msg(l.uText("".u "0085 2028").uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0085 2028"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .button{b -> b.uText("ok".u "000D 000A")}}}}).run{
-      .ok _ -> Error.msg "A carriage return in the text of a Button always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Button has a line break (U+000D) at offset 2: the text of a Button is one line"}}.assertTrue{i};
+      .ok _ -> Error.msg "A newline in the text of a Button always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this Button has a newline at offset 3: the text of a Button is one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg("["+(t.text)+"]")}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
@@ -43,16 +55,88 @@ GuiTextTests: Test {::
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[50] Height[30]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.uText("a".u("00E9")).uText.size.str)}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextField{t -> Error.msg(t.uText("a".u("00E9")).uText.size.str)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "2"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textField{t -> Error.msg(t.text "Latin" .pack .height.str + " " + (t.uText("".u "005A 030D 030D 030D 0316 0316 0316").pack.height.str))}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextField{t -> Error.msg(t.uText("Latin".u).pack .height.str + " " + (t.uText("".u "005A 030D 030D 030D 0316 0316 0316").pack.height.str))}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Height[35] Height[45]"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.uText("Latin".u "000A 005A 030D 030D 030D 0316 0316 0316").pack.height.str)}}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextArea{a -> Error.msg(a.uText("Latin".u "000A 005A 030D 030D 030D 0316 0316 0316").pack.height.str)}}}}).run{
       .ok _ -> Error.msg "The scope always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Height[58]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.cleaner{start -> {.nextByte b -> "x" | "y"; .end -> "(" + start + ")"}}.text("a").text)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == ("x" | "(y)")}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.cleaner{start -> {.nextByte b -> "x" | ""; .end -> "E"}}.text("ab").text)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == ("x" | "x" | "")}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextArea{a -> Error.msg(a.uText("e".u).uAppend("".u "0301").uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "00E9"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg(a.text("ab" | "cd").cleaner{start -> {.nextByte b -> "Z"; .end -> ""}}.append "e" .text)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == ("ab" | "ZZZ")}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> a.text("x" | "y").cleaner{start -> {.nextByte b -> Error.msg "no"; .end -> ""}}.append "z"}}}}).run{
+      .ok _ -> Error.msg "A cleaner that fails always stops the Gui";
+      .info i -> i.validate{:: > "info" .where{:: > "msg" .isMsg{:: == "no"} & > "line" .isMsg{:: == "2"} & > "col" .isMsg{:: == "1"}}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.textField{t -> Error.msg(t.cleaner{start -> {.nextByte b -> "Z"; .end -> ""}}.text("ab").text)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "ZZ"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.textArea{a -> Error.msg(a.cleaner{start -> {.nextByte b -> "Z"; .end -> ""}}.text("ab").text)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "ZZ"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.uTextField{t -> Error.msg(t.uText("".u "00E9").uText.scalarHex)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "00E9"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.uTextArea{a -> Error.msg(a.uText("".u "00E9").uText.scalarHex)}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "00E9"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
+    .let[mut Slot[mut base.TextArea]] a = {Slots#[mut base.TextArea]}
+    .do{f.content.pane{:: .save p .textArea{:: .cleaner{start -> {.nextByte b -> Error.msg "cleaner ran"; .end -> ""}} .save a}}}
+    .do{Block#(p!.clear, Void)}
+    .return{Block#(a!.text "b", Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a removed widget always fails";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This TextArea is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Pane]] p = {Slots#[mut Pane]}
+    .let[mut Slot[mut base.TextArea]] a = {Slots#[mut base.TextArea]}
+    .do{f.content.pane{:: .save p .textArea{:: .cleaner{start -> {.nextByte b -> Error.msg "cleaner ran"; .end -> ""}} .save a}}}
+    .do{Block#(p!.clear, Void)}
+    .return{Block#(a!.append "b", Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a removed widget always fails";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This TextArea is not in the window any more: .clear, a replaced Border slot or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .uTextArea{a -> Error.msg(a.uText(("a" | "b").u).cleaner(base.UStrCleaners.line).uText.scalarHex)}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "0061 000A 0062"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> a.cleaner{start -> start.isEmpty?{.then -> {.nextByte b -> "x" | "y"; .end -> ""}; .else -> Error.msg "m"}}.text "a"}}}}).run{
+      .ok _ -> Error.msg "A cleaner maker that fails always stops the Gui";
+      .info i -> i.validate{:: > "info" .where{:: > "msg" .isMsg{:: == "m"} & > "line" .isMsg{:: == "2"} & > "col" .isMsg{:: == "1"}}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> a.cleaner{start -> {.nextByte b -> ""; .end -> "x" | "y"}}.text "a"}}}}).run{
+      .ok _ -> Error.msg "A cleaner whose .end always gives a newline followed by more text always stops the Gui";
+      .info i -> i.validate{:: > "info" .where{:: > "msg" .isMsg{:: == `At the end of the input, the .end of a cleaner that received no byte, made from the starting text "y", left "y" after its first newline; that text must be shorter than "y", so that the run ends`} & > "line" .isMsg{:: == "3"} & > "col" .isMsg{:: == "1"}}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .textArea{a -> Error.msg("[" + (a.text("abc").cleaner{start -> {.nextByte b -> ""; .end -> ""}}.append "d" .text) + "]")}}}}).run{
+      .ok _ -> Error.msg "The scope always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[]"}}.assertTrue{i};
       }}
   }

@@ -1,0 +1,41 @@
+UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
+StrCleaner:{ mut .nextByte(b: Byte): Str; mut .end: Str; }
+UStrScalarCleaner:{ mut .nextScalar(n: Nat): UStr; mut .end: UStr; }
+StrScalarCleaner:{ mut .nextScalar(n: Nat): Str; mut .end: Str; }
+UStrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr }
+StrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str }
+BadTextReason:{
+  .match[R:**](mut BadTextReasonMatch[R]):R
+  }
+BadTextReasonMatch[R:**]:{
+  mut .malformedEncoding:R;
+  mut .truncatedEncoding:R;
+  mut .notScalar:R;
+  mut .notInStr:R;
+  }
+UStrCleaners:{
+  .text: F[UStr, mut UStrCleaner] -> _Magic!;
+  .line: F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf8: F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf8OrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf16LeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf16BeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf32LeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf32BeOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .asciiOrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .latin1OrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
+  .utf8Then(cleaner: F[mut UStrScalarCleaner]): F[UStr, mut UStrCleaner] -> _Magic!;
+  }
+StrCleaners:{
+  .softText: F[Str, mut StrCleaner] -> _Magic!;
+  .softLine: F[Str, mut StrCleaner] -> _Magic!;
+  .utf8: F[Str, mut StrCleaner] -> _Magic!;
+  .utf8OrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf16LeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf16BeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf32LeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf32BeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .asciiOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .latin1OrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
+  .utf8Then(cleaner: F[mut StrScalarCleaner]): F[Str, mut StrCleaner] -> _Magic!;
+  }

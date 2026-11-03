@@ -4,8 +4,8 @@ use base.Block as Block;
 use base.Str as Str;
 use base.UStr as UStr;
 use base.BadTextReason as BadTextReason;
-use base.BadStrUnitRecover as BadStrUnitRecover;
-use base.BadUStrUnitRecover as BadUStrUnitRecover;
+use base.StrFixer as StrFixer;
+use base.UStrFixer as UStrFixer;
 use base.F as F;
 use base.Void as Void;
 
@@ -19,66 +19,68 @@ AssetTextReadAsciiTests: UnitTests { ::
 AssetTextReadAsciiPlainFiles: Test { ::
   .checkWithSys { s->
     AutoLoadTestText
-      .readStrUtf8(s.assetRead,UnexpectedBadStr)
+      .readStr(s.assetRead, base.StrCleaners.utf8)
       .assertEq "Hello! We are automatically reading this file!"
     }
   .checkWithSys { s->
-    GoodAsciiStr#(AssetTextGoodAscii.readStrUtf8(s.assetRead,UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8))
     }
   .checkWithSys { s->
-    GoodAsciiUStr#(AssetTextGoodAscii.readUStrUtf8(s.assetRead,UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8))
+    }
+  .checkWithSys{s -> AssetTextGoodAscii.readStr(s.assetRead, {_ -> mut base.StrCleaner{.nextByte b -> ""; .end -> "c"}}).assertEq "c"}
+  .checkWithSys { s->
+    GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.asciiOrElse{UnexpectedBadStr}))
     }
   .checkWithSys { s->
-    GoodAsciiStr#(AssetTextGoodAscii.readStrAscii(s.assetRead,UnexpectedBadStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.asciiOrElse{UnexpectedBadUStr}))
     }
   .checkWithSys { s->
-    GoodAsciiUStr#(AssetTextGoodAscii.readUStrAscii(s.assetRead,UnexpectedBadUStr))
+    GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.latin1OrElse{UnexpectedBadStr}))
     }
   .checkWithSys { s->
-    GoodAsciiStr#(AssetTextGoodAscii.readStrLatin1(s.assetRead,UnexpectedBadStr))
-    }
-  .checkWithSys { s->
-    GoodAsciiUStr#(AssetTextGoodAscii.readUStrLatin1(s.assetRead,UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.latin1OrElse{UnexpectedBadUStr}))
     }
   .checkWithSys { s->
     AutoZipLoadSubTestTextInZip
-      .readStrUtf8(s.assetRead,UnexpectedBadStr)
+      .readStr(s.assetRead, base.StrCleaners.utf8)
       .assertEq "Hello! We are automatically reading this file from a zip!"
     }
   }
 
 AssetTextReadAsciiRepeatedRead: Test { ::
   .checkWithSys { s-> Block#
-    .do { GoodAsciiStr#(AssetTextGoodAscii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
-    .do { GoodAsciiStr#(AssetTextGoodAscii.readStrUtf8(s.assetRead,UnexpectedBadStr)) }
-    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
-    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStrUtf8(s.assetRead,UnexpectedBadUStr)) }
+    .do { GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8)) }
+    .do { GoodAsciiStr#(AssetTextGoodAscii.readStr(s.assetRead, base.StrCleaners.utf8)) }
+    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8)) }
+    .do { GoodAsciiUStr#(AssetTextGoodAscii.readUStr(s.assetRead, base.UStrCleaners.utf8)) }
     .done
     }
   }
 
 AssetTextReadAsciiConsumeProtocol: Test { ::
+  .check{AssetTextGoodAscii.consumeStr("ascii-consume-cleaner", {_ -> mut base.StrCleaner{.nextByte b -> ""; .end -> "c"}}).assertEq "c"}
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-1",UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-1", base.StrCleaners.utf8))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-2",UnexpectedBadStr)),
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-2", base.StrCleaners.utf8)),
     sys.try#{
-      AssetTextGoodAscii.consumeStrUtf8("ascii-consume-2",UnexpectedBadStr)
+      AssetTextGoodAscii.consumeStr("ascii-consume-2", base.StrCleaners.utf8)
       }.assertInfo)}
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-3a",UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-3a", base.StrCleaners.utf8))
     }
   .check {
-    GoodAsciiStr#(AssetTextGoodAscii.consumeStrUtf8("ascii-consume-3b",UnexpectedBadStr))
+    GoodAsciiStr#(AssetTextGoodAscii.consumeStr("ascii-consume-3b", base.StrCleaners.utf8))
     }
   .check {
-    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8("ascii-consume-4",UnexpectedBadUStr))
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStr("ascii-consume-4", base.UStrCleaners.utf8))
     }
   .checkWithSys { sys -> Block#(
-    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStrUtf8("ascii-consume-5",UnexpectedBadUStr)),
+    GoodAsciiUStr#(AssetTextGoodAscii.consumeUStr("ascii-consume-5", base.UStrCleaners.utf8)),
     sys.try#{
-      AssetTextGoodAscii.consumeUStrUtf8("ascii-consume-5",UnexpectedBadUStr)
+      AssetTextGoodAscii.consumeUStr("ascii-consume-5", base.UStrCleaners.utf8)
       }.assertInfo)}
   }
 
@@ -92,7 +94,7 @@ GoodAsciiStr: F[Str,Void] { ::.assertEq "Hello safe Str!" }
 
 GoodAsciiUStr: F[UStr,Void] { ::.scalarHex.assertEq "0048 0065 006C 006C 006F 0020 0073 0061 0066 0065 0020 0053 0074 0072 0021"}
 
-UnexpectedBadStr: BadStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
+UnexpectedBadStr: StrFixer { reason, byteOffset, byteLength, rejectedValue ->
   "[unexpected recovery:"
   + (BadTextReasonName#reason)
   + ":"
@@ -104,7 +106,7 @@ UnexpectedBadStr: BadStrUnitRecover { reason, byteOffset, byteLength, rejectedVa
   + "]"
   }
 
-UnexpectedBadUStr: BadUStrUnitRecover { reason, byteOffset, byteLength, rejectedValue ->
+UnexpectedBadUStr: UStrFixer { reason, byteOffset, byteLength, rejectedValue ->
   (UnexpectedBadStr#(reason,byteOffset,byteLength,rejectedValue)).u
   }
 BadTextReasonName: F[BadTextReason,Str] { ::.match {

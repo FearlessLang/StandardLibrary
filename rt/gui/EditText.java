@@ -23,11 +23,10 @@ import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import java.util.Locale;
 import javax.swing.SwingUtilities;
@@ -39,39 +38,49 @@ import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 final class _TextField extends AEditText implements TextField$ls$0{
-  _TextField(_Frame frame){ super(frame); }
-  @Override boolean oneLine(){ return true; }
-  @Override boolean barBottom(){ return true; }
+  _TextField(_Frame frame){ super(frame, false); }
 }
 
-final class _TextArea extends AEditText implements TextArea$aw$0{
-  _TextArea(_Frame frame){
-    super(frame);
-    wrap = true;
-  }
+final class _UTextField extends AEditText implements UTextField$1e8$0{
+  _UTextField(_Frame frame){ super(frame, true); }
+}
+
+final class _TextArea extends ATextArea implements TextArea$aw$0{
+  _TextArea(_Frame frame){ super(frame, false); }
+}
+
+final class _UTextArea extends ATextArea implements UTextArea$p4$0{
+  _UTextArea(_Frame frame){ super(frame, true); }
+}
+
+abstract class ATextArea extends AEditText{
+  ATextArea(_Frame frame, boolean u){ super(frame, u); }
   @Override boolean oneLine(){ return false; }
   @Override boolean barRight(){ return true; }
-  @Override boolean barBottom(){ return !wrap; }
-  @Override public Object mut$uAppend$1(Object t){
-    var s= ustr(t);
+  public Object mut$append$1(Object t){ return append(((Str$c$0Instance) t).val()); }
+  public Object mut$uAppend$1(Object t){ return append(ustr(t)); }
+  Object append(String s){
+    frame.onEdtAndWait(() -> change());
+    var ch= clean(buf.length(), buf.length(), s);
     return reStyle(() -> {
       boolean last= follow || scrollY >= maxScrollY();
-      int n= buf.length();
-      program(n, n, s, caret, anchor);
+      program(ch.start(), ch.stop(), ch.text(), caret, anchor);
       follow = last;
     });
   }
-  @Override public Object mut$wrap$1(Object b){ return reStyle(() -> wrap = Util.isTrue(b)); }
-  @Override public Object read$wrap$0(){ return Util.bool(wrap); }
+  public Object mut$wrap$1(Object b){ return reStyle(() -> wrap = Util.isTrue(b)); }
+  public Object read$wrap$0(){ return Util.bool(wrap); }
 }
 
-abstract class AEditText extends AWidget implements _EditText$aw$1{
+abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEditText$5mw$1{
   record Step(int at, String removed, String inserted, int caretBefore, int anchorBefore, int caretAfter, int anchorAfter){}
   record Seg(int from, int to, Sk.Line line){}
   record VLine(int start, int end, Sk.Line line, boolean wrapped, int y, int w, int h){
     float dx(){ return line == null ? 0 : (float) ((w - line.width()) / 2); }
   }
-  record Fire(Consumer$ao$1 handler, TextEvent$ls$0 event){}
+  record Fire(Consumer$ao$1 handler, CTextEvent event){}
+  record Req(int a, int b, String s){}
+  record Change(int start, int stop, String text, int caret){}
   static final Paint stroke= new Paint().setAntiAlias(true).setMode(PaintMode.STROKE);
   final StringBuilder buf= new StringBuilder();
   int caret;
@@ -83,7 +92,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   boolean wrap;
   final ArrayList<Step> undo= new ArrayList<>();
   final ArrayList<Step> redo= new ArrayList<>();
-  MF$7$2 onInput;
+  final boolean u;
+  Object cleaner;
   Consumer$ao$1 onEdit;
   Consumer$ao$1 onCommit;
   CaretPainter$4sg$0 caretPainter;
@@ -98,8 +108,14 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   HashMap<String,ArrayList<Seg>> shaped= new HashMap<>();
   ArrayList<VLine> lines= new ArrayList<>();
 
-  AEditText(_Frame frame){ super(frame); }
-  abstract boolean oneLine();
+  AEditText(_Frame frame, boolean u){
+    super(frame);
+    this.u= u;
+    cleaner = TextCleaning.clean(u, oneLine());
+    wrap = !oneLine();
+  }
+  boolean oneLine(){ return true; }
+  @Override boolean barBottom(){ return !wrap; }
 
   @Override Dimension need(){
     int w= 0;
@@ -115,12 +131,14 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   @Override void fit(){ dirty = true; }
   @Override Object reText(Runnable r){ return reStyle(r); }
 
-  @Override public Object mut$uText$1(Object t){
-    var s= ustr(t);
-    var b= lineBreak(s);
-    if (oneLine() && b != null){ throw Util.detErr("The new text of this TextField has " + b + ": the text of a TextField is one line; a TextArea holds more lines"); }
+  @Override public Object mut$text$1(Object t){ return text(((Str$c$0Instance) t).val()); }
+  @Override public Object mut$uText$1(Object t){ return text(ustr(t)); }
+  @Override public Object read$text$0(){ return Str$c$0Instance.instance(buf.toString()); }
+  Object text(String s){
+    frame.onEdtAndWait(() -> change());
+    var ch= clean(0, buf.length(), s);
     return reStyle(() -> {
-      program(0, buf.length(), s, s.length(), s.length());
+      program(ch.start(), ch.stop(), ch.text(), ch.text().length(), ch.text().length());
       reveal = true;
     });
   }
@@ -129,7 +147,7 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   @Override public Object read$editable$0(){ return Util.bool(editable); }
   @Override public Object mut$textClearsUndo$1(Object b){ return onEdt(() -> clearsUndo = Util.isTrue(b)); }
   @Override public Object read$textClearsUndo$0(){ return Util.bool(clearsUndo); }
-  @Override public Object mut$onInput$1(Object f){ return onEdt(() -> onInput = (MF$7$2) f); }
+  @Override public Object mut$cleaner$1(Object f){ return onEdt(() -> cleaner = f); }
   @Override public Object mut$onEdit$1(Object c){ return onEdt(() -> onEdit = (Consumer$ao$1) c); }
   @Override public Object mut$onCommit$1(Object c){ return onEdt(() -> onCommit = (Consumer$ao$1) c); }
   @Override public Object mut$caret$1(Object p){ return onEdt(() -> caretPainter = (CaretPainter$4sg$0) p); }
@@ -139,8 +157,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     int caretBefore= caret;
     int anchorBefore= anchor;
     buf.replace(at, end, s);
-    caret = snap(c);
-    anchor = snap(a);
+    caret = snap(Math.min(c, buf.length()));
+    anchor = snap(Math.min(a, buf.length()));
     var step= new Step(at, removed, s, caretBefore, anchorBefore, caret, anchor);
     moved();
     redo.clear();
@@ -302,24 +320,42 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     return moveTo(buf.length(), true);
   }
 
-  boolean edit(int a, int b, String s){
-    if (!editable){ return false; }
-    int c= a + s.length();
-    if (buf.substring(a, b).equals(s)){ return moveTo(c, false); }
-    var step= new Step(a, buf.substring(a, b), s, caret, anchor, c, c);
-    undo.add(step);
+  Change clean(int a, int b, String s){
+    int start= lineStart(a);
+    var r= new TextCleaning.Run(u, cleaner, buf.chars().limit(start).filter(c -> c == '\n').count());
+    TextCleaning.feed(r, buf.subSequence(start, a));
+    TextCleaning.feed(r, s);
+    int stop= b;
+    do{
+      int to= Math.min(lineEnd(stop) + 1, buf.length());
+      TextCleaning.feed(r, buf.subSequence(stop, to));
+      stop = to;
+    } while (stop < buf.length() && !r.fresh());
+    r.finish();
+    var res= r.chars.toString();
+    var nl= newline(res);
+    if (oneLine() && nl != null){ throw Util.detErr("The run of the cleaner maker of this " + kind() + " gave a text with " + nl + ": the text of a " + kind() + " is one line; " + (u ? "UStrCleaners.line" : "StrCleaners.softLine") + " turns each newline into a space"); }
+    int keep= Math.max(0, res.codePointCount(0, res.length()) - buf.codePointCount(b, stop));
+    return new Change(start, stop, res, start + res.offsetByCodePoints(0, keep));
+  }
+  boolean edit(Change ch){
+    var removed= buf.substring(ch.start(), ch.stop());
+    if (removed.equals(ch.text())){ return moveTo(snap(ch.caret()), false); }
+    int caretBefore= caret;
+    int anchorBefore= anchor;
+    apply(ch.start(), ch.stop(), ch.text(), ch.caret(), ch.caret());
+    undo.add(new Step(ch.start(), removed, ch.text(), caretBefore, anchorBefore, caret, anchor));
     redo.clear();
-    apply(a, b, s, c, c);
     return true;
   }
   void apply(int a, int b, String s, int c, int an){
     if (committedLive){ committed = buf.toString(); committedLive = false; }
     buf.replace(a, b, s);
-    caret = c;
-    anchor = an;
+    caret = snap(c);
+    anchor = snap(an);
     dirty = true;
     layout();
-    moveTo(c, true);
+    moveTo(caret, true);
   }
   boolean undo(){
     if (!editable || undo.isEmpty()){ return false; }
@@ -335,13 +371,13 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     undo.add(st);
     return true;
   }
-  boolean backspace(){
-    if (caret != anchor){ return edit(selA(), selB(), ""); }
-    return edit(prev(caret), caret, "");
+  Req backspace(){
+    if (caret != anchor){ return new Req(selA(), selB(), ""); }
+    return caret == 0 ? null : new Req(prev(caret), caret, "");
   }
-  boolean delete(){
-    if (caret != anchor){ return edit(selA(), selB(), ""); }
-    return edit(caret, next(caret), "");
+  Req delete(){
+    if (caret != anchor){ return new Req(selA(), selB(), ""); }
+    return caret == buf.length() ? null : new Req(caret, next(caret), "");
   }
   boolean copy(){
     if (caret == anchor){ return false; }
@@ -349,54 +385,47 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
     catch (IllegalStateException _){}
     return false;
   }
-  boolean cut(){
-    if (!editable || caret == anchor){ return false; }
+  Req cut(){
+    if (caret == anchor){ return null; }
     copy();
-    return edit(selA(), selB(), "");
+    return new Req(selA(), selB(), "");
   }
 
-  TextEvent$ls$0 event(){
+  CTextEvent event(){
     return new CTextEvent(frame.elapsed, w(component.getWidth()), h(component.getHeight()),
-      UStr$s$0Instance.instance(buf.toString()), n(buf.codePointCount(0, caret)), n(buf.codePointCount(0, anchor)));
+      buf.toString(), n(buf.codePointCount(0, caret)), n(buf.codePointCount(0, anchor)));
   }
   Fire fired(boolean changed){ return changed && onEdit != null ? new Fire(onEdit, event()) : null; }
 
-  private void submit(String incoming, Function<String,Fire> onEdt){
+  private void submit(Supplier<Fire> onEdt){
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       frame.frame.queue.midTask().set(true);
-      boolean live=frame.onEdtAndWait(() -> canChange() && (incoming == null || editable));
-      if (!live){ return Void$o$0.instance; }
-      var in= incoming == null ? null : filtered(incoming);
-      var f= frame.onEdtAndWait(() -> { layout(); return onEdt.apply(in); });
-      if (f != null){ f.handler().mut$accept$1(f.event()); }
+      if (!frame.onEdtAndWait(() -> canChange())){ return Void$o$0.instance; }
+      fire(frame.onEdtAndWait(() -> { layout(); return onEdt.get(); }));
       return Void$o$0.instance;
     }});
   }
-  private void act(BooleanSupplier onEdt){ submit(null, _ -> fired(onEdt.getAsBoolean())); }
-  void input(String s){ submit(s, in -> fired(!in.isEmpty() && edit(selA(), selB(), in))); }
+  private void change(Supplier<Req> onEdt){
+    frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+      frame.frame.queue.midTask().set(true);
+      var q= frame.onEdtAndWait(() -> canChange() && editable ? onEdt.get() : null);
+      if (q == null){ return Void$o$0.instance; }
+      var ch= clean(q.a(), q.b(), q.s());
+      fire(frame.onEdtAndWait(() -> { layout(); return fired(edit(ch)); }));
+      return Void$o$0.instance;
+    }});
+  }
+  static void fire(Fire f){ if (f != null){ f.handler().mut$accept$1(f.event()); } }
+  private void act(BooleanSupplier onEdt){ submit(() -> fired(onEdt.getAsBoolean())); }
+  void input(String s){ change(() -> new Req(selA(), selB(), s)); }
   void press(Point p, boolean extend){ act(() -> moveTo(offsetAt(p.x, p.y), extend)); }
   void drag(Point p){ act(() -> moveTo(offsetAt(p.x, p.y), true)); }
   void commit(){
-    submit(null, _ -> {
+    submit(() -> {
       if (committedLive || committed.contentEquals(buf)){ return null; }
       committedLive = true;
       return onCommit == null ? null : new Fire(onCommit, event());
     });
-  }
-
-  private String filtered(String in){
-    var f= frame.onEdtAndWait(() -> onInput);
-    var s= f == null ? standard(in, oneLine()) : ustr(f.mut$$hash$1(UStr$s$0Instance.instance(in)));
-    var b= lineBreak(s);
-    if (oneLine() && b != null){ throw Util.detErr("The .onInput of this TextField returned a text with " + b + ": the text of a TextField is one line; return the text without line breaks, for example with each line break replaced by a space"); }
-    return s;
-  }
-  static String standard(String in, boolean oneLine){
-    var s= Normalizer.normalize(in.replace("\r\n", "\n").replace('\r', '\n').replace('\t', ' '), Normalizer.Form.NFKD);
-    if (oneLine){ s = s.replace('\n', ' '); }
-    var res= new StringBuilder();
-    s.codePoints().filter(UStr$s$0Instance::isStrScalar).forEach(res::appendCodePoint);
-    return res.toString();
   }
 
   void key(KeyEvent e){
@@ -411,8 +440,8 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
       case VK_PAGE_DOWN -> act(() -> vertical(page(), shift));
       case VK_HOME -> act(() -> home(ctrl, shift));
       case VK_END -> act(() -> end(ctrl, shift));
-      case VK_BACK_SPACE -> act(this::backspace);
-      case VK_DELETE -> act(this::delete);
+      case VK_BACK_SPACE -> change(this::backspace);
+      case VK_DELETE -> change(this::delete);
       case VK_TAB -> frame.tab(shift);
       case VK_ENTER -> enter(shift, ctrl);
       default -> { if (ctrl && !e.isAltDown()){ shortcut(e.getKeyCode(), shift); } }
@@ -420,13 +449,13 @@ abstract class AEditText extends AWidget implements _EditText$aw$1{
   }
   private void enter(boolean shift, boolean ctrl){
     if (ctrl || !shift){ commit(); return; }
-    if (!oneLine()){ act(() -> edit(selA(), selB(), "\n")); }
+    if (!oneLine()){ change(() -> new Req(selA(), selB(), "\n")); }
   }
   private void shortcut(int key, boolean shift){
     switch (key){
       case VK_A -> act(this::selectAll);
       case VK_C -> act(this::copy);
-      case VK_X -> act(this::cut);
+      case VK_X -> change(this::cut);
       case VK_V -> paste();
       case VK_Z -> act(shift ? this::redo : this::undo);
       case VK_Y -> act(this::redo);
@@ -528,11 +557,12 @@ final class CCaretCtx extends CGraphicsCtx implements CaretGraphics$9kw$0{
   @Override public Object read$lineHeight$0(){ return lineHeight; }
 }
 
-record CTextEvent(Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, Object text, Object caret, Object anchor) implements TextEvent$ls$0{
+record CTextEvent(Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0 panelHeight, String text, Object caret, Object anchor) implements TextEvent$ls$0, UTextEvent$1e8$0{
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
   @Override public Object read$panelHeight$0(){ return panelHeight; }
-  @Override public Object read$text$0(){ return text; }
+  @Override public Object read$text$0(){ return Str$c$0Instance.instance(text); }
+  @Override public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   @Override public Object read$caret$0(){ return caret; }
   @Override public Object read$anchor$0(){ return anchor; }
 }
@@ -572,8 +602,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     if (t == null || reservedDown || Character.isISOControl(c) || !typesWith(e)){ return; }
     e.consume();
     if (Character.isHighSurrogate(c)){ high = c; return; }
-    if (Character.isLowSurrogate(c) && high == 0){ return; }
-    var s= Character.isLowSurrogate(c) ? "" + high + c : "" + c;
+    var s= high == 0 ? "" + c : "" + high + c;
     high = 0;
     t.input(s);
   }

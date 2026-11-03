@@ -142,7 +142,9 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$border$1(Object s){ return frame.addTo(this, null, s, _Border::new); }
   @Override public Object mut$split$0(){ return _RegionFiller.split(frame, (s, make) -> frame.addTo(this, null, s, make)); }
   @Override public Object mut$textField$1(Object s){ return frame.addTo(this, null, s, _TextField::new); }
+  @Override public Object mut$uTextField$1(Object s){ return frame.addTo(this, null, s, _UTextField::new); }
   @Override public Object mut$textArea$1(Object s){ return frame.addTo(this, null, s, _TextArea::new); }
+  @Override public Object mut$uTextArea$1(Object s){ return frame.addTo(this, null, s, _UTextArea::new); }
   @Override public Object mut$sections$1(Object s){ return frame.addTo(this, null, s, _Sections::new); }
   @Override public Object mut$clear$0(){
     return reStyle(() -> {
@@ -282,7 +284,9 @@ final class _RegionFiller implements RegionFiller$4rk$1{
   @Override public Object mut$label$1(Object s){ return sink.add(s, _Label::new); }
   @Override public Object mut$picture$1(Object s){ return sink.add(s, _Picture::new); }
   @Override public Object mut$textField$1(Object s){ return sink.add(s, _TextField::new); }
+  @Override public Object mut$uTextField$1(Object s){ return sink.add(s, _UTextField::new); }
   @Override public Object mut$textArea$1(Object s){ return sink.add(s, _TextArea::new); }
+  @Override public Object mut$uTextArea$1(Object s){ return sink.add(s, _UTextArea::new); }
   static Object and(_Frame frame, Sink sink){
     return new And$c$1(){ @Override public Object mut$and$0(){ return new _RegionFiller(frame, sink); } };
   }
@@ -348,7 +352,7 @@ abstract class AWidget implements Widget$2o$1{
   void change(){
     if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"); }
     if (canChange()){ return; }
-    throw Util.detErr("This " + getClass().getSimpleName().substring(1)
+    throw Util.detErr("This " + kind()
       + " is not in the window any more: .clear, a replaced Border slot or a new .content removed it,"
       + " so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}");
   }
@@ -482,7 +486,7 @@ abstract class AWidget implements Widget$2o$1{
   public Object read$belowBaseline$0(){ return ratio(below); }
   public Object mut$uText$1(Object t){
     var s= ustr(t);
-    var b= lineBreak(s);
+    var b= newline(s);
     if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
     return reText(() -> text = s);
   }
@@ -881,7 +885,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$uTitle$1(Object t){
     requireOpen();
     var s= ustr(t);
-    var b= lineBreak(s);
+    var b= newline(s);
     if (b != null){ throw Util.detErr("The new title of this Frame has " + b + ": the title bar shows the title on one line"); }
     title = s;
     if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }

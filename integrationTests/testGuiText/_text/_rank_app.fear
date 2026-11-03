@@ -2,10 +2,11 @@ use base.Main as Main;
 use base.Block as Block;
 use base.Void as Void;
 use base.Color as Color;
-use base.TextArea as TextArea;
+use base.UTextArea as UTextArea;
 use base.TextField as TextField;
 use base.KeyStroke as KeyStroke;
-use base.TextEvent as TextEvent;
+use base.UStr as UStr;
+use base.Nat as Nat;
 use base.Slot as Slot;
 use base.Slots as Slots;
 use base.Str as Str;
@@ -14,41 +15,40 @@ use base.WidthNat as WidthNat;
 use base.HeightNat as HeightNat;
 
 TextDemo: Main { sys -> sys.gui.run{f -> Block#
-  .let[mut Slot[mut TextArea]] log= {Slots#[mut TextArea]}
+  .let[mut Slot[mut UTextArea]] log= {Slots#[mut UTextArea]}
   .let[mut Slot[mut TextField]] field= {Slots#[mut TextField]}
   .return{f
     .title "Text editing"
     .virtualPixelSpace(WidthNat#800, HeightNat#640)
     .onKey{:: .pressed{:: .matchOnly(KeyStroke#"F1") .matchAlso(KeyStroke#"S") .matchAlso(KeyStroke#"UP")
-      .doOnly{e -> Block#(log!.append("key " + (e.keyStroke.get) | ""), Void)}
+      .doOnly{e -> Block#(log!.uAppend(("key " + (e.keyStroke.get) | "").u), Void)}
       }}
     .content.pane{::
       .background(Color.ghostWhite)
       .horizontal .maxPerLine 1
       .textField{:: .width 760 .height 34 .text "a field" .save field
-        .onEdit{e -> Log#(log!, "field edit", e)}
-        .onCommit{e -> Log#(log!, "field commit", e)}
+        .onEdit{e -> Log#(log!, "field edit", e.caret, e.anchor, e.text.u)}
+        .onCommit{e -> Log#(log!, "field commit", e.caret, e.anchor, e.text.u)}
         }
-      .textField{:: .width 760 .height 34 .text "any unicode, red caret"
-        .onInput{u -> u}
+      .uTextField{:: .width 760 .height 34 .uText("any unicode, red caret".u)
         .caret{g -> g.color(Color.dangerTomato).rect(WidthNat#4, g.lineHeight)}
-        .onEdit{e -> Log#(log!, "unicode edit", e)}
-        .onCommit{e -> Log#(log!, "unicode commit", e)}
+        .onEdit{e -> Log#(log!, "unicode edit", e.caret, e.anchor, e.uText)}
+        .onCommit{e -> Log#(log!, "unicode commit", e.caret, e.anchor, e.uText)}
         }
       .textArea{:: .width 760 .height 150 .text("an area that wraps its long lines, so this line goes on over more displayed lines once the area is narrow enough" | "second line")
-        .onEdit{e -> Log#(log!, "area edit", e)}
-        .onCommit{e -> Log#(log!, "area commit", e)}
+        .onEdit{e -> Log#(log!, "area edit", e.caret, e.anchor, e.text.u)}
+        .onCommit{e -> Log#(log!, "area commit", e.caret, e.anchor, e.text.u)}
         }
       .pane{:: .horizontal .heightGap 0 .topInset 0 .bottomInset 0
-        .button{:: .text "Append to the log" .action{Block#(log!.append("appended by the program" | ""), Void)}}
-        .button{:: .text "Clear the log" .action{Block#(log!.text "", Void)}}
+        .button{:: .text "Append to the log" .action{Block#(log!.uAppend(("appended by the program" | "").u), Void)}}
+        .button{:: .text "Clear the log" .action{Block#(log!.uText("".u), Void)}}
         .button{:: .text "Set the field" .action{Block#(field!.text "set by the program", Void)}}
         .pack
         }
-      .textArea{:: .width 760 .height 220 .wrap False .editable False .save log}
+      .uTextArea{:: .width 760 .height 220 .wrap False .editable False .save log}
       }
     }
   }}
-Log: {#(log: mut TextArea, kind: Str, e: TextEvent): Void ->
-  Block#(log.uAppend((kind + " caret=" + (e.caret.str) + " anchor=" + (e.anchor.str) + " text=").u + (e.text) | ("".u)), Void)
+Log: {#(log: mut UTextArea, kind: Str, caret: Nat, anchor: Nat, text: UStr): Void ->
+  Block#(log.uAppend((kind + " caret=" + (caret.str) + " anchor=" + (anchor.str) + " text=").u + text | ("".u)), Void)
   }
