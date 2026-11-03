@@ -229,13 +229,15 @@ final class TextCleaning{
     final Decoder d;
     final StringBuilder out= new StringBuilder();
     Cleaner(boolean u, Decoder d){ this.u= u; this.d= d; d.out = this; }
-    @Override public abstract Object mut$end$0();
     abstract void scalar(int cp, long at, int len);
     abstract void bad(Reason reason, long at, int len, long rejected);
+    Object ready(){ return text(out, u); }
+    Object rest(){ return text(out, u); }
     @Override public Object mut$nextByte$1(Object b){
       d.feed(u8(b));
-      return d.n != 0 ? empty(u) : text(out, u);
+      return d.n != 0 ? empty(u) : ready();
     }
+    @Override public Object mut$end$0(){ d.end(); return rest(); }
   }
 
   static final class Encoding extends Cleaner{
@@ -244,10 +246,6 @@ final class TextCleaning{
       super(u, d);
       fixer = fixerMaker == null ? null : ((F$3$1) fixerMaker).read$$hash$0();
       add(out, start);
-    }
-    @Override public Object mut$end$0(){
-      d.end();
-      return text(out, u);
     }
     @Override void scalar(int cp, long at, int len){
       if (u || UStr$s$0Instance.isStrScalar(cp)){ out.appendCodePoint(cp); return; }
@@ -277,12 +275,8 @@ final class TextCleaning{
       this.oneLine= oneLine;
       for (int c : scalars(start)){ put(c); }
     }
-    @Override public Object mut$nextByte$1(Object b){
-      d.feed(u8(b));
-      return out.isEmpty() || d.n != 0 || cr ? empty(u) : flush();
-    }
-    @Override public Object mut$end$0(){
-      d.end();
+    @Override Object ready(){ return out.isEmpty() || cr ? empty(u) : flush(); }
+    @Override Object rest(){
       if (cr){ newline(); }
       return flush();
     }
@@ -325,8 +319,7 @@ final class TextCleaning{
       scalars = ((F$3$1) maker).read$$hash$0();
       for (int c : scalars(start)){ put(c); }
     }
-    @Override public Object mut$end$0(){
-      d.end();
+    @Override Object rest(){
       add(out, u ? ((UStrScalarCleaner$5074$0) scalars).mut$end$0() : ((StrScalarCleaner$2728$0) scalars).mut$end$0());
       return text(out, u);
     }

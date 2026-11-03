@@ -51,6 +51,7 @@ TextCleanerTests: Test {::
   .check{ClFeed#(base.UStrCleaners.text#("".u), 11, 12, 194, 133).scalarHex.assertEq "000A 000A 000A"}
   .check{ClFeed#(base.UStrCleaners.text#("".u), 13, 239, 187, 191, 10).scalarHex.assertEq "000A"}
   .check{ClFeedS#(base.StrCleaners.text#(""), 9, 239, 172, 129).assertEq " fi"}
+  .check{ClFeed#(base.UStrCleaners.text#("".u), 9, 239, 172, 129).scalarHex.assertEq "0009 FB01"}
   .check{ClFeedS#(base.StrCleaners.text#(""), 230, 151, 165).assertEq ""}
   .check{ClFeedS#(base.StrCleaners.text#(""), 195, 169).assertEq "e"}
   .check{ClFeedS#(base.StrCleaners.utf8Then{mut base.StrScalarCleaner{.nextScalar n -> "<"+(n.str)+">"; .end -> "!"}}#("xy"), 97).assertEq "<120><121><97>!"}
