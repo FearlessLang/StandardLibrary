@@ -224,14 +224,10 @@ final class _Split extends AContainer implements Split$1c$0{
     int i= component.getComponentZOrder(k);
     int from= i == 0 ? 0 : positions[i - 1] + bar;
     int to= i == positions.length ? span() : Math.min(positions[i], span());
-    int length= Math.max(0, to - from);
-    return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH());
+    return along(from, Math.max(0, to - from));
   }
-  Rectangle grip(int i){
-    int p= positions[i];
-    var g= vertical ? new Rectangle(left, top + p, viewW(), bar) : new Rectangle(left + p, top, bar, viewH());
-    return g.intersection(view());
-  }
+  Rectangle along(int from, int length){ return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH()); }
+  Rectangle grip(int i){ return along(positions[i], bar).intersection(view()); }
   int dividerAt(java.awt.Point p){ return IntStream.range(0, positions.length).filter(i -> grip(i).contains(p)).findFirst().orElse(-1); }
   void drag(int i, int[] from, int want){
     int m= from.length;
@@ -309,7 +305,7 @@ final class _Split extends AContainer implements Split$1c$0{
     var shown= "dividerPositions " + Arrays.stream(l).mapToObj(Long::toUnsignedString).collect(Collectors.joining(", ", "[", "]"));
     if (l.length != positions.length){ throw Util.detErr(shown + ": " + l.length + (l.length == 1 ? " position is" : " positions are") + " given, but this Split has " + positions.length + (positions.length == 1 ? " divider" : " dividers") + ": one position per divider"); }
     for (int i= 0; i < l.length; i += 1){
-      if (Long.compareUnsigned(l[i], maxExtent) > 0){ throw Util.detErr(shown + ": the position " + Long.toUnsignedString(l[i]) + " at index " + i + " is too large; it must be <= " + maxExtent); }
+      if (Long.compareUnsigned(l[i], maxExtent) > 0){ throw Util.detErr(shown + ": the position at index " + i + " is " + Long.toUnsignedString(l[i]) + ", but it must be at most " + maxExtent); }
       if (i > 0 && l[i] < l[i - 1] + bar){ throw Util.detErr(shown + ": the position at index " + i + " is " + l[i] + ", but it must be at least " + (l[i - 1] + bar) + ": a divider is " + bar + " virtual pixels thick, so each position must be at least " + bar + " more than the position before it"); }
     }
     int[] v= Arrays.stream(l).mapToInt(x -> (int) x).toArray();

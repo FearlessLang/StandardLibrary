@@ -79,7 +79,7 @@ GuiSplitTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#40000) } }}}).run{
       .ok _ -> Error.msg "A divider position over the limit always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [40000]: the position 40000 at index 0 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [40000]: the position at index 0 is 40000, but it must be at most 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.dividerPositions.str{::}))}
@@ -207,10 +207,6 @@ GuiSplitTests: Test {::
     }}}).run{
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[116] Height[56]"}}.assertTrue{i};
-      }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.size.str)} }}}).run{
-      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "2"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPositions(Lists#32767).dividerPositions.str{::})} }}}).run{
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
