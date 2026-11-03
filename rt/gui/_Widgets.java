@@ -228,9 +228,10 @@ final class _Split extends AContainer implements Split$1c$0{
   int span(){ return vertical ? viewH() : viewW(); }
   @Override Rectangle region(Component k){
     int i= component.getComponentZOrder(k);
-    int from= i == 0 ? 0 : positions[i - 1] + bar;
-    int to= i == positions.length ? span() : Math.min(positions[i], span());
-    return along(from, Math.max(0, to - from));
+    int s= span();
+    int from= Math.min(s, i == 0 ? 0 : positions[i - 1] + bar);
+    int to= i == positions.length ? s : Math.min(positions[i], s);
+    return along(from, to - from);
   }
   Rectangle along(int from, int length){ return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH()); }
   Rectangle grip(int i){ return along(positions[i], bar).intersection(view()); }
