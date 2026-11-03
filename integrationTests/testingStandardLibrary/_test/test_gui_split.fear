@@ -165,4 +165,22 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "Changing a widget of a refilled region always fails";
       .info i -> i.validate{:: > "info" .isMsg{:: == "This Label is not in the window any more: .clear, a refilled region, a removed section or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.region(1).pane{:: .width 200 .height 90}.width.str + " " + (sp.height.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[217] Height[102]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{:: .width 100 .height 40 }.and.pane{:: .width 60 .height 30 }.and.pane{:: .width 50 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.vertical.width.str) + " " + (sp.height.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[122] Height[52] Width[122] Height[62]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#(100, 400)) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[183] Height[68]"}}.assertTrue{i};
+      }}
   }

@@ -286,19 +286,17 @@ final class _Split extends AContainer implements Split$1c$0{
   Object axis(boolean v){
     return reStyle(() -> {
       vertical = v;
+      frame.mouse.stopDividing(this);
       for (var c : component.getComponents()){ growFor(((SkComponent) c).w); }
     });
-  }
-  Component at(long i){
-    int n= component.getComponentCount();
-    if (Long.compareUnsigned(i, n) < 0){ return component.getComponent((int) i); }
-    throw Util.detErr("There is no region at index " + Long.toUnsignedString(i) + " in this Split: it has " + n + " regions, so the index is at most " + (n - 1));
   }
   Object replace(long i, Object scope, Function<_Frame,? extends AWidget> make){
     var c= frame.onEdtAndWait(() -> make.apply(frame));
     ((Scope$1c$1) scope).mut$run$1(c);
     return reStyle(() -> {
-      var old= at(i);
+      int n= component.getComponentCount();
+      if (Long.compareUnsigned(i, n) >= 0){ throw Util.detErr("There is no region at index " + Long.toUnsignedString(i) + " in this Split: it has " + n + " regions, so the index is at most " + (n - 1)); }
+      var old= component.getComponent((int) i);
       frame.mouse.detached((SkComponent) old);
       component.remove(old);
       component.add(c.component, (int) i);
@@ -322,7 +320,12 @@ final class _Split extends AContainer implements Split$1c$0{
     });
   }
   @Override public Object read$dividerPositions$0(){ return frame.onEdtAndWait(() -> List$o$1Instance.wrap(Arrays.stream(positions).<Object>mapToObj(Scopes::n).toList())); }
-  @Override public Object mut$draggable$1(Object b){ return reStyle(() -> draggable = Util.isTrue(b)); }
+  @Override public Object mut$draggable$1(Object b){
+    return reStyle(() -> {
+      draggable = Util.isTrue(b);
+      if (!draggable){ frame.mouse.stopDividing(this); }
+    });
+  }
   @Override public Object read$draggable$0(){ return Util.bool(draggable); }
   @Override public Object mut$region$1(Object i){
     long k= Util.natToLong(i);

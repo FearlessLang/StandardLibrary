@@ -99,8 +99,11 @@ final class SkMouse extends MouseAdapter{
     assert SwingUtilities.isEventDispatchThread();
     hover = List.of();
     pressTarget = null;
+    dividing = null;
     frame.focus = null;
   }
+
+  void stopDividing(_Split s){ if (dividing == s){ dividing = null; } }
 
   void forget(){
     if (pressTarget instanceof _Button b){ b.down = false; }
