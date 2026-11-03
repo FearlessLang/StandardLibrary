@@ -248,7 +248,7 @@ final class _Split extends AContainer implements Split$1c$0{
     component.invalidate();
     frame.markLayoutDirty();
   }
-  static int scale(int v, int to, int from){ return from == 0 ? 0 : (int) Math.round((double) v * to / from); }
+  static int scale(int v, int to, int from){ return (int) Math.round((double) v * to / from); }
   void layout(){
     for (var k : component.getComponents()){
       var r= region(k);

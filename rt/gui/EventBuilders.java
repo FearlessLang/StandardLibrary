@@ -90,6 +90,7 @@ final class SkMouse extends MouseAdapter{
     assert SwingUtilities.isEventDispatchThread();
     hover = hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList();
     if (pressTarget != null && SwingUtilities.isDescendingFrom(pressTarget.component, root)){ pressTarget = null; }
+    if (dividing != null && SwingUtilities.isDescendingFrom(dividing.component, root)){ dividing = null; }
     if (frame.focus != null && SwingUtilities.isDescendingFrom(frame.focus.component, root)){ frame.focus = null; }
   }
 

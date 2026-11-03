@@ -135,4 +135,34 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "A region index past the last region always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "There is no region at index 3 in this Split: it has 3 regions, so the index is at most 2"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#400) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[288] Height[68]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#400).content.pane{::
+    .split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.and.pane{::}.with{:: .vertical .width 80 .height 300 .dividerPositions(Lists#(100, 200)) }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[68] Height[95]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{::}.and.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.dividerPositions(Lists#(100, 200)).vertical .region(1).pane{::} .dividerPositions.str{::})}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "[100, 200]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#(100, 200)) } }}}).run{
+      .ok _ -> Error.msg "A wrong number of divider positions always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [100, 200]: 2 positions are given, but this Split has 1 divider: one position per divider"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .let[mut Slot[mut Label]] l = {Slots#[mut Label]}
+    .do{f.content.pane{:: .split.label{:: .text "a" .save l}.and.pane{::}.with{:: .region(0).pane{::}}}}
+    .return{Block#(l!.text "b", Void)}
+    }}).run{
+      .ok _ -> Error.msg "Changing a widget of a refilled region always fails";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "This Label is not in the window any more: .clear, a refilled region, a removed section or a new .content removed it, so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}"}}.assertTrue{i};
+      }}
   }
