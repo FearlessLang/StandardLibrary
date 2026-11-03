@@ -234,8 +234,8 @@ final class _Split extends AContainer implements Split$1c$0{
     return along(from, to - from);
   }
   Rectangle along(int from, int length){ return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH()); }
-  Rectangle grip(int i){ return along(positions[i], bar).intersection(view()); }
-  int dividerAt(Point p){ return IntStream.range(0, positions.length).filter(i -> grip(i).contains(p)).findFirst().orElse(-1); }
+  Rectangle divider(int i){ return along(positions[i], bar).intersection(view()); }
+  int dividerAt(Point p){ return IntStream.range(0, positions.length).filter(i -> divider(i).contains(p)).findFirst().orElse(-1); }
   void drag(int i, int[] from, int want){
     int m= from.length;
     int end= Math.max(span(), from[m - 1] + bar);
@@ -274,7 +274,7 @@ final class _Split extends AContainer implements Split$1c$0{
     });
   }
   @Override void skOver(Canvas cv){
-    for (int i= 0; i < positions.length; i += 1){ Sk.divider(cv, this, grip(i)); }
+    for (int i= 0; i < positions.length; i += 1){ Sk.divider(cv, this, divider(i)); }
   }
   @Override void growFor(AWidget k){
     int bars= positions.length * bar;
