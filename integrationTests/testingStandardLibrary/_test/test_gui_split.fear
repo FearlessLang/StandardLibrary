@@ -79,7 +79,7 @@ GuiSplitTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#40000) } }}}).run{
       .ok _ -> Error.msg "A divider position over the limit always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions: the position 40000 at index 0 is too large; it must be <= 32767"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [40000]: the position 40000 at index 0 is too large; it must be <= 32767"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .split.pane{:: .width 20 .height 20 }.and.pane{:: .width 100 .height 20 }.with{sp -> Error.msg(sp.width.str + " " + (sp.height.str) + " " + (sp.dividerPositions.str{::}))}
@@ -125,11 +125,11 @@ GuiSplitTests: Test {::
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#100) } }}}).run{
       .ok _ -> Error.msg "A wrong number of divider positions always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions: 1 position is given, but this Split has 2 dividers: one position per divider"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [100]: 1 position is given, but this Split has 2 dividers: one position per divider"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.and.pane{::}.with{:: .dividerPositions(Lists#(100, 104)) } }}}).run{
       .ok _ -> Error.msg "Divider positions closer than a divider always stop the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions: the position 104 at index 1 is less than 5 after the position 100 at index 0; a divider is 5 virtual pixels thick, so each position must be at least 5 more than the position before it"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions [100, 104]: the divider at index 1, at 104, overlaps the divider at index 0, which takes the 5 virtual pixels from 100 to 105; each position must be at least 5 more than the position before it"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.and.pane{::}.with{:: .region(3).pane{::} } }}}).run{
       .ok _ -> Error.msg "A region index past the last region always stops the Gui";

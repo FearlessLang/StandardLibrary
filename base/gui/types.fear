@@ -542,8 +542,7 @@ RegionFiller[S:*]:{
   mut .uTextArea(mut Scope[UTextArea]): S;
   }
 And[T:*]:{ mut .and: mut RegionFiller[T]; }
-SplitWith[S:*]:{ mut .with(mut Scope[Split]): S; }
-SplitAnd[S:*]:SplitWith[S]{ mut .and: mut RegionFiller[mut SplitAnd[S]]; }
+SplitAnd[S:*]:{ mut .and: mut RegionFiller[mut SplitAnd[S]]; mut .with(mut Scope[Split]): S; }
 
 Scope[T]: { mut .run(mut T): mut T; }
 Painter: { .run(mut Graphics): mut Graphics; }

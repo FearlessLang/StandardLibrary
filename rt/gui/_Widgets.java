@@ -8,17 +8,17 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
@@ -234,22 +234,19 @@ final class _Split extends AContainer implements Split$1c$0{
   }
   int dividerAt(java.awt.Point p){ return IntStream.range(0, positions.length).filter(i -> grip(i).contains(p)).findFirst().orElse(-1); }
   void drag(int i, int[] from, int want){
-    positions = dragged(from, i, want, span());
-    component.invalidate();
-    frame.markLayoutDirty();
-  }
-  static int[] dragged(int[] from, int i, int want, int span){
     int m= from.length;
-    int end= Math.max(span, from[m - 1] + bar);
-    int q= Math.clamp(want, i * bar, end - (m - i) * bar);
-    int[] res= new int[m];
+    int end= Math.max(span(), from[m - 1] + bar);
+    int hi= end - (m - i) * bar;
+    int q= Math.clamp(want, i * bar, hi);
+    positions = new int[m];
     for (int j= 0; j < m; j += 1){
       int tail= end - (m - j) * bar;
-      res[j] = j < i ? j * bar + scale(from[j] - j * bar, q - i * bar, from[i] - i * bar)
+      positions[j] = j < i ? j * bar + scale(from[j] - j * bar, q - i * bar, from[i] - i * bar)
         : j == i ? q
-        : tail - scale(tail - from[j], end - (m - i) * bar - q, end - (m - i) * bar - from[i]);
+        : tail - scale(tail - from[j], hi - q, hi - from[i]);
     }
-    return res;
+    component.invalidate();
+    frame.markLayoutDirty();
   }
   static int scale(int v, int to, int from){ return from == 0 ? 0 : (int) Math.round((double) v * to / from); }
   void layout(){
@@ -309,23 +306,18 @@ final class _Split extends AContainer implements Split$1c$0{
       c.changeable = false;
     });
   }
-  static int[] positions(Object ps){
-    var l= List$o$1Instance.asJava(ps);
-    int[] res= new int[l.size()];
-    for (int i= 0; i < res.length; i += 1){
-      long v= Util.natToLong(l.get(i));
-      if (Long.compareUnsigned(v, maxExtent) > 0){ throw Util.detErr("dividerPositions: the position " + Long.toUnsignedString(v) + " at index " + i + " is too large; it must be <= " + maxExtent); }
-      res[i] = (int) v;
-      if (i > 0 && res[i] < res[i - 1] + bar){ throw Util.detErr("dividerPositions: the position " + res[i] + " at index " + i + " is less than " + bar + " after the position " + res[i - 1] + " at index " + (i - 1) + "; a divider is " + bar + " virtual pixels thick, so each position must be at least " + bar + " more than the position before it"); }
-    }
-    return res;
-  }
   @Override public Object mut$horizontal$0(){ return axis(false); }
   @Override public Object mut$vertical$0(){ return axis(true); }
   @Override public Object mut$dividerPositions$1(Object ps){
-    int[] v= positions(ps);
+    long[] l= List$o$1Instance.asJava(ps).stream().mapToLong(Util::natToLong).toArray();
+    var shown= "dividerPositions " + Arrays.stream(l).mapToObj(Long::toUnsignedString).collect(Collectors.joining(", ", "[", "]"));
+    for (int i= 0; i < l.length; i += 1){
+      if (Long.compareUnsigned(l[i], maxExtent) > 0){ throw Util.detErr(shown + ": the position " + Long.toUnsignedString(l[i]) + " at index " + i + " is too large; it must be <= " + maxExtent); }
+      if (i > 0 && l[i] < l[i - 1] + bar){ throw Util.detErr(shown + ": the divider at index " + i + ", at " + l[i] + ", overlaps the divider at index " + (i - 1) + ", which takes the " + bar + " virtual pixels from " + l[i - 1] + " to " + (l[i - 1] + bar) + "; each position must be at least " + bar + " more than the position before it"); }
+    }
+    int[] v= Arrays.stream(l).mapToInt(x -> (int) x).toArray();
     return reStyle(() -> {
-      if (v.length != positions.length){ throw Util.detErr("dividerPositions: " + v.length + (v.length == 1 ? " position is" : " positions are") + " given, but this Split has " + positions.length + (positions.length == 1 ? " divider" : " dividers") + ": one position per divider"); }
+      if (v.length != positions.length){ throw Util.detErr(shown + ": " + v.length + (v.length == 1 ? " position is" : " positions are") + " given, but this Split has " + positions.length + (positions.length == 1 ? " divider" : " dividers") + ": one position per divider"); }
       positions = v;
     });
   }
@@ -358,18 +350,18 @@ final class _RegionFiller implements RegionFiller$4rk$1{
   static Object and(_Frame frame, Sink sink){
     return new And$c$1(){ @Override public Object mut$and$0(){ return new _RegionFiller(frame, sink); } };
   }
-  record Fill(Object scope, Function<_Frame,? extends AWidget> make){}
+  static Consumer<AWidget> fill(_Frame frame, Object s, Function<_Frame,? extends AWidget> m){ return w -> frame.addTo(w, null, s, m); }
   static Object split(_Frame frame, Sink sink){
-    return new _RegionFiller(frame, (s1, m1) -> and(frame, (s2, m2) -> more(frame, sink, List.of(new Fill(s1, m1), new Fill(s2, m2)))));
+    return new _RegionFiller(frame, (s1, m1) -> and(frame, (s2, m2) -> more(frame, sink, 2, fill(frame, s1, m1).andThen(fill(frame, s2, m2)))));
   }
-  private static Object more(_Frame frame, Sink sink, List<Fill> fills){
+  private static Object more(_Frame frame, Sink sink, int n, Consumer<AWidget> fills){
     return new SplitAnd$as$1(){
-      @Override public Object mut$and$0(){ return new _RegionFiller(frame, (s, m) -> more(frame, sink, Stream.concat(fills.stream(), Stream.of(new Fill(s, m))).toList())); }
+      @Override public Object mut$and$0(){ return new _RegionFiller(frame, (s, m) -> more(frame, sink, n + 1, fills.andThen(fill(frame, s, m)))); }
       @Override public Object mut$with$1(Object s){
         return sink.add(new Scope$1c$1(){ @Override public Object mut$run$1(Object w){
-          fills.forEach(f -> frame.addTo((AWidget) w, null, f.scope(), f.make()));
+          fills.accept((AWidget) w);
           return ((Scope$1c$1) s).mut$run$1(w);
-        }}, f -> new _Split(f, fills.size()));
+        }}, f -> new _Split(f, n));
       }
     };
   }
@@ -424,7 +416,7 @@ abstract class AWidget implements Widget$2o$1{
     if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"); }
     if (canChange()){ return; }
     throw Util.detErr("This " + kind()
-      + " is not in the window any more: .clear, a replaced Border slot or a new .content removed it,"
+      + " is not in the window any more: .clear, a refilled region, a removed section or a new .content removed it,"
       + " so changing it would have no visible effect. Change a widget that is not in the window inside .changeDetached{...}");
   }
 
@@ -575,7 +567,7 @@ abstract class AWidget implements Widget$2o$1{
     frame.onEdtAndWait(() -> {
       if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
       if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
-      if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a replaced Border slot or a new .content removed it, or the scope that adds it has not returned"); }
+      if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a refilled region, a removed section or a new .content removed it, or the scope that adds it has not returned"); }
       for (Component k= component; k != frame.top.component; k = k.getParent()){
         if (((SkComponent)k.getParent()).w.hides(k)){ throw Util.detErr("This " + kind() + " is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"); }
       }

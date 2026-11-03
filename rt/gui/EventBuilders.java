@@ -143,11 +143,10 @@ final class SkMouse extends MouseAdapter{
     if (left && d != null && (onBar(d, p, true) || onBar(d, p, false))){ return; }
     if (left && onDivider(d, p)){
       dividing = (_Split) d;
-      var at= SwingUtilities.convertPoint(top(), p, d.component);
+      var at= local(d, p);
       divider = dividing.dividerAt(at);
       from = dividing.positions.clone();
-      var g= dividing.grip(divider);
-      grab = dividing.vertical ? at.y - g.y : at.x - g.x;
+      grab = dividing.vertical ? at.y : at.x;
       return;
     }
     if (left){
@@ -192,8 +191,8 @@ final class SkMouse extends MouseAdapter{
     if (paging){ return; }
     if (dragged != null){ dragThumb(p); return; }
     if (dividing != null){
-      var at= SwingUtilities.convertPoint(top(), p, dividing.component);
-      dividing.drag(divider, from, dividing.vertical ? at.y - dividing.top - grab : at.x - dividing.left - grab);
+      var at= local(dividing, p);
+      dividing.drag(divider, from, from[divider] + (dividing.vertical ? at.y : at.x) - grab);
       return;
     }
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
@@ -214,7 +213,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   private boolean onDivider(AWidget d, Point p){
-    return d instanceof _Split s && s.draggable && s.dividerAt(SwingUtilities.convertPoint(top(), p, s.component)) >= 0;
+    return d instanceof _Split s && s.draggable && s.dividerAt(local(s, p)) >= 0;
   }
 
   private Point content(AEditText t, Point p){
