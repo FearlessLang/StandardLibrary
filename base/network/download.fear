@@ -11,14 +11,11 @@
 ///one re-validated against the same URL/scheme rule.
 ///Connect and per-request timeouts are a fixed 30s each, not configurable.
 ///A ``url`` that is not an absolute http/https URI is a deterministic error.
-///A download whose connection fails or breaks, or whose host does not answer with a valid HTTP response (such as a Content-Length that is not a number), is a non-deterministic error.
-///A download that times out, exceeds ``maxBytes``, fails in any other way, or gives an image that cannot be decoded is a deterministic error.
+///A download that fails, times out, exceeds ``maxBytes``, or gives an image that cannot be decoded is a deterministic error.
 CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadBytes(url: Str, maxBytes: Nat): List[Byte];
 
-  ///The run of ``cleaner`` on the bytes of the response body.
   mut .downloadStr(url: Str, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str;
-  ///The run of ``cleaner`` on the bytes of the response body.
   mut .downloadUStr(url: Str, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr;
 
   mut .downloadImage(url: Str, maxBytes: Nat, maxPixels: Nat): Image;

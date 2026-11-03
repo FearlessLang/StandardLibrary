@@ -62,12 +62,10 @@ CapInputCursor: ToIso[CapInputCursor],WidenTo[CapInputCursor] {
   mut .next: mut CapInputCursor;
   }
 
-///An input file, read again at every read: a file that cannot be read is a non-deterministic error.
+///An input file, read again at every read: a file that cannot be read is a deterministic error.
 CapInputCursorNode: ToIso[CapInputCursorNode],WidenTo[CapInputCursorNode] {
   mut .label: Str; ///best effort portable name to help debugging
-  ///The run of ``cleaner`` on the bytes of the file.
   mut .readStr(cleaner: F[Str, mut StrCleaner]): Str;
-  ///The run of ``cleaner`` on the bytes of the file.
   mut .readUStr(cleaner: F[UStr, mut UStrCleaner]): UStr;
   mut .readBytes: List[Byte];
   mut .readImage(maxPixels: Nat): Image;
