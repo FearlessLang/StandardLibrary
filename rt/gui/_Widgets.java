@@ -273,9 +273,7 @@ final class _Split extends AContainer implements Split$1c$0{
         positions[i] = at;
         at += bar;
       }
-      var n= need();
-      width = Math.min(maxExtent, n.width);
-      height = Math.min(maxExtent, n.height);
+      super.mut$pack$0();
     });
   }
   @Override void skOver(Canvas cv){

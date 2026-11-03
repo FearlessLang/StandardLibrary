@@ -242,4 +242,16 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "[100, 105]"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
+    .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.vertical .region(1).pane{:: .width 200 .height 90}.width.str + " " + (sp.height.str))}
+    }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[212] Height[107]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{:: .width 200 .paint{g -> Error.msg "A replaced widget was drawn"}}.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#(100, 200)) .region(1).pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} } }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[95] Height[68]"}}.assertTrue{i};
+      }}
   }
