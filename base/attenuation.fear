@@ -65,10 +65,11 @@ NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
   .reset -> Error.nonDeterministic "NoManagerQuit: CapManager.reset is revoked.";
   .connectEclipse p -> u.connectEclipse p; .editMetadata p -> u.editMetadata p;
   .openWithOrShortcut p -> u.openWithOrShortcut p; .openWithOrShortcut(p, n, m) -> u.openWithOrShortcut(p, n, m);
-  .run(n, ms) -> u.run(n, ms); .compile n -> u.compile n; .check n -> u.check n; .terminate n -> u.terminate n;
+  .run n -> u.run n; .compile n -> u.compile n; .check n -> u.check n; .terminate n -> u.terminate n;
   .deleteCache n -> u.deleteCache n; .kindIdle n -> u.kindIdle n; .kindCode n -> u.kindCode n;
   .kindDataRead n -> u.kindDataRead n; .kindDataEdit n -> u.kindDataEdit n; .forget n -> u.forget n;
   .mount(n, t, d) -> u.mount(n, t, d); .unmount(n, t) -> u.unmount(n, t); .attenuate(n, m, as) -> u.attenuate(n, m, as);
+  .selectMains(n, ms) -> u.selectMains(n, ms);
   .iso -> NoQuitManager#(u.iso.close); .close -> s;
   }}
 
@@ -185,7 +186,7 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   .editMetadata p -> Block#(r#, u.editMetadata p);
   .openWithOrShortcut p -> Block#(r#, u.openWithOrShortcut p);
   .openWithOrShortcut(p, n, m) -> Block#(r#, u.openWithOrShortcut(p, n, m));
-  .run(n, ms) -> Block#(r#, u.run(n, ms));
+  .run n -> Block#(r#, u.run n);
   .compile n -> Block#(r#, u.compile n);
   .check n -> Block#(r#, u.check n);
   .terminate n -> Block#(r#, u.terminate n);
@@ -198,6 +199,7 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   .mount(n, t, d) -> Block#(r#, u.mount(n, t, d));
   .unmount(n, t) -> Block#(r#, u.unmount(n, t));
   .attenuate(n, m, as) -> Block#(r#, u.attenuate(n, m, as));
+  .selectMains(n, ms) -> Block#(r#, u.selectMains(n, ms));
   .iso -> RevokableManager#(r.iso.close, u.iso.close);
   .close -> s;
   }}
@@ -249,7 +251,7 @@ InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 ///The new process prints to the output of this program, and its error output goes to the error output of this program.
 ///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,
 ///it throws the non deterministic error ``main`` threw.
-///A new process that cannot start, or that ends before its main ends, is a deterministic error.
+///A new process that cannot start, or that ends before its main ends, is a non deterministic error.
 ///``.start`` starts the new process and returns at once; the `CapRunningMain` it gives is how this program waits for the process or ends it.
 ///``.run`` is ``.start`` then `CapRunningMain.await`.
 CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{

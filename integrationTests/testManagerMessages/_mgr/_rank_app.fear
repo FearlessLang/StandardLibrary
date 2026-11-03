@@ -15,7 +15,9 @@ ManagerMessages: Test{::
   .checkWithSys{s -> s.manager.register(Path#s)}
   .checkWithSys{s -> s.manager.show}
   .checkWithSys{s -> s.manager.show "hello"}
-  .checkWithSys{s -> s.manager.run("hello", L#("hello.A", "hello.B")).getStr.assertEq "Output of FearlessCommandRun"}
+  .checkWithSys{s -> s.manager.selectMains("hello", L#("hello.B", "hello.A"))}
+  .checkWithSys{s -> s.manager.selectMains("hello", {})}
+  .checkWithSys{s -> s.manager.run "hello" .getStr.assertEq "Output of FearlessCommandRun"}
   .checkWithSys{s -> s.manager.compile "hello" .getStr.assertEq "Output of FearlessCommandCompile"}
   .checkWithSys{s -> s.manager.kindDataRead "hello"}
   .checkWithSys{s -> s.manager.mount("hello", "hello.Notes", "notes")}
@@ -30,10 +32,19 @@ ManagerMessagesRefused: Test{::
      "The manager refuses to forget nope."
     )}}, {t -> t.manager.forget "nope"})
   .checkDetErrWithSys({::.isMsg{:: == (
-     `The path "relative"`
-    |`of the message "Register" is not an absolute path of this system.`
+     `The message "Register" is not sent: the path "relative"`
+    |`is not an absolute path of this system other than the root of a drive.`
     )}}, {t -> base.Block#
       .openIso s = t
       .return{s.manager.register(Relative#s)}
       })
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The message "Show" is not sent: "Hello" is not a project name.`
+    )}}, {t -> t.manager.show "Hello"})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The message "Unmount" is not sent: "Pub" is not a qualified type name, like "hello.Main".`
+    )}}, {t -> t.manager.unmount("hello", "Pub")})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The message "SelectMains" is not sent: the mains are all different, and "hello.A" is named twice.`
+    )}}, {t -> t.manager.selectMains("hello", L#("hello.A", "hello.A"))})
   }

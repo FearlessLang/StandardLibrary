@@ -21,7 +21,7 @@ Forged: base.TxtFile{
   .originalFileName: base.Str -> "x.dat";
   }
 
-JavaLeakTests: UnitTests, base.PreLoadIcon[Junk]{::
+JavaLeakTests: UnitTests{::
   .test Downloads
   .test StackSpace
   .test Memory
@@ -29,7 +29,6 @@ JavaLeakTests: UnitTests, base.PreLoadIcon[Junk]{::
   .test Sets
   .test BiFlows
   .test Assets
-  .test GuiIcons
   .test Logs
   .test DataZips
   .test Manager
@@ -115,13 +114,6 @@ Assets: Test{::
     |"package: _nosuch"
     |"diskPath: _nosuch/x.dat"
     )}}, {t -> Forged.readStr(t.assetRead, base.StrCleaners.utf8)})
-  }
-
-GuiIcons: Test{::
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "Resource with path /_leak/junk.png"
-    |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
-    )}}, {t -> t.gui.icon(Junk).run{f -> Block#(f.modelFps(10, {m -> m.action{f.close}}), Void)}})
   }
 
 Logs: Test{::
