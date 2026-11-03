@@ -28,6 +28,7 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
   String fullScreenKey= "F11";
   BufferedImage awtIcon;
   String iconName;
+  String iconPath;
 
   private _FluentGUI set(Consumer<_FluentGUI> r){
     var res= copy();
@@ -103,6 +104,7 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
     var shown= icon != null ? icon : preloaded.firstEntry().getKey();
     var g= copy();
     g.iconName = preloaded.get(shown);
+    g.iconPath = AssetBytesRead.str(((ImageFile$lk$0) shown).imm$path$0()).substring("fear:/".length());
     g.awtIcon = awtIcon(shown);
     var done= new CompletableFuture<Void>();
     var fb= new _Frame(done, g);
