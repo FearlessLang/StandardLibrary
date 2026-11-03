@@ -264,7 +264,7 @@ final class _Split extends AContainer implements Split$1c$0{
     return vertical ? new Dimension(a.width + edgeW(), a.height + bars + edgeH()) : new Dimension(a.width + bars + edgeW(), a.height + edgeH());
   }
   @Override public Object mut$pack$0(){
-    reStyle(() -> {
+    return reStyle(() -> {
       frame.mouse.stopDividing(this);
       int at= 0;
       for (int i= 0; i < positions.length; i += 1){
@@ -273,8 +273,10 @@ final class _Split extends AContainer implements Split$1c$0{
         positions[i] = at;
         at += bar;
       }
+      var n= need();
+      width = Math.min(maxExtent, n.width);
+      height = Math.min(maxExtent, n.height);
     });
-    return super.mut$pack$0();
   }
   @Override void skOver(Canvas cv){
     for (int i= 0; i < positions.length; i += 1){ Sk.divider(cv, this, grip(i)); }
@@ -354,13 +356,13 @@ final class _RegionFiller implements RegionFiller$4rk$1{
   static Object and(_Frame frame, Sink sink){
     return new And$c$1(){ @Override public Object mut$and$0(){ return new _RegionFiller(frame, sink); } };
   }
-  static Consumer<AWidget> fill(_Frame frame, Object s, Function<_Frame,? extends AWidget> m){ return w -> frame.addTo(w, null, s, m); }
+  static Consumer<AWidget> fill(Object s, Function<_Frame,? extends AWidget> m){ return w -> w.frame.addTo(w, null, s, m); }
   static Object split(_Frame frame, Sink sink){
-    return new _RegionFiller(frame, (s1, m1) -> and(frame, (s2, m2) -> more(frame, sink, 2, fill(frame, s1, m1).andThen(fill(frame, s2, m2)))));
+    return new _RegionFiller(frame, (s1, m1) -> and(frame, (s2, m2) -> more(frame, sink, 2, fill(s1, m1).andThen(fill(s2, m2)))));
   }
   private static Object more(_Frame frame, Sink sink, int n, Consumer<AWidget> fills){
     return new SplitAnd$as$1(){
-      @Override public Object mut$and$0(){ return new _RegionFiller(frame, (s, m) -> more(frame, sink, n + 1, fills.andThen(fill(frame, s, m)))); }
+      @Override public Object mut$and$0(){ return new _RegionFiller(frame, (s, m) -> more(frame, sink, n + 1, fills.andThen(fill(s, m)))); }
       @Override public Object mut$with$1(Object s){
         return sink.add(new Scope$1c$1(){ @Override public Object mut$run$1(Object w){
           fills.accept((AWidget) w);

@@ -150,7 +150,7 @@ final class SkMouse extends MouseAdapter{
       var at= local(d, p);
       divider = dividing.dividerAt(at);
       from = dividing.positions.clone();
-      grab = (dividing.vertical ? at.y : at.x) - from[divider];
+      grab = (dividing.vertical ? at.y - dividing.top : at.x - dividing.left) - from[divider];
       return;
     }
     if (left){
@@ -197,7 +197,7 @@ final class SkMouse extends MouseAdapter{
     if (dividing != null){
       if (from == null){ return; }
       var at= local(dividing, p);
-      dividing.drag(divider, from, (dividing.vertical ? at.y : at.x) - grab);
+      dividing.drag(divider, from, (dividing.vertical ? at.y - dividing.top : at.x - dividing.left) - grab);
       return;
     }
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
