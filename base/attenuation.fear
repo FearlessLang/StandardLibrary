@@ -126,60 +126,24 @@ RevokableInputCursor: { #(r: mut Revocation, u: mut CapInputCursor): mut CapInpu
   }}
 RevokableInputCursorNode: { #(r: mut Revocation, u: mut CapInputCursorNode): mut CapInputCursorNode -> {'s
   .label -> Block#(r#, u.label);
-  .readStrUtf8 rec -> Block#(r#, u.readStrUtf8 rec);
-  .readUStrUtf8 rec -> Block#(r#, u.readUStrUtf8 rec);
-  .readStrUtf16Le rec -> Block#(r#, u.readStrUtf16Le rec);
-  .readUStrUtf16Le rec -> Block#(r#, u.readUStrUtf16Le rec);
-  .readStrUtf32Le rec -> Block#(r#, u.readStrUtf32Le rec);
-  .readUStrUtf32Le rec -> Block#(r#, u.readUStrUtf32Le rec);
-  .readStrUtf16Be rec -> Block#(r#, u.readStrUtf16Be rec);
-  .readUStrUtf16Be rec -> Block#(r#, u.readUStrUtf16Be rec);
-  .readStrUtf32Be rec -> Block#(r#, u.readStrUtf32Be rec);
-  .readUStrUtf32Be rec -> Block#(r#, u.readUStrUtf32Be rec);
-  .readStrAscii rec -> Block#(r#, u.readStrAscii rec);
-  .readUStrAscii rec -> Block#(r#, u.readUStrAscii rec);
-  .readStrLatin1 rec -> Block#(r#, u.readStrLatin1 rec);
-  .readUStrLatin1 rec -> Block#(r#, u.readUStrLatin1 rec);
+  .readStr c -> Block#(r#, u.readStr c);
+  .readUStr c -> Block#(r#, u.readUStr c);
   .readBytes -> Block#(r#, u.readBytes);
   .readImage n -> Block#(r#, u.readImage n);
   .iso -> RevokableInputCursorNode#(r.iso.close, u.iso.close);
   .close -> s;
   }}
 RevokableAssetRead: { #(r: mut Revocation, u: mut CapAssetRead): mut CapAssetRead -> {'s
-  .readStrUtf8(p, d, z, e, rec) -> Block#(r#, u.readStrUtf8(p, d, z, e, rec));
-  .readUStrUtf8(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf8(p, d, z, e, rec));
-  .readStrUtf16Le(p, d, z, e, rec) -> Block#(r#, u.readStrUtf16Le(p, d, z, e, rec));
-  .readUStrUtf16Le(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf16Le(p, d, z, e, rec));
-  .readStrUtf32Le(p, d, z, e, rec) -> Block#(r#, u.readStrUtf32Le(p, d, z, e, rec));
-  .readUStrUtf32Le(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf32Le(p, d, z, e, rec));
-  .readStrUtf16Be(p, d, z, e, rec) -> Block#(r#, u.readStrUtf16Be(p, d, z, e, rec));
-  .readUStrUtf16Be(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf16Be(p, d, z, e, rec));
-  .readStrUtf32Be(p, d, z, e, rec) -> Block#(r#, u.readStrUtf32Be(p, d, z, e, rec));
-  .readUStrUtf32Be(p, d, z, e, rec) -> Block#(r#, u.readUStrUtf32Be(p, d, z, e, rec));
-  .readStrAscii(p, d, z, e, rec) -> Block#(r#, u.readStrAscii(p, d, z, e, rec));
-  .readUStrAscii(p, d, z, e, rec) -> Block#(r#, u.readUStrAscii(p, d, z, e, rec));
-  .readStrLatin1(p, d, z, e, rec) -> Block#(r#, u.readStrLatin1(p, d, z, e, rec));
-  .readUStrLatin1(p, d, z, e, rec) -> Block#(r#, u.readUStrLatin1(p, d, z, e, rec));
+  .readStr(p, d, z, e, c) -> Block#(r#, u.readStr(p, d, z, e, c));
+  .readUStr(p, d, z, e, c) -> Block#(r#, u.readUStr(p, d, z, e, c));
   .readImage(p, d, z, e, n) -> Block#(r#, u.readImage(p, d, z, e, n));
   .iso -> RevokableAssetRead#(r.iso.close, u.iso.close);
   .close -> s;
   }}
 RevokableDownload: { #(r: mut Revocation, u: mut CapDownload): mut CapDownload -> {'s
   .downloadBytes(url, n) -> Block#(r#, u.downloadBytes(url, n));
-  .downloadStrUtf8(url, n, rec) -> Block#(r#, u.downloadStrUtf8(url, n, rec));
-  .downloadUStrUtf8(url, n, rec) -> Block#(r#, u.downloadUStrUtf8(url, n, rec));
-  .downloadStrUtf16Le(url, n, rec) -> Block#(r#, u.downloadStrUtf16Le(url, n, rec));
-  .downloadUStrUtf16Le(url, n, rec) -> Block#(r#, u.downloadUStrUtf16Le(url, n, rec));
-  .downloadStrUtf16Be(url, n, rec) -> Block#(r#, u.downloadStrUtf16Be(url, n, rec));
-  .downloadUStrUtf16Be(url, n, rec) -> Block#(r#, u.downloadUStrUtf16Be(url, n, rec));
-  .downloadStrUtf32Le(url, n, rec) -> Block#(r#, u.downloadStrUtf32Le(url, n, rec));
-  .downloadUStrUtf32Le(url, n, rec) -> Block#(r#, u.downloadUStrUtf32Le(url, n, rec));
-  .downloadStrUtf32Be(url, n, rec) -> Block#(r#, u.downloadStrUtf32Be(url, n, rec));
-  .downloadUStrUtf32Be(url, n, rec) -> Block#(r#, u.downloadUStrUtf32Be(url, n, rec));
-  .downloadStrAscii(url, n, rec) -> Block#(r#, u.downloadStrAscii(url, n, rec));
-  .downloadUStrAscii(url, n, rec) -> Block#(r#, u.downloadUStrAscii(url, n, rec));
-  .downloadStrLatin1(url, n, rec) -> Block#(r#, u.downloadStrLatin1(url, n, rec));
-  .downloadUStrLatin1(url, n, rec) -> Block#(r#, u.downloadUStrLatin1(url, n, rec));
+  .downloadStr(url, n, c) -> Block#(r#, u.downloadStr(url, n, c));
+  .downloadUStr(url, n, c) -> Block#(r#, u.downloadUStr(url, n, c));
   .downloadImage(url, n, px) -> Block#(r#, u.downloadImage(url, n, px));
   .iso -> RevokableDownload#(r.iso.close, u.iso.close);
   .close -> s;

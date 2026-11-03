@@ -27,7 +27,7 @@ GuiMenuTests: Test {::
     .button{b -> Block#(b.openMenu{:: .item{:: .text("Open" | "Close")}}, b)}
     }}}).run{
       .ok _ -> Error.msg "An item text with a newline always fails";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this MenuItem has a line break (U+000A) at offset 4: the text of a MenuItem is one line"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "The new text of this MenuItem has a newline at offset 4: the text of a MenuItem is one line"}}.assertTrue{i};
       }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{::
     .button{b -> Block#(b.openMenu{m -> Block#

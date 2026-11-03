@@ -55,7 +55,7 @@ class CGraphicsCtx implements Graphics$ao$0{
   @Override public Object read$uTextLines$2(Object text, Object width){
     int ww= Scopes.extent((WidthNat$as$0) width, "textLines width");
     var res= new ArrayList<Object>();
-    for (var p : Scopes.lineBreaks.split(Scopes.ustr(text), -1)){
+    for (var p : Scopes.ustr(text).split("\n", -1)){
       int from= 0;
       for (int to : Sk.wrap(p, textSize, above, below, ww)){
         res.add(UStr$s$0Instance.instance(p.substring(from, Sk.trimmed(p, from, to))));
@@ -66,7 +66,7 @@ class CGraphicsCtx implements Graphics$ao$0{
   }
   private static String oneLine(Object text, String method, String does){
     var s= Scopes.ustr(text);
-    var b= Scopes.lineBreak(s);
+    var b= Scopes.newline(s);
     if (b != null){ throw Util.detErr("The text given to " + method + " has " + b + ": " + method + " " + does + " one line"); }
     return s;
   }
