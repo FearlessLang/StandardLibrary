@@ -252,14 +252,14 @@ Split:Widget[Split]{
   .self->this;
   mut .horizontal: mut Split;
   mut .vertical: mut Split;
-  mut .dividerPosition(n:Nat): mut Split;
-  read .dividerPosition: Nat;
+  mut .dividerPositions(ps:List[Nat]): mut Split;
+  read .dividerPositions: List[Nat];
   mut .draggable(b:Bool): mut Split;
   read .draggable: Bool;
   mut .mouse(mut Scope[Mouse]):mut Split;
   mut .paint(Painter):mut Split;
-  mut .first: mut RegionFiller[mut Split];
-  mut .second: mut RegionFiller[mut Split];
+  mut .region(index: Nat): mut RegionFiller[mut Split];
+  read .size: Nat;
   }
 Sections:_Container[Sections]{
   .self->this;
@@ -509,7 +509,7 @@ Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;
   mut .border(mut Scope[Border]):mut Pane;
-  mut .split: mut RegionFiller[mut And[mut SplitWith[mut Pane]]];
+  mut .split: mut RegionFiller[mut And[mut SplitAnd[mut Pane]]];
   mut .sections(mut Scope[Sections]):mut Pane;
   mut .button(mut Scope[Button]):mut Pane;
   mut .label(mut Scope[Label]):mut Pane;
@@ -531,7 +531,7 @@ Pane:_Container[Pane]{
 RegionFiller[S:*]:{
   mut .pane(mut Scope[Pane]): S;
   mut .border(mut Scope[Border]): S;
-  mut .split: mut RegionFiller[mut And[mut SplitWith[S]]];
+  mut .split: mut RegionFiller[mut And[mut SplitAnd[S]]];
   mut .sections(mut Scope[Sections]): S;
   mut .button(mut Scope[Button]): S;
   mut .label(mut Scope[Label]): S;
@@ -543,6 +543,7 @@ RegionFiller[S:*]:{
   }
 And[T:*]:{ mut .and: mut RegionFiller[T]; }
 SplitWith[S:*]:{ mut .with(mut Scope[Split]): S; }
+SplitAnd[S:*]:SplitWith[S]{ mut .and: mut RegionFiller[mut SplitAnd[S]]; }
 
 Scope[T]: { mut .run(mut T): mut T; }
 Painter: { .run(mut Graphics): mut Graphics; }

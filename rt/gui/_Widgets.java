@@ -6,7 +6,9 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -15,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
@@ -208,29 +212,46 @@ final class _Border extends AContainer implements Border$2o$0{
 final class _Split extends AContainer implements Split$1c$0{
   boolean vertical;
   boolean draggable= true;
-  int position;
+  int[] positions;
 
-  _Split(_Frame frame){
+  _Split(_Frame frame, int regions){
     super(frame);
+    positions = IntStream.range(0, regions - 1).map(i -> i * bar).toArray();
     component.setLayout(new BorderLayout(){ @Override public void layoutContainer(Container target){ layout(); } });
   }
-  Component side(String where){ return ((BorderLayout) component.getLayout()).getLayoutComponent(where); }
   int span(){ return vertical ? viewH() : viewW(); }
   @Override Rectangle region(Component k){
-    boolean first= k == side(BorderLayout.LINE_START);
-    int from= first ? 0 : position + bar;
-    int length= Math.max(0, first ? Math.min(position, span()) : span() - from);
+    int i= component.getComponentZOrder(k);
+    int from= i == 0 ? 0 : positions[i - 1] + bar;
+    int to= i == positions.length ? span() : Math.min(positions[i], span());
+    int length= Math.max(0, to - from);
     return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH());
   }
-  Rectangle grip(){
-    var g= vertical ? new Rectangle(left, top + position, viewW(), bar) : new Rectangle(left + position, top, bar, viewH());
+  Rectangle grip(int i){
+    int p= positions[i];
+    var g= vertical ? new Rectangle(left, top + p, viewW(), bar) : new Rectangle(left + p, top, bar, viewH());
     return g.intersection(view());
   }
-  void drag(int want){
-    position = Math.clamp(want, 0, Math.max(0, span() - bar));
+  int dividerAt(java.awt.Point p){ return IntStream.range(0, positions.length).filter(i -> grip(i).contains(p)).findFirst().orElse(-1); }
+  void drag(int i, int[] from, int want){
+    positions = dragged(from, i, want, span());
     component.invalidate();
     frame.markLayoutDirty();
   }
+  static int[] dragged(int[] from, int i, int want, int span){
+    int m= from.length;
+    int end= Math.max(span, from[m - 1] + bar);
+    int q= Math.clamp(want, i * bar, end - (m - i) * bar);
+    int[] res= new int[m];
+    for (int j= 0; j < m; j += 1){
+      int tail= end - (m - j) * bar;
+      res[j] = j < i ? j * bar + scale(from[j] - j * bar, q - i * bar, from[i] - i * bar)
+        : j == i ? q
+        : tail - scale(tail - from[j], end - (m - i) * bar - q, end - (m - i) * bar - from[i]);
+    }
+    return res;
+  }
+  static int scale(int v, int to, int from){ return from == 0 ? 0 : (int) Math.round((double) v * to / from); }
   void layout(){
     for (var k : component.getComponents()){
       var r= region(k);
@@ -243,32 +264,79 @@ final class _Split extends AContainer implements Split$1c$0{
       var o= ((SkComponent) c).w.own();
       a = vertical ? new Dimension(Math.max(a.width, o.width), a.height + o.height) : new Dimension(a.width + o.width, Math.max(a.height, o.height));
     }
-    return vertical ? new Dimension(a.width + edgeW(), a.height + bar + edgeH()) : new Dimension(a.width + bar + edgeW(), a.height + edgeH());
+    int bars= positions.length * bar;
+    return vertical ? new Dimension(a.width + edgeW(), a.height + bars + edgeH()) : new Dimension(a.width + bars + edgeW(), a.height + edgeH());
   }
   @Override public Object mut$pack$0(){
     reStyle(() -> {
-      var c= side(BorderLayout.LINE_START);
-      var o= c == null ? new Dimension(0, 0) : ((SkComponent) c).w.own();
-      position = vertical ? o.height : o.width;
+      int at= 0;
+      for (int i= 0; i < positions.length; i += 1){
+        var o= ((SkComponent) component.getComponent(i)).w.own();
+        at += vertical ? o.height : o.width;
+        positions[i] = at;
+        at += bar;
+      }
     });
     return super.mut$pack$0();
   }
-  @Override void skOver(Canvas cv){ Sk.divider(cv, this); }
-  @Override void growFor(AWidget k){ grow(k.width + edgeW() + (vertical ? 0 : bar), k.height + edgeH() + (vertical ? bar : 0)); }
+  @Override void skOver(Canvas cv){
+    for (int i= 0; i < positions.length; i += 1){ Sk.divider(cv, this, grip(i)); }
+  }
+  @Override void growFor(AWidget k){
+    int bars= positions.length * bar;
+    grow(k.width + edgeW() + (vertical ? 0 : bars), k.height + edgeH() + (vertical ? bars : 0));
+  }
   Object axis(boolean v){
     return reStyle(() -> {
       vertical = v;
       for (var c : component.getComponents()){ growFor(((SkComponent) c).w); }
     });
   }
+  Component at(long i){
+    int n= component.getComponentCount();
+    if (Long.compareUnsigned(i, n) < 0){ return component.getComponent((int) i); }
+    throw Util.detErr("There is no region at index " + Long.toUnsignedString(i) + " in this Split: it has " + n + " regions, so the index is at most " + (n - 1));
+  }
+  Object replace(long i, Object scope, Function<_Frame,? extends AWidget> make){
+    var c= frame.onEdtAndWait(() -> make.apply(frame));
+    ((Scope$1c$1) scope).mut$run$1(c);
+    return reStyle(() -> {
+      var old= at(i);
+      frame.mouse.detached((SkComponent) old);
+      component.remove(old);
+      component.add(c.component, (int) i);
+      growFor(c);
+      c.changeable = false;
+    });
+  }
+  static int[] positions(Object ps){
+    var l= List$o$1Instance.asJava(ps);
+    int[] res= new int[l.size()];
+    for (int i= 0; i < res.length; i += 1){
+      long v= Util.natToLong(l.get(i));
+      if (Long.compareUnsigned(v, maxExtent) > 0){ throw Util.detErr("dividerPositions: the position " + Long.toUnsignedString(v) + " at index " + i + " is too large; it must be <= " + maxExtent); }
+      res[i] = (int) v;
+      if (i > 0 && res[i] < res[i - 1] + bar){ throw Util.detErr("dividerPositions: the position " + res[i] + " at index " + i + " is less than " + bar + " after the position " + res[i - 1] + " at index " + (i - 1) + "; a divider is " + bar + " virtual pixels thick, so each position must be at least " + bar + " more than the position before it"); }
+    }
+    return res;
+  }
   @Override public Object mut$horizontal$0(){ return axis(false); }
   @Override public Object mut$vertical$0(){ return axis(true); }
-  @Override public Object mut$dividerPosition$1(Object n){ return reStyle(extent(n, "dividerPosition"), v -> position = v); }
-  @Override public Object read$dividerPosition$0(){ return n(frame.onEdtAndWait(() -> position)); }
+  @Override public Object mut$dividerPositions$1(Object ps){
+    int[] v= positions(ps);
+    return reStyle(() -> {
+      if (v.length != positions.length){ throw Util.detErr("dividerPositions: " + v.length + (v.length == 1 ? " position is" : " positions are") + " given, but this Split has " + positions.length + (positions.length == 1 ? " divider" : " dividers") + ": one position per divider"); }
+      positions = v;
+    });
+  }
+  @Override public Object read$dividerPositions$0(){ return frame.onEdtAndWait(() -> List$o$1Instance.wrap(Arrays.stream(positions).<Object>mapToObj(Scopes::n).toList())); }
   @Override public Object mut$draggable$1(Object b){ return reStyle(() -> draggable = Util.isTrue(b)); }
   @Override public Object read$draggable$0(){ return Util.bool(draggable); }
-  @Override public Object mut$first$0(){ return frame.region(this, BorderLayout.LINE_START); }
-  @Override public Object mut$second$0(){ return frame.region(this, BorderLayout.LINE_END); }
+  @Override public Object mut$region$1(Object i){
+    long k= Util.natToLong(i);
+    return new _RegionFiller(frame, (s, make) -> replace(k, s, make));
+  }
+  @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(component.getComponentCount())); }
 }
 
 final class _RegionFiller implements RegionFiller$4rk$1{
@@ -290,17 +358,20 @@ final class _RegionFiller implements RegionFiller$4rk$1{
   static Object and(_Frame frame, Sink sink){
     return new And$c$1(){ @Override public Object mut$and$0(){ return new _RegionFiller(frame, sink); } };
   }
+  record Fill(Object scope, Function<_Frame,? extends AWidget> make){}
   static Object split(_Frame frame, Sink sink){
-    return new _RegionFiller(frame, (first, m1) -> and(frame, (second, m2) -> with(frame, sink, first, m1, second, m2)));
+    return new _RegionFiller(frame, (s1, m1) -> and(frame, (s2, m2) -> more(frame, sink, List.of(new Fill(s1, m1), new Fill(s2, m2)))));
   }
-  private static Object with(_Frame frame, Sink sink, Object first, Function<_Frame,? extends AWidget> m1, Object second, Function<_Frame,? extends AWidget> m2){
-    return new SplitWith$lk$1(){ @Override public Object mut$with$1(Object s){
-      return sink.add(new Scope$1c$1(){ @Override public Object mut$run$1(Object w){
-        frame.addTo((AWidget) w, BorderLayout.LINE_START, first, m1);
-        frame.addTo((AWidget) w, BorderLayout.LINE_END, second, m2);
-        return ((Scope$1c$1) s).mut$run$1(w);
-      }}, _Split::new);
-    }};
+  private static Object more(_Frame frame, Sink sink, List<Fill> fills){
+    return new SplitAnd$as$1(){
+      @Override public Object mut$and$0(){ return new _RegionFiller(frame, (s, m) -> more(frame, sink, Stream.concat(fills.stream(), Stream.of(new Fill(s, m))).toList())); }
+      @Override public Object mut$with$1(Object s){
+        return sink.add(new Scope$1c$1(){ @Override public Object mut$run$1(Object w){
+          fills.forEach(f -> frame.addTo((AWidget) w, null, f.scope(), f.make()));
+          return ((Scope$1c$1) s).mut$run$1(w);
+        }}, f -> new _Split(f, fills.size()));
+      }
+    };
   }
 }
 
