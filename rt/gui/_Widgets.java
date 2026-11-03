@@ -237,8 +237,7 @@ final class _Split extends AContainer implements Split$1c$0{
     int m= from.length;
     int end= Math.max(span(), from[m - 1] + bar);
     int hi= end - (m - i) * bar;
-    int q= Math.clamp(want, i * bar, hi);
-    positions = new int[m];
+    int q= Math.clamp(want, i * bar, Math.min(hi, Math.max(from[i], span() - bar)));
     for (int j= 0; j < m; j += 1){
       int tail= end - (m - j) * bar;
       positions[j] = j < i ? j * bar + scale(from[j] - j * bar, q - i * bar, from[i] - i * bar)

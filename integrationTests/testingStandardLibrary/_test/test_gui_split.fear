@@ -201,4 +201,15 @@ GuiSplitTests: Test {::
       .ok _ -> Error.msg "A wrong number of divider positions always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "dividerPositions []: 0 positions are given, but this Split has 1 divider: one position per divider"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#400, Height#200).content.pane{::
+    .split.pane{::}.and.pane{::}.with{:: .width 300 .height 80 .dividerPositions(Lists#100)
+      .region(1).split.pane{::}.and.pane{:: .fill .paint{g -> Error.msg(g.panelWidth.str + " " + (g.panelHeight.str))} }.with{:: .fill .dividerPositions(Lists#50) } }
+    }}}).run{
+      .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "Width[116] Height[56]"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.content.pane{:: .split.pane{::}.and.pane{::}.with{sp -> Error.msg(sp.size.str)} }}}).run{
+      .ok _ -> Error.msg "The split always stops the Gui before its window is shown";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "2"}}.assertTrue{i};
+      }}
   }

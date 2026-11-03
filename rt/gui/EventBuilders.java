@@ -103,7 +103,7 @@ final class SkMouse extends MouseAdapter{
     frame.focus = null;
   }
 
-  void stopDividing(_Split s){ if (dividing == s){ dividing = null; } }
+  void stopDividing(_Split s){ if (dividing == s){ from = null; } }
 
   void forget(){
     if (pressTarget instanceof _Button b){ b.down = false; }
@@ -150,7 +150,7 @@ final class SkMouse extends MouseAdapter{
       var at= local(d, p);
       divider = dividing.dividerAt(at);
       from = dividing.positions.clone();
-      grab = dividing.vertical ? at.y : at.x;
+      grab = (dividing.vertical ? at.y : at.x) - from[divider];
       return;
     }
     if (left){
@@ -195,8 +195,9 @@ final class SkMouse extends MouseAdapter{
     if (paging){ return; }
     if (dragged != null){ dragThumb(p); return; }
     if (dividing != null){
+      if (from == null){ return; }
       var at= local(dividing, p);
-      dividing.drag(divider, from, from[divider] + (dividing.vertical ? at.y : at.x) - grab);
+      dividing.drag(divider, from, (dividing.vertical ? at.y : at.x) - grab);
       return;
     }
     if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
