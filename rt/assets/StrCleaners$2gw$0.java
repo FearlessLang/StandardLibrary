@@ -1,8 +1,8 @@
 package _base;
 
 public interface StrCleaners$2gw$0{
-  default Object imm$text$0(){ return TextCleaning.clean(false, false); }
-  default Object imm$line$0(){ return TextCleaning.clean(false, true); }
+  default Object imm$softText$0(){ return TextCleaning.clean(false, false); }
+  default Object imm$softLine$0(){ return TextCleaning.clean(false, true); }
   default Object imm$utf8$0(){ return TextCleaning.encoding(false, TextCleaning.Utf8::new, null); }
   default Object imm$utf8OrElse$1(Object f){ return TextCleaning.encoding(false, TextCleaning.Utf8::new, f); }
   default Object imm$utf16LeOrElse$1(Object f){ return TextCleaning.encoding(false, () -> new TextCleaning.Utf16(true), f); }

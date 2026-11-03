@@ -1,30 +1,9 @@
-///A cleaner turns bytes into text, one byte at a time: ``.nextByte`` returns the text that ``b`` adds, and ``.end`` returns the text that is left.
-///A cleaner maker, ``imm F[UStr, mut UStrCleaner]``, makes a fresh cleaner from a starting text, the text that the cleaner sees before its first byte.
-///A run of a cleaner maker on some bytes makes the first cleaner with the empty starting text, calls ``.nextByte`` of the current cleaner with each byte, and ``.end`` at the end.
-///When a result holds a newline, the result up to its first newline goes to the result of the run, the current cleaner is over, and the cleaner maker makes the next cleaner with the rest of that result as starting text.
-///The result of ``.end`` is cut in the same way; each cleaner made from a rest at the end of the input gets only ``.end``.
-///At the end of the input, what the ``.end`` of a cleaner that received no byte leaves after its first newline must be shorter than the starting text of that cleaner, else it is a deterministic error; so every run ends.
-///A cleaner with the empty starting text that receives no byte gets no ``.end``.
-///A deterministic error raised during a run gets the entries ``"line"`` and ``"col"`` added to its info: ``"line"`` is the number of the line of the result that the run is making, counting from 1; ``"col"`` is one more than the number of bytes that the current cleaner, or the cleaner being made, received before the error.
-///In a run of a ``TextField``, a ``TextArea``, a ``UTextField`` or a ``UTextArea``, ``"line"`` counts from the first line of its text.
 UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
-///A `UStrCleaner` that gives a Str.
 StrCleaner:{ mut .nextByte(b: Byte): Str; mut .end: Str; }
-///A cleaner of scalar values: ``.nextScalar`` returns the text that the scalar value ``n`` adds, and ``.end`` returns the text that is left.
 UStrScalarCleaner:{ mut .nextScalar(n: Nat): UStr; mut .end: UStr; }
-///A `UStrScalarCleaner` that gives a Str.
 StrScalarCleaner:{ mut .nextScalar(n: Nat): Str; mut .end: Str; }
-///The text in place of a bad unit: a part of the input that the encoding rejects.
-///``byteOffset`` counts the bytes the cleaner received before the bad unit.
-///For ``.notScalar`` and ``.notInStr``, ``rejectedValue`` is the value that the bad unit encodes; for ``.malformedEncoding`` and ``.truncatedEncoding``, it is its first byte (UTF-8, ASCII), its first unit or its only byte (UTF-16), or the value of its bytes (UTF-32).
 UStrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr }
-///A `UStrFixer` that gives a Str.
 StrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str }
-///Why an encoding rejects a bad unit.
-///``.malformedEncoding``: bytes that the encoding never produces, such as a UTF-8 overlong form or an ASCII byte of 128 or more.
-///``.truncatedEncoding``: the input ends inside a sequence.
-///``.notScalar``: the bytes encode a surrogate or a value above 10FFFF.
-///``.notInStr``: the bytes encode a scalar value that is not a character of Str; only the cleaners of `StrCleaners` give it.
 BadTextReason:{
   .match[R:**](mut BadTextReasonMatch[R]):R
   }
@@ -34,15 +13,6 @@ BadTextReasonMatch[R:**]:{
   mut .notScalar:R;
   mut .notInStr:R;
   }
-///The cleaner makers of the library; no cleaner depends on the locale.
-///``.text`` decodes UTF-8: a bad unit becomes U+FFFD, each U+FEFF is dropped, carriage return newline, carriage return, U+000B, U+000C, U+0085, U+2028 and U+2029 become newline, and the result is in NFC.
-///``.line`` does what ``.text`` does, then each newline becomes a space.
-///``.utf8`` decodes UTF-8; a bad unit is a deterministic error holding the reason, the byte offset and the bytes of the bad unit.
-///``.utf8OrElse(fixer)`` decodes UTF-8; each bad unit gives the result of the fixer of the cleaner, made by ``fixer`` once for each cleaner.
-///``.utf16LeOrElse``, ``.utf16BeOrElse``, ``.utf32LeOrElse``, ``.utf32BeOrElse``, ``.asciiOrElse`` and ``.latin1OrElse`` do the same with their encodings.
-///An encoding cleaner returns its starting text as it is, in front of the first character or bad unit it decodes, or at its ``.end``; ``.text`` and ``.line`` normalize their starting text followed by the text they decode.
-///The cleaners of the library return text only when they hold no byte of an unfinished sequence, so a cleaner that ends at a newline drops no byte.
-///``.utf8Then(cleaner)`` decodes UTF-8 and calls a fresh scalar cleaner made by ``cleaner`` with each scalar value of the starting text, then with each scalar value it decodes, and calls its ``.end`` at the end; a bad unit reaches the scalar cleaner as U+FFFD; the results of the scalar cleaner are the result.
 UStrCleaners:{
   .text: F[UStr, mut UStrCleaner] -> _Magic!;
   .line: F[UStr, mut UStrCleaner] -> _Magic!;
@@ -56,12 +26,9 @@ UStrCleaners:{
   .latin1OrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
   .utf8Then(cleaner: F[mut UStrScalarCleaner]): F[UStr, mut UStrCleaner] -> _Magic!;
   }
-///The cleaner makers of `UStrCleaners`, giving a Str.
-///For the encoding cleaners, a scalar value that is not a character of Str is a bad unit with reason ``.notInStr``.
-///``.text`` and ``.line`` give ? for a bad unit, and then turn tab into space, decompose each scalar value (NFKD), so an accented letter becomes its letter, and drop what is still not in Str.
 StrCleaners:{
-  .text: F[Str, mut StrCleaner] -> _Magic!;
-  .line: F[Str, mut StrCleaner] -> _Magic!;
+  .softText: F[Str, mut StrCleaner] -> _Magic!;
+  .softLine: F[Str, mut StrCleaner] -> _Magic!;
   .utf8: F[Str, mut StrCleaner] -> _Magic!;
   .utf8OrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;
   .utf16LeOrElse(fixer: F[mut StrFixer]): F[Str, mut StrCleaner] -> _Magic!;

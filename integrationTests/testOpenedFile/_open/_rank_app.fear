@@ -37,10 +37,10 @@ TextCutByTheEndOfTheBytes: Test{::
 
 TheCleaners: Test{::
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.text)).scalarHex.assertEq "0061 000A 0062 000A 0063 000A 0064 00E9 FFFD 000A"}
-  .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.text)).assertEq("a" | "b" | "c" | "de?" | "")}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.softText)).assertEq("a" | "b" | "c" | "de?" | "")}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.line)).scalarHex.assertEq "0061 0020 0062 0020 0063 0020 0064 00E9 FFFD 0020"}
   .checkDetErrWithSys({:: > "msg" .isMsg{:: == "UStrCleaners.utf8: malformedEncoding: the byte sequence FF at byte offset 13 of the line is not UTF-8"} & > "line" .isMsg{:: == "2"} & > "col" .isMsg{:: == "14"}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readUStr(base.UStrCleaners.utf8)})
-  .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.line)).assertEq "a b c de? "}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.softLine)).assertEq "a b c de? "}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8OrElse{Show})).assertEq("a[notInStr:1:1:13]" | "b[notInStr:1:1:13]c[notInStr:3:3:8232]d[notInStr:7:3:65279]e[notInStr:11:2:769][malformedEncoding:13:1:255]" | "")}
   .checkDetErrWithSys({:: > "msg" .isMsg{:: == "UStrCleaners.utf8: truncatedEncoding: the input ends in the middle of the UTF-8 sequence E2 82 at byte offset 1 of the line"} & > "line" .isMsg{:: == "1"} & > "col" .isMsg{:: == "4"}}, {s -> s.dataRead(Pub).read(L#("cut8.bin")).readUStr(base.UStrCleaners.utf8)})
   .checkDetErrWithSys({:: > "msg" .isMsg{:: == "x"} & > "line" .isMsg{:: == "1"} & > "col" .isMsg{:: == "2"}}, {s -> s.dataRead(Pub).read(L#("mixed.bin")).readStr(base.StrCleaners.utf8OrElse{Fails})})

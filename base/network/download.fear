@@ -1,24 +1,7 @@
-///Downloads the content at ``url`` over HTTP(S).
-///``url`` must be an absolute http/https URI: since any syntactically valid
-///RFC 3986 URI is already representable as a Str (Str's whitelist is a
-///superset of the URI character set), no separate URL character check is
-///needed here beyond the scheme/syntax validation every method performs.
-///``maxBytes`` is a caller-supplied hard cap on the response body size,
-///enforced both against the response's Content-Length header (before the
-///body is read) and while streaming the body (regardless of what
-///Content-Length claimed).
-///Redirects are followed automatically up to a fixed cap of 5 hops, each
-///one re-validated against the same URL/scheme rule.
-///Connect and per-request timeouts are a fixed 30s each, not configurable.
-///A ``url`` that is not an absolute http/https URI is a deterministic error.
-///A download whose connection fails or breaks, or whose host does not answer with a valid HTTP response (such as a Content-Length that is not a number), is a non-deterministic error.
-///A download that times out, exceeds ``maxBytes``, fails in any other way, or gives an image that cannot be decoded is a deterministic error.
 CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadBytes(url: Str, maxBytes: Nat): List[Byte];
 
-  ///The run of ``cleaner`` on the bytes of the response body.
   mut .downloadStr(url: Str, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str;
-  ///The run of ``cleaner`` on the bytes of the response body.
   mut .downloadUStr(url: Str, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr;
 
   mut .downloadImage(url: Str, maxBytes: Nat, maxPixels: Nat): Image;

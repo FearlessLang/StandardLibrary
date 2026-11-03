@@ -334,7 +334,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     r.finish();
     var res= r.chars.toString();
     var nl= newline(res);
-    if (oneLine() && nl != null){ throw Util.detErr("The run of the cleaner maker of this " + kind() + " gave a text with " + nl + ": the text of a " + kind() + " is one line; " + (u ? "UStrCleaners" : "StrCleaners") + ".line turns each newline into a space"); }
+    if (oneLine() && nl != null){ throw Util.detErr("The run of the cleaner maker of this " + kind() + " gave a text with " + nl + ": the text of a " + kind() + " is one line; " + (u ? "UStrCleaners.line" : "StrCleaners.softLine") + " turns each newline into a space"); }
     int keep= Math.max(0, res.codePointCount(0, res.length()) - buf.codePointCount(b, stop));
     return new Change(start, stop, res, start + res.offsetByCodePoints(0, keep));
   }
