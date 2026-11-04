@@ -3,7 +3,7 @@
 /// - -0.0 == +0.0
 Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.getSucc` returns the closest Floating point number larger than `this`.
-  /// Throws if `this` is `Math.nan` or `Math.inf` (there is no larger value).
+  /// Throws if `this` is `Math.nan` or `Math.inf`.
   /// Note: Unlike `.getSucc` for the other numeric types this does not return ``this + 1``.
   //>   .check{1.0 .getSucc .assertGt 1.0}
   //>   .check{Math.negZero .getSucc .assertEq(+0.0.getSucc)}
@@ -16,7 +16,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .tryGetSucc: mut Action[Float];
 
   /// `this.getPred` returns the closest Floating point number smaller than `this`.
-  /// Throws if `this` is `Math.nan` or `Math.negInf` (there is no smaller value).
+  /// Throws if `this` is `Math.nan` or `Math.negInf`.
   /// Note: Unlike `.getPred` for the other numeric types this does not return ``this - 1``.
   //>   .check{1.0 .getPred .assertLt 1.0}
   //>   .check{0.0 .getPred .assertEq(Math.negZero.getPred)}
@@ -345,7 +345,6 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .isPosZero: Bool;
 
   /// `this.isFinite` returns `True` if `this` is not `Math.nan`, `Math.inf`, or `Math.negInf`.
-  /// Note: this is not equivalent to ``this.isInfinite.not``, since both are `False` for `Math.nan`.
   //>   .check{1.0 .isFinite .assertTrue}
   //>   .check{0.0 .isFinite .assertTrue}
   //>   .check{Math.inf .isFinite .assertFalse}
@@ -378,7 +377,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .ieeeSameBits(x: Float): Bool;
 
   /// `this.ieeeStr` returns an IEEE 754 round-trip decimal string for `this` (includes NaN/Inf).
-  /// NaN payloads are not distinguished (all NaNs render identically); use ``ieeeSameBits`` for that.
+  /// NaN payloads are not distinguished (all NaNs render identically).
   //>   .check{1.5 .ieeeStr .assertEq "1.5"}
   //>   .check{Math.nan .ieeeStr .assertEq `NaN`}
   //>   .check{Math.inf .ieeeStr .assertEq `Infinity`}
@@ -484,7 +483,6 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{1.0 .hash .assertNotEq(2.0 .hash)}
   .hash -> this.imm.isNegZero?{.then->"0.0".hash; .else->this.imm.ieeeStr.hash};
 
-  /// fixpoint type closed
   .close->::; .close->this;
 
   /// ``this.sumNumber(xs)`` sums all numbers in `xs` starting from `this`.
@@ -493,7 +491,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .sumNumber xs ->
     xs.fold( {this}, {acc,e -> acc + e} );
 
-  /// ``this.match(m)`` dispatches on the special variants of float weirdness:
+  /// ``this.match(m)`` dispatches on the special variants of float:
   /// ``+0.0``, ``-0.0``, ``+Inf``, ``-Inf``, ``NaN``, or a regular finite/non-special value.
   //>   .check{(0.0 .match({.posZero -> "pz"; .negZero -> "nz"; .posInf -> "pi"; .negInf -> "ni"; .nan -> "n"; .regular x -> "r"})) .assertEq "pz"}
   //>   .check{(3.5 .match({.posZero -> "pz"; .negZero -> "nz"; .posInf -> "pi"; .negInf -> "ni"; .nan -> "n"; .regular x -> "r"})) .assertEq "r"}
@@ -603,7 +601,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .return {_FloatRanges#(this, endInclusive)};
 
   /// ``this.inRange(range)`` returns `True` iff ``range.start <= this <= range.end``.
-  /// Note: since NaN is greater than everything, ``this.inRange(range)`` is `False` when `this` is NaN.
+  /// Note: ``this.inRange(range)`` is `False` when `this` is NaN.
   //>   .check{(2.0 .inRange(1.0=~~=4.0)) .assertTrue}
   //>   .check{(5.0 .inRange(1.0=~~=4.0)) .assertFalse}
   .inRange(range: Range[Float]): Bool -> range.start <= this && {this <= (range.end)};
@@ -621,7 +619,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       .info)});
 
   /// ``this.clampTo(range)`` clamps `this` into ``[range.start, range.end]``.
-  /// Note: since NaN is greater than everything, a ``Math.nan.clamp(range)`` always clamps to `range.end`;
+  /// Note: a ``Math.nan.clamp(range)`` always clamps to `range.end`;
   //>   .check{0.0 .clampTo(1.0=~~=4.0) .assertEq 1.0}
   //>   .check{5.0 .clampTo(1.0=~~=4.0) .assertEq 4.0}
   //>   .check{Math.nan .clampTo(1.0=~~=4.0) .assertEq 4.0}

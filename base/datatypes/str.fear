@@ -34,7 +34,6 @@
 /// Str.getFloat (IEEE 754 binary 64):
 /// - rejected (syntax): ``+1``.getFloat  ``+1.``.getFloat  ``+.1``.getFloat  ``+1e0``.getFloat
 /// - rejected (value): ``+NaN``.getFloat  ``+Infinity``.getFloat  ``-Infinity``.getFloat  ``+0.1``.getFloat  ``+1.0e-3``.getFloat  ``+01__0.00__1``.getFloat
-/// - Float value 0.1 (and many others) do not exist; so it is rejected.
 /// - accepted: ``1.0``.getFloat  ``+0.5``.getFloat  ``+1.25``.getFloat  ``+01__0.2__5``.getFloat  ``+1.25e-1``.getFloat
 /// - the ``soft`` suffix, as in a Float literal, accepts the closest Float: ``+0.1soft``.getFloat==``+0.1soft``; it is still rejected
 ///   when not finite: ``+1.0e400soft``.getFloat. Str.softFloat and Str.getSoftFloat accept the closest Float with or without ``soft``.
@@ -48,14 +47,9 @@
 /// - canonicalization: ``1e0``.ieeeFloat!.ieeeStr==``1.0``  and ``+0.0``.ieeeFloat!.ieeeStr==``0.0``  (NaN payload not preserved)
 /// - roundtrip (value): f.ieeeStr.ieeeFloat! == f
 ///   The roundtrip also preserves the sign of zero but not the NaN payload
-///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1`` BUT there is no Float representing 0.1
+///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1``
 ///   .ieeeFloat + .ieeeStr implement shortest string that round-trips under round-to-nearest ties-to-even
-///   That is, ``0.1``.ieeeFloat!.ieeeStr lies to you twice, once when it creates the float, and a secon time when
-///   it choses to print a near value that has a compact representation instead of the actual content of the float
 ///   Another example: ``0.100000000000000005``.ieeeFloat!.ieeeStr == ``0.1``
-///   But, ``0.100000000000000005`` is closer to the actual representable Float value. That is,
-///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
-///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
 ///
 /// Str.bool / Str.getBool:
 /// - rejected: any text other than exactly `True` or `False` (this includes ``true``, `` True`` and ``True ``)
@@ -91,9 +85,9 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .replaceSimultaneousOrdered(rules: List[Str]): Str; /// takes a list of pairs and performs simultaneous replacement where the first matching rule wins; throws on empty keys, duplicated keys, odd sized lists
   .repeat(n: Nat): Str;
 
-  .ieeeFloat: Opt[Float];      /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
-  .float: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
-  .softFloat: Opt[Float];      /// parse a string representing to the closest valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf since not syntactically valid Float, but *not* values that would round)
+  .ieeeFloat: Opt[Float];      /// parse IEEE-754 string; accepts Float.ieeeStr output; .empty on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string)
+  .float: Opt[Float];          /// parse a string representing a valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf, and values that would round)
+  .softFloat: Opt[Float];      /// parse a string representing to the closest valid Fearless Float; .empty on invalid (this includes NaN and +/-Inf, but *not* values that would round)
 
   .int: Opt[Int];              /// parse a string representing a valid Fearless Int; .empty on invalid (this includes out of range)
   .num: Opt[Num];              /// parse a string representing a valid Fearless Num; .empty on invalid (this includes denominator == 0)
@@ -102,17 +96,17 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .bool: Opt[Bool] -> (this == "True").toOpt{True} | ((this == "False").toOpt{False}); /// parses exactly `True`/`False` as produced by Bool.str; .empty on invalid (this includes out of range)
 
 
-  .getIeeeFloat: Float -> this.tryGetIeeeFloat!;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string due to canonicalization+rounding)
+  .getIeeeFloat: Float -> this.tryGetIeeeFloat!;      /// parse IEEE-754 string; accepts Float.ieeeStr output; throws on invalid (returns the rounded Float value (ties-to-even), preserving NaN/Inf and signed zero. Float.ieeeStr.ieeeFloat produces the same Float modulo NaN payload; but Str.ieeeFloat.ieeeStr may not produce the same string)
   /// `this.tryGetIeeeFloat` returns `.ok` of `this.getIeeeFloat`, or the error info of `this.getIeeeFloat` if `this` is not a valid IEEE-754 string.
   //>   .check{("1.5".tryGetIeeeFloat).ok.assertEq({::}, Opts# 1.5)}
   //>   .check{"nope".tryGetIeeeFloat .assertInfo{::.isMsg{::.startsWith "Str.getIeeeFloat:"}}}
   .tryGetIeeeFloat: mut Action[Float];
-  .getFloat: Float -> this.tryGetFloat!;          /// parse a string representing a valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, and values that would round)
+  .getFloat: Float -> this.tryGetFloat!;          /// parse a string representing a valid Fearless Float; throws on invalid (this includes NaN and +/-Inf, and values that would round)
   /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not a valid Fearless Float.
   //>   .check{("1.5".tryGetFloat).ok.assertEq({::}, Opts# 1.5)}
   //>   .check{"nope".tryGetFloat .assertInfo{::.isMsg{::.startsWith "Str.getFloat:"}}}
   .tryGetFloat: mut Action[Float];
-  .getSoftFloat: Float -> this.tryGetSoftFloat!;      /// parse a string representing to the closest valid Fearless Float; throws on invalid (this includes NaN and +/-Inf since not syntactically valid Float, but *not* values that would round)
+  .getSoftFloat: Float -> this.tryGetSoftFloat!;      /// parse a string representing to the closest valid Fearless Float; throws on invalid (this includes NaN and +/-Inf, but *not* values that would round)
   /// `this.tryGetSoftFloat` returns `.ok` of `this.getSoftFloat`, or the error info of `this.getSoftFloat` if `this` is not a valid Fearless Float.
   //>   .check{("1.5".tryGetSoftFloat).ok.assertEq({::}, Opts# 1.5)}
   //>   .check{"nope".tryGetSoftFloat .assertInfo{::.isMsg{::.startsWith "Str.getSoftFloat:"}}}

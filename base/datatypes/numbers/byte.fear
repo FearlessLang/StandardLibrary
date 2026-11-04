@@ -126,7 +126,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   .tryGetSize1Str: mut Action[Str];
 
   /// `this.size1UStr` returns `.some` of the UStr of size 1 whose scalar value is `this`.
-  /// Every Byte is a scalar value, so `this.size1UStr` is never `.empty`.
+  /// `this.size1UStr` is never `.empty`.
   //>   .check{233.getByte .size1UStr! .scalarHex .assertEq "00E9"}
   .size1UStr: Opt[UStr];
 
