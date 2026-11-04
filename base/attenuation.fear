@@ -7,8 +7,7 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///they start: every attenuator receives a `RevokableSystem` whose `Revocation` is not started yet, and the real System
 ///starts it only after every attenuator has run. Thus an attenuator can only build the System it gives: a call on the
 ///received System while the attenuator runs is a non deterministic error, in every process, and the System it gives calls
-///the received System only from its own methods. In this way the attenuated System built in a new process is
-///structurally equivalent to the one its parent built.
+///the received System only from its own methods.
 ///```
 ///NoDownload: SystemAttenuator { u -> {'s
 ///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
@@ -76,8 +75,7 @@ NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
 ///A flag in one of three states, in this order and with no way back: not started, started, revoked.
 ///``#`` returns when started; otherwise it throws the non deterministic error ``Revocation.start was not called yet.``
 ///or ``Revocation.revoke was called.``. A capability wrapper checks the flag before delegating: ``.out -> Block#(r#, u.out)``.
-///The copies ``.iso`` gives share the flag, so revocation reaches the images too. A Revocation is created by `System`,
-///so its flag is part of the world: sharing it across ``.iso`` is sound, as sharing a file is. A Revocation holds no value.
+///The copies ``.iso`` gives share the flag, so revocation reaches the images too. A Revocation holds no value.
 Revocation: ToIso[Revocation]{ mut #: Void; }
 ///The Revocation `System.revocation` gives: the one that can change the flag. Its copies are roots too.
 ///``.start`` on a started or revoked root, and ``.revoke`` on one not started or already revoked, are non deterministic

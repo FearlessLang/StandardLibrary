@@ -1,6 +1,4 @@
 /// An operation is a pipeable function that takes an S -> R, and can be piped into other operations.
-/// This can be useful to improve code readability by avoiding nested function calls.
-/// This allows for function piping from functional languages, is similar to extension methods from OOP languages
 /// Examples:
 //>   .check{Math.ln(Math.asin(Math.clamp({::}, -1.0, +1.0, 12.0))#)
 //>     .assertEq(12.0 |> {Math.clamp({::}, -1.0, +1.0, ::)} |> {Math.asin :: #} |> {Math.ln ::})}

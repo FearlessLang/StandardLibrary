@@ -46,8 +46,7 @@ Block[R:*]: Sealed {
       .done     -> Block#[Void];
       };
     };
-  /// iterates `body` without growing the call stack per iteration: unlike a Fearless
-  /// method calling itself for each `.continue`, this is backed by a native Java loop.
+  /// iterates `body` without growing the call stack per iteration.
   /// Logically equivalent to:
   ///   body#.match ControlFlowMatch[R]: {
   ///     .continue -> this.loop(body);

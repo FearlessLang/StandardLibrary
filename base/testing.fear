@@ -41,7 +41,7 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 ///  //disabled test with name inside test suite TestCars
 ///  .disabledTest TestCarsCanFly: Test {:: .check {..}}
 ///  
-///  //unnamed check in the test suite.. possible but not advised
+///  //unnamed check in the test suite
 ///  .check {Cars#(...).assertEq(MakeCar#23)  }
 ///  
 ///  //A single test can have many checks
@@ -74,14 +74,6 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 /// ```
 /// .check{SomethingThatShouldSucceed#}
 /// ```
-///
-/// Compiling a package with doc comments also generates a `UnitTests` suite from
-/// its ``//>``/``//-`` examples, built with this same `Test`/`UnitTests`/`TestCap`
-/// API: one ``_<Type>_Examples`` per documented type, aggregated into one
-/// ``AllAutoTests_<pkg>`` per package. Declaring a type of your own named exactly
-/// like a ``_<Type>_Examples`` is reported as an error naming the convention;
-/// declaring one named exactly like ``AllAutoTests_<pkg>`` instead suppresses
-/// generation for that whole package.
 UnitTests: Main {
   .main sys->Block#
     .let[mut RTestCap] ts= {_TestCaps#(sys,ELists#)}

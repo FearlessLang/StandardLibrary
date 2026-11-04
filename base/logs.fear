@@ -2,7 +2,7 @@
 ///
 ///The log is written to .out/logs/_base/log.log.
 ///Each call appends the string representation of s as one timestamped line.
-///The timestamp is in UTC and is added by the runtime.
+///The timestamp is in UTC.
 ///
 ///The log is circular across runs:
 ///- when logging starts, an existing non-empty live log is moved to a
@@ -10,14 +10,11 @@
 ///- when the program shuts down, the current non-empty live log is also
 ///  moved to a stamped archive file;
 ///- empty live logs are deleted;
-///- only a bounded number of archived logs is kept. (currently 10, this may change with future versions)
+///- only a bounded number of archived logs is kept.
 ///
 ///If a previous live log is found when logging starts, the archived copy is
 ///marked as interrupted. This usually means the previous process did not
 ///complete normal shutdown.
-///
-///Logging failures are reported to the runtime error log when possible.
-///Only a bounded number of error logs is kept. (currently 100, this may change with future versions)
 Log: { .log(s: read ToStr): Void -> _Magic! }
 
 ///Log used internally by the UnitTest library.
@@ -27,14 +24,6 @@ Log: { .log(s: read ToStr): Void -> _Magic! }
 ///representation of s, without adding a timestamp and without adding a
 ///newline. The UnitTest library is responsible for producing the whole
 ///output format.
-///
-///The live file is intended to be consumed by test tooling while tests are
-///running. The exact format is part of the UnitTest library/runtime
-///contract, not part of this general logging API.
-///
-///The log is still managed by the same circular-log mechanism as Log:
-///old non-empty logs are moved to stamped archive files, empty logs are
-///deleted, and only a bounded number of archived logs is kept.
 /// See also: base.Log
 UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 
@@ -50,12 +39,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///sys.readLog(PointLog).consume.assertEq({::},Lists#(myPoint))
 ///```
 ///
-///In memory logs are particularly useful for unit testing of immutable computation via mock objects.
-///
 ///The name of the log is the name of its type (see base.Named), to be used for debugging, test reports, and failure messages.
-///
-///The log is kept in runtime memory. Calling .log appends a value to the
-///current in-memory contents of this log.
 ///
 ///System.readLog creates a reader for this log.
 ///The reader can inspect or consume the values currently stored for this log.
