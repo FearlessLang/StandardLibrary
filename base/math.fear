@@ -50,10 +50,6 @@ _MagicMath: Sealed {
   .hypot(x: Float, y: Float): Float -> _Magic!;
   }
 
-/// Question: How many methods should be added here?
-/// Stuff like .abs and .sqrt are defined on the numeric types themselves, so they are not included here, should they be?
-/// What about .sin, .cos, .tan, .log, .exp, etc? Should they be included here?
-/// What about other constants like Pi and E? When do they get too obscure to be worth including here?
 Math: Sealed, _MagicMath {
   .minInt: Int -> -9_223_372_036_854_775_808;   /// The smallest representable Int (-2^63)
   .maxInt: Int -> +9_223_372_036_854_775_807;   /// The largest representable Int (2^63 - 1)

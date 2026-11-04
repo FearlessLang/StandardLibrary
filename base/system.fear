@@ -1,6 +1,5 @@
 ///The object capability to observe the world outside of the program.
-///Code without a System can only compute with its arguments: equal calls give equal results,
-///so the results can be cached, reordered and computed in parallel with no visible difference.
+///Code without a System can only compute with its arguments: equal calls give equal results.
 ///Whatever may answer differently to the same question (input, files, downloads, in memory logs,
 ///non deterministic errors) is observed through a method of System or of a capability created by it.
 ///Acting on the world needs no capability when the program cannot observe the action:
@@ -34,11 +33,6 @@ CapTry: ToIso[CapTry],WidenTo[CapTry] {
   ///  the program state from any exception-causing code.
   mut #[R:*](try: read F[R]): mut Action[R];
   
-  /// This method is designed to take an iso object capability to do effects while handling
-  /// the non deterministic exception.
-  /// However any violations of strong exception safety can only be observed with an object
-  /// capability because the iso reference is not linked to the outer world, so it is conceptually
-  ///  data that could have equivalently been recreated internally.
   mut #[T:**,R:*](data: iso T, try: read F[iso T,R]): mut Action[R];
   
   ///Return the current stack trace
