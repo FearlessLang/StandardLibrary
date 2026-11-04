@@ -21,8 +21,7 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 SystemAttenuator: Attenuator[System]{}
 
 ///A System with no authority: every method throws the non deterministic error ``System.<method> is revoked.``.
-///It is the System of a test that must not touch the world, and the base of an attenuator keeping a few capabilities,
-///which overrides the methods it keeps, `.iso` and `.close` included: the `.iso` of ErrorSystem is an ErrorSystem.
+///The `.iso` of ErrorSystem is an ErrorSystem.
 ErrorSystem: System {
   .try -> _Revoked#".try";
   .out -> _Revoked#".out";
@@ -74,12 +73,12 @@ NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
 
 ///A flag in one of three states, in this order and with no way back: not started, started, revoked.
 ///``#`` returns when started; otherwise it throws the non deterministic error ``Revocation.start was not called yet.``
-///or ``Revocation.revoke was called.``. A capability wrapper checks the flag before delegating: ``.out -> Block#(r#, u.out)``.
+///or ``Revocation.revoke was called.``.
 ///The copies ``.iso`` gives share the flag, so revocation reaches the images too. A Revocation holds no value.
 Revocation: ToIso[Revocation]{ mut #: Void; }
 ///The Revocation `System.revocation` gives: the one that can change the flag. Its copies are roots too.
 ///``.start`` on a started or revoked root, and ``.revoke`` on one not started or already revoked, are non deterministic
-///errors: the holder of a copy has no way to know the state.
+///errors.
 CapRevocationRoot: Revocation, ToIso[CapRevocationRoot]{ mut .start: Void; mut .revoke: Void; mut .iso: iso CapRevocationRoot; mut .close: mut CapRevocationRoot; }
 
 ///The System ``u`` under the Revocation ``r``: every method checks ``r`` and delegates to ``u``, and what it gives

@@ -2,8 +2,7 @@
 ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E] -> _Magic! }
 
 /// A mutable set, allows for in place updates.
-/// In general this collection is built up with `.add` and similar methods and then consumed into a list.
-/// **NOTE:** Unlike Set this collection does not maintain a sorted order for performance.
+/// **NOTE:** Unlike Set this collection does not maintain a sorted order.
 ESet[E]: Pipe[ESet[E]] {
   /// `this.size` returns the number of elements in `this`.
   //>   .check{ESets#[Nat, Nat]({::}).add(1).add(2).add(3).size .assertEq 3}
@@ -45,7 +44,7 @@ ESet[E]: Pipe[ESet[E]] {
   //>   .check{ESets#[Nat,Nat]{::}.add(1).add(2).containsAll(ESets#{::}.add(1).add(3)) .assertFalse}
   read .containsAll(ESet[E]): Bool;
 
-  /// ``this.add(e)`` adds ``e`` to this and returns this to allow method chaining.
+  /// ``this.add(e)`` adds ``e`` to this and returns this.
   /// Note this operation mutates `this`.
   //>   .check{ESets#{::}.add 1 .add 2 .add 3 .set.str .assertEq "{1, 2, 3}"}
   mut .add(E): mut ESet[E];
@@ -82,7 +81,7 @@ ESet[E]: Pipe[ESet[E]] {
     .empty -> this.tryGet(elem);
     };
 
-  /// `this.clear` removes all the elements from this and returns this to allow method chaining.
+  /// `this.clear` removes all the elements from this and returns this.
   /// Note this operation mutates `this`.
   //>   .check{Block#
   //>     .let eset={ESets#[Nat, Nat]{::}.add(1).add(2)}

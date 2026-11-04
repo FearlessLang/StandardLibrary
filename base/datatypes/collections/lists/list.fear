@@ -6,7 +6,6 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .size->0;
   .isEmpty->True;
 
-  /// Only assert if the method is .assertXXX
   .get(i)->Error.msg "List.get: called on empty list";
   .tryGet(i)->Actions.msg "List.get: called on empty list";
   .opt(i)->{};
@@ -148,8 +147,8 @@ _List[E:*]: Sealed,ToFlow[E],BaseContainer[E],DataType[List[E],List[imm E],E,imm
   mut  .flow(mode: FlowMode[E]): mut Flow[E]; /// flow in the mode passed
   read .flow(mode: FlowMode[read/imm E]): mut Flow[read/imm E]; /// flow in the mode passed
 
-  read .as[T2](f: BaseId[read/imm E,T2]): List[T2];        /// zero cost retyping, returns `this`
-  imm  .as[T2](f: BaseId[imm E,T2]): List[T2];             /// zero cost retyping, returns `this`
+  read .as[T2](f: BaseId[read/imm E,T2]): List[T2];        /// returns `this`
+  imm  .as[T2](f: BaseId[imm E,T2]): List[T2];             /// returns `this`
   imm .norm[R](mut MF[E,Norm[R]]): Norm[List[Norm[R]]];/// list normalization
   }
 

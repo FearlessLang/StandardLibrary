@@ -6,10 +6,6 @@ Container[N:**]: {
 
 
 /// A datatype to represent a discrete range of comparable values.
-/// Note: For the discrete numeric types, the core logic of these methods is implemented in those types,
-/// so it is safe when implementing a new Range of those types to call those methods, without it going in loop.
-/// Warning: Because of `this`, if you define your own discrete type that overrides `.contains` or `.clamp` the symmetry of these methods will be broken,
-///   That is ``MyRange.contains(n)`` may not be equivalent to ``n.inRange(n)``
 Range[N]: ToFlow[N], Container[N], Pipe[Range[N]], ToStr {
   .close -> this;
   /// `this.start` returns the first value of this range
@@ -17,7 +13,7 @@ Range[N]: ToFlow[N], Container[N], Pipe[Range[N]], ToStr {
   /// `this.end` returns the last value in this range
   .end: N;
 
-  /// `this.size` returns the number of elements in this range; a range is never empty, since it has a `.start` and an `.end`.
+  /// `this.size` returns the number of elements in this range; a range is never empty.
   /// Throws when the number does not fit in a `Nat`, as for the full ranges of `Nat` and `Int`.
   .size: Nat;
 
@@ -44,7 +40,7 @@ Range[N]: ToFlow[N], Container[N], Pipe[Range[N]], ToStr {
   }
 
 // Sealed so safe to call these methods from standard NumType
-/// A range type for the Num Ranges, significantly limited as Num have no pred/succ
+/// A range type for the Num Ranges
 NumRange: Container[Num], Pipe[NumRange], Sealed {
   .close -> this;
   .start: Num;

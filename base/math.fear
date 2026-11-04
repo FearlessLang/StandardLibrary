@@ -112,7 +112,7 @@ Math: Sealed, _MagicMath {
 
 
 
-/// The super type of `Radian` and `Degree`, used to enforce common behaviour
+/// The super type of `Radian` and `Degree`
 /// Angles that normalize to the same value are considered equal,
 /// ``360.0.degree .assertEq(0.0.degree)``
 /// ``(Math.tau / -4.0).getRad.deg .assertEq((+3.0 / +4.0 * Math.tau).getRad.deg)``

@@ -31,7 +31,6 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   **(x: Byte): Byte;
 
   /// ``this / x`` returns the exact rational quotient of `this` and ``x`` as a `Num`. Throws iff ``x == 0``.
-  /// Note: This returns a num for exact precision, if you want to do byte division you should use `.div` or `.aluDiv`
   //>   .check{7.getByte / 2 .getFloat .assertEq 3.5}
   //>   .checkDetErr({:: .isMsg{::.startsWith("Byte/: ")}}, {7.getByte / 0})
   /(x: Nat): Num;
@@ -90,28 +89,23 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
     (d != 0) && {this.getRem d == (0.getByte)} .toOpt {this.getTruncDiv(d)};
 
   /// `this.softSqrt` returns an approximate `Float` square root of `this`.
-  /// (unlike `Float.getSqrt`, `this` is always non-negative since `Byte` is unsigned).
   //>   .check{9.getByte .softSqrt .assertEq 3.0}
   //>   .check{0.getByte .softSqrt .assertEq 0.0}
   .softSqrt: Float;
 
   /// `this.nat` returns `this` widened to a `Nat`.
-  /// Note: There is no get/soft variant since this widening is always exact and never throws.
   //>   .check{Math.maxByte .nat .assertEq 255}
   .nat: Nat;
 
   /// `this.int` returns `this` widened to an `Int`.
-  /// Note: There is no get/soft variant since this widening is always exact and never throws.
   //>   .check{Math.maxByte .int .assertEq +255}
   .int: Int;
 
   /// `this.float` returns `this` widened to a `Float`.
-  /// Note: There is no get/soft variant since this widening is always exact and never throws.
   //>   .check{200.getByte .float .assertEq 200.0}
   .float: Float;
 
   /// `this.num` returns `this` widened to a `Num` (exact rational).
-  /// Note: There is no get/soft variant since this widening is always exact and never throws.
   //>   .check{200.getByte .num .assertEq(200 / 1)}
   .num: Num;
 
@@ -263,7 +257,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       .if {this >= (range.end)} .return {range.end}
       .return {this};
 
-  .hash -> this.str.hash;                      /// hash via str
+  .hash -> this.str.hash;
   .close->::; .close->this;
   .sumNumber xs ->                             /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );

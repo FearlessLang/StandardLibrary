@@ -1,7 +1,6 @@
 /// Ordering + hashing via "closed fixpoints".
 /// Intuition:
 /// - An Order[T] is a comparator that is also a *closed* value: .close: T.
-/// - Most concrete T implement Order[T] with .close->`this`.
 /// - OrderBy[T,K] is a projection: given t: T, build a closed Order[K] for its key.
 /// - OrderHash adds hashing and ToStr.
 
@@ -58,7 +57,7 @@ OrderBy[T,K]: {                       /// order values of T by a component/key K
 
 OrderBy[T]: OrderBy[T,T] {           /// produces an ordering via .cmp
   .cmp(t0: read T,t1: read T): Order;
-  # t -> { .close -> t; .cmp t0,t1 -> this.cmp(t0,t1) }; /// close->t; compare uses this.cmp
+  # t -> { .close -> t; .cmp t0,t1 -> this.cmp(t0,t1) };
   }
 
 Rev: {
@@ -83,7 +82,7 @@ Order[T,E:*]: {                      /// environment-dependent ordering of T (E 
     };
   }
 
-OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr. This is all the Maps/Set may need.
+OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr.
   read .hash: Nat;
   read .close(t: read T): read OrderHash[T];
   
@@ -175,7 +174,7 @@ OrderHashBy[T]: OrderHashBy[T,T] {         /// direct order+hash for T
   .cmp(t0: read T,t1: read T): Order;
   .hash(t: read T): Nat;
   .str(t: read T): Str;
-  # t ->                                  /// close->t; compare/hash delegate to this.cmp/this.hash
+  # t ->
     {
     .close -> t; .close t0 -> this#t0;
     .cmp t0,t1 -> this.cmp(t0,t1);

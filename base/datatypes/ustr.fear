@@ -1,8 +1,6 @@
 ///Unicode string type
-///This string type is designed to support the evil concept of Unicode strings.
-///UStr is an intentionally minimal type representing a sequence of Nats in the ranges
+///UStr is a type representing a sequence of Nats in the ranges
 ///0..55295 and 57344..1114111.
-///Yes, there is a hole in the allowed values, as required by the Unicode standard for 'scalar values'.
 ///
 ///Those numbers are conventionally written in hexadecimal (base 16) using digits 0..9 and letters A..F;
 ///total of 16 symbols representing numbers 0-15 with a single symbol each.
@@ -18,15 +16,11 @@
 ///For example: `` `Hello`.u.u`FB03 0066 0066 0069`+(`World`.u) `` would create a string that may be visualized as "HelloffiffiWorld",
 ///but where the first ``ffi`` is represented as a single scalar value representing a ligature, while the second ``ffi`` is represented as three distinct scalar values.
 ///And `` myUString.u`FB03 0066 0066 0069`+(`Hello`.u) `` would append "ffiffiHello" to a pre-existing Unicode string.
-///Since writing `` `Hello`.u.u`...` `` is clearly redundant, Str also supports `.u` with one argument, that first converts to unicode and then append the new sequence.
+///Str also supports `.u` with one argument, that first converts to unicode and then append the new sequence.
 ///
 ///This type does support concatenation (+,|,^) as for Str, but this works by simply apppending scalar values one after the other in the sequence.
-///This may not be desirable. Consider ligatures (where scalar values could/should/may be merged)
-///and grapheme clusters, where simply sequencing scalar values may accidentally create new undesired grapheme clusters.
-///More complex methods, like .startsWith(prefix) and .replace(target,dest) are not offered exactly for those reasons.
-///UStr does not implement DataType: how to turn a UStr in a Str or in an Info is really unclear.
-///How to compare two Unicode strings is also a highly debated topic.
-///UStr does offer .equalRepr(other) and .hashRepr so that a user can make an efficient OrderHash[UStr] while reconsidering their life decisions.
+///UStr does not implement DataType.
+///UStr does offer .equalRepr(other) and .hashRepr.
 UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
   + (x: read UStr): UStr;           /// string concatenation; throws on result size > maxInt
   | (x: read UStr): UStr;           /// like + but inserts a newline between the two strings

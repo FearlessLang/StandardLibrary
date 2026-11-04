@@ -2,7 +2,7 @@
 /// A family with a few named values is declared by implementing `Enum` and
 /// `Enums`: the family type binds every value to its list via `.enums` and
 /// gives ``read .close`` and ``.norm`` once (`.cmp`/`.hash`/`.index` come for free from that;
-/// ``mut .close`` stays abstract, since a `CaptureFree` value is never mut);
+/// ``mut .close`` stays abstract);
 /// each value then gets `.imm` from `.close`, and `.str` from its simple name.
 ///
 /// Minimal usage, without a dedicated Match type:
@@ -25,8 +25,7 @@
 /// ``North < East`` is `True`, and ``North.info`` is `` Infos.msg`North` `` (round-tripping
 /// through ``Directions.fromInfo``).
 ///
-/// Or, with a dedicated Match type, letting callers dispatch by pattern
-/// instead of comparing `.str`:
+/// Or, with a dedicated Match type:
 /// ```
 /// DirectionMatch[R:**]: { mut .north: R; mut .east: R; mut .south: R; mut .west: R; }
 /// Direction: Enum[Direction]{
@@ -78,10 +77,6 @@ Enums[E]: FromInfo[E], CaptureFree{
   }
 
 /// The "single value" side of an enumeration family.
-/// E names the concrete family type, but a bare generic parameter carries
-/// no methods of its own, so `.close` still needs to be given once at the
-/// family: it is what lets `.cmp` below turn an arbitrary value of type E
-/// back into an ``Enum[E]`` with an `.index` to compare.
 Enum[E]: DataType[E,E], Named, CaptureFree{
   /// the family this value belongs to; families may also add a `.match`
   /// method of their own, as shown in the second example above.
@@ -90,7 +85,7 @@ Enum[E]: DataType[E,E], Named, CaptureFree{
   /// the simple name of this value.
   /// ``North.str`` is `` `North` ``.
   .str -> this.name.split "." .get 1;
-  /// the value itself: an `Enum` is `CaptureFree`, so `this` is imm.
+  /// the value itself.
   /// ``North.imm`` is ``North``.
   .imm -> this.close;
   /// derived from `.str`, and round-trips through `Enums.fromInfo`.
@@ -100,7 +95,7 @@ Enum[E]: DataType[E,E], Named, CaptureFree{
   /// ``North.index`` is ``0``, ``West.index`` is ``3``, and ``North < East`` is `True`.
   read .index: Nat -> this.enums.indexMap.get(this.str);
   /// narrows ``DataType[E,E].close`` to ``Enum[E]`` (still given by the family,
-  /// not here) so that `.cmp` below can call `.index` on its arguments.
+  /// not here).
   read .close(t: read E): read Enum[E];
   /// this value as a ``Norm[E]``, given by the family as ``.norm->Cache.normCaptureFree(this,{::})``.
   .norm: Norm[E];

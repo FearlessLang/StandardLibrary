@@ -18,8 +18,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .checkDetErr({::}, {1 / 0})
   /(x: Num): Num;
 
-  /// ``this ** x`` raises `this` to the power ``x``. ``x`` is an `Int` (not `Num`), since fractional
-  /// exponents could produce results that aren't expressible as an exact rational.
+  /// ``this ** x`` raises `this` to the power ``x``.
   //>   .check{(2/4 ** +3) .assertEq(8 / 64)}
   //>   .check{(2/1 ** -1) .assertEq(1 / 2)}
   **(x: Int): Num;
@@ -207,8 +206,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       .str -> "["+this+", "+endInclusive+"]";
       }};
 
-  /// ``this.inRange(range)`` returns ``range.contains(this)``. Uses a sealed `NumRange` so callers
-  /// don't have to specify open/closed endpoints explicitly.
+  /// ``this.inRange(range)`` returns ``range.contains(this)``.
   //>   .check{(2/1) .inRange((1/1)=~~=(4/1)) .assertTrue}
   //>   .check{(5/1) .inRange((1/1)=~~=(4/1)) .assertFalse}
   .inRange(range: NumRange): Bool -> range.contains(this);
@@ -227,13 +225,13 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
       | "actual: "+ this
       .info)});
 
-  /// ``this.clampTo(range)`` returns `this` clamped into `range` (delegates to `range.clamp`).
-  /// Only accepts a `ClosedNumRange` (from ``=~~=``), since clamping to an open range is ill-defined.
+  /// ``this.clampTo(range)`` returns `this` clamped into `range`.
+  /// Only accepts a `ClosedNumRange` (from ``=~~=``).
   //>   .check{0/1 .clampTo(1/1=~~=(4/1)) .assertEq(1/1)}
   //>   .check{9/1 .clampTo(1/1=~~=(4/1)) .assertEq(4/1)}
   .clampTo(range: ClosedNumRange): Num -> range.clamp(this);
 
-  .hash -> this.str.hash;           /// hash via string
+  .hash -> this.str.hash;
   .close->::; .close->this;
   .sumNumber xs ->                  /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
