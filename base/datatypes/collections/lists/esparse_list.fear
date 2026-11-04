@@ -1,18 +1,15 @@
 ESparseLists: {
   /// ``ESparseLists.backedWithArray capacity`` returns an ESparseList of ``capacity`` holes, backed by an array.
-  /// Throws if ``capacity >= 2147483647``, the limit of Java arrays.
+  /// Throws if ``capacity >= 2147483647``.
   //> .check{ESparseLists.backedWithArray[Nat] 3 .capacity .assertEq 3}
   //> .checkDetErr({::.isMsg{::.startsWith "ESparseLists.backedWithArray:"}}, {ESparseLists.backedWithArray[Nat] 2147483647})
   .backedWithArray[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   /// ``ESparseLists.backedWithMap capacity`` returns an ESparseList of ``capacity`` holes, backed by a sorted map.
-  /// Any `Nat` is a valid capacity, and the memory used depends on the number of elements, not on the capacity;
-  /// each element costs more than in `ESparseLists.backedWithArray`, so it fits very sparse lists.
+  /// Any `Nat` is a valid capacity.
   //> .check{ESparseLists.backedWithMap[Nat](Math.maxNat).set(1000000000000, 7) .get(1000000000000) .assertEq({::}, Opts# 7)}
   .backedWithMap[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
-  /// ``ESparseLists.backedWithSparseSegmentTree capacity`` returns an ESparseList of ``capacity`` holes, backed by a binary tree
-  /// whose leaves are arrays of 512 indices; a subtree holding no element takes no memory.
-  /// Any `Nat` is a valid capacity. It fits dense islands of elements in seas of holes:
-  /// an element costs about as much as in `ESparseLists.backedWithArray` once its leaf exists.
+  /// ``ESparseLists.backedWithSparseSegmentTree capacity`` returns an ESparseList of ``capacity`` holes, backed by a binary tree.
+  /// Any `Nat` is a valid capacity.
   //> .check{ESparseLists.backedWithSparseSegmentTree[Nat](Math.maxNat).set(1000000000000, 7).get(1000000000000) .assertEq({::}, Opts# 7)}
   .backedWithSparseSegmentTree[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   }
@@ -121,14 +118,12 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
 
   /// ``this.fillHoles f`` returns ``this`` after putting ``f#i`` in every hole ``i``, in ascending order.
   /// Equivalent to: ``this.mapOpts{i, e -> e || {Opts#(f#i)}}``
-  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   //> .check{ESparseLists.backedWithArray[Nat] 3 .set(1, 7).fillHoles{i -> i}.getEList.list
   //>   .assertEq({::}, Lists#(0,7,2))}
   mut .fillHoles(read F[Nat, E]): mut ESparseList[E];
 
   /// ``this.mapOpts f`` returns ``this`` after replacing every index ``i``, in ascending order, with ``f#(i, old)``:
   /// ``old`` is ``.some`` of the element at ``i`` or ``.empty`` for a hole; a ``.some`` result puts its element at ``i``, an ``.empty`` result makes ``i`` a hole.
-  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   //> .check{ESparseLists.backedWithArray[Nat] 3 .set(0, 5).set(1, 6)
   //>   .mapOpts{i, e -> (i == 0).if{ .then -> {}; .else -> Opts#(i)}}.flowOpts(ParImm#).map{o -> o.isSome}.list
   //>   .assertEq({::}, Lists#(False, True, True))}
@@ -148,12 +143,10 @@ ESparseList[E:*]: _EditableList[E, ESparseList[E]] {
   /// ``this.seqFlowOpts`` drains ``this`` into a sequential flow of one `Opt` per index:
   /// ``.some`` of the element, or ``.empty`` for a hole.
   /// ``this`` is left all holes, with the same capacity.
-  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   //> .check{ESparseLists.backedWithArray[Nat] 2 .set(1, 7).seqFlowOpts.map{o -> o.isSome}.list .assertEq({::}, Lists#(False, True))}
   mut .seqFlowOpts: mut Flow[mut Opt[E]];
 
   /// ``this.flowOpts mode`` is `ESparseList.seqFlowOpts`, flowing in ``mode``.
-  /// Time Complexity: O(``this.capacity``), holes included, whatever the backing: on a very large capacity this does not finish in practice.
   mut .flowOpts(mode: FlowMode[E]): mut Flow[mut Opt[E]];
 
   /// ``this.flatSeqFlow`` drains ``this`` into a sequential flow of its elements, skipping the holes.

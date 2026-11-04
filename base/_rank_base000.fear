@@ -13,18 +13,17 @@ Main: CaptureFree{ .main(sys: mut System): Void }
 /// `OpenWith[_,_]` and `Shortcut[_,_]`. The portable Fearless ignores it.
 OpenWith[I,E]: {}
 /// ``OpenWith[I]`` is `OpenWith[_,_]` with an extension chosen by the Fearless manager, like
-/// ``ffile042``: users recognise those files by the icon ``I``, not by their extension.
+/// ``ffile042``.
 OpenWith[I]: {}
 /// A `Main` implementing ``Shortcut[I,E]`` asks the Fearless manager to create a file
 /// ``name.E`` in the top level of its project, showing the icon ``I``, that runs the main on a
 /// double click, also when moved somewhere else: ``Bar: Main, Shortcut[IconsBar,"fapp123"]{ s -> ... }``
 /// gets the file ``bar.fapp123``. ``name`` is the simple name of the main turned into a file name:
 /// ``FooBar`` gives ``foo_bar``. ``I`` is as in `OpenWith[_,_]`. ``E`` is ``"fapp"`` followed by
-/// three digits, like ``"fapp042"``: the shortcut file never looks like a document of another
-/// program or a file of the project. The portable Fearless ignores it.
+/// three digits, like ``"fapp042"``. The portable Fearless ignores it.
 Shortcut[I,E]: {}
 /// ``Shortcut[I]`` is `Shortcut[_,_]` with an extension chosen by the Fearless manager, like
-/// ``fapp042``: users recognise the shortcut file by the icon ``I``, not by its extension.
+/// ``fapp042``.
 Shortcut[I]: {}
 /// A `Main` implementing ``PreLoadIcon[I]`` can show the icon ``I`` on the windows of its Guis:
 /// ``s.gui.icon(IconsFoo)`` is a deterministic error unless the running main preloads ``IconsFoo``.

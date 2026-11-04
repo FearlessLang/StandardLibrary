@@ -44,7 +44,6 @@ _EditableList[E:*, Self]: Pipe[Self] {
   mut .mapInPlace(read F[E, E]): mut Self;
 
   /// ``this.shallowClone`` returns a shallow clone of this collection.
-  /// The main use of this is to allow holding onto an identical editable list after this one has been drained.
   /// Note: elements in the resulting list will still point to the same objects as the ones in this.
   //> .check{Block#
   //>   .let l={ELists#(1, 2)}

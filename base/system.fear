@@ -5,7 +5,7 @@
 ///Acting on the world needs no capability when the program cannot observe the action:
 ///Debug, Log and FileLog can be used anywhere, and so can InMemoryLog.log,
 ///whose content can only be read through System.
-///CapOutput only acts: it makes printing explicit in the code, while the program cannot observe what was printed.
+///CapOutput only acts: the program cannot observe what was printed.
 System: ToIso[System],WidenTo[System] {
   //mut .io: mut IO;
   //mut .rng: mut RandomSeed;
@@ -29,8 +29,7 @@ System: ToIso[System],WidenTo[System] {
   
 /// This try-catch will catch non-deterministic errors.
 CapTry: ToIso[CapTry],WidenTo[CapTry] {
-  /// This method upholds strong exception safety, so you can observe changes to
-  ///  the program state from any exception-causing code.
+  /// This method upholds strong exception safety.
   mut #[R:*](try: read F[R]): mut Action[R];
   
   mut #[T:**,R:*](data: iso T, try: read F[iso T,R]): mut Action[R];
@@ -57,7 +56,7 @@ CapInputCursor: ToIso[CapInputCursor],WidenTo[CapInputCursor] {
   }
 
 CapInputCursorNode: ToIso[CapInputCursorNode],WidenTo[CapInputCursorNode] {
-  mut .label: Str; ///best effort portable name to help debugging
+  mut .label: Str; ///best effort portable name
   mut .readStr(cleaner: F[Str, mut StrCleaner]): Str;
   mut .readUStr(cleaner: F[UStr, mut UStrCleaner]): UStr;
   mut .readBytes: List[Byte];

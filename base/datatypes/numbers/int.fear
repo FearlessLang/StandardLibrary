@@ -33,7 +33,6 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   *(x: Int): Int;
 
   /// ``this ** x`` returns the checked power of `this` raised to ``x``.
-  /// Note: ``x`` is `Nat` (not `Int`), as negative exponents would produce fractional results.
   /// Overflows if the result would exceed ``9_223_372_036_854_775_807``,
   /// Underflows if the result is less than ``-9_223_372_036_854_775_808``.
   //>   .check{(+2 ** 6) .assertEq +64}
@@ -46,7 +45,6 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   / (d: Nat) : Num;
 
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
-  /// Note: negative divisors are not allowed, if you need this use `this.aluDiv`.
   //>   .check{+7 .getTruncDiv 2 .assertEq +3}
   //>   .check{-7 .getTruncDiv 2 .assertEq -3}
   //>   .checkDetErr({::}, {+7 .getTruncDiv 0})
@@ -108,24 +106,19 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .sign: Int;
 
   /// `this.abs` returns `this` if ``this >= 0``, ``-this`` otherwise, as a `Nat`.
-  /// Note: the result is a `Nat`, not an `Int`, because ``-Math.minInt`` overflows `Math.maxInt`
-  /// and so cannot always be safely represented back as an `Int`.
   //>   .check{+5 .abs .assertEq 5}
   //>   .check{-5 .abs .assertEq 5}
   //>   .check{Math.minInt .abs .assertEq(Math.maxInt.getNat + 1)}
   .abs: Nat;
 
   /// `this.negAbs` returns `this` if ``this <= 0``, ``-this`` otherwise.
-  /// Note:
-  /// - Unlike `.abs`, the result is always safely representable as an `Int`,since ``-Math.maxInt`` is a valid `Int`.
-  /// - This is not equivalent to ``this.abs.getInt * -1``, as for the previous expression it is impossible to get `Math.minInt` as the result
   //>   .check{+5 .negAbs .assertEq -5}
   //>   .check{-5 .negAbs .assertEq -5}
   //>   .check{Math.minInt .negAbs .assertEq(Math.minInt)}
   .negAbs: Int;
 
-  /// ``this.getWrapIndex(len)`` normalizes `this` into ``[0, len - 1]`` (useful for circular-array
-  /// indexing, e.g. ``(-1).getWrapIndex(7) == 6``). Throws iff ``len == 0``.
+  /// ``this.getWrapIndex(len)`` normalizes `this` into ``[0, len - 1]``.
+  /// Throws iff ``len == 0``.
   //>   .check{-1 .getWrapIndex 7 .assertEq 6}
   //>   .check{+8 .getWrapIndex 7 .assertEq 1}
   //>   .checkDetErr({::}, {+5 .getWrapIndex 0})
@@ -142,7 +135,6 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .wrapIndex(len: Nat): Opt[Nat];
 
   /// `this.num` converts `this` to a `Num`.
-  /// Note: `Num` can exactly represent every `Int` value, so there is no ``soft``/``get`` variant needed for this conversion.
   //>   .check{+5 .num .assertEq(5/1)}
   .num: Num;
 
@@ -336,8 +328,8 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
       .if {this >= (range.end)} .return {range.end}
       .return {this};
 
-  .hash -> this.str.hash;                   /// hash via str
-  .info: Info;              /// info via str
+  .hash -> this.str.hash;
+  .info: Info;
   .close -> ::; .close -> this;
   .sumNumber xs ->                          /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );

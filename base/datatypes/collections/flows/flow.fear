@@ -51,14 +51,13 @@ Flow[E:*]: {
   /// over hygienically, which is what lets the emitted elements be ``mut``.
   /// See `ActorSink` for how such a sink is pushed to.
   mut .actorMut[S:*,R:*](state: iso S, f: read ActorImplMut[S,E,R]): mut Flow[R];
-  /// ``this.allToAll(f)`` is the fence every fence desugars to: once every element
+  /// ``this.allToAll(f)`` is a fence: once every element
   /// has arrived, ``f`` receives them all as a list, and the elements of the list it
   /// returns flow on.
   mut .allToAll[R:*](f: read F[mut List[E], mut List[R]]): mut Flow[R];
   /// ``this.distinct(by)`` keeps, for each class of elements ``by`` ranks together, the
   /// one with the smallest index, in flow order, and emits the elements as ``read`` or
-  /// ``imm``: the key it keeps may be the element itself, and nothing after it may
-  /// mutate what a kept key aliases. `Flow.distinctMut` keeps the elements ``mut``.
+  /// ``imm``. `Flow.distinctMut` keeps the elements ``mut``.
   mut .distinct[K](by: OrderHashBy[imm E,K]): mut Flow[read/imm E];
   mut .suppressMisuseExceptions: mut Flow[E];
   mut .hintSequential: mut Flow[E];
@@ -125,7 +124,6 @@ Flow[E:*]: {
   mut .join(js: JoinStr[E]): E -> js.joinStr(this);
   /// `this.last` returns the last element in the flow, consuming `this`.
   /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(e))``
-  /// Complexity: O(n)
   mut .last: mut Opt[E] -> this.fold({{}}, {_, e -> Opts#e});
   mut .size: Nat -> this.list.size;
   mut .isEmpty: Bool -> this.size == 0;
@@ -145,8 +143,7 @@ Flow[E:*]: {
   mut .getOpt: mut Opt[E] -> this.tryGetOpt!;//opt of the first element if size in {0,1} throws otherwise
   /// ``this.let(x, cont)`` consumes `this` into a list, hands that list to ``x``,
   /// then hands `cont` the result of ``x`` together with the same list, and returns
-  /// what `cont` returns. The elements are needed twice, so they are materialised
-  /// once here and both sides work from that one list.
+  /// what `cont` returns.
   /// Both sides pick how to read it back, with ``.seqFlow`` or with ``.flow(mode)``.
   //>   .check{Flows#(1,2,3).let[Nat, mut List[Nat]]({xs -> xs.size}, {n, self ->
   //>     self.seqFlow.map{e -> e + n}.list}) .assertEq({::}, Lists#(4,5,6))}

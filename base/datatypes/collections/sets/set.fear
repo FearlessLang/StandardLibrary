@@ -23,14 +23,13 @@ Sets: Sealed {
   #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
   }
 
-/// The implementation of a Set[E] the set keys must be imm to prevent breaking set invariants through mutating it's contents.
+/// The set keys must be imm.
 /// This set is immutable so this + e will produce a new set with e included, and will not change `this`.
 /// This set maintains a sorted list of elements, such that the set ordering is predictable given the OrderHash.
 Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   .close -> this; .close -> ::;
 
   /// `this.imm` returns `this` recovering imm reference capability.
-  /// This is used to make the type system happy as many things take ``read``s.
   read .imm: imm Set[E];
 
   /// `this.size` returns the number of elements in `this`.
@@ -205,7 +204,6 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   /// ``this.distinctBy(by)`` returns a new set with all the elements of this using ``by``'s orderHash.
   /// Note:
   /// - this new set may not contain all of the elements of this as elements that are considered equal under ``by`` will be deduplicated.
-  /// - The complexity of this operation is O(nlog(n)) as it needs to sort the elements of this using``by``.
   //>   .let s={Sets#({::}, +1, -1, +2, -2)}
   //>   .check{s.distinctBy({::.imm.abs}).str{::} .assertEq "{-1, -2}"}
   .distinctBy[K](by: OrderHashBy[E, K]): Set[E];
@@ -224,8 +222,6 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   /// `this.str` returns a string representation of this set,
   /// using the orderHash of this for the ToStr for each element.
   /// Equivalent to ``this.str(this.orderHash)``.
-  /// Note since this uses this.orderHash for the ToStr of each element,
-  /// this may give unexpected results.
   //>   .check{Sets#({::}, -1, +2, -3).str .assertEq "{-3, -1, +2}"}
   //>   .check{Sets#({::.imm.abs}, -1, +2, -3).str .assertEq "{1, 2, 3}"}
   //>   .check{Sets#[Int,Int]({::}).str .assertEq "{}"}
@@ -233,7 +229,6 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
 
   /// ``this.info(by)`` returns an Info representation of this set using `by` to convert each element.
   /// Returns an empty Info if this is empty.
-  /// Note: a `by` argument is required as Info.str cannot be used to recover a ToStr from the orderHash.
   //>   .check{Sets#({::}, 1, 2).info{::} .match {
   //>     .empty -> Error.msg `expected a list Info`;
   //>     .msg _ -> Error.msg `expected a list Info`;
@@ -243,7 +238,6 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   .info by -> this.imm.list.info by;
 
   /// ``this.hash(by)`` returns a hash of this set using `by` to hash each element.
-  /// The hash is seeded with the size of this set, then each element's hash is folded in.
   /// Note: lists and sets use the same hash algorithm; two collections with the same elements
   /// in the same order will produce the same hash.
   //>   .check{Sets#({::}, 1, 2, 3).hash{::}
@@ -260,7 +254,6 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   /// the first non-equal element of `b`, or all elements are equal and `a` is larger.
   /// Note the ordering of the set elements is given by their orderHash, not the given `by`.
   /// It is lt otherwise.
-  /// if you want two sets ignoring their original order, you should use `this.setCmp`
   //>   .let empty={Sets#[Nat,Nat]({::})}
   //>   .check{empty.cmp({::}, Sets#({::}, 1, 2, 3), Sets#({::}, 2, 3, 1))#{.eq -> 0; .lt -> 1; .gt -> 2} .assertEq 0}
   //>   .check{empty.cmp({::}, Sets#({::}, 3, 1, 2), Sets#({::}, 0, 1, 2, 3))#{.eq -> 0; .lt -> 1; .gt -> 2} .assertEq 2}
@@ -270,7 +263,6 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   /// ``this.cmp(a, b)`` compares sets `a` and `b` using this's orderHash.
   /// Equivalent to ``this.cmp(this.orderHash, a, b)``.
   /// Note the ordering of the set elements is given by their orderHash, not the given ``by``.
-  /// if you want two sets ignoring their original order, you should use `this.setCmp`
   //>   .let s1={Sets#({::}, +1, +2, +3)}
   //>   .let s2={Sets#({::}, -2, -3, -1)}
   //>   .check{Sets#[Int,Int]({::.imm.abs.getInt}).cmp(s1, s2)#{.eq -> 0; .lt -> 1; .gt -> 2} .assertEq 1}
@@ -283,7 +275,6 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
     -> this.cmp(by, a.distinctBy(by), b.distinctBy(by));
 
   /// `this.list` returns a sorted list of all the elements. The sorted order is the order specified by `this.orderHash`
-  /// Note: This list is zero cost as this collection maintains a sorted list.
   //>   .check{ Sets#({::.imm.abs}, -3, +2, -1).list.assertEq({::}, Lists#(-1, +2, -3)) }
   .list: List[imm E];
   }

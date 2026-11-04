@@ -87,7 +87,6 @@ _SettledInfoValidator: InfoValidator {
 
 _SuccessfulInfoValidator: InfoValidator {
   /// The Base level info we are matching on, different from .matchLevel as it is the base we chain on.
-  /// Is an opt as the matchers produced by InfoExtractors may not have an info in them.
   .close: Info;
 
   .isValid: Bool -> True;

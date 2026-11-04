@@ -13,8 +13,7 @@
 ///- only a bounded number of archived logs is kept.
 ///
 ///If a previous live log is found when logging starts, the archived copy is
-///marked as interrupted. This usually means the previous process did not
-///complete normal shutdown.
+///marked as interrupted.
 Log: { .log(s: read ToStr): Void -> _Magic! }
 
 ///Log used internally by the UnitTest library.
@@ -22,8 +21,7 @@ Log: { .log(s: read ToStr): Void -> _Magic! }
 ///The log is written to .out/logs/_base/unit_test_log.log.
 ///This log is raw: each call writes exactly the string
 ///representation of s, without adding a timestamp and without adding a
-///newline. The UnitTest library is responsible for producing the whole
-///output format.
+///newline.
 /// See also: base.Log
 UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 
@@ -39,7 +37,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
 ///sys.readLog(PointLog).consume.assertEq({::},Lists#(myPoint))
 ///```
 ///
-///The name of the log is the name of its type (see base.Named), to be used for debugging, test reports, and failure messages.
+///The name of the log is the name of its type (see base.Named).
 ///
 ///System.readLog creates a reader for this log.
 ///The reader can inspect or consume the values currently stored for this log.
@@ -60,8 +58,7 @@ InMemoryLog[T]: CaptureFree, Named{
 ///PkgLog.log("something happened")
 ///```
 ///
-///The file is named after the type, the way an asset file names its
-///type, read backwards: PkgLog writes to .out/logs/_<package>/pkg_log.log.
+///The file is named after the type: PkgLog writes to .out/logs/_<package>/pkg_log.log.
 ///There is one folder per package, named like the folder of that package
 ///(base.Log and base.UnitTestLog write in _base, as log.log and
 ///unit_test_log.log), and one file per declared type within it.
@@ -83,7 +80,7 @@ InMemoryLog[T]: CaptureFree, Named{
 ///A concrete log type cannot have generic parameters: this is a compile time error.
 ///
 ///See also: base.Log (the single fixed shared log, no declaration needed),
-///base.InMemoryLog (in memory instead of a file, for unit testing).
+///base.InMemoryLog (in memory instead of a file).
 FileLog: CaptureFree, Named{
   .log(s: read ToStr): Void -> _Magic!;
   }

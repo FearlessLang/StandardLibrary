@@ -1,7 +1,6 @@
 /// Float: 64 bits IEEE values. Note: ==/order instead follow the usual rules:
 /// - NaN == NaN (all different NaNs equal); NaN is greater than everything else including +Inf
 /// - -0.0 == +0.0
-/// Method hash must respect this ordering
 Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.getSucc` returns the closest Floating point number larger than `this`.
   /// Throws if `this` is `Math.nan` or `Math.inf` (there is no larger value).
@@ -63,7 +62,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   **(x: Float): Float;
 
   /// `this.absOrNaN` returns the IEEE absolute value of `this`: `this` if ``this >= 0``,
-  /// ``-this`` if ``this < 0``, and `Math.nan` if `this` is NaN (payload preserved semantics not guaranteed).
+  /// ``-this`` if ``this < 0``, and `Math.nan` if `this` is NaN.
   //>   .check{4.75 .absOrNaN .assertEq 4.75}
   //>   .check{-4.75 .absOrNaN .assertEq 4.75}
   //>   .check{Math.nan .absOrNaN .isNaN .assertTrue}
@@ -479,11 +478,11 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .tryGetNum: mut Action[Num];
 
   /// `this.hash` returns a hash consistent with ``==``: ``-0.0`` hashes the same as ``+0.0``, and every
-  /// NaN hashes the same as every other NaN (since ``ieeeStr`` does not distinguish NaN payloads).
+  /// NaN hashes the same as every other NaN.
   //>   .check{0.0 .hash .assertEq(Math.negZero .hash)}
   //>   .check{Math.nan .hash .assertEq((Math.nan.negAbsOrNaN) .hash)}
   //>   .check{1.0 .hash .assertNotEq(2.0 .hash)}
-  .hash -> this.imm.isNegZero?{.then->"0.0".hash; .else->this.imm.ieeeStr.hash};/// hash via str
+  .hash -> this.imm.isNegZero?{.then->"0.0".hash; .else->this.imm.ieeeStr.hash};
 
   /// fixpoint type closed
   .close->::; .close->this;
@@ -509,14 +508,12 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.deg` returns `.some` of `this` interpreted as an angle in degrees if `this` is finite,
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
-  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .deg .assertEq({::}, Opts#(90.0.getDeg))}
   //>   .check{Math.nan .deg .assertEmpty {::}}
   //>   .check{Math.inf .deg .assertEmpty {::}}
   .deg: Opt[Degree] -> this.isFinite.toOpt{{this}};
 
   /// `this.getDeg` returns `this` as a `Degree`. Throws if `this` is not finite.
-  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .getDeg# .assertEq(90.0)}
   //>   .checkDetErr({::}, {(Math.inf) .getDeg})
   .getDeg: Degree -> this.tryGetDeg!;
@@ -530,7 +527,6 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.rad` returns `.some` of `this` interpreted as an angle in radians if `this` is finite,
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
-  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{1.5 .rad .assertEq({::}, Opts#(1.5.getRad))}
   //>   .check{Math.nan .rad .assertEmpty {::}}
   .rad: Opt[Radian] -> this.isFinite.toOpt{{this}};
@@ -637,7 +633,6 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
 _FloatRanges: Sealed {
     #(startInclusive: Float, endInclusive: Float): Range[Float] -> {'self
-        /// Magic method that counts all floats in a given range.
         /// Counts -0.0 and +0.0 as the same float i.e. Math.negZero =~~= +0.0 .size == 1;
         .size -> _FloatsBetween#(startInclusive, endInclusive);
         .start -> startInclusive;
@@ -659,7 +654,7 @@ _FloatsBetween: Sealed {
 
 /// A matcher for floats, has all the special cases of float:
 /// 1. Regular floats (which are none of the following)
-/// 2. +0.0 and -0.0 (numbers can get rounded/FPE'd to these)
+/// 2. +0.0 and -0.0
 /// 3. +inf and -inf
 /// 4. NaN
 FloatMatch[R:**]: {

@@ -21,7 +21,6 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
   {'self .fileName->fn; .typeName->tn; .methodName->mn; .lineNumber->ln; .imm->self} }
 
 /// Unit tests
-///This design blends test suites, tests and individual checks.
 ///Basically, a test suite is a Test that only calls `.test` on named Tests,
 ///While a Test is a named Test that only calls `.check`.
 ///We can then arbitrary make trees of test suites or by nesting them in other test suites.
