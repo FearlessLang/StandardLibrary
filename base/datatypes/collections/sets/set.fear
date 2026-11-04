@@ -204,6 +204,7 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   /// ``this.distinctBy(by)`` returns a new set with all the elements of this using ``by``'s orderHash.
   /// Note:
   /// - this new set may not contain all of the elements of this as elements that are considered equal under ``by`` will be deduplicated.
+  /// - The complexity of this operation is O(nlog(n)).
   //>   .let s={Sets#({::}, +1, -1, +2, -2)}
   //>   .check{s.distinctBy({::.imm.abs}).str{::} .assertEq "{-1, -2}"}
   .distinctBy[K](by: OrderHashBy[E, K]): Set[E];
