@@ -1,10 +1,13 @@
 package _base;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -127,11 +130,22 @@ final class AssetBytesRead{
     var p= root;
     for (var s : segments){
       p = p.resolve(s);
-      if (Files.isSymbolicLink(p)){ throw invalidAssetDescriptor("asset path contains symbolic link: "+original); }
+      if (isLink(p)){ throw invalidAssetDescriptor("asset path contains symbolic link: "+original); }
     }
     assert full.startsWith(root);
   }
 
+  // A junction or a drive mounted in a folder of Windows is a reparse point (isOther) that resolves elsewhere, or nowhere.
+  // A OneDrive placeholder is a reparse point too, but it resolves to itself.
+  static boolean isLink(Path p){
+    BasicFileAttributes a;
+    try{ a= Files.readAttributes(p, BasicFileAttributes.class, NOFOLLOW_LINKS); }
+    catch (IOException _){ return false; }
+    if (a.isSymbolicLink()){ return true; }
+    if (!a.isOther()){ return false; }
+    try{ return !p.toRealPath().equals(p.toAbsolutePath().getParent().toRealPath().resolve(p.getFileName())); }
+    catch (IOException _){ return true; }
+  }
   static List<String> zipStepList(String zipSteps){
     if (zipSteps.isEmpty()){ return List.of(); }
     var res= new ArrayList<String>();

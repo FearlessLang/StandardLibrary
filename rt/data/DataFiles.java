@@ -14,8 +14,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,10 +204,21 @@ final class DataFiles{
     }
     return Void$o$0.instance;
   }
-  private static void deleteTree(Path dir) throws IOException{
-    try (var s= Files.walk(dir)){
-      for (var p : s.sorted(Comparator.reverseOrder()).toList()){ Files.delete(p); }
-    }
+  private static void deleteTree(Path p) throws IOException{
+    if (isDir(p)){ try (var s= Files.list(p)){ for (var c : s.toList()){ deleteTree(c); } } }
+    Files.delete(p);
+  }
+  private static boolean isDir(Path p){ return Files.isDirectory(p, NOFOLLOW_LINKS) && !isLink(p); }
+  // A junction or a drive mounted in a folder of Windows is a reparse point (isOther) that resolves elsewhere, or nowhere.
+  // A OneDrive placeholder is a reparse point too, but it resolves to itself.
+  static boolean isLink(Path p){
+    BasicFileAttributes a;
+    try{ a= Files.readAttributes(p, BasicFileAttributes.class, NOFOLLOW_LINKS); }
+    catch (IOException _){ return false; }
+    if (a.isSymbolicLink()){ return true; }
+    if (!a.isOther()){ return false; }
+    try{ return !p.toRealPath().equals(p.toAbsolutePath().getParent().toRealPath().resolve(p.getFileName())); }
+    catch (IOException _){ return true; }
   }
   private static Optional<Node> resolve(Path root, List<String> path) throws IOException{
     Optional<Node> at= Optional.of(new Dir(root));
@@ -221,7 +232,7 @@ final class DataFiles{
     switch (at){
       case Dir d -> {
         var p= d.path().resolve(s);
-        if (Files.isDirectory(p, NOFOLLOW_LINKS)){ return Optional.of(new Dir(p)); }
+        if (isDir(p)){ return Optional.of(new Dir(p)); }
         if (Files.isRegularFile(p, NOFOLLOW_LINKS)){ return Optional.of(new Resource(p, List.of(), "")); }
         var zip= d.path().resolve(s+".zip");
         return Files.isRegularFile(zip, NOFOLLOW_LINKS) ? Optional.of(new ZipDir(zip, List.of(), "")) : Optional.empty();
