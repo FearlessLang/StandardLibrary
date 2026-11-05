@@ -53,7 +53,6 @@
 ///     )};
 ///   }
 /// ```
-/// ``Directions.list`` still works outside of ``Direction``.
 
 /// The "list of values" side of an enumeration family.
 Enums[E]: FromInfo[E], CaptureFree{

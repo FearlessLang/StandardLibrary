@@ -337,7 +337,6 @@ Graphics:ScreenContext{
   mut .oval(WidthNat, HeightNat): mut Graphics;
   mut .image(image: Image): mut Graphics -> this.image(image, image.width, image.height);
   ///Draws ``image`` scaled to ``width`` x ``height``, with its top left corner at the position.
-  ///An image with more pixels than the virtual pixels it covers stays sharp on a window scaled up.
   mut .image(image: Image, width: WidthNat, height: HeightNat): mut Graphics;
   mut .textHeight(n: Nat): mut Graphics -> this.textHeight'(HeightNat#n);
   mut .textHeight'(HeightNat): mut Graphics;
