@@ -34,6 +34,7 @@
 /// Str.getFloat (IEEE 754 binary 64):
 /// - rejected (syntax): ``+1``.getFloat  ``+1.``.getFloat  ``+.1``.getFloat  ``+1e0``.getFloat
 /// - rejected (value): ``+NaN``.getFloat  ``+Infinity``.getFloat  ``-Infinity``.getFloat  ``+0.1``.getFloat  ``+1.0e-3``.getFloat  ``+01__0.00__1``.getFloat
+/// - Float value 0.1 (and many others) do not exist; so it is rejected.
 /// - accepted: ``1.0``.getFloat  ``+0.5``.getFloat  ``+1.25``.getFloat  ``+01__0.2__5``.getFloat  ``+1.25e-1``.getFloat
 /// - the ``soft`` suffix, as in a Float literal, accepts the closest Float: ``+0.1soft``.getFloat==``+0.1soft``; it is still rejected
 ///   when not finite: ``+1.0e400soft``.getFloat. Str.softFloat and Str.getSoftFloat accept the closest Float with or without ``soft``.
@@ -47,9 +48,14 @@
 /// - canonicalization: ``1e0``.ieeeFloat!.ieeeStr==``1.0``  and ``+0.0``.ieeeFloat!.ieeeStr==``0.0``  (NaN payload not preserved)
 /// - roundtrip (value): f.ieeeStr.ieeeFloat! == f
 ///   The roundtrip also preserves the sign of zero but not the NaN payload
-///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1``
+///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1`` BUT there is no Float representing 0.1
 ///   .ieeeFloat + .ieeeStr implement shortest string that round-trips under round-to-nearest ties-to-even
+///   That is, ``0.1``.ieeeFloat!.ieeeStr lies to you twice, once when it creates the float, and a secon time when
+///   it choses to print a near value that has a compact representation instead of the actual content of the float
 ///   Another example: ``0.100000000000000005``.ieeeFloat!.ieeeStr == ``0.1``
+///   But, ``0.100000000000000005`` is closer to the actual representable Float value. That is,
+///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
+///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.1/1, +0.100000000000000005/1) does not hold
 ///
 /// Str.bool / Str.getBool:
 /// - rejected: any text other than exactly `True` or `False` (this includes ``true``, `` True`` and ``True ``)

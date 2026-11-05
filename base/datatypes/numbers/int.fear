@@ -106,6 +106,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   .sign: Int;
 
   /// `this.abs` returns `this` if ``this >= 0``, ``-this`` otherwise, as a `Nat`.
+  /// Note: the result is a `Nat`, not an `Int`: ``Math.minInt.abs`` is ``Math.maxInt.getNat + 1``, which is not an `Int`.
   //>   .check{+5 .abs .assertEq 5}
   //>   .check{-5 .abs .assertEq 5}
   //>   .check{Math.minInt .abs .assertEq(Math.maxInt.getNat + 1)}

@@ -506,12 +506,14 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.deg` returns `.some` of `this` interpreted as an angle in degrees if `this` is finite,
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
+  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .deg .assertEq({::}, Opts#(90.0.getDeg))}
   //>   .check{Math.nan .deg .assertEmpty {::}}
   //>   .check{Math.inf .deg .assertEmpty {::}}
   .deg: Opt[Degree] -> this.isFinite.toOpt{{this}};
 
   /// `this.getDeg` returns `this` as a `Degree`. Throws if `this` is not finite.
+  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{90.0 .getDeg# .assertEq(90.0)}
   //>   .checkDetErr({::}, {(Math.inf) .getDeg})
   .getDeg: Degree -> this.tryGetDeg!;
@@ -525,6 +527,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.rad` returns `.some` of `this` interpreted as an angle in radians if `this` is finite,
   /// `.empty` if `this` is `Math.nan`, `Math.inf`, or `Math.negInf`.
+  /// Note: there is no ``soft`` variant, since it's unclear how to map non-finite values to an angle.
   //>   .check{1.5 .rad .assertEq({::}, Opts#(1.5.getRad))}
   //>   .check{Math.nan .rad .assertEmpty {::}}
   .rad: Opt[Radian] -> this.isFinite.toOpt{{this}};
