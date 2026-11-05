@@ -15,7 +15,7 @@ final class ByteCache{
     var u= UStr$s$0Instance.size1(b);
     var optS= s == null ? optEmpty() : optSome(s);
     var tryS= s == null ? fail(Byte$o$0Instance.noSize1Str(b)) : ok(s);
-    return new Byte$o$0Instance((byte) b, s, u, optS, optSome(u), tryS, ok(u));
+    return new Byte$o$0Instance((byte) b, s, u, optS, tryS);
   }
 
   static Byte$o$0Instance getByte(byte b){
@@ -24,7 +24,7 @@ final class ByteCache{
   }
 }
 
-public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Object optSize1Str, Object optSize1UStr, Object trySize1Str, Object trySize1UStr) implements Byte$o$0,Norm$o$1{
+public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Object optSize1Str, Object trySize1Str) implements Byte$o$0,Norm$o$1{
   private static final byte MAX_VALUE= (byte) 255;
   private static final long MAX_VALUE_LONG= 255;
 
@@ -143,9 +143,7 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
     return size1Str;
   }
   @Override public Object imm$tryGetSize1Str$0(){ return trySize1Str; }
-  @Override public Object imm$size1UStr$0(){ return optSize1UStr; }
-  @Override public Object imm$getSize1UStr$0(){ return size1UStr; }
-  @Override public Object imm$tryGetSize1UStr$0(){ return trySize1UStr; }
+  @Override public Object imm$size1UStr$0(){ return size1UStr; }
   @Override public Object read$str$0(){ return Str$c$0Instance.instance(Integer.toString(u8(val))); }
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this.read$str$0());}
   @Override public Object read$imm$0(){ return this; }

@@ -26,9 +26,6 @@ ELists: {
 
 EList[E:*]: _EditableList[E, EList[E]] {
   /// ``this.size`` returns the number of elements in this collection.
-  /// Note: this is not the same as the capacity of the collection,
-  ///   which is the maximum number of elements that can be stored in
-  ///   this collection before it has to be expanded.
   //> .check{Block#
   //>   .let l={ELists.withCapacity[Nat] 3}
   //>   .do{l.size .assertEq 0}

@@ -337,7 +337,7 @@ Graphics:ScreenContext{
   mut .oval(WidthNat, HeightNat): mut Graphics;
   mut .image(image: Image): mut Graphics -> this.image(image, image.width, image.height);
   ///Draws ``image`` scaled to ``width`` x ``height``, with its top left corner at the position.
-  ///The image goes to the screen in one scaling step: an image with more pixels than the virtual pixels it covers stays sharp on a window scaled up.
+  ///An image with more pixels than the virtual pixels it covers stays sharp on a window scaled up.
   mut .image(image: Image, width: WidthNat, height: HeightNat): mut Graphics;
   mut .textHeight(n: Nat): mut Graphics -> this.textHeight'(HeightNat#n);
   mut .textHeight'(HeightNat): mut Graphics;
@@ -378,9 +378,6 @@ TextRoom:{
   ///The distance from the top of the room to the baseline of the text, rounded to the nearest virtual pixel.
   read .baseline: HeightNat;
   }
-///Text is drawn with fonts bundled in the standard library (Noto Sans, one Noto font per major script,
-///Noto Sans Symbols/Math, Noto Sans CJK and Twemoji), never with the fonts installed on the machine:
-///the same text looks the same on every OS, and a character outside those fonts is drawn as a box everywhere.
 CapGui:{
   mut .screenWidth: WidthNat;
   mut .screenHeight: HeightNat;

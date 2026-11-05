@@ -139,8 +139,6 @@ _JsonEscape: {
     ))) + `"`;
   }
 
-/// Inverse of `_JsonEscape`'s content: turns each two-character escape sequence back
-/// into the raw character it stands for.
 _JsonUnescape: {
   #(s: Str): Str -> s.replaceSimultaneous(Lists#(
     "\\", "\",
@@ -149,9 +147,6 @@ _JsonUnescape: {
     ));
   }
 
-/// Recursive-descent inverse of `_InfoToStr`.
-/// `.pos` always indexes the next unread character; each parsing method returns
-/// both the `.info` it built and the position right after what it consumed.
 _InfoParsed: { .info: Info; .pos: Nat }
 
 _InfoFromStr: {

@@ -23,12 +23,12 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   //>   .check{(2/1 ** -1) .assertEq(1 / 2)}
   **(x: Int): Num;
 
-  /// `this.abs` returns the exact absolute value of `this`: `this` if ``this >= 0``, ``-this`` otherwise.
+  /// `this.abs` returns the exact absolute value of `this`: `this` if ``this >= 0``, ``this * -1/1`` otherwise.
   //>   .check{3/1 .abs .assertEq(3/1)}
   //>   .check{-3/4 .abs .assertEq(3/4)}
   .abs: Num;
 
-  /// `this.absNeg` returns the exact negative absolute value of `this`: `this` if ``this <= 0``, ``-this`` otherwise.
+  /// `this.absNeg` returns the exact negative absolute value of `this`: `this` if ``this <= 0``, ``this * -1/1`` otherwise.
   //>   .check{3/1 .absNeg .assertEq(-3/1)}
   //>   .check{-3/4 .absNeg .assertEq(-3/4)}
   .absNeg: Num;
