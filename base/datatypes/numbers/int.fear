@@ -1,4 +1,7 @@
 /// Int: signed 64-bit.
+/// Note: there is one more negative Int than positive Int: ``Math.minInt`` is ``-9_223_372_036_854_775_808``, while ``Math.maxInt`` is ``+9_223_372_036_854_775_807``.
+/// Thus ``Math.minInt * -1`` overflows, and ``Math.minInt .aluMulWrap -1`` is ``Math.minInt`` itself.
+/// The absolute value of ``Math.minInt`` is not an Int: `.abs` returns a `Nat`, while `.negAbs` returns an `Int`.
 /// Note: / returns the exact quotient as a Num; the div and rem methods stay in Int (divisor is Nat).
 Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.succ` returns ``this + +1``. Overflows if ``this == 9_223_372_036_854_775_807``.
@@ -105,14 +108,15 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+0 .sign .assertEq +0}
   .sign: Int;
 
-  /// `this.abs` returns `this` if ``this >= 0``, ``-this`` otherwise, as a `Nat`.
-  /// Note: the result is a `Nat`, not an `Int`: ``Math.minInt.abs`` is ``Math.maxInt.getNat + 1``, which is not an `Int`.
+  /// `this.abs` returns the absolute value of `this`, as a `Nat`.
   //>   .check{+5 .abs .assertEq 5}
   //>   .check{-5 .abs .assertEq 5}
   //>   .check{Math.minInt .abs .assertEq(Math.maxInt.getNat + 1)}
+  //>   .checkNonDetErr({::}, {Math.minInt * -1})
+  //>   .check{Math.minInt .aluMulWrap -1 .assertEq(Math.minInt)}
   .abs: Nat;
 
-  /// `this.negAbs` returns `this` if ``this <= 0``, ``-this`` otherwise.
+  /// `this.negAbs` returns `this` if ``this <= 0``, ``this * -1`` otherwise.
   //>   .check{+5 .negAbs .assertEq -5}
   //>   .check{-5 .negAbs .assertEq -5}
   //>   .check{Math.minInt .negAbs .assertEq(Math.minInt)}

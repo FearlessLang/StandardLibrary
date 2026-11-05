@@ -125,18 +125,11 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .check{200.getByte .tryGetSize1Str .assertInfo{::.isMsg{::.startsWith "Byte.getSize1Str:"}}}
   .tryGetSize1Str: mut Action[Str];
 
-  /// `this.size1UStr` returns `.some` of the UStr of size 1 whose scalar value is `this`.
-  /// `this.size1UStr` is never `.empty`.
-  //>   .check{233.getByte .size1UStr! .scalarHex .assertEq "00E9"}
-  .size1UStr: Opt[UStr];
-
-  /// `this.getSize1UStr` returns the UStr of `this.size1UStr`.
-  //>   .check{0.getByte .getSize1UStr .scalarHex .assertEq "0000"}
-  .getSize1UStr: UStr;
-
-  /// `this.tryGetSize1UStr` returns `.ok` of `this.getSize1UStr`.
-  //>   .check{(255.getByte .tryGetSize1UStr).ok! .scalarHex .assertEq "00FF"}
-  .tryGetSize1UStr: mut Action[UStr];
+  /// `this.size1UStr` returns the UStr of size 1 whose scalar value is `this`.
+  //>   .check{233.getByte .size1UStr .scalarHex .assertEq "00E9"}
+  //>   .check{0.getByte .size1UStr .scalarHex .assertEq "0000"}
+  //>   .check{255.getByte .size1UStr .scalarHex .assertEq "00FF"}
+  .size1UStr: UStr;
 
   /// ``this.aluAddWrap(x)`` returns ``this + x`` mod ``256`` (u8 wraparound add).
   //>   .check{250.getByte .aluAddWrap(10.getByte) .assertEq(4.getByte)}

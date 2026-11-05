@@ -62,20 +62,20 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   **(x: Float): Float;
 
   /// `this.absOrNaN` returns the IEEE absolute value of `this`: `this` if ``this >= 0``,
-  /// ``-this`` if ``this < 0``, and `Math.nan` if `this` is NaN.
+  /// ``this * -1.0`` if ``this < 0``, and `Math.nan` if `this` is NaN.
   //>   .check{4.75 .absOrNaN .assertEq 4.75}
   //>   .check{-4.75 .absOrNaN .assertEq 4.75}
   //>   .check{Math.nan .absOrNaN .isNaN .assertTrue}
   .absOrNaN: Float;
 
-  /// `this.abs` returns `.some` of `this` if ``this >= 0``, `.some` of ``-this`` if ``this < 0``,
+  /// `this.abs` returns `.some` of `this` if ``this >= 0``, `.some` of ``this * -1.0`` if ``this < 0``,
   /// `.empty` if `this` is NaN.
   //>   .check{4.75 .abs .assertEq({::}, Opts# 4.75)}
   //>   .check{-4.75 .abs .assertEq({::}, Opts# 4.75)}
   //>   .check{Math.nan .abs .assertEmpty {::}}
   .abs: Opt[Float] -> this.isNaN.not .toOpt {this.absOrNaN};
 
-  /// `this.getAbs` returns `this` if ``this >= 0``, ``-this`` otherwise. Throws if `this` is NaN.
+  /// `this.getAbs` returns `this` if ``this >= 0``, ``this * -1.0`` otherwise. Throws if `this` is NaN.
   //>   .check{4.75 .getAbs .assertEq 4.75}
   //>   .check{-4.75 .getAbs .assertEq 4.75}
   //>   .checkDetErr({::}, {Math.nan .getAbs})
@@ -345,6 +345,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .isPosZero: Bool;
 
   /// `this.isFinite` returns `True` if `this` is not `Math.nan`, `Math.inf`, or `Math.negInf`.
+  /// Note: this is not equivalent to ``this.isInfinite.not``, since both are `False` for `Math.nan`.
   //>   .check{1.0 .isFinite .assertTrue}
   //>   .check{0.0 .isFinite .assertTrue}
   //>   .check{Math.inf .isFinite .assertFalse}
