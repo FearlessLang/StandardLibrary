@@ -378,7 +378,6 @@ TextRoom:{
   ///The distance from the top of the room to the baseline of the text, rounded to the nearest virtual pixel.
   read .baseline: HeightNat;
   }
-///The same text looks the same on every OS, and a character that Fearless can not draw is drawn as a box on every OS.
 CapGui:{
   mut .screenWidth: WidthNat;
   mut .screenHeight: HeightNat;
