@@ -2,8 +2,11 @@ package _base;
 
 import java.math.BigInteger;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -73,7 +76,11 @@ public final class Util{
   ///The paths a Fearless program reads from its properties are written by PathClassLoader.argOf of Commons.
   public static Path pathProperty(String key){
     var text= System.getProperty(key);
-    return System.getProperty("os.name").startsWith("Windows") ? Path.of(text) : Path.of(URI.create(text));
+    if (!System.getProperty("os.name").startsWith("Windows")){ return Path.of(URI.create(text)); }
+    assert text.startsWith("Base16:");
+    var units= HexFormat.of().parseHex(text, "Base16:".length(), text.length());
+    assert units.length % 2 == 0;
+    return Path.of(ByteBuffer.wrap(units).order(ByteOrder.LITTLE_ENDIAN).asCharBuffer().toString());
   }
   public static Error nonDetErr(String msg){
     return (Error)Error$1c$0.instance.imm$nonDeterministic$1(new Str$c$0Instance(msg));
