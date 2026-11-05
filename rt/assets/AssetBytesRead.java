@@ -130,7 +130,7 @@ final class AssetBytesRead{
     var p= root;
     for (var s : segments){
       p = p.resolve(s);
-      if (isLink(p)){ throw invalidAssetDescriptor("asset path contains symbolic link: "+original); }
+      if (isLink(p)){ throw invalidAssetDescriptor("asset path contains symbolic link/junction: "+original); }
     }
     assert full.startsWith(root);
   }
