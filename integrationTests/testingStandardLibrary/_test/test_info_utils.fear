@@ -87,6 +87,9 @@ InfoValidatorTests: Test {::
   .checkTrue{info.extract{:: .extractMap .where{:: > "enemies" .isList}}.isEmpty}
   .checkDetErr({::.isMsg{::.startsWith "Info.getList:"}}, {Infos.msg "hi" .getList})
   .check{Infos.msg "hi" .tryGetList .assertInfo{::.isMsg{::.startsWith "Info.getList:"}}}
+  .check{Infos.list(Infos.msg "hi").tryGetMsg .assertInfo{::.isMsg{:: == `Info.getMsg: the Info ["hi"] is the .list variant, not the .msg variant.`}}}
+  .check{Infos.map("k", Infos.msg "hi").tryGetList .assertInfo{::.isMsg{:: == `Info.getList: the Info {"k":"hi"} is the .map variant, not the .list variant.`}}}
+  .checkDetErr({::.isMsg{:: == "Info.getMsg: the Info null is the .empty variant, not the .msg variant."}}, {Infos.msg "" .getMsg})
   .checkFalse{Infos.msg "A".validate{:: .isList & .whereNot{::.isList}}}
   .checkFalse{info.validate{:: > "enemies" .isList & > "friends" > 1 > "name" .whereNot{::.isMsg{:: == "David"}}}}
   .checkFalse{info.validate{:: > "enemies" .whereNot{::.isList}}}
