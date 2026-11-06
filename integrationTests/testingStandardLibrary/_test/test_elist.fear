@@ -1,0 +1,31 @@
+EListOfNone: EList[Nat]{
+  .size -> 0;
+  .close -> this;
+  .get(i) -> Error.msg "unused"; .tryGet(i) -> Error.msg "unused"; .add(e) -> Error.msg "unused"; .addAll(l) -> Error.msg "unused";
+  .insertBefore(i, e) -> Error.msg "unused"; .set(i, e) -> Error.msg "unused"; .clear -> Error.msg "unused"; .remove(i) -> Error.msg "unused";
+  .removeAll(is) -> Error.msg "unused"; .removeIf(f) -> Error.msg "unused"; .removeFirstWhere(f) -> Error.msg "unused"; .removeLastWhere(f) -> Error.msg "unused";
+  .trimTo(s, e) -> Error.msg "unused"; .reverse -> Error.msg "unused"; .swap(i, j) -> Error.msg "unused";
+  .sort(by) -> Error.msg "unused"; .distinct(by) -> Error.msg "unused"; .sortDistinct(by) -> Error.msg "unused";
+  .trimToSize -> Error.msg "unused"; .expandCapacity(n) -> Error.msg "unused";
+  .fold(a, f) -> Error.msg "unused"; .foldRight(a, f) -> Error.msg "unused"; .foldUntil(a, f, p) -> Error.msg "unused"; .foldRightUntil(a, f, p) -> Error.msg "unused";
+  .accumulateInPlace(f) -> Error.msg "unused"; .accumulateRightInPlace(f) -> Error.msg "unused";
+  .seqFlow -> Error.msg "unused"; .flow(m) -> Error.msg "unused"; .flow -> Error.msg "unused"; .list -> Error.msg "unused"; .eView(s, e) -> Error.msg "unused";
+  .all(f) -> Error.msg "unused"; .any(f) -> Error.msg "unused"; .none(f) -> Error.msg "unused";
+  .firstIndexWhere(f) -> Error.msg "unused"; .lastIndexWhere(f) -> Error.msg "unused"; .indicesWhere(f) -> Error.msg "unused";
+  .mapInPlace(f) -> Error.msg "unused"; .shallowClone -> Error.msg "unused";
+  }
+
+TestEList: Test {::
+  .checkDetErr({::.isMsg{::.startsWith "EList.set:"}}, {Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(0, 3)}
+    .let list={l.list}
+    .return{v.set(0, 9)}})
+  .checkDetErr({::.isMsg{::.startsWith "EList.get:"}}, {Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(0, 2)}
+    .do{l.add(4).void}
+    .return{v.get 0}})
+  .check{ELists#(1).addAll(EListOfNone).list .assertEq({::}, Lists#(1))}
+  .check{ELists#(1).removeAll(EListOfNone).list .assertEq({::}, Lists#(1))}
+  }
