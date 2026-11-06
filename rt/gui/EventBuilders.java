@@ -68,7 +68,6 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
   private AWidget pressTarget;
-  private Point pressAt;
   private AWidget secondary;
   private AWidget tip;
   private long tipSince;
@@ -155,7 +154,7 @@ final class SkMouse extends MouseAdapter{
     }
     if (left){
       pressTarget = d;
-      pressAt = p;
+      for (var t : chainOf(d)){ if (t instanceof _Sections s){ s.pressed = s.part(local(s, p)); } }
       if (d instanceof _Button b){ b.down = true; }
       if (d instanceof AEditText t){ t.press(content(t, p), e.isShiftDown()); }
     }
@@ -278,7 +277,7 @@ final class SkMouse extends MouseAdapter{
         frame.frame.queue.submit(whileShown(b, b.action));
         return;
       }
-      if (t instanceof _Sections s && s.click(local(s, pressAt), local(s, p))){ return; }
+      if (t instanceof _Sections s && s.click(local(s, p))){ return; }
       if (clicks == 2 && fire(t, DoubleClicked, p)){ return; }
       if (fire(t, Clicked, p)){ return; }
       if (t.handlers.containsKey(DoubleClicked)){ return; }

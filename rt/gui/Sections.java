@@ -33,6 +33,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   SectionHandler$j0g$0 onTitleClick= expandClicked;
   SectionHandler$j0g$0 onClose;
   Rectangle area= new Rectangle();
+  Part pressed;
 
   _Sections(_Frame frame){
     super(frame);
@@ -150,9 +151,9 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     }
     return null;
   }
-  boolean click(Point press, Point release){
-    var p= part(press);
-    if (p == null || !p.equals(part(release))){ return false; }
+  boolean click(Point release){
+    var p= part(release);
+    if (p == null || !p.equals(pressed)){ return false; }
     handle(p.x() ? onClose : onTitleClick, p.s());
     return true;
   }
