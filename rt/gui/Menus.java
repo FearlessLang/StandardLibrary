@@ -8,6 +8,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
@@ -120,6 +122,7 @@ final class SkMenus{
   int grab;
   boolean swallow;
   boolean took;
+  final HashSet<List<Integer>> heldKeys= new HashSet<>();
   int asked;
 
   SkMenus(_Frame frame){ this.frame= frame; }
@@ -283,7 +286,10 @@ final class SkMenus{
 
   boolean key(KeyEvent e){
     int c= e.getKeyCode();
-    if (!isOpen() || c == _FluentGUI.code(frame.gui.fullScreenKey)){ return false; }
+    var id= List.of(c, e.getKeyLocation());
+    if (!isOpen()){ return heldKeys.contains(id); }
+    if (c == _FluentGUI.code(frame.gui.fullScreenKey)){ return false; }
+    heldKeys.add(id);
     int k= open.size() - 1;
     if (c == _FluentGUI.code(frame.gui.closeKey)){ close(k); return true; }
     switch (c){

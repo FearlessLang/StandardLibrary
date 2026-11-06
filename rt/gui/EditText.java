@@ -25,6 +25,7 @@ import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -607,7 +608,8 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     t.input(s);
   }
   @Override public void focusGained(FocusEvent e){ frame.keyboard = true; }
-  @Override public void focusLost(FocusEvent e){ frame.keyboard = false; }
+  @Override public void keyReleased(KeyEvent e){ frame.menus.heldKeys.remove(List.of(e.getKeyCode(), e.getKeyLocation())); }
+  @Override public void focusLost(FocusEvent e){ frame.keyboard = false; frame.menus.heldKeys.clear(); }
 
   @Override public void inputMethodTextChanged(InputMethodEvent e){
     var done= new StringBuilder();
