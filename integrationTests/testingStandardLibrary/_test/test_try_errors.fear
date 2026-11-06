@@ -1,4 +1,18 @@
+_TryBoom: {.go: Void -> Error.msg "boom"}
+_TryDeep: {#(n: Nat, t: mut CapTry): Str -> (n == 0).if{.then -> t#{_TryBoom.go}.run{.ok _ -> "ok"; .info i -> i.str}; .else -> this#(n - 1, t)}}
 TestTryErrors: Test {::
+  .check{Block#
+    .let[mut base.Action[base.EList[Nat]]] a= {Try#(ELists#[Nat], {l -> l.add(1)})}
+    .let[base.EList[Nat]] first= {a!}
+    .do{a.run{.ok _ -> Void; .info _ -> Void}}
+    .return{first.size.assertEq 1}
+    }
+  .checkWithSys{sys -> Block#
+    .let[mut base.Action[base.EList[Nat]]] a= {sys.try#(ELists#[Nat], {l -> l.add(1)})}
+    .let[base.EList[Nat]] first= {a!}
+    .do{a.run{.ok _ -> Void; .info _ -> Void}}
+    .return{first.size.assertEq 1}
+    }
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
     .let[mut CapRevocationRoot] root= {real.revocation}
@@ -12,4 +26,5 @@ TestTryErrors: Test {::
     .do{root.start}
     .return{RevokableSystem#(root, sys).try.currentStackTrace.getFirst.fileName.assertEq "_test/test_try_errors.fear"}
     }
+  .checkWithSys{sys -> _TryDeep#(600, sys.try).assertEq(_TryDeep#(5, sys.try))}
   }
