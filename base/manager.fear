@@ -3,7 +3,7 @@
 ///and returns once the manager has applied the message; `.run` and `.compile` return once the mains or the compilation end.
 ///A message the manager refuses is a deterministic error saying why, as the manager window shows it.
 ///`.quit`, `.reset` and `.terminate` naming the project of this program never return: this program ends.
-///A program started by the portable Fearless has no manager: every method is a non deterministic error.
+///A program started by the portable Fearless has no manager: every call is a non deterministic error.
 ///``name`` is the name of a registered project.
 ///``path`` is the bytes naming an absolute path on this system:
 ///on Windows the UTF-16 code units of the path, little endian (`UStr.utf16Le`);

@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -56,7 +58,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     var bs= List$o$1Instance.asJava(path);
     var bytes= new byte[bs.size()];
     for (var i= 0; i < bytes.length; i += 1){ bytes[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
-    var text= new String(bytes, pathCharset);
+    var text= pathCharset == UTF_16LE ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asCharBuffer().toString() : new String(bytes, pathCharset);
     if (pathCharset == UTF_16LE && bytes.length % 2 != 0){ throw detErr("The message \""+verb+"\" is not sent: a path of Windows is 16 bit units, so its bytes are an even number."); }
     if (!absolute(text)){ throw detErr("The message \""+verb+"\" is not sent: the path \""+InputFile.portable(text)+"\"\nis not an absolute path of this system other than the root of a drive."); }
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)));
