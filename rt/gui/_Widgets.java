@@ -651,10 +651,10 @@ final class _Frame implements Frame$1c$0{
   private int fps= 30;
   private long modelPeriodNs;
   private ArrayList<MF$7$1> modelTickActions= new ArrayList<>();// live, EDT confined
-  private float opacity= 1f;
+  float opacity= 1f;
   private String title= "";
-  private int canvasW= 1000;
-  private int canvasH= 1000;
+  int canvasW= 1000;
+  int canvasH= 1000;
   private int bands= 0xFF000000;
   private Consumer$ao$1 onResize;
   private MF$7$1 onClose;
@@ -854,7 +854,7 @@ final class _Frame implements Frame$1c$0{
     top.component.setBounds(0, 0, canvasW, canvasH);
     top.component.validate();
     layoutDirty.set(false);
-    stage= new Stage(this, canvasW, canvasH, opacity);
+    stage= new Stage(this);
     stage.f.validate();
     render();
     // Nothing after startRuntime may throw: abortBeforeStart asserts the
@@ -897,11 +897,12 @@ final class _Frame implements Frame$1c$0{
     int ww= extent((WidthNat$as$0) w, "virtual pixel space width");
     int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
     if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
-    canvasW = ww;
-    canvasH = hh;
-    if (!started){ return this; }
+    if (!started){ canvasW = ww; canvasH = hh; return this; }
     onEdtAndWait(() -> {
-      stage.canvas(ww, hh);
+      if (ww == canvasW && hh == canvasH){ return; }
+      canvasW = ww;
+      canvasH = hh;
+      stage.canvas();
       top.component.setBounds(0, 0, ww, hh);
     });
     markLayoutDirty();
@@ -920,7 +921,7 @@ final class _Frame implements Frame$1c$0{
     int v= alpha(a);
     if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this CapGui: the window cannot be more transparent than CapGui.opacityFloor allows"); }
     opacity = v / 255f;
-    if (started){ onEdtAndWait(() -> stage.opacity(opacity)); }
+    if (started){ onEdtAndWait(stage::opacity); }
     return this;
   }
   private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
@@ -1018,7 +1019,7 @@ final class _Frame implements Frame$1c$0{
     onEdtAndWait(() -> {
       uninstall(top);
       install(t);
-      t.component.setBounds(0, 0, stage.canvasW, stage.canvasH);
+      t.component.setBounds(0, 0, canvasW, canvasH);
       // The old tree is gone: no Exited events for it, and a gesture in
       // progress is forgotten (an in-flight release finds no press target,
       // like a release over empty space).
