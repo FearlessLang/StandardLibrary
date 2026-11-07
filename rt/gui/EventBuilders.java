@@ -1,7 +1,6 @@
 package _base;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -367,13 +366,14 @@ final class SkMouse extends MouseAdapter{
     return res;
   }
 
-  private static AWidget deepest(Component c, int x, int y){
+  private static AWidget deepest(SkComponent c, int x, int y){
     if (!c.contains(x, y)){ return null; }
-    var w= ((SkComponent) c).w;
-    for (var k : ((Container) c).getComponents()){
+    var w= c.w;
+    for (int i= c.getComponentCount() - 1; i >= 0; i -= 1){
+      var k= c.getComponent(i);
       var r= w.region(k);
       if (w.hides(k) || r != null && !r.contains(x, y)){ continue; }
-      var d= deepest(k, x - k.getX(), y - k.getY());
+      var d= deepest((SkComponent) k, x - k.getX(), y - k.getY());
       if (d != null){ return d; }
     }
     return w;
