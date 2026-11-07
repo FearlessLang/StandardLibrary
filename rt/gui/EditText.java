@@ -503,8 +503,6 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       caret(cv, v.h());
     }
     cv.restoreToCount(save);
-    if (barRight()){ Sk.bar(cv, this, true); }
-    if (barBottom()){ Sk.bar(cv, this, false); }
   }
   private void line(Canvas cv, VLine v, boolean focused){
     int a= selA();

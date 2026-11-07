@@ -14,7 +14,6 @@ import java.util.List;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 final class CMenu implements Menu$o$0{
@@ -99,12 +98,7 @@ final class SkMenus{
     boolean scrolls(){ return content > box.height; }
     int room(){ return scrolls() ? AWidget.bar + 4 : 0; }
     Rectangle track(){ return new Rectangle(box.x + box.width - 3 - AWidget.bar, box.y + 4, AWidget.bar, Math.max(0, box.height - 8)); }
-    Rectangle thumb(){
-      var t= track();
-      int size= AWidget.thumbLength(t.height, box.height, content);
-      int at= (int) ((long) (t.height - size) * scroll[0] / (content - box.height));
-      return new Rectangle(t.x, t.y + at, t.width, size);
-    }
+    Rectangle thumb(){ return AWidget.thumb(track(), true, box.height, content, scroll[0]); }
     void scrollTo(int v){ scroll[0] = Math.clamp(v, 0, content - box.height); }
     int height(int i){ return (i + 1 < tops.length ? tops[i + 1] : content - 4) - tops[i]; }
   }
@@ -280,9 +274,7 @@ final class SkMenus{
   private void dragBar(Point p){
     var o= open.get(dragMenu);
     var t= o.track();
-    int free= t.height - o.thumb().height;
-    if (free == 0){ return; }
-    o.scrollTo((int) ((long) (p.y - grab - t.y) * (o.content() - o.box().height) / free));
+    o.scrollTo(AWidget.scrollFor(t, o.thumb(), true, p.y - grab - t.y, o.content() - o.box().height));
   }
 
   boolean key(KeyEvent e){
@@ -333,13 +325,7 @@ final class SkMenus{
       cv.clipRect(inside);
       for (int i= 0; i < o.tops().length; i += 1){ paint(cv, k, i); }
       cv.restoreToCount(save);
-      if (!o.scrolls()){ continue; }
-      var t= o.track();
-      var m= o.thumb();
-      Sk.paint.setColor(0x30000000);
-      cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, AWidget.bar / 2f), Sk.paint);
-      Sk.paint.setColor(0xA0000000);
-      cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), Sk.paint);
+      if (o.scrolls()){ Sk.bar(cv, o.track(), o.thumb(), 0, false); }
     }
   }
 

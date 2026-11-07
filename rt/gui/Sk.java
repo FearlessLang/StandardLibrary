@@ -233,6 +233,7 @@ interface Sk{
       cv.restoreToCount(save);
     }
     c.w.skOver(cv);
+    bars(cv, c.w);
   }
 
   static void head(Canvas cv, _Sections p, _Sections.Section s){
@@ -252,13 +253,15 @@ interface Sk{
     cv.drawLine(x - 3, y + 3, x + 3, y - 3, stroke);
   }
 
-  static void bar(Canvas cv, AWidget p, boolean vert){
-    var t= p.track(vert);
-    var m= p.thumb(vert);
-    paint.setColor(p.fg & 0xFFFFFF | 0x30000000);
+  static void bars(Canvas cv, AWidget s){
+    if (s.barRight()){ bar(cv, s.track(true), s.thumb(true), s.fg, s.maxScrollY() == 0); }
+    if (s.barBottom()){ bar(cv, s.track(false), s.thumb(false), s.fg, s.maxScrollX() == 0); }
+  }
+
+  static void bar(Canvas cv, java.awt.Rectangle t, java.awt.Rectangle m, int rgb, boolean fits){
+    paint.setColor(rgb & 0xFFFFFF | 0x30000000);
     cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, AWidget.bar / 2f), paint);
-    boolean fits= (vert ? p.maxScrollY() : p.maxScrollX()) == 0;
-    paint.setColor(p.fg & 0xFFFFFF | (fits ? 0x30000000 : 0xA0000000));
+    paint.setColor(rgb & 0xFFFFFF | (fits ? 0x30000000 : 0xA0000000));
     cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), paint);
   }
 

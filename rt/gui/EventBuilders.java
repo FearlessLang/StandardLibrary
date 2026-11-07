@@ -242,10 +242,11 @@ final class SkMouse extends MouseAdapter{
 
   private void dragThumb(Thumb g, Point p){
     var q= g.widget();
+    boolean v= g.vert();
     var at= SwingUtilities.convertPoint(top(), p, q.component);
-    var t= q.track(g.vert());
-    int s= q.scrollFor(g.vert(), g.vert() ? at.y - g.grab() - t.y : at.x - g.grab() - t.x);
-    if (g.vert()){ q.scrollTo(q.scrollX, s); }
+    var t= q.track(v);
+    int s= AWidget.scrollFor(t, q.thumb(v), v, v ? at.y - g.grab() - t.y : at.x - g.grab() - t.x, v ? q.maxScrollY() : q.maxScrollX());
+    if (v){ q.scrollTo(q.scrollX, s); }
     else{ q.scrollTo(s, q.scrollY); }
   }
 

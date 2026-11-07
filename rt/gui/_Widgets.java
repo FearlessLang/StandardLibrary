@@ -164,10 +164,6 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override boolean barRight(){ return vertical ? lineScroll : stackScroll; }
   @Override boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
   @Override Rectangle clip(Component k){ return barRight() || barBottom() ? view() : null; }
-  @Override void skOver(Canvas cv){
-    if (barRight()){ Sk.bar(cv, this, true); }
-    if (barBottom()){ Sk.bar(cv, this, false); }
-  }
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
   @Override public Object mut$minPerLine$1(Object n){
@@ -457,22 +453,17 @@ abstract class AWidget implements Widget$2o$1{
       ? new Rectangle(component.getWidth() - right - bar, top, bar, viewH())
       : new Rectangle(left, component.getHeight() - bottom - bar, viewW(), bar);
   }
-  Rectangle thumb(boolean vert){
-    var t= track(vert);
+  Rectangle thumb(boolean vert){ return vert ? thumb(track(true), true, viewH(), contentH, scrollY) : thumb(track(false), false, viewW(), contentW, scrollX); }
+  static Rectangle thumb(Rectangle t, boolean vert, int view, int content, int scroll){
     int length= vert ? t.height : t.width;
-    int view= vert ? viewH() : viewW();
-    int content= Math.max(view, vert ? contentH : contentW);
-    int size= thumbLength(length, view, content);
-    int at= (int) ((long) (length - size) * (vert ? scrollY : scrollX) / Math.max(1, content - view));
-    return vert ? new Rectangle(t.x, t.y + at, bar, size) : new Rectangle(t.x + at, t.y, size, bar);
+    content = Math.max(view, content);
+    int size= Math.min(length, Math.max(Math.min(4 * bar, length / 2), (int) ((long) length * view / Math.max(1, content))));
+    int at= (int) ((long) (length - size) * scroll / Math.max(1, content - view));
+    return vert ? new Rectangle(t.x, t.y + at, t.width, size) : new Rectangle(t.x + at, t.y, size, t.height);
   }
-  static int thumbLength(int length, int view, int content){ return Math.min(length, Math.max(Math.min(4 * bar, length / 2), (int) ((long) length * view / Math.max(1, content)))); }
-  int scrollFor(boolean vert, int thumbAt){
-    var t= track(vert);
-    int size= vert ? thumb(vert).height : thumb(vert).width;
-    int length= (vert ? t.height : t.width) - size;
-    int max= vert ? maxScrollY() : maxScrollX();
-    return (int) ((long) thumbAt * max / Math.max(1, length));
+  static int scrollFor(Rectangle t, Rectangle m, boolean vert, int thumbAt, int max){
+    int free= vert ? t.height - m.height : t.width - m.width;
+    return (int) ((long) thumbAt * max / Math.max(1, free));
   }
   void skOver(Canvas cv){}
   Dimension own(){ return new Dimension(width, height); }
