@@ -108,6 +108,7 @@ final class SkMenus{
     void scrollTo(int v){ scroll[0] = Math.clamp(v, 0, content - box.height); }
     int height(int i){ return (i + 1 < tops.length ? tops[i + 1] : content - 4) - tops[i]; }
   }
+  record Hit(int menu, int item){}
   static final int row= 24;
   static final int gap= 9;
   static final int pad= 8;
@@ -210,17 +211,17 @@ final class SkMenus{
     add(m, new Rectangle(o.box().x, o.box().y + o.tops()[i] - 4 - o.scroll()[0], o.box().width, o.height(i)), true, i);
   }
 
-  private int[] hit(Point p){
+  private Hit hit(Point p){
     for (int k= open.size() - 1; k >= 0; k -= 1){
       var o= open.get(k);
       if (!o.box().contains(p)){ continue; }
-      if (onBar(o, p)){ return new int[]{ k, -1 }; }
+      if (onBar(o, p)){ return new Hit(k, -1); }
       int y= p.y - o.box().y + o.scroll()[0];
       for (int i= 0; i < o.tops().length; i += 1){
         boolean on= o.menu().items.get(i) != null && y >= o.tops()[i] && y < o.tops()[i] + o.height(i);
-        if (on){ return new int[]{ k, i }; }
+        if (on){ return new Hit(k, i); }
       }
-      return new int[]{ k, -1 };
+      return new Hit(k, -1);
     }
     return null;
   }
@@ -232,8 +233,8 @@ final class SkMenus{
     if (second || !isOpen()){ swallow = true; return true; }
     var h= hit(p);
     if (h == null){ close(0); swallow = true; return true; }
-    if (left && onBar(open.get(h[0]), p)){ pressBar(h[0], p); return true; }
-    if (left){ pressMenu = h[0]; pressItem = h[1]; }
+    if (left && onBar(open.get(h.menu()), p)){ pressBar(h.menu(), p); return true; }
+    if (left){ pressMenu = h.menu(); pressItem = h.item(); }
     return true;
   }
 
@@ -249,7 +250,7 @@ final class SkMenus{
   void wheel(Point p, double rotation){
     var h= hit(p);
     if (h == null){ return; }
-    var o= open.get(h[0]);
+    var o= open.get(h.menu());
     o.scrollTo(o.scroll()[0] + (int) Math.round(rotation * 40));
     moved(p);
   }
@@ -260,9 +261,9 @@ final class SkMenus{
     if (!left){ return true; }
     if (dragMenu >= 0){ dragMenu = -1; return true; }
     var h= hit(p);
-    boolean same= h != null && h[1] >= 0 && h[0] == pressMenu && h[1] == pressItem;
+    boolean same= h != null && h.item() >= 0 && h.menu() == pressMenu && h.item() == pressItem;
     pressMenu = -1;
-    if (same){ choose(h[0], h[1]); }
+    if (same){ choose(h.menu(), h.item()); }
     return true;
   }
 
@@ -270,9 +271,9 @@ final class SkMenus{
     if (!isOpen()){ return swallow; }
     if (dragMenu >= 0){ dragBar(p); return true; }
     var h= hit(p);
-    boolean on= h != null && h[1] >= 0 && open.get(h[0]).menu().items.get(h[1]).enabled;
-    highMenu = on ? h[0] : -1;
-    highItem = on ? h[1] : -1;
+    boolean on= h != null && h.item() >= 0 && open.get(h.menu()).menu().items.get(h.item()).enabled;
+    highMenu = on ? h.menu() : -1;
+    highItem = on ? h.item() : -1;
     return true;
   }
 
