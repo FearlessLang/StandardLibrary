@@ -218,7 +218,7 @@ interface Sk{
   }
 
   static void paintNode(SkComponent c, Canvas cv){
-    c.w.textWarning = c.w.warned(c.w.textWarning, textClip(c.w));
+    c.w.textWarning = c.w.warned(c.w.textWarning, c.w.textClip());
     c.w.sk(cv);
     for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
@@ -318,14 +318,6 @@ interface Sk{
     float h= s.component.getHeight();
     paint.setColor(s.bg);
     cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2)), paint);
-  }
-
-  static String textClip(AWidget s){
-    if (s.text.isEmpty()){ return null; }
-    var need= textSizeWithInsets(s);
-    var c= s.component;
-    if (need.width <= c.getWidth() && need.height <= c.getHeight()){ return null; }
-    return "the text of " + s.describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + c.getWidth() + "x" + c.getHeight() + ": the text is clipped";
   }
 
   static String boundsClip(SkComponent c, Component k){
