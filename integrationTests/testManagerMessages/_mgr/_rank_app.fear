@@ -5,10 +5,12 @@ use base.Lists as L;
 Pub: base.DataRead{}
 Path: { #(s: mut base.System): base.List[base.Byte] -> s.dataRead(Pub).read(L#("path.bin")).readBytes }
 Relative: { #(s: mut base.System): base.List[base.Byte] -> s.dataRead(Pub).read(L#("relative.bin")).readBytes }
+Root: { #(s: mut base.System): base.List[base.Byte] -> s.dataRead(Pub).read(L#("root.bin")).readBytes }
 
 ManagerMessageTests: UnitTests{::
   .test ManagerMessages
   .test ManagerMessagesRefused
+  .test ManagerMessagesRoot
   }
 
 ManagerMessages: Test{::
@@ -47,4 +49,11 @@ ManagerMessagesRefused: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
      `The message "SelectMains" is not sent: the mains are all different, and "hello.A" is named twice.`
     )}}, {t -> t.manager.selectMains("hello", L#("hello.A", "hello.A"))})
+  }
+
+ManagerMessagesRoot: Test{::
+  .checkDetErrWithSys({::.isMsg{::.startsWith `The message "Register" is not sent: the path "`}}, {t -> base.Block#
+      .openIso s = t
+      .return{s.manager.register(Root#s)}
+      })
   }

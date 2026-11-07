@@ -1,0 +1,12 @@
+use base.Main as Main;
+use base.Block as Block;
+
+Quit: Main { sys -> Block#
+  .do{ sys.manager.quit }
+  .return{ sys.out.println "quit returned" }
+  }
+Reset: Main { sys -> Block#
+  .do{ sys.manager.reset }
+  .return{ sys.out.println "reset returned" }
+  }
+RunsQuit: Main { sys -> sys.out.println((sys.manager.run "quitter").getStr) }
