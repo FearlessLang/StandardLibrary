@@ -98,7 +98,7 @@ final class SkMenus{
   record Open(CMenu menu, Rectangle box, int[] tops, int textAt, int from, int content, int[] scroll){
     boolean scrolls(){ return content > box.height; }
     int room(){ return scrolls() ? AWidget.bar + 4 : 0; }
-    Rectangle track(){ return new Rectangle(box.x + box.width - 3 - AWidget.bar, box.y + 4, AWidget.bar, box.height - 8); }
+    Rectangle track(){ return new Rectangle(box.x + box.width - 3 - AWidget.bar, box.y + 4, AWidget.bar, Math.max(0, box.height - 8)); }
     Rectangle thumb(){
       var t= track();
       int size= AWidget.thumbLength(t.height, box.height, content);
@@ -326,9 +326,10 @@ final class SkMenus{
       Sk.paint.setColor(0xFF767676);
       cv.drawRect(Rect.makeXYWH(b.x, b.y, b.width, b.height), Sk.paint);
       Sk.paint.setColor(0xFFFAFAFA);
-      cv.drawRect(Rect.makeXYWH(b.x + 1, b.y + 1, b.width - 2, b.height - 2), Sk.paint);
+      var inside= Rect.makeXYWH(b.x + 1, b.y + 1, b.width - 2, Math.max(0, b.height - 2));
+      cv.drawRect(inside, Sk.paint);
       int save= cv.save();
-      cv.clipRect(Rect.makeXYWH(b.x + 1, b.y + 1, b.width - 2, b.height - 2));
+      cv.clipRect(inside);
       for (int i= 0; i < o.tops().length; i += 1){ paint(cv, k, i); }
       cv.restoreToCount(save);
       if (!o.scrolls()){ continue; }
