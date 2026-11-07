@@ -40,8 +40,9 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     catch (IOException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: the manager program could not be started."); }
   }
   private static Object send(String verb, Stream<String> args, Function<String,Object> result){
+    var words= args.toList();
     if (launcher == null){ throw nonDetErr("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }
-    return result.apply(applied(verb, message(verb, args.toList())));
+    return result.apply(applied(verb, message(verb, words)));
   }
   private static String applied(String verb, String text){
     if (text.startsWith(applied)){ return text.substring(applied.length()); }
@@ -61,7 +62,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)));
   }
   private static boolean absolute(String path){
-    try{ var p= Path.of(path); return p.isAbsolute() && p.getFileName() != null; }
+    try{ var p= Path.of(path); return p.isAbsolute() && p.normalize().getFileName() != null; }
     catch (InvalidPathException _){ return false; }
   }
   private static String name(String verb, Object name){ return word(verb, AssetBytesRead.str(name), projectName, "a project name"); }
