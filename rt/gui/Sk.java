@@ -218,8 +218,6 @@ interface Sk{
   static void paintNode(SkComponent c, Canvas cv){
     c.w.textWarning = c.w.warned(c.w.textWarning, textClip(c.w));
     c.w.sk(cv);
-    int outer= cv.save();
-    c.w.clipChildren(cv);
     for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
       if (c.w.hides(k)){ continue; }
@@ -227,14 +225,13 @@ interface Sk{
       kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k));
       kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i));
       int save= cv.save();
-      var r= c.w.region(k);
+      var r= c.w.clip(k);
       if (r != null){ cv.clipRect(Rect.makeXYWH(r.x, r.y, r.width, r.height)); }
       cv.translate(k.getX(), k.getY());
       cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
       paintNode((SkComponent) k, cv);
       cv.restoreToCount(save);
     }
-    cv.restoreToCount(outer);
     c.w.skOver(cv);
   }
 

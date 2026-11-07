@@ -163,10 +163,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$centered$1(Object b){ return reStyle(() -> centered = Util.isTrue(b)); }
   @Override boolean barRight(){ return vertical ? lineScroll : stackScroll; }
   @Override boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
-  @Override void clipChildren(Canvas cv){
-    if (!barRight() && !barBottom()){ return; }
-    cv.clipRect(io.github.humbleui.types.Rect.makeXYWH(left, top, viewW(), viewH()));
-  }
+  @Override Rectangle clip(Component k){ return barRight() || barBottom() ? view() : null; }
   @Override void skOver(Canvas cv){
     if (barRight()){ Sk.bar(cv, this, true); }
     if (barBottom()){ Sk.bar(cv, this, false); }
@@ -433,9 +430,9 @@ abstract class AWidget implements Widget$2o$1{
   }
   abstract Dimension need();
   void fit(){}
-  void clipChildren(Canvas cv){}
   boolean hides(Component k){ return false; }
   Rectangle region(Component k){ return null; }
+  Rectangle clip(Component k){ return region(k); }
   boolean barRight(){ return false; }
   boolean barBottom(){ return false; }
   int edgeW(){ return left + right + (barRight() ? bar : 0); }

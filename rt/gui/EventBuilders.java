@@ -354,21 +354,14 @@ final class SkMouse extends MouseAdapter{
 
   private SkComponent top(){ return frame.top.component; }
 
-  private AWidget deepestAt(Point p){
-    AWidget res= deepest(top(), p.x, p.y);
-    for (var t : chainOf(res)){
-      boolean hides= (t.barRight() || t.barBottom()) && !t.view().contains(SwingUtilities.convertPoint(top(), p, t.component));
-      if (hides){ res = t; }
-    }
-    return res;
-  }
+  private AWidget deepestAt(Point p){ return deepest(top(), p.x, p.y); }
 
   private static AWidget deepest(SkComponent c, int x, int y){
     if (!c.contains(x, y)){ return null; }
     var w= c.w;
     for (int i= c.getComponentCount() - 1; i >= 0; i -= 1){
       var k= c.getComponent(i);
-      var r= w.region(k);
+      var r= w.clip(k);
       if (w.hides(k) || r != null && !r.contains(x, y)){ continue; }
       var d= deepest((SkComponent) k, x - k.getX(), y - k.getY());
       if (d != null){ return d; }
