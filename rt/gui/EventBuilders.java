@@ -181,7 +181,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mouseMoved(MouseEvent e){
-    if (tipOff){ tipOff = false; tipSince = System.nanoTime(); tipAt = null; }
+    if (tipOff || tipAt == null){ tipOff = false; tipSince = System.nanoTime(); tipAt = null; }
     var p= point(e);
     if (frame.menus.moved(p)){ return; }
     updateHover(p);
