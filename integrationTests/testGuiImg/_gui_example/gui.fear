@@ -3,11 +3,10 @@ CapGui:Consumer[mut Frame]{::
   .title "Gui buttons replace canvas painter"
   .virtualPixelSpace(Width#532, Height#424)
   .fps 30
-//.modelFps(100)//behaves like a button.
   .content.border{::
     .background(Color.ghostWhite)
     .north.pane(mut ShapeHeader)
-    .center.pane{:: .style(ShapeCanvas) .save(this.canvas)}//how to avoid bad errors for () instead of {}
+    .center.pane{:: .style(ShapeCanvas) .save(this.canvas)}
     .south.pane(mut ShapeButtons{this.model})
     };
 

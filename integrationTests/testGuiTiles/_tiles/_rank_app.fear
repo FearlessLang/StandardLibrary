@@ -41,6 +41,7 @@ TileGrid:Main{sys -> Block#
   .return{sys.gui.name "Tiles" .run{f -> Block#(f
     .save frame
     .virtualPixelSpace(Width#660, Height#420)
+    .modelFps(4, {:: .action{m.settle}})
     .content.border{::
       .background(Color.ghostWhite)
       .north.pane{:: .fill
@@ -142,6 +143,11 @@ Managers:{ #(grid: mut Slot[mut Pane], status: mut Slot[mut Label], frame: mut S
       .do{cycle.set(cycle.get + 1)}
       .do{self.set(i, States.all.get(cycle.get.getRem 8))}
       .do{self.say((projects.get.get i).name+": "+((projects.get.get i).state.text))}
+      .return{self.render};
+    mut .settle: Void -> Block#
+      .let[Instant] now= {frame!.elapsed}
+      .if{projects.get.flow.any{p -> (p.state.at now).text != (p.state.text)}.not} .return{Void}
+      .do{projects.set(projects.get.flow.map{p -> p.with(p.state.at now)}.list)}
       .return{self.render};
     mut .click(i: Nat): Void -> Block#
       .let[Instant] now= {frame!.elapsed}
