@@ -49,11 +49,9 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       change();
       var s= new Section(title, c);
       sections.add(s);
-      component.add(title.component);
-      component.add(c.component);
+      attach(title, null, -1);
+      attach(c, null, -1);
       grow(s);
-      title.changeable = false;
-      c.changeable = false;
     });
     frame.markLayoutDirty();
     return this;
@@ -68,12 +66,10 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     return reStyle(() -> {
       var s= at(i);
       var old= title ? s.title : s.content;
-      frame.mouse.detached(old.component);
-      component.remove(old.component);
-      component.add(w.component);
+      detach(old.component);
+      attach(w, null, -1);
       if (title){ s.title = w; } else { s.content = w; }
       grow(s);
-      w.changeable = false;
     });
   }
   int lead(){ return tabs ? 0 : mark + widthGap; }
@@ -186,10 +182,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     return reStyle(() -> {
       var s= at(k);
       sections.remove(s);
-      for (var w : List.of(s.title, s.content)){
-        frame.mouse.detached(w.component);
-        component.remove(w.component);
-      }
+      for (var w : List.of(s.title, s.content)){ detach(w.component); }
     });
   }
   @Override public Object mut$title$1(Object i){ return replacer(Util.natToLong(i), true); }
