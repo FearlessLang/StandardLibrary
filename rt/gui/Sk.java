@@ -82,6 +82,11 @@ interface Sk{
       if (best == null){ return width; }
       return best.rtl() ? best.x() + best.advance() : best.x();
     }
+    double advance(int from, int to){
+      double res= 0;
+      for (var g : glyphs){ if (g.cluster() >= from && g.cluster() < to){ res += g.advance(); } }
+      return res;
+    }
     int offsetAt(double x){
       var cs= glyphs.stream().mapToInt(G::cluster).distinct().sorted().toArray();
       int res= 0;
@@ -404,10 +409,9 @@ interface Sk{
   }
 
   private static int fit(String s, Line whole, BreakIterator b, int from, int size, double above, double below, int ww){
-    double x0= whole.coord(from);
     var fits= new ArrayList<Integer>();
     for (int at= b.following(from); at != BreakIterator.DONE; at = b.next()){
-      if (whole.coord(trimmed(s, from, at)) - x0 > ww){ break; }
+      if (whole.advance(from, trimmed(s, from, at)) > ww){ break; }
       fits.add(at);
     }
     for (int i= fits.size() - 1; i >= 0; i -= 1){
