@@ -108,6 +108,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   Sk.TextSettings laidSettings;
   HashMap<String,ArrayList<Seg>> shaped= new HashMap<>();
   ArrayList<VLine> lines= new ArrayList<>();
+  int tallest;
 
   AEditText(_Frame frame, boolean u){
     super(frame);
@@ -170,6 +171,14 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
 
   int lineHeight(){ return (int) Math.max(1, textSettings.lineHeight()); }
+  @Override String textClip(){
+    layout();
+    if (buf.isEmpty()){ return null; }
+    int needW= edgeW() + 1;
+    int needH= edgeH() + tallest;
+    if (needW <= component.getWidth() && needH <= component.getHeight()){ return null; }
+    return "the text of " + describe() + " needs at least " + needW + "x" + needH + " insets and scroll bars included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
+  }
   int selA(){ return Math.min(caret, anchor); }
   int selB(){ return Math.max(caret, anchor); }
 
@@ -188,6 +197,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     lines = new ArrayList<>();
     int w= 0;
     int y= 0;
+    tallest = 0;
     for (int s= 0;;){
       int e= buf.indexOf("\n", s);
       int end= e < 0 ? buf.length() : e;
@@ -198,6 +208,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
         int h= Math.max(lineHeight(), n.height);
         lines.add(new VLine(s + g.from(), s + g.to(), g.line(), i < segs.size() - 1, y, n.width, h));
         w = Math.max(w, n.width);
+        tallest = Math.max(tallest, h);
         y += h;
       }
       if (e < 0){ break; }

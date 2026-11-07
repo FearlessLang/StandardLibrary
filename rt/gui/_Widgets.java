@@ -420,6 +420,12 @@ abstract class AWidget implements Widget$2o$1{
   abstract void sk(Canvas cv);
   String kind(){ return getClass().getSimpleName().substring(1); }
   String describe(){ return "a " + kind() + (text.isEmpty() ? "" : " \"" + text + "\""); }
+  String textClip(){
+    if (text.isEmpty()){ return null; }
+    var need= Sk.textSizeWithInsets(this);
+    if (need.width <= component.getWidth() && need.height <= component.getHeight()){ return null; }
+    return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
+  }
   String warned(String was, String now){
     if (was == null && now != null){ frame.frame.warn(now); }
     return now;
