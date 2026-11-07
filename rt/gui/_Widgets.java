@@ -107,8 +107,8 @@ final class _Picture extends AWidget implements Picture$5c$0{
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
     if (image == null){ return; }
-    int cw= component.getWidth() - edgeW();
-    int ch= component.getHeight() - edgeH();
+    int cw= viewW();
+    int ch= viewH();
     float s= Math.max((float) cw / image.getWidth(), (float) ch / image.getHeight());
     float iw= keepAspect ? image.getWidth() * s : cw;
     float ih= keepAspect ? image.getHeight() * s : ch;
@@ -442,8 +442,8 @@ abstract class AWidget implements Widget$2o$1{
   boolean barBottom(){ return false; }
   int edgeW(){ return left + right + (barRight() ? bar : 0); }
   int edgeH(){ return top + bottom + (barBottom() ? bar : 0); }
-  int viewW(){ return component.getWidth() - edgeW(); }
-  int viewH(){ return component.getHeight() - edgeH(); }
+  int viewW(){ return Math.max(0, component.getWidth() - edgeW()); }
+  int viewH(){ return Math.max(0, component.getHeight() - edgeH()); }
   Rectangle view(){ return new Rectangle(left, top, viewW(), viewH()); }
   int maxScrollX(){ return barBottom() ? Math.max(0, contentW - viewW()) : 0; }
   int maxScrollY(){ return barRight() ? Math.max(0, contentH - viewH()) : 0; }
