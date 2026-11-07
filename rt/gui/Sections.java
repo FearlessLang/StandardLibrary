@@ -19,12 +19,12 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   static final class Section{
     AWidget title;
     AWidget content;
-    boolean expanded;
     Rectangle head= new Rectangle();
     Section(AWidget title, AWidget content){ this.title= title; this.content= content; }
   }
   record Part(Section s, boolean x){}
   final ArrayList<Section> sections= new ArrayList<>();
+  Section expanded;
   static final SectionHandler$j0g$0 expandClicked= new SectionHandler$j0g$0(){ @Override public Object mut$$hash$2(Object s, Object i){
     ((_Sections) s).mut$expand$1(i);
     return Void$o$0.instance;
@@ -107,7 +107,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
       int tw= s.title.fill ? Math.max(t.width, w - lead() - trail()) : t.width;
       s.title.component.setBounds(left + lead(), y, tw, t.height);
       y += t.height + heightGap;
-      if (!s.expanded){ continue; }
+      if (s != expanded){ continue; }
       var c= s.content.own();
       MutableBorderLayout.place(s.content.component, left, y, w, c.height, true, false);
       y += c.height + heightGap;
@@ -124,12 +124,10 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     }
     int gap= sections.isEmpty() ? 0 : rowH + heightGap;
     area = new Rectangle(left, top + gap, viewW(), Math.max(0, viewH() - gap));
-    for (var s : sections){
-      if (s.expanded){ MutableBorderLayout.place(s.content.component, area.x, area.y, area.width, area.height, true, true); }
-    }
+    if (expanded != null){ MutableBorderLayout.place(expanded.content.component, area.x, area.y, area.width, area.height, true, true); }
   }
   @Override boolean hides(Component k){
-    for (var s : sections){ if (s.content.component == k){ return !s.expanded; } }
+    for (var s : sections){ if (s.content.component == k){ return s != expanded; } }
     return false;
   }
   @Override Rectangle region(Component k){
@@ -164,12 +162,9 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     }}));
   }
   void expand(Section s){
-    sections.stream().filter(o -> o != s).forEach(o -> show(o, false));
-    show(s, true);
-  }
-  void show(Section s, boolean expanded){
-    s.expanded = expanded;
-    if (!expanded){ frame.mouse.detached(s.content.component); }
+    if (s == expanded){ return; }
+    if (expanded != null){ frame.mouse.detached(expanded.content.component); }
+    expanded = s;
   }
   @Override public Object mut$section$0(){ return new _RegionFiller(frame, (t, mt) -> _RegionFiller.and(frame, (s, make) -> add(frame.build(t, mt), frame.build(s, make)))); }
   @Override public Object mut$tabs$1(Object b){ return reStyle(() -> tabs = Util.isTrue(b)); }
@@ -179,13 +174,14 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   @Override public Object mut$collapse$1(Object i){
     long k= Util.natToLong(i);
-    return reStyle(() -> show(at(k), false));
+    return reStyle(() -> { if (at(k) == expanded){ expand(null); } });
   }
   @Override public Object mut$remove$1(Object i){
     long k= Util.natToLong(i);
     return reStyle(() -> {
       var s= at(k);
       sections.remove(s);
+      if (s == expanded){ expanded = null; }
       for (var w : List.of(s.title, s.content)){
         frame.mouse.detached(w.component);
         component.remove(w.component);
@@ -204,6 +200,6 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }
   @Override public Object read$isExpanded$1(Object i){
     long k= Util.natToLong(i);
-    return frame.onEdtAndWait(() -> Util.bool(at(k).expanded));
+    return frame.onEdtAndWait(() -> Util.bool(at(k) == expanded));
   }
 }

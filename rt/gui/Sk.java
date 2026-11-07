@@ -240,13 +240,13 @@ interface Sk{
 
   static void head(Canvas cv, _Sections p, _Sections.Section s){
     var h= s.head;
-    paint.setColor(p.fg & 0xFFFFFF | (s.expanded ? 0x40000000 : 0x18000000));
+    paint.setColor(p.fg & 0xFFFFFF | (s == p.expanded ? 0x40000000 : 0x18000000));
     cv.drawRRect(RRect.makeXYWH(h.x, h.y, h.width, h.height, 4), paint);
     stroke.setColor(p.fg & 0xFFFFFF | 0xA0000000);
     float y= h.y + h.height / 2f;
     if (!p.tabs){
       float x= h.x + _Sections.mark / 2f;
-      if (s.expanded){ cv.drawLine(x - 4, y - 2, x, y + 2, stroke); cv.drawLine(x, y + 2, x + 4, y - 2, stroke); }
+      if (s == p.expanded){ cv.drawLine(x - 4, y - 2, x, y + 2, stroke); cv.drawLine(x, y + 2, x + 4, y - 2, stroke); }
       else{ cv.drawLine(x - 2, y - 4, x + 2, y, stroke); cv.drawLine(x + 2, y, x - 2, y + 4, stroke); }
     }
     if (p.onClose == null){ return; }
