@@ -138,14 +138,14 @@ class CGraphicsCtx implements Graphics$ao$0{
     bottom = Math.max(bottom, r.getBottom());
     return r;
   }
-  String outside(String what, String noun, int w, int h){
+  String outside(String what, int w, int h){
     var edges= new java.util.ArrayList<String>();
     if (left < 0){ edges.add("left"); }
     if (top < 0){ edges.add("top"); }
     if (right > w){ edges.add("right"); }
     if (bottom > h){ edges.add("bottom"); }
     if (edges.isEmpty()){ return null; }
-    return "the painter of " + what + " of " + w + "x" + h + " draws past its " + String.join(", ", edges) + (edges.size() == 1 ? " edge" : " edges") + ": the part outside the " + noun + " is clipped";
+    return "the painter of " + what + " of " + w + "x" + h + " draws past its " + String.join(", ", edges) + (edges.size() == 1 ? " edge" : " edges") + ": the part outside the widget is clipped";
   }
   @Override public Object read$elapsed$0(){ return elapsed; }
   @Override public Object read$panelWidth$0(){ return panelWidth; }
