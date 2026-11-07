@@ -1,8 +1,10 @@
 package _base;
 
 import io.github.humbleui.skija.Canvas;
+import io.github.humbleui.skija.FilterTileMode;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
+import io.github.humbleui.skija.Matrix33;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.PathBuilder;
@@ -524,14 +526,15 @@ interface Sk{
 
   private static int half(int side, int goal){ return side / 2 >= goal ? side / 2 : side; }
 
-  static Image image(Canvas cv, Image src, Image kept, Rect to){
+  static Image image(Canvas cv, Image src, Image kept, Rect to, Rect room){
     var m= cv.getLocalToDeviceAsMatrix33().getMat();
     var w= Math.max(1, Math.round(to.getWidth() * m[0]));
     var h= Math.max(1, Math.round(to.getHeight() * m[4]));
     var fits= kept != null && kept.getWidth() == halvedSide(src.getWidth(), w) && kept.getHeight() == halvedSide(src.getHeight(), h);
     if (!fits && kept != null && kept != src){ kept.close(); }
     var res= fits ? kept : halved(src, w, h);
-    cv.drawImageRect(res, Rect.makeWH(res.getWidth(), res.getHeight()), to, SamplingMode.LINEAR, null, true);
+    var fit= new Matrix33(to.getWidth() / res.getWidth(), 0, to.getLeft(), 0, to.getHeight() / res.getHeight(), to.getTop(), 0, 0, 1);
+    try (var sh= res.makeShader(FilterTileMode.CLAMP, FilterTileMode.CLAMP, SamplingMode.LINEAR, fit); var p= new Paint().setAntiAlias(false).setShader(sh)){ cv.drawRect(room, p); }
     return res;
   }
 
