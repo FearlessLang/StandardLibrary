@@ -429,39 +429,46 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     });
   }
 
-  void key(KeyEvent e){
+  boolean key(KeyEvent e){
     boolean shift= e.isShiftDown();
     boolean ctrl= e.isControlDown();
-    switch (e.getKeyCode()){
+    int k= e.getKeyCode();
+    switch (k){
       case VK_LEFT, VK_KP_LEFT -> act(() -> horizontal(false, shift));
       case VK_RIGHT, VK_KP_RIGHT -> act(() -> horizontal(true, shift));
-      case VK_UP, VK_KP_UP -> act(() -> vertical(-1, shift));
-      case VK_DOWN, VK_KP_DOWN -> act(() -> vertical(1, shift));
-      case VK_PAGE_UP -> act(() -> vertical(-page(), shift));
-      case VK_PAGE_DOWN -> act(() -> vertical(page(), shift));
+      case VK_UP, VK_KP_UP -> { return acrossLines(() -> vertical(-1, shift)); }
+      case VK_DOWN, VK_KP_DOWN -> { return acrossLines(() -> vertical(1, shift)); }
+      case VK_PAGE_UP -> { return acrossLines(() -> vertical(-page(), shift)); }
+      case VK_PAGE_DOWN -> { return acrossLines(() -> vertical(page(), shift)); }
       case VK_HOME -> act(() -> home(ctrl, shift));
       case VK_END -> act(() -> end(ctrl, shift));
       case VK_BACK_SPACE -> change(this::backspace);
       case VK_DELETE -> change(this::delete);
       case VK_TAB -> frame.tab(shift);
       case VK_ENTER -> enter(shift, ctrl);
-      default -> { if (ctrl && !e.isAltDown()){ shortcut(e.getKeyCode(), shift); } }
+      case VK_A -> { return command(e, () -> act(this::selectAll)); }
+      case VK_C -> { return command(e, () -> act(this::copy)); }
+      case VK_X -> { return command(e, () -> change(this::cut)); }
+      case VK_V -> { return command(e, this::paste); }
+      case VK_Z -> { return command(e, () -> act(shift ? this::redo : this::undo)); }
+      case VK_Y -> { return command(e, () -> act(this::redo)); }
+      default -> { return k >= VK_DEAD_GRAVE && k <= VK_DEAD_SEMIVOICED_SOUND || CTextKeys.types(e); }
     }
+    return true;
+  }
+  private boolean acrossLines(BooleanSupplier onEdt){
+    if (oneLine()){ return false; }
+    act(onEdt);
+    return true;
+  }
+  private static boolean command(KeyEvent e, Runnable r){
+    if (!e.isControlDown() || e.isAltDown()){ return CTextKeys.types(e); }
+    r.run();
+    return true;
   }
   private void enter(boolean shift, boolean ctrl){
     if (ctrl || !shift){ commit(); return; }
     if (!oneLine()){ change(() -> new Req(selA(), selB(), "\n")); }
-  }
-  private void shortcut(int key, boolean shift){
-    switch (key){
-      case VK_A -> act(this::selectAll);
-      case VK_C -> act(this::copy);
-      case VK_X -> change(this::cut);
-      case VK_V -> paste();
-      case VK_Z -> act(shift ? this::redo : this::undo);
-      case VK_Y -> act(this::redo);
-      default -> {}
-    }
   }
   private void paste(){
     var c= Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -573,17 +580,6 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   char high;
   CTextKeys(_Frame frame){ this.frame= frame; }
 
-  boolean uses(KeyEvent e){
-    var t= frame.focus;
-    int k= e.getKeyCode();
-    if (t == null || frame.reserved(k)){ return false; }
-    return switch (k){
-      case VK_LEFT, VK_RIGHT, VK_KP_LEFT, VK_KP_RIGHT, VK_HOME, VK_END, VK_BACK_SPACE, VK_DELETE, VK_ENTER, VK_TAB -> true;
-      case VK_UP, VK_DOWN, VK_KP_UP, VK_KP_DOWN, VK_PAGE_UP, VK_PAGE_DOWN -> !t.oneLine();
-      case VK_A, VK_C, VK_X, VK_V, VK_Z, VK_Y -> e.isControlDown() && !e.isAltDown() || types(e);
-      default -> k >= VK_DEAD_GRAVE && k <= VK_DEAD_SEMIVOICED_SOUND || types(e);
-    };
-  }
   static boolean typesWith(java.awt.event.InputEvent e){ return e.isAltDown() == e.isControlDown() || e.isAltGraphDown(); }
   static boolean types(KeyEvent e){
     char c= e.getKeyChar();
@@ -592,9 +588,8 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   @Override public void keyPressed(KeyEvent e){
     if (frame.menus.key(e)){ reservedDown = true; e.consume(); return; }
     reservedDown = frame.reserved(e.getKeyCode());
-    if (!uses(e)){ return; }
-    e.consume();
-    frame.focus.key(e);
+    if (frame.focus == null || reservedDown){ return; }
+    if (frame.focus.key(e)){ e.consume(); }
   }
   @Override public void keyTyped(KeyEvent e){
     var t= frame.focus;
