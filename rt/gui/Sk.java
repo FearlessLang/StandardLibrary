@@ -73,7 +73,12 @@ interface Sk{
   record Glyph(List<Hb.Layer> layers, Rect box){}
   record Run(int from, int to, int font, int level, int script){}
   record G(int font, int glyph, int cluster, boolean rtl, double x, double advance, double dx, double dy){}
-  record Line(String text, int size, List<G> glyphs, double width, boolean rtl){
+  record TextSettings(int size, double above, double below){
+    static final TextSettings label= new TextSettings(12, 1, 0.5);
+    long lineHeight(){ return Math.round(size * (above + below)); }
+    double baseline(float h){ return (h - lineHeight()) / 2d + size * above; }
+  }
+  record Line(String text, TextSettings settings, List<G> glyphs, double width, boolean rtl){
     double coord(int off){
       G best= null;
       for (var g : glyphs){
@@ -131,10 +136,10 @@ interface Sk{
       || t == Character.COMBINING_SPACING_MARK || t == Character.FORMAT || Character.isEmojiModifier(cp);
   }
 
-  static Line shape(String text, int size){ return shape(text, size, new Bidi(text, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT)); }
+  static Line shape(String text, TextSettings settings){ return shape(text, settings, new Bidi(text, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT)); }
 
-  static Line shape(String text, int size, Bidi bidi){
-    if (text.isEmpty()){ return new Line(text, size, List.of(), 0, false); }
+  static Line shape(String text, TextSettings settings, Bidi bidi){
+    if (text.isEmpty()){ return new Line(text, settings, List.of(), 0, false); }
     synchronized (fonts){
       var runs= new ArrayList<Run>();
       int from= 0, font= -1, level= 0, script= Hb.common;
@@ -164,14 +169,14 @@ interface Sk{
       var res= new ArrayList<G>();
       double x= 0;
       for (var r : order){
-        double k= (double) size / upems[r.font()];
+        double k= (double) settings.size() / upems[r.font()];
         boolean rtl= (r.level() & 1) != 0;
         for (var g : Hb.shape(fonts[r.font()], text, r.from(), r.to(), rtl, r.script())){
           res.add(new G(r.font(), g.glyph(), g.cluster(), rtl, x, g.advance() * k, g.dx() * k, -g.dy() * k));
           x += g.advance() * k;
         }
       }
-      return new Line(text, size, List.copyOf(res), x, !bidi.baseIsLeftToRight());
+      return new Line(text, settings, List.copyOf(res), x, !bidi.baseIsLeftToRight());
     }
   }
 
@@ -193,7 +198,7 @@ interface Sk{
     for (var g : line.glyphs()){
       var b= glyph(g.font(), g.glyph()).box();
       if (b == null){ continue; }
-      double k= (double) line.size() / upems[g.font()];
+      double k= (double) line.settings().size() / upems[g.font()];
       double x= g.x() + g.dx();
       res = union(res, Rect.makeLTRB((float) (x + b.getLeft() * k), (float) (g.dy() + b.getTop() * k), (float) (x + b.getRight() * k), (float) (g.dy() + b.getBottom() * k)));
     }
@@ -201,14 +206,10 @@ interface Sk{
   }
 
   static Line line(AWidget s){
-    if (s.line == null){ s.line = shape(s.text, s.textSize); }
+    if (s.line == null){ s.line = shape(s.text, s.textSettings); }
     return s.line;
   }
 
-
-  static long lineHeight(int size, double above, double below){ return Math.round(size * (above + below)); }
-
-  static long lineHeight(AWidget s){ return lineHeight(s.textSize, s.above, s.below); }
 
   static int color(Color$1c$0 c){
     return alpha(c.read$alpha$0()) << 24 | red(c.read$red$0()) << 16
@@ -283,8 +284,8 @@ interface Sk{
   record Tip(String text, List<Line> lines, List<Dimension> needs, int width, int height){}
 
   static Tip tip(String text){
-    var lines= Arrays.stream(text.split("\n", -1)).map(l -> shape(l, 12)).toList();
-    var needs= lines.stream().map(l -> need(l, 1, 0.5)).toList();
+    var lines= Arrays.stream(text.split("\n", -1)).map(l -> shape(l, TextSettings.label)).toList();
+    var needs= lines.stream().map(Sk::need).toList();
     int bw= needs.stream().mapToInt(d -> d.width).max().orElseThrow() + 10;
     int bh= needs.stream().mapToInt(d -> d.height).sum() + 6;
     return new Tip(text, lines, needs, bw, bh);
@@ -305,7 +306,7 @@ interface Sk{
     float ly= y + 3;
     for (int i= 0; i < lines.size(); i += 1){
       var n= needs.get(i);
-      draw(cv, lines.get(i), x + 5, ly, n.width, n.height, 1, 0.5, paint);
+      draw(cv, lines.get(i), x + 5, ly, n.width, n.height, paint);
       ly += n.height;
     }
   }
@@ -356,26 +357,25 @@ interface Sk{
     return null;
   }
 
-  static Dimension need(Line line, double above, double below){
+  static Dimension need(Line line){
+    var t= line.settings();
     var ink= ink(line);
     double w= line.width();
-    long h= lineHeight(line.size(), above, below);
-    double a= line.size() * above;
+    long h= t.lineHeight();
+    double a= t.size() * t.above();
     double overX= Math.max(Math.max(0, -ink.getLeft()), ink.getRight() - w);
     double overY= Math.max(Math.max(0, -ink.getTop() - a), ink.getBottom() + a - h);
     return new Dimension((int) Math.ceil(w + 2 * overX), (int) Math.ceil(h + 2 * overY));
   }
 
-  static double baseline(float h, int size, double above, double below){ return (h - lineHeight(size, above, below)) / 2d + size * above; }
-
-  static void draw(Canvas cv, Line line, float x, float y, float w, float h, double above, double below, Paint p){
-    drawAt(cv, line, x + (w - line.width()) / 2, y + baseline(h, line.size(), above, below), p);
+  static void draw(Canvas cv, Line line, float x, float y, float w, float h, Paint p){
+    drawAt(cv, line, x + (w - line.width()) / 2, y + line.settings().baseline(h), p);
   }
 
   static void drawAt(Canvas cv, Line line, double x, double y, Paint p){
     int fg= p.getColor();
     for (var g : line.glyphs()){
-      float k= (float) ((double) line.size() / upems[g.font()]);
+      float k= (float) ((double) line.settings().size() / upems[g.font()]);
       cv.save();
       cv.translate((float) (x + g.x() + g.dx()), (float) (y + g.dy()));
       cv.scale(k, k);
@@ -388,18 +388,16 @@ interface Sk{
     p.setColor(fg);
   }
 
-  static int roomWidth(String text, int size, double above, double below){ return need(shape(text, size), above, below).width; }
-
-  static ArrayList<Integer> wrap(String s, int size, double above, double below, int ww){
+  static ArrayList<Integer> wrap(String s, TextSettings settings, int ww){
     var res= new ArrayList<Integer>();
     var words= BreakIterator.getLineInstance(Locale.ROOT);
     words.setText(s);
     var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
     clusters.setText(s);
-    var whole= shape(s, size);
+    var whole= shape(s, settings);
     for (int from= 0; from < s.length();){
-      int to= fit(s, whole, words, from, size, above, below, ww);
-      if (to == from){ to = fit(s, whole, clusters, from, size, above, below, ww); }
+      int to= fit(s, whole, words, from, ww);
+      if (to == from){ to = fit(s, whole, clusters, from, ww); }
       if (to == from){ to = clusters.following(from); }
       while (to < s.length() && space(s.charAt(to))){ to += 1; }
       res.add(to);
@@ -409,14 +407,14 @@ interface Sk{
     return res;
   }
 
-  private static int fit(String s, Line whole, BreakIterator b, int from, int size, double above, double below, int ww){
+  private static int fit(String s, Line whole, BreakIterator b, int from, int ww){
     var fits= new ArrayList<Integer>();
     for (int at= b.following(from); at != BreakIterator.DONE; at = b.next()){
       if (whole.advance(from, trimmed(s, from, at)) > ww){ break; }
       fits.add(at);
     }
     for (int i= fits.size() - 1; i >= 0; i -= 1){
-      if (roomWidth(s.substring(from, trimmed(s, from, fits.get(i))), size, above, below) <= ww){ return fits.get(i); }
+      if (need(shape(s.substring(from, trimmed(s, from, fits.get(i))), whole.settings())).width <= ww){ return fits.get(i); }
     }
     return from;
   }
@@ -428,7 +426,7 @@ interface Sk{
   static boolean space(char c){ return c == '\t' || Character.getType(c) == Character.SPACE_SEPARATOR && Character.isWhitespace(c); }
 
   static Dimension textSizeWithInsets(AWidget s){
-    var need= need(line(s), s.above, s.below);
+    var need= need(line(s));
     return new Dimension(need.width + s.left + s.right, need.height + s.top + s.bottom);
   }
 
@@ -443,7 +441,7 @@ interface Sk{
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
     paint.setColor(s.fg);
-    draw(cv, line, x0 + dx, y0 + dy, cw, ch, s.above, s.below, paint);
+    draw(cv, line, x0 + dx, y0 + dy, cw, ch, paint);
     cv.restoreToCount(save);
   }
 

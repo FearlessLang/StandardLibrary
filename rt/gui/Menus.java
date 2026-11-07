@@ -3,7 +3,6 @@ package _base;
 import static _base.Scopes.*;
 import static java.awt.event.KeyEvent.*;
 
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -142,8 +141,8 @@ final class SkMenus{
       var it= m.items.get(i);
       tops[i] = y;
       if (it == null){ y += gap; continue; }
-      it.line = Sk.shape(it.text, 12);
-      var need= need(it);
+      it.line = Sk.shape(it.text, Sk.TextSettings.label);
+      var need= Sk.need(it.line);
       y += need.height + row - 18;
       text = Math.max(text, need.width);
     }
@@ -158,8 +157,6 @@ final class SkMenus{
     if (w > vw){ frame.frame.warn("a menu " + w + " virtual pixels wide does not fit in the virtual pixel space " + vw + " wide: the part outside it is clipped"); }
     open.add(new Open(m, new Rectangle(x, top, w, h), tops, textAt, from, content, new int[1]));
   }
-
-  private static Dimension need(CMenuItem it){ return Sk.need(it.line, 1, 0.5); }
 
   private static int place(int first, int second, int size, int room){
     if (first + size > room && second - size >= 0){ return second - size; }
@@ -350,7 +347,7 @@ final class SkMenus{
     int ink= it.enabled ? 0xFF000000 : 0xFF9A9A9A;
     Sk.paint.setColor(ink);
     line.setColor(ink);
-    Sk.draw(cv, it.line, b.x + o.textAt(), y, need(it).width, h, 1, 0.5, Sk.paint);
+    Sk.draw(cv, it.line, b.x + o.textAt(), y, Sk.need(it.line).width, h, Sk.paint);
     float mx= b.x + 1 + pad + 5;
     float my= y + h / 2f;
     if (it.mark == 1){ cv.drawRect(Rect.makeXYWH(mx - 5, my - 5, 10, 10), line); }

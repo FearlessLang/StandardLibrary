@@ -105,7 +105,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   boolean reveal;
   boolean dirty= true;
   int laidWidth= -1;
-  int laidSize= -1;
+  Sk.TextSettings laidSettings;
   HashMap<String,ArrayList<Seg>> shaped= new HashMap<>();
   ArrayList<VLine> lines= new ArrayList<>();
 
@@ -122,7 +122,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     int w= 0;
     int h= 0;
     for (var l : buf.toString().split("\n", -1)){
-      var n= Sk.need(Sk.shape(l, textSize), above, below);
+      var n= Sk.need(Sk.shape(l, textSettings));
       w = Math.max(w, n.width);
       h += Math.max(lineHeight(), n.height);
     }
@@ -169,16 +169,16 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     dirty = true;
   }
 
-  int lineHeight(){ return (int) Math.max(1, Sk.lineHeight(this)); }
+  int lineHeight(){ return (int) Math.max(1, textSettings.lineHeight()); }
   int selA(){ return Math.min(caret, anchor); }
   int selB(){ return Math.max(caret, anchor); }
 
   void layout(){
     int ww= wrap ? Math.max(1, viewW()) : Integer.MAX_VALUE;
-    if (ww != laidWidth || textSize != laidSize){
+    if (ww != laidWidth || !textSettings.equals(laidSettings)){
       shaped = new HashMap<>();
       laidWidth = ww;
-      laidSize = textSize;
+      laidSettings = textSettings;
       dirty = true;
     }
     if (!dirty){ return; }
@@ -194,7 +194,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       var segs= segsOf(buf.substring(s, end), old, ww);
       for (int i= 0; i < segs.size(); i += 1){
         var g= segs.get(i);
-        var n= g.line() == null ? new Dimension() : Sk.need(g.line(), above, below);
+        var n= g.line() == null ? new Dimension() : Sk.need(g.line());
         int h= Math.max(lineHeight(), n.height);
         lines.add(new VLine(s + g.from(), s + g.to(), g.line(), i < segs.size() - 1, y, n.width, h));
         w = Math.max(w, n.width);
@@ -223,8 +223,8 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
     var bidi= new Bidi(s, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
     int from= 0;
-    for (int to : Sk.wrap(s, textSize, above, below, ww)){
-      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize, bidi.createLineBidi(from, to))));
+    for (int to : Sk.wrap(s, textSettings, ww)){
+      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSettings, bidi.createLineBidi(from, to))));
       from = to;
     }
     return res;
@@ -518,22 +518,22 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     if (a < b && a < vEnd && b > v.start()){
       boolean rtl= v.line() != null && v.line().rtl();
       float x1= a <= v.start() ? (rtl ? v.w() : 0) : xOf(v, a);
-      float x2= b > v.end() ? xOf(v, v.end()) + (v.wrapped() ? 0 : rtl ? -textSize / 3f : textSize / 3f) : xOf(v, b);
+      float x2= b > v.end() ? xOf(v, v.end()) + (v.wrapped() ? 0 : rtl ? -textSettings.size() / 3f : textSettings.size() / 3f) : xOf(v, b);
       Sk.paint.setColor(focused ? 0xFFB4CDF5 : 0xFFDCDCDC);
       cv.drawRect(Rect.makeLTRB(Math.min(x1, x2), v.y(), Math.max(x1, x2), v.y() + v.h()), Sk.paint);
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);
-    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), above, below, Sk.paint);
+    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), Sk.paint);
   }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){
-      var t= Sk.shape(composing, textSize);
+      var t= Sk.shape(composing, textSettings);
       float tw= (float) t.width();
       Sk.paint.setColor(0xFFFFFFF0);
       cv.drawRect(Rect.makeXYWH(0, 0, tw, lh), Sk.paint);
       Sk.paint.setColor(fg);
-      float base= (float) Sk.baseline(lh, textSize, above, below);
+      float base= (float) textSettings.baseline(lh);
       Sk.drawAt(cv, t, 0, base, Sk.paint);
       cv.drawRect(Rect.makeXYWH(0, base + 2, tw, 1), Sk.paint);
       cv.translate(tw, 0);

@@ -372,9 +372,7 @@ abstract class AWidget implements Widget$2o$1{
   Color$1c$0 background= (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
   int fg= Sk.color(foreground);
   int bg= Sk.color(background);
-  int textSize= 12;
-  double above= 1;
-  double below= 0.5;
+  Sk.TextSettings textSettings= Sk.TextSettings.label;
   Sk.Line line;
   static final int bar= 5;
   int scrollX;
@@ -527,13 +525,13 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$radius$1(Object r){ return reStyle(extent(r, "radius"), n -> radius = n); }
   public Object mut$textHeight$p1$1(Object t){
     int n= extent((HeightNat$lg$0) t, "text height");
-    return reText(() -> textSize = n);
+    return reText(() -> textSettings = new Sk.TextSettings(n, textSettings.above(), textSettings.below()));
   }
-  public Object read$textHeight$0(){ return h(textSize); }
-  public Object mut$aboveBaseline$p1$1(Object r){ return reText(() -> above = ratio(r)); }
-  public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> below = ratio(r)); }
-  public Object read$aboveBaseline$0(){ return ratio(above); }
-  public Object read$belowBaseline$0(){ return ratio(below); }
+  public Object read$textHeight$0(){ return h(textSettings.size()); }
+  public Object mut$aboveBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), ratio(r), textSettings.below())); }
+  public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), textSettings.above(), ratio(r))); }
+  public Object read$aboveBaseline$0(){ return ratio(textSettings.above()); }
+  public Object read$belowBaseline$0(){ return ratio(textSettings.below()); }
   public Object mut$uText$1(Object t){
     var s= ustr(t);
     var b= newline(s);
