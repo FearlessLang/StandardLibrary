@@ -31,7 +31,6 @@ import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
-import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.Surface;
 import io.github.humbleui.types.Rect;
 
@@ -88,6 +87,7 @@ final class _Label extends AWidget implements Label$1c$0{
 
 final class _Picture extends AWidget implements Picture$5c$0{
   Image image;
+  Image halved;
   boolean keepAspect= true;
   boolean byHeight;
 
@@ -112,12 +112,12 @@ final class _Picture extends AWidget implements Picture$5c$0{
     float ih= keepAspect ? image.getHeight() * s : ch;
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(left, top, cw, ch));
-    cv.drawImageRect(image, Rect.makeWH(image.getWidth(), image.getHeight()), Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), SamplingMode.LINEAR, null, true);
+    halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih));
     cv.restoreToCount(save);
   }
   @Override public Object mut$image$1(Object i){
     var img= ((Image$1c$0Instance) i).image;
-    return reStyle(() -> { image = img; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
+    return reStyle(() -> { image = img; halved = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
   @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }

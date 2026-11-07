@@ -1,9 +1,6 @@
 package _base;
 
 import io.github.humbleui.skija.Canvas;
-import io.github.humbleui.skija.FilterMipmap;
-import io.github.humbleui.skija.FilterMode;
-import io.github.humbleui.skija.MipmapMode;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
 import io.github.humbleui.types.Rect;
@@ -99,13 +96,8 @@ class CGraphicsCtx implements Graphics$ao$0{
   }
   @Override public Object mut$image$3(Object image, Object w, Object h){
     var img= ((Image$1c$0Instance) image).image;
-    cv.drawImageRect(
-      img,
-      Rect.makeWH(img.getWidth(), img.getHeight()),
-      reach(shapeRect(w, h, "image")),
-      new FilterMipmap(FilterMode.LINEAR, MipmapMode.LINEAR),
-      null,
-      true);
+    var drawn= Sk.image(cv, img, null, reach(shapeRect(w, h, "image")));
+    if (drawn != img){ drawn.close(); }
     return this;
   }
   @Override public Object mut$textHeight$p1$1(Object h){

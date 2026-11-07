@@ -30,7 +30,6 @@ import io.github.humbleui.skija.ClipMode;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.PathBuilder;
-import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.types.Rect;
 
 final class Stage extends MouseAdapter{
@@ -44,6 +43,7 @@ final class Stage extends MouseAdapter{
   final boolean translucent= device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
   Win f;
   Mode mode;
+  Image cornerKept;
   Dimension lastSize= new Dimension();
   Dimension chosen= new Dimension();
   boolean deskResized;
@@ -428,8 +428,7 @@ final class Stage extends MouseAdapter{
       cv.clipPath(tri, ClipMode.INTERSECT, true);
       int side= l/2;
       int at= (int)Math.round(l*(2-Math.sqrt(2))/2)-side/2;
-      var icon= cornerIcon;
-      cv.drawImageRect(icon, Rect.makeWH(icon.getWidth(), icon.getHeight()), Rect.makeXYWH(at, at, side, side), SamplingMode.LINEAR, null, true);
+      cornerKept = Sk.image(cv, cornerIcon, cornerKept, Rect.makeXYWH(at, at, side, side));
       cv.restoreToCount(save);
     }
     if (mode != Mode.fearless){ return; }
