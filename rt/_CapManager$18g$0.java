@@ -1,7 +1,6 @@
 package _base;
 
 import static _base.Util.*;
-import static java.nio.charset.StandardCharsets.UTF_16LE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static final String launcher= System.getProperty("fearlessManager.launcher");
   private static final String applied= "Applied\n";
   private static final String refused= "Refused\n";
-  private static final Charset pathCharset= System.getProperty("os.name").startsWith("Windows") ? UTF_16LE : Charset.forName(System.getProperty("sun.jnu.encoding"));
   private static final Pattern projectName= Pattern.compile("(?!(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$)[a-z_][a-z0-9_]{0,190}");
   private static final Pattern typeName= Pattern.compile("(?!(?:con|prn|aux|nul|com[1-9]|lpt[1-9])[.])[a-z][a-z0-9_]*[.]_*[A-Z][A-Za-z0-9_]*'*");
   private static String message(String verb, List<String> args){
@@ -57,10 +55,14 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     var bs= List$o$1Instance.asJava(path);
     var bytes= new byte[bs.size()];
     for (var i= 0; i < bytes.length; i += 1){ bytes[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
-    var text= pathCharset == UTF_16LE ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asCharBuffer().toString() : new String(bytes, pathCharset);
-    if (pathCharset == UTF_16LE && bytes.length % 2 != 0){ throw detErr("The message \""+verb+"\" is not sent: a path of Windows is 16 bit units, so its bytes are an even number."); }
+    var text= pathText(verb, bytes);
     if (!absolute(text)){ throw detErr("The message \""+verb+"\" is not sent: the path \""+InputFile.portable(text)+"\"\nis not an absolute path of this system other than the root of a drive."); }
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)).toList());
+  }
+  private static String pathText(String verb, byte[] bytes){
+    if (!System.getProperty("os.name").startsWith("Windows")){ return new String(bytes, Charset.forName(System.getProperty("sun.jnu.encoding"))); }
+    if (bytes.length % 2 != 0){ throw detErr("The message \""+verb+"\" is not sent: a path of Windows is 16 bit units, so its bytes are an even number."); }
+    return ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asCharBuffer().toString();
   }
   private static boolean absolute(String path){
     try{ var p= Path.of(path); return p.isAbsolute() && p.normalize().getFileName() != null; }
