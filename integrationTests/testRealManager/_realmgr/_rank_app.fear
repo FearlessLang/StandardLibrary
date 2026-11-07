@@ -1,5 +1,8 @@
 use base.Main as Main;
 use base.Block as Block;
+use base.UnitTests as UnitTests;
+use base.Test as Test;
+use base.Lists as L;
 
 Quit: Main { sys -> Block#
   .do{ sys.manager.quit }
@@ -8,4 +11,14 @@ Quit: Main { sys -> Block#
 Reset: Main { sys -> Block#
   .do{ sys.manager.reset }
   .return{ sys.out.println "reset returned" }
+  }
+RegisterTests: UnitTests{::
+  .test RegisterRootAfterUnpairedSurrogate
+  }
+RegisterRootAfterUnpairedSurrogate: Test{::
+  .checkDetErrWithSys({::.isMsg{::.startsWith `The message "Register" is not sent:`}}, {t -> t.manager.register(L#(
+    +67.getByte, +0.getByte, +58.getByte, +0.getByte, +92.getByte, +0.getByte, +0.getByte, +216.getByte,
+    +92.getByte, +0.getByte, +46.getByte, +0.getByte, +46.getByte, +0.getByte))})
+  .checkDetErrWithSys({::.isMsg{::.startsWith `The message "Register" is not sent:`}}, {t -> t.manager.register(L#(
+    +47.getByte, +237.getByte, +160.getByte, +128.getByte, +47.getByte, +46.getByte, +46.getByte))})
   }
