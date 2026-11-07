@@ -63,24 +63,22 @@ final class CMouseBuilder implements Mouse$1c$0{
 //   semantics), and firing events for widgets that no longer exist would be
 //   misleading.
 final class SkMouse extends MouseAdapter{
+  sealed interface Gesture{ AWidget widget(); }
+  record Press(AWidget widget, boolean inside) implements Gesture{}
+  record Thumb(AWidget widget, boolean vert, int grab) implements Gesture{}
+  record Divide(_Split widget, int divider, int[] from, int grab) implements Gesture{}
+  record Swallowed() implements Gesture{ @Override public AWidget widget(){ return null; } }
+  private static final Swallowed swallowed= new Swallowed();
   private final _Frame frame;
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
-  private AWidget pressTarget;
-  private boolean pressInside;
+  private Gesture gesture;
   private AWidget secondary;
   private AWidget tip;
   private long tipSince;
   private Point tipAt;
   private boolean tipOff;
   private Sk.Tip shown;
-  private AWidget dragged;
-  private boolean draggedVert;
-  private boolean paging;
-  private _Split dividing;
-  private int divider;
-  private int[] from;
-  private int grab;
 
   SkMouse(_Frame frame){ this.frame= frame; }
 
@@ -88,8 +86,8 @@ final class SkMouse extends MouseAdapter{
   void detached(SkComponent root){
     assert SwingUtilities.isEventDispatchThread();
     hover = hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList();
-    if (pressTarget != null && SwingUtilities.isDescendingFrom(pressTarget.component, root)){ pressTarget = null; }
-    if (dividing != null && SwingUtilities.isDescendingFrom(dividing.component, root)){ from = null; }
+    var w= gesture == null ? null : gesture.widget();
+    if (w != null && SwingUtilities.isDescendingFrom(w.component, root)){ stop(); }
     if (frame.focus != null && SwingUtilities.isDescendingFrom(frame.focus.component, root)){ frame.focus = null; }
   }
 
@@ -97,19 +95,17 @@ final class SkMouse extends MouseAdapter{
   void reset(){
     assert SwingUtilities.isEventDispatchThread();
     hover = List.of();
-    pressTarget = null;
-    from = null;
+    stop();
     frame.focus = null;
   }
 
-  void stopDividing(_Split s){ if (dividing == s){ from = null; } }
+  void stopDividing(_Split s){ if (gesture instanceof Divide d && d.widget() == s){ stop(); } }
 
-  void forget(){
-    pressTarget = null;
-    dragged = null;
-    paging = false;
-    dividing = null;
-  }
+  private void stop(){ gesture = gesture == null || gesture instanceof Press ? null : swallowed; }
+
+  void forget(){ gesture = null; }
+
+  private AWidget pressTarget(){ return gesture instanceof Press q ? q.widget() : null; }
 
   void rehover(){
     assert SwingUtilities.isEventDispatchThread();
@@ -124,7 +120,7 @@ final class SkMouse extends MouseAdapter{
 
   boolean over(AWidget t){ return !frame.menus.isOpen() && hover.contains(t); }
 
-  boolean down(AWidget t){ return t == pressTarget && pressInside; }
+  boolean down(AWidget t){ return gesture instanceof Press q && q.widget() == t && q.inside(); }
 
   void paintTip(Canvas cv){
     var owner= frame.menus.isOpen() ? null : hover.stream().filter(t -> !t.tooltip.isEmpty()).findFirst().orElse(null);
@@ -148,17 +144,16 @@ final class SkMouse extends MouseAdapter{
     if (left && d instanceof AEditText t){ frame.focus = t; }
     if (left && d != null && (onBar(d, p, true) || onBar(d, p, false))){ return; }
     if (left && onDivider(d, p)){
-      dividing = (_Split) d;
-      var at= local(d, p);
-      divider = dividing.dividerAt(at);
-      from = dividing.positions.clone();
-      grab = (dividing.vertical ? at.y - dividing.top : at.x - dividing.left) - from[divider];
+      var s= (_Split) d;
+      var at= local(s, p);
+      int i= s.dividerAt(at);
+      var from= s.positions.clone();
+      gesture = new Divide(s, i, from, spanAt(s, at) - from[i]);
       return;
     }
     if (left){
-      pressTarget = d;
+      gesture = new Press(d, true);
       for (var t : chainOf(d)){ if (t instanceof _Sections s){ s.pressed = s.part(local(s, p)); } }
-      pressInside = true;
       if (d instanceof AEditText t){ t.press(content(t, p), e.isShiftDown()); }
     }
     dispatch(d, Pressed, p);
@@ -169,17 +164,18 @@ final class SkMouse extends MouseAdapter{
     boolean left= SwingUtilities.isLeftMouseButton(e);
     int buttons= MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
     if (frame.menus.released(p, left, (e.getModifiersEx() & buttons) == 0)){ return; }
-    if ((dragged != null || dividing != null || paging) && left){ dragged = null; dividing = null; paging = false; return; }
+    if (left && gesture != null && !(gesture instanceof Press)){ gesture = null; return; }
     // mousePressed only ever captures a left press into pressTarget, so only
     // a left release is interpreted against that press chain (AWT delivers
     // it to the pressed component even if the cursor left it); any other
     // button was dispatched at its own current location on press and is
     // released the same way, not against an unrelated left gesture's target.
-    dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p);
+    var t= pressTarget();
+    dispatch(left && t != null ? t : deepestAt(p), Released, p);
     if (SwingUtilities.isRightMouseButton(e)){ context(p); }
     if (!left){ return; }
     click(p, e.getClickCount());
-    pressTarget = null;
+    gesture = null;
   }
 
   @Override public void mouseMoved(MouseEvent e){
@@ -193,18 +189,17 @@ final class SkMouse extends MouseAdapter{
   @Override public void mouseDragged(MouseEvent e){
     var p= point(e);
     if (frame.menus.moved(p)){ return; }
-    if (paging){ return; }
-    if (dragged != null){ dragThumb(p); return; }
-    if (dividing != null){
-      if (from == null){ return; }
-      var at= local(dividing, p);
-      dividing.drag(divider, from, (dividing.vertical ? at.y - dividing.top : at.x - dividing.left) - grab);
+    if (gesture instanceof Swallowed){ return; }
+    if (gesture instanceof Thumb g){ dragThumb(g, p); return; }
+    if (gesture instanceof Divide g){
+      g.widget().drag(g.divider(), g.from(), spanAt(g.widget(), local(g.widget(), p)) - g.grab());
       return;
     }
-    if (pressTarget instanceof _Button b){ pressInside = inside(b, p); }
-    if (pressTarget instanceof AEditText t){ t.drag(content(t, p)); }
+    var t= pressTarget();
+    if (t instanceof _Button b){ gesture = new Press(b, inside(b, p)); }
+    if (t instanceof AEditText a){ a.drag(content(a, p)); }
     updateHover(p);
-    dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);
+    dispatch(t == null ? deepestAt(p) : t, Dragged, p);
   }
 
   @Override public void mouseEntered(MouseEvent e){ if (!frame.menus.isOpen()){ updateHover(point(e)); } }
@@ -222,6 +217,8 @@ final class SkMouse extends MouseAdapter{
     return d instanceof _Split s && s.draggable && s.dividerAt(local(s, p)) >= 0;
   }
 
+  private static int spanAt(_Split s, Point at){ return s.vertical ? at.y - s.top : at.x - s.left; }
+
   private Point content(AEditText t, Point p){
     var q= SwingUtilities.convertPoint(top(), p, t.component);
     return new Point(q.x - t.left + t.scrollX, q.y - t.top + t.scrollY);
@@ -233,24 +230,23 @@ final class SkMouse extends MouseAdapter{
     if (!q.track(vert).contains(at)){ return false; }
     var m= q.thumb(vert);
     if (m.contains(at)){
-      dragged = q;
-      draggedVert = vert;
-      grab = vert ? at.y - m.y : at.x - m.x;
+      gesture = new Thumb(q, vert, vert ? at.y - m.y : at.x - m.x);
       return true;
     }
-    paging = true;
+    gesture = swallowed;
     int page= (vert ? at.y < m.y : at.x < m.x) ? -1 : 1;
     if (vert){ q.scrollTo(q.scrollX, q.scrollY + page * q.viewH()); }
     else{ q.scrollTo(q.scrollX + page * q.viewW(), q.scrollY); }
     return true;
   }
 
-  private void dragThumb(Point p){
-    var at= SwingUtilities.convertPoint(top(), p, dragged.component);
-    var t= dragged.track(draggedVert);
-    int s= dragged.scrollFor(draggedVert, draggedVert ? at.y - grab - t.y : at.x - grab - t.x);
-    if (draggedVert){ dragged.scrollTo(dragged.scrollX, s); }
-    else{ dragged.scrollTo(s, dragged.scrollY); }
+  private void dragThumb(Thumb g, Point p){
+    var q= g.widget();
+    var at= SwingUtilities.convertPoint(top(), p, q.component);
+    var t= q.track(g.vert());
+    int s= q.scrollFor(g.vert(), g.vert() ? at.y - g.grab() - t.y : at.x - g.grab() - t.x);
+    if (g.vert()){ q.scrollTo(q.scrollX, s); }
+    else{ q.scrollTo(s, q.scrollY); }
   }
 
   void wheel(Point p, double rotation, boolean horizontal){
@@ -272,7 +268,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   private void click(Point p, int clicks){
-    for (var t : chainOf(pressTarget)){
+    for (var t : chainOf(pressTarget())){
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
         if (b.action == null){ continue; }// nothing reaches the programmer: bubble
