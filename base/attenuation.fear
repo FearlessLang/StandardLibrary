@@ -40,7 +40,7 @@ ErrorSystem: System {
   }
 _Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked.") }
 
-///Every method reaches the received System, but `.manager` is revoked: the program cannot call the Fearless manager.
+///Every method reaches the received System, but `.manager` is revoked: the system capability returned by NoManager can not call the Fearless manager.
 NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
