@@ -504,18 +504,31 @@ interface Sk{
   }
 
   static Image scaled(Image src, int w, int h){
+    var s= halved(src, w, h);
+    var res= pass(s, w, h, SamplingMode.CATMULL_ROM);
+    if (s != src){ s.close(); }
+    return res;
+  }
+
+  static Image halved(Image src, int w, int h){
     var s= src;
     while (s.getWidth() / 2 >= w || s.getHeight() / 2 >= h){
       var t= pass(s, half(s.getWidth(), w), half(s.getHeight(), h), SamplingMode.LINEAR);
       if (s != src){ s.close(); }
       s = t;
     }
-    var res= pass(s, w, h, SamplingMode.CATMULL_ROM);
-    if (s != src){ s.close(); }
-    return res;
+    return s;
   }
 
+  static int halvedSide(int side, int goal){ return side / 2 >= goal ? halvedSide(side / 2, goal) : side; }
+
   private static int half(int side, int goal){ return side / 2 >= goal ? side / 2 : side; }
+
+  static void image(Canvas cv, Image$1c$0Instance img, Rect to){
+    var m= cv.getLocalToDeviceAsMatrix33().getMat();
+    var src= img.drawn(Math.max(1, Math.round(to.getWidth() * m[0])), Math.max(1, Math.round(to.getHeight() * m[4])));
+    cv.drawImageRect(src, Rect.makeWH(src.getWidth(), src.getHeight()), to, SamplingMode.LINEAR, null, true);
+  }
 
   static Image pass(Image src, int w, int h, SamplingMode m){
     try (var surf= Surface.makeRaster(ImageInfo.makeN32Premul(w, h))){

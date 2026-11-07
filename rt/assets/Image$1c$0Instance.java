@@ -1,5 +1,6 @@
 package _base;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import io.github.humbleui.skija.Bitmap;
@@ -11,7 +12,15 @@ import io.github.humbleui.skija.Surface;
 
 final class Image$1c$0Instance implements Image$1c$0{
   final Image image;
+  final ConcurrentHashMap<Long,Image> halved= new ConcurrentHashMap<>();
   Image$1c$0Instance(Image image){ this.image= image; }
+
+  Image drawn(int w, int h){
+    var dw= Sk.halvedSide(image.getWidth(), w);
+    var dh= Sk.halvedSide(image.getHeight(), h);
+    if (dw == image.getWidth() && dh == image.getHeight()){ return image; }
+    return halved.computeIfAbsent((long)dw<<32 | dh, _ -> Sk.halved(image, w, h));
+  }
 
   @Override public Object read$width$0(){ return width(image.getWidth()); }
   @Override public Object read$height$0(){ return height(image.getHeight()); }

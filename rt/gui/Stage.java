@@ -27,15 +27,13 @@ import javax.swing.WindowConstants;
 
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.ClipMode;
-import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.PathBuilder;
-import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.types.Rect;
 
 final class Stage extends MouseAdapter{
   enum Mode{ decorated, fearless, fullScreen }
-  static final Image cornerIcon= AssetImageRead.decode("Resource with path /_base/icons/fearless.png", _FluentGUI.iconBytes(IconsFearless$9kw$0.instance), Scopes.maxImagePixels);
+  static final Image$1c$0Instance cornerIcon= new Image$1c$0Instance(AssetImageRead.decode("Resource with path /_base/icons/fearless.png", _FluentGUI.iconBytes(IconsFearless$9kw$0.instance), Scopes.maxImagePixels));
   final _Frame owner;
   final _FluentGUI gui;
   final GraphicsDevice device= GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -428,8 +426,7 @@ final class Stage extends MouseAdapter{
       cv.clipPath(tri, ClipMode.INTERSECT, true);
       int side= l/2;
       int at= (int)Math.round(l*(2-Math.sqrt(2))/2)-side/2;
-      var icon= cornerIcon;
-      cv.drawImageRect(icon, Rect.makeWH(icon.getWidth(), icon.getHeight()), Rect.makeXYWH(at, at, side, side), SamplingMode.LINEAR, null, true);
+      Sk.image(cv, cornerIcon, Rect.makeXYWH(at, at, side, side));
       cv.restoreToCount(save);
     }
     if (mode != Mode.fearless){ return; }
