@@ -21,6 +21,7 @@ import java.awt.im.InputMethodRequests;
 import java.io.IOException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
+import java.text.Bidi;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
@@ -86,8 +87,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   final StringBuilder buf= new StringBuilder();
   int caret;
   int anchor;
-  String committed= "";
-  boolean committedLive= true;
+  String committed;
   boolean editable= true;
   boolean clearsUndo= true;
   boolean wrap;
@@ -105,7 +105,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   boolean reveal;
   boolean dirty= true;
   int laidWidth= -1;
-  int laidSize= -1;
+  Sk.TextSettings laidSettings;
   HashMap<String,ArrayList<Seg>> shaped= new HashMap<>();
   ArrayList<VLine> lines= new ArrayList<>();
 
@@ -122,7 +122,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     int w= 0;
     int h= 0;
     for (var l : buf.toString().split("\n", -1)){
-      var n= Sk.need(Sk.shape(l, textSize), above, below);
+      var n= Sk.need(Sk.shape(l, textSettings));
       w = Math.max(w, n.width);
       h += Math.max(lineHeight(), n.height);
     }
@@ -165,20 +165,20 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     redo.clear();
     if (clearsUndo){ undo.clear(); }
     else{ undo.add(step); }
-    committedLive = true;
+    committed = null;
     dirty = true;
   }
 
-  int lineHeight(){ return (int) Math.max(1, Sk.lineHeight(this)); }
+  int lineHeight(){ return (int) Math.max(1, textSettings.lineHeight()); }
   int selA(){ return Math.min(caret, anchor); }
   int selB(){ return Math.max(caret, anchor); }
 
   void layout(){
     int ww= wrap ? Math.max(1, viewW()) : Integer.MAX_VALUE;
-    if (ww != laidWidth || textSize != laidSize){
+    if (ww != laidWidth || !textSettings.equals(laidSettings)){
       shaped = new HashMap<>();
       laidWidth = ww;
-      laidSize = textSize;
+      laidSettings = textSettings;
       dirty = true;
     }
     if (!dirty){ return; }
@@ -194,7 +194,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       var segs= segsOf(buf.substring(s, end), old, ww);
       for (int i= 0; i < segs.size(); i += 1){
         var g= segs.get(i);
-        var n= g.line() == null ? new Dimension() : Sk.need(g.line(), above, below);
+        var n= g.line() == null ? new Dimension() : Sk.need(g.line());
         int h= Math.max(lineHeight(), n.height);
         lines.add(new VLine(s + g.from(), s + g.to(), g.line(), i < segs.size() - 1, y, n.width, h));
         w = Math.max(w, n.width);
@@ -218,13 +218,13 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     shaped.put(text, res);
     return res;
   }
-  static float width(Sk.Line t){ return t == null ? 0 : (float) t.width(); }
   private ArrayList<Seg> segs(String s, int ww){
     var res= new ArrayList<Seg>();
     if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
+    var bidi= new Bidi(s, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
     int from= 0;
-    for (int to : Sk.wrap(s, textSize, above, below, ww)){
-      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize)));
+    for (int to : Sk.wrap(s, textSettings, ww)){
+      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSettings, bidi.createLineBidi(from, to))));
       from = to;
     }
     return res;
@@ -350,7 +350,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     return true;
   }
   void apply(int a, int b, String s, int c, int an){
-    if (committedLive){ committed = buf.toString(); committedLive = false; }
+    if (committed == null){ committed = buf.toString(); }
     buf.replace(a, b, s);
     caret = snap(c);
     anchor = snap(an);
@@ -423,45 +423,52 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   void drag(Point p){ act(() -> moveTo(offsetAt(p.x, p.y), true)); }
   void commit(){
     submit(() -> {
-      if (committedLive || committed.contentEquals(buf)){ return null; }
-      committedLive = true;
+      if (committed == null || committed.contentEquals(buf)){ return null; }
+      committed = null;
       return onCommit == null ? null : new Fire(onCommit, event());
     });
   }
 
-  void key(KeyEvent e){
+  boolean key(KeyEvent e){
     boolean shift= e.isShiftDown();
     boolean ctrl= e.isControlDown();
-    switch (e.getKeyCode()){
+    int k= e.getKeyCode();
+    switch (k){
       case VK_LEFT, VK_KP_LEFT -> act(() -> horizontal(false, shift));
       case VK_RIGHT, VK_KP_RIGHT -> act(() -> horizontal(true, shift));
-      case VK_UP, VK_KP_UP -> act(() -> vertical(-1, shift));
-      case VK_DOWN, VK_KP_DOWN -> act(() -> vertical(1, shift));
-      case VK_PAGE_UP -> act(() -> vertical(-page(), shift));
-      case VK_PAGE_DOWN -> act(() -> vertical(page(), shift));
+      case VK_UP, VK_KP_UP -> { return acrossLines(() -> vertical(-1, shift)); }
+      case VK_DOWN, VK_KP_DOWN -> { return acrossLines(() -> vertical(1, shift)); }
+      case VK_PAGE_UP -> { return acrossLines(() -> vertical(-page(), shift)); }
+      case VK_PAGE_DOWN -> { return acrossLines(() -> vertical(page(), shift)); }
       case VK_HOME -> act(() -> home(ctrl, shift));
       case VK_END -> act(() -> end(ctrl, shift));
       case VK_BACK_SPACE -> change(this::backspace);
       case VK_DELETE -> change(this::delete);
       case VK_TAB -> frame.tab(shift);
       case VK_ENTER -> enter(shift, ctrl);
-      default -> { if (ctrl && !e.isAltDown()){ shortcut(e.getKeyCode(), shift); } }
+      case VK_A -> { return command(e, () -> act(this::selectAll)); }
+      case VK_C -> { return command(e, () -> act(this::copy)); }
+      case VK_X -> { return command(e, () -> change(this::cut)); }
+      case VK_V -> { return command(e, this::paste); }
+      case VK_Z -> { return command(e, () -> act(shift ? this::redo : this::undo)); }
+      case VK_Y -> { return command(e, () -> act(this::redo)); }
+      default -> { return k >= VK_DEAD_GRAVE && k <= VK_DEAD_SEMIVOICED_SOUND || CTextKeys.types(e); }
     }
+    return true;
+  }
+  private boolean acrossLines(BooleanSupplier onEdt){
+    if (oneLine()){ return false; }
+    act(onEdt);
+    return true;
+  }
+  private static boolean command(KeyEvent e, Runnable r){
+    if (!e.isControlDown() || e.isAltDown()){ return CTextKeys.types(e); }
+    r.run();
+    return true;
   }
   private void enter(boolean shift, boolean ctrl){
     if (ctrl || !shift){ commit(); return; }
     if (!oneLine()){ change(() -> new Req(selA(), selB(), "\n")); }
-  }
-  private void shortcut(int key, boolean shift){
-    switch (key){
-      case VK_A -> act(this::selectAll);
-      case VK_C -> act(this::copy);
-      case VK_X -> change(this::cut);
-      case VK_V -> paste();
-      case VK_Z -> act(shift ? this::redo : this::undo);
-      case VK_Y -> act(this::redo);
-      default -> {}
-    }
   }
   private void paste(){
     var c= Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -503,31 +510,30 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       caret(cv, v.h());
     }
     cv.restoreToCount(save);
-    if (barRight()){ Sk.bar(cv, this, true); }
-    if (barBottom()){ Sk.bar(cv, this, false); }
   }
   private void line(Canvas cv, VLine v, boolean focused){
     int a= selA();
     int b= selB();
     int vEnd= v.wrapped() ? v.end() : v.end() + 1;
     if (a < b && a < vEnd && b > v.start()){
-      float x1= a <= v.start() ? 0 : xOf(v, a);
-      float x2= b > v.end() ? v.dx() + width(v.line()) + (v.wrapped() ? 0 : textSize / 3f) : xOf(v, b);
+      boolean rtl= v.line() != null && v.line().rtl();
+      float x1= a <= v.start() ? (rtl ? v.w() : 0) : xOf(v, a);
+      float x2= b > v.end() ? xOf(v, v.end()) + (v.wrapped() ? 0 : rtl ? -textSettings.size() / 3f : textSettings.size() / 3f) : xOf(v, b);
       Sk.paint.setColor(focused ? 0xFFB4CDF5 : 0xFFDCDCDC);
-      cv.drawRect(Rect.makeXYWH(x1, v.y(), x2 - x1, v.h()), Sk.paint);
+      cv.drawRect(Rect.makeLTRB(Math.min(x1, x2), v.y(), Math.max(x1, x2), v.y() + v.h()), Sk.paint);
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);
-    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), above, below, Sk.paint);
+    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), Sk.paint);
   }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){
-      var t= Sk.shape(composing, textSize);
+      var t= Sk.shape(composing, textSettings);
       float tw= (float) t.width();
       Sk.paint.setColor(0xFFFFFFF0);
       cv.drawRect(Rect.makeXYWH(0, 0, tw, lh), Sk.paint);
       Sk.paint.setColor(fg);
-      float base= (float) Sk.baseline(lh, textSize, above, below);
+      float base= (float) textSettings.baseline(lh);
       Sk.drawAt(cv, t, 0, base, Sk.paint);
       cv.drawRect(Rect.makeXYWH(0, base + 2, tw, 1), Sk.paint);
       cv.translate(tw, 0);
@@ -574,17 +580,6 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   char high;
   CTextKeys(_Frame frame){ this.frame= frame; }
 
-  boolean uses(KeyEvent e){
-    var t= frame.focus;
-    int k= e.getKeyCode();
-    if (t == null || frame.reserved(k)){ return false; }
-    return switch (k){
-      case VK_LEFT, VK_RIGHT, VK_KP_LEFT, VK_KP_RIGHT, VK_HOME, VK_END, VK_BACK_SPACE, VK_DELETE, VK_ENTER, VK_TAB -> true;
-      case VK_UP, VK_DOWN, VK_KP_UP, VK_KP_DOWN, VK_PAGE_UP, VK_PAGE_DOWN -> !t.oneLine();
-      case VK_A, VK_C, VK_X, VK_V, VK_Z, VK_Y -> e.isControlDown() && !e.isAltDown() || types(e);
-      default -> k >= VK_DEAD_GRAVE && k <= VK_DEAD_SEMIVOICED_SOUND || types(e);
-    };
-  }
   static boolean typesWith(java.awt.event.InputEvent e){ return e.isAltDown() == e.isControlDown() || e.isAltGraphDown(); }
   static boolean types(KeyEvent e){
     char c= e.getKeyChar();
@@ -593,9 +588,8 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   @Override public void keyPressed(KeyEvent e){
     if (frame.menus.key(e)){ reservedDown = true; e.consume(); return; }
     reservedDown = frame.reserved(e.getKeyCode());
-    if (!uses(e)){ return; }
-    e.consume();
-    frame.focus.key(e);
+    if (frame.focus == null || reservedDown){ return; }
+    if (frame.focus.key(e)){ e.consume(); }
   }
   @Override public void keyTyped(KeyEvent e){
     var t= frame.focus;

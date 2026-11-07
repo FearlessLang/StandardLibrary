@@ -101,6 +101,20 @@ GuiMenuTests: Test {::
       .ok _ -> Error.msg "A model action always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "This Pane is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> Block#
+    .var[Nat] ticks = {0}
+    .let[mut Slot[mut Pane]] root = {Slots#[mut Pane]}
+    .do{Block#(f.virtualPixelSpace(Width#100, Height#1).modelFps(100, {:: .action{Block#
+      .do{ticks.set(ticks.get + 1)}
+      .if{ticks.get == 1} .return{root!.openMenu{:: .item{:: .text "Open"}}}
+      .if{ticks.get == 50} .return{Error.msg "A menu stayed open for 50 model ticks in a virtual pixel space 1 high"}
+      .return{Void}
+      }}), Void)}
+    .return{f.content.pane{:: .save root}}
+    }}).run{
+      .ok _ -> Error.msg "A model action always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "A menu stayed open for 50 model ticks in a virtual pixel space 1 high"}}.assertTrue{i};
+      }}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> ClosedMenu#(s.gui)}).run{
       .ok _ -> Error.msg "Opening a menu in a closed window always fails";
       .info i -> i.validate{:: > "info" .isMsg{:: == "This Pane is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"}}.assertTrue{i};

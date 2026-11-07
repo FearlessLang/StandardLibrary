@@ -143,4 +143,12 @@ GuiLayoutTests: Test {::
       .ok _ -> Error.msg "The painter always stops the Gui before its window is shown";
       .info i -> i.validate{:: > "info" .isMsg{:: == "Width[143] Height[42]"}}.assertTrue{i};
       }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#10, Height#10).modelFps(100, {:: .action{Error.msg "A model tick ran"}}).content.textField{::}}}).run{
+      .ok _ -> Error.msg "The model tick always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "A model tick ran"}}.assertTrue{i};
+      }}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.run{f -> f.virtualPixelSpace(Width#10, Height#10).modelFps(100, {:: .action{Error.msg "A model tick ran"}}).content.sections{::}}}).run{
+      .ok _ -> Error.msg "The model tick always stops the Gui";
+      .info i -> i.validate{:: > "info" .isMsg{:: == "A model tick ran"}}.assertTrue{i};
+      }}
   }

@@ -38,10 +38,9 @@ final class FearlessFrame{
   final SerialQueue queue= new SerialQueue(this::high);
   private Timer timer;
   private Timer modelTimer;
+  private enum Life{ running, closing, closingOnHighFailure, completed }
   private Throwable failure;
-  private boolean high;
-  private boolean closing;
-  private boolean completed;
+  private Life life= Life.running;
   // Frame-loss / backlog detection state; all EDT confined (all starters and
   // all timer callbacks run on the EDT).
   private long runtimeStartNs= System.nanoTime();// re-based in startRuntime
@@ -178,15 +177,14 @@ final class FearlessFrame{
     Throwable discarded;
     boolean accepted;
     synchronized (this){
-      if (completed || high){
+      if (life == Life.closingOnHighFailure || life == Life.completed){
         discarded= e;
         accepted= false;
       }
       else{
         discarded= failure;
         failure = e;
-        high = true;
-        closing = true;
+        life = Life.closingOnHighFailure;
         accepted= true;
       }
     }
@@ -200,10 +198,10 @@ final class FearlessFrame{
     assert SwingUtilities.isEventDispatchThread();
     boolean accepted;
     synchronized (this){
-      accepted= !completed && !closing && failure == null;
+      accepted= life == Life.running;
       if (accepted){
         failure = e;
-        closing = true;
+        life = Life.closing;
       }
     }
     if (!accepted){
@@ -218,8 +216,8 @@ final class FearlessFrame{
     assert SwingUtilities.isEventDispatchThread();
     boolean accepted;
     synchronized (this){
-      accepted= !completed && !closing;
-      if (accepted){ closing = true; }
+      accepted= life == Life.running;
+      if (accepted){ life = Life.closing; }
     }
     if (!accepted){ return; }
     stopSwingOnEdt();
@@ -230,11 +228,8 @@ final class FearlessFrame{
     assert timer == null: "unreachable: runtime timer started before abortBeforeStart";
     boolean accepted;
     synchronized (this){
-      accepted= !completed && !closing;
-      if (accepted){
-        closing = true;
-        completed = true;
-      }
+      accepted= life == Life.running;
+      if (accepted){ life = Life.completed; }
     }
     if (!accepted){
       printDiscarded(e);
@@ -245,8 +240,8 @@ final class FearlessFrame{
     done.completeExceptionally(e);
   }
 
-  private synchronized boolean active(){ return !closing && !completed; }
-  synchronized boolean completed(){ return completed; }
+  private synchronized boolean active(){ return life == Life.running; }
+  synchronized boolean completed(){ return life == Life.completed; }
 
   private void stopSwingOnEdt(){
     assert SwingUtilities.isEventDispatchThread();
@@ -266,8 +261,8 @@ final class FearlessFrame{
   private void finish(){
     Throwable e;
     synchronized (this){
-      if (completed){ return; }
-      completed = true;
+      if (life == Life.completed){ return; }
+      life = Life.completed;
       e= failure;
     }
     if (e == null){ done.complete(null); }
