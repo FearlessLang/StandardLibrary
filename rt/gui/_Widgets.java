@@ -219,13 +219,15 @@ final class _Split extends AContainer implements Split$1c$0{
   int span(){ return vertical ? viewH() : viewW(); }
   @Override Rectangle region(Component k){
     int i= component.getComponentZOrder(k);
-    int s= span();
-    int from= Math.min(s, i == 0 ? 0 : positions[i - 1] + bar);
-    int to= i == positions.length ? s : Math.min(positions[i], s);
-    return along(from, to - from);
+    return along(i == 0 ? 0 : positions[i - 1] + bar, i == positions.length ? span() : positions[i]);
   }
-  Rectangle along(int from, int length){ return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH()); }
-  Rectangle divider(int i){ return along(positions[i], bar).intersection(view()); }
+  Rectangle along(int from, int to){
+    int s= span();
+    int a= Math.min(from, s);
+    int b= Math.min(to, s);
+    return vertical ? new Rectangle(left, top + a, viewW(), b - a) : new Rectangle(left + a, top, b - a, viewH());
+  }
+  Rectangle divider(int i){ return along(positions[i], positions[i] + bar); }
   int dividerAt(Point p){ return IntStream.range(0, positions.length).filter(i -> divider(i).contains(p)).findFirst().orElse(-1); }
   void drag(int i, int[] from, int want){
     int m= from.length;
