@@ -428,7 +428,8 @@ final class Stage extends MouseAdapter{
       cv.clipPath(tri, ClipMode.INTERSECT, true);
       int side= l/2;
       int at= (int)Math.round(l*(2-Math.sqrt(2))/2)-side/2;
-      cornerKept = Sk.image(cv, cornerIcon, cornerKept, Rect.makeXYWH(at, at, side, side));
+      var to= Rect.makeXYWH(at, at, side, side);
+      cornerKept = Sk.image(cv, cornerIcon, cornerKept, to, to);
       cv.restoreToCount(save);
     }
     if (mode != Mode.fearless){ return; }

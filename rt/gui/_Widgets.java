@@ -107,13 +107,10 @@ final class _Picture extends AWidget implements Picture$5c$0{
     if (image == null){ return; }
     int cw= viewW();
     int ch= viewH();
-    float s= Math.max((float) cw / image.getWidth(), (float) ch / image.getHeight());
+    float s= Math.min((float) cw / image.getWidth(), (float) ch / image.getHeight());
     float iw= keepAspect ? image.getWidth() * s : cw;
     float ih= keepAspect ? image.getHeight() * s : ch;
-    int save= cv.save();
-    cv.clipRect(Rect.makeXYWH(left, top, cw, ch));
-    halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih));
-    cv.restoreToCount(save);
+    halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), Rect.makeXYWH(left, top, cw, ch));
   }
   @Override public Object mut$image$1(Object i){
     var img= ((Image$1c$0Instance) i).image;

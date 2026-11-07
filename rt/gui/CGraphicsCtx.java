@@ -96,7 +96,8 @@ class CGraphicsCtx implements Graphics$ao$0{
   }
   @Override public Object mut$image$3(Object image, Object w, Object h){
     var img= ((Image$1c$0Instance) image).image;
-    var drawn= Sk.image(cv, img, null, reach(shapeRect(w, h, "image")));
+    var to= reach(shapeRect(w, h, "image"));
+    var drawn= Sk.image(cv, img, null, to, to);
     if (drawn != img){ drawn.close(); }
     return this;
   }
