@@ -73,13 +73,13 @@ interface Sk{
   record Glyph(List<Hb.Layer> layers, Rect box){}
   record Run(int from, int to, int font, int level, int script){}
   record G(int font, int glyph, int cluster, boolean rtl, double x, double advance, double dx, double dy){}
-  record Line(String text, int size, List<G> glyphs, double width){
+  record Line(String text, int size, List<G> glyphs, double width, boolean rtl){
     double coord(int off){
       G best= null;
       for (var g : glyphs){
         if (g.cluster() >= off && (best == null || g.cluster() < best.cluster() || g.cluster() == best.cluster() && (g.rtl() ? g.x() > best.x() : g.x() < best.x()))){ best = g; }
       }
-      if (best == null){ return width; }
+      if (best == null){ return rtl ? 0 : width; }
       return best.rtl() ? best.x() + best.advance() : best.x();
     }
     double advance(int from, int to){
@@ -132,7 +132,7 @@ interface Sk{
   }
 
   static Line shape(String text, int size){
-    if (text.isEmpty()){ return new Line(text, size, List.of(), 0); }
+    if (text.isEmpty()){ return new Line(text, size, List.of(), 0, false); }
     synchronized (fonts){
       var bidi= new Bidi(text, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
       var runs= new ArrayList<Run>();
@@ -170,7 +170,7 @@ interface Sk{
           x += g.advance() * k;
         }
       }
-      return new Line(text, size, List.copyOf(res), x);
+      return new Line(text, size, List.copyOf(res), x, !bidi.baseIsLeftToRight());
     }
   }
 
