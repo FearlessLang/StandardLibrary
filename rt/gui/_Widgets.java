@@ -635,7 +635,6 @@ final class _Frame implements Frame$1c$0{
   volatile Instant$5c$0 elapsed= time(0);
   AWidget top;
   Stage stage;
-  private long startNanos= System.nanoTime();// re-based in start(): game time zero = warmup end
   private int fps= 30;
   private long modelPeriodNs;
   private ArrayList<MF$7$1> modelTickActions= new ArrayList<>();// live, EDT confined
@@ -852,14 +851,8 @@ final class _Frame implements Frame$1c$0{
     // is already visible showing the frame rendered above. Game time zero
     // is warmup end, so elapsed, the model tick deadlines and warning
     // timestamps agree, and the first tick behaves like every later one.
-    startNanos = System.nanoTime() + FearlessFrame.WarmupMillis * 1_000_000L;
-    frame.startRuntime(
-      Math.round(1000.0f / fps),
-      () -> tick(timeNanos(System.nanoTime() - startNanos))
-    );
-    if (modelPeriodNs != 0){
-      frame.restartModelTimer(modelPeriodNs, FearlessFrame.WarmupMillis, modelTickActions);
-    }
+    frame.startRuntime(Math.round(1000.0f / fps), ns -> tick(timeNanos(ns)));
+    if (modelPeriodNs != 0){ frame.restartModelTimer(modelPeriodNs, modelTickActions); }
     started = true;
   }
 
@@ -982,7 +975,7 @@ final class _Frame implements Frame$1c$0{
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
       b.changeable = false;
       // Live change: fixed-rate deadlines restart from now, no warmup.
-      if (started){ frame.restartModelTimer(modelPeriodNs, 0, actions); }
+      if (started){ frame.restartModelTimer(modelPeriodNs, actions); }
     });
     return this;
   }
