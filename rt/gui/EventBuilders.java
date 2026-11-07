@@ -67,6 +67,7 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
   private AWidget pressTarget;
+  private boolean pressInside;
   private AWidget secondary;
   private AWidget tip;
   private long tipSince;
@@ -104,7 +105,6 @@ final class SkMouse extends MouseAdapter{
   void stopDividing(_Split s){ if (dividing == s){ from = null; } }
 
   void forget(){
-    if (pressTarget instanceof _Button b){ b.down = false; }
     pressTarget = null;
     dragged = null;
     paging = false;
@@ -123,6 +123,8 @@ final class SkMouse extends MouseAdapter{
   }
 
   boolean over(AWidget t){ return !frame.menus.isOpen() && hover.contains(t); }
+
+  boolean down(AWidget t){ return t == pressTarget && pressInside; }
 
   void paintTip(Canvas cv){
     var owner= frame.menus.isOpen() ? null : hover.stream().filter(t -> !t.tooltip.isEmpty()).findFirst().orElse(null);
@@ -156,7 +158,7 @@ final class SkMouse extends MouseAdapter{
     if (left){
       pressTarget = d;
       for (var t : chainOf(d)){ if (t instanceof _Sections s){ s.pressed = s.part(local(s, p)); } }
-      if (d instanceof _Button b){ b.down = true; }
+      pressInside = true;
       if (d instanceof AEditText t){ t.press(content(t, p), e.isShiftDown()); }
     }
     dispatch(d, Pressed, p);
@@ -176,7 +178,6 @@ final class SkMouse extends MouseAdapter{
     dispatch(left && pressTarget != null ? pressTarget : deepestAt(p), Released, p);
     if (SwingUtilities.isRightMouseButton(e)){ context(p); }
     if (!left){ return; }
-    if (pressTarget instanceof _Button b){ b.down = false; }
     click(p, e.getClickCount());
     pressTarget = null;
   }
@@ -200,7 +201,7 @@ final class SkMouse extends MouseAdapter{
       dividing.drag(divider, from, (dividing.vertical ? at.y - dividing.top : at.x - dividing.left) - grab);
       return;
     }
-    if (pressTarget instanceof _Button b){ b.down = inside(b, p); }
+    if (pressTarget instanceof _Button b){ pressInside = inside(b, p); }
     if (pressTarget instanceof AEditText t){ t.drag(content(t, p)); }
     updateHover(p);
     dispatch(pressTarget == null ? deepestAt(p) : pressTarget, Dragged, p);

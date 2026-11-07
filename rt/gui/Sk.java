@@ -450,7 +450,7 @@ interface Sk{
     var b= s.component;
     int w= b.getWidth(), h= b.getHeight();
     if (w <= 0 || h <= 0){ return; }
-    boolean down= s.down;
+    boolean down= s.frame.mouse.down(s);
     boolean over= !down && s.frame.mouse.over(s);
     float r= Math.min(s.radius, Math.min(w, h) / 2f);
     int d= bevel(w, h, (int) r, s);
