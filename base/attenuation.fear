@@ -49,7 +49,7 @@ NoManager: SystemAttenuator { u -> {'s
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
 ///Every method reaches the received System, but the `CapManager` it gives revokes `.quit` and `.reset`:
-///the program cannot end the Fearless manager.
+///the system capability returned by NoManagerQuit can not end the Fearless manager.
 NoManagerQuit: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
