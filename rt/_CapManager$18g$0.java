@@ -41,19 +41,18 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     try{ return new ProcessBuilder(cmd).redirectOutput(Redirect.DISCARD).redirectError(Redirect.DISCARD).start(); }
     catch (IOException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: the manager program could not be started."); }
   }
-  private static Object send(String verb, Stream<String> args, Function<String,Object> result){
-    var words= args.toList();
+  private static Object send(String verb, List<String> args, Function<String,Object> result){
     if (launcher == null){ throw nonDetErr("The message \""+verb+"\" is not sent: this program was not started by the Fearless manager."); }
-    return result.apply(applied(verb, message(verb, words)));
+    return result.apply(applied(verb, message(verb, args)));
   }
   private static String applied(String verb, String text){
     if (text.startsWith(applied)){ return text.substring(applied.length()); }
     if (!text.startsWith(refused)){ throw nonDetErr("The Fearless manager ended the connection of the message \""+verb+"\" without saying whether it applied it."); }
     throw detErr(InputFile.portable(text.substring(refused.length())));
   }
-  private static Object send(String verb, Stream<String> args){ return send(verb, args, _ -> Void$o$0.instance); }
-  private static Object output(String verb, Stream<String> args){ return send(verb, args, o -> new UStr$s$0Instance(o.codePoints().toArray())); }
-  private static Object send(String verb, String... args){ return send(verb, Stream.of(args)); }
+  private static Object send(String verb, List<String> args){ return send(verb, args, _ -> Void$o$0.instance); }
+  private static Object output(String verb, String name){ return send(verb, List.of(name), o -> new UStr$s$0Instance(o.codePoints().toArray())); }
+  private static Object send(String verb, String... args){ return send(verb, List.of(args)); }
   private static Object sendPath(String verb, Object path, String... args){
     var bs= List$o$1Instance.asJava(path);
     var bytes= new byte[bs.size()];
@@ -61,7 +60,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     var text= pathCharset == UTF_16LE ? ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asCharBuffer().toString() : new String(bytes, pathCharset);
     if (pathCharset == UTF_16LE && bytes.length % 2 != 0){ throw detErr("The message \""+verb+"\" is not sent: a path of Windows is 16 bit units, so its bytes are an even number."); }
     if (!absolute(text)){ throw detErr("The message \""+verb+"\" is not sent: the path \""+InputFile.portable(text)+"\"\nis not an absolute path of this system other than the root of a drive."); }
-    return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)));
+    return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)).toList());
   }
   private static boolean absolute(String path){
     try{ var p= Path.of(path); return p.isAbsolute() && p.normalize().getFileName() != null; }
@@ -73,11 +72,11 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     if (p.matcher(word).matches()){ return word; }
     throw detErr("The message \""+verb+"\" is not sent: \""+InputFile.portable(word)+"\" is not "+what+".");
   }
-  private static Stream<String> types(String verb, Object list){ return List$o$1Instance.asJava(list).stream().map(t -> type(verb, t)); }
-  private static Stream<String> mains(Object list){
-    var res= types("SelectMains", list).toList();
+  private static List<String> types(String verb, Object list){ return List$o$1Instance.asJava(list).stream().map(t -> type(verb, t)).toList(); }
+  private static List<String> mains(Object list){
+    var res= types("SelectMains", list);
     res.stream().filter(m -> res.indexOf(m) != res.lastIndexOf(m)).findFirst().ifPresent(m -> { throw detErr("The message \"SelectMains\" is not sent: the mains are all different, and \""+m+"\" is named twice."); });
-    return res.stream();
+    return res;
   }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
@@ -90,8 +89,8 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$editMetadata$1(Object path){ return sendPath("EditMetadata", path); }
   @Override public Object mut$openWithOrShortcut$1(Object path){ return sendPath("OpenWithOrShortcut", path); }
   @Override public Object mut$openWithOrShortcut$3(Object path, Object name, Object main){ return sendPath("OpenWithOrShortcut", path, name("OpenWithOrShortcut", name), type("OpenWithOrShortcut", main)); }
-  @Override public Object mut$run$1(Object name){ return output("Run", Stream.of(name("Run", name))); }
-  @Override public Object mut$compile$1(Object name){ return output("Compile", Stream.of(name("Compile", name))); }
+  @Override public Object mut$run$1(Object name){ return output("Run", name("Run", name)); }
+  @Override public Object mut$compile$1(Object name){ return output("Compile", name("Compile", name)); }
   @Override public Object mut$check$1(Object name){ return send("Check", name("Check", name)); }
   @Override public Object mut$terminate$1(Object name){ return send("Terminate", name("Terminate", name)); }
   @Override public Object mut$deleteCache$1(Object name){ return send("DeleteCache", name("DeleteCache", name)); }
@@ -102,6 +101,6 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$forget$1(Object name){ return send("Forget", name("Forget", name)); }
   @Override public Object mut$mount$3(Object name, Object type, Object data){ return send("Mount", name("Mount", name), type("Mount", type), name("Mount", data)); }
   @Override public Object mut$unmount$2(Object name, Object type){ return send("Unmount", name("Unmount", name), type("Unmount", type)); }
-  @Override public Object mut$attenuate$3(Object name, Object main, Object attenuators){ return send("Attenuate", Stream.concat(Stream.of(name("Attenuate", name), type("Attenuate", main)), types("Attenuate", attenuators))); }
-  @Override public Object mut$selectMains$2(Object name, Object mains){ return send("SelectMains", Stream.concat(Stream.of(name("SelectMains", name)), mains(mains))); }
+  @Override public Object mut$attenuate$3(Object name, Object main, Object attenuators){ return send("Attenuate", Stream.concat(Stream.of(name("Attenuate", name), type("Attenuate", main)), types("Attenuate", attenuators).stream()).toList()); }
+  @Override public Object mut$selectMains$2(Object name, Object mains){ return send("SelectMains", Stream.concat(Stream.of(name("SelectMains", name)), mains(mains).stream()).toList()); }
 }
