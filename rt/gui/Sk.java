@@ -131,10 +131,11 @@ interface Sk{
       || t == Character.COMBINING_SPACING_MARK || t == Character.FORMAT || Character.isEmojiModifier(cp);
   }
 
-  static Line shape(String text, int size){
+  static Line shape(String text, int size){ return shape(text, size, new Bidi(text, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT)); }
+
+  static Line shape(String text, int size, Bidi bidi){
     if (text.isEmpty()){ return new Line(text, size, List.of(), 0, false); }
     synchronized (fonts){
-      var bidi= new Bidi(text, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
       var runs= new ArrayList<Run>();
       int from= 0, font= -1, level= 0, script= Hb.common;
       for (int i= 0, prev= -1; i < text.length();){

@@ -21,6 +21,7 @@ import java.awt.im.InputMethodRequests;
 import java.io.IOException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
+import java.text.Bidi;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
@@ -221,9 +222,10 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   private ArrayList<Seg> segs(String s, int ww){
     var res= new ArrayList<Seg>();
     if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
+    var bidi= new Bidi(s, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
     int from= 0;
     for (int to : Sk.wrap(s, textSize, above, below, ww)){
-      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize)));
+      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSize, bidi.createLineBidi(from, to))));
       from = to;
     }
     return res;
