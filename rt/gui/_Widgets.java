@@ -154,7 +154,8 @@ final class _Pane extends AContainer implements Pane$o$0{
       // Removed widgets get no Exited events (DOM semantics: removal is not
       // an exit); SkMouse just forgets its references into the subtrees.
       // Handler tasks already queued for removed widgets are skipped.
-      for (int i= component.getComponentCount() - 1; i >= 0; i -= 1){ detach(component.getComponent(i)); }
+      for (var c : component.getComponents()){ frame.mouse.detached((SkComponent) c); }
+      component.removeAll();
     });
   }
   @Override public Object mut$lineScroll$1(Object b){ return reStyle(() -> lineScroll = Util.isTrue(b)); }
@@ -286,9 +287,12 @@ final class _Split extends AContainer implements Split$1c$0{
   }
   Object replace(int i, AWidget c){
     return reStyle(() -> {
-      detach(component.getComponent(i));
-      attach(c, null, i);
+      var old= component.getComponent(i);
+      frame.mouse.detached((SkComponent) old);
+      component.remove(old);
+      component.add(c.component, i);
       growFor(c);
+      c.changeable = false;
     });
   }
   @Override public Object mut$horizontal$0(){ return axis(false); }
@@ -480,14 +484,6 @@ abstract class AWidget implements Widget$2o$1{
     height = Math.min(maxExtent, Math.max(height, h));
   }
   void growFor(AWidget k){ grow(k.width + edgeW(), k.height + edgeH()); }
-  void attach(AWidget k, Object where, int index){
-    component.add(k.component, where, index);
-    k.changeable = false;
-  }
-  void detach(Component k){
-    frame.mouse.detached((SkComponent) k);
-    component.remove(k);
-  }
   void insetsFit(String setter, int l, int r, int t, int b, int w, int h){
     if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": leftInset " + l + " + rightInset " + r + " is more than width " + w); }
     if (t + b > h){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": topInset " + t + " + bottomInset " + b + " is more than height " + h); }
@@ -723,6 +719,7 @@ final class _Frame implements Frame$1c$0{
     return c;
   }
   Object addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
+    var parent= into.component;
     var b= build(scope, make);
     onEdtAndWait(() -> {
       into.change();
@@ -730,10 +727,14 @@ final class _Frame implements Frame$1c$0{
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old= where == null ? null : ((BorderLayout) into.component.getLayout()).getLayoutComponent(where);
-      if (old != null){ into.detach(old); }
-      into.attach(b, where, -1);
+      var old= where == null ? null : ((BorderLayout) parent.getLayout()).getLayoutComponent(where);
+      if (old != null){
+        mouse.detached((SkComponent) old);
+        parent.remove(old);
+      }
+      parent.add(b.component, where);
       into.growFor(b);
+      b.changeable = false;
     });
     markLayoutDirty();
     return into;
