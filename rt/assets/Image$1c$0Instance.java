@@ -8,6 +8,7 @@ import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Surface;
+import io.github.humbleui.types.IRect;
 
 final class Image$1c$0Instance implements Image$1c$0{
   final Image image;
@@ -34,6 +35,22 @@ final class Image$1c$0Instance implements Image$1c$0{
       int c= b.getColor(0, 0);
       return Color$1c$0.instance.imm$$hash$4(Red$c$0.instance.read$$hash$1(byt(c >>> 16)), Green$1c$0.instance.read$$hash$1(byt(c >>> 8)), Blue$o$0.instance.read$$hash$1(byt(c)), Alpha$1c$0.instance.read$$hash$1(byt(c >>> 24)));
     }
+  }
+  @Override public Object imm$crop$4(Object x, Object y, Object w, Object h){
+    var cw= cropSide(Util.natToLong(((WidthNat$as$0) w).read$get$0()), image.getWidth(), "width");
+    var ch= cropSide(Util.natToLong(((HeightNat$lg$0) h).read$get$0()), image.getHeight(), "height");
+    var cx= cropStart(((XInt$s$0) x).read$get$0(), cw, image.getWidth(), "x", "width");
+    var cy= cropStart(((YInt$s$0) y).read$get$0(), ch, image.getHeight(), "y", "height");
+    return new Image$1c$0Instance(image.makeSubset(IRect.makeXYWH(cx, cy, cw, ch)));
+  }
+  private static int cropSide(long n, int side, String what){
+    if (Long.compareUnsigned(n, side) > 0){ throw Util.detErr("crop " + what + " " + Long.toUnsignedString(n) + " is too large; it must be <= " + side); }
+    return side(n, "crop " + what);
+  }
+  private static int cropStart(Object c, int extent, int side, String what, String extentName){
+    long v= Util.intToLong(c);
+    if (v < 0 || v > side - extent){ throw Util.detErr("crop " + what + " " + v + " is out of range; with " + extentName + " " + extent + " it must be between 0 and " + (side - extent)); }
+    return (int) v;
   }
   private static Object byt(int c){ return Byte$o$0Instance.instance((byte) c); }
   private static int pixel(Object c, int side, String what){
