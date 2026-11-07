@@ -140,15 +140,16 @@ interface Sk{
 
   static Line shape(String text, TextSettings settings, Bidi bidi){
     if (text.isEmpty()){ return new Line(text, settings, List.of(), 0, false); }
+    var shaped= text.replace('\t', ' ');
     synchronized (fonts){
       var runs= new ArrayList<Run>();
       int from= 0, font= -1, level= 0, script= Hb.common;
       for (int i= 0, prev= -1; i < text.length();){
-        int cp= text.codePointAt(i);
+        int cp= shaped.codePointAt(i);
         int next= i + Character.charCount(cp);
         int f= font;
         if (font < 0 || !(sticky(cp) || prev == 0x200D)){
-          int nx= next < text.length() ? text.codePointAt(next) : -1;
+          int nx= next < text.length() ? shaped.codePointAt(next) : -1;
           f = fontOf(cp, nx == 0xFE0F || Character.isEmojiPresentation(cp));
         }
         int s= Hb.script(cp);
@@ -171,7 +172,7 @@ interface Sk{
       for (var r : order){
         double k= (double) settings.size() / upems[r.font()];
         boolean rtl= (r.level() & 1) != 0;
-        for (var g : Hb.shape(fonts[r.font()], text, r.from(), r.to(), rtl, r.script())){
+        for (var g : Hb.shape(fonts[r.font()], shaped, r.from(), r.to(), rtl, r.script())){
           res.add(new G(r.font(), g.glyph(), g.cluster(), rtl, x, g.advance() * k, g.dx() * k, -g.dy() * k));
           x += g.advance() * k;
         }
