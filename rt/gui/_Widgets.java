@@ -27,6 +27,7 @@ import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.ColorAlphaType;
 import io.github.humbleui.skija.ColorType;
+import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
@@ -85,7 +86,8 @@ final class _Label extends AWidget implements Label$1c$0{
 }
 
 final class _Picture extends AWidget implements Picture$5c$0{
-  Image$1c$0Instance image;
+  Image image;
+  Image halved;
   boolean keepAspect= true;
   boolean byHeight;
 
@@ -93,29 +95,29 @@ final class _Picture extends AWidget implements Picture$5c$0{
 
   @Override Dimension need(){
     if (image == null){ return new Dimension(edgeW(), edgeH()); }
-    return new Dimension(image.image.getWidth() + edgeW(), image.image.getHeight() + edgeH());
+    return new Dimension(image.getWidth() + edgeW(), image.getHeight() + edgeH());
   }
   @Override void fit(){
     if (!keepAspect || image == null){ return; }
-    if (byHeight){ width = extent(edgeW() + Math.round((double) (height - edgeH()) * image.image.getWidth() / image.image.getHeight()), "keepAspect width"); return; }
-    height = extent(edgeH() + Math.round((double) (width - edgeW()) * image.image.getHeight() / image.image.getWidth()), "keepAspect height");
+    if (byHeight){ width = extent(edgeW() + Math.round((double) (height - edgeH()) * image.getWidth() / image.getHeight()), "keepAspect width"); return; }
+    height = extent(edgeH() + Math.round((double) (width - edgeW()) * image.getHeight() / image.getWidth()), "keepAspect height");
   }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
     if (image == null){ return; }
     int cw= viewW();
     int ch= viewH();
-    float s= Math.max((float) cw / image.image.getWidth(), (float) ch / image.image.getHeight());
-    float iw= keepAspect ? image.image.getWidth() * s : cw;
-    float ih= keepAspect ? image.image.getHeight() * s : ch;
+    float s= Math.max((float) cw / image.getWidth(), (float) ch / image.getHeight());
+    float iw= keepAspect ? image.getWidth() * s : cw;
+    float ih= keepAspect ? image.getHeight() * s : ch;
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(left, top, cw, ch));
-    Sk.image(cv, image, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih));
+    halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih));
     cv.restoreToCount(save);
   }
   @Override public Object mut$image$1(Object i){
-    var img= (Image$1c$0Instance) i;
-    return reStyle(() -> { image = img; grow(img.image.getWidth() + edgeW(), img.image.getHeight() + edgeH()); });
+    var img= ((Image$1c$0Instance) i).image;
+    return reStyle(() -> { image = img; halved = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
   @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }

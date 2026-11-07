@@ -95,7 +95,9 @@ class CGraphicsCtx implements Graphics$ao$0{
     return Rect.makeXYWH(x, y, Scopes.extent((WidthNat$as$0) w, what + " width"), Scopes.extent((HeightNat$lg$0) h, what + " height"));
   }
   @Override public Object mut$image$3(Object image, Object w, Object h){
-    Sk.image(cv, (Image$1c$0Instance) image, reach(shapeRect(w, h, "image")));
+    var img= ((Image$1c$0Instance) image).image;
+    var drawn= Sk.image(cv, img, null, reach(shapeRect(w, h, "image")));
+    if (drawn != img){ drawn.close(); }
     return this;
   }
   @Override public Object mut$textHeight$p1$1(Object h){
