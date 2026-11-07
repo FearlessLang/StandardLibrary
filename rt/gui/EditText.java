@@ -87,8 +87,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   final StringBuilder buf= new StringBuilder();
   int caret;
   int anchor;
-  String committed= "";
-  boolean committedLive= true;
+  String committed;
   boolean editable= true;
   boolean clearsUndo= true;
   boolean wrap;
@@ -166,7 +165,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     redo.clear();
     if (clearsUndo){ undo.clear(); }
     else{ undo.add(step); }
-    committedLive = true;
+    committed = null;
     dirty = true;
   }
 
@@ -351,7 +350,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     return true;
   }
   void apply(int a, int b, String s, int c, int an){
-    if (committedLive){ committed = buf.toString(); committedLive = false; }
+    if (committed == null){ committed = buf.toString(); }
     buf.replace(a, b, s);
     caret = snap(c);
     anchor = snap(an);
@@ -424,8 +423,8 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   void drag(Point p){ act(() -> moveTo(offsetAt(p.x, p.y), true)); }
   void commit(){
     submit(() -> {
-      if (committedLive || committed.contentEquals(buf)){ return null; }
-      committedLive = true;
+      if (committed == null || committed.contentEquals(buf)){ return null; }
+      committed = null;
       return onCommit == null ? null : new Fire(onCommit, event());
     });
   }
