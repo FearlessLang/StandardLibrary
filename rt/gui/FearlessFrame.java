@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.LongConsumer;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -27,7 +26,7 @@ final class FearlessFrame{
   // is visible and correct in the meantime: start() renders one frame before
   // the window is first painted, and expose repaints blit that image. Game time zero
   // (elapsed, model tick deadlines, the t= in warnings) is warmup end.
-  private static final int WarmupMillis= 500;
+  static final int WarmupMillis= 500;
   // A model timer firing catches up at most this many overdue ticks. Longer
   // stalls (machine sleep, debugger pause) drop the excess with a warning:
   // replaying unbounded ticks after resume would flood the queue and visibly
@@ -73,7 +72,7 @@ final class FearlessFrame{
     e.dropComplete(ok);
   }
 
-  void startRuntime(int delayMillis, LongConsumer tick){
+  void startRuntime(int delayMillis, Runnable tick){
     assert SwingUtilities.isEventDispatchThread();
     assert timer == null;
     runtimeStartNs = System.nanoTime() + WarmupMillis * 1_000_000L;// game time zero: warmup end
@@ -81,9 +80,9 @@ final class FearlessFrame{
     tickLast = runtimeStartNs;
     timer = new Timer(delayMillis, _ -> {
       long now= System.nanoTime();
-      warnIfLost("repaint", now - tickLast, tickPeriodNs);
+      warnIfLost("repaint", now, now - tickLast, tickPeriodNs);
       tickLast = now;
-      try{ tick.accept(now - runtimeStartNs); }
+      try{ tick.run(); }
       catch (Throwable t){ low(t); }
     });
     timer.setInitialDelay(delayMillis + WarmupMillis);
@@ -103,20 +102,20 @@ final class FearlessFrame{
     tickLast = Math.max(now, runtimeStartNs);// no spurious loss warning across the change
   }
 
-  // Starts or replaces the model timer, fixed-rate semantics.
-  // The action list is live and EDT confined:
+  // Starts or replaces the model timer, fixed-rate semantics. warmupMillis
+  // delays the first firing and the tick deadlines (WarmupMillis at startup,
+  // 0 on a live modelFps change). The action list is live and EDT confined:
   // an action set later by the model takes part from the next due tick.
   // Each firing submits one task running the
   // whole action list per model tick that became due since the previous
   // firing; the submissions of one firing are contiguous on the queue (single
   // EDT producer), so catch-up ticks cannot interleave with button or key events.
-  void restartModelTimer(long periodNs, java.util.List<MF$7$1> actions){
+  void restartModelTimer(long periodNs, int warmupMillis, java.util.List<MF$7$1> actions){
     assert SwingUtilities.isEventDispatchThread();
     if (!active()){ return; }
     if (modelTimer != null){ modelTimer.stop(); }
-    long from= System.nanoTime();
     modelPeriodNs = periodNs;
-    modelStartNs = Math.max(from, runtimeStartNs);
+    modelStartNs = System.nanoTime() + warmupMillis * 1_000_000L;
     modelTicks = 0;
     modelWarnAt = 1_000;
     int delayMillis= Math.max(1, Math.toIntExact(Math.round(periodNs / 1_000_000.0)));
@@ -126,7 +125,8 @@ final class FearlessFrame{
       long todo= due - modelTicks;
       if (todo > ModelCatchupMax){
         long dropped= todo - ModelCatchupMax;
-        warn(dropped + " model tick(s) dropped: stall longer than "
+        System.err.println("Warning [t=" + (now - runtimeStartNs) / 1_000_000 + "ms]: "
+          + dropped + " model tick(s) dropped: stall longer than "
           + ModelCatchupMax + " periods (" + ModelCatchupMax * modelPeriodNs / 1_000_000
           + "ms); catch-up capped");
         modelTicks += dropped;
@@ -141,12 +141,13 @@ final class FearlessFrame{
       // then 10000, ... and re-arm once the queue fully drains.
       int backlog= queue.q().size();
       if (backlog >= modelWarnAt){
-        warn("model queue backlog at " + backlog + " tasks");
+        System.err.println("Warning [t=" + (now - runtimeStartNs) / 1_000_000
+          + "ms]: model queue backlog at " + backlog + " tasks");
         modelWarnAt *= 10;
       }
       else if (backlog == 0){ modelWarnAt = 1_000; }
     });
-    modelTimer.setInitialDelay(delayMillis + (int) Math.ceilDiv(modelStartNs - from, 1_000_000L));
+    modelTimer.setInitialDelay(delayMillis + warmupMillis);
     modelTimer.start();
   }
 
@@ -159,10 +160,11 @@ final class FearlessFrame{
   // skipped beyond jitter) is reported. The model timer needs no gap
   // warning: a late firing is absorbed by fixed-rate catch-up, and true
   // losses (cap exceeded) are reported above.
-  private void warnIfLost(String what, long gapNs, long periodNs){
+  private void warnIfLost(String what, long nowNs, long gapNs, long periodNs){
     long lost= gapNs / periodNs - 1;// integer division: only whole skipped periods count
     if (lost <= 0){ return; }
-    warn(lost + " " + what + " frame(s) lost ("
+    System.err.println("Warning [t=" + (nowNs - runtimeStartNs) / 1_000_000 + "ms]: "
+      + lost + " " + what + " frame(s) lost ("
       + gapNs / 1_000_000 + "ms gap, period " + periodNs / 1_000_000 + "ms)");
   }
 
