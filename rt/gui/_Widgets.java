@@ -57,7 +57,6 @@ final class SkComponent extends JComponent{
 final class _Button extends AWidget implements Button$2o$0{
   MF$7$1 action;// EDT confined
   boolean down;// visual pressed state, maintained by SkMouse, read by Sk.button
-  boolean over;// visual rollover state, maintained by SkMouse, read by Sk.button
   // Bevel path cache, used and maintained by Sk.button; EDT confined. The
   // paths depend only on (width, height, radius, bevel depth), so a stable
   // button costs zero path allocations per frame. Stale paths of discarded

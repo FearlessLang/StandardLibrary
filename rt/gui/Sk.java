@@ -451,7 +451,7 @@ interface Sk{
     int w= b.getWidth(), h= b.getHeight();
     if (w <= 0 || h <= 0){ return; }
     boolean down= s.down;
-    boolean over= s.over && !down;
+    boolean over= !down && s.frame.mouse.over(s);
     float r= Math.min(s.radius, Math.min(w, h) / 2f);
     int d= bevel(w, h, (int) r, s);
     int center= baseColor(s.bg, over, down);

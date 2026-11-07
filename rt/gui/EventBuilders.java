@@ -122,6 +122,8 @@ final class SkMouse extends MouseAdapter{
     updateHover(p);
   }
 
+  boolean over(AWidget t){ return !frame.menus.isOpen() && hover.contains(t); }
+
   void paintTip(Canvas cv){
     var owner= frame.menus.isOpen() ? null : hover.stream().filter(t -> !t.tooltip.isEmpty()).findFirst().orElse(null);
     if (owner != tip){ tip = owner; tipSince = System.nanoTime(); tipAt = null; }
@@ -304,12 +306,10 @@ final class SkMouse extends MouseAdapter{
     var tasks= new ArrayList<MF$7$1>();
     for (var t : hover){// exits, deepest first
       if (now.contains(t)){ continue; }
-      if (t instanceof _Button b){ b.over = false; }
       handlers(t, Exited, at, tasks);
     }
     for (var t : now.reversed()){// enters, outermost first
       if (hover.contains(t)){ continue; }
-      if (t instanceof _Button b){ b.over = true; }
       handlers(t, Entered, at, tasks);
     }
     hover = now;
