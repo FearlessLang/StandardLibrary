@@ -50,7 +50,7 @@ Image:{
   ///A copy of this image with ``painter`` drawn over it, by the `Graphics` that paints a widget.
   ///Here ``.panelWidth`` and ``.panelHeight`` are the size of this image, and ``.elapsed`` is ``Instant.origin``.
   ///The color starts as opaque black, and the position at (0, 0).
-  ///What ``painter`` draws past the edges of this image is clipped, with a warning, as for the painter of a widget.
+  ///What ``painter`` draws past the edges of this image is clipped.
   .paint(painter: Painter): Image;
   ///The color of the pixel at (``x``, ``y``) of this image; (0, 0) is the top left pixel.
   ///``x`` is between 0 and ``.width`` - 1, and ``y`` is between 0 and ``.height`` - 1.
