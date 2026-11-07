@@ -218,7 +218,6 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     shaped.put(text, res);
     return res;
   }
-  static float width(Sk.Line t){ return t == null ? 0 : (float) t.width(); }
   private ArrayList<Seg> segs(String s, int ww){
     var res= new ArrayList<Seg>();
     if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
@@ -511,10 +510,11 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     int b= selB();
     int vEnd= v.wrapped() ? v.end() : v.end() + 1;
     if (a < b && a < vEnd && b > v.start()){
-      float x1= a <= v.start() ? 0 : xOf(v, a);
-      float x2= b > v.end() ? v.dx() + width(v.line()) + (v.wrapped() ? 0 : textSize / 3f) : xOf(v, b);
+      boolean rtl= v.line() != null && v.line().rtl();
+      float x1= a <= v.start() ? (rtl ? v.w() : 0) : xOf(v, a);
+      float x2= b > v.end() ? xOf(v, v.end()) + (v.wrapped() ? 0 : rtl ? -textSize / 3f : textSize / 3f) : xOf(v, b);
       Sk.paint.setColor(focused ? 0xFFB4CDF5 : 0xFFDCDCDC);
-      cv.drawRect(Rect.makeXYWH(x1, v.y(), x2 - x1, v.h()), Sk.paint);
+      cv.drawRect(Rect.makeLTRB(Math.min(x1, x2), v.y(), Math.max(x1, x2), v.y() + v.h()), Sk.paint);
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);

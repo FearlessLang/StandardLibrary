@@ -553,7 +553,7 @@ abstract class AWidget implements Widget$2o$1{
     return reText(() -> text = s);
   }
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
-  @Override public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
+  public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
   @Override public Object mut$uTooltip$1(Object t){
     var s= ustr(t);
@@ -583,7 +583,7 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object read$height$0(){ return h(height); }
   @Override public Object read$fill$0(){ return Util.bool(fill); }
   @Override public Object read$radius$0(){ return n(radius); }
-  @Override public Object read$foreground$0(){ return foreground; }
+  public Object read$foreground$0(){ return foreground; }
   @Override public Object read$background$0(){ return background; }
 }
 
