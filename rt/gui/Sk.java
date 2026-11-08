@@ -316,10 +316,14 @@ interface Sk{
 
   static void background(Canvas cv, AWidget s){
     if (s.bg >>> 24 == 0){ return; }
+    paint.setColor(s.bg);
+    cv.drawRRect(rounded(s), paint);
+  }
+
+  static RRect rounded(AWidget s){
     float w= s.component.getWidth();
     float h= s.component.getHeight();
-    paint.setColor(s.bg);
-    cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2)), paint);
+    return RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2));
   }
 
   static String boundsClip(SkComponent c, Component k){

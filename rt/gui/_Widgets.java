@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 
 import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
+import io.github.humbleui.skija.ClipMode;
 import io.github.humbleui.skija.ColorAlphaType;
 import io.github.humbleui.skija.ColorType;
 import io.github.humbleui.skija.Image;
@@ -110,7 +111,10 @@ final class _Picture extends AWidget implements Picture$5c$0{
     float s= Math.min((float) cw / image.getWidth(), (float) ch / image.getHeight());
     float iw= keepAspect ? image.getWidth() * s : cw;
     float ih= keepAspect ? image.getHeight() * s : ch;
+    int save= cv.save();
+    cv.clipRRect(Sk.rounded(this), ClipMode.INTERSECT, true);
     halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), Rect.makeXYWH(left, top, cw, ch));
+    cv.restoreToCount(save);
   }
   @Override public Object mut$image$1(Object i){
     var img= ((Image$1c$0Instance) i).image;
