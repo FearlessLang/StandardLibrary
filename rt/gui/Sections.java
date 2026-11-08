@@ -1,6 +1,5 @@
 package _base;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -56,7 +55,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
   Object replace(long i, boolean title, AWidget w){
     return reStyle(() -> {
       var s= at(i);
-      attach((title ? s.title : s.content).component, w);
+      attach(title ? s.title : s.content, w);
       if (title){ s.title = w; } else { s.content = w; }
       grow(s);
     });
@@ -90,7 +89,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
       y += t.height + heightGap;
       if (s != expanded){ continue; }
       var c= s.content.own();
-      MutableBorderLayout.place(s.content.component, left, y, w, c.height, true, false);
+      MutableBorderLayout.place(s.content, left, y, w, c.height, true, false);
       y += c.height + heightGap;
     }
   }
@@ -105,15 +104,15 @@ final class _Sections extends AContainer implements Sections$ao$0{
     }
     int gap= sections.isEmpty() ? 0 : rowH + heightGap;
     area = new Rectangle(left, top + gap, viewW(), Math.max(0, viewH() - gap));
-    if (expanded != null){ MutableBorderLayout.place(expanded.content.component, area.x, area.y, area.width, area.height, true, true); }
+    if (expanded != null){ MutableBorderLayout.place(expanded.content, area.x, area.y, area.width, area.height, true, true); }
   }
-  @Override boolean hides(Component k){
-    for (var s : sections){ if (s.content.component == k){ return s != expanded; } }
+  @Override boolean hides(AWidget k){
+    for (var s : sections){ if (s.content == k){ return s != expanded; } }
     return false;
   }
-  @Override Rectangle region(Component k){
+  @Override Rectangle region(AWidget k){
     if (!tabs){ return null; }
-    for (var s : sections){ if (s.content.component == k){ return area; } }
+    for (var s : sections){ if (s.content == k){ return area; } }
     return null;
   }
   @Override void sk(Canvas cv){
@@ -160,7 +159,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
   }
   void expand(Section s){
     if (s == expanded){ return; }
-    if (expanded != null){ frame.mouse.hidden(expanded.content.component); }
+    if (expanded != null){ frame.mouse.hidden(expanded.content); }
     expanded = s;
   }
   @Override public Object mut$section$0(){ return new _RegionFiller(frame, (t, mt) -> _RegionFiller.and(frame, (s, make) -> add(frame.build(t, mt), frame.build(s, make)))); }
@@ -179,7 +178,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
       var s= at(k);
       sections.remove(s);
       if (s == expanded){ expanded = null; }
-      for (var w : List.of(s.title, s.content)){ detach(w.component); }
+      for (var w : List.of(s.title, s.content)){ detach(w); }
     });
   }
   @Override public Object mut$title$1(Object i){ return replacer(Util.natToLong(i), true); }

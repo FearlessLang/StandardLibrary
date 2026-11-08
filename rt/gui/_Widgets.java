@@ -1,6 +1,5 @@
 package _base;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -8,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -195,8 +195,8 @@ final class _Pane extends AContainer implements Pane$o$0{
   final CenteredFlowLayout flow= new CenteredFlowLayout(this);
 
   _Pane(_Frame frame){ super(frame); }
-  @Override Dimension need(){ return flow.natural(component); }
-  @Override void placeChildren(){ flow.layoutContainer(component); }
+  @Override Dimension need(){ return flow.natural(); }
+  @Override void placeChildren(){ flow.layoutContainer(); }
   @Override public Object mut$button$1(Object s){ return frame.addTo(this, null, s, _Button::new); }
   @Override public Object mut$label$1(Object s){ return frame.addTo(this, null, s, _Label::new); }
   @Override public Object mut$picture$1(Object s){ return frame.addTo(this, null, s, _Picture::new); }
@@ -213,7 +213,7 @@ final class _Pane extends AContainer implements Pane$o$0{
       // Removed widgets get no Exited events (DOM semantics: removal is not
       // an exit); SkMouse just forgets its references into the subtrees.
       // Handler tasks already queued for removed widgets are skipped.
-      for (var c : component.getComponents()){ detach(c); }
+      for (var c : children()){ detach(c); }
     });
   }
   @Override public Object mut$lineScroll$1(Object b){ return reStyle(() -> lineScroll = Util.isTrue(b)); }
@@ -221,7 +221,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$centered$1(Object b){ return reStyle(() -> centered = Util.isTrue(b)); }
   @Override boolean barRight(){ return vertical ? lineScroll : stackScroll; }
   @Override boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
-  @Override Rectangle clip(Component k){ return barRight() || barBottom() ? view() : null; }
+  @Override Rectangle clip(AWidget k){ return barRight() || barBottom() ? view() : null; }
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
   @Override public Object mut$minPerLine$1(Object n){
@@ -250,7 +250,7 @@ final class _Border extends AContainer implements Border$2o$0{
 
   _Border(_Frame frame){ super(frame); }
   @Override Dimension need(){ return layout.natural(); }
-  @Override void placeChildren(){ layout.layoutContainer(component); }
+  @Override void placeChildren(){ layout.layoutContainer(); }
   @Override public Object mut$north$0(){ return frame.region(this, "north"); }
   @Override public Object mut$south$0(){ return frame.region(this, "south"); }
   @Override public Object mut$east$0(){ return frame.region(this, "east"); }
@@ -269,14 +269,14 @@ final class _Split extends AContainer implements Split$1c$0{
     positions = IntStream.range(0, regions - 1).map(i -> i * bar).toArray();
   }
   @Override void placeChildren(){
-    for (var k : component.getComponents()){
+    for (var k : children()){
       var r= region(k);
       MutableBorderLayout.place(k, r.x, r.y, r.width, r.height, true, true);
     }
   }
   int span(){ return vertical ? viewH() : viewW(); }
-  @Override Rectangle region(Component k){
-    int i= component.getComponentZOrder(k);
+  @Override Rectangle region(AWidget k){
+    int i= indexOf(k);
     return along(i == 0 ? 0 : positions[i - 1] + bar, i == positions.length ? span() : positions[i]);
   }
   Rectangle along(int from, int to){
@@ -303,8 +303,8 @@ final class _Split extends AContainer implements Split$1c$0{
   static int scale(int v, int to, int from){ return (int) Math.round((double) v * to / from); }
   @Override Dimension need(){
     var a= new Dimension(0, 0);
-    for (var c : component.getComponents()){
-      var o= ((SkComponent) c).w.own();
+    for (var c : children()){
+      var o= c.own();
       a = vertical ? new Dimension(Math.max(a.width, o.width), a.height + o.height) : new Dimension(a.width + o.width, Math.max(a.height, o.height));
     }
     int bars= positions.length * bar;
@@ -315,7 +315,7 @@ final class _Split extends AContainer implements Split$1c$0{
       frame.mouse.stopDividing(this);
       int at= 0;
       for (int i= 0; i < positions.length; i += 1){
-        var o= ((SkComponent) component.getComponent(i)).w.own();
+        var o= child(i).own();
         at += vertical ? o.height : o.width;
         positions[i] = at;
         at += bar;
@@ -348,12 +348,12 @@ final class _Split extends AContainer implements Split$1c$0{
     return reStyle(() -> {
       vertical = v;
       frame.mouse.stopDividing(this);
-      for (var c : component.getComponents()){ growFor(((SkComponent) c).w); }
+      for (var c : children()){ growFor(c); }
     });
   }
   Object replace(int i, AWidget c){
     return reStyle(() -> {
-      attach(component.getComponent(i), c);
+      attach(child(i), c);
       growFor(c);
     });
   }
@@ -464,7 +464,7 @@ abstract class AWidget implements Widget$2o$1{
   AWidget(_Frame frame){ this.frame= frame; }
 
   boolean canChange(){
-    return changeable || this == frame.top || component.getParent() instanceof SkComponent p && p.w.canChange();
+    return changeable || this == frame.top || parent() instanceof AWidget p && p.canChange();
   }
 
   void change(){
@@ -501,9 +501,14 @@ abstract class AWidget implements Widget$2o$1{
   abstract Dimension need();
   void fit(){}
   void placeChildren(){}
-  boolean hides(Component k){ return false; }
-  Rectangle region(Component k){ return null; }
-  Rectangle clip(Component k){ return region(k); }
+  AWidget parent(){ return component.getParent() instanceof SkComponent p ? p.w : null; }
+  int childCount(){ return component.getComponentCount(); }
+  AWidget child(int i){ return ((SkComponent) component.getComponent(i)).w; }
+  List<AWidget> children(){ return IntStream.range(0, childCount()).mapToObj(this::child).toList(); }
+  int indexOf(AWidget k){ return component.getComponentZOrder(k.component); }
+  boolean hides(AWidget k){ return false; }
+  Rectangle region(AWidget k){ return null; }
+  Rectangle clip(AWidget k){ return region(k); }
   boolean barRight(){ return false; }
   boolean barBottom(){ return false; }
   int edgeW(){ return left + right + (barRight() ? bar : 0); }
@@ -546,15 +551,15 @@ abstract class AWidget implements Widget$2o$1{
     height = Math.min(maxExtent, Math.max(height, h));
   }
   void growFor(AWidget k){ grow(k.width + edgeW(), k.height + edgeH()); }
-  void attach(Component replaced, AWidget c){
-    int at= component.getComponentZOrder(replaced);
-    if (replaced != null){ detach(replaced); }
+  void attach(AWidget replaced, AWidget c){
+    int at= -1;
+    if (replaced != null){ at = indexOf(replaced); detach(replaced); }
     component.add(c.component, at);
     c.changeable = false;
   }
-  void detach(Component c){
-    frame.mouse.detached((SkComponent) c);
-    component.remove(c);
+  void detach(AWidget c){
+    frame.mouse.detached(c);
+    component.remove(c.component);
   }
   void insetsFit(String setter, int l, int r, int t, int b, int w, int h){
     if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": leftInset " + l + " + rightInset " + r + " is more than width " + w); }
@@ -639,8 +644,8 @@ abstract class AWidget implements Widget$2o$1{
       if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
       if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
       if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a refilled region, a removed section or a new .content removed it, or the scope that adds it has not returned"); }
-      for (Component k= component; k != frame.top.component; k = k.getParent()){
-        if (((SkComponent)k.getParent()).w.hides(k)){ throw Util.detErr("This " + kind() + " is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"); }
+      for (var k= this; k != frame.top; k = k.parent()){
+        if (k.parent().hides(k)){ throw Util.detErr("This " + kind() + " is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"); }
       }
       var at= SwingUtilities.convertPoint(component, 0, 0, frame.top.component);
       frame.menus.show(m, new Rectangle(at.x, at.y, component.getWidth(), component.getHeight()));
@@ -776,7 +781,7 @@ final class _Frame implements Frame$1c$0{
 
   void tab(boolean back){
     var all= new ArrayList<AEditText>();
-    edits(top.component, all);
+    edits(top, all);
     int i= all.indexOf(focus);
     assert i >= 0;
     var next= all.get(Math.floorMod(i + (back ? -1 : 1), all.size()));
@@ -785,11 +790,10 @@ final class _Frame implements Frame$1c$0{
     focus(next);
   }
 
-  private static void edits(java.awt.Container c, ArrayList<AEditText> all){
-    var w= ((SkComponent) c).w;
+  private static void edits(AWidget w, ArrayList<AEditText> all){
     if (w instanceof AEditText t){ all.add(t); }
-    for (var k : c.getComponents()){
-      if (!w.hides(k)){ edits((java.awt.Container) k, all); }
+    for (var k : w.children()){
+      if (!w.hides(k)){ edits(k, all); }
     }
   }
 
@@ -806,7 +810,7 @@ final class _Frame implements Frame$1c$0{
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old= where == null ? null : ((_Border) into).layout.slots.put(where, b.component);
+      var old= where == null ? null : ((_Border) into).layout.slots.put(where, b);
       into.attach(old, b);
       into.growFor(b);
     });
@@ -913,7 +917,7 @@ final class _Frame implements Frame$1c$0{
     var c= top.component;
     Sk.clip(canvas, 0, 0, c.getWidth(), c.getHeight());
     canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
-    Sk.paintNode(c, canvas);
+    Sk.paintNode(top, canvas);
     menus.paint(canvas);
     mouse.paintTip(canvas);
     canvas.restoreToCount(picture);

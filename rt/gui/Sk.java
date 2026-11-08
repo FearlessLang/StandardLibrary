@@ -10,7 +10,6 @@ import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.Surface;
 import io.github.humbleui.types.Rect;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -224,26 +223,26 @@ interface Sk{
       | green(c.read$green$0()) << 8 | blue(c.read$blue$0());
   }
 
-  static void paintNode(SkComponent c, Canvas cv){
-    if (c.w.starts(AWidget.Warning.textClipped, c.w.textClipped())){ c.w.frame.frame.warn(c.w.textClippedWarning()); }
-    c.w.sk(cv);
-    for (int i= 0; i < c.getComponentCount(); i += 1){
-      var k= c.getComponent(i);
-      if (c.w.hides(k)){ continue; }
-      var kw= ((SkComponent) k).w;
-      if (kw.starts(AWidget.Warning.outsideParent, !fits(c, k))){ kw.frame.frame.warn(fitWarning(c, k)); }
-      var o= covered(c, i);
-      if (kw.starts(AWidget.Warning.overlapping, o != null)){ kw.frame.frame.warn(overlapWarning(c, k, o)); }
+  static void paintNode(AWidget w, Canvas cv){
+    if (w.starts(AWidget.Warning.textClipped, w.textClipped())){ w.frame.frame.warn(w.textClippedWarning()); }
+    w.sk(cv);
+    for (int i= 0; i < w.childCount(); i += 1){
+      var k= w.child(i);
+      if (w.hides(k)){ continue; }
+      if (k.starts(AWidget.Warning.outsideParent, !fits(w, k))){ k.frame.frame.warn(fitWarning(w, k)); }
+      var o= covered(w, i);
+      if (k.starts(AWidget.Warning.overlapping, o != null)){ k.frame.frame.warn(overlapWarning(w, k, o)); }
       int save= cv.save();
-      var r= c.w.clip(k);
+      var r= w.clip(k);
       if (r != null){ clip(cv, r.x, r.y, r.width, r.height); }
-      at(cv, k.getX(), k.getY(), 1);
-      clip(cv, 0, 0, k.getWidth(), k.getHeight());
-      paintNode((SkComponent) k, cv);
+      var b= k.component;
+      at(cv, b.getX(), b.getY(), 1);
+      clip(cv, 0, 0, b.getWidth(), b.getHeight());
+      paintNode(k, cv);
       cv.restoreToCount(save);
     }
-    c.w.skOver(cv);
-    bars(cv, c.w);
+    w.skOver(cv);
+    bars(cv, w);
   }
 
   static void bars(Canvas cv, AWidget s){
@@ -296,34 +295,40 @@ interface Sk{
     rrect(cv, 0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2), paint);
   }
 
-  static boolean fits(SkComponent c, Component k){
-    var r= c.w.region(k);
-    if (r != null){ return k.getX() >= r.x && k.getY() >= r.y && k.getX() + k.getWidth() <= r.x + r.width && k.getY() + k.getHeight() <= r.y + r.height; }
-    boolean insideX= c.w.barBottom() || k.getX() >= 0 && k.getX() + k.getWidth() <= c.getWidth();
-    boolean insideY= c.w.barRight() || k.getY() >= 0 && k.getY() + k.getHeight() <= c.getHeight();
+  static boolean fits(AWidget c, AWidget k){
+    var r= c.region(k);
+    var b= k.component;
+    if (r != null){ return b.getX() >= r.x && b.getY() >= r.y && b.getX() + b.getWidth() <= r.x + r.width && b.getY() + b.getHeight() <= r.y + r.height; }
+    boolean insideX= c.barBottom() || b.getX() >= 0 && b.getX() + b.getWidth() <= c.component.getWidth();
+    boolean insideY= c.barRight() || b.getY() >= 0 && b.getY() + b.getHeight() <= c.component.getHeight();
     return insideX && insideY;
   }
 
-  static String fitWarning(SkComponent c, Component k){
-    var r= c.w.region(k);
-    var child= ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in ";
-    if (r == null){ return child + "its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped"; }
-    var which= c.w instanceof _Split ? "region at index " + c.getComponentZOrder(k) : "content area";
-    return child + "the " + which + " of its parent, " + c.w.describe() + ": the " + which + " is " + r.width + "x" + r.height + " at (" + r.x + ", " + r.y + "), and the part outside it is clipped";
+  static String fitWarning(AWidget c, AWidget k){
+    var r= c.region(k);
+    var child= placed(k) + " does not fit in ";
+    if (r == null){ return child + "its parent, " + c.describe() + " of " + c.component.getWidth() + "x" + c.component.getHeight() + ": the part outside the parent is clipped"; }
+    var which= c instanceof _Split ? "region at index " + c.indexOf(k) : "content area";
+    return child + "the " + which + " of its parent, " + c.describe() + ": the " + which + " is " + r.width + "x" + r.height + " at (" + r.x + ", " + r.y + "), and the part outside it is clipped";
   }
 
-  static Component covered(SkComponent c, int i){
-    if (!(c.w instanceof _Border)){ return null; }
-    var k= c.getComponent(i);
+  static AWidget covered(AWidget c, int i){
+    if (!(c instanceof _Border)){ return null; }
+    var k= c.child(i);
     for (int j= 0; j < i; j += 1){
-      var o= c.getComponent(j);
-      if (k.getBounds().intersects(o.getBounds())){ return o; }
+      var o= c.child(j);
+      if (k.component.getBounds().intersects(o.component.getBounds())){ return o; }
     }
     return null;
   }
 
-  static String overlapWarning(SkComponent c, Component k, Component o){
-    return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") overlaps " + ((SkComponent) o).w.describe() + " of " + o.getWidth() + "x" + o.getHeight() + " at (" + o.getX() + ", " + o.getY() + ") in their parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the first one covers the second";
+  static String overlapWarning(AWidget c, AWidget k, AWidget o){
+    return placed(k) + " overlaps " + placed(o) + " in their parent, " + c.describe() + " of " + c.component.getWidth() + "x" + c.component.getHeight() + ": the first one covers the second";
+  }
+
+  static String placed(AWidget k){
+    var b= k.component;
+    return k.describe() + " of " + b.getWidth() + "x" + b.getHeight() + " at (" + b.getX() + ", " + b.getY() + ")";
   }
 
   static Dimension need(Line line){

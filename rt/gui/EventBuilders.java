@@ -1,6 +1,5 @@
 package _base;
 
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -83,19 +82,21 @@ final class SkMouse extends MouseAdapter{
   SkMouse(_Frame frame){ this.frame= frame; }
 
   // A subtree was removed from the live tree: forget every reference into it.
-  void detached(SkComponent root){
+  void detached(AWidget root){
     assert SwingUtilities.isEventDispatchThread();
-    hover = hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList();
+    hover = hover.stream().filter(t -> !within(t, root)).toList();
     var w= gesture == null ? null : gesture.widget();
-    if (w != null && SwingUtilities.isDescendingFrom(w.component, root)){ stop(); }
-    if (frame.focus != null && SwingUtilities.isDescendingFrom(frame.focus.component, root)){ frame.focus(null); }
+    if (w != null && within(w, root)){ stop(); }
+    if (frame.focus != null && within(frame.focus, root)){ frame.focus(null); }
   }
 
-  void hidden(SkComponent root){
+  void hidden(AWidget root){
     assert SwingUtilities.isEventDispatchThread();
-    hoverTo(hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList());
+    hoverTo(hover.stream().filter(t -> !within(t, root)).toList());
     detached(root);
   }
+
+  private static boolean within(AWidget t, AWidget root){ return SwingUtilities.isDescendingFrom(t.component, root.component); }
 
   // The whole tree was replaced (content swap): forget everything.
   void reset(){
@@ -366,16 +367,15 @@ final class SkMouse extends MouseAdapter{
 
   private SkComponent top(){ return frame.top.component; }
 
-  private AWidget deepestAt(Point p){ return deepest(top(), p.x, p.y); }
+  private AWidget deepestAt(Point p){ return deepest(frame.top, p.x, p.y); }
 
-  private static AWidget deepest(SkComponent c, int x, int y){
-    if (!c.contains(x, y)){ return null; }
-    var w= c.w;
-    for (int i= c.getComponentCount() - 1; i >= 0; i -= 1){
-      var k= c.getComponent(i);
+  private static AWidget deepest(AWidget w, int x, int y){
+    if (!w.component.contains(x, y)){ return null; }
+    for (int i= w.childCount() - 1; i >= 0; i -= 1){
+      var k= w.child(i);
       var r= w.clip(k);
       if (w.hides(k) || r != null && !r.contains(x, y)){ continue; }
-      var d= deepest((SkComponent) k, x - k.getX(), y - k.getY());
+      var d= deepest(k, x - k.component.getX(), y - k.component.getY());
       if (d != null){ return d; }
     }
     return w;
@@ -387,9 +387,7 @@ final class SkMouse extends MouseAdapter{
 
   private static List<AWidget> chainOf(AWidget t){
     var l= new ArrayList<AWidget>();
-    for (Component c= t == null ? null : t.component; c instanceof SkComponent s; c = c.getParent()){
-      l.add(s.w);
-    }
+    for (var w= t; w != null; w = w.parent()){ l.add(w); }
     return l;
   }
 }

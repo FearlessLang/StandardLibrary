@@ -1,13 +1,11 @@
 package _base;
 
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.util.HashMap;
 
 public final class MutableBorderLayout{
   private final AContainer gap;
-  final HashMap<String,Component> slots= new HashMap<>();
+  final HashMap<String,AWidget> slots= new HashMap<>();
 
   public MutableBorderLayout(AContainer gap){ this.gap= gap; }
 
@@ -16,37 +14,37 @@ public final class MutableBorderLayout{
   // widget can legitimately have width or height 0 (Nat includes 0), and
   // that must not be mistaken for "nothing here yet" the way it would be
   // with a plain `total == 0` check.
-  void layoutContainer(Container target){
+  void layoutContainer(){
     var north= slots.get("north");
     var south= slots.get("south");
     var west= slots.get("west");
     var east= slots.get("east");
     var center= slots.get("center");
     int left= gap.left;
-    int right= target.getWidth() - gap.right;
+    int right= gap.component.getWidth() - gap.right;
     int top= gap.top;
-    int bottom= target.getHeight() - gap.bottom;
+    int bottom= gap.component.getHeight() - gap.bottom;
     boolean middle= west != null || center != null || east != null;
     if (north != null){
-      int h= own(north).height;
+      int h= north.own().height;
       place(north, left, top, right - left, h, true, false);
       top += h;
       if (middle || south != null){ top += gap.heightGap; }
     }
     if (south != null){
-      int h= own(south).height;
+      int h= south.own().height;
       bottom -= h;
       place(south, left, bottom, right - left, h, true, false);
       if (middle){ bottom -= gap.heightGap; }
     }
     if (west != null){
-      int w= own(west).width;
+      int w= west.own().width;
       place(west, left, top, w, bottom - top, false, true);
       left += w;
       if (center != null || east != null){ left += gap.widthGap; }
     }
     if (east != null){
-      int w= own(east).width;
+      int w= east.own().width;
       right -= w;
       place(east, right, top, w, bottom - top, false, true);
       if (center != null){ right -= gap.widthGap; }
@@ -54,11 +52,9 @@ public final class MutableBorderLayout{
     if (center != null){ place(center, left, top, right - left, bottom - top, true, true); }
   }
 
-  private static Dimension own(Component c){ return ((SkComponent) c).w.own(); }
-
   private Dimension own(String where){
     var c= slots.get(where);
-    return c == null ? null : own(c);
+    return c == null ? null : c.own();
   }
 
   Dimension natural(){
@@ -93,11 +89,10 @@ public final class MutableBorderLayout{
     return new Dimension(width + gap.left + gap.right, height + gap.top + gap.bottom);
   }
 
-  static void place(Component c, int x, int y, int w, int h, boolean fillsWidth, boolean fillsHeight){
-    var s= ((SkComponent) c).w;
+  static void place(AWidget s, int x, int y, int w, int h, boolean fillsWidth, boolean fillsHeight){
     var o= s.own();
     int cw= s.fill && fillsWidth ? Math.max(o.width, w) : o.width;
     int ch= s.fill && fillsHeight ? Math.max(o.height, h) : o.height;
-    c.setBounds(x + Math.max(0, w - cw) / 2, y + Math.max(0, h - ch) / 2, cw, ch);
+    s.component.setBounds(x + Math.max(0, w - cw) / 2, y + Math.max(0, h - ch) / 2, cw, ch);
   }
 }
