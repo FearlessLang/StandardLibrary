@@ -1,0 +1,23 @@
+use base.Main as Main;
+use base.Color as Color;
+use base.Images as Images;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+use base.XInt as XInt;
+use base.YInt as YInt;
+
+PictureFill: Main{ sys -> sys.gui.run{f -> f
+  .title "GuiPictureFill: a square image in a wide Picture"
+  .virtualPixelSpace(WidthNat#400, HeightNat#200)
+  .content.border{::
+    .background(Color.ghostWhite)
+    .center.picture{::
+      .fill
+      .radius 0
+      .background(Color.ghostWhite)
+      .image(Images#(WidthNat#40, HeightNat#40, Color.sleepyBlue).paint{g -> g
+        .color(Color.dangerTomato).position(XInt#(+0), YInt#(+0)).rect(WidthNat#4, HeightNat#40)
+        })
+      }
+    }
+  }}

@@ -1,0 +1,32 @@
+use base.Main as Main;
+use base.Color as Color;
+use base.True as True;
+use base.Images as Images;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+Square: {#(c: Color): base.Image -> Images#(WidthNat#40, HeightNat#40, c).paint{g -> g}}
+StillWidgets: Main{ sys -> sys.gui.run{f -> f
+  .title "GuiStillWidgets: nothing on this window changes"
+  .virtualPixelSpace(WidthNat#600, HeightNat#400)
+  .content.border{::
+    .background(Color.ghostWhite)
+    .north.split
+      .picture{:: .image(Square#(Color.sleepyBlue)) }
+      .and.picture{:: .image(Square#(Color.dangerTomato)) }
+      .with{:: .fill .pack }
+    .center.sections{:: .fill
+      .section.label{:: .text "A still section" } .and.pane{:: .width 300 .height 60 .stackScroll(True) .maxPerLine 1
+        .label{:: .text "A still label in a scrolling pane" }
+        .label{:: .text "A still label in a scrolling pane" }
+        .label{:: .text "A still label in a scrolling pane" }
+        }
+      .expand 0
+      }
+    .south.pane{::
+      .textField{:: .width 200 .height 40 .text "A still text field" }
+      .textArea{:: .width 200 .height 60 .text "A still text area" }
+      .pack
+      }
+    }
+  }}

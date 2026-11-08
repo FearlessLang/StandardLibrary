@@ -50,3 +50,46 @@ At step 3 the window moves left until a third of the screen width is visible.
 At step 4 the window moves back onto the primary screen, until a third of the screen width is visible.
 On the tiling desks (arch_sway, omarchy_hyprland, void_i3) the desk decides where the window is, and the window is not moved.
 On fedora_cosmic the window stays where it was let go: the position that Java reads for a window on that desk is not the position on the screen.
+
+5. A still window allocates nothing per frame for a Picture, a Split, a Border, a Sections, a scrolling Pane, a TextField and a TextArea
+
+Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
+Steps:
+1. Run integrationTests/testGuiStillWidgets and do not touch the window.
+   The window holds a Border: in its north a Split of two Pictures, in its center an expanded Sections whose content is a scrolling Pane, in its south a TextField and a TextArea.
+2. Take the two class histograms of section 1, steps 2 and 3.
+Expected: the difference of the two histograms holds the objects per frame that section 1 lists for integrationTests/testGuiStill, and as many java.awt.Rectangle per frame.
+The difference holds no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader, no io.github.humbleui.types.Rect, no io.github.humbleui.types.RRect and no java.util.ArrayList$Itr.
+
+6. A still window with a clipped widget builds no text per frame
+
+Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
+Steps:
+1. Run integrationTests/testGuiStillClipped and do not touch the window.
+   The window holds a Label narrower than its text, and a Pane narrower than the Pane inside it.
+2. Look at the console of the run.
+3. Take the two class histograms of section 1, steps 2 and 3.
+Expected: at step 2 the console shows two warnings, one for the text of the Label and one for the Pane inside the Pane, each once.
+At step 3 the difference of the two histograms holds the objects per frame that section 1 lists for integrationTests/testGuiStill: no java.lang.String and no byte[].
+
+7. A still window in full screen allocates nothing per frame for its corner
+
+Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
+Steps:
+1. Run integrationTests/testGuiStill.
+2. Press F11, the full screen key of the CapGui, and do not touch the window.
+   The window fills the screen and shows the Fearless corner at its top left.
+3. Take the two class histograms of section 1, steps 2 and 3.
+Expected: the difference of the two histograms holds the objects per frame that section 1 lists.
+The difference holds no io.github.humbleui.skija.PathBuilder, no io.github.humbleui.skija.Path, no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader and no io.github.humbleui.types.Rect.
+
+8. A Picture wider than its image shows its background beside the image
+
+Design: a Picture with .keepAspect(True), the default, draws its image as large as its content box allows with the proportions of the image, centered in the content box.
+The part of the content box outside the image shows the background of the Picture.
+Steps:
+1. Run integrationTests/testGuiPictureFill.
+   The center of the Border of the window is a Picture with .fill, wider than tall, with a ghost white background.
+   The image of the Picture is a blue square whose left edge is a red stripe, 4 of its 40 pixels wide.
+Expected: the middle of the window shows a blue square with a thin red stripe along its left side.
+Left and right of the square the Picture is ghost white, as the window around the Picture.

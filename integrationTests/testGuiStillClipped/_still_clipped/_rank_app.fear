@@ -1,0 +1,14 @@
+use base.Main as Main;
+use base.Color as Color;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+StillClipped: Main{ sys -> sys.gui.run{f -> f
+  .title "GuiStillClipped: nothing on this window changes"
+  .virtualPixelSpace(WidthNat#400, HeightNat#200)
+  .content.pane{::
+    .background(Color.ghostWhite)
+    .label{:: .text "A label narrower than its text" .width 60 }
+    .pane{:: .background(Color.moonCheese) .pane{:: .background(Color.sleepyBlue) .width 200 .height 30 } .width 100 }
+    }
+  }}
