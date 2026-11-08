@@ -1,0 +1,22 @@
+use base.Main as Main;
+use base.Block as Block;
+use base.Color as Color;
+use base.Str as Str;
+use base.False as False;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+Double: {#(s: Str): Str -> s + s}
+LongLine: Main{ sys -> sys.gui.run{f -> Block#
+  .let[Str] line= {Double#(Double#(Double#(Double#(Double#(Double#(Double#(Double#(Double#(Double#(Double#(Double#(Double#(Double#("word ")))))))))))))) }
+  .return{f
+    .title "GuiLongLine: one line of 81920 characters"
+    .virtualPixelSpace(WidthNat#800, HeightNat#400)
+    .content.pane{::
+      .background(Color.ghostWhite)
+      .horizontal .maxPerLine 1
+      .label{:: .text "Click in the area below, press Home and type: each key shows within a frame." }
+      .textArea{:: .width 760 .height 150 .wrap False .text line }
+      }
+    }
+  }}

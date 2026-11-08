@@ -1,0 +1,14 @@
+use base.Main as Main;
+use base.Color as Color;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+Still: Main{ sys -> sys.gui.run{f -> f
+  .title "GuiStill: nothing on this window changes"
+  .virtualPixelSpace(WidthNat#400, HeightNat#200)
+  .content.pane{::
+    .background(Color.ghostWhite)
+    .label{:: .text "A still label" }
+    .button{:: .text "A still button" }
+    }
+  }}
