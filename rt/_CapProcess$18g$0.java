@@ -24,6 +24,9 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   static final String namesKey= "fearlessAttenuators";
   static final String markerKey= "fearlessProcess.resultMarker";
   private static final AtomicInteger children= new AtomicInteger();
+  private final List<String> applied;
+  public _CapProcess$18g$0(){ this(List.of()); }
+  private _CapProcess$18g$0(List<String> applied){ this.applied= applied; }
   public static void main(String[] args) throws IOException{
     NativeLocale.force();
     var line= new ByteArrayOutputStream();
@@ -71,12 +74,12 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
   @Override public Object mut$run$3(Object main, Object arg, Object attenuators){ return ((_CapRunningMain$jrc$1)mut$start$3(main, arg, attenuators)).mut$await$0(); }
   @Override public Object mut$start$2(Object main, Object attenuators){ return new _CapRunningMain$jrc$1(name(main), names(attenuators), Optional.empty()); }
   @Override public Object mut$start$3(Object main, Object arg, Object attenuators){ return new _CapRunningMain$jrc$1(name(main), names(attenuators), Optional.of(toS(arg))); }
-  private static String names(Object attenuators){
+  @Override public Object mut$with$1(Object attenuator){ return new _CapProcess$18g$0(Stream.concat(applied.stream(), Stream.of(name(attenuator))).toList()); }
+  private String names(Object attenuators){
     var list= (List$o$1)attenuators;
     var size= ((Nat$c$0Instance)list.read$size$0()).val();
     var extra= LongStream.range(0, size).mapToObj(i -> name(list.read$get$1(Nat$c$0Instance.instance(i))));
-    var inherited= System.getProperty(namesKey);
-    return Stream.concat(inherited == null ? Stream.of() : Stream.of(inherited), extra).collect(Collectors.joining(","));
+    return Stream.of(Stream.ofNullable(System.getProperty(namesKey)), applied.stream(), extra).flatMap(s -> s).collect(Collectors.joining(","));
   }
   static String marker(){ return "fearless result "+ProcessHandle.current().pid()+" "+children.incrementAndGet(); }
   static void forward(InputStream in){
