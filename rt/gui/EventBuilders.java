@@ -88,7 +88,7 @@ final class SkMouse extends MouseAdapter{
     hover = hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList();
     var w= gesture == null ? null : gesture.widget();
     if (w != null && SwingUtilities.isDescendingFrom(w.component, root)){ stop(); }
-    if (frame.focus != null && SwingUtilities.isDescendingFrom(frame.focus.component, root)){ frame.focus = null; }
+    if (frame.focus != null && SwingUtilities.isDescendingFrom(frame.focus.component, root)){ frame.focus(null); }
   }
 
   void hidden(SkComponent root){
@@ -102,7 +102,7 @@ final class SkMouse extends MouseAdapter{
     assert SwingUtilities.isEventDispatchThread();
     hover = List.of();
     stop();
-    frame.focus = null;
+    frame.focus(null);
   }
 
   void stopDividing(_Split s){ if (gesture instanceof Divide d && d.widget() == s){ stop(); } }
@@ -147,7 +147,7 @@ final class SkMouse extends MouseAdapter{
     var d= deepestAt(p);
     if (SwingUtilities.isRightMouseButton(e)){ secondary = d; }
     frame.pressed(d);
-    if (left && d instanceof AEditText t){ frame.focus = t; }
+    if (left && d instanceof AEditText t){ frame.focus(t); }
     if (left && d != null && (onBar(d, p, true) || onBar(d, p, false))){ return; }
     if (left && onDivider(d, p)){
       var s= (_Split) d;

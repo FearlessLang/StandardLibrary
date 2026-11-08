@@ -18,7 +18,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
   // model set on .pressed (e.g. "moving left") stuck forever, since the
   // matching .released handler never runs.
   private final java.util.Set<List<Integer>> held= new java.util.HashSet<>();
-  private final java.util.Set<List<Integer>> taken= new java.util.HashSet<>();
+  private final java.util.Set<List<Integer>> ignored= new java.util.HashSet<>();
 
   boolean changeable= true;// EDT confined
 
@@ -26,23 +26,23 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
 
   @Override public void keyPressed(KeyEvent e){
     var k= List.of(e.getKeyCode(), e.getKeyLocation());
-    if (frame.reserved(e.getKeyCode())){ return; }
-    if (e.isConsumed()){
-      if (!held.contains(k)){ taken.add(k); }
-      return;
-    }
-    if (taken.contains(k)){ return; }
+    if (frame.reserved(e.getKeyCode()) || ignored.contains(k)){ return; }
+    if (e.isConsumed()){ ignored.add(k); return; }
     if (held.add(k)){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){
     var k= List.of(e.getKeyCode(), e.getKeyLocation());
-    if (frame.reserved(e.getKeyCode()) || taken.remove(k)){ return; }
+    if (frame.reserved(e.getKeyCode()) || ignored.remove(k)){ return; }
     if (held.remove(k)){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
   }
-  @Override public void focusLost(java.awt.event.FocusEvent e){
+  void releaseAll(){
     frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(), released)).toList());
+    ignored.addAll(held);
     held.clear();
-    taken.clear();
+  }
+  @Override public void focusLost(java.awt.event.FocusEvent e){
+    releaseAll();
+    ignored.clear();
   }
   @Override public void focusGained(java.awt.event.FocusEvent e){}
 
