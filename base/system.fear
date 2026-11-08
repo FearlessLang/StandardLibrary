@@ -38,8 +38,6 @@ CapTry: ToIso[CapTry],WidenTo[CapTry] {
   mut .currentStackTrace: List[StackFrame];
   }
 
-CapTrys: F[mut System, mut CapTry] {sys -> sys.try}
-  
 CapOutput: ToIso[CapOutput],WidenTo[CapOutput] {
   mut .print(ToStr): Void;
   mut .println(ToStr): Void;//later add printU and printlnU
