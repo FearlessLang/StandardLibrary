@@ -7,12 +7,8 @@ import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Matrix33;
 import io.github.humbleui.skija.Paint;
-import io.github.humbleui.skija.Path;
-import io.github.humbleui.skija.PathBuilder;
-import io.github.humbleui.skija.PathOp;
 import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.Surface;
-import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -249,23 +245,6 @@ interface Sk{
     bars(cv, c.w);
   }
 
-  static void head(Canvas cv, _Sections p, _Sections.Section s){
-    var h= s.head;
-    paint.setColor(p.fg & 0xFFFFFF | (s == p.expanded ? 0x40000000 : 0x18000000));
-    rrect(cv, h.x, h.y, h.width, h.height, 4, paint);
-    stroke.setColor(p.fg & 0xFFFFFF | 0xA0000000);
-    float y= h.y + h.height / 2f;
-    if (!p.tabs){
-      float x= h.x + _Sections.mark / 2f;
-      if (s == p.expanded){ cv.drawLine(x - 4, y - 2, x, y + 2, stroke); cv.drawLine(x, y + 2, x + 4, y - 2, stroke); }
-      else{ cv.drawLine(x - 2, y - 4, x + 2, y, stroke); cv.drawLine(x + 2, y, x - 2, y + 4, stroke); }
-    }
-    if (p.onClose == null){ return; }
-    float x= h.x + h.width - _Sections.mark / 2f;
-    cv.drawLine(x - 3, y - 3, x + 3, y + 3, stroke);
-    cv.drawLine(x - 3, y + 3, x + 3, y - 3, stroke);
-  }
-
   static void bars(Canvas cv, AWidget s){
     if (s.barRight()){ bar(cv, s.track(true), s.thumb(true), s.fg, s.maxScrollY() == 0); }
     if (s.barBottom()){ bar(cv, s.track(false), s.thumb(false), s.fg, s.maxScrollX() == 0); }
@@ -276,21 +255,6 @@ interface Sk{
     rrect(cv, t.x, t.y, t.width, t.height, AWidget.bar / 2f, paint);
     paint.setColor(rgb & 0xFFFFFF | (fits ? 0x30000000 : 0xA0000000));
     rrect(cv, m.x, m.y, m.width, m.height, AWidget.bar / 2f, paint);
-  }
-
-  static void divider(Canvas cv, _Split s, java.awt.Rectangle d){
-    if (d.isEmpty()){ return; }
-    paint.setColor(s.fg & 0xFFFFFF | 0x30000000);
-    rect(cv, d.x, d.y, d.width, d.height, paint);
-    if (!s.draggable){ return; }
-    int t= Math.max(1, (s.vertical ? d.height : d.width) / 3);
-    float l= Math.min(s.vertical ? d.width : d.height, 30);
-    paint.setColor(s.fg & 0xFFFFFF | 0xA0000000);
-    float cx= d.x + d.width / 2f;
-    float cy= d.y + d.height / 2f;
-    float gw= s.vertical ? l : t;
-    float gh= s.vertical ? t : l;
-    rrect(cv, cx - gw / 2, cy - gh / 2, gw, gh, t / 2f, paint);
   }
 
   record Tip(String text, List<Line> lines, List<Dimension> needs, int width, int height){}
@@ -485,70 +449,6 @@ interface Sk{
     paint.setColor(s.fg);
     draw(cv, line, x0 + dx, y0 + dy, cw, ch, paint);
     cv.restoreToCount(save);
-  }
-
-  static void button(Canvas cv, _Button s){
-    var b= s.component;
-    int w= b.getWidth(), h= b.getHeight();
-    if (w <= 0 || h <= 0){ return; }
-    boolean down= s.frame.mouse.down(s);
-    boolean over= !down && s.frame.mouse.over(s);
-    float r= Math.min(s.radius, Math.min(w, h) / 2f);
-    int d= bevel(w, h, (int) r, s);
-    int center= baseColor(s.bg, over, down);
-    int light= mix(center, 0xFFFFFFFF, 45);
-    int dark= mix(center, 0xFF000000, 45);
-    paint.setColor(center);
-    rrect(cv, 0, 0, w, h, r, paint);
-    if (d > 0){
-      // The bevel paths depend only on (w, h, radius, d) and are cached on
-      // the button: a stable button costs zero path allocations per frame.
-      if (s.bevelW != w || s.bevelH != h || s.bevelR != s.radius || s.bevelD != d){
-        if (s.bevelTl != null){ s.bevelTl.close(); s.bevelBr.close(); }
-        Path o= Path.makeRRect(RRect.makeXYWH(0, 0, w, h, r));
-        Path i= Path.makeRRect(RRect.makeXYWH(d, d, w - 2f * d, h - 2f * d, Math.max(0, r - d)));
-        var pb= new PathBuilder();
-        pb.moveTo(0, h);
-        pb.lineTo(w, 0);
-        pb.lineTo(0, 0);
-        pb.closePath();
-        Path diag= pb.build();
-        Path ring= Path.makeCombining(o, i, PathOp.DIFFERENCE);
-        s.bevelTl = Path.makeCombining(ring, diag, PathOp.INTERSECT);
-        s.bevelBr = Path.makeCombining(ring, diag, PathOp.DIFFERENCE);
-        assert ring != null && s.bevelTl != null && s.bevelBr != null;
-        for (Path p : new Path[]{ o, i, diag, ring }){ p.close(); }
-        s.bevelW = w;
-        s.bevelH = h;
-        s.bevelR = s.radius;
-        s.bevelD = d;
-      }
-      paint.setColor(down ? dark : light);
-      cv.drawPath(s.bevelTl, paint);
-      paint.setColor(down ? light : dark);
-      cv.drawPath(s.bevelBr, paint);
-    }
-    int shift= down && d > 0 ? Math.max(1, d / 2) : 0;
-    text(cv, s, shift, shift);
-  }
-
-  private static int bevel(int w, int h, int r, AWidget s){
-    int d= Math.max(3, Math.min(8, Math.min(w, h) / 9));
-    d = Math.min(d, Math.min(Math.min(s.left, s.right), Math.min(s.top, s.bottom)));
-    d = Math.min(d, Math.min(w, h) / 2);
-    return r > 0 ? Math.min(d, r) : d;
-  }
-
-  private static int baseColor(int c, boolean over, boolean down){
-    if (over){ c = mix(c, 0xFFFFFFFF, 12); }
-    if (down){ c = mix(c, 0xFF000000, 16); }
-    return c;
-  }
-
-  private static int mix(int a, int b, int p){
-    int res= 0;
-    for (int s= 0; s < 32; s += 8){ res |= ((a >>> s & 255) * (100 - p) + (b >>> s & 255) * p) / 100 << s; }
-    return res;
   }
 
   static Image scaled(Image src, int w, int h){

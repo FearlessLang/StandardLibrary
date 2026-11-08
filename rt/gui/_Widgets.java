@@ -29,7 +29,10 @@ import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
+import io.github.humbleui.skija.PathBuilder;
+import io.github.humbleui.skija.PathOp;
 import io.github.humbleui.skija.Surface;
+import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
@@ -52,12 +55,12 @@ final class SkComponent extends JComponent{
 
 final class _Button extends AWidget implements Button$2o$0{
   MF$7$1 action;// EDT confined
-  // Bevel path cache, used and maintained by Sk.button; EDT confined. The
+  // Bevel path cache, used and maintained by sk; EDT confined. The
   // paths depend only on (width, height, radius, bevel depth), so a stable
   // button costs zero path allocations per frame. Stale paths of discarded
   // buttons are reclaimed by Skija's cleaner.
-  Path bevelTl, bevelBr;
-  int bevelW= -1, bevelH= -1, bevelR= -1, bevelD= -1;
+  private Path bevelTl, bevelBr;
+  private int bevelW= -1, bevelH= -1, bevelR= -1, bevelD= -1;
 
   _Button(_Frame frame){
     super(frame);
@@ -69,7 +72,65 @@ final class _Button extends AWidget implements Button$2o$0{
     return onEdt(() -> action = (MF$7$1) r);
   }
   @Override Dimension need(){ return Sk.textSizeWithInsets(this); }
-  @Override void sk(Canvas cv){ Sk.button(cv, this); }
+  @Override void sk(Canvas cv){
+    int w= component.getWidth(), h= component.getHeight();
+    if (w <= 0 || h <= 0){ return; }
+    boolean down= frame.mouse.down(this);
+    boolean over= !down && frame.mouse.over(this);
+    float r= Math.min(radius, Math.min(w, h) / 2f);
+    int d= bevel(w, h, (int) r);
+    int center= baseColor(bg, over, down);
+    int light= mix(center, 0xFFFFFFFF, 45);
+    int dark= mix(center, 0xFF000000, 45);
+    Sk.paint.setColor(center);
+    Sk.rrect(cv, 0, 0, w, h, r, Sk.paint);
+    if (d > 0){
+      // The bevel paths depend only on (w, h, radius, d) and are cached on
+      // the button: a stable button costs zero path allocations per frame.
+      if (bevelW != w || bevelH != h || bevelR != radius || bevelD != d){
+        if (bevelTl != null){ bevelTl.close(); bevelBr.close(); }
+        Path o= Path.makeRRect(RRect.makeXYWH(0, 0, w, h, r));
+        Path i= Path.makeRRect(RRect.makeXYWH(d, d, w - 2f * d, h - 2f * d, Math.max(0, r - d)));
+        var pb= new PathBuilder();
+        pb.moveTo(0, h);
+        pb.lineTo(w, 0);
+        pb.lineTo(0, 0);
+        pb.closePath();
+        Path diag= pb.build();
+        Path ring= Path.makeCombining(o, i, PathOp.DIFFERENCE);
+        bevelTl = Path.makeCombining(ring, diag, PathOp.INTERSECT);
+        bevelBr = Path.makeCombining(ring, diag, PathOp.DIFFERENCE);
+        assert ring != null && bevelTl != null && bevelBr != null;
+        for (Path p : new Path[]{ o, i, diag, ring }){ p.close(); }
+        bevelW = w;
+        bevelH = h;
+        bevelR = radius;
+        bevelD = d;
+      }
+      Sk.paint.setColor(down ? dark : light);
+      cv.drawPath(bevelTl, Sk.paint);
+      Sk.paint.setColor(down ? light : dark);
+      cv.drawPath(bevelBr, Sk.paint);
+    }
+    int shift= down && d > 0 ? Math.max(1, d / 2) : 0;
+    Sk.text(cv, this, shift, shift);
+  }
+  private int bevel(int w, int h, int r){
+    int d= Math.max(3, Math.min(8, Math.min(w, h) / 9));
+    d = Math.min(d, Math.min(Math.min(left, right), Math.min(top, bottom)));
+    d = Math.min(d, Math.min(w, h) / 2);
+    return r > 0 ? Math.min(d, r) : d;
+  }
+  private static int baseColor(int c, boolean over, boolean down){
+    if (over){ c = mix(c, 0xFFFFFFFF, 12); }
+    if (down){ c = mix(c, 0xFF000000, 16); }
+    return c;
+  }
+  private static int mix(int a, int b, int p){
+    int res= 0;
+    for (int s= 0; s < 32; s += 8){ res |= ((a >>> s & 255) * (100 - p) + (b >>> s & 255) * p) / 100 << s; }
+    return res;
+  }
 }
 
 final class _Label extends AWidget implements Label$1c$0{
@@ -263,7 +324,21 @@ final class _Split extends AContainer implements Split$1c$0{
     });
   }
   @Override void skOver(Canvas cv){
-    for (int i= 0; i < positions.length; i += 1){ Sk.divider(cv, this, divider(i)); }
+    for (int i= 0; i < positions.length; i += 1){ skDivider(cv, divider(i)); }
+  }
+  void skDivider(Canvas cv, Rectangle d){
+    if (d.isEmpty()){ return; }
+    Sk.paint.setColor(fg & 0xFFFFFF | 0x30000000);
+    Sk.rect(cv, d.x, d.y, d.width, d.height, Sk.paint);
+    if (!draggable){ return; }
+    int t= Math.max(1, (vertical ? d.height : d.width) / 3);
+    float l= Math.min(vertical ? d.width : d.height, 30);
+    Sk.paint.setColor(fg & 0xFFFFFF | 0xA0000000);
+    float cx= d.x + d.width / 2f;
+    float cy= d.y + d.height / 2f;
+    float gw= vertical ? l : t;
+    float gh= vertical ? t : l;
+    Sk.rrect(cv, cx - gw / 2, cy - gh / 2, gw, gh, t / 2f, Sk.paint);
   }
   @Override void growFor(AWidget k){
     int bars= positions.length * bar;

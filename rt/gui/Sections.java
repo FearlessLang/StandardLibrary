@@ -123,8 +123,24 @@ final class _Sections extends AContainer implements Sections$ao$0{
     super.sk(cv);
     int save= cv.save();
     Sk.clip(cv, left, top, viewW(), viewH());
-    for (var s : sections){ Sk.head(cv, this, s); }
+    for (var s : sections){ skHead(cv, s); }
     cv.restoreToCount(save);
+  }
+  void skHead(Canvas cv, Section s){
+    var h= s.head;
+    Sk.paint.setColor(fg & 0xFFFFFF | (s == expanded ? 0x40000000 : 0x18000000));
+    Sk.rrect(cv, h.x, h.y, h.width, h.height, 4, Sk.paint);
+    Sk.stroke.setColor(fg & 0xFFFFFF | 0xA0000000);
+    float y= h.y + h.height / 2f;
+    if (!tabs){
+      float x= h.x + mark / 2f;
+      if (s == expanded){ cv.drawLine(x - 4, y - 2, x, y + 2, Sk.stroke); cv.drawLine(x, y + 2, x + 4, y - 2, Sk.stroke); }
+      else{ cv.drawLine(x - 2, y - 4, x + 2, y, Sk.stroke); cv.drawLine(x + 2, y, x - 2, y + 4, Sk.stroke); }
+    }
+    if (onClose == null){ return; }
+    float x= h.x + h.width - mark / 2f;
+    cv.drawLine(x - 3, y - 3, x + 3, y + 3, Sk.stroke);
+    cv.drawLine(x - 3, y + 3, x + 3, y - 3, Sk.stroke);
   }
   Part part(Point p){
     if (!view().contains(p)){ return null; }
