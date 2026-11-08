@@ -414,7 +414,7 @@ interface Sk{
     clusters.setText(s);
     var advances= new double[s.length() + 1];
     for (var g : shape(s, settings).glyphs()){ advances[g.cluster() + 1] += g.advance(); }
-    Arrays.parallelPrefix(advances, Double::sum);
+    for (int i= 1; i < advances.length; i += 1){ advances[i] += advances[i - 1]; }
     for (int from= 0; from < s.length();){
       int to= fit(s, settings, advances, words, from, ww);
       if (to == from){ to = fit(s, settings, advances, clusters, from, ww); }
