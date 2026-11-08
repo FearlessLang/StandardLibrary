@@ -47,6 +47,20 @@ final class Desk{
       return new Rectangle(t.get(ValueLayout.JAVA_INT, 0), t.get(ValueLayout.JAVA_INT, 4), g.get(ValueLayout.JAVA_INT, 16), g.get(ValueLayout.JAVA_INT, 20));
     }
   }
+  static long xid(Frame f){ return X11.window(f); }
+  static java.awt.Insets extents(long window){
+    var e= X11.atoms(window, "_NET_FRAME_EXTENTS");
+    return new java.awt.Insets((int)e[2], (int)e[0], (int)e[3], (int)e[1]);
+  }
+  static long position(long window){
+    try{ int ignored= (int)X11.translate.invokeExact(X11.display, window, X11.root, 0, 0, X11.pos, X11.posY, X11.posChild); }
+    catch (Throwable t){ throw new Error(t); }
+    return ((long)X11.pos.get(ValueLayout.JAVA_INT, 0) << 32) | (X11.pos.get(ValueLayout.JAVA_INT, 4) & 0xffffffffL);
+  }
+  static void move(Frame f, java.awt.Point at){
+    call(X11.move, X11.display, X11.window(f), at.x, at.y);
+    call(X11.flush, X11.display);
+  }
   static void resize(Frame f, java.awt.Dimension d){
     call(X11.resize, X11.display, X11.window(f), d.width, d.height);
     call(X11.flush, X11.display);
@@ -195,6 +209,10 @@ final class Desk{
       ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
     static final MethodHandle translate= fn(lib, "XTranslateCoordinates", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG,
       ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MethodHandle move= fn(lib, "XMoveWindow", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
+    static final MemorySegment pos= Arena.global().allocate(16);
+    static final MemorySegment posY= pos.asSlice(4);
+    static final MemorySegment posChild= pos.asSlice(8);
     static final MethodHandle resize= fn(lib, "XResizeWindow", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
     static final MethodHandle ungrab= fn(lib, "XUngrabPointer", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
     static final MethodHandle flush= fn(lib, "XFlush", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS));

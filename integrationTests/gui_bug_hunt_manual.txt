@@ -49,7 +49,7 @@ Expected: at step 2 the window moves up, as soon as the pointer lets go, until a
 At step 3 the window moves left until a third of the screen width is visible.
 At step 4 the window moves back onto the primary screen, until a third of the screen width is visible.
 On the tiling desks (arch_sway, omarchy_hyprland, void_i3) the desk decides where the window is, and the window is not moved.
-On fedora_cosmic the window stays where it was let go: the position that Java reads for a window on that desk is not the position on the screen.
+On fedora_cosmic the window stays where it was let go: the desk ignores a request of a program to move one of its windows.
 
 5. A still window allocates nothing per frame for a Picture, a Split, a Border, a Sections, a scrolling Pane, a TextField and a TextArea
 
