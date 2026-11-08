@@ -7,12 +7,12 @@
 ///whose content can only be read through System.
 ///CapOutput only acts: the program cannot observe what was printed.
 System: ToIso[System],WidenTo[System] {
-  //mut .io: mut IO;
-  //mut .rng: mut RandomSeed;
+  ///A number chosen at random, a new one at every call: the seed of a generator of random numbers.
+  mut .randomSeed: Nat;
   mut .try: mut CapTry;
   mut .out: mut CapOutput;
   mut .inputCursor: mut CapInputCursor;
-  mut .assetRead: mut CapAssetRead;//TODO: complete real system and the inherited metods returning 'this'
+  mut .assetRead: mut CapAssetRead;
   mut .download: mut CapDownload;
   mut .dataRead(data: DataRead): mut CapDataRead;
   mut .dataEdit(data: DataEdit): mut CapDataEdit;
@@ -40,7 +40,11 @@ CapTry: ToIso[CapTry],WidenTo[CapTry] {
 
 CapOutput: ToIso[CapOutput],WidenTo[CapOutput] {
   mut .print(ToStr): Void;
-  mut .println(ToStr): Void;//later add printU and printlnU
+  mut .println(ToStr): Void;
+  ///Prints the UTF-8 encoding of the text.
+  mut .printU(UStr): Void;
+  ///Prints the UTF-8 encoding of the text, followed by a newline.
+  mut .printlnU(UStr): Void;
   mut .byte(Byte): Void;///Does not flush
   mut .bytes(List[Byte]): Void;//Does flush
   }

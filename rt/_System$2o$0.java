@@ -1,7 +1,10 @@
 package _base;
+import java.security.SecureRandom;
 import java.util.*;
 
 public final class _System$2o$0 implements System$2o$0{
+  private static final SecureRandom seeds= new SecureRandom();
+  @Override public Object mut$randomSeed$0(){ return Nat$c$0Instance.instance(seeds.nextLong()); }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$try$0(){ return new _CapTry$2s$0(); }

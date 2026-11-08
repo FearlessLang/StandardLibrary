@@ -3,6 +3,7 @@ _CapManagerProbe: base.InfoMain{sys, arg -> Block#(sys.manager, arg)}
 _CapQuitProbe: base.InfoMain{sys, arg -> Block#(sys.manager.quit, arg)}
 _CapFails: base.InfoMain{sys, arg -> Error.msg "the child fails"}
 TestCapabilities: Test {::
+  .checkWithSys{sys -> (sys.randomSeed == (sys.randomSeed)).assertFalse}
   .checkNonDetErrWithSys({:: > "info" .isMsg{:: == "NoManager: System.manager is revoked."}}, {t -> NoManager#(t).process.run(_CapManagerProbe, Infos.msg "", {})})
   .checkNonDetErrWithSys({:: > "info" .isMsg{:: == "NoManagerQuit: CapManager.quit is revoked."}}, {t -> NoManagerQuit#(t).process.run(_CapQuitProbe, Infos.msg "", {})})
   .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> Block#(s.dataRead(_CapNoMount), Void)})

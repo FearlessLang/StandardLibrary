@@ -1,6 +1,7 @@
 package _base;
 
 import static _base.Util.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public final class _CapOutput$m8$0 implements CapOutput$m8$0{
   @Override public Object mut$iso$0(){ return this; }
@@ -12,6 +13,18 @@ public final class _CapOutput$m8$0 implements CapOutput$m8$0{
   @Override public Object mut$println$1(Object p0){ 
     print(toS(p0)+"\n");
     return Void$o$0.instance;
+  }
+  @Override public Object mut$printU$1(Object p0){
+    System.out.writeBytes(text(p0).getBytes(UTF_8));
+    return Void$o$0.instance;
+  }
+  @Override public Object mut$printlnU$1(Object p0){
+    System.out.writeBytes((text(p0)+"\n").getBytes(UTF_8));
+    return Void$o$0.instance;
+  }
+  private static String text(Object u){
+    var cps= ((UStr$s$0Instance)u).val();
+    return new String(cps, 0, cps.length);
   }
   public void print(String s){
     System.out.print(s);
