@@ -1,9 +1,7 @@
 package _base;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -14,7 +12,7 @@ import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
 
-final class _Sections extends AContainer implements Sections$ao$0, LayoutManager{
+final class _Sections extends AContainer implements Sections$ao$0{
   static final int mark= 16;
   static final class Section{
     AWidget title;
@@ -35,10 +33,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   Rectangle area= new Rectangle();
   Part pressed;
 
-  _Sections(_Frame frame){
-    super(frame);
-    component.setLayout(this);
-  }
+  _Sections(_Frame frame){ super(frame); }
   Section at(long i){
     if (Long.compareUnsigned(i, sections.size()) < 0){ return sections.get((int) i); }
     throw Util.detErr("There is no section at index " + Long.toUnsignedString(i) + " in this Sections: "
@@ -93,11 +88,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
     int h= ts.stream().mapToInt(d -> d.height).sum() + cs.stream().mapToInt(d -> d.height).max().orElse(0) + heightGap * n;
     return new Dimension(Math.max(titleW, contentW) + edgeW(), h + edgeH());
   }
-  @Override public void addLayoutComponent(String name, Component comp){}
-  @Override public void removeLayoutComponent(Component comp){}
-  @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
-  @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
-  @Override public void layoutContainer(Container target){
+  @Override void placeChildren(){
     if (tabs){ layoutTabs(); return; }
     int w= viewW();
     int y= top;
