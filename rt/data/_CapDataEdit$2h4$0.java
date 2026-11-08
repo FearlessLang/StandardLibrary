@@ -31,12 +31,7 @@ public final class _CapDataEdit$2h4$0 implements CapDataEdit$2h4$0{
   @Override public Object mut$writeUStrUtf32Be$2(Object path, Object content){ return DataFiles.writeText(root, path, content, utf32be); }
   @Override public Object mut$writeUStrAscii$3(Object path, Object content, Object recover){ return DataFiles.writeLossy(root, path, content, recover, 0x7F); }
   @Override public Object mut$writeUStrLatin1$3(Object path, Object content, Object recover){ return DataFiles.writeLossy(root, path, content, recover, 0xFF); }
-  @Override public Object mut$writeBytes$2(Object path, Object content){
-    var bs= List$o$1Instance.asJava(content);
-    var res= new byte[bs.size()];
-    for (var i= 0; i < res.length; i += 1){ res[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
-    return DataFiles.writeBytes(root, path, res);
-  }
+  @Override public Object mut$writeBytes$2(Object path, Object content){ return DataFiles.writeBytes(root, path, Byte$o$0Instance.unwrapAll(content)); }
   @Override public Object mut$writeImagePng$2(Object path, Object content){
     try (var png= EncoderPNG.encode(((Image$1c$0Instance)content).image)){ return DataFiles.writeBytes(root, path, png.getBytes()); }
   }

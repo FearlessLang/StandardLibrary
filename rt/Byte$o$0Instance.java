@@ -37,6 +37,12 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
     return (byte) (((Byte$o$0Instance)o).val & 255);
   }
   public static byte unwrap(Object p0){return ((Byte$o$0Instance) p0).val;}
+  public static byte[] unwrapAll(Object list){
+    var bs= List$o$1Instance.asJava(list);
+    var res= new byte[bs.size()];
+    for (var i= 0; i < res.length; i += 1){ res[i] = unwrap(bs.get(i)); }
+    return res;
+  }
   private static int u8(byte b){ return Byte.toUnsignedInt(b); }
   private static int u8(Object o){ return u8(((Byte$o$0Instance)o).val); }
   private static byte b(Object o){ return ((Byte$o$0Instance)o).val; }
