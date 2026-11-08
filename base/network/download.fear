@@ -4,25 +4,23 @@ CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadUStr(url: Url, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner], follower: F[mut RedirectFollower]): UStr;
   mut .downloadImage(url: Url, maxBytes: Nat, maxPixels: Nat, follower: F[mut RedirectFollower]): Image;
 
-  mut .downloadBytes(url: Url, maxBytes: Nat): List[Byte] -> this.downloadBytes(url, maxBytes, RedirectFollowers.default);
-  mut .downloadStr(url: Url, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str -> this.downloadStr(url, maxBytes, cleaner, RedirectFollowers.default);
-  mut .downloadUStr(url: Url, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr -> this.downloadUStr(url, maxBytes, cleaner, RedirectFollowers.default);
-  mut .downloadImage(url: Url, maxBytes: Nat, maxPixels: Nat): Image -> this.downloadImage(url, maxBytes, maxPixels, RedirectFollowers.default);
+  mut .downloadBytes(url: Url, maxBytes: Nat): List[Byte] -> this.downloadBytes(url, maxBytes, DefaultRedirectFollowers);
+  mut .downloadStr(url: Url, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str -> this.downloadStr(url, maxBytes, cleaner, DefaultRedirectFollowers);
+  mut .downloadUStr(url: Url, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr -> this.downloadUStr(url, maxBytes, cleaner, DefaultRedirectFollowers);
+  mut .downloadImage(url: Url, maxBytes: Nat, maxPixels: Nat): Image -> this.downloadImage(url, maxBytes, maxPixels, DefaultRedirectFollowers);
   }
 
 RedirectFollower: { mut #(from: Url, location: Str): Url; }
 
-RedirectFollowers: {
-  .default: F[mut RedirectFollower] -> { Block#
-    .let count= {Count.nat 0}
-    .return{mut RedirectFollower{ from, location -> Block#
-      .if{count.get >= 5} .error{"RedirectFollowers.default: a download follows at most 5 redirects"}
-      .let next= {Urls.resolve(from, location)}
-      .if{from.scheme == "https" && {next.scheme == "http"}} .error{"RedirectFollowers.default: a redirect from https to http is refused: "+(next.text.escape)}
-      .do{count++}
-      .return{next}
-      }}
-    };
+DefaultRedirectFollowers: F[mut RedirectFollower]{ Block#
+  .let count= {Count.nat 0}
+  .return{mut RedirectFollower{ from, location -> Block#
+    .if{count.get >= 5} .error{"DefaultRedirectFollowers: a download follows at most 5 redirects"}
+    .let next= {Urls.resolve(from, location)}
+    .if{from.scheme == "https" && {next.scheme == "http"}} .error{"DefaultRedirectFollowers: a redirect from https to http is refused: "+(next.text.escape)}
+    .do{count++}
+    .return{next}
+    }}
   }
 
 Url: Sealed{
@@ -51,8 +49,8 @@ Urls: {
     .let host= {_UrlHost#(text, hostPort.get 0)}
     .let port= {hostPort.size == 2 ? {.then -> _UrlPort#(text, hostPort.get 1); .else -> _UrlPort.default scheme}}
     .let q= {pathQuery.indexOf "?"}
-    .let rawPath= {_UrlChars#(text, "path", q.match{.some i -> pathQuery.sub(0, i); .empty -> pathQuery})}
-    .let query= {_UrlChars#(text, "query", q.match{.some i -> pathQuery.sub(i + 1, pathQuery.size); .empty -> ""})}
+    .let rawPath= {_UrlPart#(text, "path", q.match{.some i -> pathQuery.sub(0, i); .empty -> pathQuery})}
+    .let query= {_UrlPart#(text, "query", q.match{.some i -> pathQuery.sub(i + 1, pathQuery.size); .empty -> ""})}
     .if{q.isSome && {query.isEmpty}} .error{_UrlErr#(text, `its query is empty: a "?" must be followed by a query`)}
     .let path= {_UrlDots#rawPath}
     .if{path.contains "//"} .error{_UrlErr#(text, "its path without dot segments "+(path.escape)+` holds "//"; some servers read a path that starts with "//" as a host, and some merge "//" into "/"`)}
@@ -95,21 +93,26 @@ _UrlPort: {
     .return{port.getNat};
   .default(scheme: Str): Nat -> scheme == "https" ? {.then -> 443; .else -> 80};
   }
-_UrlChars: {
-  .pathChars: Str -> "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,=:@/%";
-  #(text: Str, part: Str, s: Str): Str -> Block#
-    .let inPath= {part == "path"}
-    .let allowed= {inPath ? {.then -> this.pathChars; .else -> this.pathChars+";?"}}
-    .do{_UrlFirstOutside#(s, allowed).ifSome{i -> Error.msg(_UrlErr#(text, "its "+part+" "+(s.escape)+" holds the character "+(s.sub(i, i + 1).escape)+"; a "+part+" holds only the characters "+allowed))}}
-    .do{s.indicesOf "%" .findFirst{i -> this.escapeOk(this.escapeAt(s, i), inPath).not}.ifSome{i -> Error.msg(_UrlErr#(text, "its "+part+" "+(s.escape)+" holds the percent escape "+(("%"+(this.escapeAt(s, i))).escape)+`; a percent escape is "%" and two digits 0-9 or A-F, and it does not escape a letter, a digit, "-", ".", "_", "~" or the byte 00`+(inPath ? {.then -> `, and in a path "/", "\", ";" or "%"`; .else -> ""})))}}
-    .return{s};
-  .escapeAt(s: Str, i: Nat): Str -> s.sub(i + 1, Math.min({::}, i + 3, s.size));
-  .escapeOk(e: Str, inPath: Bool): Bool -> (e.size == 2) && {_UrlOnly#(e, "0123456789ABCDEF")} && {Block#
-    .let v= {(this.hex(e.sub(0, 1))) * 16 + (this.hex(e.sub(1, 2)))}
-    .let unreserved= {v == 45 || {v == 46} || {v == 95} || {v == 126} || {v.inRange(48 =~~= 57)} || {v.inRange(65 =~~= 90)} || {v.inRange(97 =~~= 122)}}
-    .return{unreserved.not && {v != 0} && {(inPath && {v == 47 || {v == 92} || {v == 59} || {v == 37}}).not}}
-    };
+_UrlPart: { #(text: Str, part: Str, s: Str): Str -> Block#
+  .do{_UrlPartChars#(text, part, s)}
+  .do{_UrlPartEscapes#(text, part, s)}
+  .return{s}
+  }
+_UrlPartChars: {
+  .path: Str -> "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,=:@/%";
+  .of(part: Str): Str -> part == "path" ? {.then -> this.path; .else -> this.path+";?"};
+  #(text: Str, part: Str, s: Str): Void -> _UrlFirstOutside#(s, this.of part).ifSome{i -> Error.msg(_UrlErr#(text, "its "+part+" "+(s.escape)+" holds the character "+(s.sub(i, i + 1).escape)+"; a "+part+" holds only the characters "+(this.of part)))};
+  }
+_UrlPartEscapes: { #(text: Str, part: Str, s: Str): Void -> s.indicesOf "%" .findFirst{i -> _UrlEscape.ok(_UrlEscape.at(s, i), part).not}.ifSome{i -> Error.msg(_UrlErr#(text, "its "+part+" "+(s.escape)+" holds the percent escape "+(("%"+(_UrlEscape.at(s, i))).escape)+(_UrlEscape.rule part)))} }
+_UrlEscape: {
+  .at(s: Str, i: Nat): Str -> s.sub(i + 1, Math.min({::}, i + 3, s.size));
+  .ok(e: Str, part: Str): Bool -> (e.size == 2) && {_UrlOnly#(e, "0123456789ABCDEF")} && {this.allowed(this.value e, part)};
+  .value(e: Str): Nat -> (this.hex(e.sub(0, 1))) * 16 + (this.hex(e.sub(1, 2)));
   .hex(c: Str): Nat -> ("0123456789ABCDEF".indexOf c)!;
+  .allowed(v: Nat, part: Str): Bool -> this.unreserved(v).not && {v != 0} && {(part == "path" && {this.pathOnly v}).not};
+  .unreserved(v: Nat): Bool -> v == 45 || {v == 46} || {v == 95} || {v == 126} || {v.inRange(48 =~~= 57)} || {v.inRange(65 =~~= 90)} || {v.inRange(97 =~~= 122)};
+  .pathOnly(v: Nat): Bool -> v == 47 || {v == 92} || {v == 59} || {v == 37};
+  .rule(part: Str): Str -> `; a percent escape is "%" and two digits 0-9 or A-F, and it does not escape a letter, a digit, "-", ".", "_", "~" or the byte 00`+(part == "path" ? {.then -> `, and in a path "/", "\", ";" or "%"`; .else -> ""});
   }
 _UrlDots: { #(path: Str): Str -> Block#
   .if{path.isEmpty} .return{"/"}
@@ -139,5 +142,7 @@ _StrUrls: {
     .let inner= {f#}
     .return{mut RedirectFollower{ from, location -> _StrUrls#(inner#(from, location)) }}
     };
-  .inStr(e: Str): Bool -> e == "0A" || {"234567".contains(e.sub(0, 1)) && {e != "7F"}};
+  .inStr(e: Str): Bool -> Block#
+    .let v= {_UrlEscape.value e}
+    .return{v == 10 || {v.inRange(32 =~~= 126)}};
   }

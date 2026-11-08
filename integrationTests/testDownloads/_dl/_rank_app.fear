@@ -156,19 +156,19 @@ UrlsResolved: Test{::
 
 DefaultFollower: Test{::
   .check{Block#
-    .let f= {base.RedirectFollowers.default#}
+    .let f= {base.DefaultRedirectFollowers#}
     .let u= {Urls#"http://a.b/"}
     .return{f#(f#(f#(f#(f#(u, "/1"), "/2"), "/3"), "/4"), "/5").text.assertEq "http://a.b/5"}
     }
-  .checkDetErr({::.isMsg{:: == "RedirectFollowers.default: a download follows at most 5 redirects"}}, {Block#
-    .let f= {base.RedirectFollowers.default#}
+  .checkDetErr({::.isMsg{:: == "DefaultRedirectFollowers: a download follows at most 5 redirects"}}, {Block#
+    .let f= {base.DefaultRedirectFollowers#}
     .let u= {Urls#"http://a.b/"}
     .return{f#(f#(f#(f#(f#(f#(u, "/1"), "/2"), "/3"), "/4"), "/5"), "/6")}
     })
-  .checkDetErr({::.isMsg{:: == ("RedirectFollowers.default: a redirect from https to http is refused: "+("http://c.d/".escape))}}, {(base.RedirectFollowers.default#)#(Urls#"https://a.b/", "http://c.d/")})
-  .check{(base.RedirectFollowers.default#)#(Urls#"http://a.b/", "https://c.d/").text.assertEq "https://c.d/"}
-  .checkDetErr({::.isMsg{:: == "RedirectFollowers.default: a download follows at most 5 redirects"}}, {Block#
-    .let f= {base.RedirectFollowers.default#}
+  .checkDetErr({::.isMsg{:: == ("DefaultRedirectFollowers: a redirect from https to http is refused: "+("http://c.d/".escape))}}, {(base.DefaultRedirectFollowers#)#(Urls#"https://a.b/", "http://c.d/")})
+  .check{(base.DefaultRedirectFollowers#)#(Urls#"http://a.b/", "https://c.d/").text.assertEq "https://c.d/"}
+  .checkDetErr({::.isMsg{:: == "DefaultRedirectFollowers: a download follows at most 5 redirects"}}, {Block#
+    .let f= {base.DefaultRedirectFollowers#}
     .let u= {Urls#"http://a.b/"}
     .return{f#(f#(f#(f#(f#(f#(u, "/1"), "/2"), "/3"), "/4"), "/5"), "ftp://c.d/")}
     })
@@ -225,7 +225,7 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/loop"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == "RedirectFollowers.default: a download follows at most 5 redirects"} & > "from" .isMsg{:: == (b+"/loop")} & > "location" .isMsg{:: == "/loop"}}}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/loop"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == "DefaultRedirectFollowers: a download follows at most 5 redirects"} & > "from" .isMsg{:: == (b+"/loop")} & > "location" .isMsg{:: == "/loop"}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
