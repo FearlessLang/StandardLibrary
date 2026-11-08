@@ -112,6 +112,6 @@ public final class MutableBorderLayout extends BorderLayout{
     var o= s.own();
     int cw= s.fill && fillsWidth ? Math.max(o.width, w) : o.width;
     int ch= s.fill && fillsHeight ? Math.max(o.height, h) : o.height;
-    c.setBounds(x + (w - cw) / 2, y + (h - ch) / 2, cw, ch);
+    c.setBounds(x + Math.max(0, w - cw) / 2, y + Math.max(0, h - ch) / 2, cw, ch);
   }
 }
