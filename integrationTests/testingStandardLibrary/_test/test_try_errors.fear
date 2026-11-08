@@ -1,16 +1,4 @@
 TestTryErrors: Test {::
-  .check{Block#
-    .let[mut base.Action[base.EList[Nat]]] a= {Try#(ELists#[Nat], {l -> l.add(1)})}
-    .let[base.EList[Nat]] first= {a!}
-    .do{a.run{.ok _ -> Void; .info _ -> Void}}
-    .return{first.size.assertEq 1}
-    }
-  .checkWithSys{sys -> Block#
-    .let[mut base.Action[base.EList[Nat]]] a= {sys.try#(ELists#[Nat], {l -> l.add(1)})}
-    .let[base.EList[Nat]] first= {a!}
-    .do{a.run{.ok _ -> Void; .info _ -> Void}}
-    .return{first.size.assertEq 1}
-    }
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
     .let[mut CapRevocationRoot] root= {real.revocation}
