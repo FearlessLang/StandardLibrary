@@ -81,9 +81,11 @@ final class DataFiles{
     return writeBytes(root, path, out.toByteArray());
   }
   static Object delete(Root root, Object path){ return act(root, path, true, DataFiles::delete); }
-  static byte[] bytes(Path path, List<String> steps, String entry) throws IOException{
-    if (entry.isEmpty()){ return Files.readAllBytes(path); }
-    return item(items(path, steps), entry).bytes();
+  private static byte[] bytes(Root root, List<String> path) throws IOException{
+    reachable(root);
+    if (!(resolve(root.path(), path).orElse(null) instanceof Resource f)){ throw new NoSuchFileException(root.name()+"/"+String.join("/", path)); }
+    if (f.entry().isEmpty()){ return Files.readAllBytes(f.path()); }
+    return item(items(f.path(), f.steps()), f.entry()).bytes();
   }
   static void reachable(Root root){
     if (!Files.isDirectory(root.path())){ throw nonDetErr("The root folder of the data project mounted on \""+root.name()+"\" cannot be reached."); }
@@ -144,8 +146,10 @@ final class DataFiles{
   private static Object open(String name, Path root, List<String> path) throws IOException{
     resource(name, path);
     var at= resolve(root, path);
-    if (!(at.orElse(null) instanceof Resource f)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
-    return new InputFile(Optional.of(new Root(name, root)), name+"/"+String.join("/", path), f.path(), f.steps(), f.entry());
+    if (!(at.orElse(null) instanceof Resource)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
+    var label= name+"/"+String.join("/", path);
+    var r= new Root(name, root);
+    return new InputFile("Resource with path "+label, label, () -> bytes(r, path));
   }
   private static Object write(String name, Path root, List<String> path, byte[] bytes) throws IOException{
     writable(name, path);
