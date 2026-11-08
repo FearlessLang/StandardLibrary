@@ -33,6 +33,7 @@ import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.Surface;
+import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
@@ -112,7 +113,7 @@ final class _Picture extends AWidget implements Picture$5c$0{
     float iw= keepAspect ? image.getWidth() * s : cw;
     float ih= keepAspect ? image.getHeight() * s : ch;
     int save= cv.save();
-    cv.clipRRect(Sk.rounded(this), ClipMode.INTERSECT, true);
+    cv.clipRRect(RRect.makeXYWH(left, top, cw, ch, Math.min(radius, Math.min(cw, ch) / 2f)), ClipMode.INTERSECT, true);
     halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), Rect.makeXYWH(left, top, cw, ch));
     cv.restoreToCount(save);
   }
