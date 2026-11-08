@@ -27,15 +27,8 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
     };
   }
    static Object addStackInfo(Object info, Throwable t){
-    return Infos$1c$0.instance.imm$map$4(new Str$c$0Instance("info"), info, new Str$c$0Instance("stack"), stackTraceOf(aboveHere(t.getStackTrace())).read$info$1(dtId));
+    return Infos$1c$0.instance.imm$map$4(new Str$c$0Instance("info"), info, new Str$c$0Instance("stack"), stackTraceOf(t.getStackTrace()).read$info$1(dtId));
   }
-  private static StackTraceElement[] aboveHere(StackTraceElement[] st){
-    var here= new Throwable().getStackTrace();
-    int n= st.length, m= here.length;
-    while (n > 0 && m > 0 && same(st[n-1], here[m-1])){ n -= 1; m -= 1; }
-    return java.util.Arrays.copyOf(st, n);
-  }
-  private static boolean same(StackTraceElement a, StackTraceElement b){ return a.getClassName().equals(b.getClassName()) && a.getMethodName().equals(b.getMethodName()); }
   private static final DataTypeBy$17m$3 dtId= new DataTypeBy$17m$3(){
     @Override public Object imm$$hash$1(Object p0){ return p0; }
   };
