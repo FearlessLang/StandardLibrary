@@ -8,11 +8,12 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///starts it only after every attenuator has run. Thus an attenuator can only build the System it gives: a call on the
 ///received System while the attenuator runs is a non deterministic error, in every process, and the System it gives calls
 ///the received System only from its own methods.
+///An attenuator that keeps `.process` gives ``u.process.with`` itself: ``u.process`` starts processes with the authority of ``u``.
 ///```
 ///NoDownload: SystemAttenuator { u -> {'s
 ///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
 ///  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
-///  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d; .manager -> u.manager; .process -> u.process;
+///  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d; .manager -> u.manager; .process -> u.process.with NoDownload;
 ///  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
 ///  .iso -> NoDownload#(u.iso.close); .close -> s;
 ///  }}
@@ -45,7 +46,7 @@ NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
   .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
-  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
+  .process -> u.process.with NoManager; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
 ///Every method reaches the received System, but the `CapManager` it gives revokes `.quit` and `.reset`:
@@ -54,7 +55,7 @@ NoManagerQuit: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
   .manager -> NoQuitManager#(u.manager);
-  .process -> u.process; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
+  .process -> u.process.with NoManagerQuit; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation;
   .iso -> NoManagerQuit#(u.iso.close); .close -> s;
   }}
 NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
@@ -205,6 +206,7 @@ RevokableProcess: { #(r: mut Revocation, u: mut CapProcess): mut CapProcess -> {
   .run(m, a, as) -> Block#(r#, u.run(m, a, as));
   .start(m, as) -> Block#(r#, RevokableRunningMain#(r, u.start(m, as)));
   .start(m, a, as) -> Block#(r#, RevokableRunningMain#(r, u.start(m, a, as)));
+  .with a -> Block#(r#, RevokableProcess#(r, u.with a));
   .iso -> RevokableProcess#(r.iso.close, u.iso.close);
   .close -> s;
   }}
@@ -243,7 +245,7 @@ InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 ///The object capability to run another main of this program in a new process.
 ///The new process starts as this program started: with the same first input file, the same data projects and the same manager.
 ///Its main receives a System with the authority of this program or less: the attenuators of this program, in their order,
-///then ``attenuators`` in their order, build that System in the new process, as described in `SystemAttenuator`;
+///then the attenuators of `.with`, in their order, then ``attenuators`` in their order, build that System in the new process, as described in `SystemAttenuator`;
 ///no object of this program reaches the new process.
 ///The new process prints to the output of this program, and its error output goes to the error output of this program.
 ///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,
@@ -256,6 +258,8 @@ CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
   mut .run(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): Info;
   mut .start(main: Main, attenuators: List[SystemAttenuator]): mut CapRunningMain[Void];
   mut .start(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): mut CapRunningMain[Info];
+  ///This CapProcess, but its new processes also apply ``attenuator``, after the attenuators this CapProcess applies.
+  mut .with(attenuator: SystemAttenuator): mut CapProcess;
   }
 
 CapRunningMain[R]: ToIso[CapRunningMain[R]], WidenTo[CapRunningMain[R]]{
