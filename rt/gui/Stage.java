@@ -30,7 +30,6 @@ import io.github.humbleui.skija.ClipMode;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.PathBuilder;
-import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.types.Rect;
 
 final class Stage extends MouseAdapter{
@@ -43,10 +42,8 @@ final class Stage extends MouseAdapter{
   final Rectangle screen= gc.getBounds();
   final boolean translucent= device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
   Win f;
-  int canvasW;
-  int canvasH;
-  float opacity;
   Mode mode;
+  Image cornerKept;
   Dimension lastSize= new Dimension();
   Dimension chosen= new Dimension();
   boolean deskResized;
@@ -69,12 +66,9 @@ final class Stage extends MouseAdapter{
   Rectangle seen= new Rectangle();
   boolean deskMaximized;
 
-  Stage(_Frame owner, int canvasW, int canvasH, float opacity){
+  Stage(_Frame owner){
     this.owner= owner;
     this.gui= owner.gui;
-    this.canvasW = canvasW;
-    this.canvasH = canvasH;
-    this.opacity = opacity;
     owner.surface.addMouseListener(this);
     owner.surface.addMouseMotionListener(this);
     owner.surface.addMouseWheelListener(this);
@@ -152,7 +146,7 @@ final class Stage extends MouseAdapter{
       case fearless -> {
         if (device.getFullScreenWindow() == f){ device.setFullScreenWindow(null); }
         place(r);
-        if (translucent){ f.setOpacity(opacity); }
+        if (translucent){ f.setOpacity(owner.opacity); }
       }
       case decorated -> {
         f.pack();
@@ -205,18 +199,18 @@ final class Stage extends MouseAdapter{
   private Rectangle rescaled(Rectangle r){
     var room= inset(workArea(), f.getInsets());
     if (Desk.cosmic){
-      var d= clamped(Math.sqrt(r.width*(double)r.height*canvasW/canvasH), room.x+room.width-r.x, room.y+room.height-r.y);
+      var d= clamped(Math.sqrt(r.width*(double)r.height*owner.canvasW/owner.canvasH), room.x+room.width-r.x, room.y+room.height-r.y);
       return new Rectangle(r.x, r.y, d.width, d.height);
     }
-    var d= clamped(Math.sqrt(r.width*(double)r.height*canvasW/canvasH), room.width, room.height);
+    var d= clamped(Math.sqrt(r.width*(double)r.height*owner.canvasW/owner.canvasH), room.width, room.height);
     int x= within(r.x+(r.width-d.width)/2, room.x, room.x+room.width-d.width);
     return new Rectangle(x, within(r.y+(r.height-d.height)/2, room.y, room.y+room.height-d.height), d.width, d.height);
   }
   private Dimension size(double w){
     int iw= (int)w;
-    return new Dimension(iw, (int)Math.round(iw*(double)canvasH/canvasW));
+    return new Dimension(iw, (int)Math.round(iw*(double)owner.canvasH/owner.canvasW));
   }
-  private double fitWidth(double w, double h){ return Math.min(w, h*canvasW/canvasH); }
+  private double fitWidth(double w, double h){ return Math.min(w, h*owner.canvasW/owner.canvasH); }
   private Rectangle fit(Rectangle r, double w){
     var d= size(Math.min(w, fitWidth(r.width, r.height)));
     return new Rectangle(r.x+(r.width-d.width)/2, r.y+(r.height-d.height)/2, d.width, d.height);
@@ -228,7 +222,7 @@ final class Stage extends MouseAdapter{
   }
   private double areaWidth(double area){
     var w= workArea();
-    return Math.min(Math.sqrt(area*screen.width*screen.height*canvasW/canvasH), fitWidth(w.width, w.height));
+    return Math.min(Math.sqrt(area*screen.width*screen.height*owner.canvasW/owner.canvasH), fitWidth(w.width, w.height));
   }
   private Dimension clamped(double w, int roomW, int roomH){ return size(Math.max(Math.min(w, fitWidth(roomW, roomH)), areaWidth(gui.minArea))); }
   private boolean maximized(){ return mode == Mode.decorated && !Desk.managed && (f.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH; }
@@ -237,18 +231,14 @@ final class Stage extends MouseAdapter{
     if (mode == Mode.fearless || d.width == 0 || d.height == 0){ return; }
     owner.resizeRequest(d.getWidth()/d.getHeight());
   }
-  void canvas(int w, int h){
-    if (w == canvasW && h == canvasH){ return; }
+  void canvas(){
     var old= inset(bounds(), f.getInsets());
-    canvasW = w;
-    canvasH = h;
     minimum();
     if (mode == Mode.fullScreen || maximized() || deskResized || Desk.managed){ return; }
     place(rescaled(old));
   }
-  void opacity(float a){
-    opacity = a;
-    if (mode == Mode.fearless && translucent){ f.setOpacity(a); }
+  void opacity(){
+    if (mode == Mode.fearless && translucent){ f.setOpacity(owner.opacity); }
   }
 
   void tick(){
@@ -323,8 +313,8 @@ final class Stage extends MouseAdapter{
     if (Desk.windows){ Desk.restoreSize(f, f.getBounds(), false); }
   }
 
-  double scale(){ return fitWidth(owner.surface.getWidth(), owner.surface.getHeight())/canvasW; }
-  Point offset(double s){ return new Point((int)((owner.surface.getWidth()-canvasW*s)/2), (int)((owner.surface.getHeight()-canvasH*s)/2)); }
+  double scale(){ return fitWidth(owner.surface.getWidth(), owner.surface.getHeight())/owner.canvasW; }
+  Point offset(double s){ return new Point((int)((owner.surface.getWidth()-owner.canvasW*s)/2), (int)((owner.surface.getHeight()-owner.canvasH*s)/2)); }
   Point canvasPoint(Point p){
     if (inCorner(p)){ return new Point(-1, -1); }
     double s= scale();
@@ -419,7 +409,7 @@ final class Stage extends MouseAdapter{
     int right= pressBounds.x+pressBounds.width;
     int bottom= pressBounds.y+pressBounds.height;
     var w= workArea();
-    var d= clamped(Math.max(right-at.x, (bottom-at.y)*(double)canvasW/canvasH), right-w.x, bottom-w.y);
+    var d= clamped(Math.max(right-at.x, (bottom-at.y)*(double)owner.canvasW/owner.canvasH), right-w.x, bottom-w.y);
     return new Rectangle(right-d.width, bottom-d.height, d.width, d.height);
   }
 
@@ -438,8 +428,7 @@ final class Stage extends MouseAdapter{
       cv.clipPath(tri, ClipMode.INTERSECT, true);
       int side= l/2;
       int at= (int)Math.round(l*(2-Math.sqrt(2))/2)-side/2;
-      var icon= cornerIcon;
-      cv.drawImageRect(icon, Rect.makeWH(icon.getWidth(), icon.getHeight()), Rect.makeXYWH(at, at, side, side), SamplingMode.LINEAR, null, true);
+      cornerKept = Sk.image(cv, cornerIcon, cornerKept, Rect.makeXYWH(at, at, side, side));
       cv.restoreToCount(save);
     }
     if (mode != Mode.fearless){ return; }

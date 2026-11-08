@@ -31,7 +31,6 @@ import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
-import io.github.humbleui.skija.SamplingMode;
 import io.github.humbleui.skija.Surface;
 import io.github.humbleui.types.Rect;
 
@@ -56,8 +55,6 @@ final class SkComponent extends JComponent{
 
 final class _Button extends AWidget implements Button$2o$0{
   MF$7$1 action;// EDT confined
-  boolean down;// visual pressed state, maintained by SkMouse, read by Sk.button
-  boolean over;// visual rollover state, maintained by SkMouse, read by Sk.button
   // Bevel path cache, used and maintained by Sk.button; EDT confined. The
   // paths depend only on (width, height, radius, bevel depth), so a stable
   // button costs zero path allocations per frame. Stale paths of discarded
@@ -90,6 +87,7 @@ final class _Label extends AWidget implements Label$1c$0{
 
 final class _Picture extends AWidget implements Picture$5c$0{
   Image image;
+  Image halved;
   boolean keepAspect= true;
   boolean byHeight;
 
@@ -107,19 +105,19 @@ final class _Picture extends AWidget implements Picture$5c$0{
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
     if (image == null){ return; }
-    int cw= component.getWidth() - edgeW();
-    int ch= component.getHeight() - edgeH();
+    int cw= viewW();
+    int ch= viewH();
     float s= Math.max((float) cw / image.getWidth(), (float) ch / image.getHeight());
     float iw= keepAspect ? image.getWidth() * s : cw;
     float ih= keepAspect ? image.getHeight() * s : ch;
     int save= cv.save();
     cv.clipRect(Rect.makeXYWH(left, top, cw, ch));
-    cv.drawImageRect(image, Rect.makeWH(image.getWidth(), image.getHeight()), Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), SamplingMode.LINEAR, null, true);
+    halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih));
     cv.restoreToCount(save);
   }
   @Override public Object mut$image$1(Object i){
     var img= ((Image$1c$0Instance) i).image;
-    return reStyle(() -> { image = img; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
+    return reStyle(() -> { image = img; halved = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
   @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }
@@ -165,14 +163,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$centered$1(Object b){ return reStyle(() -> centered = Util.isTrue(b)); }
   @Override boolean barRight(){ return vertical ? lineScroll : stackScroll; }
   @Override boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
-  @Override void clipChildren(Canvas cv){
-    if (!barRight() && !barBottom()){ return; }
-    cv.clipRect(io.github.humbleui.types.Rect.makeXYWH(left, top, viewW(), viewH()));
-  }
-  @Override void skOver(Canvas cv){
-    if (barRight()){ Sk.bar(cv, this, true); }
-    if (barBottom()){ Sk.bar(cv, this, false); }
-  }
+  @Override Rectangle clip(Component k){ return barRight() || barBottom() ? view() : null; }
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
   @Override public Object mut$minPerLine$1(Object n){
@@ -228,13 +219,15 @@ final class _Split extends AContainer implements Split$1c$0{
   int span(){ return vertical ? viewH() : viewW(); }
   @Override Rectangle region(Component k){
     int i= component.getComponentZOrder(k);
-    int s= span();
-    int from= Math.min(s, i == 0 ? 0 : positions[i - 1] + bar);
-    int to= i == positions.length ? s : Math.min(positions[i], s);
-    return along(from, to - from);
+    return along(i == 0 ? 0 : positions[i - 1] + bar, i == positions.length ? span() : positions[i]);
   }
-  Rectangle along(int from, int length){ return vertical ? new Rectangle(left, top + from, viewW(), length) : new Rectangle(left + from, top, length, viewH()); }
-  Rectangle divider(int i){ return along(positions[i], bar).intersection(view()); }
+  Rectangle along(int from, int to){
+    int s= span();
+    int a= Math.min(from, s);
+    int b= Math.min(to, s);
+    return vertical ? new Rectangle(left, top + a, viewW(), b - a) : new Rectangle(left + a, top, b - a, viewH());
+  }
+  Rectangle divider(int i){ return along(positions[i], positions[i] + bar); }
   int dividerAt(Point p){ return IntStream.range(0, positions.length).filter(i -> divider(i).contains(p)).findFirst().orElse(-1); }
   void drag(int i, int[] from, int want){
     int m= from.length;
@@ -379,9 +372,7 @@ abstract class AWidget implements Widget$2o$1{
   Color$1c$0 background= (Color$1c$0) Color$1c$0.instance.imm$transparent$0();
   int fg= Sk.color(foreground);
   int bg= Sk.color(background);
-  int textSize= 12;
-  double above= 1;
-  double below= 0.5;
+  Sk.TextSettings textSettings= Sk.TextSettings.label;
   Sk.Line line;
   static final int bar= 5;
   int scrollX;
@@ -429,21 +420,27 @@ abstract class AWidget implements Widget$2o$1{
   abstract void sk(Canvas cv);
   String kind(){ return getClass().getSimpleName().substring(1); }
   String describe(){ return "a " + kind() + (text.isEmpty() ? "" : " \"" + text + "\""); }
+  String textClip(){
+    if (text.isEmpty()){ return null; }
+    var need= Sk.textSizeWithInsets(this);
+    if (need.width <= component.getWidth() && need.height <= component.getHeight()){ return null; }
+    return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
+  }
   String warned(String was, String now){
     if (was == null && now != null){ frame.frame.warn(now); }
     return now;
   }
   abstract Dimension need();
   void fit(){}
-  void clipChildren(Canvas cv){}
   boolean hides(Component k){ return false; }
   Rectangle region(Component k){ return null; }
+  Rectangle clip(Component k){ return region(k); }
   boolean barRight(){ return false; }
   boolean barBottom(){ return false; }
   int edgeW(){ return left + right + (barRight() ? bar : 0); }
   int edgeH(){ return top + bottom + (barBottom() ? bar : 0); }
-  int viewW(){ return component.getWidth() - edgeW(); }
-  int viewH(){ return component.getHeight() - edgeH(); }
+  int viewW(){ return Math.max(0, component.getWidth() - edgeW()); }
+  int viewH(){ return Math.max(0, component.getHeight() - edgeH()); }
   Rectangle view(){ return new Rectangle(left, top, viewW(), viewH()); }
   int maxScrollX(){ return barBottom() ? Math.max(0, contentW - viewW()) : 0; }
   int maxScrollY(){ return barRight() ? Math.max(0, contentH - viewH()) : 0; }
@@ -462,22 +459,17 @@ abstract class AWidget implements Widget$2o$1{
       ? new Rectangle(component.getWidth() - right - bar, top, bar, viewH())
       : new Rectangle(left, component.getHeight() - bottom - bar, viewW(), bar);
   }
-  Rectangle thumb(boolean vert){
-    var t= track(vert);
+  Rectangle thumb(boolean vert){ return vert ? thumb(track(true), true, viewH(), contentH, scrollY) : thumb(track(false), false, viewW(), contentW, scrollX); }
+  static Rectangle thumb(Rectangle t, boolean vert, int view, int content, int scroll){
     int length= vert ? t.height : t.width;
-    int view= vert ? viewH() : viewW();
-    int content= Math.max(view, vert ? contentH : contentW);
-    int size= thumbLength(length, view, content);
-    int at= (int) ((long) (length - size) * (vert ? scrollY : scrollX) / Math.max(1, content - view));
-    return vert ? new Rectangle(t.x, t.y + at, bar, size) : new Rectangle(t.x + at, t.y, size, bar);
+    content = Math.max(view, content);
+    int size= Math.min(length, Math.max(Math.min(4 * bar, length / 2), (int) ((long) length * view / Math.max(1, content))));
+    int at= (int) ((long) (length - size) * scroll / Math.max(1, content - view));
+    return vert ? new Rectangle(t.x, t.y + at, t.width, size) : new Rectangle(t.x + at, t.y, size, t.height);
   }
-  static int thumbLength(int length, int view, int content){ return Math.min(length, Math.max(Math.min(4 * bar, length / 2), (int) ((long) length * view / Math.max(1, content)))); }
-  int scrollFor(boolean vert, int thumbAt){
-    var t= track(vert);
-    int size= vert ? thumb(vert).height : thumb(vert).width;
-    int length= (vert ? t.height : t.width) - size;
-    int max= vert ? maxScrollY() : maxScrollX();
-    return (int) ((long) thumbAt * max / Math.max(1, length));
+  static int scrollFor(Rectangle t, Rectangle m, boolean vert, int thumbAt, int max){
+    int free= vert ? t.height - m.height : t.width - m.width;
+    return (int) ((long) thumbAt * max / Math.max(1, free));
   }
   void skOver(Canvas cv){}
   Dimension own(){ return new Dimension(width, height); }
@@ -539,13 +531,13 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$radius$1(Object r){ return reStyle(extent(r, "radius"), n -> radius = n); }
   public Object mut$textHeight$p1$1(Object t){
     int n= extent((HeightNat$lg$0) t, "text height");
-    return reText(() -> textSize = n);
+    return reText(() -> textSettings = new Sk.TextSettings(n, textSettings.above(), textSettings.below()));
   }
-  public Object read$textHeight$0(){ return h(textSize); }
-  public Object mut$aboveBaseline$p1$1(Object r){ return reText(() -> above = ratio(r)); }
-  public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> below = ratio(r)); }
-  public Object read$aboveBaseline$0(){ return ratio(above); }
-  public Object read$belowBaseline$0(){ return ratio(below); }
+  public Object read$textHeight$0(){ return h(textSettings.size()); }
+  public Object mut$aboveBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), ratio(r), textSettings.below())); }
+  public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), textSettings.above(), ratio(r))); }
+  public Object read$aboveBaseline$0(){ return ratio(textSettings.above()); }
+  public Object read$belowBaseline$0(){ return ratio(textSettings.below()); }
   public Object mut$uText$1(Object t){
     var s= ustr(t);
     var b= newline(s);
@@ -553,7 +545,7 @@ abstract class AWidget implements Widget$2o$1{
     return reText(() -> text = s);
   }
   public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
-  @Override public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
+  public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
   @Override public Object mut$uTooltip$1(Object t){
     var s= ustr(t);
@@ -583,7 +575,7 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object read$height$0(){ return h(height); }
   @Override public Object read$fill$0(){ return Util.bool(fill); }
   @Override public Object read$radius$0(){ return n(radius); }
-  @Override public Object read$foreground$0(){ return foreground; }
+  public Object read$foreground$0(){ return foreground; }
   @Override public Object read$background$0(){ return background; }
 }
 
@@ -653,10 +645,10 @@ final class _Frame implements Frame$1c$0{
   private int fps= 30;
   private long modelPeriodNs;
   private ArrayList<MF$7$1> modelTickActions= new ArrayList<>();// live, EDT confined
-  private float opacity= 1f;
+  float opacity= 1f;
   private String title= "";
-  private int canvasW= 1000;
-  private int canvasH= 1000;
+  int canvasW= 1000;
+  int canvasH= 1000;
   private int bands= 0xFF000000;
   private Consumer$ao$1 onResize;
   private MF$7$1 onClose;
@@ -856,7 +848,7 @@ final class _Frame implements Frame$1c$0{
     top.component.setBounds(0, 0, canvasW, canvasH);
     top.component.validate();
     layoutDirty.set(false);
-    stage= new Stage(this, canvasW, canvasH, opacity);
+    stage= new Stage(this);
     stage.f.validate();
     render();
     // Nothing after startRuntime may throw: abortBeforeStart asserts the
@@ -899,11 +891,12 @@ final class _Frame implements Frame$1c$0{
     int ww= extent((WidthNat$as$0) w, "virtual pixel space width");
     int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
     if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
-    canvasW = ww;
-    canvasH = hh;
-    if (!started){ return this; }
+    if (!started){ canvasW = ww; canvasH = hh; return this; }
     onEdtAndWait(() -> {
-      stage.canvas(ww, hh);
+      if (ww == canvasW && hh == canvasH){ return; }
+      canvasW = ww;
+      canvasH = hh;
+      stage.canvas();
       top.component.setBounds(0, 0, ww, hh);
     });
     markLayoutDirty();
@@ -922,7 +915,7 @@ final class _Frame implements Frame$1c$0{
     int v= alpha(a);
     if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this CapGui: the window cannot be more transparent than CapGui.opacityFloor allows"); }
     opacity = v / 255f;
-    if (started){ onEdtAndWait(() -> stage.opacity(opacity)); }
+    if (started){ onEdtAndWait(stage::opacity); }
     return this;
   }
   private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
@@ -1020,7 +1013,7 @@ final class _Frame implements Frame$1c$0{
     onEdtAndWait(() -> {
       uninstall(top);
       install(t);
-      t.component.setBounds(0, 0, stage.canvasW, stage.canvasH);
+      t.component.setBounds(0, 0, canvasW, canvasH);
       // The old tree is gone: no Exited events for it, and a gesture in
       // progress is forgotten (an in-flight release finds no press target,
       // like a release over empty space).

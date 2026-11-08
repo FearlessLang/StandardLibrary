@@ -137,6 +137,10 @@ ImagesWritten: Test{::
     .let img= {base.Images#(base.WidthNat#1024, base.HeightNat#16, base.Color.rgb(0, 0, 0)).paint{g -> Columns#(g.color(base.Color.rgb(255, 255, 255)), 0, 8, 1024, 16)}}
     .return{s.dataEdit(Notes).writeImagePng(L#("thin.png"), img.scale(base.WidthNat#8, base.HeightNat#16))}
     }
+  .checkWithSys{s -> Block#
+    .let big= {base.Images#(base.WidthNat#512, base.HeightNat#512, base.Color.rgb(0, 0, 0)).paint{g -> Columns#(g.color(base.Color.rgb(255, 255, 255)), 0, 2, 512, 512)}}
+    .return{s.dataEdit(Notes).writeImagePng(L#("small.png"), base.Images#(base.WidthNat#60, base.HeightNat#60, base.Color.rgb(0, 0, 0)).paint{g -> g.image(big, base.WidthNat#60, base.HeightNat#60)})}
+    }
   .checkWithSys{s -> s.dataEdit(Notes).writeImagePng(L#("upright.png"), s.dataRead(Pub).read(L#("turned.jpg")).readImage(1000))}
   .checkWithSys{s -> s.dataEdit(Notes).writeImagePng(L#("srgb.png"), s.dataRead(Pub).read(L#("linear.jpg")).readImage(1000))}
   }

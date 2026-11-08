@@ -3,7 +3,6 @@ package _base;
 import static _base.Scopes.*;
 import static java.awt.event.KeyEvent.*;
 
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -14,7 +13,6 @@ import java.util.List;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 final class CMenu implements Menu$o$0{
@@ -98,16 +96,12 @@ final class SkMenus{
   record Open(CMenu menu, Rectangle box, int[] tops, int textAt, int from, int content, int[] scroll){
     boolean scrolls(){ return content > box.height; }
     int room(){ return scrolls() ? AWidget.bar + 4 : 0; }
-    Rectangle track(){ return new Rectangle(box.x + box.width - 3 - AWidget.bar, box.y + 4, AWidget.bar, box.height - 8); }
-    Rectangle thumb(){
-      var t= track();
-      int size= AWidget.thumbLength(t.height, box.height, content);
-      int at= (int) ((long) (t.height - size) * scroll[0] / (content - box.height));
-      return new Rectangle(t.x, t.y + at, t.width, size);
-    }
+    Rectangle track(){ return new Rectangle(box.x + box.width - 3 - AWidget.bar, box.y + 4, AWidget.bar, Math.max(0, box.height - 8)); }
+    Rectangle thumb(){ return AWidget.thumb(track(), true, box.height, content, scroll[0]); }
     void scrollTo(int v){ scroll[0] = Math.clamp(v, 0, content - box.height); }
     int height(int i){ return (i + 1 < tops.length ? tops[i + 1] : content - 4) - tops[i]; }
   }
+  record Hit(int menu, int item){}
   static final int row= 24;
   static final int gap= 9;
   static final int pad= 8;
@@ -147,8 +141,8 @@ final class SkMenus{
       var it= m.items.get(i);
       tops[i] = y;
       if (it == null){ y += gap; continue; }
-      it.line = Sk.shape(it.text, 12);
-      var need= need(it);
+      it.line = Sk.shape(it.text, Sk.TextSettings.label);
+      var need= Sk.need(it.line);
       y += need.height + row - 18;
       text = Math.max(text, need.width);
     }
@@ -163,8 +157,6 @@ final class SkMenus{
     if (w > vw){ frame.frame.warn("a menu " + w + " virtual pixels wide does not fit in the virtual pixel space " + vw + " wide: the part outside it is clipped"); }
     open.add(new Open(m, new Rectangle(x, top, w, h), tops, textAt, from, content, new int[1]));
   }
-
-  private static Dimension need(CMenuItem it){ return Sk.need(it.line, 1, 0.5); }
 
   private static int place(int first, int second, int size, int room){
     if (first + size > room && second - size >= 0){ return second - size; }
@@ -210,17 +202,17 @@ final class SkMenus{
     add(m, new Rectangle(o.box().x, o.box().y + o.tops()[i] - 4 - o.scroll()[0], o.box().width, o.height(i)), true, i);
   }
 
-  private int[] hit(Point p){
+  private Hit hit(Point p){
     for (int k= open.size() - 1; k >= 0; k -= 1){
       var o= open.get(k);
       if (!o.box().contains(p)){ continue; }
-      if (onBar(o, p)){ return new int[]{ k, -1 }; }
+      if (onBar(o, p)){ return new Hit(k, -1); }
       int y= p.y - o.box().y + o.scroll()[0];
       for (int i= 0; i < o.tops().length; i += 1){
         boolean on= o.menu().items.get(i) != null && y >= o.tops()[i] && y < o.tops()[i] + o.height(i);
-        if (on){ return new int[]{ k, i }; }
+        if (on){ return new Hit(k, i); }
       }
-      return new int[]{ k, -1 };
+      return new Hit(k, -1);
     }
     return null;
   }
@@ -232,8 +224,8 @@ final class SkMenus{
     if (second || !isOpen()){ swallow = true; return true; }
     var h= hit(p);
     if (h == null){ close(0); swallow = true; return true; }
-    if (left && onBar(open.get(h[0]), p)){ pressBar(h[0], p); return true; }
-    if (left){ pressMenu = h[0]; pressItem = h[1]; }
+    if (left && onBar(open.get(h.menu()), p)){ pressBar(h.menu(), p); return true; }
+    if (left){ pressMenu = h.menu(); pressItem = h.item(); }
     return true;
   }
 
@@ -249,7 +241,7 @@ final class SkMenus{
   void wheel(Point p, double rotation){
     var h= hit(p);
     if (h == null){ return; }
-    var o= open.get(h[0]);
+    var o= open.get(h.menu());
     o.scrollTo(o.scroll()[0] + (int) Math.round(rotation * 40));
     moved(p);
   }
@@ -260,9 +252,9 @@ final class SkMenus{
     if (!left){ return true; }
     if (dragMenu >= 0){ dragMenu = -1; return true; }
     var h= hit(p);
-    boolean same= h != null && h[1] >= 0 && h[0] == pressMenu && h[1] == pressItem;
+    boolean same= h != null && h.item() >= 0 && h.menu() == pressMenu && h.item() == pressItem;
     pressMenu = -1;
-    if (same){ choose(h[0], h[1]); }
+    if (same){ choose(h.menu(), h.item()); }
     return true;
   }
 
@@ -270,18 +262,16 @@ final class SkMenus{
     if (!isOpen()){ return swallow; }
     if (dragMenu >= 0){ dragBar(p); return true; }
     var h= hit(p);
-    boolean on= h != null && h[1] >= 0 && open.get(h[0]).menu().items.get(h[1]).enabled;
-    highMenu = on ? h[0] : -1;
-    highItem = on ? h[1] : -1;
+    boolean on= h != null && h.item() >= 0 && open.get(h.menu()).menu().items.get(h.item()).enabled;
+    highMenu = on ? h.menu() : -1;
+    highItem = on ? h.item() : -1;
     return true;
   }
 
   private void dragBar(Point p){
     var o= open.get(dragMenu);
     var t= o.track();
-    int free= t.height - o.thumb().height;
-    if (free == 0){ return; }
-    o.scrollTo((int) ((long) (p.y - grab - t.y) * (o.content() - o.box().height) / free));
+    o.scrollTo(AWidget.scrollFor(t, o.thumb(), true, p.y - grab - t.y, o.content() - o.box().height));
   }
 
   boolean key(KeyEvent e){
@@ -326,18 +316,13 @@ final class SkMenus{
       Sk.paint.setColor(0xFF767676);
       cv.drawRect(Rect.makeXYWH(b.x, b.y, b.width, b.height), Sk.paint);
       Sk.paint.setColor(0xFFFAFAFA);
-      cv.drawRect(Rect.makeXYWH(b.x + 1, b.y + 1, b.width - 2, b.height - 2), Sk.paint);
+      var inside= Rect.makeXYWH(b.x + 1, b.y + 1, b.width - 2, Math.max(0, b.height - 2));
+      cv.drawRect(inside, Sk.paint);
       int save= cv.save();
-      cv.clipRect(Rect.makeXYWH(b.x + 1, b.y + 1, b.width - 2, b.height - 2));
+      cv.clipRect(inside);
       for (int i= 0; i < o.tops().length; i += 1){ paint(cv, k, i); }
       cv.restoreToCount(save);
-      if (!o.scrolls()){ continue; }
-      var t= o.track();
-      var m= o.thumb();
-      Sk.paint.setColor(0x30000000);
-      cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, AWidget.bar / 2f), Sk.paint);
-      Sk.paint.setColor(0xA0000000);
-      cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), Sk.paint);
+      if (o.scrolls()){ Sk.bar(cv, o.track(), o.thumb(), 0, false); }
     }
   }
 
@@ -362,7 +347,7 @@ final class SkMenus{
     int ink= it.enabled ? 0xFF000000 : 0xFF9A9A9A;
     Sk.paint.setColor(ink);
     line.setColor(ink);
-    Sk.draw(cv, it.line, b.x + o.textAt(), y, need(it).width, h, 1, 0.5, Sk.paint);
+    Sk.draw(cv, it.line, b.x + o.textAt(), y, Sk.need(it.line).width, h, Sk.paint);
     float mx= b.x + 1 + pad + 5;
     float my= y + h / 2f;
     if (it.mark == 1){ cv.drawRect(Rect.makeXYWH(mx - 5, my - 5, 10, 10), line); }
