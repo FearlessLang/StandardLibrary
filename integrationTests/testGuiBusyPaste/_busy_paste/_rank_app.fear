@@ -1,0 +1,31 @@
+use base.Main as Main;
+use base.Block as Block;
+use base.Void as Void;
+use base.Color as Color;
+use base.Frame as Frame;
+use base.Duration as Duration;
+use base.Instant as Instant;
+use base.Break as Break;
+use base.Continue as Continue;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+Busy: {#(f: read Frame, d: Duration): Void -> Block#
+  .let[Instant] end = {f.elapsed + d}
+  .loop{Block#
+    .if{f.elapsed >= end} .return{Break#}
+    .return{Continue#}
+    }
+  .done
+  }
+BusyPaste: Main{ sys -> sys.gui.run{f -> f
+  .title "GuiBusyPaste: the model is busy 900 ms of every second"
+  .virtualPixelSpace(WidthNat#400, HeightNat#200)
+  .modelFps(1, {:: .action{Busy#(f, Duration.milliSeconds 900)}})
+  .content.pane{::
+    .background(Color.ghostWhite)
+    .horizontal .maxPerLine 1
+    .textField{:: .width 380 .height 40 .text "old"}
+    .textField{:: .width 380 .height 40 .text "new"}
+    }
+  }}

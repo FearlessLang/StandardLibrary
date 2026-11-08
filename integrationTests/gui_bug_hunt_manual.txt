@@ -121,3 +121,34 @@ Steps:
 4. Click in the area right of "lmnopqrstu", press Up, then press Shift+Home.
 Expected: at step 2 the caret stands after "k", at the end of the first displayed line, and the highlight covers "abcdefghijk".
 At steps 3 and 4 the highlight covers "abcdefghijk": the caret stood after "k".
+
+11. Ctrl+V pastes the text that the Ctrl+C before it copied, also while the model is busy
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": "Each action of the user is one model task, queued with the clicks and the keys: one key, one paste, one cut, one undo."
+and "Queued with the clicks and the keys, the user and the program change the text in one order. The cost is when the model is busy: the text shows up late, as in a busy terminal."
+Steps:
+1. Run integrationTests/testGuiBusyPaste.
+   The first field holds "old", the second field holds "new".
+   An action of .modelFps keeps the model busy for 900 milliseconds of every second.
+2. Click in the first field, press Ctrl+A, then Ctrl+C, and wait 2 seconds.
+   The clipboard holds "old".
+3. Click in the second field and wait 2 seconds.
+4. Press Ctrl+A, Ctrl+C, End and Ctrl+V, one after the other within half a second, and wait 2 seconds.
+Expected: at step 4 the second field shows "newnew": the paste pastes the text of the copy before it.
+The second field showing "newold" means that the paste read the clipboard when its key was pressed, before the copy queued before it ran.
+
+12. Tab after a replaced content of a section goes to the next text widget in the order of the sections
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Focus": "Tab and Shift+Tab, in the widget that has the focus, give the focus to the next and the previous TextField or TextArea of the window, in the order of the tree",
+and "Sections": ".title(index) and .content(index) replace the title and the content of the section at that index; the section keeps its place in the list".
+Steps:
+1. Run integrationTests/testGuiTabOrder.
+   The window holds a Button "Replace the content of section zero" and a Sections of two sections.
+   The title of section zero is a TextField "title zero" and its content, expanded, is a TextField "content zero".
+   The title of section one is a TextField "title one".
+2. Click in "title zero" and press Tab.
+3. Click "Replace the content of section zero".
+   The content of section zero becomes a TextField "new content zero".
+4. Click in "title zero" and press Tab.
+Expected: at step 2 the focus goes to "content zero", and at step 4 the focus goes to "new content zero".
+At step 4 the focus going to "title one" means that the replaced content went to the end of the order of Tab.
