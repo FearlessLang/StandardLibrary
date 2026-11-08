@@ -6,6 +6,7 @@ Pub: base.DataRead{}
 
 NoManagerTests: UnitTests{::
   .test NoManagerMessages
+  .test NoManagerBadAttenuate
   }
 
 NoManagerMessages: Test{::
@@ -18,4 +19,13 @@ NoManagerMessages: Test{::
       .openIso s = t
       .return{s.manager.register(s.dataRead(Pub).read(L#("path.bin")).readBytes)}
       })
+  }
+
+NoManagerBadAttenuate: Test{::
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The message "Attenuate" is not sent: "Bad" is not a qualified type name, like "hello.Main".`
+    )}}, {t -> t.manager.attenuate("hello", "Bad", {})})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The message "Attenuate" is not sent: "Bad" is not a qualified type name, like "hello.Main".`
+    )}}, {t -> t.manager.attenuate("hello", "hello.A", L#("Bad"))})
   }
