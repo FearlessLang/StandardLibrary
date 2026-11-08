@@ -105,8 +105,10 @@ Steps:
 1. Run integrationTests/testGuiTextLines.
    The second field holds "office"; the bundled font draws "ffi" as one glyph.
 2. Click in the second field, press Home, and press Shift+Right four times, looking at the highlight after each press.
-Expected: the highlight grows at each press: it covers "o", then "of", then "off", then "offi".
+3. Click in the second field on the middle of the "ffi" glyph, and press Shift+Home.
+Expected: at step 2 the highlight grows at each press: it covers "o", then "of", then "off", then "offi".
 The highlight of "of" covers "o" and the left part of the "ffi" glyph, and the highlight of "off" a larger part of it.
+At step 3 the highlight covers "o" and a part of the "ffi" glyph: the click put the caret inside the glyph.
 
 10. End in a word broken over displayed lines goes to the end of the displayed line
 
@@ -115,4 +117,7 @@ Steps:
 1. Run integrationTests/testGuiTextLines.
    The area holds "abcdefghijklmnopqrstuvwxyz", one word longer than the area, broken over three displayed lines: "abcdefghijk", "lmnopqrstu" and "vwxyz".
 2. Click in the area, press Ctrl+Home, then press Shift+End.
-Expected: the caret stands after "k", at the end of the first displayed line, and the highlight covers "abcdefghijk".
+3. Click in the area right of "abcdefghijk", then press Shift+Home.
+4. Click in the area right of "lmnopqrstu", press Up, then press Shift+Home.
+Expected: at step 2 the caret stands after "k", at the end of the first displayed line, and the highlight covers "abcdefghijk".
+At steps 3 and 4 the highlight covers "abcdefghijk": the caret stood after "k".

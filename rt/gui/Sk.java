@@ -84,25 +84,36 @@ interface Sk{
     double baseline(float h){ return (h - lineHeight()) / 2d + size * above; }
   }
   record Line(String text, TextSettings settings, List<G> glyphs, double width, boolean rtl, Rect ink){
-    double coord(int off){
-      G best= null;
+    float[] edges(){
+      int n= text.length();
+      var l= new double[n + 1];
+      var r= new double[n + 1];
+      var back= new boolean[n + 1];
+      Arrays.fill(l, Double.POSITIVE_INFINITY);
+      Arrays.fill(r, Double.NEGATIVE_INFINITY);
       for (var g : glyphs){
-        if (g.cluster() >= off && (best == null || g.cluster() < best.cluster() || g.cluster() == best.cluster() && (g.rtl() ? g.x() > best.x() : g.x() < best.x()))){ best = g; }
+        int c= g.cluster();
+        l[c] = Math.min(l[c], g.x());
+        r[c] = Math.max(r[c], g.x() + g.advance());
+        back[c] = g.rtl();
       }
-      if (best == null){ return rtl ? 0 : width; }
-      return best.rtl() ? best.x() + best.advance() : best.x();
-    }
-    int offsetAt(double x){
-      var cs= glyphs.stream().mapToInt(G::cluster).distinct().sorted().toArray();
-      int res= 0;
-      double d= Double.POSITIVE_INFINITY;
-      for (var g : glyphs){
-        int k= Arrays.binarySearch(cs, g.cluster());
-        int after= k + 1 < cs.length ? cs[k + 1] : text.length();
-        double l= Math.abs(g.x() - x);
-        double r= Math.abs(g.x() + g.advance() - x);
-        if (l < d){ d = l; res = g.rtl() ? after : g.cluster(); }
-        if (r < d){ d = r; res = g.rtl() ? g.cluster() : after; }
+      var b= BreakIterator.getCharacterInstance(Locale.ROOT);
+      b.setText(text);
+      var res= new float[2 * n];
+      Arrays.fill(res, Float.NaN);
+      for (int u= 0, q; u < n; u = q){
+        int m= 1;
+        q = b.following(u);
+        while (q < n && l[q] == Double.POSITIVE_INFINITY){ q = b.following(q); m += 1; }
+        double lo= Double.POSITIVE_INFINITY;
+        double hi= Double.NEGATIVE_INFINITY;
+        for (int i= u; i < q; i += 1){ lo = Math.min(lo, l[i]); hi = Math.max(hi, r[i]); }
+        double w= (back[u] ? lo - hi : hi - lo) / m;
+        double x= back[u] ? hi : lo;
+        for (int p= u, k= 0; p < q; p = b.following(p), k += 1){
+          res[2 * p] = (float) (x + k * w);
+          res[2 * p + 1] = (float) (x + (k + 1) * w);
+        }
       }
       return res;
     }
@@ -450,7 +461,7 @@ interface Sk{
     return from;
   }
 
-  static int trimmed(String s, int from, int to){
+  static int trimmed(CharSequence s, int from, int to){
     while (to > from && space(s.charAt(to - 1))){ to -= 1; }
     return to;
   }
