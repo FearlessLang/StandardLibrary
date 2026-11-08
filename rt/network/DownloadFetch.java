@@ -68,7 +68,7 @@ final class DownloadFetch{
   }
 
   static HttpResponse<InputStream> send(String url){
-    var answer= client.sendAsync(HttpRequest.newBuilder(URI.create(url)).GET().build(), HttpResponse.BodyHandlers.ofInputStream());
+    var answer= client.sendAsync(HttpRequest.newBuilder(URI.create(url)).header("User-Agent", "Fearless").GET().build(), HttpResponse.BodyHandlers.ofInputStream());
     try{ return answer.get(idleTimeout.toMillis(), TimeUnit.MILLISECONDS); }
     catch (TimeoutException e){
       answer.cancel(true);

@@ -196,6 +196,7 @@ DownloadsThatSucceed: Test{::
   .checkWithSys{s -> s.download.downloadStr(At#(s, "/ok"), 1000, base.StrCleaners.utf8).assertEq "hello download"}
   .checkWithSys{s -> s.download.downloadBytes(At#(s, "/bytes"), 1000).assertEq({::}, L#(65.getByte, 66.getByte, 67.getByte))}
   .checkWithSys{s -> s.download.downloadStr(At#(s, "/start"), 1000, base.StrCleaners.utf8).assertEq "landed"}
+  .checkWithSys{s -> s.download.downloadStr(At#(s, "/agent"), 1000, base.StrCleaners.utf8).assertEq "Fearless"}
   .checkWithSys{s -> s.download.downloadStr(At#(s, "/accent"), 1000, base.StrCleaners.utf8OrElse{Recover}).assertEq "caf?"}
   .checkWithSys{s -> s.download.downloadUStr(At#(s, "/accent"), 1000, base.UStrCleaners.utf8).size.assertEq 4}
   .checkWithSys{s -> s.download.downloadImage(At#(s, "/img.png"), 100000, 1000000).width.get.assertEq 3}
