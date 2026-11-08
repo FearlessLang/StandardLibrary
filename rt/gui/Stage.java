@@ -64,6 +64,7 @@ final class Stage extends MouseAdapter{
   Rectangle pending;
   Rectangle maxed= new Rectangle();
   Rectangle seen= new Rectangle();
+  Point kept= new Point();
   boolean deskMaximized;
 
   Stage(_Frame owner){
@@ -254,8 +255,18 @@ final class Stage extends MouseAdapter{
     if (!now.equals(lastSize) && deskChose && !fitted){ deskResized |= deskWindow && !Desk.resizeUnseen; request(now); }
     if (Desk.managed && deskChose && now.width > 0){ chosen = new Dimension(); }
     lastSize = now;
+    boolean movable= mode != Mode.fullScreen && !maximized() && !Desk.managed && !Desk.cosmic && (f.getExtendedState() & Frame.ICONIFIED) == 0;
+    if (movable){ keepVisible(); }
     if (unmaximized && (Desk.cosmic ? sameSize(f.getBounds(), restore) : !Desk.down())){ unmaximized(); return; }
     if (deskResized && !Desk.down()){ compact(); }
+  }
+  private void keepVisible(){
+    if (f.getX() == kept.x && f.getY() == kept.y || Desk.down()){ return; }
+    var w= workArea();
+    int vw= Math.min(screen.width/3, f.getWidth());
+    int vh= Math.min(screen.height/3, f.getHeight());
+    kept = new Point(within(f.getX(), w.x+vw-f.getWidth(), w.x+w.width-vw), within(f.getY(), w.y+vh-f.getHeight(), w.y+w.height-vh));
+    f.setLocation(kept);
   }
   private boolean cosmicTick(boolean deskWindow){
     if (maximized()){

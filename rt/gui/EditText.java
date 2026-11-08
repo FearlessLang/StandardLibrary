@@ -36,7 +36,6 @@ import javax.swing.SwingUtilities;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 final class _TextField extends AEditText implements TextField$ls$0{
@@ -234,7 +233,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
     var bidi= new Bidi(s, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
     int from= 0;
-    for (int to : Sk.wrap(s, textSettings, ww)){
+    for (int to : ww == Integer.MAX_VALUE ? List.of(s.length()) : Sk.wrap(s, textSettings, ww)){
       res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSettings, bidi.createLineBidi(from, to))));
       from = to;
     }
@@ -506,18 +505,18 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     boolean focused= frame.focus == this;
     float r= Math.min(radius, Math.min(w, h) / 2f);
     Sk.paint.setColor(bg >>> 24 == 0 ? 0xFFFFFFFF : bg);
-    cv.drawRRect(RRect.makeXYWH(0, 0, w, h, r), Sk.paint);
+    Sk.rrect(cv, 0, 0, w, h, r, Sk.paint);
     float sw= focused ? 2 : 1;
     stroke.setStrokeWidth(sw).setColor(focused ? 0xFF4878D2 : 0xFF8C8C8C);
-    cv.drawRRect(RRect.makeXYWH(sw / 2, sw / 2, w - sw, h - sw, Math.max(0, r - sw / 2)), stroke);
+    Sk.rrect(cv, sw / 2, sw / 2, w - sw, h - sw, Math.max(0, r - sw / 2), stroke);
     int save= cv.save();
-    cv.clipRect(Rect.makeXYWH(left, top, viewW(), viewH()));
-    cv.translate(left - scrollX, top - scrollY);
+    Sk.clip(cv, left, top, viewW(), viewH());
+    Sk.at(cv, left - scrollX, top - scrollY, 1);
     int last= lineAt(scrollY + viewH());
     for (int i= lineAt(scrollY); i <= last; i += 1){ line(cv, lines.get(i), focused); }
     if (focused && frame.keyboard){
       var v= lines.get(lineOf(caret));
-      cv.translate(xOf(v, caret), v.y());
+      Sk.at(cv, xOf(v, caret), v.y(), 1);
       caret(cv, v.h());
     }
     cv.restoreToCount(save);
@@ -535,7 +534,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);
-    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), Sk.paint);
+    Sk.drawAt(cv, v.line(), (v.w() - v.line().width()) / 2, v.y() + v.line().settings().baseline(v.h()), Sk.paint, scrollX, scrollX + viewW());
   }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){

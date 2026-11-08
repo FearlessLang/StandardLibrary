@@ -1,6 +1,7 @@
 package _base;
 
 import io.github.humbleui.skija.Canvas;
+import io.github.humbleui.skija.ClipMode;
 import io.github.humbleui.skija.FilterTileMode;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
@@ -72,15 +73,17 @@ interface Sk{
   int[] upems= new int[fontFiles.length];
   HashMap<Integer,Integer> fontByCp= new HashMap<>();
   HashMap<Long,Glyph> glyphs= new HashMap<>();
+  ThreadLocal<float[]> matrix= ThreadLocal.withInitial(() -> new float[]{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
+  ThreadLocal<float[]> radius= ThreadLocal.withInitial(() -> new float[1]);
   record Glyph(List<Hb.Layer> layers, Rect box){}
   record Run(int from, int to, int font, int level, int script){}
-  record G(int font, int glyph, int cluster, boolean rtl, double x, double advance, double dx, double dy){}
+  record G(int font, Glyph glyph, int cluster, boolean rtl, double x, double advance, double dx, double dy){}
   record TextSettings(int size, double above, double below){
     static final TextSettings label= new TextSettings(12, 1, 0.5);
     long lineHeight(){ return Math.round(size * (above + below)); }
     double baseline(float h){ return (h - lineHeight()) / 2d + size * above; }
   }
-  record Line(String text, TextSettings settings, List<G> glyphs, double width, boolean rtl){
+  record Line(String text, TextSettings settings, List<G> glyphs, double width, boolean rtl, Rect ink){
     double coord(int off){
       G best= null;
       for (var g : glyphs){
@@ -88,11 +91,6 @@ interface Sk{
       }
       if (best == null){ return rtl ? 0 : width; }
       return best.rtl() ? best.x() + best.advance() : best.x();
-    }
-    double advance(int from, int to){
-      double res= 0;
-      for (var g : glyphs){ if (g.cluster() >= from && g.cluster() < to){ res += g.advance(); } }
-      return res;
     }
     int offsetAt(double x){
       var cs= glyphs.stream().mapToInt(G::cluster).distinct().sorted().toArray();
@@ -141,7 +139,7 @@ interface Sk{
   static Line shape(String text, TextSettings settings){ return shape(text, settings, new Bidi(text, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT)); }
 
   static Line shape(String text, TextSettings settings, Bidi bidi){
-    if (text.isEmpty()){ return new Line(text, settings, List.of(), 0, false); }
+    if (text.isEmpty()){ return new Line(text, settings, List.of(), 0, false, Rect.makeWH(0, 0)); }
     var shaped= text.replace('\t', ' ');
     synchronized (fonts){
       var runs= new ArrayList<Run>();
@@ -175,11 +173,11 @@ interface Sk{
         double k= (double) settings.size() / upems[r.font()];
         boolean rtl= (r.level() & 1) != 0;
         for (var g : Hb.shape(fonts[r.font()], shaped, r.from(), r.to(), rtl, r.script())){
-          res.add(new G(r.font(), g.glyph(), g.cluster(), rtl, x, g.advance() * k, g.dx() * k, -g.dy() * k));
+          res.add(new G(r.font(), glyph(r.font(), g.glyph()), g.cluster(), rtl, x, g.advance() * k, g.dx() * k, -g.dy() * k));
           x += g.advance() * k;
         }
       }
-      return new Line(text, settings, List.copyOf(res), x, !bidi.baseIsLeftToRight());
+      return new Line(text, settings, List.copyOf(res), x, !bidi.baseIsLeftToRight(), ink(res, settings));
     }
   }
 
@@ -196,12 +194,12 @@ interface Sk{
     return Rect.makeLTRB(Math.min(a.getLeft(), b.getLeft()), Math.min(a.getTop(), b.getTop()), Math.max(a.getRight(), b.getRight()), Math.max(a.getBottom(), b.getBottom()));
   }
 
-  static Rect ink(Line line){
+  static Rect ink(List<G> glyphs, TextSettings settings){
     var res= Rect.makeWH(0, 0);
-    for (var g : line.glyphs()){
-      var b= glyph(g.font(), g.glyph()).box();
+    for (var g : glyphs){
+      var b= g.glyph().box();
       if (b == null){ continue; }
-      double k= (double) line.settings().size() / upems[g.font()];
+      double k= (double) settings.size() / upems[g.font()];
       double x= g.x() + g.dx();
       res = union(res, Rect.makeLTRB((float) (x + b.getLeft() * k), (float) (g.dy() + b.getTop() * k), (float) (x + b.getRight() * k), (float) (g.dy() + b.getBottom() * k)));
     }
@@ -230,9 +228,9 @@ interface Sk{
       kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i));
       int save= cv.save();
       var r= c.w.clip(k);
-      if (r != null){ cv.clipRect(Rect.makeXYWH(r.x, r.y, r.width, r.height)); }
-      cv.translate(k.getX(), k.getY());
-      cv.clipRect(Rect.makeWH(k.getWidth(), k.getHeight()));
+      if (r != null){ clip(cv, r.x, r.y, r.width, r.height); }
+      at(cv, k.getX(), k.getY(), 1);
+      clip(cv, 0, 0, k.getWidth(), k.getHeight());
       paintNode((SkComponent) k, cv);
       cv.restoreToCount(save);
     }
@@ -243,7 +241,7 @@ interface Sk{
   static void head(Canvas cv, _Sections p, _Sections.Section s){
     var h= s.head;
     paint.setColor(p.fg & 0xFFFFFF | (s == p.expanded ? 0x40000000 : 0x18000000));
-    cv.drawRRect(RRect.makeXYWH(h.x, h.y, h.width, h.height, 4), paint);
+    rrect(cv, h.x, h.y, h.width, h.height, 4, paint);
     stroke.setColor(p.fg & 0xFFFFFF | 0xA0000000);
     float y= h.y + h.height / 2f;
     if (!p.tabs){
@@ -264,9 +262,9 @@ interface Sk{
 
   static void bar(Canvas cv, java.awt.Rectangle t, java.awt.Rectangle m, int rgb, boolean fits){
     paint.setColor(rgb & 0xFFFFFF | 0x30000000);
-    cv.drawRRect(RRect.makeXYWH(t.x, t.y, t.width, t.height, AWidget.bar / 2f), paint);
+    rrect(cv, t.x, t.y, t.width, t.height, AWidget.bar / 2f, paint);
     paint.setColor(rgb & 0xFFFFFF | (fits ? 0x30000000 : 0xA0000000));
-    cv.drawRRect(RRect.makeXYWH(m.x, m.y, m.width, m.height, AWidget.bar / 2f), paint);
+    rrect(cv, m.x, m.y, m.width, m.height, AWidget.bar / 2f, paint);
   }
 
   static void divider(Canvas cv, _Split s, java.awt.Rectangle d){
@@ -281,7 +279,7 @@ interface Sk{
     float cy= d.y + d.height / 2f;
     float gw= s.vertical ? l : t;
     float gh= s.vertical ? t : l;
-    cv.drawRRect(RRect.makeXYWH(cx - gw / 2, cy - gh / 2, gw, gh, t / 2f), paint);
+    rrect(cv, cx - gw / 2, cy - gh / 2, gw, gh, t / 2f, paint);
   }
 
   record Tip(String text, List<Line> lines, List<Dimension> needs, int width, int height){}
@@ -319,7 +317,7 @@ interface Sk{
     float w= s.component.getWidth();
     float h= s.component.getHeight();
     paint.setColor(s.bg);
-    cv.drawRRect(RRect.makeXYWH(0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2)), paint);
+    rrect(cv, 0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2), paint);
   }
 
   static String boundsClip(SkComponent c, Component k){
@@ -354,7 +352,7 @@ interface Sk{
 
   static Dimension need(Line line){
     var t= line.settings();
-    var ink= ink(line);
+    var ink= line.ink();
     double w= line.width();
     long h= t.lineHeight();
     double a= t.size() * t.above();
@@ -367,14 +365,22 @@ interface Sk{
     drawAt(cv, line, x + (w - line.width()) / 2, y + line.settings().baseline(h), p);
   }
 
-  static void drawAt(Canvas cv, Line line, double x, double y, Paint p){
+  static void drawAt(Canvas cv, Line line, double x, double y, Paint p){ drawAt(cv, line, x, y, p, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY); }
+
+  static void drawAt(Canvas cv, Line line, double x, double y, Paint p, double left, double right){
     int fg= p.getColor();
-    for (var g : line.glyphs()){
+    var gs= line.glyphs();
+    for (int i= 0; i < gs.size(); i += 1){
+      var g= gs.get(i);
+      var b= g.glyph().box();
       float k= (float) ((double) line.settings().size() / upems[g.font()]);
+      double gx= x + g.x() + g.dx();
+      if (b == null || gx + b.getRight() * k < left || gx + b.getLeft() * k > right){ continue; }
       cv.save();
-      cv.translate((float) (x + g.x() + g.dx()), (float) (y + g.dy()));
-      cv.scale(k, k);
-      for (var l : glyph(g.font(), g.glyph()).layers()){
+      at(cv, gx, y + g.dy(), k);
+      var ls= g.glyph().layers();
+      for (int j= 0; j < ls.size(); j += 1){
+        var l= ls.get(j);
         p.setColor(l.foreground() ? fg : l.color());
         cv.drawPath(l.path(), p);
       }
@@ -383,16 +389,35 @@ interface Sk{
     p.setColor(fg);
   }
 
+  static void at(Canvas cv, double x, double y, float k){
+    var m= matrix.get();
+    m[0] = k;
+    m[2] = (float) x;
+    m[4] = k;
+    m[5] = (float) y;
+    Canvas._nConcat(cv._ptr, m);
+  }
+
+  static void clip(Canvas cv, float x, float y, float w, float h){ Canvas._nClipRect(cv._ptr, x, y, x + w, y + h, ClipMode.INTERSECT.ordinal(), false); }
+
+  static void rrect(Canvas cv, float x, float y, float w, float h, float r, Paint p){
+    var a= radius.get();
+    a[0] = r;
+    Canvas._nDrawRRect(cv._ptr, x, y, x + w, y + h, a, p._ptr);
+  }
+
   static ArrayList<Integer> wrap(String s, TextSettings settings, int ww){
     var res= new ArrayList<Integer>();
     var words= BreakIterator.getLineInstance(Locale.ROOT);
     words.setText(s);
     var clusters= BreakIterator.getCharacterInstance(Locale.ROOT);
     clusters.setText(s);
-    var whole= shape(s, settings);
+    var advances= new double[s.length() + 1];
+    for (var g : shape(s, settings).glyphs()){ advances[g.cluster() + 1] += g.advance(); }
+    Arrays.parallelPrefix(advances, Double::sum);
     for (int from= 0; from < s.length();){
-      int to= fit(s, whole, words, from, ww);
-      if (to == from){ to = fit(s, whole, clusters, from, ww); }
+      int to= fit(s, settings, advances, words, from, ww);
+      if (to == from){ to = fit(s, settings, advances, clusters, from, ww); }
       if (to == from){ to = clusters.following(from); }
       while (to < s.length() && space(s.charAt(to))){ to += 1; }
       res.add(to);
@@ -402,14 +427,14 @@ interface Sk{
     return res;
   }
 
-  private static int fit(String s, Line whole, BreakIterator b, int from, int ww){
+  private static int fit(String s, TextSettings settings, double[] advances, BreakIterator b, int from, int ww){
     var fits= new ArrayList<Integer>();
     for (int at= b.following(from); at != BreakIterator.DONE; at = b.next()){
-      if (whole.advance(from, trimmed(s, from, at)) > ww){ break; }
+      if (advances[trimmed(s, from, at)] - advances[from] > ww){ break; }
       fits.add(at);
     }
     for (int i= fits.size() - 1; i >= 0; i -= 1){
-      if (need(shape(s.substring(from, trimmed(s, from, fits.get(i))), whole.settings())).width <= ww){ return fits.get(i); }
+      if (need(shape(s.substring(from, trimmed(s, from, fits.get(i))), settings)).width <= ww){ return fits.get(i); }
     }
     return from;
   }
@@ -434,7 +459,7 @@ interface Sk{
     int ch= c.getHeight() - s.top - s.bottom;
     if (cw <= 0 || ch <= 0){ return; }
     int save= cv.save();
-    cv.clipRect(Rect.makeXYWH(x0 + dx, y0 + dy, cw, ch));
+    clip(cv, x0 + dx, y0 + dy, cw, ch);
     paint.setColor(s.fg);
     draw(cv, line, x0 + dx, y0 + dy, cw, ch, paint);
     cv.restoreToCount(save);
@@ -451,15 +476,14 @@ interface Sk{
     int center= baseColor(s.bg, over, down);
     int light= mix(center, 0xFFFFFFFF, 45);
     int dark= mix(center, 0xFF000000, 45);
-    var outer= RRect.makeXYWH(0, 0, w, h, r);
     paint.setColor(center);
-    cv.drawRRect(outer, paint);
+    rrect(cv, 0, 0, w, h, r, paint);
     if (d > 0){
       // The bevel paths depend only on (w, h, radius, d) and are cached on
       // the button: a stable button costs zero path allocations per frame.
       if (s.bevelW != w || s.bevelH != h || s.bevelR != s.radius || s.bevelD != d){
         if (s.bevelTl != null){ s.bevelTl.close(); s.bevelBr.close(); }
-        Path o= Path.makeRRect(outer);
+        Path o= Path.makeRRect(RRect.makeXYWH(0, 0, w, h, r));
         Path i= Path.makeRRect(RRect.makeXYWH(d, d, w - 2f * d, h - 2f * d, Math.max(0, r - d)));
         var pb= new PathBuilder();
         pb.moveTo(0, h);

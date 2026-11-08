@@ -129,7 +129,7 @@ final class SkMouse extends MouseAdapter{
   boolean down(AWidget t){ return gesture instanceof Press q && q.widget() == t && q.inside(); }
 
   void paintTip(Canvas cv){
-    var owner= frame.menus.isOpen() ? null : hover.stream().filter(t -> !t.tooltip.isEmpty()).findFirst().orElse(null);
+    var owner= tipOwner();
     if (owner != tip){ tip = owner; tipSince = System.nanoTime(); tipAt = null; }
     if (tip == null || tipOff || System.nanoTime() - tipSince < 500_000_000L){ return; }
     if (tipAt == null){ tipAt = at; }
@@ -137,6 +137,11 @@ final class SkMouse extends MouseAdapter{
       shown = Sk.tip(tip.tooltip);
     }
     Sk.tooltip(cv, shown, tipAt, top().getWidth(), top().getHeight());
+  }
+  private AWidget tipOwner(){
+    if (frame.menus.isOpen()){ return null; }
+    for (int i= 0; i < hover.size(); i += 1){ if (!hover.get(i).tooltip.isEmpty()){ return hover.get(i); } }
+    return null;
   }
 
   @Override public void mousePressed(MouseEvent e){

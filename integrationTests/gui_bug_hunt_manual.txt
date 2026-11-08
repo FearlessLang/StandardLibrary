@@ -1,55 +1,40 @@
-Steps that show bugs of the Fearless GUI that no Fearless test can observe.
-Each section is one bug: the steps, what the design says a person sees, and what a person sees today.
+Steps that check behaviours of the Fearless GUI that no Fearless test can observe.
+Each section is one behaviour: the steps, and what a person sees when the GUI follows the design.
 "Run P" means: run the portable Fearless (built by Coordinator/Build/src/scripts/DeployPortableFearless.java) with the project folder P as its argument.
 The console of that run shows the output and the warnings of the program.
 
-1. A still window allocates memory at every frame
+1. A still window allocates nothing per frame for its widgets and its text
 
 Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
 Steps:
 1. Run integrationTests/testGuiStill and do not touch the window.
 2. In another console, run "jps -l" of the JDK and find the process id of the line ending with "tools.PathClassLoader".
-3. Run "jstat -gc <that process id> 1000 20" of the JDK.
-Expected: the column EU (eden used, in KB) stays the same, as nothing on the window changes.
-Observed: EU grows by about 2048 KB every 5 seconds, until a young collection (column YGC) empties it.
-The growth of EU is about 13 KB per frame, for a window with one Label and one Button.
-Two class histograms 3 seconds apart ("jcmd <process id> GC.class_histogram -all") show, per frame of this window with 27 glyphs:
-54 new instances of a lambda class of _base.Sk, 61 new float[] and 53 new io.github.humbleui.types.Rect.
-Cause:
-- Sk.glyph (rt/gui/Sk.java:188) creates a capturing lambda at every lookup, and Sk.drawAt (rt/gui/Sk.java:377) looks up every glyph at every frame.
-- Sk.drawAt calls Canvas.translate and Canvas.scale for every glyph at every frame (rt/gui/Sk.java:375-376).
-- Sk.paintNode (rt/gui/Sk.java:223) calls AWidget.textClip at every frame: Sk.need measures the text again, and Sk.ink makes Rect objects for every glyph (rt/gui/Sk.java:206).
+3. Wait one minute, then take two class histograms 10 seconds apart: "jcmd <that process id> GC.class_histogram -all".
+Expected: the difference of the two histograms holds about 90 objects per frame (the window renders 30 frames per second), and none of them depends on the widgets or on the text of the window.
+They are the event of the frame timer and the copy of the frame onto the window (classes of java.awt, java.util.concurrent, javax.swing, sun.awt and sun.java2d),
+the elapsed time of the frame (one _base.Instant$5c$0$1 and one _base.Nat$c$0Instance)
+and the scale to device pixels (one io.github.humbleui.skija.Matrix33 and one float[]).
+The difference holds no lambda of _base.Sk, no io.github.humbleui.types.Rect and no io.github.humbleui.types.RRect.
 
-2. Typing in a long line takes time proportional to the square of the length of the line
+2. Typing in a long line takes time proportional to the length of the line
 
-Design: obvious performance waste; a key typed in a text widget shows on the next frame.
+Design: a key typed in a text widget shows on one of the next frames.
 Steps:
 1. Run integrationTests/testGuiLongLine.
    The area holds one line of 81920 characters, "word " repeated, and does not wrap.
 2. Click in the area, press Home, and type x four times.
-Expected: each x shows within a frame, as in a short text field.
-Observed: each x shows about 1.5 seconds after its key.
-With a line of 40960 characters each x shows after about 0.35 seconds: double the length, four times the time.
-In a text field holding "short field" each x shows after about 0.06 seconds.
-Cause:
-- AEditText.layout wraps the edited line again after every edit (rt/gui/EditText.java:204 and 237), also when wrap is False: then the width is Integer.MAX_VALUE (rt/gui/EditText.java:186), and wrapping can only return the whole line.
-- Sk.wrap calls Sk.fit, which visits every line break opportunity of the line (rt/gui/Sk.java:407-410), and for each one Line.advance sums the advances of all the glyphs of the line (rt/gui/Sk.java:92-96).
-  The work is (number of words) times (number of glyphs).
-Graphics.textLines uses the same Sk.wrap (rt/gui/CGraphicsCtx.java:55).
+Expected: each x shows within about two frames (70 ms) of its key, as in a text area holding "word word word word".
 
-3. A still window with a long line draws every glyph of the line at every frame
+3. A still window with a long line draws only the glyphs it shows
 
-Design: obvious performance waste; drawing a TextArea that shows 100 characters of a long line costs as much as drawing a TextArea whose whole line is those 100 characters.
+Design: drawing a TextArea that shows 100 characters of a long line costs as much as drawing a TextArea whose whole line is those 100 characters.
 Steps:
 1. Run integrationTests/testGuiLongLine and do not touch the window.
 2. Look at the console of the run.
 Expected: no warning: the window shows about 100 characters of the line, at 30 frames per second.
-Observed: the line "Warning [t=...ms]: 1 repaint frame(s) lost (67ms gap, period 33ms)" is printed at every frame, about 13 times a second, for as long as the window is open: the window renders at 15 frames per second.
-Cause:
-- AEditText.sk draws only the visual lines inside the view vertically (rt/gui/EditText.java:516-517), but draws each of those lines whole (rt/gui/EditText.java:538).
-- Sk.drawAt does a save, translate, scale, glyph lookup, path draw and restore for every glyph of the line (rt/gui/Sk.java:372-382), also for the 81800 glyphs outside the clip.
+A line "Warning [t=...ms]: N repaint frame(s) lost" means the window renders fewer frames per second.
 
-4. A window dragged by its title bar stays mostly off the screen
+4. A window dragged by its title bar moves back until a third of the screen shows it
 
 Design: StandardLibraryGuiBugs.txt, "The window raises no geometry error: it moves so that min(screen/3, window size) stays visible on each axis, also after the user drags it."
 and "The window stays on the primary screen: every move, also a drag by the user, is clamped to the default screen device."
@@ -58,10 +43,10 @@ Steps:
    The window opens with the decorations of the desk.
 2. Drag the title bar of the window straight down, until only the title bar is above the bottom edge of the work area, and let go.
    Do not touch an edge of the screen with the pointer: on some desks that snaps the window.
-3. Wait 3 seconds.
-Expected: the window moves up until a third of the screen height is visible.
-Observed: the window stays where it was let go; on a 1280x800 desk only 75 pixels of its height are visible.
-The code below clamps no drag of a decorated window, so on a desk with two monitors a drag of the title bar onto the second monitor leaves the window there too.
-Cause:
-- Stage clamps only the drags of the Fearless corner of an undecorated window (Stage.moved, rt/gui/Stage.java:399-407).
-- Nothing reads the position of a decorated window after the desk moves it: Stage.tick (rt/gui/Stage.java:244-259) looks only at its size and its maximized state.
+3. Drag the title bar of the window to the right, until most of the window is past the right edge of the screen, and let go.
+4. On a desk with two monitors, drag the title bar of the window onto the second monitor, and let go.
+Expected: at step 2 the window moves up, as soon as the pointer lets go, until a third of the screen height is visible above the bottom edge of the work area.
+At step 3 the window moves left until a third of the screen width is visible.
+At step 4 the window moves back onto the primary screen, until a third of the screen width is visible.
+On the tiling desks (arch_sway, omarchy_hyprland, void_i3) the desk decides where the window is, and the window is not moved.
+On fedora_cosmic the window stays where it was let go: the position that Java reads for a window on that desk is not the position on the screen.

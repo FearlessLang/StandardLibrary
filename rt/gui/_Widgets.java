@@ -630,6 +630,7 @@ final class _Frame implements Frame$1c$0{
   @SuppressWarnings("serial")
   final JComponent surface= new JComponent(){
     @Override protected void paintComponent(java.awt.Graphics g){ blit(g); }
+    @Override protected void paintChildren(java.awt.Graphics g){}
     @Override public java.awt.im.InputMethodRequests getInputMethodRequests(){ return textKeys; }
   };
   AEditText focus;// EDT confined
@@ -830,10 +831,9 @@ final class _Frame implements Frame$1c$0{
     int picture= canvas.save();
     double s= stage.scale();
     var o= stage.offset(s);
-    canvas.translate(o.x, o.y);
-    canvas.scale((float) s, (float) s);
+    Sk.at(canvas, o.x, o.y, (float) s);
     var c= top.component;
-    canvas.clipRect(io.github.humbleui.types.Rect.makeWH(c.getWidth(), c.getHeight()));
+    Sk.clip(canvas, 0, 0, c.getWidth(), c.getHeight());
     canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
     Sk.paintNode(c, canvas);
     menus.paint(canvas);
