@@ -85,8 +85,8 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$show$0(){ return send("Show"); }
   @Override public Object mut$show$1(Object name){ return send("Show", name("Show", name)); }
   @Override public Object mut$register$1(Object path){ return sendPath("Register", path); }
-  @Override public Object mut$quit$0(){ return send("Quit"); }
-  @Override public Object mut$reset$0(){ return send("Reset"); }
+  @Override public Object mut$quit$0(){ send("Quit"); throw new EndedByManager(); }
+  @Override public Object mut$reset$0(){ send("Reset"); throw new EndedByManager(); }
   @Override public Object mut$connectEclipse$1(Object path){ return sendPath("ConnectEclipse", path); }
   @Override public Object mut$editMetadata$1(Object path){ return sendPath("EditMetadata", path); }
   @Override public Object mut$openWithOrShortcut$1(Object path){ return sendPath("OpenWithOrShortcut", path); }

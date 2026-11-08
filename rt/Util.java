@@ -168,6 +168,7 @@ public final class Util{
     try{ var res= r.get(); endMarker(); _CapProcess$18g$0.result("ok", res instanceof Info$o$0 i ? i : null); return true; }
     catch (Deterministic d){ uncaught("det", d.i, d); }
     catch (NonDeterministic d){ uncaught("nondet", d.i, d); }
+    catch (EndedByManager _){ System.exit(0); }
     catch (Throwable t){ uncaught("nondet", (Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t))), t); }
     return false;
   }
@@ -256,3 +257,5 @@ final class Deterministic extends RuntimeException{
 final class NonDeterministic extends RuntimeException{
   Info$o$0 i;NonDeterministic(Info$o$0 i){this.i= i;}
 }
+@SuppressWarnings("serial")
+final class EndedByManager extends Error{}
