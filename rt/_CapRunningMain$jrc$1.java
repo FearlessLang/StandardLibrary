@@ -4,6 +4,7 @@ import static _base.Util.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.lang.ref.Cleaner;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -24,8 +25,17 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
       if (arg.isPresent()){ p.getOutputStream().write((arg.get()+"\n").getBytes(UTF_8)); p.getOutputStream().flush(); }
     }
     catch (IOException e){ throw nonDetErr("The process running "+name+" could not be started: "+e.getClass().getSimpleName()); }
-    out= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(p.getInputStream()));
-    err= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(p.getErrorStream(), marker, tail));
+    var proc= p;
+    var t= tail;
+    out= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(proc.getInputStream()));
+    err= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(proc.getErrorStream(), marker, t));
+    dropped.register(this, () -> kill(proc));
+  }
+  private static final Cleaner dropped= Cleaner.create();
+  private static void kill(Process p){
+    if (!p.isAlive()){ return; }
+    p.descendants().forEach(ProcessHandle::destroyForcibly);
+    p.destroyForcibly();
   }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
@@ -46,8 +56,7 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
   @Override public Object mut$terminate$0(){
     running("terminate");
     if (!p.isAlive()){ ended(); return Void$o$0.instance; }
-    p.descendants().forEach(ProcessHandle::destroyForcibly);
-    p.destroyForcibly();
+    kill(p);
     try{ p.waitFor(); }
     catch (InterruptedException e){ throw interrupted(); }
     joined();
