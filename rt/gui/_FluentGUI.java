@@ -110,7 +110,7 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
     var fb= new _Frame(done, g);
     try{
       f.mut$accept$1(fb);
-      fb.onEdtAndWait(fb::start);
+      fb.changeOnEdt(fb::start);
     }
     catch (Throwable e){ fb.frame.abortBeforeStart(e); }// Throwable: sneaky throws exist
     try{ done.join(); }

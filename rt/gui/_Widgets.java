@@ -476,9 +476,9 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   @Override public Object mut$changeDetached$1(Object s){
-    boolean was= frame.onEdtAndWait(() -> { var c= changeable; changeable = true; return c; });
+    boolean was= frame.changeOnEdt(() -> { var c= changeable; changeable = true; return c; });
     ((Scope$1c$1) s).mut$run$1(mut$self$0());
-    frame.onEdtAndWait(() -> changeable = was);
+    frame.changeOnEdt(() -> changeable = was);
     return mut$self$0();
   }
 
@@ -562,7 +562,7 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   Object onEdt(Runnable r){
-    frame.onEdtAndWait(() -> { change(); r.run(); });
+    frame.changeOnEdt(() -> { change(); r.run(); });
     return mut$self$0();
   }
 
@@ -635,7 +635,7 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$contextMenu$1(Object s){ return onEdt(() -> contextMenu = s); }
   @Override public Object mut$openMenu$1(Object s){
     var m= CMenu.build(s);
-    frame.onEdtAndWait(() -> {
+    frame.changeOnEdt(() -> {
       if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
       if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
       if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a refilled region, a removed section or a new .content removed it, or the scope that adds it has not returned"); }
@@ -831,11 +831,20 @@ final class _Frame implements Frame$1c$0{
   }
 
   void onEdtAndWait(Runnable r){
-    if (started){ frame.queue.midTask().set(true); }
     onEdtAndWait(() -> {
       r.run();
       return null;
     });
+  }
+
+  <T> T changeOnEdt(Supplier<T> s){
+    if (started){ frame.queue.midTask().set(true); }
+    return onEdtAndWait(s);
+  }
+
+  void changeOnEdt(Runnable r){
+    if (started){ frame.queue.midTask().set(true); }
+    onEdtAndWait(r);
   }
 
   void markLayoutDirty(){ layoutDirty.set(true); }
@@ -969,7 +978,7 @@ final class _Frame implements Frame$1c$0{
     int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
     if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
     if (!started){ canvasW = ww; canvasH = hh; return this; }
-    onEdtAndWait(() -> {
+    changeOnEdt(() -> {
       if (ww == canvasW && hh == canvasH){ return; }
       canvasW = ww;
       canvasH = hh;
@@ -984,7 +993,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$bands$1(Object c){
     requireOpen();
     int b= Sk.color((Color$1c$0) c) | 0xFF000000;
-    onEdtAndWait(() -> bands = b);
+    changeOnEdt(() -> bands = b);
     return this;
   }
   @Override public Object mut$opacity$1(Object a){
@@ -992,7 +1001,7 @@ final class _Frame implements Frame$1c$0{
     int v= alpha(a);
     if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this CapGui: the window cannot be more transparent than CapGui.opacityFloor allows"); }
     opacity = v / 255f;
-    if (started){ onEdtAndWait(stage::opacity); }
+    if (started){ changeOnEdt(stage::opacity); }
     return this;
   }
   private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
@@ -1001,14 +1010,14 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$close$0(){
     requireOpen();
     if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
-    onEdtAndWait(frame::closed);
+    changeOnEdt(frame::closed);
     return Void$o$0.instance;
   }
   @Override public Object mut$onKey$1(Object scope){
     requireOpen();
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
-    onEdtAndWait(() -> {
+    changeOnEdt(() -> {
       textKeys.routes.replaceAll((_, to) -> to == CTextKeys.To.frame ? CTextKeys.To.nobody : to);
       for (var l : surface.getKeyListeners()){
         if (l instanceof CKeyManager k){ k.releaseAll(); surface.removeKeyListener(k); surface.removeFocusListener(k); }
@@ -1025,7 +1034,7 @@ final class _Frame implements Frame$1c$0{
     var b= newline(s);
     if (b != null){ throw Util.detErr("The new title of this Frame has " + b + ": the title bar shows the title on one line"); }
     title = s;
-    if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }
+    if (started){ changeOnEdt(() -> stage.f.setTitle(windowTitle())); }
     return this;
   }
   @Override public Object mut$fps$1(Object f){
@@ -1033,7 +1042,7 @@ final class _Frame implements Frame$1c$0{
     fps = (int) fpsOf(f, "fps");
     if (started){
       int delay= Math.round(1000.0f / fps);
-      onEdtAndWait(() -> frame.setTickDelay(delay));
+      changeOnEdt(() -> frame.setTickDelay(delay));
     }
     return this;
   }
@@ -1049,7 +1058,7 @@ final class _Frame implements Frame$1c$0{
     var b= new ModelFps$as$0(){
       boolean changeable= true;
       @Override public Object mut$action$1(Object r){
-        onEdtAndWait(() -> {
+        changeOnEdt(() -> {
           if (frame.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"); }
           if (!changeable && modelTickActions != actions){
             throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
@@ -1061,7 +1070,7 @@ final class _Frame implements Frame$1c$0{
       }
     };
     ((Scope$1c$1) scope).mut$run$1(b);
-    onEdtAndWait(() -> {
+    changeOnEdt(() -> {
       modelPeriodNs = Math.round(1e9 / nn);
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
       b.changeable = false;
@@ -1079,7 +1088,7 @@ final class _Frame implements Frame$1c$0{
     // the old tree), then swap in one EDT block so no tick or mouse event
     // ever sees a half-built tree. The new tree takes the current virtual pixel space.
     ((Scope$1c$1) scope).mut$run$1(t);
-    onEdtAndWait(() -> {
+    changeOnEdt(() -> {
       if (top != null){ uninstall(top); }// a later .content replaces an earlier one
       install(t);
       t.component.setBounds(0, 0, canvasW, canvasH);

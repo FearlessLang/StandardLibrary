@@ -434,19 +434,17 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
 
   private void submit(Supplier<Fire> onEdt){
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
-      frame.frame.queue.midTask().set(true);
       if (!frame.onEdtAndWait(() -> canChange())){ return Void$o$0.instance; }
-      fire(frame.onEdtAndWait(() -> { layout(); return onEdt.get(); }));
+      fire(frame.changeOnEdt(() -> { layout(); return onEdt.get(); }));
       return Void$o$0.instance;
     }});
   }
   private void change(Supplier<Req> onEdt){
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
-      frame.frame.queue.midTask().set(true);
       var q= frame.onEdtAndWait(() -> canChange() && editable ? onEdt.get() : null);
       if (q == null){ return Void$o$0.instance; }
       var ch= clean(q.a(), q.b(), q.s());
-      fire(frame.onEdtAndWait(() -> { layout(); return fired(edit(ch)); }));
+      fire(frame.changeOnEdt(() -> { layout(); return fired(edit(ch)); }));
       return Void$o$0.instance;
     }});
   }

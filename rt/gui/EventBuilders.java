@@ -24,7 +24,7 @@ final class CMouseBuilder implements Mouse$1c$0{
   boolean changeable= true;// EDT confined
   CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
-    owner.frame.onEdtAndWait(() -> {
+    owner.frame.changeOnEdt(() -> {
       if (owner.frame.frame.completed()){ throw Util.detErr("This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"); }
       if (!changeable && (owner.handlers != handlers || !owner.canChange())){
         throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
@@ -302,7 +302,7 @@ final class SkMouse extends MouseAdapter{
       var s= t.contextMenu;
       frame.frame.queue.submit(whileShown(t, new MF$7$1(){ @Override public Object mut$$hash$0(){
         var m= CMenu.build(s);
-        frame.onEdtAndWait(() -> frame.menus.show(m, new Rectangle(p.x, p.y, 0, 0)));
+        frame.changeOnEdt(() -> frame.menus.show(m, new Rectangle(p.x, p.y, 0, 0)));
         return Void$o$0.instance;
       }}));
       return;
