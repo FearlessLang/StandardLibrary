@@ -1,13 +1,7 @@
-Container[N:**]: {
-  .contains(N): Bool;
-  .assertContains(n: N, err: LazyInfo): Void -> this.contains(n).assertTrue err;
-  .assertContains(n: N): Void -> this.assertContains(n, {""});
-  }
-
-
 /// A datatype to represent a discrete range of comparable values.
-Range[N]: ToFlow[N], Container[N], Pipe[Range[N]], ToStr {
+Range[N]: ToFlow[N], Pipe[Range[N]], ToStr {
   .close -> this;
+  .contains(N): Bool;
   /// `this.start` returns the first value of this range
   .start: N;
   /// `this.end` returns the last value in this range
@@ -41,8 +35,9 @@ Range[N]: ToFlow[N], Container[N], Pipe[Range[N]], ToStr {
 
 // Sealed so safe to call these methods from standard NumType
 /// A range type for the Num Ranges
-NumRange: Container[Num], Pipe[NumRange], Sealed {
+NumRange: Pipe[NumRange], Sealed {
   .close -> this;
+  .contains(Num): Bool;
   .start: Num;
   .end: Num;
   .str: Str;
