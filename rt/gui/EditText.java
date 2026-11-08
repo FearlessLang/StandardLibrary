@@ -590,7 +590,6 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   final _Frame frame;
   final HashMap<List<Integer>,To> routes= new HashMap<>();
   To typing= To.nobody;
-  long moves;
   char high;
   CTextKeys(_Frame frame){ this.frame= frame; }
 
@@ -604,11 +603,11 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     var to= routes.get(id);
     boolean first= to == null;
     if (first){
-      long m= moves;
+      var f= frame.focus;
       to = first(e);
-      routes.put(id, moves == m ? to : To.nobody);
+      routes.put(id, f == frame.focus ? to : To.nobody);
     }
-    else if (to == To.menus && frame.menus.isOpen()){ frame.menus.key(e); }
+    else if (to == To.menus && frame.menus.isOpen() && e.getKeyCode() != _FluentGUI.code(frame.gui.closeKey)){ frame.menus.key(e); }
     else if (to == To.widget){ frame.focus.key(e); }
     typing = routes.get(id);
     if (to != To.frame && !(first && to == To.desk)){ e.consume(); }
@@ -622,14 +621,15 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     if (frame.focus != null && frame.focus.key(e)){ return To.widget; }
     return To.frame;
   }
-  void moved(){
-    moves += 1;
+  void focusMoved(){
+    typing = To.nobody;
     routes.replaceAll((_, _) -> To.nobody);
   }
   @Override public void keyTyped(KeyEvent e){
     var t= frame.focus;
     char c= e.getKeyChar();
-    if (typing != To.widget || Character.isISOControl(c) || !typesWith(e)){ return; }
+    boolean typesHere= typing == To.widget || typing == To.frame;
+    if (t == null || !typesHere || Character.isISOControl(c) || !typesWith(e)){ return; }
     e.consume();
     if (Character.isHighSurrogate(c)){ high = c; return; }
     var s= high == 0 ? "" + c : "" + high + c;
@@ -641,7 +641,11 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     var to= routes.remove(List.of(e.getKeyCode(), e.getKeyLocation()));
     if (to != null && to != To.frame){ e.consume(); }
   }
-  @Override public void focusLost(FocusEvent e){ frame.keyboard = false; routes.clear(); }
+  @Override public void focusLost(FocusEvent e){
+    frame.keyboard = false;
+    typing = To.nobody;
+    routes.clear();
+  }
 
   @Override public void inputMethodTextChanged(InputMethodEvent e){
     var done= new StringBuilder();

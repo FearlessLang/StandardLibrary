@@ -689,10 +689,7 @@ final class _Frame implements Frame$1c$0{
   void focus(AEditText t){
     if (t == focus){ return; }
     focus = t;
-    keysMoved();
-  }
-  void keysMoved(){
-    textKeys.moved();
+    textKeys.focusMoved();
     for (var l : surface.getKeyListeners()){
       if (l instanceof CKeyManager k){ k.releaseAll(); }
     }
@@ -943,9 +940,9 @@ final class _Frame implements Frame$1c$0{
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
     onEdtAndWait(() -> {
-      keysMoved();
+      textKeys.routes.replaceAll((_, to) -> to == CTextKeys.To.frame ? CTextKeys.To.nobody : to);
       for (var l : surface.getKeyListeners()){
-        if (l instanceof CKeyManager k){ surface.removeKeyListener(k); surface.removeFocusListener(k); }
+        if (l instanceof CKeyManager k){ k.releaseAll(); surface.removeKeyListener(k); surface.removeFocusListener(k); }
       }
       surface.addKeyListener(keys);
       surface.addFocusListener(keys);

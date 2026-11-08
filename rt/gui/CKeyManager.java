@@ -28,7 +28,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
     if (held.add(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){
-    if (frame.reserved(e.getKeyCode()) || e.isConsumed()){ return; }
+    if (frame.reserved(e.getKeyCode())){ return; }
     if (held.remove(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
   }
   void releaseAll(){
