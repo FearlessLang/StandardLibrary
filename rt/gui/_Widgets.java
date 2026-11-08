@@ -730,11 +730,12 @@ final class _Frame implements Frame$1c$0{
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
       var old= where == null ? null : ((_Border) into).layout.slots.put(where, b.component);
+      int at= parent.getComponentZOrder(old);
       if (old != null){
         mouse.detached((SkComponent) old);
         parent.remove(old);
       }
-      parent.add(b.component);
+      parent.add(b.component, at);
       into.growFor(b);
       b.changeable = false;
     });

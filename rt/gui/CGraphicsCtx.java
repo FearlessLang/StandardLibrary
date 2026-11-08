@@ -53,7 +53,7 @@ class CGraphicsCtx implements Graphics$ao$0{
     for (var p : Scopes.ustr(text).split("\n", -1)){
       int from= 0;
       for (int to : Sk.wrap(p, textSettings, ww)){
-        res.add(UStr$s$0Instance.instance(p.substring(from, Sk.trimmed(p, from, to))));
+        res.add(UStr$s$0Instance.instance(p.substring(from, to == p.length() ? to : Sk.trimmed(p, from, to))));
         from = to;
       }
     }

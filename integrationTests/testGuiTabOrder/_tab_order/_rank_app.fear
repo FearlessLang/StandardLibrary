@@ -3,6 +3,7 @@ use base.Block as Block;
 use base.Void as Void;
 use base.Color as Color;
 use base.Sections as Sections;
+use base.Border as Border;
 use base.Slot as Slot;
 use base.Slots as Slots;
 use base.WidthNat as WidthNat;
@@ -10,9 +11,10 @@ use base.HeightNat as HeightNat;
 
 TabOrder: Main{ sys -> sys.gui.run{f -> Block#
   .let[mut Slot[mut Sections]] sections= {Slots#[mut Sections]}
+  .let[mut Slot[mut Border]] border= {Slots#[mut Border]}
   .return{f
-    .title "GuiTabOrder: Tab after a replaced content of a section"
-    .virtualPixelSpace(WidthNat#400, HeightNat#300)
+    .title "GuiTabOrder: Tab after a replaced content of a section or region of a border"
+    .virtualPixelSpace(WidthNat#400, HeightNat#400)
     .content.pane{::
       .background(Color.ghostWhite)
       .horizontal .maxPerLine 1
@@ -21,6 +23,12 @@ TabOrder: Main{ sys -> sys.gui.run{f -> Block#
         .section.textField{:: .width 300 .height 40 .text "title zero"}.and.textField{:: .width 300 .height 40 .text "content zero"}
         .section.textField{:: .width 300 .height 40 .text "title one"}.and.label{:: .text "content one"}
         .expand 0 .pack
+        }
+      .button{:: .text "Replace the north of the border" .action{Block#(border!.north.textField{:: .width 300 .height 40 .text "new north"}, Void)}}
+      .border{:: .save border
+        .north.textField{:: .width 300 .height 40 .text "north"}
+        .center.textField{:: .width 300 .height 40 .text "center"}
+        .pack
         }
       }
     }

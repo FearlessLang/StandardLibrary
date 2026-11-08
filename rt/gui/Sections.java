@@ -63,8 +63,9 @@ final class _Sections extends AContainer implements Sections$ao$0{
       var s= at(i);
       var old= title ? s.title : s.content;
       frame.mouse.detached(old.component);
+      int at= component.getComponentZOrder(old.component);
       component.remove(old.component);
-      component.add(w.component);
+      component.add(w.component, at);
       if (title){ s.title = w; } else { s.content = w; }
       grow(s);
       w.changeable = false;

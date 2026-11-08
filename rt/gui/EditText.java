@@ -485,7 +485,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       case VK_A -> { return command(e, () -> act(this::selectAll)); }
       case VK_C -> { return command(e, () -> act(this::copy)); }
       case VK_X -> { return command(e, () -> change(this::cut)); }
-      case VK_V -> { return command(e, this::paste); }
+      case VK_V -> { return command(e, () -> change(this::paste)); }
       case VK_Z -> { return command(e, () -> act(shift ? this::redo : this::undo)); }
       case VK_Y -> { return command(e, () -> act(this::redo)); }
       default -> { return k >= VK_DEAD_GRAVE && k <= VK_DEAD_SEMIVOICED_SOUND || CTextKeys.types(e); }
@@ -506,12 +506,10 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     if (ctrl || !shift){ commit(); return; }
     if (!oneLine()){ change(() -> new Req(selA(), selB(), "\n")); }
   }
-  private void paste(){
+  private Req paste(){
     var c= Toolkit.getDefaultToolkit().getSystemClipboard();
-    String s;
-    try{ s= c.isDataFlavorAvailable(DataFlavor.stringFlavor) ? (String) c.getData(DataFlavor.stringFlavor) : null; }
-    catch (IllegalStateException | UnsupportedFlavorException | IOException _){ s= null; }
-    if (s != null){ input(s); }
+    try{ return c.isDataFlavorAvailable(DataFlavor.stringFlavor) ? new Req(selA(), selB(), (String) c.getData(DataFlavor.stringFlavor)) : null; }
+    catch (IllegalStateException | UnsupportedFlavorException | IOException _){ return null; }
   }
 
   Rectangle caretOnScreen(){
