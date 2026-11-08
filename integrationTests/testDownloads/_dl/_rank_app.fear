@@ -45,7 +45,7 @@ DownloadsThatFail: Test{::
     .return{Try#(s.iso.close, {t -> t.download.downloadBytes(b+"/big", 4)}).assertInfo{::.isMsg{:: == (
        "Download exceeds maxBytes."
       |"url: "+b+"/big"
-      |"contentLength: 10"
+      |"bytesRead: 10"
       |"maxBytes: 4"
       )}}}
     }
