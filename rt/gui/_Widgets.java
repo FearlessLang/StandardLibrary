@@ -298,8 +298,7 @@ final class _Split extends AContainer implements Split$1c$0{
         : j == i ? q
         : tail - scale(tail - from[j], hi - q, hi - from[i]);
     }
-    component.invalidate();
-    frame.markLayoutDirty();
+    relayout();
   }
   static int scale(int v, int to, int from){ return (int) Math.round((double) v * to / from); }
   @Override Dimension need(){
@@ -520,8 +519,7 @@ abstract class AWidget implements Widget$2o$1{
     if (x == scrollX && y == scrollY){ return false; }
     scrollX = x;
     scrollY = y;
-    component.invalidate();
-    frame.markLayoutDirty();
+    relayout();
     return true;
   }
   Rectangle track(boolean vert){
@@ -568,18 +566,20 @@ abstract class AWidget implements Widget$2o$1{
     return mut$self$0();
   }
 
-  Object reStyle(Runnable r){
+  void relayout(){
     // Invalidate only this component: invalidation propagates upward on its
     // own, and _Frame.tick re-lays-out just the invalid path, so unchanged
     // widgets keep their exact bounds.
-    frame.onEdtAndWait(() -> {
-      change();
+    component.invalidate();
+    frame.markLayoutDirty();
+  }
+
+  Object reStyle(Runnable r){
+    return onEdt(() -> {
       r.run();
       fit();
-      component.invalidate();
+      relayout();
     });
-    frame.markLayoutDirty();
-    return mut$self$0();
   }
 
   Object reStyle(int n, IntConsumer set){ return reStyle(() -> set.accept(n)); }
@@ -690,12 +690,10 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
   @Override public Object mut$mouse$1(Object s){
     var b= new CMouseBuilder(this);
     ((Scope$1c$1) s).mut$run$1(b);
-    frame.onEdtAndWait(() -> {
-      change();
+    return onEdt(() -> {
       handlers = b.handlers;// .mouse replaces earlier handlers
       b.changeable = false;
     });
-    return mut$self$0();
   }
 
   @Override public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$5c$0) p); }
@@ -803,8 +801,7 @@ final class _Frame implements Frame$1c$0{
   }
   Object addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
     var b= build(scope, make);
-    onEdtAndWait(() -> {
-      into.change();
+    return into.reStyle(() -> {
       // Border slots are replaceable: a second .north evicts the first. The
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
@@ -813,8 +810,6 @@ final class _Frame implements Frame$1c$0{
       into.attach(old, b);
       into.growFor(b);
     });
-    markLayoutDirty();
-    return into;
   }
 
   <T> T onEdtAndWait(Supplier<T> s){

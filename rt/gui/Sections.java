@@ -39,16 +39,13 @@ final class _Sections extends AContainer implements Sections$ao$0{
       + (sections.isEmpty() ? "it has no sections" : "it has " + sections.size() + (sections.size() == 1 ? " section" : " sections") + ", so the index is at most " + (sections.size() - 1)));
   }
   Object add(AWidget title, AWidget c){
-    frame.onEdtAndWait(() -> {
-      change();
+    return reStyle(() -> {
       var s= new Section(title, c);
       sections.add(s);
       attach(null, title);
       attach(null, c);
       grow(s);
     });
-    frame.markLayoutDirty();
-    return this;
   }
   void grow(Section s){
     var t= s.title.own();
