@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -458,10 +459,8 @@ abstract class AWidget implements Widget$2o$1{
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
   EnumMap<MouseKind,MouseHandler$4sg$0> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
-  String boundsWarning;
-  String overlapWarning;
-  String textWarning;
-  String paintWarning;
+  enum Warning{ textClipped, outsideParent, overlapping, paintedOutside }
+  final EnumSet<Warning> warned= EnumSet.noneOf(Warning.class);
 
   AWidget(_Frame frame){ this.frame= frame; }
 
@@ -487,16 +486,18 @@ abstract class AWidget implements Widget$2o$1{
   abstract void sk(Canvas cv);
   String kind(){ return getClass().getSimpleName().substring(1); }
   String describe(){ return "a " + kind() + (text.isEmpty() ? "" : " \"" + text + "\""); }
-  String textClip(String warning){
-    if (text.isEmpty()){ return null; }
+  boolean textClipped(){
+    if (text.isEmpty()){ return false; }
     var need= Sk.textSizeWithInsets(this);
-    if (need.width <= component.getWidth() && need.height <= component.getHeight()){ return null; }
-    if (warning != null){ return warning; }
+    return need.width > component.getWidth() || need.height > component.getHeight();
+  }
+  String textClippedWarning(){
+    var need= Sk.textSizeWithInsets(this);
     return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
   }
-  String warned(String was, String now){
-    if (was == null && now != null){ frame.frame.warn(now); }
-    return now;
+  boolean starts(Warning w, boolean holds){
+    if (!holds){ warned.remove(w); return false; }
+    return warned.add(w);
   }
   abstract Dimension need();
   void fit(){}
@@ -678,7 +679,7 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
         foreground
       );
       paint.imm$run$1(g);
-      paintWarning = warned(paintWarning, g.outside(describe(), component.getWidth(), component.getHeight()));
+      if (starts(Warning.paintedOutside, g.outside(component.getWidth(), component.getHeight()))){ frame.frame.warn(g.outsideWarning(describe(), component.getWidth(), component.getHeight())); }
     }
   }
 

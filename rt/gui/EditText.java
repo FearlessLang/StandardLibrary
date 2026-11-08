@@ -172,14 +172,12 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
 
   int lineHeight(){ return (int) Math.max(1, textSettings.lineHeight()); }
-  @Override String textClip(String warning){
+  @Override boolean textClipped(){
     layout();
-    if (buf.isEmpty()){ return null; }
-    int needW= edgeW() + 1;
-    int needH= edgeH() + tallest;
-    if (needW <= component.getWidth() && needH <= component.getHeight()){ return null; }
-    if (warning != null){ return warning; }
-    return "the text of " + describe() + " needs at least " + needW + "x" + needH + " insets and scroll bars included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
+    return !buf.isEmpty() && (edgeW() + 1 > component.getWidth() || edgeH() + tallest > component.getHeight());
+  }
+  @Override String textClippedWarning(){
+    return "the text of " + describe() + " needs at least " + (edgeW() + 1) + "x" + (edgeH() + tallest) + " insets and scroll bars included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
   }
   int selA(){ return Math.min(caret, anchor); }
   int selB(){ return Math.max(caret, anchor); }
