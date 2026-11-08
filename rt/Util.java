@@ -73,6 +73,18 @@ public final class Util{
   }
   public static Object ok(Object x){ return Actions$5c$0.instance.imm$ok$1(x); }
   public static Object fail(String msg){ return Actions$5c$0.instance.imm$msg$1(new Str$c$0Instance(msg)); }
+  public static Object info(Object i){ return Actions$5c$0.instance.imm$info$1(i); }
+  public static Action$2o$1 once(Supplier<Object> outcome){
+    var res= new Action$2o$1(){
+      Supplier<Object> pending; Action$2o$1 done;
+      @Override public Object mut$run$1(Object m){
+        if (pending != null){ var f= pending; pending= null; done= (Action$2o$1)f.get(); }
+        return done.mut$run$1(m);
+      }
+    };
+    res.pending= outcome;
+    return res;
+  }
   ///The paths a Fearless program reads from its properties are written by PathClassLoader.argOf of Commons.
   public static Path pathProperty(String key){
     var text= System.getProperty(key);

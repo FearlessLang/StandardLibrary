@@ -1,4 +1,87 @@
+_TryRuns: base.InMemoryLog[Nat]{}
 TestTryErrors: Test {::
+  .checkWithSys{sys -> Block#
+    .let[mut base.CapLogReader[Nat]] r= {sys.readLog(_TryRuns)}
+    .do{r.clear}
+    .let[mut base.Action[Nat]] a= {Try#{Block#(_TryRuns.log 1, 5)}}
+    .let[mut base.Action[Nat]] b= {a.map{x -> Block#(_TryRuns.log 2, x)}}
+    .do{Block#(Try#(ELists#[Nat], {_ -> Block#(_TryRuns.log 4, 5)}), Void)}
+    .do{r.read.size.assertEq 0}
+    .do{b!.assertEq 5}
+    .do{b!.assertEq 5}
+    .do{a!.assertEq 5}
+    .return{r.consume.assertEq({::}, Lists#[Nat](1, 2, 2))}
+    }
+  .checkWithSys{sys -> Block#
+    .let[mut base.CapLogReader[Nat]] r= {sys.readLog(_TryRuns)}
+    .do{r.clear}
+    .let[mut base.Action[Nat]] a= {sys.try#{Block#(_TryRuns.log 3, 5)}}
+    .do{Block#(sys.try#(ELists#[Nat], {_ -> Block#(_TryRuns.log 4, 5)}), Void)}
+    .do{r.read.size.assertEq 0}
+    .do{a!.assertEq 5}
+    .do{a!.assertEq 5}
+    .return{r.consume.assertEq({::}, Lists#[Nat](3))}
+    }
+  .checkWithSys{sys -> Block#
+    .let[mut base.CapLogReader[Nat]] r= {sys.readLog(_TryRuns)}
+    .do{r.clear}
+    .let[mut base.Action[Nat]] a= {Try#{Block#(_TryRuns.log 5, Error.msg[Nat] "x")}}
+    .do{a.assertInfo}
+    .do{a.assertInfo}
+    .return{r.consume.assertEq({::}, Lists#[Nat](5))}
+    }
+  .checkWithSys{sys -> Block#
+    .let[mut base.Action[Nat]] a= {sys.try#{Error.msg[Nat] "x"}}
+    .let[Info] first= {a.info!}
+    .let[Info] second= {a.info!}
+    .return{second.assertEq first}
+    }
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut CapRevocationRoot] root= {real.revocation}
+    .do{root.start}
+    .let[mut base.Action[Nat]] a= {RevokableSystem#(root, real).try#{5}}
+    .do{a!.assertEq 5}
+    .do{root.revoke}
+    .return{a!}
+    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .check{Block#
+    .let[mut base.Action[base.EList[Nat]]] a= {Try#(ELists#[Nat], {l -> l.add(1)})}
+    .let[base.EList[Nat]] first= {a!}
+    .do{a!.size.assertEq 1}
+    .return{first.size.assertEq 1}
+    }
+  .checkWithSys{sys -> Block#
+    .let[mut base.Action[base.EList[Nat]]] a= {sys.try#(ELists#[Nat], {l -> l.add(1)})}
+    .let[base.EList[Nat]] first= {a!}
+    .do{a!.size.assertEq 1}
+    .return{first.size.assertEq 1}
+    }
+  .check{Block#
+    .let[mut base.Action[Nat]] a= {Try#(ELists#[Nat], {l -> Block#
+      .openIso m = l
+      .do{Block#(m.add(1), Void)}
+      .return{Error.msg[Nat](m.size.str)}
+      })}
+    .do{a.assertInfo{::.isMsg{:: == "1"}}}
+    .return{a.assertInfo{::.isMsg{:: == "1"}}}
+    }
+  .checkWithSys{sys -> Block#
+    .let[mut base.Action[Nat]] a= {sys.try#(ELists#[Nat], {l -> Block#
+      .openIso m = l
+      .do{Block#(m.add(1), Void)}
+      .return{Error.nonDeterministic[Nat](m.size.str)}
+      })}
+    .do{a.assertInfo{:: > "info" .isMsg{:: == "1"}}}
+    .return{a.assertInfo{:: > "info" .isMsg{:: == "1"}}}
+    }
+  .check{Block#
+    .let[mut base.Action[mut base.EList[Nat]]] a= {Try#{ELists#[Nat]}}
+    .let[mut base.EList[Nat]] first= {a!}
+    .do{Block#(first.add(1), Void)}
+    .let[mut base.EList[Nat]] second= {a!}
+    .return{second.size.assertEq 1}
+    }
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
     .let[mut CapRevocationRoot] root= {real.revocation}
