@@ -22,7 +22,7 @@ public final class _CapOutput$m8$0 implements CapOutput$m8$0{
     return Void$o$0.instance;
   }
   @Override public Object mut$bytes$1(Object o){
-    if (o instanceof List$o$1Instance l){ l.val().forEach(this::mut$byte$1); }
+    System.out.writeBytes(Byte$o$0Instance.unwrapAll(o));
     System.out.flush();
     return Void$o$0.instance;    
   }

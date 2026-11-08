@@ -76,7 +76,7 @@ final class DataFiles{
     var cps= ((UStr$s$0Instance)content).val();
     for (var i= 0; i < cps.length; i += 1){
       if (cps[i] <= max){ out.write(cps[i]); continue; }
-      for (var b : List$o$1Instance.asJava(((UnencodableRecover$8fgg$0)recover).mut$$hash$2(Nat$c$0Instance.instance(cps[i]), Nat$c$0Instance.instance(i)))){ out.write(Byte$o$0Instance.unwrap(b)); }
+      out.writeBytes(Byte$o$0Instance.unwrapAll(((UnencodableRecover$8fgg$0)recover).mut$$hash$2(Nat$c$0Instance.instance(cps[i]), Nat$c$0Instance.instance(i))));
     }
     return writeBytes(root, path, out.toByteArray());
   }

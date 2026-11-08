@@ -52,9 +52,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static Object output(String verb, String name){ return send(verb, List.of(name), o -> new UStr$s$0Instance(o.codePoints().toArray())); }
   private static Object send(String verb, String... args){ return send(verb, List.of(args)); }
   private static Object sendPath(String verb, Object path, String... args){
-    var bs= List$o$1Instance.asJava(path);
-    var bytes= new byte[bs.size()];
-    for (var i= 0; i < bytes.length; i += 1){ bytes[i] = Byte$o$0Instance.unwrap(bs.get(i)); }
+    var bytes= Byte$o$0Instance.unwrapAll(path);
     var text= pathText(verb, bytes);
     if (!absolute(text)){ throw detErr("The message \""+verb+"\" is not sent: the path \""+InputFile.portable(text)+"\"\nis not an absolute path of this system other than the root of a drive."); }
     return send(verb, Stream.concat(Stream.of("Base16:"+HexFormat.of().withUpperCase().formatHex(bytes)), Stream.of(args)).toList());
