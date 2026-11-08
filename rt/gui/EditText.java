@@ -132,7 +132,6 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   @Override void grow(int w, int h){}
   @Override void fit(){ dirty = true; }
-  @Override Object reText(Runnable r){ return reStyle(r); }
 
   @Override public Object mut$text$1(Object t){ return text(((Str$c$0Instance) t).val()); }
   @Override public Object mut$uText$1(Object t){ return text(ustr(t)); }

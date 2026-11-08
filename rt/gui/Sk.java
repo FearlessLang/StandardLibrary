@@ -212,12 +212,6 @@ interface Sk{
     return res;
   }
 
-  static Line line(AWidget s){
-    if (s.line == null){ s.line = shape(s.text, s.textSettings); }
-    return s.line;
-  }
-
-
   static int color(Color$1c$0 c){
     return alpha(c.read$alpha$0()) << 24 | red(c.read$red$0()) << 16
       | green(c.read$green$0()) << 8 | blue(c.read$blue$0());
@@ -433,26 +427,6 @@ interface Sk{
     return to;
   }
   static boolean space(char c){ return c == '\t' || Character.getType(c) == Character.SPACE_SEPARATOR && Character.isWhitespace(c); }
-
-  static Dimension textSizeWithInsets(AWidget s){
-    var need= need(line(s));
-    return new Dimension(need.width + s.left + s.right, need.height + s.top + s.bottom);
-  }
-
-  static void text(Canvas cv, AWidget s, float dx, float dy){
-    var c= s.component;
-    var line= line(s);
-    int x0= s.left;
-    int y0= s.top;
-    int cw= c.getWidth() - s.left - s.right;
-    int ch= c.getHeight() - s.top - s.bottom;
-    if (cw <= 0 || ch <= 0){ return; }
-    int save= cv.save();
-    clip(cv, x0 + dx, y0 + dy, cw, ch);
-    paint.setColor(s.fg);
-    draw(cv, line, x0 + dx, y0 + dy, cw, ch, paint);
-    cv.restoreToCount(save);
-  }
 
   static Image scaled(Image src, int w, int h){
     var s= halved(src, w, h);

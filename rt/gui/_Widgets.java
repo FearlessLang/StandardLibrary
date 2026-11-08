@@ -53,7 +53,7 @@ final class SkComponent extends JComponent{
   @Override public void doLayout(){ w.placeChildren(); }
 }
 
-final class _Button extends AWidget implements Button$2o$0{
+final class _Button extends ACaption implements Button$2o$0{
   MF$7$1 action;// EDT confined
   // Bevel path cache, used and maintained by sk; EDT confined. The
   // paths depend only on (width, height, radius, bevel depth), so a stable
@@ -71,7 +71,6 @@ final class _Button extends AWidget implements Button$2o$0{
   @Override public Object mut$action$1(Object r){
     return onEdt(() -> action = (MF$7$1) r);
   }
-  @Override Dimension need(){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){
     int w= component.getWidth(), h= component.getHeight();
     if (w <= 0 || h <= 0){ return; }
@@ -113,7 +112,7 @@ final class _Button extends AWidget implements Button$2o$0{
       cv.drawPath(bevelBr, Sk.paint);
     }
     int shift= down && d > 0 ? Math.max(1, d / 2) : 0;
-    Sk.text(cv, this, shift, shift);
+    skText(cv, shift, shift);
   }
   private int bevel(int w, int h, int r){
     int d= Math.max(3, Math.min(8, Math.min(w, h) / 9));
@@ -133,13 +132,12 @@ final class _Button extends AWidget implements Button$2o$0{
   }
 }
 
-final class _Label extends AWidget implements Label$1c$0{
+final class _Label extends ACaption implements Label$1c$0{
   _Label(_Frame frame){ super(frame); }
 
-  @Override Dimension need(){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
-    Sk.text(cv, this, 0, 0);
+    skText(cv, 0, 0);
   }
 }
 
@@ -439,16 +437,11 @@ abstract class AWidget implements Widget$2o$1{
   int fg= Sk.color(foreground);
   int bg= Sk.color(background);
   Sk.TextSettings textSettings= Sk.TextSettings.label;
-  Sk.Line line;
   static final int bar= 5;
   int scrollX;
   int scrollY;
   int contentW;
   int contentH;
-  // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
-  // expose Fearless methods to change it, but it lives here alongside the
-  // other style fields.
-  String text= "";
   String tooltip= "";
   Object contextMenu;
 
@@ -483,16 +476,9 @@ abstract class AWidget implements Widget$2o$1{
 
   abstract void sk(Canvas cv);
   String kind(){ return getClass().getSimpleName().substring(1); }
-  String describe(){ return "a " + kind() + (text.isEmpty() ? "" : " \"" + text + "\""); }
-  boolean textClipped(){
-    if (text.isEmpty()){ return false; }
-    var need= Sk.textSizeWithInsets(this);
-    return need.width > component.getWidth() || need.height > component.getHeight();
-  }
-  String textClippedWarning(){
-    var need= Sk.textSizeWithInsets(this);
-    return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
-  }
+  String describe(){ return "a " + kind(); }
+  boolean textClipped(){ return false; }
+  String textClippedWarning(){ throw new AssertionError(); }
   boolean starts(Warning w, boolean holds){
     if (!holds){ warned.remove(w); return false; }
     return warned.add(w);
@@ -588,14 +574,7 @@ abstract class AWidget implements Widget$2o$1{
 
   Object reStyle(int n, IntConsumer set){ return reStyle(() -> set.accept(n)); }
 
-  Object reText(Runnable r){
-    return reStyle(() -> {
-      r.run();
-      line = null;
-      var n= need();
-      grow(n.width, n.height);
-    });
-  }
+  Object reText(Runnable r){ return reStyle(r); }
 
   @Override public Object mut$topInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "top inset"), n -> { insetsFit("topInset " + n, left, right, n, bottom, width, height); top = n; }); }
   @Override public Object mut$bottomInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "bottom inset"), n -> { insetsFit("bottomInset " + n, left, right, top, n, width, height); bottom = n; }); }
@@ -622,13 +601,6 @@ abstract class AWidget implements Widget$2o$1{
   public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), textSettings.above(), ratio(r))); }
   public Object read$aboveBaseline$0(){ return ratio(textSettings.above()); }
   public Object read$belowBaseline$0(){ return ratio(textSettings.below()); }
-  public Object mut$uText$1(Object t){
-    var s= ustr(t);
-    var b= newline(s);
-    if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
-    return reText(() -> text = s);
-  }
-  public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
   @Override public Object mut$uTooltip$1(Object t){
@@ -701,6 +673,58 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
   }
 
   @Override public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$5c$0) p); }
+}
+
+abstract class ACaption extends AWidget{
+  String text= "";
+  Sk.Line line;
+
+  ACaption(_Frame frame){ super(frame); }
+
+  Sk.Line line(){
+    if (line == null){ line = Sk.shape(text, textSettings); }
+    return line;
+  }
+  @Override Dimension need(){
+    var need= Sk.need(line());
+    return new Dimension(need.width + left + right, need.height + top + bottom);
+  }
+  @Override String describe(){ return super.describe() + (text.isEmpty() ? "" : " \"" + text + "\""); }
+  @Override boolean textClipped(){
+    if (text.isEmpty()){ return false; }
+    var need= need();
+    return need.width > component.getWidth() || need.height > component.getHeight();
+  }
+  @Override String textClippedWarning(){
+    var need= need();
+    return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
+  }
+  void skText(Canvas cv, float dx, float dy){
+    var l= line();
+    int cw= component.getWidth() - left - right;
+    int ch= component.getHeight() - top - bottom;
+    if (cw <= 0 || ch <= 0){ return; }
+    int save= cv.save();
+    Sk.clip(cv, left + dx, top + dy, cw, ch);
+    Sk.paint.setColor(fg);
+    Sk.draw(cv, l, left + dx, top + dy, cw, ch, Sk.paint);
+    cv.restoreToCount(save);
+  }
+  @Override Object reText(Runnable r){
+    return reStyle(() -> {
+      r.run();
+      line = null;
+      var n= need();
+      grow(n.width, n.height);
+    });
+  }
+  public Object mut$uText$1(Object t){
+    var s= ustr(t);
+    var b= newline(s);
+    if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
+    return reText(() -> text = s);
+  }
+  public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
 }
 
 final class _Frame implements Frame$1c$0{
