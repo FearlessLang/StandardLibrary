@@ -3,87 +3,89 @@ package _base;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.net.ConnectException;
 import java.net.ProtocolException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.net.ssl.SSLException;
+
 import static _base.Util.*;
 
 final class DownloadFetch{
-  static final int maxRedirects= 5;
-  static final Duration connectTimeout= Duration.ofSeconds(30);
   static final Duration idleTimeout= Duration.ofSeconds(30);
-  static final ScheduledExecutorService alarms= Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().factory());
+  static final Set<Integer> redirects= Set.of(301, 302, 303, 307, 308);
+  static final ScheduledThreadPoolExecutor alarms= new ScheduledThreadPoolExecutor(1, Thread.ofVirtual().factory());
+  static{ alarms.setRemoveOnCancelPolicy(true); }
 
   static final HttpClient client= HttpClient.newBuilder()
-    .connectTimeout(connectTimeout)
+    .version(HttpClient.Version.HTTP_1_1)
     .followRedirects(HttpClient.Redirect.NEVER)
     .build();
 
-  static byte[] bytes(String url, long maxBytes){
-    int redirectsLeft= maxRedirects;
+  static byte[] bytes(Object url, long maxBytes, Object maker){
+    var follower= (RedirectFollower$23y8$0) ((F$3$1) maker).read$$hash$0();
     for (;;){
-      var uri= validate(url);
-      var resp= send(url, uri);
+      var text= textOf(url);
+      var resp= send(text);
       try (var in= resp.body()){
         int status= resp.statusCode();
-        if (300 <= status && status < 400){
-          var location= resp.headers().firstValue("Location");
-          if (location.isEmpty()){ throw downloadFailed(url, "redirect with no Location header"); }
-          if (redirectsLeft == 0){ throw downloadFailed(url, "too many redirects"); }
-          redirectsLeft -= 1;
-          url = redirect(url, uri, location.get());
+        if (redirects.contains(status)){
+          var locations= resp.headers().allValues("Location");
+          if (locations.size() != 1){ throw downloadFailed(text, "HTTP status: "+status+"\na redirect has one Location header, but this redirect has "+locations.size()); }
+          url = follow(url, follower, locations.getFirst());
           continue;
         }
-        if (status < 200 || status >= 300){ throw downloadFailed(url, "HTTP status: "+status); }
-        return readBounded(url, in, maxBytes);
+        if (status < 200 || status >= 300){ throw downloadFailed(text, "HTTP status: "+status); }
+        return readBounded(text, in, maxBytes);
       }
-      catch (IOException e){ throw networkFailed(url, "the connection ended before the whole response arrived"); }
+      catch (IOException e){ throw failed(text, e); }
     }
   }
 
-  static String redirect(String url, URI uri, String location){
-    URI next;
-    try{ next= uri.resolve(new URI(location)); }
-    catch (URISyntaxException e){ throw downloadFailed(url, "redirect to a malformed Location: "+location); }
-    var toHttp= uri.getScheme().equalsIgnoreCase("https") && "http".equalsIgnoreCase(next.getScheme());
-    if (toHttp){ throw downloadFailed(url, "redirect from https to http: "+next.toASCIIString()); }
-    return next.toASCIIString();
+  static String textOf(Object url){ return AssetBytesRead.str(((Url$c$0) url).imm$text$0()); }
+
+  static Object follow(Object url, RedirectFollower$23y8$0 follower, String location){
+    var text= textOf(url);
+    var bad= location.chars().filter(c -> c < 0x20 || c > 0x7E).findFirst();
+    if (bad.isPresent()){ throw downloadFailed(text, String.format(Locale.ROOT, "the Location of the redirect holds the byte %02X, which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E", bad.getAsInt())); }
+    var ls= Str$c$0Instance.instance(location);
+    try{ return follower.mut$$hash$2(url, ls); }
+    catch (Deterministic d){
+      d.i= (Info$o$0) d.i.imm$$plus$1(Infos$1c$0.instance.imm$map$4(Str$c$0Instance.instance("from"), Str$c$0Instance.instance(text), Str$c$0Instance.instance("location"), ls));
+      throw d;
+    }
   }
 
-  static HttpResponse<InputStream> send(String url, URI uri){
-    var answer= client.sendAsync(HttpRequest.newBuilder(uri).GET().build(), HttpResponse.BodyHandlers.ofInputStream());
+  static HttpResponse<InputStream> send(String url){
+    var answer= client.sendAsync(HttpRequest.newBuilder(URI.create(url)).GET().build(), HttpResponse.BodyHandlers.ofInputStream());
     try{ return answer.get(idleTimeout.toMillis(), TimeUnit.MILLISECONDS); }
     catch (TimeoutException e){
       answer.cancel(true);
-      throw timedOut(url);
+      throw timedOut(url, "the answer did not start within "+idleTimeout.toMillis()+" milliseconds");
     }
     catch (ExecutionException e){ throw failed(url, e.getCause()); }
     catch (InterruptedException e){
       Thread.currentThread().interrupt();
-      throw downloadFailed(url, "the download was interrupted");
+      throw networkFailed(url, "the download was interrupted");
     }
   }
 
   static Error failed(String url, Throwable t){
     return switch (t){
-      case HttpTimeoutException _ -> timedOut(url);
       case ConnectException _ -> networkFailed(url, "the connection to the host could not be opened");
       case ProtocolException _ -> networkFailed(url, "the host did not answer with a valid HTTP response");
+      case SSLException _ -> networkFailed(url, "the TLS handshake with the host failed");
       case IOException e when e.getCause() instanceof IllegalArgumentException -> networkFailed(url, "the Content-Length of the answer is not a number");
       case IOException _ -> networkFailed(url, "the connection ended before the whole response arrived");
       default -> throw new Error(t);
@@ -100,39 +102,24 @@ final class DownloadFetch{
       int n;
       try{ n= in.read(chunk); }
       catch (IOException e){
-        if (idle.get()){ throw timedOut(url); }
+        if (idle.get()){ throw timedOut(url, "no byte arrived for "+idleTimeout.toMillis()+" milliseconds"); }
         throw e;
       }
       finally{ alarm.cancel(false); }
       if (n == -1){ return buf.toByteArray(); }
-      total = Math.addExact(total, n);
-      if (Long.compareUnsigned(total, maxBytes) > 0){
-        throw detErr("Download exceeds maxBytes.\nurl: "+url+"\nbytesRead: "+Long.toUnsignedString(total)+"\nmaxBytes: "+Long.toUnsignedString(maxBytes));
-      }
+      total += n;
+      if (Long.compareUnsigned(total, maxBytes) > 0){ throw detErr("Download exceeds maxBytes.\nurl: "+url+"\nmaxBytes: "+Long.toUnsignedString(maxBytes)); }
       buf.write(chunk, 0, n);
     }
   }
 
-  static void close(InputStream in, AtomicBoolean idle){
+  static Void close(InputStream in, AtomicBoolean idle) throws IOException{
     idle.set(true);
-    try{ in.close(); }
-    catch (IOException e){ throw new UncheckedIOException(e); }
+    in.close();
+    return null;
   }
 
-  static URI validate(String url){
-    URI uri;
-    try{ uri= new URI(url); }
-    catch (URISyntaxException e){ throw invalidUrl(url, "not a valid URI according to RFC 2396 and RFC 2732"); }
-    if (!uri.isAbsolute()){ throw invalidUrl(url, "not an absolute URI (missing scheme)"); }
-    var scheme= uri.getScheme().toLowerCase(Locale.ROOT);
-    if (!scheme.equals("http") && !scheme.equals("https")){ throw detErr("Invalid URL descriptor.\nunsupported scheme (only http/https allowed): "+uri.getScheme()+" in "+url); }
-    if (uri.getHost() == null){ throw invalidUrl(url, "missing host"); }
-    if (uri.getPort() > 65535){ throw invalidUrl(url, "port out of range: "+uri.getPort()); }
-    return uri;
-  }
-
-  static Error invalidUrl(String url, String reason){ return detErr("Invalid URL descriptor.\n"+reason+"\nurl: "+url); }
   static Error downloadFailed(String url, String reason){ return detErr("Download failed.\nurl: "+url+"\n"+reason); }
   static Error networkFailed(String url, String reason){ return nonDetErr("Download failed.\nurl: "+url+"\n"+reason); }
-  static Error timedOut(String url){ return detErr("Download timed out.\nurl: "+url+"\nno byte arrived for "+idleTimeout.toMillis()+" milliseconds"); }
+  static Error timedOut(String url, String reason){ return nonDetErr("Download timed out.\nurl: "+url+"\n"+reason); }
 }

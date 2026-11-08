@@ -140,10 +140,10 @@ RevokableAssetRead: { #(r: mut Revocation, u: mut CapAssetRead): mut CapAssetRea
   .close -> s;
   }}
 RevokableDownload: { #(r: mut Revocation, u: mut CapDownload): mut CapDownload -> {'s
-  .downloadBytes(url, n) -> Block#(r#, u.downloadBytes(url, n));
-  .downloadStr(url, n, c) -> Block#(r#, u.downloadStr(url, n, c));
-  .downloadUStr(url, n, c) -> Block#(r#, u.downloadUStr(url, n, c));
-  .downloadImage(url, n, px) -> Block#(r#, u.downloadImage(url, n, px));
+  .downloadBytes(url, n, f) -> Block#(r#, u.downloadBytes(url, n, f));
+  .downloadStr(url, n, c, f) -> Block#(r#, u.downloadStr(url, n, c, f));
+  .downloadUStr(url, n, c, f) -> Block#(r#, u.downloadUStr(url, n, c, f));
+  .downloadImage(url, n, px, f) -> Block#(r#, u.downloadImage(url, n, px, f));
   .iso -> RevokableDownload#(r.iso.close, u.iso.close);
   .close -> s;
   }}

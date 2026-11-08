@@ -3,83 +3,237 @@ use base.Test as Test;
 use base.Block as Block;
 use base.Try as Try;
 use base.Lists as L;
+use base.Urls as Urls;
 
 Recover: base.StrFixer { reason, byteOffset, byteLength, rejectedValue -> "?" }
 Pub: base.DataRead{}
 Base: { #(s: mut base.System): base.Str -> s.dataRead(Pub).read(L#("base.txt")).readStr(base.StrCleaners.utf8) }
+At: { #(s: mut base.System, path: base.Str): base.Url -> Urls#(Base#s+path) }
+Refused: { #(text: base.Str, reason: base.Str): base.Str -> "Urls#: "+(text.escape)+" is refused: "+reason }
+Label: { #(host: base.Str, label: base.Str): base.Str -> "its host "+(host.escape)+" has the label "+(label.escape)+` that is not a label of a host name: a label is 1 to 63 lowercase letters a-z, digits and "-", and does not start or end with "-"` }
+Ipv4: { #: base.Str -> " has a last label that starts with a digit, so it must be an IPv4 address: 4 decimal numbers from 0 to 255 separated by dots, without leading zeros" }
+Escape: { #(part: base.Str): base.Str -> `; a percent escape is "%" and two digits 0-9 or A-F, and it does not escape a letter, a digit, "-", ".", "_", "~" or the byte 00`+(part == "path" ? {.then -> `, and in a path "/", "\", ";" or "%"`; .else -> ""}) }
+Port: { #: base.Str -> " is not a number from 1 to 65535 written without leading zeros" }
+PathChars: { #: base.Str -> "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,=:@/%" }
+Rfc: { #: base.Url -> Urls#"http://a/b/c/d?q" }
+Fake: { #: mut base.CapDownload -> {'s
+  .downloadBytes(u, n, f) -> (f#)#(u, "/next").text.u.utf8;
+  .downloadStr(u, n, c, f) -> (f#)#(u, "/next").text;
+  .downloadUStr(u, n, c, f) -> (f#)#(u, "/next").text.u;
+  .downloadImage(u, n, px, f) -> Block#((f#)#(u, "/next"), base.Images#(base.WidthNat#1, base.HeightNat#1, base.Color.rgb(0, 0, 0)).paint{g -> g});
+  .iso -> Fake#;
+  .close -> s;
+  }}
+To: { #(text: base.Str): base.F[mut base.RedirectFollower] -> {mut base.RedirectFollower{ from, location -> Urls#text }} }
+From: { #: base.Url -> Urls#"http://a.b/x/y?q=1" }
+StrUrlsRefused: { #(text: base.Str, part: base.Str, s: base.Str, e: base.Str): base.Str -> "StrUrls: "+(text.escape)+" is refused: its "+part+" "+(s.escape)+" holds the percent escape "+(e.escape)+" of the byte "+(e.sub(1, 3))+", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E" }
 
 DownloadTests: UnitTests{::
+  .test UrlsThatParse
+  .test UrlsRefused
+  .test UrlsResolved
+  .test DefaultFollower
+  .test StrUrlsChecks
   .test DownloadsThatSucceed
-  .test DownloadsRefusedByTheirUrl
   .test DownloadsThatFail
   }
 
-DownloadsThatSucceed: Test{::
-  .checkWithSys{s -> s.download.downloadStr(Base#s+"/ok", 1000, base.StrCleaners.utf8).assertEq "hello download"}
-  .checkWithSys{s -> s.download.downloadBytes(Base#s+"/bytes", 1000).assertEq({::}, L#(65.getByte, 66.getByte, 67.getByte))}
-  .checkWithSys{s -> s.download.downloadStr(Base#s+"/start", 1000, base.StrCleaners.utf8).assertEq "landed"}
-  .checkWithSys{s -> s.download.downloadStr(Base#s+"/accent", 1000, base.StrCleaners.utf8OrElse{Recover}).assertEq "caf?"}
-  .checkWithSys{s -> s.download.downloadUStr(Base#s+"/accent", 1000, base.UStrCleaners.utf8).size.assertEq 4}
-  .checkWithSys{s -> s.download.downloadImage(Base#s+"/img.png", 100000, 1000000).width.get.assertEq 3}
+UrlsThatParse: Test{::
+  .check{Urls#"http://example.com".text.assertEq "http://example.com/"}
+  .check{Urls#"https://example.com:443/a/./b/../c?x=1".text.assertEq "https://example.com/a/c?x=1"}
+  .check{Urls#"http://example.com:8080".text.assertEq "http://example.com:8080/"}
+  .check{Urls#"http://example.com:8080".port.assertEq 8080}
+  .check{Urls#"https://example.com".port.assertEq 443}
+  .check{Urls#"https://xn--caf-dma.example/a/../..".text.assertEq "https://xn--caf-dma.example/"}
+  .check{Urls#"http://10.0.0.0/".host.assertEq "10.0.0.0"}
+  .check{Urls#"http://1a.b/".host.assertEq "1a.b"}
+  .check{Urls#"http://123.example/".host.assertEq "123.example"}
+  .check{Urls#"http://a.b/x?a%3Bb%25c".query.assertEq "a%3Bb%25c"}
+  .check{Urls#"http://10.0.0.255/%C3%A9?%2F".path.assertEq "/%C3%A9"}
+  .check{Urls#"http://10.0.0.255/%C3%A9?%2F".query.assertEq "%2F"}
+  .check{Urls#"http://a.b:65535/".port.assertEq 65535}
+  .check{Urls#"http://a.b:80".text.assertEq "http://a.b/"}
+  .check{Urls#"http://a.b?x".text.assertEq "http://a.b/?x"}
+  .check{Urls#"http://a.b/x?a;b".query.assertEq "a;b"}
+  .check{Urls#("http://"+("a".repeat 63)+".b/").host.size.assertEq 65}
+  .check{Urls#("http://"+("a".repeat 63)+"."+("b".repeat 63)+"."+("c".repeat 63)+"."+("d".repeat 61)+"/").host.size.assertEq 253}
+  .check{Urls#"http://a.b/x?q=a/b?c".query.assertEq "q=a/b?c"}
+  .check{Urls#"http://a.b/x?q=a/b?c".host.assertEq "a.b"}
+  .check{Urls#"https://a.b:80/".text.assertEq "https://a.b:80/"}
+  .check{Urls#"http://a.b:443/".text.assertEq "http://a.b:443/"}
+  .check{Urls#("http://a.b/"+("x".repeat 7989)).text.size.assertEq 8000}
   }
 
-DownloadsRefusedByTheirUrl: Test{::
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "Invalid URL descriptor."
-    |"unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/x"
-    )}}, {t -> t.download.downloadStr("ftp://127.0.0.1/x", 1000, base.StrCleaners.utf8)})
-  .checkDetErrWithSys({::.isMsg{::.startsWith(
-     "Invalid URL descriptor."
-    |""
-    )}}, {t -> t.download.downloadStr("not a url", 1000, base.StrCleaners.utf8)})
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "Invalid URL descriptor."
-    |"port out of range: 99999"
-    |"url: http://127.0.0.1:99999/x"
-    )}}, {t -> t.download.downloadStr("http://127.0.0.1:99999/x", 1000, base.StrCleaners.utf8)})
+UrlsRefused: Test{::
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x#y", `it has a fragment, the part from "#"; the server never receives a fragment`))}}, {Urls#"http://a.b/x#y"})
+  .checkDetErr({::.isMsg{:: == (Refused#("ftp://a.b/x", `it does not start with "http://" or "https://"`))}}, {Urls#"ftp://a.b/x"})
+  .checkDetErr({::.isMsg{:: == (Refused#("HTTP://a.b/", `it does not start with "http://" or "https://"`))}}, {Urls#"HTTP://a.b/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("not a url", `it does not start with "http://" or "https://"`))}}, {Urls#"not a url"})
+  .checkDetErr({::.isMsg{:: == (Refused#("https://a.b@c.d/", `it has a user part, the part before "@"; a URL to download names no user`))}}, {Urls#"https://a.b@c.d/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://[::1]/", "its host is an IPv6 address; a URL to download names its host by a host name or an IPv4 address"))}}, {Urls#"http://[::1]/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b:1:2/", "its host and port "+("a.b:1:2".escape)+` hold more than one ":"`))}}, {Urls#"http://a.b:1:2/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http:///x", "it has no host"))}}, {Urls#"http:///x"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://Example.com/", Label#("Example.com", "Example")))}}, {Urls#"http://Example.com/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://example.com./", Label#("example.com.", "")))}}, {Urls#"http://example.com./"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a..b/", Label#("a..b", "")))}}, {Urls#"http://a..b/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://-a.b/", Label#("-a.b", "-a")))}}, {Urls#"http://-a.b/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a_b.c/", Label#("a_b.c", "a_b")))}}, {Urls#"http://a_b.c/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://127.1/", "its host "+("127.1".escape)+(Ipv4#)))}}, {Urls#"http://127.1/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://0x7f.0.0.1/", "its host "+("0x7f.0.0.1".escape)+(Ipv4#)))}}, {Urls#"http://0x7f.0.0.1/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://2130706433/", "its host "+("2130706433".escape)+(Ipv4#)))}}, {Urls#"http://2130706433/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://0177.0.0.1/", "its host "+("0177.0.0.1".escape)+(Ipv4#)))}}, {Urls#"http://0177.0.0.1/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://256.0.0.1/", "its host "+("256.0.0.1".escape)+(Ipv4#)))}}, {Urls#"http://256.0.0.1/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://example.0x10/", "its host "+("example.0x10".escape)+(Ipv4#)))}}, {Urls#"http://example.0x10/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b:0/", "its port "+("0".escape)+(Port#)))}}, {Urls#"http://a.b:0/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b:080/", "its port "+("080".escape)+(Port#)))}}, {Urls#"http://a.b:080/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b:65536/", "its port "+("65536".escape)+(Port#)))}}, {Urls#"http://a.b:65536/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b:/", "its port "+("".escape)+(Port#)))}}, {Urls#"http://a.b:/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/?", `its query is empty: a "?" must be followed by a query`))}}, {Urls#"http://a.b/?"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/a b", "its path "+("/a b".escape)+" holds the character "+(" ".escape)+"; a path holds only the characters "+(PathChars#)))}}, {Urls#"http://a.b/a b"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/a\b", "its path "+("/a\b".escape)+" holds the character "+("\".escape)+"; a path holds only the characters "+(PathChars#)))}}, {Urls#"http://a.b/a\b"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/%zz", "its path "+("/%zz".escape)+" holds the percent escape "+("%zz".escape)+(Escape#"path")))}}, {Urls#"http://a.b/%zz"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x?%4", "its query "+("%4".escape)+" holds the percent escape "+("%4".escape)+(Escape#"query")))}}, {Urls#"http://a.b/x?%4"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x%4", "its path "+("/x%4".escape)+" holds the percent escape "+("%4".escape)+(Escape#"path")))}}, {Urls#"http://a.b/x%4"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/%c3", "its path "+("/%c3".escape)+" holds the percent escape "+("%c3".escape)+(Escape#"path")))}}, {Urls#"http://a.b/%c3"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/public/%2E%2E/admin", "its path "+("/public/%2E%2E/admin".escape)+" holds the percent escape "+("%2E".escape)+(Escape#"path")))}}, {Urls#"http://a.b/public/%2E%2E/admin"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/%41", "its path "+("/%41".escape)+" holds the percent escape "+("%41".escape)+(Escape#"path")))}}, {Urls#"http://a.b/%41"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/a%2Fb", "its path "+("/a%2Fb".escape)+" holds the percent escape "+("%2F".escape)+(Escape#"path")))}}, {Urls#"http://a.b/a%2Fb"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/a%5Cb", "its path "+("/a%5Cb".escape)+" holds the percent escape "+("%5C".escape)+(Escape#"path")))}}, {Urls#"http://a.b/a%5Cb"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/public/..;/admin", "its path "+("/public/..;/admin".escape)+" holds the character "+(";".escape)+"; a path holds only the characters "+(PathChars#)))}}, {Urls#"http://a.b/public/..;/admin"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x?a b", "its query "+("a b".escape)+" holds the character "+(" ".escape)+"; a query holds only the characters "+(PathChars#)+";?"))}}, {Urls#"http://a.b/x?a b"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.1b/", "its host "+("a.1b".escape)+(Ipv4#)))}}, {Urls#"http://a.1b/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://1.2.3.4a/", "its host "+("1.2.3.4a".escape)+(Ipv4#)))}}, {Urls#"http://1.2.3.4a/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://"+("a".repeat 64)+".b/", Label#(("a".repeat 64)+".b", "a".repeat 64)))}}, {Urls#("http://"+("a".repeat 64)+".b/")})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://"+("a".repeat 63)+"."+("b".repeat 63)+"."+("c".repeat 63)+"."+("d".repeat 62)+"/", "its host "+((("a".repeat 63)+"."+("b".repeat 63)+"."+("c".repeat 63)+"."+("d".repeat 62)).escape)+" has 254 characters; a host name has at most 253 characters"))}}, {Urls#("http://"+("a".repeat 63)+"."+("b".repeat 63)+"."+("c".repeat 63)+"."+("d".repeat 62)+"/")})
+  .checkDetErr({::.isMsg{:: == "Urls#: a URL of 8001 characters is refused: a URL has at most 8000 characters"}}, {Urls#("http://a.b/"+("x".repeat 7990))})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/..//evil.com/x", "its path without dot segments "+("//evil.com/x".escape)+` holds "//"; some servers read a path that starts with "//" as a host, and some merge "//" into "/"`))}}, {Urls#"http://a.b/..//evil.com/x"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b//evil.com/x", "its path without dot segments "+("//evil.com/x".escape)+` holds "//"; some servers read a path that starts with "//" as a host, and some merge "//" into "/"`))}}, {Urls#"http://a.b//evil.com/x"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/a//b/../", "its path without dot segments "+("/a//".escape)+` holds "//"; some servers read a path that starts with "//" as a host, and some merge "//" into "/"`))}}, {Urls#"http://a.b/a//b/../"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x%00", "its path "+("/x%00".escape)+" holds the percent escape "+("%00".escape)+(Escape#"path")))}}, {Urls#"http://a.b/x%00"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x?a%00", "its query "+("a%00".escape)+" holds the percent escape "+("%00".escape)+(Escape#"query")))}}, {Urls#"http://a.b/x?a%00"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/..%3B/admin", "its path "+("/..%3B/admin".escape)+" holds the percent escape "+("%3B".escape)+(Escape#"path")))}}, {Urls#"http://a.b/..%3B/admin"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/%252E%252E/", "its path "+("/%252E%252E/".escape)+" holds the percent escape "+("%25".escape)+(Escape#"path")))}}, {Urls#"http://a.b/%252E%252E/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b:"+("9".repeat 25)+"/", "its port "+(("9".repeat 25).escape)+(Port#)))}}, {Urls#("http://a.b:"+("9".repeat 25)+"/")})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a-.b/", Label#("a-.b", "a-")))}}, {Urls#"http://a-.b/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://1.2.3.99999999999999999999/", "its host "+("1.2.3.99999999999999999999".escape)+(Ipv4#)))}}, {Urls#"http://1.2.3.99999999999999999999/"})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x?%41", "its query "+("%41".escape)+" holds the percent escape "+("%41".escape)+(Escape#"query")))}}, {Urls#"http://a.b/x?%41"})
+  }
+
+UrlsResolved: Test{::
+  .check{Urls.resolve(From#, "/z").text.assertEq "http://a.b/z"}
+  .check{Urls.resolve(From#, "z").text.assertEq "http://a.b/x/z"}
+  .check{Urls.resolve(From#, "../z").text.assertEq "http://a.b/z"}
+  .check{Urls.resolve(From#, "../../../z").text.assertEq "http://a.b/z"}
+  .check{Urls.resolve(From#, "?k=2").text.assertEq "http://a.b/x/y?k=2"}
+  .check{Urls.resolve(From#, "").text.assertEq "http://a.b/x/y?q=1"}
+  .check{Urls.resolve(From#, "//c.d/e").text.assertEq "http://c.d/e"}
+  .check{Urls.resolve(Urls#"https://a.b:8443/x", "/e").text.assertEq "https://a.b:8443/e"}
+  .check{Urls.resolve(From#, "https://c.d/e").text.assertEq "https://c.d/e"}
+  .checkDetErr({::.isMsg{:: == (Refused#("ftp://c.d/e", `it does not start with "http://" or "https://"`))}}, {Urls.resolve(From#, "ftp://c.d/e")})
+  .checkDetErr({::.isMsg{:: == (Refused#("a:b", `it does not start with "http://" or "https://"`))}}, {Urls.resolve(From#, "a:b")})
+  .check{Urls.resolve(From#, "./a:b").text.assertEq "http://a.b/x/a:b"}
+  .check{Urls.resolve(From#, "x/y:z").text.assertEq "http://a.b/x/x/y:z"}
+  .check{Urls.resolve(From#, "?a:b").text.assertEq "http://a.b/x/y?a:b"}
+  .check{Urls.resolve(Urls#"https://a.b/", "//c.d/e").text.assertEq "https://c.d/e"}
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x/\evil.com/x", "its path "+("/x/\evil.com/x".escape)+" holds the character "+("\".escape)+"; a path holds only the characters "+(PathChars#)))}}, {Urls.resolve(From#, "\evil.com/x")})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/\evil.com/x", "its path "+("/\evil.com/x".escape)+" holds the character "+("\".escape)+"; a path holds only the characters "+(PathChars#)))}}, {Urls.resolve(From#, "/\evil.com/x")})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x/y?", `its query is empty: a "?" must be followed by a query`))}}, {Urls.resolve(From#, "?")})
+  .checkDetErr({::.isMsg{:: == (Refused#("http://a.b/x/#top", `it has a fragment, the part from "#"; the server never receives a fragment`))}}, {Urls.resolve(From#, "#top")})
+  .check{Urls.resolve(Rfc#, "g").text.assertEq "http://a/b/c/g"}
+  .check{Urls.resolve(Rfc#, "./g").text.assertEq "http://a/b/c/g"}
+  .check{Urls.resolve(Rfc#, "g/").text.assertEq "http://a/b/c/g/"}
+  .check{Urls.resolve(Rfc#, "/./g").text.assertEq "http://a/g"}
+  .check{Urls.resolve(Rfc#, "?y").text.assertEq "http://a/b/c/d?y"}
+  .check{Urls.resolve(Rfc#, "g?y/./x").text.assertEq "http://a/b/c/g?y/./x"}
+  .check{Urls.resolve(Rfc#, ".").text.assertEq "http://a/b/c/"}
+  .check{Urls.resolve(Rfc#, "./").text.assertEq "http://a/b/c/"}
+  .check{Urls.resolve(Rfc#, "..").text.assertEq "http://a/b/"}
+  .check{Urls.resolve(Rfc#, "../").text.assertEq "http://a/b/"}
+  .check{Urls.resolve(Rfc#, "../g").text.assertEq "http://a/b/g"}
+  .check{Urls.resolve(Rfc#, "../..").text.assertEq "http://a/"}
+  .check{Urls.resolve(Rfc#, "../../g").text.assertEq "http://a/g"}
+  }
+
+DefaultFollower: Test{::
+  .check{Block#
+    .let f= {base.RedirectFollowers.default#}
+    .let u= {Urls#"http://a.b/"}
+    .return{f#(f#(f#(f#(f#(u, "/1"), "/2"), "/3"), "/4"), "/5").text.assertEq "http://a.b/5"}
+    }
+  .checkDetErr({::.isMsg{:: == "RedirectFollowers.default: a download follows at most 5 redirects"}}, {Block#
+    .let f= {base.RedirectFollowers.default#}
+    .let u= {Urls#"http://a.b/"}
+    .return{f#(f#(f#(f#(f#(f#(u, "/1"), "/2"), "/3"), "/4"), "/5"), "/6")}
+    })
+  .checkDetErr({::.isMsg{:: == ("RedirectFollowers.default: a redirect from https to http is refused: "+("http://c.d/".escape))}}, {(base.RedirectFollowers.default#)#(Urls#"https://a.b/", "http://c.d/")})
+  .check{(base.RedirectFollowers.default#)#(Urls#"http://a.b/", "https://c.d/").text.assertEq "https://c.d/"}
+  .checkDetErr({::.isMsg{:: == "RedirectFollowers.default: a download follows at most 5 redirects"}}, {Block#
+    .let f= {base.RedirectFollowers.default#}
+    .let u= {Urls#"http://a.b/"}
+    .return{f#(f#(f#(f#(f#(f#(u, "/1"), "/2"), "/3"), "/4"), "/5"), "ftp://c.d/")}
+    })
+  }
+
+StrUrlsChecks: Test{::
+  .check{base.StrUrls#(Fake#).downloadStr(Urls#"http://a.b/x%0A%20%7D?q=%21", 10, base.StrCleaners.utf8).assertEq "http://a.b/next"}
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://a.b/x?q=%C3", "query", "q=%C3", "%C3"))}}, {base.StrUrls#(Fake#).downloadStr(Urls#"http://a.b/x?q=%C3", 10, base.StrCleaners.utf8)})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://a.b/%09", "path", "/%09", "%09"))}}, {base.StrUrls#(Fake#).downloadStr(Urls#"http://a.b/%09", 10, base.StrCleaners.utf8)})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://a.b/%7F", "path", "/%7F", "%7F"))}}, {base.StrUrls#(Fake#).downloadStr(Urls#"http://a.b/%7F", 10, base.StrCleaners.utf8)})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://c.d/%FF", "path", "/%FF", "%FF"))}}, {base.StrUrls#(Fake#).downloadStr(Urls#"http://a.b/", 10, base.StrCleaners.utf8, To#"http://c.d/%FF")})
+  .check{base.StrUrls#(Fake#).downloadStr(Urls#"http://a.b/", 10, base.StrCleaners.utf8, To#"http://c.d/%7D").assertEq "http://c.d/%7D"}
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://c.d/%FF", "path", "/%FF", "%FF"))}}, {base.StrUrls#(Fake#).downloadBytes(Urls#"http://a.b/", 10, To#"http://c.d/%FF")})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://c.d/%FF", "path", "/%FF", "%FF"))}}, {base.StrUrls#(Fake#).downloadUStr(Urls#"http://a.b/", 10, base.UStrCleaners.utf8, To#"http://c.d/%FF")})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://c.d/%FF", "path", "/%FF", "%FF"))}}, {base.StrUrls#(Fake#).downloadImage(Urls#"http://a.b/", 10, 10, To#"http://c.d/%FF")})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://a.b/%C3", "path", "/%C3", "%C3"))}}, {base.StrUrls#(Fake#).downloadBytes(Urls#"http://a.b/%C3", 10)})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://a.b/%C3", "path", "/%C3", "%C3"))}}, {base.StrUrls#(Fake#).downloadUStr(Urls#"http://a.b/%C3", 10, base.UStrCleaners.utf8)})
+  .checkDetErr({::.isMsg{:: == (StrUrlsRefused#("http://a.b/%C3", "path", "/%C3", "%C3"))}}, {base.StrUrls#(Fake#).downloadImage(Urls#"http://a.b/%C3", 10, 10)})
+  .check{base.StrUrls#(Fake#).downloadBytes(Urls#"http://a.b/", 10).size.assertEq 15}
+  .check{base.StrUrls#(Fake#).downloadUStr(Urls#"http://a.b/", 10, base.UStrCleaners.utf8).size.assertEq 15}
+  .check{base.StrUrls#(Fake#).downloadImage(Urls#"http://a.b/", 10, 10).width.get.assertEq 1}
+  }
+
+DownloadsThatSucceed: Test{::
+  .checkWithSys{s -> s.download.downloadStr(At#(s, "/ok"), 1000, base.StrCleaners.utf8).assertEq "hello download"}
+  .checkWithSys{s -> s.download.downloadBytes(At#(s, "/bytes"), 1000).assertEq({::}, L#(65.getByte, 66.getByte, 67.getByte))}
+  .checkWithSys{s -> s.download.downloadStr(At#(s, "/start"), 1000, base.StrCleaners.utf8).assertEq "landed"}
+  .checkWithSys{s -> s.download.downloadStr(At#(s, "/accent"), 1000, base.StrCleaners.utf8OrElse{Recover}).assertEq "caf?"}
+  .checkWithSys{s -> s.download.downloadUStr(At#(s, "/accent"), 1000, base.UStrCleaners.utf8).size.assertEq 4}
+  .checkWithSys{s -> s.download.downloadImage(At#(s, "/img.png"), 100000, 1000000).width.get.assertEq 3}
+  .checkWithSys{s -> base.StrUrls#(s.download).downloadStr(At#(s, "/start"), 1000, base.StrCleaners.utf8).assertEq "landed"}
   }
 
 DownloadsThatFail: Test{::
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(b+"/big", 4)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(Urls#(b+"/big"), 4)}).assertInfo{::.isMsg{:: == (
        "Download exceeds maxBytes."
       |"url: "+b+"/big"
-      |"bytesRead: 10"
       |"maxBytes: 4"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(b+"/chunked", 4)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadBytes(Urls#(b+"/chunked"), 4)}).assertInfo{::.isMsg{:: == (
        "Download exceeds maxBytes."
       |"url: "+b+"/chunked"
-      |"bytesRead: 10"
       |"maxBytes: 4"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/accent", 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == "StrCleaners.utf8: notInStr: the byte sequence C3 A9 at byte offset 3 of the line encodes U+00E9, which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E"} & > "line" .isMsg{:: == "1"} & > "col" .isMsg{:: == "5"}}}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/accent"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == "StrCleaners.utf8: notInStr: the byte sequence C3 A9 at byte offset 3 of the line encodes U+00E9, which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E"} & > "line" .isMsg{:: == "1"} & > "col" .isMsg{:: == "5"}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/loop", 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
-       "Download failed."
-      |"url: "+b+"/loop"
-      |"too many redirects"
-      )}}}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/loop"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == "RedirectFollowers.default: a download follows at most 5 redirects"} & > "from" .isMsg{:: == (b+"/loop")} & > "location" .isMsg{:: == "/loop"}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/file", 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
-       "Invalid URL descriptor."
-      |"unsupported scheme (only http/https allowed): file in file:///etc/passwd"
-      )}}}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/file"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == (Refused#("file:///etc/passwd", `it does not start with "http://" or "https://"`))} & > "from" .isMsg{:: == (b+"/file")} & > "location" .isMsg{:: == "file:///etc/passwd"}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/missing", 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/missing"), 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
        "Download failed."
       |"url: "+b+"/missing"
       |"HTTP status: 404"
@@ -87,7 +241,7 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/back", 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/back"), 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
        "Download failed."
       |"url: "+b+"/missing"
       |"HTTP status: 404"
@@ -95,17 +249,48 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/space", 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/space"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == (Refused#(b+"/a b", "its path "+("/a b".escape)+" holds the character "+(" ".escape)+"; a path holds only the characters "+(PathChars#)))} & > "from" .isMsg{:: == (b+"/space")} & > "location" .isMsg{:: == "/a b"}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/accentLocation"), 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
        "Download failed."
-      |"url: "+b+"/space"
-      |"redirect to a malformed Location: /a b"
+      |"url: "+b+"/accentLocation"
+      |"the Location of the redirect holds the byte E9, which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(b+"/ftp", 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
-       "Invalid URL descriptor."
-      |"unsupported scheme (only http/https allowed): ftp in ftp://127.0.0.1/caf%C3%A9"
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/twoLocations"), 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
+       "Download failed."
+      |"url: "+b+"/twoLocations"
+      |"HTTP status: 302"
+      |"a redirect has one Location header, but this redirect has 2"
       )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/noLocation"), 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
+       "Download failed."
+      |"url: "+b+"/noLocation"
+      |"HTTP status: 302"
+      |"a redirect has one Location header, but this redirect has 0"
+      )}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/start"), 1000, base.StrCleaners.utf8, {mut base.RedirectFollower{ from, location -> (location == "/final") ? {.then -> base.Error.msg "no final"; .else -> Urls.resolve(from, location)}}})}).assertInfo{:: > "msg" .isMsg{:: == "no final"} & > "from" .isMsg{:: == (b+"/next")} & > "location" .isMsg{:: == "/final"}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/start"), 1000, base.StrCleaners.utf8, {mut base.RedirectFollower{ from, location -> base.Error.msg "no redirects"}})}).assertInfo{:: > "msg" .isMsg{:: == "no redirects"} & > "from" .isMsg{:: == (b+"/start")} & > "location" .isMsg{:: == "/next"}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> base.StrUrls#(t.download).downloadStr(Urls#(b+"/caf%C3%A9"), 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (StrUrlsRefused#(b+"/caf%C3%A9", "path", "/caf%C3%A9", "%C3"))}}}
+    }
+  .checkWithSys{s -> Block#
+    .let b= {Base#s}
+    .return{Try#(s.iso.close, {t -> base.StrUrls#(t.download).downloadStr(Urls#(b+"/toAccent"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == (StrUrlsRefused#(b+"/caf%C3%A9", "path", "/caf%C3%A9", "%C3"))} & > "from" .isMsg{:: == (b+"/toAccent")} & > "location" .isMsg{:: == "/caf%C3%A9"}}}
     }
   }
