@@ -1,7 +1,6 @@
 package _base;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -16,14 +15,6 @@ public interface _Throw$1c$0{
     var this$= this;
     var info$= (Info$o$0)p0;
     throw Util.nonDeterministic(info$);//throw new Error(info$.read$str$0().toString());
-  }
-  default Object imm$stackTrace$0(){
-    var st= new Throwable().getStackTrace();
-    var al= new ArrayList<>();
-    for (var f : frames(Arrays.copyOfRange(st, 2, st.length))){ al.add(new Str$c$0Instance(fmtFrame(f))); }
-    var list= new List$o$1Instance(al);
-    var dtId= new DataTypeBy$17m$3(){ @Override public Object imm$$hash$1(Object p0){ return p0; } };
-    return list.read$info$1(dtId);
   }
   static Set<String> machinery= Set.of("errors.fear", "action.fear", "attenuation.fear");
   static Pattern exampleSuite= Pattern.compile("_.+_Examples(_[0-9]+)?");
