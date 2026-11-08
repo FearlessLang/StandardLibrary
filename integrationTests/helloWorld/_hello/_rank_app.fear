@@ -14,3 +14,4 @@ Hello5:Main{s->base.Debug#(L#(1,2,3,4).flow.map{:: + 10}.list.str{::})}
 Hello6:Main{s->Foo.foo}
 Foo:{.foo:Void->Bar.bar}
 Bar:{.bar:Void->Error.msg"AAAAh"}
+Hello7:Main{s->base.Block#(s.out.printU(`printU `.u), s.out.printlnU(`printlnU caf`.u.u`E9`))}

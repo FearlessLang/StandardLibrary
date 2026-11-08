@@ -51,7 +51,6 @@ _MagicDebug: Sealed {
 Debug: Sealed {
   #[T](x: T, f: ToStrBy[T]): T -> Block#(this#(f#x.str),x);
   #(x: read ToStr): Void -> _MagicDebug# x;
-  //.identify[T](x: read T): Str -> _Magic!;//TODO: can this break observability?
   }
 
 BaseId[T1:*,T2]: CaptureFree{ #(x: T1): T2 }
