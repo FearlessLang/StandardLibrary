@@ -74,11 +74,21 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 /// .check{SomethingThatShouldSucceed#}
 /// ```
 UnitTests: Main {
-  .main sys->Block#
-    .let[mut RTestCap] ts= {_TestCaps#(sys,ELists#)}
+  .main sys->sys.try#(sys.iso.close, {r -> Block#
+    .openIso s = r
+    .let[mut RTestCap] ts= {_TestCaps#(s,ELists#)}
     .do {Block#(this.tests(ts),Void)}
-    .return {ts.run};
+    .return {ts.run}
+    }).run{
+      .ok _ -> Void;
+      .info i -> UnitTestLog.log(_AddToLog#(Lists#(_InfoFrame#i), Actions.info[Void] i));
+      };
   .tests(t: mut TestCap): mut TestCap;
+  }
+
+_InfoFrame: { #(i: Info): StackFrame -> Block#
+  .let[Info] f= {i.getMap.get("stack").getList.getFirst}
+  .return {StackFrames#(_FrameField#(f, "fileName"), _FrameField#(f, "typeName"), _FrameField#(f, "methodName"), _FrameField#(f, "lineNumber").getNat)}
   }
 
 LazyToString: MF[read ToStr] {}
