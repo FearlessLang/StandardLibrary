@@ -29,14 +29,9 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
     var t= tail;
     out= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(proc.getInputStream()));
     err= Thread.startVirtualThread(() -> _CapProcess$18g$0.forward(proc.getErrorStream(), marker, t));
-    dropped.register(this, () -> kill(proc));
+    dropped.register(this, proc::destroyForcibly);
   }
   private static final Cleaner dropped= Cleaner.create();
-  private static void kill(Process p){
-    if (!p.isAlive()){ return; }
-    p.descendants().forEach(ProcessHandle::destroyForcibly);
-    p.destroyForcibly();
-  }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
   @Override public Object mut$await$0(){
@@ -56,7 +51,7 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
   @Override public Object mut$terminate$0(){
     running("terminate");
     if (!p.isAlive()){ ended(); return Void$o$0.instance; }
-    kill(p);
+    p.destroyForcibly();
     try{ p.waitFor(); }
     catch (InterruptedException e){ throw interrupted(); }
     joined();
