@@ -172,6 +172,13 @@ DataProjectDeletes: Test{::
     }
   .checkWithSys{s -> s.dataEdit(Notes).delete(L#("d3", "one.txt"))}
   .checkWithSys{s -> s.dataEdit(Notes).delete(L#("d4", "a.txt"))}
+  .checkWithSys{s -> Block#
+    .let n= {s.dataEdit(Notes).read(L#("mv", "one.txt"))}
+    .do{(n.readStr(base.StrCleaners.utf8)).assertEq "inside"}
+    .do{s.dataEdit(Notes).delete(L#("mv", "one.txt"))}
+    .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("mv", "one.txt"), "again")}
+    .return{(n.readStr(base.StrCleaners.utf8)).assertEq "again"}
+    }
   }
 
 DataProjectFolderDeletes: Test{::
