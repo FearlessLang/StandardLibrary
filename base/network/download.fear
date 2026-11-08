@@ -1,8 +1,143 @@
 CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
-  mut .downloadBytes(url: Str, maxBytes: Nat): List[Byte];
+  mut .downloadBytes(url: Url, maxBytes: Nat, follower: F[mut RedirectFollower]): List[Byte];
+  mut .downloadStr(url: Url, maxBytes: Nat, cleaner: F[Str, mut StrCleaner], follower: F[mut RedirectFollower]): Str;
+  mut .downloadUStr(url: Url, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner], follower: F[mut RedirectFollower]): UStr;
+  mut .downloadImage(url: Url, maxBytes: Nat, maxPixels: Nat, follower: F[mut RedirectFollower]): Image;
 
-  mut .downloadStr(url: Str, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str;
-  mut .downloadUStr(url: Str, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr;
+  mut .downloadBytes(url: Url, maxBytes: Nat): List[Byte] -> this.downloadBytes(url, maxBytes, RedirectFollowers.default);
+  mut .downloadStr(url: Url, maxBytes: Nat, cleaner: F[Str, mut StrCleaner]): Str -> this.downloadStr(url, maxBytes, cleaner, RedirectFollowers.default);
+  mut .downloadUStr(url: Url, maxBytes: Nat, cleaner: F[UStr, mut UStrCleaner]): UStr -> this.downloadUStr(url, maxBytes, cleaner, RedirectFollowers.default);
+  mut .downloadImage(url: Url, maxBytes: Nat, maxPixels: Nat): Image -> this.downloadImage(url, maxBytes, maxPixels, RedirectFollowers.default);
+  }
 
-  mut .downloadImage(url: Str, maxBytes: Nat, maxPixels: Nat): Image;
+RedirectFollower: { mut #(from: Url, location: Str): Url; }
+
+RedirectFollowers: {
+  .default: F[mut RedirectFollower] -> { Block#
+    .let count= {Count.nat 0}
+    .return{mut RedirectFollower{ from, location -> Block#
+      .if{count.get >= 5} .error{"RedirectFollowers.default: a download follows at most 5 redirects"}
+      .let next= {Urls.resolve(from, location)}
+      .if{from.scheme == "https" && {next.scheme == "http"}} .error{"RedirectFollowers.default: a redirect from https to http is refused: "+(next.text.escape)}
+      .do{count++}
+      .return{next}
+      }}
+    };
+  }
+
+Url: Sealed{
+  .scheme: Str;
+  .host: Str;
+  .port: Nat;
+  .path: Str;
+  .query: Str;
+  .text: Str;
+  }
+
+Urls: {
+  #(text: Str): Url -> Block#
+    .if{text.size > 8000} .error{"Urls#: a URL of "+(text.size.str)+" characters is refused: a URL has at most 8000 characters"}
+    .if{text.contains "#"} .error{_UrlErr#(text, `it has a fragment, the part from "#"; the server never receives a fragment`)}
+    .let scheme= {text.startsWith "https://" ? {.then -> "https"; .else -> "http"}}
+    .if{text.startsWith(scheme+"://").not} .error{_UrlErr#(text, `it does not start with "http://" or "https://"`)}
+    .let rest= {text.sub(scheme.size + 3, text.size)}
+    .let end= {_UrlSlashOrQuestion#rest}
+    .let authority= {rest.sub(0, end)}
+    .let pathQuery= {rest.sub(end, rest.size)}
+    .if{authority.contains "@"} .error{_UrlErr#(text, `it has a user part, the part before "@"; a URL to download names no user`)}
+    .if{authority.startsWith "["} .error{_UrlErr#(text, "its host is an IPv6 address; a URL to download names its host by a host name or an IPv4 address")}
+    .let hostPort= {authority.split ":"}
+    .if{hostPort.size > 2} .error{_UrlErr#(text, "its host and port "+(authority.escape)+` hold more than one ":"`)}
+    .let host= {_UrlHost#(text, hostPort.get 0)}
+    .let port= {hostPort.size == 2 ? {.then -> _UrlPort#(text, hostPort.get 1); .else -> _UrlPort.default scheme}}
+    .let q= {pathQuery.indexOf "?"}
+    .let rawPath= {_UrlChars#(text, "path", q.match{.some i -> pathQuery.sub(0, i); .empty -> pathQuery})}
+    .let query= {_UrlChars#(text, "query", q.match{.some i -> pathQuery.sub(i + 1, pathQuery.size); .empty -> ""})}
+    .if{q.isSome && {query.isEmpty}} .error{_UrlErr#(text, `its query is empty: a "?" must be followed by a query`)}
+    .let path= {_UrlDots#rawPath}
+    .if{path.contains "//"} .error{_UrlErr#(text, "its path without dot segments "+(path.escape)+` holds "//"; some servers read a path that starts with "//" as a host, and some merge "//" into "/"`)}
+    .let queryText= {query.isEmpty ? {.then -> ""; .else -> "?"+query}}
+    .return{Url{ .scheme -> scheme; .host -> host; .port -> port; .path -> path; .query -> query; .text -> _UrlOrigin#(scheme, host, port)+path+queryText }};
+  .resolve(from: Url, location: Str): Url -> Block#
+    .if{location.isEmpty} .return{from}
+    .let origin= {_UrlOrigin#(from.scheme, from.host, from.port)}
+    .let end= {_UrlSlashOrQuestion#location}
+    .if{(location.indexOf ":").orValue(end) < end} .return{this#location}
+    .if{location.startsWith "//"} .return{this#(from.scheme+":"+location)}
+    .if{location.startsWith "/"} .return{this#(origin+location)}
+    .if{location.startsWith "?"} .return{this#(origin+(from.path)+location)}
+    .return{this#(origin+(from.path.sub(0, ((from.path.lastIndexOf "/")!) + 1))+location)};
+  }
+
+_UrlErr: { #(text: Str, reason: Str): Str -> "Urls#: "+(text.escape)+" is refused: "+reason }
+_UrlOrigin: { #(scheme: Str, host: Str, port: Nat): Str -> scheme+"://"+host+(port == (_UrlPort.default scheme) ? {.then -> ""; .else -> ":"+(port.str)}) }
+_UrlSlashOrQuestion: { #(s: Str): Nat -> Math.min({::}, (s.indexOf "/").orValue(s.size), (s.indexOf "?").orValue(s.size)) }
+_UrlFirstOutside: { #(s: Str, allowed: Str): mut Opt[Nat] -> s.indicesOf "" .findFirst{i -> i < (s.size) && {allowed.contains(s.sub(i, i + 1)).not}} }
+_UrlOnly: { #(s: Str, allowed: Str): Bool -> _UrlFirstOutside#(s, allowed).isEmpty }
+_UrlDigits: { #(s: Str): Bool -> s.isEmpty.not && {_UrlOnly#(s, "0123456789")} }
+_UrlLabel: { #(l: Str): Bool -> l.isEmpty.not && {l.size <= 63} && {l.startsWith "-" .not} && {l.endsWith "-" .not} && {_UrlOnly#(l, "abcdefghijklmnopqrstuvwxyz0123456789-")} }
+_UrlOctet: { #(l: Str): Bool -> (_UrlDigits#l) && {l.size <= 3} && {l == "0" || {l.startsWith "0" .not}} && {l.getNat <= 255} }
+_UrlHost: { #(text: Str, host: Str): Str -> Block#
+  .if{host.isEmpty} .error{_UrlErr#(text, "it has no host")}
+  .let labels= {host.split "."}
+  .let last= {labels.get(labels.size - 1)}
+  .let ipv4= {last.isEmpty.not && {"0123456789".contains(last.sub(0, 1))}}
+  .if{ipv4 && {labels.size != 4 || {labels.flow.all{l -> _UrlOctet#l}.not}}} .error{_UrlErr#(text, "its host "+(host.escape)+" has a last label that starts with a digit, so it must be an IPv4 address: 4 decimal numbers from 0 to 255 separated by dots, without leading zeros")}
+  .if{ipv4} .return{host}
+  .if{host.size > 253} .error{_UrlErr#(text, "its host "+(host.escape)+" has "+(host.size.str)+" characters; a host name has at most 253 characters")}
+  .do{labels.flow.findFirst{l -> (_UrlLabel#l).not}.ifSome{l -> Error.msg(_UrlErr#(text, "its host "+(host.escape)+" has the label "+(l.escape)+` that is not a label of a host name: a label is 1 to 63 lowercase letters a-z, digits and "-", and does not start or end with "-"`))}}
+  .return{host}
+  }
+_UrlPort: {
+  #(text: Str, port: Str): Nat -> Block#
+    .let ok= {(_UrlDigits#port) && {port.size <= 5} && {port.startsWith "0" .not} && {port.getNat <= 65535}}
+    .if{ok.not} .error{_UrlErr#(text, "its port "+(port.escape)+" is not a number from 1 to 65535 written without leading zeros")}
+    .return{port.getNat};
+  .default(scheme: Str): Nat -> scheme == "https" ? {.then -> 443; .else -> 80};
+  }
+_UrlChars: {
+  .pathChars: Str -> "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,=:@/%";
+  #(text: Str, part: Str, s: Str): Str -> Block#
+    .let inPath= {part == "path"}
+    .let allowed= {inPath ? {.then -> this.pathChars; .else -> this.pathChars+";?"}}
+    .do{_UrlFirstOutside#(s, allowed).ifSome{i -> Error.msg(_UrlErr#(text, "its "+part+" "+(s.escape)+" holds the character "+(s.sub(i, i + 1).escape)+"; a "+part+" holds only the characters "+allowed))}}
+    .do{s.indicesOf "%" .findFirst{i -> this.escapeOk(this.escapeAt(s, i), inPath).not}.ifSome{i -> Error.msg(_UrlErr#(text, "its "+part+" "+(s.escape)+" holds the percent escape "+(("%"+(this.escapeAt(s, i))).escape)+`; a percent escape is "%" and two digits 0-9 or A-F, and it does not escape a letter, a digit, "-", ".", "_", "~" or the byte 00`+(inPath ? {.then -> `, and in a path "/", "\", ";" or "%"`; .else -> ""})))}}
+    .return{s};
+  .escapeAt(s: Str, i: Nat): Str -> s.sub(i + 1, Math.min({::}, i + 3, s.size));
+  .escapeOk(e: Str, inPath: Bool): Bool -> (e.size == 2) && {_UrlOnly#(e, "0123456789ABCDEF")} && {Block#
+    .let v= {(this.hex(e.sub(0, 1))) * 16 + (this.hex(e.sub(1, 2)))}
+    .let unreserved= {v == 45 || {v == 46} || {v == 95} || {v == 126} || {v.inRange(48 =~~= 57)} || {v.inRange(65 =~~= 90)} || {v.inRange(97 =~~= 122)}}
+    .return{unreserved.not && {v != 0} && {(inPath && {v == 47 || {v == 92} || {v == 59} || {v == 37}}).not}}
+    };
+  .hex(c: Str): Nat -> ("0123456789ABCDEF".indexOf c)!;
+  }
+_UrlDots: { #(path: Str): Str -> Block#
+  .if{path.isEmpty} .return{"/"}
+  .let segs= {path.sub(1, path.size).split "/"}
+  .let res= {segs.flow.fold({""}, {out, seg -> this.step(out, seg)})}
+  .let last= {segs.get(segs.size - 1)}
+  .if{last == "." || {last == ".."}} .return{res+"/"}
+  .return{res};
+  .step(out: Str, seg: Str): Str -> seg == "." ? {.then -> out; .else -> seg == ".." ? {.then -> out.sub(0, (out.lastIndexOf "/").orValue 0); .else -> out+"/"+seg}};
+  }
+
+StrUrls: Attenuator[CapDownload]{ u -> {'s
+  .downloadBytes(url, n, f) -> u.downloadBytes(_StrUrls#url, n, _StrUrls.follower f);
+  .downloadStr(url, n, c, f) -> u.downloadStr(_StrUrls#url, n, c, _StrUrls.follower f);
+  .downloadUStr(url, n, c, f) -> u.downloadUStr(_StrUrls#url, n, c, _StrUrls.follower f);
+  .downloadImage(url, n, px, f) -> u.downloadImage(_StrUrls#url, n, px, _StrUrls.follower f);
+  .iso -> StrUrls#(u.iso.close);
+  .close -> s;
+  }}
+_StrUrls: {
+  #(url: Url): Url -> Block#
+    .do{this.part(url, "path", url.path)}
+    .do{this.part(url, "query", url.query)}
+    .return{url};
+  .part(url: Url, part: Str, s: Str): Void -> s.indicesOf "%" .findFirst{i -> this.inStr(s.sub(i + 1, i + 3)).not}.ifSome{i -> Error.msg("StrUrls: "+(url.text.escape)+" is refused: its "+part+" "+(s.escape)+" holds the percent escape "+(s.sub(i, i + 3).escape)+" of the byte "+(s.sub(i + 1, i + 3))+", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E")};
+  .follower(f: F[mut RedirectFollower]): F[mut RedirectFollower] -> { Block#
+    .let inner= {f#}
+    .return{mut RedirectFollower{ from, location -> _StrUrls#(inner#(from, location)) }}
+    };
+  .inStr(e: Str): Bool -> e == "0A" || {"234567".contains(e.sub(0, 1)) && {e != "7F"}};
   }

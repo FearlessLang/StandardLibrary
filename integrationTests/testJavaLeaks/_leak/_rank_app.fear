@@ -7,7 +7,7 @@ use base.Void as Void;
 
 Pub: base.DataRead{}
 Zips: base.DataRead{}
-Url: { #(s: mut base.System, name: base.Str): base.Str -> s.dataRead(Pub).read(L#(name)).readStr(base.StrCleaners.utf8) }
+UrlText: { #(s: mut base.System, name: base.Str): base.Str -> s.dataRead(Pub).read(L#(name)).readStr(base.StrCleaners.utf8) }
 Deep: { #(n: Nat): Nat -> this#(n + 1) + 1 }
 DeepChild: base.InfoMain{sys, arg -> Block#((Deep#0).str, arg)}
 Lg: base.FileLog{}
@@ -43,13 +43,8 @@ Downloads: Test{::
       |"the connection to the host could not be opened"
       )}}}, {t -> Block#
       .openIso s = t
-      .return{s.download.downloadStr(Url#(s, "refused.txt")+"/x", 1000, base.StrCleaners.utf8)}
+      .return{s.download.downloadStr(base.Urls#(UrlText#(s, "refused.txt")+"/x"), 1000, base.StrCleaners.utf8)}
       })
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "Invalid URL descriptor."
-    |"not a valid URI according to RFC 2396 and RFC 2732"
-    |"url: http://a b/"
-    )}}, {t -> t.download.downloadStr("http://a b/", 1000, base.StrCleaners.utf8)})
   .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith(
        "Download failed."
       |"url: http://127.0.0.1:"
@@ -58,7 +53,7 @@ Downloads: Test{::
       |"the host did not answer with a valid HTTP response"
       )}}}, {t -> Block#
       .openIso s = t
-      .return{s.download.downloadStr(Url#(s, "base.txt")+"/bad", 1000, base.StrCleaners.utf8)}
+      .return{s.download.downloadStr(base.Urls#(UrlText#(s, "base.txt")+"/bad"), 1000, base.StrCleaners.utf8)}
       })
   .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith(
        "Download failed."
@@ -68,7 +63,7 @@ Downloads: Test{::
       |"the connection ended before the whole response arrived"
       )}}}, {t -> Block#
       .openIso s = t
-      .return{s.download.downloadStr(Url#(s, "base.txt")+"/cut", 1000, base.StrCleaners.utf8)}
+      .return{s.download.downloadStr(base.Urls#(UrlText#(s, "base.txt")+"/cut"), 1000, base.StrCleaners.utf8)}
       })
   .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith(
        "Download failed."
@@ -78,7 +73,7 @@ Downloads: Test{::
       |"the Content-Length of the answer is not a number"
       )}}}, {t -> Block#
       .openIso s = t
-      .return{s.download.downloadStr(Url#(s, "base.txt")+"/len", 1000, base.StrCleaners.utf8)}
+      .return{s.download.downloadStr(base.Urls#(UrlText#(s, "base.txt")+"/len"), 1000, base.StrCleaners.utf8)}
       })
   }
 
