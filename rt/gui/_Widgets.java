@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -576,7 +575,7 @@ abstract class AWidget implements Widget$2o$1{
     // own, and _Frame.tick re-lays-out just the invalid path, so unchanged
     // widgets keep their exact bounds.
     component.invalidate();
-    frame.markLayoutDirty();
+    frame.layoutDirty = true;
   }
 
   Object reStyle(Runnable r){
@@ -743,7 +742,7 @@ final class _Frame implements Frame$1c$0{
   // EDT) happens after the write, so the queue handoff gives the
   // happens-before. Single mutator at every point in time: no volatile.
   boolean started;
-  private final AtomicBoolean layoutDirty= new AtomicBoolean();
+  boolean layoutDirty;
   private Bitmap bitmap;
   private Surface gpu;
   private Canvas canvas;
@@ -851,8 +850,6 @@ final class _Frame implements Frame$1c$0{
     onEdtAndWait(r);
   }
 
-  void markLayoutDirty(){ layoutDirty.set(true); }
-
   void tick(Instant$5c$0 elapsed){
     this.elapsed = elapsed;
     stage.tick();
@@ -861,8 +858,8 @@ final class _Frame implements Frame$1c$0{
     // tick: the user made it on the pixels on screen, so it is interpreted
     // against the bounds those pixels show. The dirty flag stays set, so the
     // pending layout runs on a later tick.
-    if (layoutDirty.get() && !mouseEventPending()){
-      layoutDirty.set(false);
+    if (layoutDirty && !mouseEventPending()){
+      layoutDirty = false;
       // Only the invalid path (marked by reStyle/add) is re-laid-out.
       top.component.validate();
       mouse.rehover();
@@ -937,7 +934,7 @@ final class _Frame implements Frame$1c$0{
     if (top == null){ install(new _Pane(this)); }
     top.component.setBounds(0, 0, canvasW, canvasH);
     top.component.validate();
-    layoutDirty.set(false);
+    layoutDirty = false;
     stage= new Stage(this);
     stage.f.validate();
     render();
@@ -977,51 +974,52 @@ final class _Frame implements Frame$1c$0{
     }});
   }
   @Override public Object mut$virtualPixelSpace$2(Object w, Object h){
-    requireOpen();
     int ww= extent((WidthNat$as$0) w, "virtual pixel space width");
     int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
     if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
-    if (!started){ canvasW = ww; canvasH = hh; return this; }
-    changeOnEdt(() -> {
+    return onEdt(() -> {
       if (ww == canvasW && hh == canvasH){ return; }
       canvasW = ww;
       canvasH = hh;
+      if (!started){ return; }
       stage.canvas();
       top.component.setBounds(0, 0, ww, hh);
+      top.relayout();
     });
-    markLayoutDirty();
-    return this;
   }
   @Override public Object read$virtualWidth$0(){ return w(canvasW); }
   @Override public Object read$virtualHeight$0(){ return h(canvasH); }
   @Override public Object mut$bands$1(Object c){
-    requireOpen();
     int b= Sk.color((Color$1c$0) c) | 0xFF000000;
-    changeOnEdt(() -> bands = b);
-    return this;
+    return onEdt(() -> bands = b);
   }
   @Override public Object mut$opacity$1(Object a){
-    requireOpen();
     int v= alpha(a);
     if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this CapGui: the window cannot be more transparent than CapGui.opacityFloor allows"); }
-    opacity = v / 255f;
-    if (started){ changeOnEdt(stage::opacity); }
-    return this;
+    return onEdt(() -> {
+      opacity = v / 255f;
+      if (started){ stage.opacity(); }
+    });
   }
   private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
-  @Override public Object mut$onResize$1(Object c){ requireOpen(); onResize = (Consumer$ao$1) c; return this; }
-  @Override public Object mut$onClose$1(Object a){ requireOpen(); onClose = (MF$7$1) a; return this; }
+  private Object onEdt(Runnable r){
+    changeOnEdt(() -> { requireOpen(); r.run(); });
+    return this;
+  }
+  @Override public Object mut$onResize$1(Object c){ return onEdt(() -> onResize = (Consumer$ao$1) c); }
+  @Override public Object mut$onClose$1(Object a){ return onEdt(() -> onClose = (MF$7$1) a); }
   @Override public Object mut$close$0(){
-    requireOpen();
-    if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
-    changeOnEdt(frame::closed);
+    onEdt(() -> {
+      if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
+      frame.closed();
+    });
     return Void$o$0.instance;
   }
   @Override public Object mut$onKey$1(Object scope){
     requireOpen();
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
-    changeOnEdt(() -> {
+    return onEdt(() -> {
       textKeys.routes.replaceAll((_, to) -> to == CTextKeys.To.frame ? CTextKeys.To.nobody : to);
       for (var l : surface.getKeyListeners()){
         if (l instanceof CKeyManager k){ k.releaseAll(); surface.removeKeyListener(k); surface.removeFocusListener(k); }
@@ -1030,25 +1028,22 @@ final class _Frame implements Frame$1c$0{
       surface.addFocusListener(keys);
       keys.changeable = false;
     });
-    return this;
   }
   @Override public Object mut$uTitle$1(Object t){
-    requireOpen();
     var s= ustr(t);
     var b= newline(s);
     if (b != null){ throw Util.detErr("The new title of this Frame has " + b + ": the title bar shows the title on one line"); }
-    title = s;
-    if (started){ changeOnEdt(() -> stage.f.setTitle(windowTitle())); }
-    return this;
+    return onEdt(() -> {
+      title = s;
+      if (started){ stage.f.setTitle(windowTitle()); }
+    });
   }
   @Override public Object mut$fps$1(Object f){
-    requireOpen();
-    fps = (int) fpsOf(f, "fps");
-    if (started){
-      int delay= Math.round(1000.0f / fps);
-      changeOnEdt(() -> frame.setTickDelay(delay));
-    }
-    return this;
+    int v= (int) fpsOf(f, "fps");
+    return onEdt(() -> {
+      fps = v;
+      if (started){ frame.setTickDelay(Math.round(1000.0f / v)); }
+    });
   }
   // Getters. All safe from the queue thread: title/fps are read under the
   // single-mutator model, elapsed is volatile.
@@ -1074,14 +1069,13 @@ final class _Frame implements Frame$1c$0{
       }
     };
     ((Scope$1c$1) scope).mut$run$1(b);
-    changeOnEdt(() -> {
+    return onEdt(() -> {
       modelPeriodNs = Math.round(1e9 / nn);
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
       b.changeable = false;
       // Live change: fixed-rate deadlines restart from now, no warmup.
       if (started){ frame.restartModelTimer(modelPeriodNs, 0, actions); }
     });
-    return this;
   }
   @Override public Object mut$content$0(){ return new _RegionFiller(this, this::newContent); }
 
@@ -1092,7 +1086,7 @@ final class _Frame implements Frame$1c$0{
     // the old tree), then swap in one EDT block so no tick or mouse event
     // ever sees a half-built tree. The new tree takes the current virtual pixel space.
     ((Scope$1c$1) scope).mut$run$1(t);
-    changeOnEdt(() -> {
+    onEdt(() -> {
       if (top != null){ uninstall(top); }// a later .content replaces an earlier one
       install(t);
       t.component.setBounds(0, 0, canvasW, canvasH);
@@ -1100,8 +1094,8 @@ final class _Frame implements Frame$1c$0{
       // progress is forgotten (an in-flight release finds no press target,
       // like a release over empty space).
       mouse.reset();
+      t.relayout();
     });
-    markLayoutDirty();
     return Void$o$0.instance;
   }
 
