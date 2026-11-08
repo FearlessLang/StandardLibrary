@@ -3,8 +3,6 @@ package _base;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.LayoutManager;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,58 +21,45 @@ import java.util.List;
 // Every child keeps its own size; a child with fill takes the whole flow
 // axis of the container. Laying out never changes the size of the container;
 // natural is the size .pack gives it: lines broken only at maxPerLine.
-public final class CenteredFlowLayout implements LayoutManager, Serializable{
-  private static final long serialVersionUID= 1L;
-
+public final class CenteredFlowLayout{
   private final _Pane gap;
 
   public CenteredFlowLayout(_Pane gap){ this.gap= gap; }
 
-  @Override public void addLayoutComponent(String name, Component comp){}
-  @Override public void removeLayoutComponent(Component comp){}
+  void layoutContainer(Container target){
+    boolean vert= gap.vertical;
+    int availW= gap.viewW();
+    int availH= gap.viewH();
+    int lineGap= vert ? gap.widthGap : gap.heightGap;
+    var ls= lines(target, vert ? availH : availW, true);
 
-  @Override public Dimension preferredLayoutSize(Container target){ return target.getPreferredSize(); }
+    int totalCross= crossSum(ls, lineGap);
+    int longest= ls.stream().mapToInt(Line::primary).max().orElse(0);
+    gap.contentW = vert ? totalCross : longest;
+    gap.contentH = vert ? longest : totalCross;
+    gap.scrollX = Math.clamp(gap.scrollX, 0, gap.maxScrollX());
+    gap.scrollY = Math.clamp(gap.scrollY, 0, gap.maxScrollY());
 
-  // Below-preferred minimums are deliberately not supported: content wraps
-  // or clips instead of shrinking.
-  @Override public Dimension minimumLayoutSize(Container target){ return target.getPreferredSize(); }
-
-  @Override public void layoutContainer(Container target){
-    synchronized (target.getTreeLock()){
-      boolean vert= gap.vertical;
-      int availW= gap.viewW();
-      int availH= gap.viewH();
-      int lineGap= vert ? gap.widthGap : gap.heightGap;
-      var ls= lines(target, vert ? availH : availW, true);
-
-      int totalCross= crossSum(ls, lineGap);
-      int longest= ls.stream().mapToInt(Line::primary).max().orElse(0);
-      gap.contentW = vert ? totalCross : longest;
-      gap.contentH = vert ? longest : totalCross;
-      gap.scrollX = Math.clamp(gap.scrollX, 0, gap.maxScrollX());
-      gap.scrollY = Math.clamp(gap.scrollY, 0, gap.maxScrollY());
-
-      int crossStart= vert
-        ? gap.left + half(availW - totalCross)
-        : gap.top + half(availH - totalCross);
-      int cross= crossStart;
-      for (var ln : ls){
-        int primaryStart= vert
-          ? gap.top + half(availH - ln.primary())
-          : gap.left + half(availW - ln.primary());
-        int primary= primaryStart;
-        for (var it : ln.items()){
-          var c= it.c();
-          var d= it.d();
-          int pSize= vert ? d.height : d.width;
-          int cSize= vert ? d.width : d.height;
-          int off= cross + half(ln.cross() - cSize);
-          if (vert){ c.setBounds(off - gap.scrollX, primary - gap.scrollY, cSize, pSize); }
-          else{ c.setBounds(primary - gap.scrollX, off - gap.scrollY, pSize, cSize); }
-          primary += pSize + (vert ? gap.heightGap : gap.widthGap);
-        }
-        cross += ln.cross() + lineGap;
+    int crossStart= vert
+      ? gap.left + half(availW - totalCross)
+      : gap.top + half(availH - totalCross);
+    int cross= crossStart;
+    for (var ln : ls){
+      int primaryStart= vert
+        ? gap.top + half(availH - ln.primary())
+        : gap.left + half(availW - ln.primary());
+      int primary= primaryStart;
+      for (var it : ln.items()){
+        var c= it.c();
+        var d= it.d();
+        int pSize= vert ? d.height : d.width;
+        int cSize= vert ? d.width : d.height;
+        int off= cross + half(ln.cross() - cSize);
+        if (vert){ c.setBounds(off - gap.scrollX, primary - gap.scrollY, cSize, pSize); }
+        else{ c.setBounds(primary - gap.scrollX, off - gap.scrollY, pSize, cSize); }
+        primary += pSize + (vert ? gap.heightGap : gap.widthGap);
       }
+      cross += ln.cross() + lineGap;
     }
   }
 
@@ -90,15 +75,13 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
   // availPrimary along the flow axis. A line holding minPerLine children
   // longer than availPrimary clips.
   Dimension natural(Container target){
-    synchronized (target.getTreeLock()){
-      boolean vert= gap.vertical;
-      var ls= lines(target, Integer.MAX_VALUE, false);
-      int cross= crossSum(ls, vert ? gap.widthGap : gap.heightGap);
-      int primary= ls.stream().mapToInt(Line::primary).max().orElse(0);
-      return vert
-        ? new Dimension(cross + gap.edgeW(), primary + gap.edgeH())
-        : new Dimension(primary + gap.edgeW(), cross + gap.edgeH());
-    }
+    boolean vert= gap.vertical;
+    var ls= lines(target, Integer.MAX_VALUE, false);
+    int cross= crossSum(ls, vert ? gap.widthGap : gap.heightGap);
+    int primary= ls.stream().mapToInt(Line::primary).max().orElse(0);
+    return vert
+      ? new Dimension(cross + gap.edgeW(), primary + gap.edgeH())
+      : new Dimension(primary + gap.edgeW(), cross + gap.edgeH());
   }
 
   private List<Line> lines(Container target, int availPrimary, boolean fills){

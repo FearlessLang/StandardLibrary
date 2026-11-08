@@ -1,8 +1,6 @@
 package _base;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -51,8 +49,7 @@ final class SkComponent extends JComponent{
     setOpaque(false);
     setFocusable(false);
   }
-  @Override public Dimension getPreferredSize(){ return w.own(); }
-  @Override public Dimension getMinimumSize(){ return getPreferredSize(); }
+  @Override public void doLayout(){ w.placeChildren(); }
 }
 
 final class _Button extends AWidget implements Button$2o$0{
@@ -135,11 +132,11 @@ final class _Pane extends AContainer implements Pane$o$0{
   boolean stackScroll;
   boolean centered= true;
 
-  _Pane(_Frame frame){
-    super(frame);
-    component.setLayout(new CenteredFlowLayout(this));
-  }
-  @Override Dimension need(){ return ((CenteredFlowLayout) component.getLayout()).natural(component); }
+  final CenteredFlowLayout flow= new CenteredFlowLayout(this);
+
+  _Pane(_Frame frame){ super(frame); }
+  @Override Dimension need(){ return flow.natural(component); }
+  @Override void placeChildren(){ flow.layoutContainer(component); }
   @Override public Object mut$button$1(Object s){ return frame.addTo(this, null, s, _Button::new); }
   @Override public Object mut$label$1(Object s){ return frame.addTo(this, null, s, _Label::new); }
   @Override public Object mut$picture$1(Object s){ return frame.addTo(this, null, s, _Picture::new); }
@@ -190,16 +187,16 @@ final class _Pane extends AContainer implements Pane$o$0{
 }
 
 final class _Border extends AContainer implements Border$2o$0{
-  _Border(_Frame frame){
-    super(frame);
-    component.setLayout(new MutableBorderLayout(this));
-  }
-  @Override Dimension need(){ return ((MutableBorderLayout) component.getLayout()).natural(component); }
-  @Override public Object mut$north$0(){ return frame.region(this, BorderLayout.NORTH); }
-  @Override public Object mut$south$0(){ return frame.region(this, BorderLayout.SOUTH); }
-  @Override public Object mut$east$0(){ return frame.region(this, BorderLayout.EAST); }
-  @Override public Object mut$west$0(){ return frame.region(this, BorderLayout.WEST); }
-  @Override public Object mut$center$0(){ return frame.region(this, BorderLayout.CENTER); }
+  final MutableBorderLayout layout= new MutableBorderLayout(this);
+
+  _Border(_Frame frame){ super(frame); }
+  @Override Dimension need(){ return layout.natural(); }
+  @Override void placeChildren(){ layout.layoutContainer(component); }
+  @Override public Object mut$north$0(){ return frame.region(this, "north"); }
+  @Override public Object mut$south$0(){ return frame.region(this, "south"); }
+  @Override public Object mut$east$0(){ return frame.region(this, "east"); }
+  @Override public Object mut$west$0(){ return frame.region(this, "west"); }
+  @Override public Object mut$center$0(){ return frame.region(this, "center"); }
 }
 
 @SuppressWarnings("serial")
@@ -211,12 +208,12 @@ final class _Split extends AContainer implements Split$1c$0{
   _Split(_Frame frame, int regions){
     super(frame);
     positions = IntStream.range(0, regions - 1).map(i -> i * bar).toArray();
-    component.setLayout(new BorderLayout(){ @Override public void layoutContainer(Container target){
-      for (var k : component.getComponents()){
-        var r= region(k);
-        MutableBorderLayout.place(k, r.x, r.y, r.width, r.height, true, true);
-      }
-    }});
+  }
+  @Override void placeChildren(){
+    for (var k : component.getComponents()){
+      var r= region(k);
+      MutableBorderLayout.place(k, r.x, r.y, r.width, r.height, true, true);
+    }
   }
   int span(){ return vertical ? viewH() : viewW(); }
   @Override Rectangle region(Component k){
@@ -434,6 +431,7 @@ abstract class AWidget implements Widget$2o$1{
   }
   abstract Dimension need();
   void fit(){}
+  void placeChildren(){}
   boolean hides(Component k){ return false; }
   Rectangle region(Component k){ return null; }
   Rectangle clip(Component k){ return region(k); }
@@ -723,12 +721,12 @@ final class _Frame implements Frame$1c$0{
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old= where == null ? null : ((BorderLayout) parent.getLayout()).getLayoutComponent(where);
+      var old= where == null ? null : ((_Border) into).layout.slots.put(where, b.component);
       if (old != null){
         mouse.detached((SkComponent) old);
         parent.remove(old);
       }
-      parent.add(b.component, where);
+      parent.add(b.component);
       into.growFor(b);
       b.changeable = false;
     });
