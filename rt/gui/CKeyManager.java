@@ -18,22 +18,31 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
   // model set on .pressed (e.g. "moving left") stuck forever, since the
   // matching .released handler never runs.
   private final java.util.Set<List<Integer>> held= new java.util.HashSet<>();
+  private final java.util.Set<List<Integer>> taken= new java.util.HashSet<>();
 
   boolean changeable= true;// EDT confined
 
   CKeyManager(_Frame frame){ this.frame= frame; }
 
   @Override public void keyPressed(KeyEvent e){
-    if (frame.reserved(e.getKeyCode()) || e.isConsumed()){ return; }
-    if (held.add(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
+    var k= List.of(e.getKeyCode(), e.getKeyLocation());
+    if (frame.reserved(e.getKeyCode())){ return; }
+    if (e.isConsumed()){
+      if (!held.contains(k)){ taken.add(k); }
+      return;
+    }
+    if (taken.contains(k)){ return; }
+    if (held.add(k)){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
   }
   @Override public void keyReleased(KeyEvent e){
-    if (frame.reserved(e.getKeyCode())){ return; }
-    if (held.remove(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
+    var k= List.of(e.getKeyCode(), e.getKeyLocation());
+    if (frame.reserved(e.getKeyCode()) || taken.remove(k)){ return; }
+    if (held.remove(k)){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
   }
   @Override public void focusLost(java.awt.event.FocusEvent e){
     frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(), released)).toList());
     held.clear();
+    taken.clear();
   }
   @Override public void focusGained(java.awt.event.FocusEvent e){}
 
