@@ -43,7 +43,10 @@ final class Stage extends MouseAdapter{
   final boolean translucent= device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
   Win f;
   Mode mode;
-  Image cornerKept;
+  final Sk.Kept cornerKept= new Sk.Kept();
+  Path corner;
+  Rect cornerTo;
+  int cornerLegs= -1;
   Dimension lastSize= new Dimension();
   Dimension chosen= new Dimension();
   boolean deskResized;
@@ -427,24 +430,21 @@ final class Stage extends MouseAdapter{
   void paintCorner(Canvas cv){
     if (mode == Mode.decorated && !Desk.managed){ return; }
     int l= legs();
-    var pb= new PathBuilder();
-    pb.moveTo(0, 0);
-    pb.lineTo(l, 0);
-    pb.lineTo(0, l);
-    pb.closePath();
-    try (Path tri= pb.build()){
-      Sk.paint.setColor(0xFF1C1C20);
-      cv.drawPath(tri, Sk.paint);
-      int save= cv.save();
-      cv.clipPath(tri, ClipMode.INTERSECT, true);
+    if (l != cornerLegs){
+      corner = new PathBuilder().moveTo(0, 0).lineTo(l, 0).lineTo(0, l).closePath().build();
       int side= l/2;
       int at= (int)Math.round(l*(2-Math.sqrt(2))/2)-side/2;
-      var to= Rect.makeXYWH(at, at, side, side);
-      cornerKept = Sk.image(cv, cornerIcon, cornerKept, to, to);
-      cv.restoreToCount(save);
+      cornerTo = Rect.makeXYWH(at, at, side, side);
+      cornerLegs = l;
     }
+    Sk.paint.setColor(0xFF1C1C20);
+    cv.drawPath(corner, Sk.paint);
+    int save= cv.save();
+    cv.clipPath(corner, ClipMode.INTERSECT, true);
+    Sk.image(cv, cornerIcon, cornerKept, cornerTo, cornerTo);
+    cv.restoreToCount(save);
     if (mode != Mode.fearless){ return; }
     Sk.paint.setColor(0xFF404046);
-    cv.drawRect(Rect.makeWH(tip(), tip()), Sk.paint);
+    Sk.rect(cv, 0, 0, tip(), tip(), Sk.paint);
   }
 }

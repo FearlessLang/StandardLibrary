@@ -218,14 +218,14 @@ interface Sk{
   }
 
   static void paintNode(SkComponent c, Canvas cv){
-    c.w.textWarning = c.w.warned(c.w.textWarning, c.w.textClip());
+    c.w.textWarning = c.w.warned(c.w.textWarning, c.w.textClip(c.w.textWarning));
     c.w.sk(cv);
     for (int i= 0; i < c.getComponentCount(); i += 1){
       var k= c.getComponent(i);
       if (c.w.hides(k)){ continue; }
       var kw= ((SkComponent) k).w;
-      kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k));
-      kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i));
+      kw.boundsWarning = kw.warned(kw.boundsWarning, boundsClip(c, k, kw.boundsWarning));
+      kw.overlapWarning = kw.warned(kw.overlapWarning, overlap(c, i, kw.overlapWarning));
       int save= cv.save();
       var r= c.w.clip(k);
       if (r != null){ clip(cv, r.x, r.y, r.width, r.height); }
@@ -270,7 +270,7 @@ interface Sk{
   static void divider(Canvas cv, _Split s, java.awt.Rectangle d){
     if (d.isEmpty()){ return; }
     paint.setColor(s.fg & 0xFFFFFF | 0x30000000);
-    cv.drawRect(Rect.makeXYWH(d.x, d.y, d.width, d.height), paint);
+    rect(cv, d.x, d.y, d.width, d.height, paint);
     if (!s.draggable){ return; }
     int t= Math.max(1, (s.vertical ? d.height : d.width) / 3);
     float l= Math.min(s.vertical ? d.width : d.height, 30);
@@ -320,31 +320,34 @@ interface Sk{
     rrect(cv, 0, 0, w, h, Math.min(s.radius, Math.min(w, h) / 2), paint);
   }
 
-  static String boundsClip(SkComponent c, Component k){
+  static String boundsClip(SkComponent c, Component k, String warning){
     var r= c.w.region(k);
-    if (r != null){ return regionClip(c.w, k, r); }
+    if (r != null){ return regionClip(c.w, k, r, warning); }
     boolean scrollsX= c.w.barBottom();
     boolean scrollsY= c.w.barRight();
     boolean insideX= scrollsX || k.getX() >= 0 && k.getX() + k.getWidth() <= c.getWidth();
     boolean insideY= scrollsY || k.getY() >= 0 && k.getY() + k.getHeight() <= c.getHeight();
     boolean inside= insideX && insideY;
     if (inside){ return null; }
+    if (warning != null){ return warning; }
     return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in its parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the part outside the parent is clipped";
   }
 
-  static String regionClip(AWidget s, Component k, java.awt.Rectangle r){
+  static String regionClip(AWidget s, Component k, java.awt.Rectangle r, String warning){
     boolean inside= k.getX() >= r.x && k.getY() >= r.y && k.getX() + k.getWidth() <= r.x + r.width && k.getY() + k.getHeight() <= r.y + r.height;
     if (inside){ return null; }
+    if (warning != null){ return warning; }
     var which= s instanceof _Split ? "region at index " + s.component.getComponentZOrder(k) : "content area";
     return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") does not fit in the " + which + " of its parent, " + s.describe() + ": the " + which + " is " + r.width + "x" + r.height + " at (" + r.x + ", " + r.y + "), and the part outside it is clipped";
   }
 
-  static String overlap(SkComponent c, int i){
+  static String overlap(SkComponent c, int i, String warning){
     if (!(c.w instanceof _Border)){ return null; }
     var k= c.getComponent(i);
     for (int j= 0; j < i; j += 1){
       var o= c.getComponent(j);
       if (!k.getBounds().intersects(o.getBounds())){ continue; }
+      if (warning != null){ return warning; }
       return ((SkComponent) k).w.describe() + " of " + k.getWidth() + "x" + k.getHeight() + " at (" + k.getX() + ", " + k.getY() + ") overlaps " + ((SkComponent) o).w.describe() + " of " + o.getWidth() + "x" + o.getHeight() + " at (" + o.getX() + ", " + o.getY() + ") in their parent, " + c.w.describe() + " of " + c.getWidth() + "x" + c.getHeight() + ": the first one covers the second";
     }
     return null;
@@ -399,6 +402,14 @@ interface Sk{
   }
 
   static void clip(Canvas cv, float x, float y, float w, float h){ Canvas._nClipRect(cv._ptr, x, y, x + w, y + h, ClipMode.INTERSECT.ordinal(), false); }
+
+  static void clip(Canvas cv, float x, float y, float w, float h, float r){
+    var a= radius.get();
+    a[0] = r;
+    Canvas._nClipRRect(cv._ptr, x, y, x + w, y + h, a, ClipMode.INTERSECT.ordinal(), true);
+  }
+
+  static void rect(Canvas cv, float x, float y, float w, float h, Paint p){ Canvas._nDrawRect(cv._ptr, x, y, x + w, y + h, p._ptr); }
 
   static void rrect(Canvas cv, float x, float y, float w, float h, float r, Paint p){
     var a= radius.get();
@@ -550,16 +561,28 @@ interface Sk{
 
   private static int half(int side, int goal){ return side / 2 >= goal ? side / 2 : side; }
 
-  static Image image(Canvas cv, Image src, Image kept, Rect to, Rect room){
-    var m= cv.getLocalToDeviceAsMatrix33().getMat();
+  final class Kept{
+    Image image;
+    Rect to;
+    final Paint paint= new Paint().setAntiAlias(false);
+  }
+
+  static void image(Canvas cv, Image src, Kept k, Rect to, Rect room){
+    var m= Canvas._nGetLocalToDevice(cv._ptr);
     var w= Math.max(1, Math.round(to.getWidth() * m[0]));
-    var h= Math.max(1, Math.round(to.getHeight() * m[4]));
-    var fits= kept != null && kept.getWidth() == halvedSide(src.getWidth(), w) && kept.getHeight() == halvedSide(src.getHeight(), h);
-    if (!fits && kept != null && kept != src){ kept.close(); }
-    var res= fits ? kept : halved(src, w, h);
-    var fit= new Matrix33(to.getWidth() / res.getWidth(), 0, to.getLeft(), 0, to.getHeight() / res.getHeight(), to.getTop(), 0, 0, 1);
-    try (var sh= res.makeShader(FilterTileMode.CLAMP, FilterTileMode.CLAMP, SamplingMode.LINEAR, fit); var p= new Paint().setAntiAlias(false).setShader(sh)){ cv.drawRect(room, p); }
-    return res;
+    var h= Math.max(1, Math.round(to.getHeight() * m[5]));
+    var fits= k.image != null && k.image.getWidth() == halvedSide(src.getWidth(), w) && k.image.getHeight() == halvedSide(src.getHeight(), h);
+    if (!fits){
+      if (k.image != null && k.image != src){ k.image.close(); }
+      k.image = halved(src, w, h);
+      k.to = null;
+    }
+    if (!to.equals(k.to)){
+      k.to = to;
+      var fit= new Matrix33(to.getWidth() / k.image.getWidth(), 0, to.getLeft(), 0, to.getHeight() / k.image.getHeight(), to.getTop(), 0, 0, 1);
+      try (var sh= k.image.makeShader(FilterTileMode.CLAMP, FilterTileMode.CLAMP, SamplingMode.LINEAR, fit)){ k.paint.setShader(sh); }
+    }
+    cv.drawRect(room, k.paint);
   }
 
   static Image pass(Image src, int w, int h, SamplingMode m){

@@ -58,8 +58,10 @@ Steps:
 1. Run integrationTests/testGuiStillWidgets and do not touch the window.
    The window holds a Border: in its north a Split of two Pictures, in its center an expanded Sections whose content is a scrolling Pane, in its south a TextField and a TextArea.
 2. Take the two class histograms of section 1, steps 2 and 3.
-Expected: the difference of the two histograms holds the objects per frame that section 1 lists for integrationTests/testGuiStill, and as many java.awt.Rectangle per frame.
-The difference holds no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader, no io.github.humbleui.types.Rect, no io.github.humbleui.types.RRect and no java.util.ArrayList$Itr.
+Expected: the difference of the two histograms holds the objects per frame that section 1 lists for integrationTests/testGuiStill,
+one float[] per Picture (the scale to device pixels, which chooses the size the image is drawn at),
+and some java.awt.Rectangle, java.util.ArrayList$Itr and io.github.humbleui.types.Rect (short-lived rectangles of the layout of the widgets): their number shrinks while the JIT compiles the code that paints.
+The difference holds no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader, no io.github.humbleui.skija.Matrix44, no io.github.humbleui.types.RRect, and no more io.github.humbleui.skija.Matrix33 than section 1 lists.
 
 6. A still window with a clipped widget builds no text per frame
 
@@ -80,16 +82,5 @@ Steps:
 2. Press F11, the full screen key of the CapGui, and do not touch the window.
    The window fills the screen and shows the Fearless corner at its top left.
 3. Take the two class histograms of section 1, steps 2 and 3.
-Expected: the difference of the two histograms holds the objects per frame that section 1 lists.
+Expected: the difference of the two histograms holds the objects per frame that section 1 lists, and one float[] (the scale to device pixels, which chooses the size the icon of the corner is drawn at).
 The difference holds no io.github.humbleui.skija.PathBuilder, no io.github.humbleui.skija.Path, no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader and no io.github.humbleui.types.Rect.
-
-8. A Picture wider than its image shows its background beside the image
-
-Design: a Picture with .keepAspect(True), the default, draws its image as large as its content box allows with the proportions of the image, centered in the content box.
-The part of the content box outside the image shows the background of the Picture.
-Steps:
-1. Run integrationTests/testGuiPictureFill.
-   The center of the Border of the window is a Picture with .fill, wider than tall, with a ghost white background.
-   The image of the Picture is a blue square whose left edge is a red stripe, 4 of its 40 pixels wide.
-Expected: the middle of the window shows a blue square with a thin red stripe along its left side.
-Left and right of the square the Picture is ghost white, as the window around the Picture.

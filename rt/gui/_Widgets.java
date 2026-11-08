@@ -23,7 +23,6 @@ import javax.swing.SwingUtilities;
 
 import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
-import io.github.humbleui.skija.ClipMode;
 import io.github.humbleui.skija.ColorAlphaType;
 import io.github.humbleui.skija.ColorType;
 import io.github.humbleui.skija.Image;
@@ -31,7 +30,6 @@ import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
 import io.github.humbleui.skija.Surface;
-import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
@@ -86,7 +84,7 @@ final class _Label extends AWidget implements Label$1c$0{
 
 final class _Picture extends AWidget implements Picture$5c$0{
   Image image;
-  Image halved;
+  final Sk.Kept kept= new Sk.Kept();
   boolean keepAspect= true;
   boolean byHeight;
 
@@ -110,13 +108,13 @@ final class _Picture extends AWidget implements Picture$5c$0{
     float iw= keepAspect ? image.getWidth() * s : cw;
     float ih= keepAspect ? image.getHeight() * s : ch;
     int save= cv.save();
-    cv.clipRRect(RRect.makeXYWH(left, top, cw, ch, Math.min(radius, Math.min(cw, ch) / 2f)), ClipMode.INTERSECT, true);
-    halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), Rect.makeXYWH(left, top, cw, ch));
+    Sk.clip(cv, left, top, cw, ch, Math.min(radius, Math.min(cw, ch) / 2f));
+    Sk.image(cv, image, kept, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), Rect.makeXYWH(left, top, cw, ch));
     cv.restoreToCount(save);
   }
   @Override public Object mut$image$1(Object i){
     var img= ((Image$1c$0Instance) i).image;
-    return reStyle(() -> { image = img; halved = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
+    return reStyle(() -> { image = img; kept.image = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
   @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }
@@ -419,10 +417,11 @@ abstract class AWidget implements Widget$2o$1{
   abstract void sk(Canvas cv);
   String kind(){ return getClass().getSimpleName().substring(1); }
   String describe(){ return "a " + kind() + (text.isEmpty() ? "" : " \"" + text + "\""); }
-  String textClip(){
+  String textClip(String warning){
     if (text.isEmpty()){ return null; }
     var need= Sk.textSizeWithInsets(this);
     if (need.width <= component.getWidth() && need.height <= component.getHeight()){ return null; }
+    if (warning != null){ return warning; }
     return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
   }
   String warned(String was, String now){

@@ -97,8 +97,10 @@ class CGraphicsCtx implements Graphics$ao$0{
   @Override public Object mut$image$3(Object image, Object w, Object h){
     var img= ((Image$1c$0Instance) image).image;
     var to= reach(shapeRect(w, h, "image"));
-    var drawn= Sk.image(cv, img, null, to, to);
-    if (drawn != img){ drawn.close(); }
+    var k= new Sk.Kept();
+    Sk.image(cv, img, k, to, to);
+    if (k.image != img){ k.image.close(); }
+    k.paint.close();
     return this;
   }
   @Override public Object mut$textHeight$p1$1(Object h){

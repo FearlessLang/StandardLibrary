@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.humbleui.skija.Canvas;
-import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
 
@@ -129,7 +128,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
   @Override void sk(Canvas cv){
     super.sk(cv);
     int save= cv.save();
-    cv.clipRect(Rect.makeXYWH(left, top, viewW(), viewH()));
+    Sk.clip(cv, left, top, viewW(), viewH());
     for (var s : sections){ Sk.head(cv, this, s); }
     cv.restoreToCount(save);
   }
