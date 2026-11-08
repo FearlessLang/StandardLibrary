@@ -16,7 +16,7 @@ public interface _Throw$1c$0{
     var info$= (Info$o$0)p0;
     throw Util.nonDeterministic(info$);//throw new Error(info$.read$str$0().toString());
   }
-  static Set<String> machinery= Set.of("errors.fear", "action.fear", "attenuation.fear");
+  static Set<String> machinery= Set.of("errors.fear", "action.fear", "attenuation.fear", "testing.fear", "blocks.fear");
   static Pattern exampleSuite= Pattern.compile("_.+_Examples(_[0-9]+)?");
   static Set<String> rcs= Set.of("imm", "mut", "read", "iso", "readH", "mutH");
   static List<StackFrame$174$0> frames(StackTraceElement[] st){

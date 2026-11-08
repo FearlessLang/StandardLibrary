@@ -175,9 +175,9 @@ _TestCaps: {
       self);
 
     mut .run: Void ->
-      ts.seqFlow.for { ci->
+      ts.seqFlow.forEach(Void, { _, ci->
         UnitTestLog.log(_AddToLog#(ci.stackTrace,sys.try#(sys.iso.close,{ t: iso System -> ci.check#t })))
-      }
+      })
     }
   }
 
@@ -189,17 +189,9 @@ CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->CheckInfo: {
 
 Test: { .tests(t: mut TestCap): mut TestCap; }
 
-//The frames that belong to this file or blocks.fear are the test DSL itself; the
-//others are the user's, and the first of them is the real caller of a check.
-_IsUserFile: F[Str, Bool] { fn -> fn.startsWith("testing.fear").not && {fn.startsWith("blocks.fear").not} }
-
-_RealFrame: {
-  #(st: List[StackFrame]): StackFrame -> st.flow.filter{_IsUserFile#(::.fileName)}.first!
-  }
-
 _AddToLog: {
   #(st: List[StackFrame], a: mut Action[Void]): Str -> Block#
-    .let[StackFrame] f = {_RealFrame#st}
+    .let[StackFrame] f = {st.getFirst}
     .return {a.run {
       .ok _ ->
         `<testcase classname="` + (_XmlEscape#(f.typeName))
@@ -266,7 +258,7 @@ _FailureActual: {
 _FailureList: {
   #(i: Info): Str ->
     i.extract{:: > "stack" .extractList}
-      .mapSome{::.flow.filter{_IsUserFile#(_FrameField#(::, "fileName"))}.map {_FailureTrace#::}.join ("" |)}
+      .mapSome{::.flow.map {_FailureTrace#::}.join ("" |)}
       .orValue ""
   }
 
@@ -303,7 +295,7 @@ _FailureTrace: { #(i: Info): Str -> Block#
 
 _PlanLine: {
   #(kind: Str, st: List[StackFrame]): Str -> Block#
-    .let[StackFrame] f = {_RealFrame#st}
+    .let[StackFrame] f = {st.getFirst}
     .return {
       "PLAN|"
       + kind
