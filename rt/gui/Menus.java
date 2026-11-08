@@ -7,8 +7,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
@@ -116,7 +114,6 @@ final class SkMenus{
   int grab;
   boolean swallow;
   boolean took;
-  final HashSet<List<Integer>> heldKeys= new HashSet<>();
   int asked;
 
   SkMenus(_Frame frame){ this.frame= frame; }
@@ -274,21 +271,16 @@ final class SkMenus{
     o.scrollTo(AWidget.scrollFor(t, o.thumb(), true, p.y - grab - t.y, o.content() - o.box().height));
   }
 
-  boolean key(KeyEvent e){
+  void key(KeyEvent e){
     int c= e.getKeyCode();
-    var id= List.of(c, e.getKeyLocation());
-    if (!isOpen()){ return heldKeys.contains(id); }
-    if (c == _FluentGUI.code(frame.gui.fullScreenKey)){ return false; }
-    heldKeys.add(id);
     int k= open.size() - 1;
-    if (c == _FluentGUI.code(frame.gui.closeKey)){ close(k); return true; }
+    if (c == _FluentGUI.code(frame.gui.closeKey)){ close(k); return; }
     switch (c){
       case VK_DOWN, VK_KP_DOWN -> step(k, 1);
       case VK_UP, VK_KP_UP -> step(k, -1);
       case VK_ENTER -> { if (highMenu == k){ choose(k, highItem); } }
       default -> {}
     }
-    return true;
   }
 
   private void step(int k, int by){
