@@ -163,7 +163,7 @@ final class _Sections extends AContainer implements Sections$ao$0, LayoutManager
   }
   void expand(Section s){
     if (s == expanded){ return; }
-    if (expanded != null){ frame.mouse.detached(expanded.content.component); }
+    if (expanded != null){ frame.mouse.hidden(expanded.content.component); }
     expanded = s;
   }
   @Override public Object mut$section$0(){ return new _RegionFiller(frame, (t, mt) -> _RegionFiller.and(frame, (s, make) -> add(frame.build(t, mt), frame.build(s, make)))); }

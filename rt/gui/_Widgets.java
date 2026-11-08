@@ -994,21 +994,12 @@ final class _Frame implements Frame$1c$0{
   private Object newContent(Object scope, Function<_Frame,? extends AWidget> make){
     requireOpen();
     var t= onEdtAndWait(() -> make.apply(this));
-    if (!started){
-      onEdtAndWait(() -> {
-        if (top != null){ uninstall(top); }// a later .content replaces an earlier one
-        install(t);
-      });
-      ((Scope$1c$1) scope).mut$run$1(t);
-      markLayoutDirty();
-      return Void$o$0.instance;
-    }
     // Post start: configure the new tree while detached (ticks keep painting
     // the old tree), then swap in one EDT block so no tick or mouse event
     // ever sees a half-built tree. The new tree takes the current virtual pixel space.
     ((Scope$1c$1) scope).mut$run$1(t);
     onEdtAndWait(() -> {
-      uninstall(top);
+      if (top != null){ uninstall(top); }// a later .content replaces an earlier one
       install(t);
       t.component.setBounds(0, 0, canvasW, canvasH);
       // The old tree is gone: no Exited events for it, and a gesture in

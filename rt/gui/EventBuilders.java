@@ -91,6 +91,12 @@ final class SkMouse extends MouseAdapter{
     if (frame.focus != null && SwingUtilities.isDescendingFrom(frame.focus.component, root)){ frame.focus = null; }
   }
 
+  void hidden(SkComponent root){
+    assert SwingUtilities.isEventDispatchThread();
+    hoverTo(hover.stream().filter(t -> !SwingUtilities.isDescendingFrom(t.component, root)).toList());
+    detached(root);
+  }
+
   // The whole tree was replaced (content swap): forget everything.
   void reset(){
     assert SwingUtilities.isEventDispatchThread();

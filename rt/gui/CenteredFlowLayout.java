@@ -109,7 +109,6 @@ public final class CenteredFlowLayout implements LayoutManager, Serializable{
     int lp= 0;
     int lc= 0;
     for (var c : target.getComponents()){
-      if (!c.isVisible()){ continue; }
       var d= size(((SkComponent) c).w, vert, availPrimary, fills);
       int cp= vert ? d.height : d.width;
       int cc= vert ? d.width : d.height;
