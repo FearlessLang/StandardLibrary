@@ -684,7 +684,15 @@ final class _Frame implements Frame$1c$0{
   void pressed(AWidget d){
     if (focus == null || focus == d){ return; }
     focus.commit();
-    focus = null;
+    focus(null);
+  }
+  void focus(AEditText t){
+    if (t == focus){ return; }
+    focus = t;
+    textKeys.focusMoved();
+    for (var l : surface.getKeyListeners()){
+      if (l instanceof CKeyManager k){ k.releaseAll(); }
+    }
   }
 
   void tab(boolean back){
@@ -695,7 +703,7 @@ final class _Frame implements Frame$1c$0{
     var next= all.get(Math.floorMod(i + (back ? -1 : 1), all.size()));
     if (next == focus){ return; }
     focus.commit();
-    focus = next;
+    focus(next);
   }
 
   private static void edits(java.awt.Container c, ArrayList<AEditText> all){
@@ -932,8 +940,9 @@ final class _Frame implements Frame$1c$0{
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
     onEdtAndWait(() -> {
+      textKeys.routes.replaceAll((_, to) -> to == CTextKeys.To.frame ? CTextKeys.To.nobody : to);
       for (var l : surface.getKeyListeners()){
-        if (l instanceof CKeyManager k){ k.focusLost(null); surface.removeKeyListener(k); surface.removeFocusListener(k); }
+        if (l instanceof CKeyManager k){ k.releaseAll(); surface.removeKeyListener(k); surface.removeFocusListener(k); }
       }
       surface.addKeyListener(keys);
       surface.addFocusListener(keys);

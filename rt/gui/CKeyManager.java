@@ -31,10 +31,11 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
     if (frame.reserved(e.getKeyCode())){ return; }
     if (held.remove(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
   }
-  @Override public void focusLost(java.awt.event.FocusEvent e){
+  void releaseAll(){
     frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(), released)).toList());
     held.clear();
   }
+  @Override public void focusLost(java.awt.event.FocusEvent e){ releaseAll(); }
   @Override public void focusGained(java.awt.event.FocusEvent e){}
 
   private MF$7$1 task(int eventKey, List<CKeyAction> keyActions){
