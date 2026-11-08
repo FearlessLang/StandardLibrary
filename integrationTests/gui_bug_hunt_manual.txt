@@ -84,3 +84,35 @@ Steps:
 3. Take the two class histograms of section 1, steps 2 and 3.
 Expected: the difference of the two histograms holds the objects per frame that section 1 lists, and one float[] (the scale to device pixels, which chooses the size the icon of the corner is drawn at).
 The difference holds no io.github.humbleui.skija.PathBuilder, no io.github.humbleui.skija.Path, no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader and no io.github.humbleui.types.Rect.
+
+8. The selection in a line of two directions highlights the text it holds
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": "The selection is the text between .anchor and .caret", and Ctrl+C "copies the selection to the clipboard".
+Steps:
+1. Run integrationTests/testGuiTextLines.
+   The first field holds "abc ", the Hebrew letters alef, bet, gimel, and " def".
+   The Hebrew word goes from right to left, so alef is its rightmost letter: the field shows "abc", gimel, bet, alef, "def".
+2. Click in the first field, press Home, and press Shift+Right five times.
+   The selection holds "abc " and alef.
+3. Press Ctrl+C, click in the last field, and press Ctrl+V.
+Expected: at step 2 the highlight covers "abc " and alef, the rightmost Hebrew letter, and not gimel and bet.
+At step 3 the last field shows "abc " and alef, the text the highlight covers.
+
+9. The caret and the selection move at each grapheme cluster of a ligature
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": Left and Right move "one grapheme cluster", and "The selection is the text between .anchor and .caret".
+Steps:
+1. Run integrationTests/testGuiTextLines.
+   The second field holds "office"; the bundled font draws "ffi" as one glyph.
+2. Click in the second field, press Home, and press Shift+Right four times, looking at the highlight after each press.
+Expected: the highlight grows at each press: it covers "o", then "of", then "off", then "offi".
+The highlight of "of" covers "o" and the left part of the "ffi" glyph, and the highlight of "off" a larger part of it.
+
+10. End in a word broken over displayed lines goes to the end of the displayed line
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": Home and End move to "the start and the end of the displayed line".
+Steps:
+1. Run integrationTests/testGuiTextLines.
+   The area holds "abcdefghijklmnopqrstuvwxyz", one word longer than the area, broken over three displayed lines: "abcdefghijk", "lmnopqrstu" and "vwxyz".
+2. Click in the area, press Ctrl+Home, then press Shift+End.
+Expected: the caret stands after "k", at the end of the first displayed line, and the highlight covers "abcdefghijk".
