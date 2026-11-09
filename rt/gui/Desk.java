@@ -32,7 +32,7 @@ final class Desk{
   static final boolean managed= System.getenv("SWAYSOCK") != null
     || Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).map(d -> d.toLowerCase(Locale.ROOT)).anyMatch(List.of("hyprland", "sway", "i3")::contains);
   static final boolean cosmic= Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).anyMatch("COSMIC"::equalsIgnoreCase);
-  static final boolean resizeUnseen= cosmic || System.getenv("WAYLAND_DISPLAY") != null && Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).anyMatch("KDE"::equalsIgnoreCase);
+  static final boolean boundsUnseen= cosmic || System.getenv("WAYLAND_DISPLAY") != null && Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).anyMatch("KDE"::equalsIgnoreCase);
   static Rectangle cosmicArea= cosmicGuess();
   private static Rectangle cosmicGuess(){
     var s= java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
@@ -46,6 +46,29 @@ final class Desk{
       call(X11.translate, X11.display, X11.window(f), X11.root, 0, 0, t, t.asSlice(4), t.asSlice(8));
       return new Rectangle(t.get(ValueLayout.JAVA_INT, 0), t.get(ValueLayout.JAVA_INT, 4), g.get(ValueLayout.JAVA_INT, 16), g.get(ValueLayout.JAVA_INT, 20));
     }
+  }
+  static java.awt.Insets extents(Frame f){
+    var e= X11.atoms(X11.window(f), "_NET_FRAME_EXTENTS");
+    return new java.awt.Insets((int)e[2], (int)e[0], (int)e[3], (int)e[1]);
+  }
+  static void watch(Frame f){
+    call(X11.select, X11.display, X11.window(f), 1L<<17);
+    call(X11.flush, X11.display);
+  }
+  static boolean changed(){
+    try{
+      boolean any= false;
+      while ((int)X11.pending.invokeExact(X11.display) > 0){
+        int ignored= (int)X11.next.invokeExact(X11.display, X11.event);
+        any = true;
+      }
+      return any;
+    }
+    catch (Throwable t){ throw new Error(t); }
+  }
+  static void move(Frame f, java.awt.Point at){
+    call(X11.move, X11.display, X11.window(f), at.x, at.y);
+    call(X11.flush, X11.display);
   }
   static void resize(Frame f, java.awt.Dimension d){
     call(X11.resize, X11.display, X11.window(f), d.width, d.height);
@@ -195,6 +218,11 @@ final class Desk{
       ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
     static final MethodHandle translate= fn(lib, "XTranslateCoordinates", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG,
       ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MethodHandle move= fn(lib, "XMoveWindow", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
+    static final MethodHandle select= fn(lib, "XSelectInput", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG));
+    static final MethodHandle pending= fn(lib, "XPending", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS));
+    static final MethodHandle next= fn(lib, "XNextEvent", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MemorySegment event= Arena.global().allocate(192);
     static final MethodHandle resize= fn(lib, "XResizeWindow", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
     static final MethodHandle ungrab= fn(lib, "XUngrabPointer", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
     static final MethodHandle flush= fn(lib, "XFlush", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS));

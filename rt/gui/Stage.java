@@ -43,7 +43,10 @@ final class Stage extends MouseAdapter{
   final boolean translucent= device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
   Win f;
   Mode mode;
-  Image cornerKept;
+  final Sk.Kept cornerKept= new Sk.Kept();
+  Path corner;
+  Rect cornerTo;
+  int cornerLegs= -1;
   Dimension lastSize= new Dimension();
   Dimension chosen= new Dimension();
   boolean deskResized;
@@ -64,7 +67,12 @@ final class Stage extends MouseAdapter{
   Rectangle pending;
   Rectangle maxed= new Rectangle();
   Rectangle seen= new Rectangle();
+  Point kept= new Point();
   boolean deskMaximized;
+  int polledX, polledY, polledW, polledH;
+  Frame watched;
+  int still;
+  boolean settled;
 
   Stage(_Frame owner){
     this.owner= owner;
@@ -244,18 +252,43 @@ final class Stage extends MouseAdapter{
   void tick(){
     if (Desk.managed){ managedState(); }
     if (activating && Desk.managing(f)){ activating = false; Desk.activate(f); }
-    if (x11Unmaximize() && mode == Mode.decorated){ unmaximizeX11(); }
+    if (x11Unmaximize() && mode == Mode.decorated && (deskMaximized || boundsMoved())){ unmaximizeX11(); }
     var now= owner.surface.getSize();
     boolean deskWindow= mode == Mode.decorated && !maximized() && !Desk.managed;
     deskResized &= deskWindow;
     boolean fitted= Desk.cosmic && cosmicTick(deskWindow);
-    if (!Desk.cosmic && deskWindow && !unmaximized && (Desk.resizeUnseen || sameSize(f.getBounds(), restore))){ restore = f.getBounds(); }
+    if (!Desk.cosmic && deskWindow && !unmaximized && (Desk.boundsUnseen || sameSize(f.getBounds(), restore))){ restore = f.getBounds(); }
     boolean deskChose= !near(now.width, chosen.width) || !near(now.height, chosen.height);
-    if (!now.equals(lastSize) && deskChose && !fitted){ deskResized |= deskWindow && !Desk.resizeUnseen; request(now); }
+    if (!now.equals(lastSize) && deskChose && !fitted){ deskResized |= deskWindow && !Desk.boundsUnseen; request(now); }
     if (Desk.managed && deskChose && now.width > 0){ chosen = new Dimension(); }
     lastSize = now;
+    boolean movable= mode != Mode.fullScreen && !maximized() && !Desk.managed && !Desk.cosmic && (f.getExtendedState() & Frame.ICONIFIED) == 0;
+    if (movable){ if (Desk.boundsUnseen){ keepVisibleSeen(); } else{ keepVisible(); } }
     if (unmaximized && (Desk.cosmic ? sameSize(f.getBounds(), restore) : !Desk.down())){ unmaximized(); return; }
     if (deskResized && !Desk.down()){ compact(); }
+  }
+  private void keepVisible(){
+    if (f.getX() == kept.x && f.getY() == kept.y || Desk.down()){ return; }
+    var w= workArea();
+    int vw= Math.min(screen.width/3, f.getWidth());
+    int vh= Math.min(screen.height/3, f.getHeight());
+    kept = new Point(within(f.getX(), w.x+vw-f.getWidth(), w.x+w.width-vw), within(f.getY(), w.y+vh-f.getHeight(), w.y+w.height-vh));
+    f.setLocation(kept);
+  }
+  private void keepVisibleSeen(){
+    if (watched != f){ watched = f; Desk.watch(f); still = 0; settled = false; }
+    if (Desk.changed()){ still = 0; settled = false; return; }
+    if (settled || ++still < 10){ return; }
+    still = 0;
+    var w= workArea();
+    var c= Desk.bounds(f);
+    var e= Desk.extents(f);
+    var b= new Rectangle(c.x-e.left, c.y-e.top, c.width+e.left+e.right, c.height+e.top+e.bottom);
+    int vw= Math.min(screen.width/3, b.width);
+    int vh= Math.min(screen.height/3, b.height);
+    var to= new Point(within(b.x, w.x+vw-b.width, w.x+w.width-vw), within(b.y, w.y+vh-b.height, w.y+w.height-vh));
+    settled = to.equals(b.getLocation());
+    if (!settled){ Desk.move(f, to); }
   }
   private boolean cosmicTick(boolean deskWindow){
     if (maximized()){
@@ -291,6 +324,11 @@ final class Stage extends MouseAdapter{
   }
   private static boolean near(int a, int b){ return Math.abs(a-b) <= 1; }
   private boolean x11Unmaximize(){ return !Desk.windows && !Desk.mac && !Desk.cosmic && !Desk.managed; }
+  private boolean boundsMoved(){
+    boolean same= f.getX() == polledX && f.getY() == polledY && f.getWidth() == polledW && f.getHeight() == polledH;
+    polledX = f.getX(); polledY = f.getY(); polledW = f.getWidth(); polledH = f.getHeight();
+    return !same;
+  }
   private void unmaximizeX11(){
     var now= Desk.bounds(f);
     if (Desk.maximized(f)){ maxed = now; deskMaximized = true; return; }
@@ -416,24 +454,21 @@ final class Stage extends MouseAdapter{
   void paintCorner(Canvas cv){
     if (mode == Mode.decorated && !Desk.managed){ return; }
     int l= legs();
-    var pb= new PathBuilder();
-    pb.moveTo(0, 0);
-    pb.lineTo(l, 0);
-    pb.lineTo(0, l);
-    pb.closePath();
-    try (Path tri= pb.build()){
-      Sk.paint.setColor(0xFF1C1C20);
-      cv.drawPath(tri, Sk.paint);
-      int save= cv.save();
-      cv.clipPath(tri, ClipMode.INTERSECT, true);
+    if (l != cornerLegs){
+      corner = new PathBuilder().moveTo(0, 0).lineTo(l, 0).lineTo(0, l).closePath().build();
       int side= l/2;
       int at= (int)Math.round(l*(2-Math.sqrt(2))/2)-side/2;
-      var to= Rect.makeXYWH(at, at, side, side);
-      cornerKept = Sk.image(cv, cornerIcon, cornerKept, to, to);
-      cv.restoreToCount(save);
+      cornerTo = Rect.makeXYWH(at, at, side, side);
+      cornerLegs = l;
     }
+    Sk.paint.setColor(0xFF1C1C20);
+    cv.drawPath(corner, Sk.paint);
+    int save= cv.save();
+    cv.clipPath(corner, ClipMode.INTERSECT, true);
+    Sk.image(cv, cornerIcon, cornerKept, cornerTo, cornerTo);
+    cv.restoreToCount(save);
     if (mode != Mode.fearless){ return; }
     Sk.paint.setColor(0xFF404046);
-    cv.drawRect(Rect.makeWH(tip(), tip()), Sk.paint);
+    Sk.rect(cv, 0, 0, tip(), tip(), Sk.paint);
   }
 }

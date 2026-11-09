@@ -1,6 +1,5 @@
 package _base;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -8,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.humbleui.skija.Canvas;
-import io.github.humbleui.types.Rect;
 
 import static _base.Scopes.*;
 
@@ -40,18 +38,13 @@ final class _Sections extends AContainer implements Sections$ao$0{
       + (sections.isEmpty() ? "it has no sections" : "it has " + sections.size() + (sections.size() == 1 ? " section" : " sections") + ", so the index is at most " + (sections.size() - 1)));
   }
   Object add(AWidget title, AWidget c){
-    frame.onEdtAndWait(() -> {
-      change();
+    return reStyle(() -> {
       var s= new Section(title, c);
       sections.add(s);
-      component.add(title.component);
-      component.add(c.component);
+      attach(null, title);
+      attach(null, c);
       grow(s);
-      title.changeable = false;
-      c.changeable = false;
     });
-    frame.markLayoutDirty();
-    return this;
   }
   void grow(Section s){
     var t= s.title.own();
@@ -62,13 +55,9 @@ final class _Sections extends AContainer implements Sections$ao$0{
   Object replace(long i, boolean title, AWidget w){
     return reStyle(() -> {
       var s= at(i);
-      var old= title ? s.title : s.content;
-      frame.mouse.detached(old.component);
-      component.remove(old.component);
-      component.add(w.component);
+      attach(title ? s.title : s.content, w);
       if (title){ s.title = w; } else { s.content = w; }
       grow(s);
-      w.changeable = false;
     });
   }
   int lead(){ return tabs ? 0 : mark + widthGap; }
@@ -100,7 +89,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
       y += t.height + heightGap;
       if (s != expanded){ continue; }
       var c= s.content.own();
-      MutableBorderLayout.place(s.content.component, left, y, w, c.height, true, false);
+      MutableBorderLayout.place(s.content, left, y, w, c.height, true, false);
       y += c.height + heightGap;
     }
   }
@@ -115,23 +104,39 @@ final class _Sections extends AContainer implements Sections$ao$0{
     }
     int gap= sections.isEmpty() ? 0 : rowH + heightGap;
     area = new Rectangle(left, top + gap, viewW(), Math.max(0, viewH() - gap));
-    if (expanded != null){ MutableBorderLayout.place(expanded.content.component, area.x, area.y, area.width, area.height, true, true); }
+    if (expanded != null){ MutableBorderLayout.place(expanded.content, area.x, area.y, area.width, area.height, true, true); }
   }
-  @Override boolean hides(Component k){
-    for (var s : sections){ if (s.content.component == k){ return s != expanded; } }
+  @Override boolean hides(AWidget k){
+    for (var s : sections){ if (s.content == k){ return s != expanded; } }
     return false;
   }
-  @Override Rectangle region(Component k){
+  @Override Rectangle region(AWidget k){
     if (!tabs){ return null; }
-    for (var s : sections){ if (s.content.component == k){ return area; } }
+    for (var s : sections){ if (s.content == k){ return area; } }
     return null;
   }
   @Override void sk(Canvas cv){
     super.sk(cv);
     int save= cv.save();
-    cv.clipRect(Rect.makeXYWH(left, top, viewW(), viewH()));
-    for (var s : sections){ Sk.head(cv, this, s); }
+    Sk.clip(cv, left, top, viewW(), viewH());
+    for (var s : sections){ skHead(cv, s); }
     cv.restoreToCount(save);
+  }
+  void skHead(Canvas cv, Section s){
+    var h= s.head;
+    Sk.paint.setColor(fg & 0xFFFFFF | (s == expanded ? 0x40000000 : 0x18000000));
+    Sk.rrect(cv, h.x, h.y, h.width, h.height, 4, Sk.paint);
+    Sk.stroke.setColor(fg & 0xFFFFFF | 0xA0000000);
+    float y= h.y + h.height / 2f;
+    if (!tabs){
+      float x= h.x + mark / 2f;
+      if (s == expanded){ cv.drawLine(x - 4, y - 2, x, y + 2, Sk.stroke); cv.drawLine(x, y + 2, x + 4, y - 2, Sk.stroke); }
+      else{ cv.drawLine(x - 2, y - 4, x + 2, y, Sk.stroke); cv.drawLine(x + 2, y, x - 2, y + 4, Sk.stroke); }
+    }
+    if (onClose == null){ return; }
+    float x= h.x + h.width - mark / 2f;
+    cv.drawLine(x - 3, y - 3, x + 3, y + 3, Sk.stroke);
+    cv.drawLine(x - 3, y + 3, x + 3, y - 3, Sk.stroke);
   }
   Part part(Point p){
     if (!view().contains(p)){ return null; }
@@ -154,7 +159,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
   }
   void expand(Section s){
     if (s == expanded){ return; }
-    if (expanded != null){ frame.mouse.hidden(expanded.content.component); }
+    if (expanded != null){ frame.mouse.hidden(expanded.content); }
     expanded = s;
   }
   @Override public Object mut$section$0(){ return new _RegionFiller(frame, (t, mt) -> _RegionFiller.and(frame, (s, make) -> add(frame.build(t, mt), frame.build(s, make)))); }
@@ -173,10 +178,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
       var s= at(k);
       sections.remove(s);
       if (s == expanded){ expanded = null; }
-      for (var w : List.of(s.title, s.content)){
-        frame.mouse.detached(w.component);
-        component.remove(w.component);
-      }
+      for (var w : List.of(s.title, s.content)){ detach(w); }
     });
   }
   @Override public Object mut$title$1(Object i){ return replacer(Util.natToLong(i), true); }

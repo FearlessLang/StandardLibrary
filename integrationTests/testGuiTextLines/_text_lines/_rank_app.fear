@@ -1,0 +1,17 @@
+use base.Main as Main;
+use base.Color as Color;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+TextLines: Main{ sys -> sys.gui.run{f -> f
+  .title "GuiTextLines: a mixed direction line, a ligature, a long word"
+  .virtualPixelSpace(WidthNat#400, HeightNat#300)
+  .content.pane{::
+    .background(Color.ghostWhite)
+    .horizontal .maxPerLine 1
+    .uTextField{:: .width 380 .height 50 .textHeight 24 .uText("abc ".u "05D0 05D1 05D2 0020 0064 0065 0066")}
+    .textField{:: .width 380 .height 50 .textHeight 24 .text "office"}
+    .textArea{:: .width 150 .height 120 .textHeight 24 .text "abcdefghijklmnopqrstuvwxyz"}
+    .uTextField{:: .width 380 .height 50 .textHeight 24}
+    }
+  }}

@@ -53,7 +53,7 @@ class CGraphicsCtx implements Graphics$ao$0{
     for (var p : Scopes.ustr(text).split("\n", -1)){
       int from= 0;
       for (int to : Sk.wrap(p, textSettings, ww)){
-        res.add(UStr$s$0Instance.instance(p.substring(from, Sk.trimmed(p, from, to))));
+        res.add(UStr$s$0Instance.instance(p.substring(from, to == p.length() ? to : Sk.trimmed(p, from, to))));
         from = to;
       }
     }
@@ -97,8 +97,10 @@ class CGraphicsCtx implements Graphics$ao$0{
   @Override public Object mut$image$3(Object image, Object w, Object h){
     var img= ((Image$1c$0Instance) image).image;
     var to= reach(shapeRect(w, h, "image"));
-    var drawn= Sk.image(cv, img, null, to, to);
-    if (drawn != img){ drawn.close(); }
+    var k= new Sk.Kept();
+    Sk.image(cv, img, k, to, to);
+    if (k.image != img){ k.image.close(); }
+    k.paint.close();
     return this;
   }
   @Override public Object mut$textHeight$p1$1(Object h){
@@ -138,13 +140,13 @@ class CGraphicsCtx implements Graphics$ao$0{
     bottom = Math.max(bottom, r.getBottom());
     return r;
   }
-  String outside(String what, int w, int h){
+  boolean outside(int w, int h){ return left < 0 || top < 0 || right > w || bottom > h; }
+  String outsideWarning(String what, int w, int h){
     var edges= new java.util.ArrayList<String>();
     if (left < 0){ edges.add("left"); }
     if (top < 0){ edges.add("top"); }
     if (right > w){ edges.add("right"); }
     if (bottom > h){ edges.add("bottom"); }
-    if (edges.isEmpty()){ return null; }
     return "the painter of " + what + " of " + w + "x" + h + " draws past its " + String.join(", ", edges) + (edges.size() == 1 ? " edge" : " edges") + ": the part outside the widget is clipped";
   }
   @Override public Object read$elapsed$0(){ return elapsed; }

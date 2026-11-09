@@ -1,16 +1,16 @@
 package _base;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -23,13 +23,14 @@ import javax.swing.SwingUtilities;
 
 import io.github.humbleui.skija.Bitmap;
 import io.github.humbleui.skija.Canvas;
-import io.github.humbleui.skija.ClipMode;
 import io.github.humbleui.skija.ColorAlphaType;
 import io.github.humbleui.skija.ColorType;
 import io.github.humbleui.skija.Image;
 import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Path;
+import io.github.humbleui.skija.PathBuilder;
+import io.github.humbleui.skija.PathOp;
 import io.github.humbleui.skija.Surface;
 import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
@@ -52,14 +53,14 @@ final class SkComponent extends JComponent{
   @Override public void doLayout(){ w.placeChildren(); }
 }
 
-final class _Button extends AWidget implements Button$2o$0{
+final class _Button extends ACaption implements Button$2o$0{
   MF$7$1 action;// EDT confined
-  // Bevel path cache, used and maintained by Sk.button; EDT confined. The
+  // Bevel path cache, used and maintained by sk; EDT confined. The
   // paths depend only on (width, height, radius, bevel depth), so a stable
   // button costs zero path allocations per frame. Stale paths of discarded
   // buttons are reclaimed by Skija's cleaner.
-  Path bevelTl, bevelBr;
-  int bevelW= -1, bevelH= -1, bevelR= -1, bevelD= -1;
+  private Path bevelTl, bevelBr;
+  private int bevelW= -1, bevelH= -1, bevelR= -1, bevelD= -1;
 
   _Button(_Frame frame){
     super(frame);
@@ -70,23 +71,79 @@ final class _Button extends AWidget implements Button$2o$0{
   @Override public Object mut$action$1(Object r){
     return onEdt(() -> action = (MF$7$1) r);
   }
-  @Override Dimension need(){ return Sk.textSizeWithInsets(this); }
-  @Override void sk(Canvas cv){ Sk.button(cv, this); }
+  @Override void sk(Canvas cv){
+    int w= component.getWidth(), h= component.getHeight();
+    if (w <= 0 || h <= 0){ return; }
+    boolean down= frame.mouse.down(this);
+    boolean over= !down && frame.mouse.over(this);
+    float r= Math.min(radius, Math.min(w, h) / 2f);
+    int d= bevel(w, h, (int) r);
+    int center= baseColor(bg, over, down);
+    int light= mix(center, 0xFFFFFFFF, 45);
+    int dark= mix(center, 0xFF000000, 45);
+    Sk.paint.setColor(center);
+    Sk.rrect(cv, 0, 0, w, h, r, Sk.paint);
+    if (d > 0){
+      // The bevel paths depend only on (w, h, radius, d) and are cached on
+      // the button: a stable button costs zero path allocations per frame.
+      if (bevelW != w || bevelH != h || bevelR != radius || bevelD != d){
+        if (bevelTl != null){ bevelTl.close(); bevelBr.close(); }
+        Path o= Path.makeRRect(RRect.makeXYWH(0, 0, w, h, r));
+        Path i= Path.makeRRect(RRect.makeXYWH(d, d, w - 2f * d, h - 2f * d, Math.max(0, r - d)));
+        var pb= new PathBuilder();
+        pb.moveTo(0, h);
+        pb.lineTo(w, 0);
+        pb.lineTo(0, 0);
+        pb.closePath();
+        Path diag= pb.build();
+        Path ring= Path.makeCombining(o, i, PathOp.DIFFERENCE);
+        bevelTl = Path.makeCombining(ring, diag, PathOp.INTERSECT);
+        bevelBr = Path.makeCombining(ring, diag, PathOp.DIFFERENCE);
+        assert ring != null && bevelTl != null && bevelBr != null;
+        for (Path p : new Path[]{ o, i, diag, ring }){ p.close(); }
+        bevelW = w;
+        bevelH = h;
+        bevelR = radius;
+        bevelD = d;
+      }
+      Sk.paint.setColor(down ? dark : light);
+      cv.drawPath(bevelTl, Sk.paint);
+      Sk.paint.setColor(down ? light : dark);
+      cv.drawPath(bevelBr, Sk.paint);
+    }
+    int shift= down && d > 0 ? Math.max(1, d / 2) : 0;
+    skText(cv, shift, shift);
+  }
+  private int bevel(int w, int h, int r){
+    int d= Math.max(3, Math.min(8, Math.min(w, h) / 9));
+    d = Math.min(d, Math.min(Math.min(left, right), Math.min(top, bottom)));
+    d = Math.min(d, Math.min(w, h) / 2);
+    return r > 0 ? Math.min(d, r) : d;
+  }
+  private static int baseColor(int c, boolean over, boolean down){
+    if (over){ c = mix(c, 0xFFFFFFFF, 12); }
+    if (down){ c = mix(c, 0xFF000000, 16); }
+    return c;
+  }
+  private static int mix(int a, int b, int p){
+    int res= 0;
+    for (int s= 0; s < 32; s += 8){ res |= ((a >>> s & 255) * (100 - p) + (b >>> s & 255) * p) / 100 << s; }
+    return res;
+  }
 }
 
-final class _Label extends AWidget implements Label$1c$0{
+final class _Label extends ACaption implements Label$1c$0{
   _Label(_Frame frame){ super(frame); }
 
-  @Override Dimension need(){ return Sk.textSizeWithInsets(this); }
   @Override void sk(Canvas cv){
     Sk.background(cv, this);
-    Sk.text(cv, this, 0, 0);
+    skText(cv, 0, 0);
   }
 }
 
 final class _Picture extends AWidget implements Picture$5c$0{
   Image image;
-  Image halved;
+  final Sk.Kept kept= new Sk.Kept();
   boolean keepAspect= true;
   boolean byHeight;
 
@@ -110,13 +167,13 @@ final class _Picture extends AWidget implements Picture$5c$0{
     float iw= keepAspect ? image.getWidth() * s : cw;
     float ih= keepAspect ? image.getHeight() * s : ch;
     int save= cv.save();
-    cv.clipRRect(RRect.makeXYWH(left, top, cw, ch, Math.min(radius, Math.min(cw, ch) / 2f)), ClipMode.INTERSECT, true);
-    halved = Sk.image(cv, image, halved, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), Rect.makeXYWH(left, top, cw, ch));
+    Sk.clip(cv, left, top, cw, ch, Math.min(radius, Math.min(cw, ch) / 2f));
+    Sk.image(cv, image, kept, Rect.makeXYWH(left + (cw - iw) / 2, top + (ch - ih) / 2, iw, ih), Rect.makeXYWH(left, top, cw, ch));
     cv.restoreToCount(save);
   }
   @Override public Object mut$image$1(Object i){
     var img= ((Image$1c$0Instance) i).image;
-    return reStyle(() -> { image = img; halved = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
+    return reStyle(() -> { image = img; kept.image = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
   @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }
@@ -135,8 +192,8 @@ final class _Pane extends AContainer implements Pane$o$0{
   final CenteredFlowLayout flow= new CenteredFlowLayout(this);
 
   _Pane(_Frame frame){ super(frame); }
-  @Override Dimension need(){ return flow.natural(component); }
-  @Override void placeChildren(){ flow.layoutContainer(component); }
+  @Override Dimension need(){ return flow.natural(); }
+  @Override void placeChildren(){ flow.layoutContainer(); }
   @Override public Object mut$button$1(Object s){ return frame.addTo(this, null, s, _Button::new); }
   @Override public Object mut$label$1(Object s){ return frame.addTo(this, null, s, _Label::new); }
   @Override public Object mut$picture$1(Object s){ return frame.addTo(this, null, s, _Picture::new); }
@@ -153,8 +210,7 @@ final class _Pane extends AContainer implements Pane$o$0{
       // Removed widgets get no Exited events (DOM semantics: removal is not
       // an exit); SkMouse just forgets its references into the subtrees.
       // Handler tasks already queued for removed widgets are skipped.
-      for (var c : component.getComponents()){ frame.mouse.detached((SkComponent) c); }
-      component.removeAll();
+      for (var c : children()){ detach(c); }
     });
   }
   @Override public Object mut$lineScroll$1(Object b){ return reStyle(() -> lineScroll = Util.isTrue(b)); }
@@ -162,7 +218,7 @@ final class _Pane extends AContainer implements Pane$o$0{
   @Override public Object mut$centered$1(Object b){ return reStyle(() -> centered = Util.isTrue(b)); }
   @Override boolean barRight(){ return vertical ? lineScroll : stackScroll; }
   @Override boolean barBottom(){ return vertical ? stackScroll : lineScroll; }
-  @Override Rectangle clip(Component k){ return barRight() || barBottom() ? view() : null; }
+  @Override Rectangle clip(AWidget k){ return barRight() || barBottom() ? view() : null; }
   @Override public Object mut$horizontal$0(){ return reStyle(() -> vertical = false); }
   @Override public Object mut$vertical$0(){ return reStyle(() -> vertical = true); }
   @Override public Object mut$minPerLine$1(Object n){
@@ -191,7 +247,7 @@ final class _Border extends AContainer implements Border$2o$0{
 
   _Border(_Frame frame){ super(frame); }
   @Override Dimension need(){ return layout.natural(); }
-  @Override void placeChildren(){ layout.layoutContainer(component); }
+  @Override void placeChildren(){ layout.layoutContainer(); }
   @Override public Object mut$north$0(){ return frame.region(this, "north"); }
   @Override public Object mut$south$0(){ return frame.region(this, "south"); }
   @Override public Object mut$east$0(){ return frame.region(this, "east"); }
@@ -210,14 +266,14 @@ final class _Split extends AContainer implements Split$1c$0{
     positions = IntStream.range(0, regions - 1).map(i -> i * bar).toArray();
   }
   @Override void placeChildren(){
-    for (var k : component.getComponents()){
+    for (var k : children()){
       var r= region(k);
       MutableBorderLayout.place(k, r.x, r.y, r.width, r.height, true, true);
     }
   }
   int span(){ return vertical ? viewH() : viewW(); }
-  @Override Rectangle region(Component k){
-    int i= component.getComponentZOrder(k);
+  @Override Rectangle region(AWidget k){
+    int i= indexOf(k);
     return along(i == 0 ? 0 : positions[i - 1] + bar, i == positions.length ? span() : positions[i]);
   }
   Rectangle along(int from, int to){
@@ -239,14 +295,13 @@ final class _Split extends AContainer implements Split$1c$0{
         : j == i ? q
         : tail - scale(tail - from[j], hi - q, hi - from[i]);
     }
-    component.invalidate();
-    frame.markLayoutDirty();
+    relayout();
   }
   static int scale(int v, int to, int from){ return (int) Math.round((double) v * to / from); }
   @Override Dimension need(){
     var a= new Dimension(0, 0);
-    for (var c : component.getComponents()){
-      var o= ((SkComponent) c).w.own();
+    for (var c : children()){
+      var o= c.own();
       a = vertical ? new Dimension(Math.max(a.width, o.width), a.height + o.height) : new Dimension(a.width + o.width, Math.max(a.height, o.height));
     }
     int bars= positions.length * bar;
@@ -257,7 +312,7 @@ final class _Split extends AContainer implements Split$1c$0{
       frame.mouse.stopDividing(this);
       int at= 0;
       for (int i= 0; i < positions.length; i += 1){
-        var o= ((SkComponent) component.getComponent(i)).w.own();
+        var o= child(i).own();
         at += vertical ? o.height : o.width;
         positions[i] = at;
         at += bar;
@@ -266,7 +321,21 @@ final class _Split extends AContainer implements Split$1c$0{
     });
   }
   @Override void skOver(Canvas cv){
-    for (int i= 0; i < positions.length; i += 1){ Sk.divider(cv, this, divider(i)); }
+    for (int i= 0; i < positions.length; i += 1){ skDivider(cv, divider(i)); }
+  }
+  void skDivider(Canvas cv, Rectangle d){
+    if (d.isEmpty()){ return; }
+    Sk.paint.setColor(fg & 0xFFFFFF | 0x30000000);
+    Sk.rect(cv, d.x, d.y, d.width, d.height, Sk.paint);
+    if (!draggable){ return; }
+    int t= Math.max(1, (vertical ? d.height : d.width) / 3);
+    float l= Math.min(vertical ? d.width : d.height, 30);
+    Sk.paint.setColor(fg & 0xFFFFFF | 0xA0000000);
+    float cx= d.x + d.width / 2f;
+    float cy= d.y + d.height / 2f;
+    float gw= vertical ? l : t;
+    float gh= vertical ? t : l;
+    Sk.rrect(cv, cx - gw / 2, cy - gh / 2, gw, gh, t / 2f, Sk.paint);
   }
   @Override void growFor(AWidget k){
     int bars= positions.length * bar;
@@ -276,17 +345,13 @@ final class _Split extends AContainer implements Split$1c$0{
     return reStyle(() -> {
       vertical = v;
       frame.mouse.stopDividing(this);
-      for (var c : component.getComponents()){ growFor(((SkComponent) c).w); }
+      for (var c : children()){ growFor(c); }
     });
   }
   Object replace(int i, AWidget c){
     return reStyle(() -> {
-      var old= component.getComponent(i);
-      frame.mouse.detached((SkComponent) old);
-      component.remove(old);
-      component.add(c.component, i);
+      attach(child(i), c);
       growFor(c);
-      c.changeable = false;
     });
   }
   @Override public Object mut$horizontal$0(){ return axis(false); }
@@ -372,16 +437,11 @@ abstract class AWidget implements Widget$2o$1{
   int fg= Sk.color(foreground);
   int bg= Sk.color(background);
   Sk.TextSettings textSettings= Sk.TextSettings.label;
-  Sk.Line line;
   static final int bar= 5;
   int scrollX;
   int scrollY;
   int contentW;
   int contentH;
-  // Read live by Sk.textSizeWithInsets/Sk.text; only _Button and _Label
-  // expose Fearless methods to change it, but it lives here alongside the
-  // other style fields.
-  String text= "";
   String tooltip= "";
   Object contextMenu;
 
@@ -390,15 +450,13 @@ abstract class AWidget implements Widget$2o$1{
   // Fearless mouse handlers per event kind; EDT confined, read by SkMouse.
   EnumMap<MouseKind,MouseHandler$4sg$0> handlers= new EnumMap<>(MouseKind.class);
   boolean changeable= true;// EDT confined
-  String boundsWarning;
-  String overlapWarning;
-  String textWarning;
-  String paintWarning;
+  enum Warning{ textClipped, outsideParent, overlapping, paintedOutside }
+  final EnumSet<Warning> warned= EnumSet.noneOf(Warning.class);
 
   AWidget(_Frame frame){ this.frame= frame; }
 
   boolean canChange(){
-    return changeable || this == frame.top || component.getParent() instanceof SkComponent p && p.w.canChange();
+    return changeable || this == frame.top || parent() instanceof AWidget p && p.canChange();
   }
 
   void change(){
@@ -410,31 +468,32 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   @Override public Object mut$changeDetached$1(Object s){
-    boolean was= frame.onEdtAndWait(() -> { var c= changeable; changeable = true; return c; });
+    boolean was= frame.changeOnEdt(() -> { var c= changeable; changeable = true; return c; });
     ((Scope$1c$1) s).mut$run$1(mut$self$0());
-    frame.onEdtAndWait(() -> changeable = was);
+    frame.changeOnEdt(() -> changeable = was);
     return mut$self$0();
   }
 
   abstract void sk(Canvas cv);
   String kind(){ return getClass().getSimpleName().substring(1); }
-  String describe(){ return "a " + kind() + (text.isEmpty() ? "" : " \"" + text + "\""); }
-  String textClip(){
-    if (text.isEmpty()){ return null; }
-    var need= Sk.textSizeWithInsets(this);
-    if (need.width <= component.getWidth() && need.height <= component.getHeight()){ return null; }
-    return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
-  }
-  String warned(String was, String now){
-    if (was == null && now != null){ frame.frame.warn(now); }
-    return now;
+  String describe(){ return "a " + kind(); }
+  boolean textClipped(){ return false; }
+  String textClippedWarning(){ throw new AssertionError(); }
+  boolean starts(Warning w, boolean holds){
+    if (!holds){ warned.remove(w); return false; }
+    return warned.add(w);
   }
   abstract Dimension need();
   void fit(){}
   void placeChildren(){}
-  boolean hides(Component k){ return false; }
-  Rectangle region(Component k){ return null; }
-  Rectangle clip(Component k){ return region(k); }
+  AWidget parent(){ return component.getParent() instanceof SkComponent p ? p.w : null; }
+  int childCount(){ return component.getComponentCount(); }
+  AWidget child(int i){ return ((SkComponent) component.getComponent(i)).w; }
+  List<AWidget> children(){ return IntStream.range(0, childCount()).mapToObj(this::child).toList(); }
+  int indexOf(AWidget k){ return component.getComponentZOrder(k.component); }
+  boolean hides(AWidget k){ return false; }
+  Rectangle region(AWidget k){ return null; }
+  Rectangle clip(AWidget k){ return region(k); }
   boolean barRight(){ return false; }
   boolean barBottom(){ return false; }
   int edgeW(){ return left + right + (barRight() ? bar : 0); }
@@ -450,8 +509,7 @@ abstract class AWidget implements Widget$2o$1{
     if (x == scrollX && y == scrollY){ return false; }
     scrollX = x;
     scrollY = y;
-    component.invalidate();
-    frame.markLayoutDirty();
+    relayout();
     return true;
   }
   Rectangle track(boolean vert){
@@ -478,40 +536,45 @@ abstract class AWidget implements Widget$2o$1{
     height = Math.min(maxExtent, Math.max(height, h));
   }
   void growFor(AWidget k){ grow(k.width + edgeW(), k.height + edgeH()); }
+  void attach(AWidget replaced, AWidget c){
+    int at= -1;
+    if (replaced != null){ at = indexOf(replaced); detach(replaced); }
+    component.add(c.component, at);
+    c.changeable = false;
+  }
+  void detach(AWidget c){
+    frame.mouse.detached(c);
+    component.remove(c.component);
+  }
   void insetsFit(String setter, int l, int r, int t, int b, int w, int h){
     if (l + r > w){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": leftInset " + l + " + rightInset " + r + " is more than width " + w); }
     if (t + b > h){ throw Util.detErr(setter + " would make the insets of this " + kind() + " larger than the " + kind() + ": topInset " + t + " + bottomInset " + b + " is more than height " + h); }
   }
 
   Object onEdt(Runnable r){
-    frame.onEdtAndWait(() -> { change(); r.run(); });
+    frame.changeOnEdt(() -> { change(); r.run(); });
     return mut$self$0();
   }
 
-  Object reStyle(Runnable r){
+  void relayout(){
     // Invalidate only this component: invalidation propagates upward on its
     // own, and _Frame.tick re-lays-out just the invalid path, so unchanged
     // widgets keep their exact bounds.
-    frame.onEdtAndWait(() -> {
-      change();
+    component.invalidate();
+    frame.layoutDirty = true;
+  }
+
+  Object reStyle(Runnable r){
+    return onEdt(() -> {
       r.run();
       fit();
-      component.invalidate();
+      relayout();
     });
-    frame.markLayoutDirty();
-    return mut$self$0();
   }
 
   Object reStyle(int n, IntConsumer set){ return reStyle(() -> set.accept(n)); }
 
-  Object reText(Runnable r){
-    return reStyle(() -> {
-      r.run();
-      line = null;
-      var n= need();
-      grow(n.width, n.height);
-    });
-  }
+  Object reText(Runnable r){ return reStyle(r); }
 
   @Override public Object mut$topInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "top inset"), n -> { insetsFit("topInset " + n, left, right, n, bottom, width, height); top = n; }); }
   @Override public Object mut$bottomInset$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "bottom inset"), n -> { insetsFit("bottomInset " + n, left, right, top, n, width, height); bottom = n; }); }
@@ -538,13 +601,6 @@ abstract class AWidget implements Widget$2o$1{
   public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), textSettings.above(), ratio(r))); }
   public Object read$aboveBaseline$0(){ return ratio(textSettings.above()); }
   public Object read$belowBaseline$0(){ return ratio(textSettings.below()); }
-  public Object mut$uText$1(Object t){
-    var s= ustr(t);
-    var b= newline(s);
-    if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
-    return reText(() -> text = s);
-  }
-  public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
   public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
   @Override public Object mut$uTooltip$1(Object t){
@@ -555,12 +611,12 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$contextMenu$1(Object s){ return onEdt(() -> contextMenu = s); }
   @Override public Object mut$openMenu$1(Object s){
     var m= CMenu.build(s);
-    frame.onEdtAndWait(() -> {
+    frame.changeOnEdt(() -> {
       if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
       if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
       if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a refilled region, a removed section or a new .content removed it, or the scope that adds it has not returned"); }
-      for (Component k= component; k != frame.top.component; k = k.getParent()){
-        if (((SkComponent)k.getParent()).w.hides(k)){ throw Util.detErr("This " + kind() + " is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"); }
+      for (var k= this; k != frame.top; k = k.parent()){
+        if (k.parent().hides(k)){ throw Util.detErr("This " + kind() + " is in the content of a collapsed section, so .openMenu has no place below it to open a menu: the content of a collapsed section is not drawn"); }
       }
       var at= SwingUtilities.convertPoint(component, 0, 0, frame.top.component);
       frame.menus.show(m, new Rectangle(at.x, at.y, component.getWidth(), component.getHeight()));
@@ -599,7 +655,7 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
         foreground
       );
       paint.imm$run$1(g);
-      paintWarning = warned(paintWarning, g.outside(describe(), component.getWidth(), component.getHeight()));
+      if (starts(Warning.paintedOutside, g.outside(component.getWidth(), component.getHeight()))){ frame.frame.warn(g.outsideWarning(describe(), component.getWidth(), component.getHeight())); }
     }
   }
 
@@ -610,15 +666,65 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
   @Override public Object mut$mouse$1(Object s){
     var b= new CMouseBuilder(this);
     ((Scope$1c$1) s).mut$run$1(b);
-    frame.onEdtAndWait(() -> {
-      change();
+    return onEdt(() -> {
       handlers = b.handlers;// .mouse replaces earlier handlers
       b.changeable = false;
     });
-    return mut$self$0();
   }
 
   @Override public Object mut$paint$1(Object p){ return onEdt(() -> paint = (Painter$5c$0) p); }
+}
+
+abstract class ACaption extends AWidget{
+  String text= "";
+  Sk.Line line;
+
+  ACaption(_Frame frame){ super(frame); }
+
+  Sk.Line line(){
+    if (line == null){ line = Sk.shape(text, textSettings); }
+    return line;
+  }
+  @Override Dimension need(){
+    var need= Sk.need(line());
+    return new Dimension(need.width + left + right, need.height + top + bottom);
+  }
+  @Override String describe(){ return super.describe() + (text.isEmpty() ? "" : " \"" + text + "\""); }
+  @Override boolean textClipped(){
+    if (text.isEmpty()){ return false; }
+    var need= need();
+    return need.width > component.getWidth() || need.height > component.getHeight();
+  }
+  @Override String textClippedWarning(){
+    var need= need();
+    return "the text of " + describe() + " needs " + need.width + "x" + need.height + " insets included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
+  }
+  void skText(Canvas cv, float dx, float dy){
+    var l= line();
+    int cw= component.getWidth() - left - right;
+    int ch= component.getHeight() - top - bottom;
+    if (cw <= 0 || ch <= 0){ return; }
+    int save= cv.save();
+    Sk.clip(cv, left + dx, top + dy, cw, ch);
+    Sk.paint.setColor(fg);
+    Sk.draw(cv, l, left + dx, top + dy, cw, ch, Sk.paint);
+    cv.restoreToCount(save);
+  }
+  @Override Object reText(Runnable r){
+    return reStyle(() -> {
+      r.run();
+      line = null;
+      var n= need();
+      grow(n.width, n.height);
+    });
+  }
+  public Object mut$uText$1(Object t){
+    var s= ustr(t);
+    var b= newline(s);
+    if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
+    return reText(() -> text = s);
+  }
+  public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
 }
 
 final class _Frame implements Frame$1c$0{
@@ -630,6 +736,7 @@ final class _Frame implements Frame$1c$0{
   @SuppressWarnings("serial")
   final JComponent surface= new JComponent(){
     @Override protected void paintComponent(java.awt.Graphics g){ blit(g); }
+    @Override protected void paintChildren(java.awt.Graphics g){}
     @Override public java.awt.im.InputMethodRequests getInputMethodRequests(){ return textKeys; }
   };
   AEditText focus;// EDT confined
@@ -659,7 +766,7 @@ final class _Frame implements Frame$1c$0{
   // EDT) happens after the write, so the queue handoff gives the
   // happens-before. Single mutator at every point in time: no volatile.
   boolean started;
-  private final AtomicBoolean layoutDirty= new AtomicBoolean();
+  boolean layoutDirty;
   private Bitmap bitmap;
   private Surface gpu;
   private Canvas canvas;
@@ -697,7 +804,7 @@ final class _Frame implements Frame$1c$0{
 
   void tab(boolean back){
     var all= new ArrayList<AEditText>();
-    edits(top.component, all);
+    edits(top, all);
     int i= all.indexOf(focus);
     assert i >= 0;
     var next= all.get(Math.floorMod(i + (back ? -1 : 1), all.size()));
@@ -706,11 +813,10 @@ final class _Frame implements Frame$1c$0{
     focus(next);
   }
 
-  private static void edits(java.awt.Container c, ArrayList<AEditText> all){
-    var w= ((SkComponent) c).w;
+  private static void edits(AWidget w, ArrayList<AEditText> all){
     if (w instanceof AEditText t){ all.add(t); }
-    for (var k : c.getComponents()){
-      if (!w.hides(k)){ edits((java.awt.Container) k, all); }
+    for (var k : w.children()){
+      if (!w.hides(k)){ edits(k, all); }
     }
   }
 
@@ -721,25 +827,16 @@ final class _Frame implements Frame$1c$0{
     return c;
   }
   Object addTo(AWidget into, String where, Object scope, Function<_Frame,? extends AWidget> make){
-    var parent= into.component;
     var b= build(scope, make);
-    onEdtAndWait(() -> {
-      into.change();
+    return into.reStyle(() -> {
       // Border slots are replaceable: a second .north evicts the first. The
       // model is the single mutator, so this removal cannot race any gesture
       // dispatch; SkMouse just forgets its references into the old subtree
       // (no Exited events for removed widgets: removal is not an exit).
-      var old= where == null ? null : ((_Border) into).layout.slots.put(where, b.component);
-      if (old != null){
-        mouse.detached((SkComponent) old);
-        parent.remove(old);
-      }
-      parent.add(b.component);
+      var old= where == null ? null : ((_Border) into).layout.slots.put(where, b);
+      into.attach(old, b);
       into.growFor(b);
-      b.changeable = false;
     });
-    markLayoutDirty();
-    return into;
   }
 
   <T> T onEdtAndWait(Supplier<T> s){
@@ -761,14 +858,21 @@ final class _Frame implements Frame$1c$0{
   }
 
   void onEdtAndWait(Runnable r){
-    if (started){ frame.queue.midTask().set(true); }
     onEdtAndWait(() -> {
       r.run();
       return null;
     });
   }
 
-  void markLayoutDirty(){ layoutDirty.set(true); }
+  <T> T changeOnEdt(Supplier<T> s){
+    if (started){ frame.queue.midTask().set(true); }
+    return onEdtAndWait(s);
+  }
+
+  void changeOnEdt(Runnable r){
+    if (started){ frame.queue.midTask().set(true); }
+    onEdtAndWait(r);
+  }
 
   void tick(Instant$5c$0 elapsed){
     this.elapsed = elapsed;
@@ -778,8 +882,8 @@ final class _Frame implements Frame$1c$0{
     // tick: the user made it on the pixels on screen, so it is interpreted
     // against the bounds those pixels show. The dirty flag stays set, so the
     // pending layout runs on a later tick.
-    if (layoutDirty.get() && !mouseEventPending()){
-      layoutDirty.set(false);
+    if (layoutDirty && !mouseEventPending()){
+      layoutDirty = false;
       // Only the invalid path (marked by reStyle/add) is re-laid-out.
       top.component.validate();
       mouse.rehover();
@@ -830,12 +934,11 @@ final class _Frame implements Frame$1c$0{
     int picture= canvas.save();
     double s= stage.scale();
     var o= stage.offset(s);
-    canvas.translate(o.x, o.y);
-    canvas.scale((float) s, (float) s);
+    Sk.at(canvas, o.x, o.y, (float) s);
     var c= top.component;
-    canvas.clipRect(io.github.humbleui.types.Rect.makeWH(c.getWidth(), c.getHeight()));
+    Sk.clip(canvas, 0, 0, c.getWidth(), c.getHeight());
     canvas.clear(top.bg >>> 24 == 0 ? 0xFFA0A0A0 : top.bg | 0xFF000000);
-    Sk.paintNode(c, canvas);
+    Sk.paintNode(top, canvas);
     menus.paint(canvas);
     mouse.paintTip(canvas);
     canvas.restoreToCount(picture);
@@ -855,7 +958,7 @@ final class _Frame implements Frame$1c$0{
     if (top == null){ install(new _Pane(this)); }
     top.component.setBounds(0, 0, canvasW, canvasH);
     top.component.validate();
-    layoutDirty.set(false);
+    layoutDirty = false;
     stage= new Stage(this);
     stage.f.validate();
     render();
@@ -895,51 +998,52 @@ final class _Frame implements Frame$1c$0{
     }});
   }
   @Override public Object mut$virtualPixelSpace$2(Object w, Object h){
-    requireOpen();
     int ww= extent((WidthNat$as$0) w, "virtual pixel space width");
     int hh= extent((HeightNat$lg$0) h, "virtual pixel space height");
     if (ww == 0 || hh == 0){ throw Util.detErr("The virtual pixel space " + ww + "x" + hh + " is empty: a virtual pixel space has at least one virtual pixel in each direction"); }
-    if (!started){ canvasW = ww; canvasH = hh; return this; }
-    onEdtAndWait(() -> {
+    return onEdt(() -> {
       if (ww == canvasW && hh == canvasH){ return; }
       canvasW = ww;
       canvasH = hh;
+      if (!started){ return; }
       stage.canvas();
       top.component.setBounds(0, 0, ww, hh);
+      top.relayout();
     });
-    markLayoutDirty();
-    return this;
   }
   @Override public Object read$virtualWidth$0(){ return w(canvasW); }
   @Override public Object read$virtualHeight$0(){ return h(canvasH); }
   @Override public Object mut$bands$1(Object c){
-    requireOpen();
     int b= Sk.color((Color$1c$0) c) | 0xFF000000;
-    onEdtAndWait(() -> bands = b);
-    return this;
+    return onEdt(() -> bands = b);
   }
   @Override public Object mut$opacity$1(Object a){
-    requireOpen();
     int v= alpha(a);
     if (v < gui.opacityFloor){ throw Util.detErr("Frame.opacity(Alpha[" + v + "]) is below the opacity floor Alpha[" + gui.opacityFloor + "] of this CapGui: the window cannot be more transparent than CapGui.opacityFloor allows"); }
-    opacity = v / 255f;
-    if (started){ onEdtAndWait(stage::opacity); }
-    return this;
+    return onEdt(() -> {
+      opacity = v / 255f;
+      if (started){ stage.opacity(); }
+    });
   }
   private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
-  @Override public Object mut$onResize$1(Object c){ requireOpen(); onResize = (Consumer$ao$1) c; return this; }
-  @Override public Object mut$onClose$1(Object a){ requireOpen(); onClose = (MF$7$1) a; return this; }
+  private Object onEdt(Runnable r){
+    changeOnEdt(() -> { requireOpen(); r.run(); });
+    return this;
+  }
+  @Override public Object mut$onResize$1(Object c){ return onEdt(() -> onResize = (Consumer$ao$1) c); }
+  @Override public Object mut$onClose$1(Object a){ return onEdt(() -> onClose = (MF$7$1) a); }
   @Override public Object mut$close$0(){
-    requireOpen();
-    if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
-    onEdtAndWait(frame::closed);
+    onEdt(() -> {
+      if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
+      frame.closed();
+    });
     return Void$o$0.instance;
   }
   @Override public Object mut$onKey$1(Object scope){
     requireOpen();
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
-    onEdtAndWait(() -> {
+    return onEdt(() -> {
       textKeys.routes.replaceAll((_, to) -> to == CTextKeys.To.frame ? CTextKeys.To.nobody : to);
       for (var l : surface.getKeyListeners()){
         if (l instanceof CKeyManager k){ k.releaseAll(); surface.removeKeyListener(k); surface.removeFocusListener(k); }
@@ -948,25 +1052,22 @@ final class _Frame implements Frame$1c$0{
       surface.addFocusListener(keys);
       keys.changeable = false;
     });
-    return this;
   }
   @Override public Object mut$uTitle$1(Object t){
-    requireOpen();
     var s= ustr(t);
     var b= newline(s);
     if (b != null){ throw Util.detErr("The new title of this Frame has " + b + ": the title bar shows the title on one line"); }
-    title = s;
-    if (started){ onEdtAndWait(() -> stage.f.setTitle(windowTitle())); }
-    return this;
+    return onEdt(() -> {
+      title = s;
+      if (started){ stage.f.setTitle(windowTitle()); }
+    });
   }
   @Override public Object mut$fps$1(Object f){
-    requireOpen();
-    fps = (int) fpsOf(f, "fps");
-    if (started){
-      int delay= Math.round(1000.0f / fps);
-      onEdtAndWait(() -> frame.setTickDelay(delay));
-    }
-    return this;
+    int v= (int) fpsOf(f, "fps");
+    return onEdt(() -> {
+      fps = v;
+      if (started){ frame.setTickDelay(Math.round(1000.0f / v)); }
+    });
   }
   // Getters. All safe from the queue thread: title/fps are read under the
   // single-mutator model, elapsed is volatile.
@@ -980,7 +1081,7 @@ final class _Frame implements Frame$1c$0{
     var b= new ModelFps$as$0(){
       boolean changeable= true;
       @Override public Object mut$action$1(Object r){
-        onEdtAndWait(() -> {
+        changeOnEdt(() -> {
           if (frame.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"); }
           if (!changeable && modelTickActions != actions){
             throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
@@ -992,14 +1093,13 @@ final class _Frame implements Frame$1c$0{
       }
     };
     ((Scope$1c$1) scope).mut$run$1(b);
-    onEdtAndWait(() -> {
+    return onEdt(() -> {
       modelPeriodNs = Math.round(1e9 / nn);
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
       b.changeable = false;
       // Live change: fixed-rate deadlines restart from now, no warmup.
       if (started){ frame.restartModelTimer(modelPeriodNs, 0, actions); }
     });
-    return this;
   }
   @Override public Object mut$content$0(){ return new _RegionFiller(this, this::newContent); }
 
@@ -1010,7 +1110,7 @@ final class _Frame implements Frame$1c$0{
     // the old tree), then swap in one EDT block so no tick or mouse event
     // ever sees a half-built tree. The new tree takes the current virtual pixel space.
     ((Scope$1c$1) scope).mut$run$1(t);
-    onEdtAndWait(() -> {
+    onEdt(() -> {
       if (top != null){ uninstall(top); }// a later .content replaces an earlier one
       install(t);
       t.component.setBounds(0, 0, canvasW, canvasH);
@@ -1018,8 +1118,8 @@ final class _Frame implements Frame$1c$0{
       // progress is forgotten (an in-flight release finds no press target,
       // like a release over empty space).
       mouse.reset();
+      t.relayout();
     });
-    markLayoutDirty();
     return Void$o$0.instance;
   }
 

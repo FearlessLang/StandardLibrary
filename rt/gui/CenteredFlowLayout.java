@@ -1,7 +1,5 @@
 package _base;
 
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +24,12 @@ public final class CenteredFlowLayout{
 
   public CenteredFlowLayout(_Pane gap){ this.gap= gap; }
 
-  void layoutContainer(Container target){
+  void layoutContainer(){
     boolean vert= gap.vertical;
     int availW= gap.viewW();
     int availH= gap.viewH();
     int lineGap= vert ? gap.widthGap : gap.heightGap;
-    var ls= lines(target, vert ? availH : availW, true);
+    var ls= lines(vert ? availH : availW, true);
 
     int totalCross= crossSum(ls, lineGap);
     int longest= ls.stream().mapToInt(Line::primary).max().orElse(0);
@@ -50,7 +48,7 @@ public final class CenteredFlowLayout{
         : gap.left + half(availW - ln.primary());
       int primary= primaryStart;
       for (var it : ln.items()){
-        var c= it.c();
+        var c= it.w().component;
         var d= it.d();
         int pSize= vert ? d.height : d.width;
         int cSize= vert ? d.width : d.height;
@@ -65,7 +63,7 @@ public final class CenteredFlowLayout{
 
   private int half(int space){ return gap.centered ? Math.max(0, space) / 2 : 0; }
 
-  private record Item(Component c, Dimension d){}
+  private record Item(AWidget w, Dimension d){}
 
   private record Line(List<Item> items, int primary, int cross){}
 
@@ -74,9 +72,9 @@ public final class CenteredFlowLayout{
   // least minPerLine children and the next child would make it longer than
   // availPrimary along the flow axis. A line holding minPerLine children
   // longer than availPrimary clips.
-  Dimension natural(Container target){
+  Dimension natural(){
     boolean vert= gap.vertical;
-    var ls= lines(target, Integer.MAX_VALUE, false);
+    var ls= lines(Integer.MAX_VALUE, false);
     int cross= crossSum(ls, vert ? gap.widthGap : gap.heightGap);
     int primary= ls.stream().mapToInt(Line::primary).max().orElse(0);
     return vert
@@ -84,15 +82,15 @@ public final class CenteredFlowLayout{
       : new Dimension(primary + gap.edgeW(), cross + gap.edgeH());
   }
 
-  private List<Line> lines(Container target, int availPrimary, boolean fills){
+  private List<Line> lines(int availPrimary, boolean fills){
     boolean vert= gap.vertical;
     int pg= vert ? gap.heightGap : gap.widthGap;
     var res= new ArrayList<Line>();
     var items= new ArrayList<Item>();
     int lp= 0;
     int lc= 0;
-    for (var c : target.getComponents()){
-      var d= size(((SkComponent) c).w, vert, availPrimary, fills);
+    for (var c : gap.children()){
+      var d= size(c, vert, availPrimary, fills);
       int cp= vert ? d.height : d.width;
       int cc= vert ? d.width : d.height;
       boolean full= Long.compareUnsigned(items.size(), gap.maxPerLine) >= 0;

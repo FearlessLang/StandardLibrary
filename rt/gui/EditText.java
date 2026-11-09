@@ -36,7 +36,6 @@ import javax.swing.SwingUtilities;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.types.RRect;
 import io.github.humbleui.types.Rect;
 
 final class _TextField extends AEditText implements TextField$ls$0{
@@ -76,17 +75,19 @@ abstract class ATextArea extends AEditText{
 
 abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEditText$5mw$1{
   record Step(int at, String removed, String inserted, int caretBefore, int anchorBefore, int caretAfter, int anchorAfter){}
-  record Seg(int from, int to, Sk.Line line){}
-  record VLine(int start, int end, Sk.Line line, boolean wrapped, int y, int w, int h){
+  record Seg(int from, int to, Sk.Line line, float[] edges){}
+  record VLine(int start, int end, Sk.Line line, float[] edges, boolean wrapped, int y, int w, int h){
     float dx(){ return line == null ? 0 : (float) ((w - line.width()) / 2); }
   }
   record Fire(Consumer$ao$1 handler, CTextEvent event){}
   record Req(int a, int b, String s){}
   record Change(int start, int stop, String text, int caret){}
   static final Paint stroke= new Paint().setAntiAlias(true).setMode(PaintMode.STROKE);
+  static final Paint fill= new Paint().setAntiAlias(false);
   final StringBuilder buf= new StringBuilder();
   int caret;
   int anchor;
+  boolean up;
   String committed;
   boolean editable= true;
   boolean clearsUndo= true;
@@ -131,7 +132,6 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   @Override void grow(int w, int h){}
   @Override void fit(){ dirty = true; }
-  @Override Object reText(Runnable r){ return reStyle(r); }
 
   @Override public Object mut$text$1(Object t){ return text(((Str$c$0Instance) t).val()); }
   @Override public Object mut$uText$1(Object t){ return text(ustr(t)); }
@@ -171,13 +171,12 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
 
   int lineHeight(){ return (int) Math.max(1, textSettings.lineHeight()); }
-  @Override String textClip(){
+  @Override boolean textClipped(){
     layout();
-    if (buf.isEmpty()){ return null; }
-    int needW= edgeW() + 1;
-    int needH= edgeH() + tallest;
-    if (needW <= component.getWidth() && needH <= component.getHeight()){ return null; }
-    return "the text of " + describe() + " needs at least " + needW + "x" + needH + " insets and scroll bars included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
+    return !buf.isEmpty() && (edgeW() + 1 > component.getWidth() || edgeH() + tallest > component.getHeight());
+  }
+  @Override String textClippedWarning(){
+    return "the text of " + describe() + " needs at least " + (edgeW() + 1) + "x" + (edgeH() + tallest) + " insets and scroll bars included, but the widget is " + component.getWidth() + "x" + component.getHeight() + ": the text is clipped";
   }
   int selA(){ return Math.min(caret, anchor); }
   int selB(){ return Math.max(caret, anchor); }
@@ -206,7 +205,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
         var g= segs.get(i);
         var n= g.line() == null ? new Dimension() : Sk.need(g.line());
         int h= Math.max(lineHeight(), n.height);
-        lines.add(new VLine(s + g.from(), s + g.to(), g.line(), i < segs.size() - 1, y, n.width, h));
+        lines.add(new VLine(s + g.from(), s + g.to(), g.line(), g.edges(), i < segs.size() - 1, y, n.width, h));
         w = Math.max(w, n.width);
         tallest = Math.max(tallest, h);
         y += h;
@@ -231,11 +230,12 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   private ArrayList<Seg> segs(String s, int ww){
     var res= new ArrayList<Seg>();
-    if (s.isEmpty()){ res.add(new Seg(0, 0, null)); return res; }
+    if (s.isEmpty()){ res.add(new Seg(0, 0, null, null)); return res; }
     var bidi= new Bidi(s, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
     int from= 0;
-    for (int to : Sk.wrap(s, textSettings, ww)){
-      res.add(new Seg(from, to, Sk.shape(s.substring(from, to), textSettings, bidi.createLineBidi(from, to))));
+    for (int to : ww == Integer.MAX_VALUE ? List.of(s.length()) : Sk.wrap(s, textSettings, ww)){
+      var line= Sk.shape(s.substring(from, to), textSettings, bidi.createLineBidi(from, to));
+      res.add(new Seg(from, to, line, line.edges()));
       from = to;
     }
     return res;
@@ -253,12 +253,34 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   int lineOf(int off){ return find(VLine::start, off); }
   int lineAt(int y){ return find(VLine::y, y); }
-  static float xOf(VLine v, int off){ return v.line() == null ? 0 : (float) (v.dx() + v.line().coord(off - v.start())); }
-  int offsetAt(int x, int y){
+  int caretLine(){
+    int i= lineOf(caret);
+    return up && i > 0 && lines.get(i - 1).end() == caret ? i - 1 : i;
+  }
+  int endOf(VLine v){ return v.wrapped() ? Sk.trimmed(buf, v.start(), v.end()) : v.end(); }
+  static float xOf(VLine v, int off){
+    if (v.line() == null){ return 0; }
+    int i= 2 * (off - v.start());
+    float x= i == v.edges().length ? (float) (v.line().rtl() ? 0 : v.line().width()) : v.edges()[i];
+    assert !Float.isNaN(x);
+    return v.dx() + x;
+  }
+  static int offsetAt(VLine v, float x){
+    var e= v.edges();
+    int res= 0;
+    float d= Float.POSITIVE_INFINITY;
+    for (int p= 0, q; p < e.length / 2; p = q){
+      q = p + 1;
+      while (2 * q < e.length && Float.isNaN(e[2 * q])){ q += 1; }
+      if (Math.abs(e[2 * p] - x) < d){ d = Math.abs(e[2 * p] - x); res = p; }
+      if (Math.abs(e[2 * p + 1] - x) < d){ d = Math.abs(e[2 * p + 1] - x); res = q; }
+    }
+    return v.start() + res;
+  }
+  boolean pointTo(int x, int y, boolean extend){
     var v= lines.get(lineAt(y));
-    int off= v.line() == null ? v.start() : Math.clamp(v.start() + v.line().offsetAt(x - v.dx()), v.start(), v.end());
-    if (v.wrapped() && off == v.end()){ off = prev(off); }
-    return snap(off);
+    int off= v.line() == null ? v.start() : Math.min(offsetAt(v, x - v.dx()), endOf(v));
+    return moveTo(off, extend, off == v.end());
   }
   int lineStart(int i){ return buf.lastIndexOf("\n", i - 1) + 1; }
   int lineEnd(int i){
@@ -291,7 +313,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
 
   void showCaret(){
-    var v= lines.get(lineOf(caret));
+    var v= lines.get(caretLine());
     int x= (int) xOf(v, caret);
     int nx= Math.max(Math.min(scrollX, x), x + 2 - viewW());
     int ny= Math.max(Math.min(scrollY, v.y()), v.y() + v.h() - viewH());
@@ -299,8 +321,10 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   void moved(){ movedAt = micros(frame.elapsed); }
   static long micros(Instant$5c$0 i){ return Util.natToLong(i.read$get$0()); }
-  boolean moveTo(int c, boolean extend){
+  boolean moveTo(int c, boolean extend){ return moveTo(c, extend, false); }
+  boolean moveTo(int c, boolean extend, boolean up){
     caret = c;
+    this.up = up;
     if (!extend){ anchor = c; }
     goalX = -1;
     moved();
@@ -308,25 +332,23 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     return false;
   }
   boolean horizontal(boolean right, boolean extend){
-    if (!extend && caret != anchor){ return moveTo(right ? selB() : selA(), false); }
+    int c= right ? selB() : selA();
+    if (!extend && caret != anchor){ return moveTo(c, false, up && c == caret); }
     return moveTo(right ? next(caret) : prev(caret), extend);
   }
   boolean vertical(int dy, boolean extend){
-    var v= lines.get(lineOf(caret));
+    var v= lines.get(caretLine());
     float g= goalX < 0 ? xOf(v, caret) : goalX;
     int by= Math.max(v.h(), Math.abs(dy));
     int y= dy > 0 ? v.y() + by : v.y() + v.h() - 1 - by;
-    int c= y < 0 ? 0 : y >= contentH ? buf.length() : offsetAt((int) g, y);
-    moveTo(c, extend);
+    if (y < 0 || y >= contentH){ moveTo(y < 0 ? 0 : buf.length(), extend); }
+    else{ pointTo((int) g, y, extend); }
     goalX = g;
     return false;
   }
   int page(){ return Math.max(1, viewH()); }
-  boolean home(boolean ctrl, boolean extend){ return moveTo(ctrl ? 0 : lines.get(lineOf(caret)).start(), extend); }
-  boolean end(boolean ctrl, boolean extend){
-    var v= lines.get(lineOf(caret));
-    return moveTo(ctrl ? buf.length() : v.wrapped() ? prev(v.end()) : v.end(), extend);
-  }
+  boolean home(boolean ctrl, boolean extend){ return moveTo(ctrl ? 0 : lines.get(caretLine()).start(), extend); }
+  boolean end(boolean ctrl, boolean extend){ return ctrl ? moveTo(buf.length(), extend) : moveTo(endOf(lines.get(caretLine())), extend, true); }
   boolean selectAll(){
     anchor = 0;
     return moveTo(buf.length(), true);
@@ -411,27 +433,25 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
 
   private void submit(Supplier<Fire> onEdt){
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
-      frame.frame.queue.midTask().set(true);
       if (!frame.onEdtAndWait(() -> canChange())){ return Void$o$0.instance; }
-      fire(frame.onEdtAndWait(() -> { layout(); return onEdt.get(); }));
+      fire(frame.changeOnEdt(() -> { layout(); return onEdt.get(); }));
       return Void$o$0.instance;
     }});
   }
   private void change(Supplier<Req> onEdt){
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
-      frame.frame.queue.midTask().set(true);
       var q= frame.onEdtAndWait(() -> canChange() && editable ? onEdt.get() : null);
       if (q == null){ return Void$o$0.instance; }
       var ch= clean(q.a(), q.b(), q.s());
-      fire(frame.onEdtAndWait(() -> { layout(); return fired(edit(ch)); }));
+      fire(frame.changeOnEdt(() -> { layout(); return fired(edit(ch)); }));
       return Void$o$0.instance;
     }});
   }
   static void fire(Fire f){ if (f != null){ f.handler().mut$accept$1(f.event()); } }
   private void act(BooleanSupplier onEdt){ submit(() -> fired(onEdt.getAsBoolean())); }
   void input(String s){ change(() -> new Req(selA(), selB(), s)); }
-  void press(Point p, boolean extend){ act(() -> moveTo(offsetAt(p.x, p.y), extend)); }
-  void drag(Point p){ act(() -> moveTo(offsetAt(p.x, p.y), true)); }
+  void press(Point p, boolean extend){ act(() -> pointTo(p.x, p.y, extend)); }
+  void drag(Point p){ act(() -> pointTo(p.x, p.y, true)); }
   void commit(){
     submit(() -> {
       if (committed == null || committed.contentEquals(buf)){ return null; }
@@ -460,7 +480,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       case VK_A -> { return command(e, () -> act(this::selectAll)); }
       case VK_C -> { return command(e, () -> act(this::copy)); }
       case VK_X -> { return command(e, () -> change(this::cut)); }
-      case VK_V -> { return command(e, this::paste); }
+      case VK_V -> { return command(e, () -> change(this::paste)); }
       case VK_Z -> { return command(e, () -> act(shift ? this::redo : this::undo)); }
       case VK_Y -> { return command(e, () -> act(this::redo)); }
       default -> { return k >= VK_DEAD_GRAVE && k <= VK_DEAD_SEMIVOICED_SOUND || CTextKeys.types(e); }
@@ -481,17 +501,15 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     if (ctrl || !shift){ commit(); return; }
     if (!oneLine()){ change(() -> new Req(selA(), selB(), "\n")); }
   }
-  private void paste(){
+  private Req paste(){
     var c= Toolkit.getDefaultToolkit().getSystemClipboard();
-    String s;
-    try{ s= c.isDataFlavorAvailable(DataFlavor.stringFlavor) ? (String) c.getData(DataFlavor.stringFlavor) : null; }
-    catch (IllegalStateException | UnsupportedFlavorException | IOException _){ s= null; }
-    if (s != null){ input(s); }
+    try{ return c.isDataFlavorAvailable(DataFlavor.stringFlavor) ? new Req(selA(), selB(), (String) c.getData(DataFlavor.stringFlavor)) : null; }
+    catch (IllegalStateException | UnsupportedFlavorException | IOException _){ return null; }
   }
 
   Rectangle caretOnScreen(){
     layout();
-    var v= lines.get(lineOf(caret));
+    var v= lines.get(caretLine());
     var p= SwingUtilities.convertPoint(component, (int) (left - scrollX + xOf(v, caret)), top - scrollY + v.y(), frame.top.component);
     double s= frame.stage.scale();
     var o= frame.stage.offset(s);
@@ -506,37 +524,48 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     boolean focused= frame.focus == this;
     float r= Math.min(radius, Math.min(w, h) / 2f);
     Sk.paint.setColor(bg >>> 24 == 0 ? 0xFFFFFFFF : bg);
-    cv.drawRRect(RRect.makeXYWH(0, 0, w, h, r), Sk.paint);
+    Sk.rrect(cv, 0, 0, w, h, r, Sk.paint);
     float sw= focused ? 2 : 1;
     stroke.setStrokeWidth(sw).setColor(focused ? 0xFF4878D2 : 0xFF8C8C8C);
-    cv.drawRRect(RRect.makeXYWH(sw / 2, sw / 2, w - sw, h - sw, Math.max(0, r - sw / 2)), stroke);
+    Sk.rrect(cv, sw / 2, sw / 2, w - sw, h - sw, Math.max(0, r - sw / 2), stroke);
     int save= cv.save();
-    cv.clipRect(Rect.makeXYWH(left, top, viewW(), viewH()));
-    cv.translate(left - scrollX, top - scrollY);
+    Sk.clip(cv, left, top, viewW(), viewH());
+    Sk.at(cv, left - scrollX, top - scrollY, 1);
     int last= lineAt(scrollY + viewH());
     for (int i= lineAt(scrollY); i <= last; i += 1){ line(cv, lines.get(i), focused); }
     if (focused && frame.keyboard){
-      var v= lines.get(lineOf(caret));
-      cv.translate(xOf(v, caret), v.y());
+      var v= lines.get(caretLine());
+      Sk.at(cv, xOf(v, caret), v.y(), 1);
       caret(cv, v.h());
     }
     cv.restoreToCount(save);
   }
   private void line(Canvas cv, VLine v, boolean focused){
-    int a= selA();
-    int b= selB();
-    int vEnd= v.wrapped() ? v.end() : v.end() + 1;
-    if (a < b && a < vEnd && b > v.start()){
-      boolean rtl= v.line() != null && v.line().rtl();
-      float x1= a <= v.start() ? (rtl ? v.w() : 0) : xOf(v, a);
-      float x2= b > v.end() ? xOf(v, v.end()) + (v.wrapped() ? 0 : rtl ? -textSettings.size() / 3f : textSettings.size() / 3f) : xOf(v, b);
-      Sk.paint.setColor(focused ? 0xFFB4CDF5 : 0xFFDCDCDC);
-      cv.drawRect(Rect.makeLTRB(Math.min(x1, x2), v.y(), Math.max(x1, x2), v.y() + v.h()), Sk.paint);
+    fill.setColor(focused ? 0xFFB4CDF5 : 0xFFDCDCDC);
+    int b= Math.min(selB(), v.end());
+    float lo= 0;
+    float hi= 0;
+    for (int p= Math.max(selA(), v.start()); p < b; p += 1){
+      int i= 2 * (p - v.start());
+      if (Float.isNaN(v.edges()[i])){ continue; }
+      float x1= v.dx() + Math.min(v.edges()[i], v.edges()[i + 1]);
+      float x2= v.dx() + Math.max(v.edges()[i], v.edges()[i + 1]);
+      if (x1 > hi || x2 < lo){ highlight(cv, v, lo, hi); lo = x1; hi = x2; continue; }
+      lo = Math.min(lo, x1);
+      hi = Math.max(hi, x2);
+    }
+    highlight(cv, v, lo, hi);
+    boolean newline= !v.wrapped() && selA() <= v.end() && selB() > v.end();
+    if (newline){
+      float x= xOf(v, v.end());
+      float d= v.line() != null && v.line().rtl() ? -textSettings.size() / 3f : textSettings.size() / 3f;
+      highlight(cv, v, Math.min(x, x + d), Math.max(x, x + d));
     }
     if (v.line() == null){ return; }
     Sk.paint.setColor(fg);
-    Sk.draw(cv, v.line(), 0, v.y(), v.w(), v.h(), Sk.paint);
+    Sk.drawAt(cv, v.line(), (v.w() - v.line().width()) / 2, v.y() + v.line().settings().baseline(v.h()), Sk.paint, scrollX, scrollX + viewW());
   }
+  private static void highlight(Canvas cv, VLine v, float lo, float hi){ if (lo < hi){ Sk.rect(cv, lo, v.y(), hi - lo, v.h(), fill); } }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){
       var t= Sk.shape(composing, textSettings);

@@ -188,7 +188,7 @@ final class SkMenus{
     int mine= asked;
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       var m= CMenu.build(scope);
-      frame.onEdtAndWait(() -> sub(mine, i, m));
+      frame.changeOnEdt(() -> sub(mine, i, m));
       return Void$o$0.instance;
     }});
   }
