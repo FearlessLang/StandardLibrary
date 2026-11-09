@@ -790,18 +790,15 @@ final class _Frame implements Frame$1c$0{
   }
 
   void pressed(AWidget d){
-    if (focus == null || focus == d){ return; }
+    if (focus == null){ return; }
+    endComposition();
+    if (focus == d){ return; }
     focus.commit();
     focus(null);
   }
   void focus(AEditText t){
     if (t == focus){ return; }
-    if (focus != null){
-      focus.composing = "";
-      textKeys.dropping = true;
-      surface.getInputContext().endComposition();
-      SwingUtilities.invokeLater(() -> textKeys.dropping = false);
-    }
+    if (focus != null){ focus.composing = ""; }
     surface.enableInputMethods(t != null);
     focus = t;
     textKeys.focusMoved();
@@ -814,8 +811,18 @@ final class _Frame implements Frame$1c$0{
     assert i >= 0;
     var next= all.get(Math.floorMod(i + (back ? -1 : 1), all.size()));
     if (next == focus){ return; }
+    endComposition();
     focus.commit();
     focus(next);
+  }
+  void endComposition(){
+    var t= focus;
+    if (t.composing.isEmpty()){ return; }
+    t.input(t.composing);
+    t.composing = "";
+    textKeys.dropping = true;
+    surface.getInputContext().endComposition();
+    SwingUtilities.invokeLater(() -> textKeys.dropping = false);
   }
 
   private static void edits(AWidget w, ArrayList<AEditText> all){
