@@ -4,12 +4,16 @@ import static _base.Util.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -19,12 +23,15 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -35,7 +42,9 @@ final class DataFiles{
   static final Map<String,Path> reads= linked("fearlessDataRead.");
   static final Map<String,Path> edits= linked("fearlessDataEdit.");
   static final Map<String,Path> readable= readable();
-  private static final Object lock= new Object();
+  static final Map<String,Path> locks= linked("fearlessDataLock.");
+  private static final Map<Path,FileChannel> channels= new ConcurrentHashMap<>();
+  private static final Pattern tmpName= Pattern.compile("\\.[0-9a-f-]{36}\\.tmp");
   private static final Set<String> reserved= Set.of("con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
   private static final Set<String> noExt= Set.of("readme", "license", "copying", "notice", "authors", "contributors", "changelog", "changes", "news", "todo", "thanks", "security", "contributing", "code_of_conduct");
   private static final Set<String> multiDot= Set.of("tar.gz", "tar.bz2", "tar.xz", "tar.zst", "tar.lz", "tar.lz4", "d.ts", "d.ts.map", "js.map", "css.map", "min.js", "min.css");
@@ -44,8 +53,9 @@ final class DataFiles{
   record ZipDir(Path zip, List<String> steps, String prefix) implements Node{}
   record Resource(Path path, List<String> steps, String entry) implements Node{}
   record Item(long time, byte[] bytes){}
-  record Root(String name, Path path){}
-  interface Op{ Object apply(String name, Path root, List<String> path) throws IOException; }
+  record Root(String name, Path path, Path lock){}
+  interface Op{ Object apply(Root root, List<String> path) throws IOException; }
+  interface Locked<T>{ T run() throws IOException; }
   private static Map<String,Path> linked(String prefix){
     var res= new TreeMap<String,Path>();
     for (var k : System.getProperties().stringPropertyNames()){
@@ -62,11 +72,11 @@ final class DataFiles{
     var name= AssetBytesRead.str(((Named$1c$0)data).read$name$0());
     var res= view.get(name);
     if (res == null){ throw nonDetErr("No "+kind+" is mounted on \""+name+"\"."); }
-    return new Root(name, res);
+    return new Root(name, res, Objects.requireNonNull(locks.get(name)));
   }
-  static Object paths(Root root, Object path){ return act(root, path, false, DataFiles::list); }
+  static Object paths(Root root, Object path){ return act(root, path, false, (r, p) -> list(r.name(), r.path(), p)); }
   static Object read(Root root, Object path){ return act(root, path, false, DataFiles::open); }
-  static Object writeBytes(Root root, Object path, byte[] bytes){ return act(root, path, true, (n, r, p) -> write(n, r, p, bytes)); }
+  static Object writeBytes(Root root, Object path, byte[] bytes){ return act(root, path, true, (r, p) -> write(r.name(), r.path(), p, bytes)); }
   static Object writeText(Root root, Object path, Object content, Charset cs){
     var cps= ((UStr$s$0Instance)content).val();
     return writeBytes(root, path, new String(cps, 0, cps.length).getBytes(cs));
@@ -80,7 +90,7 @@ final class DataFiles{
     }
     return writeBytes(root, path, out.toByteArray());
   }
-  static Object delete(Root root, Object path){ return act(root, path, true, DataFiles::delete); }
+  static Object delete(Root root, Object path){ return act(root, path, true, (r, p) -> delete(r.name(), r.path(), p)); }
   private static byte[] bytes(Root root, List<String> path) throws IOException{
     reachable(root);
     if (!(resolve(root.path(), path).orElse(null) instanceof Resource f)){ throw new NoSuchFileException(root.name()+"/"+String.join("/", path)); }
@@ -94,10 +104,29 @@ final class DataFiles{
   private static Object act(Root root, Object path, boolean write, Op op){
     var p= List$o$1Instance.asJava(path).stream().map(AssetBytesRead::str).toList();
     reachable(root);
-    try{ return op.apply(root.name(), root.path(), p); }
+    try{ return held(root, write, () -> op.apply(root, p)); }
     catch (IOException e){ throw failed(root.name(), p, write, e); }
     catch (UncheckedIOException e){ throw failed(root.name(), p, write, e.getCause()); }
   }
+  private static <T> T held(Root root, boolean edit, Locked<T> body) throws IOException{
+    var ch= channels.computeIfAbsent(root.lock(), DataFiles::channel);
+    synchronized (ch){
+      try (var _= ch.lock(0, Long.MAX_VALUE, !edit)){
+        if (edit){ dropTmps(root.path()); }
+        return body.run();
+      }
+    }
+  }
+  private static FileChannel channel(Path lock){
+    try{ return FileChannel.open(lock, CREATE, READ, WRITE); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
+  }
+  private static void dropTmps(Path root) throws IOException{
+    try (var s= Files.list(root)){
+      for (var p : s.filter(p -> tmpName.matcher(p.getFileName().toString()).matches()).toList()){ deleteTree(p); }
+    }
+  }
+  private static Path tmp(Path root){ return root.resolve("."+UUID.randomUUID()+".tmp"); }
   private static Error failed(String name, List<String> path, boolean write, IOException e){
     return lost("The "+at(name, path)+"\ncan not be "+(write ? "changed" : "read")+".", e);
   }
@@ -143,28 +172,26 @@ final class DataFiles{
     names.stream().filter(n -> !atom(n) && !fileName(n)).findFirst().ifPresent(n -> { throw nonDetErr("The folder at the "+at(name, path)+"\nholds \""+n+"\", which is not a valid resource name: the data project changed while this program runs."); });
     return List$o$1Instance.wrap(names.stream().<Object>map(Str$c$0Instance::instance).toList());
   }
-  private static Object open(String name, Path root, List<String> path) throws IOException{
+  private static Object open(Root r, List<String> path) throws IOException{
+    var name= r.name();
     resource(name, path);
-    var at= resolve(root, path);
+    var at= resolve(r.path(), path);
     if (!(at.orElse(null) instanceof Resource)){ throw refused(name, path, at.isEmpty() ? "names no resource." : "names a folder, not a file."); }
     var label= name+"/"+String.join("/", path);
-    var r= new Root(name, root);
-    return new InputFile("Resource with path "+label, label, () -> bytes(r, path));
+    return new InputFile("Resource with path "+label, label, () -> held(r, false, () -> bytes(r, path)));
   }
   private static Object write(String name, Path root, List<String> path, byte[] bytes) throws IOException{
     writable(name, path);
-    synchronized (lock){
-      Node at= new Dir(root);
-      var i= 0;
-      for (; i < path.size()-1; i += 1){
-        var next= child(at, path.get(i));
-        if (next.isEmpty()){ break; }
-        if (next.get() instanceof Resource){ throw refused(name, path, "is not valid: \""+path.get(i)+"\" is a file, not a folder."); }
-        at = next.get();
-      }
-      if (i == path.size()-1){ clash(name, path, at); }
-      put(at, path.subList(i, path.size()), bytes, root);
+    Node at= new Dir(root);
+    var i= 0;
+    for (; i < path.size()-1; i += 1){
+      var next= child(at, path.get(i));
+      if (next.isEmpty()){ break; }
+      if (next.get() instanceof Resource){ throw refused(name, path, "is not valid: \""+path.get(i)+"\" is a file, not a folder."); }
+      at = next.get();
     }
+    if (i == path.size()-1){ clash(name, path, at); }
+    put(at, path.subList(i, path.size()), bytes, root);
     return Void$o$0.instance;
   }
   private static void clash(String name, List<String> path, Node at) throws IOException{
@@ -181,10 +208,12 @@ final class DataFiles{
   private static void put(Node at, List<String> rest, byte[] bytes, Path root) throws IOException{
     switch (at){
       case Dir d -> {
-        var target= d.path();
-        for (var s : rest){ target = target.resolve(s); }
-        Files.createDirectories(target.getParent());
-        save(target, bytes);
+        var tmp= tmp(root);
+        var file= tmp;
+        for (var s : rest.subList(1, rest.size())){ file = file.resolve(s); }
+        Files.createDirectories(file.getParent());
+        Files.write(file, bytes, CREATE_NEW);
+        Files.move(tmp, d.path().resolve(rest.getFirst()), ATOMIC_MOVE);
       }
       case ZipDir z -> editZip(z.zip(), z.steps(), m -> m.put(z.prefix()+String.join("/", rest), new Item(System.currentTimeMillis(), bytes)), root);
       case Resource _ -> throw new AssertionError(at);
@@ -194,17 +223,15 @@ final class DataFiles{
     if (path.isEmpty()){ throw refused(name, path, "names the root folder, which can not be deleted."); }
     if (atom(path.getLast())){ folders(name, path, path); }
     else{ writable(name, path); }
-    synchronized (lock){
-      var at= resolve(root, path);
-      if (at.isEmpty()){ throw refused(name, path, "names no resource."); }
-      switch (at.get()){
-        case Resource f when f.entry().isEmpty() -> { Files.delete(f.path()); prune(f.path().getParent(), root); }
-        case Resource f -> editZip(f.path(), f.steps(), m -> m.remove(f.entry()), root);
-        case Dir d -> { deleteTree(d.path()); prune(d.path().getParent(), root); }
-        case ZipDir z when !z.prefix().isEmpty() -> editZip(z.zip(), z.steps(), m -> m.keySet().removeIf(k -> k.startsWith(z.prefix())), root);
-        case ZipDir z when z.steps().isEmpty() -> { Files.delete(z.zip()); prune(z.zip().getParent(), root); }
-        case ZipDir z -> editZip(z.zip(), z.steps().subList(0, z.steps().size()-1), m -> m.remove(z.steps().getLast()), root);
-      }
+    var at= resolve(root, path);
+    if (at.isEmpty()){ throw refused(name, path, "names no resource."); }
+    switch (at.get()){
+      case Resource f when f.entry().isEmpty() -> remove(f.path(), root);
+      case Resource f -> editZip(f.path(), f.steps(), m -> m.remove(f.entry()), root);
+      case Dir d -> remove(d.path(), root);
+      case ZipDir z when !z.prefix().isEmpty() -> editZip(z.zip(), z.steps(), m -> m.keySet().removeIf(k -> k.startsWith(z.prefix())), root);
+      case ZipDir z when z.steps().isEmpty() -> remove(z.zip(), root);
+      case ZipDir z -> editZip(z.zip(), z.steps().subList(0, z.steps().size()-1), m -> m.remove(z.steps().getLast()), root);
     }
     return Void$o$0.instance;
   }
@@ -297,9 +324,10 @@ final class DataFiles{
   }
   private static void editZip(Path zip, List<String> steps, Consumer<LinkedHashMap<String,Item>> op, Path root) throws IOException{
     var bytes= edit(Files.readAllBytes(zip), steps, op);
-    if (bytes != null){ save(zip, bytes); return; }
-    Files.delete(zip);
-    prune(zip.getParent(), root);
+    if (bytes == null){ remove(zip, root); return; }
+    var tmp= tmp(root);
+    Files.write(tmp, bytes, CREATE_NEW);
+    Files.move(tmp, zip, ATOMIC_MOVE);
   }
   private static byte[] edit(byte[] zip, List<String> steps, Consumer<LinkedHashMap<String,Item>> op) throws IOException{
     var items= items(zip);
@@ -322,15 +350,13 @@ final class DataFiles{
     }
     return out.toByteArray();
   }
-  private static void save(Path target, byte[] bytes) throws IOException{
-    var tmp= target.resolveSibling("."+UUID.randomUUID()+".tmp");
-    Files.write(tmp, bytes, CREATE_NEW);
-    Files.move(tmp, target, ATOMIC_MOVE);
+  private static void remove(Path p, Path root) throws IOException{
+    while (!p.getParent().equals(root) && only(p.getParent())){ p = p.getParent(); }
+    var tmp= tmp(root);
+    Files.move(p, tmp, ATOMIC_MOVE);
+    deleteTree(tmp);
   }
-  private static void prune(Path dir, Path root) throws IOException{
-    for (var d= dir; !d.equals(root) && empty(d); d = d.getParent()){ Files.delete(d); }
-  }
-  private static boolean empty(Path dir) throws IOException{
-    try (var s= Files.list(dir)){ return s.findAny().isEmpty(); }
+  private static boolean only(Path dir) throws IOException{
+    try (var s= Files.list(dir)){ return s.limit(2).count() == 1; }
   }
 }
