@@ -615,7 +615,7 @@ record CTextEvent(Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0
 }
 
 final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodListener, InputMethodRequests{
-  enum To{ menus, widget, frame, nobody }
+  enum To{ menus, widget, frame, reserved, nobody }
   final _Frame frame;
   final HashMap<List<Integer>,To> routes= new HashMap<>();
   To typing= To.nobody;
@@ -630,24 +630,24 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   @Override public void keyPressed(KeyEvent e){
     var id= List.of(e.getKeyCode(), e.getKeyLocation());
     var to= routes.get(id);
+    typing = To.nobody;
     if (to == null){
       var f= frame.focus;
       to = first(e);
       if (f != frame.focus){ to = To.nobody; }
       routes.put(id, to);
+      typing = to;
       if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.pressed)); }
     }
-    else if (to == To.menus && frame.menus.isOpen() && e.getKeyCode() != _FluentGUI.code(frame.gui.closeKey)){ frame.menus.key(e); }
-    else if (to == To.widget){ frame.focus.key(e); }
-    typing = to;
     if (to != To.frame){ e.consume(); }
   }
   private To first(KeyEvent e){
-    if (frame.menus.isOpen() && e.getKeyCode() != _FluentGUI.code(frame.gui.fullScreenKey)){
-      frame.menus.key(e);
+    int c= e.getKeyCode();
+    if (frame.menus.isOpen() && c != _FluentGUI.code(frame.gui.fullScreenKey)){
+      if (c != _FluentGUI.code(frame.gui.closeKey)){ frame.menus.key(e); }
       return To.menus;
     }
-    if (frame.stage.reservedKey(e.getKeyCode())){ return To.nobody; }
+    if (frame.reserved(c)){ return To.reserved; }
     if (frame.focus != null && frame.focus.key(e)){ return To.widget; }
     return To.frame;
   }
@@ -674,14 +674,18 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   }
   @Override public void focusGained(FocusEvent e){ frame.keyboard = true; }
   @Override public void keyReleased(KeyEvent e){
-    var to= routes.remove(List.of(e.getKeyCode(), e.getKeyLocation()));
-    if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.released)); return; }
-    if (to != null){ e.consume(); }
+    int c= e.getKeyCode();
+    var to= routes.remove(List.of(c, e.getKeyLocation()));
+    if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(c, frame.keys.released)); return; }
+    if (to == null){ return; }
+    e.consume();
+    if (to == To.reserved){ frame.stage.reservedKey(c); }
+    boolean closesMenu= to == To.menus && c == _FluentGUI.code(frame.gui.closeKey) && frame.menus.isOpen();
+    if (closesMenu){ frame.menus.key(e); }
   }
   @Override public void focusLost(FocusEvent e){
     frame.keyboard = false;
     focusMoved();
-    routes.clear();
   }
 
   @Override public void inputMethodTextChanged(InputMethodEvent e){
