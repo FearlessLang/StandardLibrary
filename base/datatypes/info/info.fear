@@ -74,13 +74,13 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
       };
     .map(m1) -> other.match {
       .empty   -> this;
-      .msg  s2 -> _InfoMapPlus#(m1, Infos.map("msg",s2).getMap) .info {::};
-      .list l2 -> _InfoMapPlus#(m1, Infos.map("list",l2.info {::}).getMap) .info {::};
+      .msg  s2 -> _InfoMapPlus#(m1, Maps#({::}, "msg", s2.info)) .info {::};
+      .list l2 -> _InfoMapPlus#(m1, Maps#({::}, "list", l2.info {::})) .info {::};
       .map  m2 -> _InfoMapPlus#(m1, m2) .info {::};
       };
     };
 
-  .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> f#{.close -> this; .extract -> Opts# this }.extract;
+  .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> f#{.extract -> Opts# this }.extract;
   .validate(f: read F[InfoValidator, InfoCheck]): Bool -> f#(InfoValidators# this).isValid;
   }
 
@@ -92,7 +92,7 @@ InfoKey: Sealed, ToStr {
   .indexInto(Info): Opt[Info];
   }
 
-_InfoMapPlus: { #[K](m1: Map[K,Info], m2: Map[K,Info]): Map[K,Info] ->
+_InfoMapPlus: { #(m1: Map[Str,Info], m2: Map[Str,Info]): Map[Str,Info] ->
   m2.fold({m1}, {acc, k, e ->
     acc.opt(k).match {
       .empty -> acc.with(k, e);

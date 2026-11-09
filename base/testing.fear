@@ -168,26 +168,18 @@ _TestCaps: {
       .do {name.set outer}
       .return {self};
 
-    .check c -> Block#
-      .let[List[StackFrame]] st = {_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get)}
-      .do {UnitTestLog.log(_PlanLine#("RUN",st))}
-      .do {ts.add(CheckInfos#(
-        { _ -> c#; ._fetchTrace f -> c._fetchTrace f },
-        st)).void}
-      .return {self};
+    .check c -> self.checkWithSys{_ -> c#};
 
     .checkWithSys c -> Block#
-      .let[List[StackFrame]] st = {_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get)}
+      .let[List[StackFrame]] st = {_Named#(sys.try.currentStackTrace, name.get)}
       .do {UnitTestLog.log(_PlanLine#("RUN",st))}
       .do {ts.add(CheckInfos#(c,st)).void}
       .return {self};
 
-    .disabledCheck c -> Block#(
-      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get))),
-      self);
+    .disabledCheck c -> self.disabledCheckWithSys{_ -> c#};
 
     .disabledCheckWithSys c -> Block#(
-      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get))),
+      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(sys.try.currentStackTrace, name.get))),
       self);
 
     .disabledTest t -> Block#(
@@ -212,8 +204,8 @@ _Named: { #(st: List[StackFrame], name: Opt[Str]): List[StackFrame] -> name.matc
   .some n -> Lists#(StackFrames#(st.getFirst.fileName, n, st.getFirst.methodName, st.getFirst.lineNumber));
   }}
 
-Check: { #: Void; ._fetchTrace(f: mut MF[List[StackFrame]]): List[StackFrame]->f#; }
-CheckSys: { #(sys: mut System): Void; ._fetchTrace(f: mut MF[List[StackFrame]]): List[StackFrame]->f#; }
+Check: { #: Void; }
+CheckSys: { #(sys: mut System): Void; }
 
 CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->CheckInfo: {
   .check: CheckSys->c; .stackTrace: List[StackFrame]->st;}}

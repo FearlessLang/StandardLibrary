@@ -1,11 +1,6 @@
 _AssertApprox[T]: DataType[T,T] {
   .eqDelta(n: T, delta: T): Bool;
-  .assertEqDelta(expected: T, delta: T): Void -> Assert!(
-    this.eqDelta(expected,delta),
-    { "Expected within delta"
-      | "expected: "+(this.close(expected))
-      | "delta: "+(this.close(delta))
-      | "actual: "+this });
+  .assertEqDelta(expected: T, delta: T): Void -> this.assertEqDelta(expected, delta, {""});
   .assertEqDelta(expected: T, delta: T, msg: read LazyInfo): Void -> Assert!(
     this.eqDelta(expected,delta),
     { msg#.info + ("Expected within delta"
