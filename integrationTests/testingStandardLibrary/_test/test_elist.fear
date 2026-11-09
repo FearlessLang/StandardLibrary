@@ -1,0 +1,29 @@
+TestEList: Test {::
+  .checkDetErr({::.isMsg{::.startsWith "EList.eView: the view of the indices [0, 3) is out of range for its EList of length 0"}}, {Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(0, 3)}
+    .let list={l.list}
+    .return{v.set(0, 9)}})
+  .check{Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(0, 2)}
+    .do{l.add(4).void}
+    .return{v.get(0).assertEq 1}}
+  .check{Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(0, 2)}
+    .do{l.insertBefore(0, 7).void}
+    .return{v.list.assertEq({::}, Lists#(7, 1))}}
+  .check{Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(1, 2)}
+    .do{v.add(9).void}
+    .do{v.add(8).void}
+    .return{l.list.assertEq({::}, Lists#(1, 2, 9, 8, 3))}}
+  .check{Block#
+    .let l={ELists#(1, 2, 3, 4)}
+    .let a={l.eView(0, 2)}
+    .let b={l.eView(2, 4)}
+    .do{a.add(5).void}
+    .return{b.list.assertEq({::}, Lists#(5, 3))}}
+  }

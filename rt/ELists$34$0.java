@@ -1,9 +1,13 @@
 package _base;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.RandomAccess;
+import java.util.function.Predicate;
 
 import static _base.Util.*;
 
@@ -35,7 +39,7 @@ public interface ELists$34$0 extends Sealed$2o$0{
 }
 final class EList$1k$1Instance implements EList$1k$1{
   EList$1k$1Instance(List<Object> l){ xs= l; }
-  private List<Object> xs;
+  List<Object> xs;
   private ArrayList<Object> drain(){
     if (xs instanceof ArrayList<Object> a){ xs = new ArrayList<>(); return a; }
     var r= new ArrayList<>(xs);
@@ -109,7 +113,7 @@ final class EList$1k$1Instance implements EList$1k$1{
   }
   @Override public Object mut$eView$2(Object p0, Object p1){
     int s= range("eView", p0, p1);
-    return new EList$1k$1Instance(xs.subList(s, idx("eView", p1, xs.size() + 1)));
+    return new EList$1k$1Instance(new EListWindow(this, s, idx("eView", p1, xs.size() + 1)));
   }
   @Override public Object mut$reverse$0(){ Collections.reverse(xs); return this; }
   @Override public Object mut$mapInPlace$1(Object p0){ xs.replaceAll(e -> callF$2(p0, e)); return this; }
@@ -191,4 +195,28 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$flow$1(Object p0){ return Flow$o$1Instance.of(drain(), FlowMode.of(p0)); }
   @Override public Object imm$flow$0(){ return Flow$o$1Instance.of(new ArrayList<>(xs), FlowMode.ParImm); }
   @Override public Object mut$list$0(){ return List$o$1Instance.wrap(drain()); }
+}
+final class EListWindow extends AbstractList<Object> implements RandomAccess{
+  private final EList$1k$1Instance parent;
+  private final int start;
+  private int end;
+  EListWindow(EList$1k$1Instance parent, int start, int end){ this.parent= parent; this.start= start; this.end= end; }
+  private List<Object> sub(){
+    if (end > parent.xs.size()){ throw detErr("EList.eView: the view of the indices ["+start+", "+end+") is out of range for its EList of length "+parent.xs.size()); }
+    return parent.xs.subList(start, end);
+  }
+  @Override public Object get(int i){ return sub().get(i); }
+  @Override public Object set(int i, Object e){ return sub().set(i, e); }
+  @Override public int size(){ return sub().size(); }
+  @Override public void add(int i, Object e){ sub().add(i, e); end += 1; }
+  @Override public Object remove(int i){ var r= sub().remove(i); end -= 1; return r; }
+  @Override protected void removeRange(int from, int to){ sub().subList(from, to).clear(); end -= to - from; }
+  @Override public boolean addAll(Collection<?> c){ sub().addAll(c); end += c.size(); return !c.isEmpty(); }
+  @Override public boolean removeIf(Predicate<? super Object> f){
+    var s= sub();
+    int before= s.size();
+    s.removeIf(f);
+    end -= before - s.size();
+    return before != end - start;
+  }
 }
