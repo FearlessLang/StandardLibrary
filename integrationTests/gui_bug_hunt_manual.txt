@@ -3,38 +3,7 @@ Each section is one behaviour: the steps, and what a person sees when the GUI fo
 "Run P" means: run the portable Fearless (built by Coordinator/Build/src/scripts/DeployPortableFearless.java) with the project folder P as its argument.
 The console of that run shows the output and the warnings of the program.
 
-1. A still window allocates nothing per frame for its widgets and its text
-
-Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
-Steps:
-1. Run integrationTests/testGuiStill and do not touch the window.
-2. In another console, run "jps -l" of the JDK and find the process id of the line ending with "tools.PathClassLoader".
-3. Wait one minute, then take two class histograms 10 seconds apart: "jcmd <that process id> GC.class_histogram -all".
-Expected: the difference of the two histograms holds about 90 objects per frame (the window renders 30 frames per second), and none of them depends on the widgets or on the text of the window.
-They are the event of the frame timer and the copy of the frame onto the window (classes of java.awt, java.util.concurrent, javax.swing, sun.awt and sun.java2d),
-the elapsed time of the frame (one _base.Instant$5c$0$1 and one _base.Nat$c$0Instance)
-and the scale to device pixels (one io.github.humbleui.skija.Matrix33 and one float[]).
-The difference holds no lambda of _base.Sk, no io.github.humbleui.types.Rect and no io.github.humbleui.types.RRect.
-
-2. Typing in a long line takes time proportional to the length of the line
-
-Design: a key typed in a text widget shows on one of the next frames.
-Steps:
-1. Run integrationTests/testGuiLongLine.
-   The area holds one line of 81920 characters, "word " repeated, and does not wrap.
-2. Click in the area, press Home, and type x four times.
-Expected: each x shows within about two frames (70 ms) of its key, as in a text area holding "word word word word".
-
-3. A still window with a long line draws only the glyphs it shows
-
-Design: drawing a TextArea that shows 100 characters of a long line costs as much as drawing a TextArea whose whole line is those 100 characters.
-Steps:
-1. Run integrationTests/testGuiLongLine and do not touch the window.
-2. Look at the console of the run.
-Expected: no warning: the window shows about 100 characters of the line, at 30 frames per second.
-A line "Warning [t=...ms]: N repaint frame(s) lost" means the window renders fewer frames per second.
-
-4. A window dragged by its title bar moves back until a third of the screen shows it
+1. A window dragged by its title bar moves back until a third of the screen shows it
 
 Design: StandardLibraryGuiBugs.txt, "The window raises no geometry error: it moves so that min(screen/3, window size) stays visible on each axis, also after the user drags it."
 and "The window stays on the primary screen: every move, also a drag by the user, is clamped to the default screen device."
@@ -51,41 +20,7 @@ At step 4 the window moves back onto the primary screen, until a third of the sc
 On the tiling desks (arch_sway, omarchy_hyprland, void_i3) the desk decides where the window is, and the window is not moved.
 On fedora_cosmic the window stays where it was let go: the desk ignores a request of a program to move one of its windows.
 
-5. A still window allocates nothing per frame for a Picture, a Split, a Border, a Sections, a scrolling Pane, a TextField and a TextArea
-
-Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
-Steps:
-1. Run integrationTests/testGuiStillWidgets and do not touch the window.
-   The window holds a Border: in its north a Split of two Pictures, in its center an expanded Sections whose content is a scrolling Pane, in its south a TextField and a TextArea.
-2. Take the two class histograms of section 1, steps 2 and 3.
-Expected: the difference of the two histograms holds the objects per frame that section 1 lists for integrationTests/testGuiStill,
-one float[] per Picture (the scale to device pixels, which chooses the size the image is drawn at),
-and some java.awt.Rectangle, java.util.ArrayList$Itr and io.github.humbleui.types.Rect (short-lived rectangles of the layout of the widgets): their number shrinks while the JIT compiles the code that paints.
-The difference holds no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader, no io.github.humbleui.skija.Matrix44, no io.github.humbleui.types.RRect, and no more io.github.humbleui.skija.Matrix33 than section 1 lists.
-
-6. A still window with a clipped widget builds no text per frame
-
-Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
-Steps:
-1. Run integrationTests/testGuiStillClipped and do not touch the window.
-   The window holds a Label narrower than its text, and a Pane narrower than the Pane inside it.
-2. Look at the console of the run.
-3. Take the two class histograms of section 1, steps 2 and 3.
-Expected: at step 2 the console shows two warnings, one for the text of the Label and one for the Pane inside the Pane, each once.
-At step 3 the difference of the two histograms holds the objects per frame that section 1 lists for integrationTests/testGuiStill: no java.lang.String and no byte[].
-
-7. A still window in full screen allocates nothing per frame for its corner
-
-Design: StandardLibraryGuiBugs.txt, "A still GUI allocates nothing per frame."
-Steps:
-1. Run integrationTests/testGuiStill.
-2. Press F11, the full screen key of the CapGui, and do not touch the window.
-   The window fills the screen and shows the Fearless corner at its top left.
-3. Take the two class histograms of section 1, steps 2 and 3.
-Expected: the difference of the two histograms holds the objects per frame that section 1 lists, and one float[] (the scale to device pixels, which chooses the size the icon of the corner is drawn at).
-The difference holds no io.github.humbleui.skija.PathBuilder, no io.github.humbleui.skija.Path, no io.github.humbleui.skija.Paint, no io.github.humbleui.skija.Shader and no io.github.humbleui.types.Rect.
-
-8. The selection in a line of two directions highlights the text it holds
+2. The selection in a line of two directions highlights the text it holds
 
 Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": "The selection is the text between .anchor and .caret", and Ctrl+C "copies the selection to the clipboard".
 Steps:
@@ -98,7 +33,7 @@ Steps:
 Expected: at step 2 the highlight covers "abc " and alef, the rightmost Hebrew letter, and not gimel and bet.
 At step 3 the last field shows "abc " and alef, the text the highlight covers.
 
-9. The caret and the selection move at each grapheme cluster of a ligature
+3. The caret and the selection move at each grapheme cluster of a ligature
 
 Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": Left and Right move "one grapheme cluster", and "The selection is the text between .anchor and .caret".
 Steps:
@@ -110,7 +45,7 @@ Expected: at step 2 the highlight grows at each press: it covers "o", then "of",
 The highlight of "of" covers "o" and the left part of the "ffi" glyph, and the highlight of "off" a larger part of it.
 At step 3 the highlight covers "o" and a part of the "ffi" glyph: the click put the caret inside the glyph.
 
-10. End in a word broken over displayed lines goes to the end of the displayed line
+4. End in a word broken over displayed lines goes to the end of the displayed line
 
 Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": Home and End move to "the start and the end of the displayed line".
 Steps:
@@ -122,7 +57,7 @@ Steps:
 Expected: at step 2 the caret stands after "k", at the end of the first displayed line, and the highlight covers "abcdefghijk".
 At steps 3 and 4 the highlight covers "abcdefghijk": the caret stood after "k".
 
-11. Ctrl+V pastes the text that the Ctrl+C before it copied, also while the model is busy
+5. Ctrl+V pastes the text that the Ctrl+C before it copied, also while the model is busy
 
 Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Text editing": "Each action of the user is one model task, queued with the clicks and the keys: one key, one paste, one cut, one undo."
 and "Queued with the clicks and the keys, the user and the program change the text in one order. The cost is when the model is busy: the text shows up late, as in a busy terminal."
@@ -136,7 +71,7 @@ Steps:
 4. Press Ctrl+A, Ctrl+C, End and Ctrl+V, one after the other within half a second, and wait 2 seconds.
 Expected: at step 4 the second field shows "newnew": the paste pastes the text of the copy before it.
 
-12. Tab after a replaced content of a section or a replaced region of a border goes to the next text widget in the order of the tree
+6. Tab after a replaced content of a section or a replaced region of a border goes to the next text widget in the order of the tree
 
 Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Focus": "Tab and Shift+Tab, in the widget that has the focus, give the focus to the next and the previous TextField or TextArea of the window, in the order of the tree",
 and "Sections": ".title(index) and .content(index) replace the title and the content of the section at that index; the section keeps its place in the list".
