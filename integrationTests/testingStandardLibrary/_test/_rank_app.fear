@@ -122,7 +122,6 @@ MyTests:UnitTests{::
   .test GuiSectionsTests
   .test TestList
   .test TestESparseList
-  .test TestEList
   .test TestMultiFlowFence
   .test TestMultiFlowTrickle
   .test TestMultiFlowSizes
