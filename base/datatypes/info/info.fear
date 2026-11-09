@@ -13,7 +13,8 @@ Infos: Sealed {
   .map(k1: Str, e1: read ToInfo,k2: Str, e2: read ToInfo,k3: Str, e3: read ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info,k3,e3.info).info {::};
   .map(k1: Str, e1: read ToInfo,k2: Str, e2: read ToInfo,k3: Str, e3: read ToInfo,k4: Str, e4: read ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info,k3,e3.info,k4,e4.info).info {::};
   .map(k1: Str, e1: read ToInfo,k2: Str, e2: read ToInfo,k3: Str, e3: read ToInfo,k4: Str, e4: read ToInfo,k5: Str, e5: read ToInfo): Info-> Maps#({::},k1,e1.info,k2,e2.info,k3,e3.info,k4,e4.info,k5,e5.info).info {::};
-  /// parses text produced by ``Info.str`` back into the same `Info`; throws on malformed input
+  /// parses text produced by ``Info.str`` or ``Info.prettyStr`` back into the same `Info`; throws on malformed input.
+  /// Spaces and new lines between the parts of the text are ignored.
   .fromStr(s: Str): Info -> _InfoFromStr#(s);
   }
 
@@ -156,10 +157,16 @@ _InfoParsed: { .info: Info; .pos: Nat }
 _InfoFromStr: {
   #(s: Str): Info -> Block#
     .let result = {this.value(s, 0)}
-    .if {(result.pos) != (s.size)} .error {"Infos.fromStr: unexpected trailing characters at position "+(result.pos)+" in "+(s.escape)+"."}
+    .if {(this.skip(s, result.pos)) != (s.size)} .error {"Infos.fromStr: unexpected trailing characters at position "+(result.pos)+" in "+(s.escape)+"."}
     .return {result.info};
 
-  .value(s: Str, pos: Nat): _InfoParsed -> Block#
+  .skip(s: Str, pos: Nat): Nat -> (pos < (s.size)) && {Block#
+    .let c = {s.sub(pos, pos + 1)}
+    .return {c == " " || {c == ("" |)}}
+    } ? {.then -> this.skip(s, pos + 1); .else -> pos};
+
+  .value(s: Str, start: Nat): _InfoParsed -> Block#
+    .let pos = {this.skip(s, start)}
     .if {pos >= (s.size)} .error {"Infos.fromStr: unexpected end of input while expecting a value in "+(s.escape)+"."}
     .let c = {s.sub(pos, pos + 1)}
     .if {c == `"`} .return {this.msgValue(s, pos)}
@@ -201,13 +208,13 @@ _InfoFromStr: {
     .var[Nat] i = {pos}
     .let acc = {ELists#[Info]}
     .loop { Block#
-      .if {(i.get) >= (s.size)} .error {"Infos.fromStr: unterminated list in "+(s.escape)+"."}
-      .if {(s.sub(i.get, (i.get) + 1)) == "]"} .return {Block#
+      .let[Nat] at = {this.skip(s, i.get)}
+      .if {at >= (s.size)} .error {"Infos.fromStr: unterminated list in "+(s.escape)+"."}
+      .if {(s.sub(at, at + 1)) == "]"} .return {Block#
         .let result = {(acc.list).info {::}}
-        .let endPos = {(i.get) + 1}
-        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
+        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> at + 1})}
         }
-      .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, ",")}}
+      .let start = {(acc.size) == 0 ? {.then -> at; .else -> this.expect(s, at, ",")}}
       .let elem = {this.value(s, start)}
       .do {acc.add(elem.info).void}
       .do {i.set(elem.pos)}
@@ -220,19 +227,19 @@ _InfoFromStr: {
     .let acc = {ELists#[KeyElem[Str,Info]]}
     .let keys = {ESets#[Str,Str]{::}}
     .loop { Block#
-      .if {(i.get) >= (s.size)} .error {"Infos.fromStr: unterminated map in "+(s.escape)+"."}
-      .if {(s.sub(i.get, (i.get) + 1)) == "}"} .return {Block#
+      .let[Nat] at = {this.skip(s, i.get)}
+      .if {at >= (s.size)} .error {"Infos.fromStr: unterminated map in "+(s.escape)+"."}
+      .if {(s.sub(at, at + 1)) == "}"} .return {Block#
         .let result = {(acc.list).seqFlow.mapping({::}, {.key e -> e.key; .elem e -> e.elem}).info {::}}
-        .let endPos = {(i.get) + 1}
-        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> endPos})}
+        .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> at + 1})}
         }
-      .let start = {(acc.size) == 0 ? {.then -> i.get; .else -> this.expect(s, i.get, ",")}}
-      .let keyStart = {this.expect(s, start, `"`)}
+      .let start = {(acc.size) == 0 ? {.then -> at; .else -> this.expect(s, at, ",")}}
+      .let keyStart = {this.expect(s, this.skip(s, start), `"`)}
       .let keyEnd = {this.strEnd(s, keyStart)}
       .let key = {_JsonUnescape#(s.sub(keyStart, keyEnd))}
       .if {keys.contains key} .error {"Infos.fromStr: repeated key "+(key.escape)+" at position "+start+" in "+(s.escape)+"."}
       .do {keys.add(key).void}
-      .let afterColon = {this.expect(s, keyEnd + 1, ":")}
+      .let afterColon = {this.expect(s, this.skip(s, keyEnd + 1), ":")}
       .let elem = {this.value(s, afterColon)}
       .do {acc.add({.key -> key; .elem -> elem.info}).void}
       .do {i.set(elem.pos)}
