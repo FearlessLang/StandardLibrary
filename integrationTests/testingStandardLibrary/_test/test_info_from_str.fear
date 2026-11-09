@@ -26,6 +26,10 @@ InfoFromStrRoundTripTests: Test {::
   .check{Infos.fromStr(_Infos.largeNested.str) .assertEq(_Infos.largeNested)}
   .check{Infos.fromStr(_Infos.wideFlat.str) .assertEq(_Infos.wideFlat)}
   .check{Infos.fromStr(Infos.map("", Infos.msg "x").str) .assertEq(Infos.map("", Infos.msg "x"))}
+  .check{Infos.fromStr(_Infos.largeNested.prettyStr) .assertEq(_Infos.largeNested)}
+  .check{Infos.fromStr(` { "k" : [ "a" , null ] } `) .assertEq(Infos.map("k", Infos.list(Infos.msg "a", Info)))}
+  .check{Infos.fromStr("[" | `"a",` | `"b"` | "]") .assertEq(Infos.list(Infos.msg "a", Infos.msg "b"))}
+  .check{Infos.fromStr(`" a "`) .assertEq(Infos.msg " a ")}
   }
 
 InfoFromStrErrorTests: Test {::
@@ -39,6 +43,7 @@ InfoFromStrErrorTests: Test {::
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{"a""b"}`})
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{ab":"c"}`})
   .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: invalid escape at position 2 in "}}, {Infos.fromStr `"a\tb"`})
+  .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: invalid escape at position 1 in "}}, {Infos.fromStr `"\u0009"`})
   .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: repeated key "}}, {Infos.fromStr `{"a":"1","a":"2"}`})
   }
 
