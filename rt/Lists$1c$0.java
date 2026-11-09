@@ -8,86 +8,23 @@ import static _base.Util.*;
 public interface Lists$1c$0 extends Sealed$2o$0{
   default Object imm$singletonRead$1(Object p0){ return imm$$hash$1(p0); }
     
-  default Object imm$$hash$1(Object p0){
-    var l= new ArrayList<>(1);
-    l.add(p0);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$2(Object p0, Object p1){
-    var l= new ArrayList<>(2);
-    l.add(p0); l.add(p1);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$3(Object p0, Object p1, Object p2){
-    var l= new ArrayList<>(3);
-    l.add(p0); l.add(p1); l.add(p2);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$4(Object p0, Object p1, Object p2, Object p3){
-    var l= new ArrayList<>(4);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){
-    var l= new ArrayList<>(5);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$6(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5){
-    var l= new ArrayList<>(6);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){
-    var l= new ArrayList<>(7);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$8(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7){
-    var l= new ArrayList<>(8);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){
-    var l= new ArrayList<>(9);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$10(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){
-    var l= new ArrayList<Object>(10);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){
-    var l= new ArrayList<>(11);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$12(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){
-    var l= new ArrayList<>(12);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){
-    var l= new ArrayList<>(13);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$14(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){
-    var l= new ArrayList<>(14);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12); l.add(p13);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){
-    var l= new ArrayList<>(15);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12); l.add(p13); l.add(p14);
-    return new List$o$1Instance(l);
-  }
-  default Object imm$$hash$16(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){
-    var l= new ArrayList<>(16);
-    l.add(p0); l.add(p1); l.add(p2); l.add(p3); l.add(p4); l.add(p5); l.add(p6); l.add(p7); l.add(p8); l.add(p9); l.add(p10); l.add(p11); l.add(p12); l.add(p13); l.add(p14); l.add(p15);
-    return new List$o$1Instance(l);
-  }
+  private static Object of(Object... es){ return new List$o$1Instance(List.of(es)); }
+  default Object imm$$hash$1(Object p0){ return of(p0); }
+  default Object imm$$hash$2(Object p0, Object p1){ return of(p0, p1); }
+  default Object imm$$hash$3(Object p0, Object p1, Object p2){ return of(p0, p1, p2); }
+  default Object imm$$hash$4(Object p0, Object p1, Object p2, Object p3){ return of(p0, p1, p2, p3); }
+  default Object imm$$hash$5(Object p0, Object p1, Object p2, Object p3, Object p4){ return of(p0, p1, p2, p3, p4); }
+  default Object imm$$hash$6(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5){ return of(p0, p1, p2, p3, p4, p5); }
+  default Object imm$$hash$7(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6){ return of(p0, p1, p2, p3, p4, p5, p6); }
+  default Object imm$$hash$8(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7){ return of(p0, p1, p2, p3, p4, p5, p6, p7); }
+  default Object imm$$hash$9(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8); }
+  default Object imm$$hash$10(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9); }
+  default Object imm$$hash$11(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10); }
+  default Object imm$$hash$12(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11); }
+  default Object imm$$hash$13(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12); }
+  default Object imm$$hash$14(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13); }
+  default Object imm$$hash$15(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14); }
+  default Object imm$$hash$16(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15){ return of(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15); }
   Lists$1c$0 instance= new Lists$1c$0(){};
 }
 
@@ -201,7 +138,6 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object read$withAlso$2(Object p0, Object p1){ return mut$withAlso$2(p0, p1); }
   @Override public Object mut$without$1(Object p0){
     int i= idx("List.without", p0);
-    if (val.size() == 1 && i == 0){ return List$o$1.instance; }
     if (i == 0){ return wrap(val.subList(1, val.size())); }
     if (i == val.size()-1){ return wrap(val.subList(0, val.size()-1)); }
     var l= new ArrayList<Object>(val.size()-1);
