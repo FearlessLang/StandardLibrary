@@ -434,7 +434,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   private void submit(Supplier<Fire> onEdt){
     frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       if (!frame.onEdtAndWait(() -> canChange())){ return Void$o$0.instance; }
-      fire(frame.changeOnEdt(() -> { layout(); return onEdt.get(); }));
+      fire(frame.changeOnEdt(() -> { layout(); return shown(onEdt.get()); }));
       return Void$o$0.instance;
     }});
   }
@@ -443,9 +443,13 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       var q= frame.onEdtAndWait(() -> canChange() && editable ? onEdt.get() : null);
       if (q == null){ return Void$o$0.instance; }
       var ch= clean(q.a(), q.b(), q.s());
-      fire(frame.changeOnEdt(() -> { layout(); return fired(edit(ch)); }));
+      fire(frame.changeOnEdt(() -> { layout(); return shown(fired(edit(ch))); }));
       return Void$o$0.instance;
     }});
+  }
+  private Fire shown(Fire f){
+    if (frame.focus == this){ frame.scrollToShow(this, caretRect()); }
+    return f;
   }
   static void fire(Fire f){ if (f != null){ f.handler().mut$accept$1(f.event()); } }
   private void act(BooleanSupplier onEdt){ submit(() -> fired(onEdt.getAsBoolean())); }
@@ -507,14 +511,18 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     catch (IllegalStateException | UnsupportedFlavorException | IOException _){ return null; }
   }
 
-  Rectangle caretOnScreen(){
+  Rectangle caretRect(){
     layout();
     var v= lines.get(caretLine());
-    var p= SwingUtilities.convertPoint(component, (int) (left - scrollX + xOf(v, caret)), top - scrollY + v.y(), frame.top.component);
+    return new Rectangle((int) (left - scrollX + xOf(v, caret)), top - scrollY + v.y(), 2 + (int) Math.ceil(composingWidth()), v.h());
+  }
+  Rectangle caretOnScreen(){
+    var c= caretRect();
+    var p= SwingUtilities.convertPoint(component, c.x, c.y, frame.top.component);
     double s= frame.stage.scale();
     var o= frame.stage.offset(s);
     var on= frame.surface.getLocationOnScreen();
-    return new Rectangle(on.x + o.x + (int) (p.x * s), on.y + o.y + (int) (p.y * s), 1, (int) Math.ceil(v.h() * s));
+    return new Rectangle(on.x + o.x + (int) (p.x * s), on.y + o.y + (int) (p.y * s), 1, (int) Math.ceil(c.height * s));
   }
 
   @Override void sk(Canvas cv){
@@ -719,6 +727,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     t.composing = composing.toString();
     t.dirty = true;
     t.reveal = true;
+    frame.scrollToShow(t, t.caretRect());
     if (!done.isEmpty()){ t.input(done.toString()); }
   }
   @Override public void caretPositionChanged(InputMethodEvent e){ e.consume(); }
