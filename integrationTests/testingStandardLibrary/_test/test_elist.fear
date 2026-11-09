@@ -1,4 +1,4 @@
-EListOfNone: EList[Nat]{
+EListOfNone: base.EList[Nat]{
   .size -> 0;
   .close -> this;
   .get(i) -> Error.msg "unused"; .tryGet(i) -> Error.msg "unused"; .add(e) -> Error.msg "unused"; .addAll(l) -> Error.msg "unused";
