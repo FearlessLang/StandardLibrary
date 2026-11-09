@@ -15,8 +15,6 @@ import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -80,7 +78,6 @@ final class Stage extends MouseAdapter{
     owner.surface.addMouseListener(this);
     owner.surface.addMouseMotionListener(this);
     owner.surface.addMouseWheelListener(this);
-    owner.surface.addKeyListener(new KeyAdapter(){ @Override public void keyPressed(KeyEvent e){ if (!e.isConsumed()){ reservedKey(e.getKeyCode()); } } });
     if (Desk.managed){ open(); return; }
     realize(switch (gui.start){ case fullScreen -> Mode.fullScreen; case undecorated -> Mode.fearless; case window, maximised -> Mode.decorated; });
     if (gui.start == _FluentGUI.Start.maximised){ f.setExtendedState(Frame.MAXIMIZED_BOTH); }
@@ -122,11 +119,12 @@ final class Stage extends MouseAdapter{
     Desk.identify(frame, gui.iconName, gui.iconPath, gui.name);
     return frame;
   }
-  private void reservedKey(int code){
-    if (code == _FluentGUI.code(gui.closeKey)){ owner.closeRequest(); return; }
-    if (code != _FluentGUI.code(gui.fullScreenKey)){ return; }
-    if (Desk.managed){ Desk.fullScreen(f, mode != Mode.fullScreen); return; }
+  boolean reservedKey(int code){
+    if (code == _FluentGUI.code(gui.closeKey)){ owner.closeRequest(); return true; }
+    if (code != _FluentGUI.code(gui.fullScreenKey)){ return false; }
+    if (Desk.managed){ Desk.fullScreen(f, mode != Mode.fullScreen); return true; }
     realize(mode == Mode.fullScreen ? Mode.fearless : Mode.fullScreen);
+    return true;
   }
   private void open(){
     f = makeFrame(false);
