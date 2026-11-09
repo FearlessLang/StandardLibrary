@@ -814,8 +814,10 @@ final class _Frame implements Frame$1c$0{
     endComposition();
     focus.commit();
     focus(next);
-    var r= new Rectangle(next.component.getSize());
-    for (AWidget k= next; k.parent() instanceof AWidget p; k = p){
+    scrollToShow(next, new Rectangle(next.component.getSize()));
+  }
+  void scrollToShow(AWidget w, Rectangle r){
+    for (AWidget k= w; k.parent() instanceof AWidget p; k = p){
       r.translate(k.component.getX(), k.component.getY());
       int sx= p.scrollX;
       int sy= p.scrollY;
