@@ -187,7 +187,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   @Override public Object read$get$1(Object p0){ return opt(s.at(idx("get", p0))); }
   @Override public Object mut$set$2(Object p0, Object p1){ s.put(idx("set", p0), p1); return this; }
   @Override public Object mut$remove$1(Object p0){ s.put(idx("remove", p0), null); return this; }
-  @Override public Object mut$clear$0(){ s = s.empty(s.cap()); return this; }
+  @Override public Object mut$clear$0(){ drain(); return this; }
   @Override public Object mut$swap$2(Object p0, Object p1){
     long i= idx("swap", p0);
     long j= idx("swap", p1);
