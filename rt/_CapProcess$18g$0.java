@@ -32,9 +32,10 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     var line= new ByteArrayOutputStream();
     for (var b= System.in.read(); b != '\n'; b= System.in.read()){ assert b >= 0; line.write(b); }
     installParentLifeline();
-    var arg= Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(line.toString(UTF_8)));
-    if (!topLevel(() -> ((InfoMain$aw$0)instance(args[0])).imm$main$2(system(), arg))){ System.exit(1); }
+    var text= line.toString(UTF_8);
+    if (!topLevel(() -> ((InfoMain$aw$0)instance(args[0])).imm$main$2(system(), arg(text, args[0])))){ System.exit(1); }
   }
+  private static Object arg(String text, String main){ return Infos$1c$0.instance.imm$fromStr$1(strOf(text, "The argument of the main "+main)); }
   public static Object system(){
     var sys= new _System$2o$0();
     var names= System.getProperty(namesKey);

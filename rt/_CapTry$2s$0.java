@@ -17,7 +17,7 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
     catch (EndedByManager e){ throw e; }
     catch (StackOverflowError|OutOfMemoryError t){ return info(addStackInfo(new Str$c$0Instance(javaErrMsg(t)).read$info$0(), t)); }
     catch (Throwable t){
-      var msg= t.getClass().getSimpleName()+"\n"+t.getMessage();
+      var msg= t.getClass().getSimpleName()+"\n"+InputFile.portable(String.valueOf(t.getMessage()));
       return info(addStackInfo(new Str$c$0Instance(msg).read$info$0(), t));
     }
   }
