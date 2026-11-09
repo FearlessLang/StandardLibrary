@@ -11,7 +11,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
@@ -119,12 +118,10 @@ final class Stage extends MouseAdapter{
     Desk.identify(frame, gui.iconName, gui.iconPath, gui.name);
     return frame;
   }
-  boolean reservedKey(int code){
-    if (code == _FluentGUI.code(gui.closeKey)){ owner.closeRequest(); return true; }
-    if (code != _FluentGUI.code(gui.fullScreenKey)){ return false; }
-    if (Desk.managed){ Desk.fullScreen(f, mode != Mode.fullScreen); return true; }
+  void reservedKey(int code){
+    if (code == _FluentGUI.code(gui.closeKey)){ owner.closeRequest(); return; }
+    if (Desk.managed){ Desk.fullScreen(f, mode != Mode.fullScreen); return; }
     realize(mode == Mode.fullScreen ? Mode.fearless : Mode.fullScreen);
-    return true;
   }
   private void open(){
     f = makeFrame(false);
@@ -407,7 +404,7 @@ final class Stage extends MouseAdapter{
   @Override public void mouseDragged(MouseEvent e){
     if (pressAt == null){ forward(e); return; }
     var p= e.getLocationOnScreen();
-    if (!dragged && p.distance(pressAt) <= DragSource.getDragThreshold()){ return; }
+    if (!dragged && p.distance(pressAt) <= 4){ return; }
     dragged = true;
     if (Desk.cosmic){ handOver(p); return; }
     if (mode == Mode.fullScreen){ realize(Mode.fearless); }
