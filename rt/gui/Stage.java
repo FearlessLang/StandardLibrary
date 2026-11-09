@@ -70,9 +70,9 @@ final class Stage extends MouseAdapter{
   Point kept= new Point();
   boolean deskMaximized;
   int polledX, polledY, polledW, polledH;
-  Frame xidFrame;
-  long xid, seenPos;
+  Frame watched;
   int still;
+  boolean settled;
 
   Stage(_Frame owner){
     this.owner= owner;
@@ -257,13 +257,13 @@ final class Stage extends MouseAdapter{
     boolean deskWindow= mode == Mode.decorated && !maximized() && !Desk.managed;
     deskResized &= deskWindow;
     boolean fitted= Desk.cosmic && cosmicTick(deskWindow);
-    if (!Desk.cosmic && deskWindow && !unmaximized && (Desk.resizeUnseen || sameSize(f.getBounds(), restore))){ restore = f.getBounds(); }
+    if (!Desk.cosmic && deskWindow && !unmaximized && (Desk.boundsUnseen || sameSize(f.getBounds(), restore))){ restore = f.getBounds(); }
     boolean deskChose= !near(now.width, chosen.width) || !near(now.height, chosen.height);
-    if (!now.equals(lastSize) && deskChose && !fitted){ deskResized |= deskWindow && !Desk.resizeUnseen; request(now); }
+    if (!now.equals(lastSize) && deskChose && !fitted){ deskResized |= deskWindow && !Desk.boundsUnseen; request(now); }
     if (Desk.managed && deskChose && now.width > 0){ chosen = new Dimension(); }
     lastSize = now;
     boolean movable= mode != Mode.fullScreen && !maximized() && !Desk.managed && !Desk.cosmic && (f.getExtendedState() & Frame.ICONIFIED) == 0;
-    if (movable){ if (Desk.resizeUnseen){ keepVisibleSeen(); } else{ keepVisible(); } }
+    if (movable){ if (Desk.boundsUnseen){ keepVisibleSeen(); } else{ keepVisible(); } }
     if (unmaximized && (Desk.cosmic ? sameSize(f.getBounds(), restore) : !Desk.down())){ unmaximized(); return; }
     if (deskResized && !Desk.down()){ compact(); }
   }
@@ -276,20 +276,19 @@ final class Stage extends MouseAdapter{
     f.setLocation(kept);
   }
   private void keepVisibleSeen(){
-    if (xidFrame != f){ xidFrame = f; xid = Desk.xid(f); }
-    long p= Desk.position(xid);
-    if (p != seenPos){ seenPos = p; still = 0; return; }
-    if (still > 10){ return; }
-    still += 1;
-    if (still <= 10){ return; }
+    if (watched != f){ watched = f; Desk.watch(f); still = 0; settled = false; }
+    if (Desk.changed()){ still = 0; settled = false; return; }
+    if (settled || ++still < 10){ return; }
+    still = 0;
     var w= workArea();
     var c= Desk.bounds(f);
-    var e= Desk.extents(xid);
+    var e= Desk.extents(f);
     var b= new Rectangle(c.x-e.left, c.y-e.top, c.width+e.left+e.right, c.height+e.top+e.bottom);
     int vw= Math.min(screen.width/3, b.width);
     int vh= Math.min(screen.height/3, b.height);
     var to= new Point(within(b.x, w.x+vw-b.width, w.x+w.width-vw), within(b.y, w.y+vh-b.height, w.y+w.height-vh));
-    if (!to.equals(b.getLocation())){ Desk.move(f, to); }
+    settled = to.equals(b.getLocation());
+    if (!settled){ Desk.move(f, to); }
   }
   private boolean cosmicTick(boolean deskWindow){
     if (maximized()){
