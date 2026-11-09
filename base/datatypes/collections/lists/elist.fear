@@ -1,4 +1,4 @@
-ELists: {
+ELists: Sealed {
   #[E:*]: mut EList[E] -> _Magic!;
   /// ``ELists.withCapacity n`` creates and returns an empty EList with capacity ``n``.
   /// Throws if ``n >= 2147483647``.
@@ -24,7 +24,7 @@ ELists: {
   #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut EList[E] -> _Magic!;
   }
 
-EList[E:*]: _EditableList[E, EList[E]] {
+EList[E:*]: Sealed, _EditableList[E, EList[E]] {
   /// ``this.size`` returns the number of elements in this collection.
   //> .check{Block#
   //>   .let l={ELists.withCapacity[Nat] 3}
@@ -314,7 +314,9 @@ EList[E:*]: _EditableList[E, EList[E]] {
   /// with indices in the range ``[start, end)``.
   /// Throws if ``start > end`` or ``end > this.size``; returns an empty view if ``start == end``.
   /// Changes made to the view are reflected in this collection.
-  /// Changing the size of this collection other than through the view invalidates the view.
+  /// The view is the range of indices ``[start, end)`` of this collection: adding or removing through the view moves ``end``,
+  /// and a change of size of this collection other than through the view moves neither ``start`` nor ``end``.
+  /// Using the view when ``end`` is greater than ``this.size`` throws.
   /// Time Complexity: O(1).
   //> .check{Block#
   //>   .let elist={ELists#(1,2,3,4,5)}
