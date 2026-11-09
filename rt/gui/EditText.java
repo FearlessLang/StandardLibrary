@@ -213,7 +213,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       if (e < 0){ break; }
       s = e + 1;
     }
-    contentW = w + 2;
+    contentW = w + 2 + (int) Math.ceil(composingWidth());
     contentH = y;
     scrollX = Math.clamp(scrollX, 0, maxScrollX());
     scrollY = Math.clamp(scrollY, 0, maxScrollY());
@@ -314,7 +314,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
 
   void showCaret(){
     var v= lines.get(caretLine());
-    int x= (int) xOf(v, caret);
+    int x= (int) (xOf(v, caret) + composingWidth());
     int nx= Math.max(Math.min(scrollX, x), x + 2 - viewW());
     int ny= Math.max(Math.min(scrollY, v.y()), v.y() + v.h() - viewH());
     scrollTo(nx, ny);
@@ -532,9 +532,14 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     Sk.clip(cv, left, top, viewW(), viewH());
     Sk.at(cv, left - scrollX, top - scrollY, 1);
     int last= lineAt(scrollY + viewH());
-    for (int i= lineAt(scrollY); i <= last; i += 1){ line(cv, lines.get(i), focused); }
+    float tw= focused && frame.keyboard ? composingWidth() : 0;
+    int at= caretLine();
+    for (int i= lineAt(scrollY); i <= last; i += 1){
+      if (i == at && tw > 0){ pushed(cv, lines.get(i), tw); continue; }
+      line(cv, lines.get(i), focused);
+    }
     if (focused && frame.keyboard){
-      var v= lines.get(caretLine());
+      var v= lines.get(at);
       Sk.at(cv, xOf(v, caret), v.y(), 1);
       caret(cv, v.h());
     }
@@ -565,13 +570,24 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     Sk.paint.setColor(fg);
     Sk.drawAt(cv, v.line(), (v.w() - v.line().width()) / 2, v.y() + v.line().settings().baseline(v.h()), Sk.paint, scrollX, scrollX + viewW());
   }
+  private void pushed(Canvas cv, VLine v, float tw){
+    float x= xOf(v, caret);
+    int save= cv.save();
+    Sk.clip(cv, scrollX - 1, v.y(), x - scrollX + 1, v.h());
+    line(cv, v, true);
+    cv.restoreToCount(save);
+    cv.save();
+    Sk.clip(cv, x + tw, v.y(), contentW, v.h());
+    Sk.at(cv, tw, 0, 1);
+    line(cv, v, true);
+    cv.restoreToCount(save);
+  }
+  float composingWidth(){ return composing.isEmpty() ? 0 : (float) Sk.shape(composing, textSettings).width(); }
   private static void highlight(Canvas cv, VLine v, float lo, float hi){ if (lo < hi){ Sk.rect(cv, lo, v.y(), hi - lo, v.h(), fill); } }
   private void caret(Canvas cv, int lh){
     if (!composing.isEmpty()){
       var t= Sk.shape(composing, textSettings);
       float tw= (float) t.width();
-      Sk.paint.setColor(0xFFFFFFF0);
-      cv.drawRect(Rect.makeXYWH(0, 0, tw, lh), Sk.paint);
       Sk.paint.setColor(fg);
       float base= (float) textSettings.baseline(lh);
       Sk.drawAt(cv, t, 0, base, Sk.paint);
@@ -701,6 +717,8 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     var t= frame.focus;
     if (t == null || frame.menus.isOpen() || dropping){ return; }
     t.composing = composing.toString();
+    t.dirty = true;
+    t.reveal = true;
     if (!done.isEmpty()){ t.input(done.toString()); }
   }
   @Override public void caretPositionChanged(InputMethodEvent e){ e.consume(); }
