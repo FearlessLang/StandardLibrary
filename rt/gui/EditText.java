@@ -619,6 +619,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   final _Frame frame;
   final HashMap<List<Integer>,To> routes= new HashMap<>();
   To typing= To.nobody;
+  boolean dropping;
   char high;
   CTextKeys(_Frame frame){ this.frame= frame; }
 
@@ -698,7 +699,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     }
     e.consume();
     var t= frame.focus;
-    if (t == null || frame.menus.isOpen()){ return; }
+    if (t == null || frame.menus.isOpen() || dropping){ return; }
     t.composing = composing.toString();
     if (!done.isEmpty()){ t.input(done.toString()); }
   }

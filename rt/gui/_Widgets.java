@@ -786,7 +786,7 @@ final class _Frame implements Frame$1c$0{
     surface.addKeyListener(textKeys);
     surface.addFocusListener(textKeys);
     surface.addInputMethodListener(textKeys);
-    surface.enableInputMethods(true);
+    surface.enableInputMethods(false);
   }
 
   void pressed(AWidget d){
@@ -796,6 +796,13 @@ final class _Frame implements Frame$1c$0{
   }
   void focus(AEditText t){
     if (t == focus){ return; }
+    if (focus != null){
+      focus.composing = "";
+      textKeys.dropping = true;
+      surface.getInputContext().endComposition();
+      SwingUtilities.invokeLater(() -> textKeys.dropping = false);
+    }
+    surface.enableInputMethods(t != null);
     focus = t;
     textKeys.focusMoved();
   }
