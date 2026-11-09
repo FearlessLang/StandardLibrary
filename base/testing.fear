@@ -25,7 +25,8 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 ///While a Test is a named Test that only calls `.check`.
 ///We can then arbitrary make trees of test suites or by nesting them in other test suites.
 ///
-///A name is only reported when the name is present.
+///A check is reported under the name of the innermost `Test` around it whose name does not start with ``_``.
+///A check with no such `Test` around it is reported under the type where the check is written.
 ///Example code with two test suites.
 ///```
 ///MyTests: UnitTests {::
@@ -157,9 +158,18 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
 TestCont[T]: { #(t: T, self: mut TestCap): mut TestCap }
 
 _TestCaps: {
-  #(sys: mut System, ts: mut EList[CheckInfo]): mut RTestCap -> mut RTestCap: TestCap {'self
+  #(sys: mut System, ts: mut EList[CheckInfo]): mut RTestCap -> Block#
+    .var[Opt[Str]] name = {Opt[Str]{}}
+    .return {mut RTestCap: TestCap {'self
+    .test t -> Block#
+      .let[Opt[Str]] outer = {name.get}
+      .do {name.set(_TestName#(t, outer))}
+      .do {Block#(t.tests self, Void)}
+      .do {name.set outer}
+      .return {self};
+
     .check c -> Block#
-      .let[List[StackFrame]] st = {c._fetchTrace {sys.try.currentStackTrace}}
+      .let[List[StackFrame]] st = {_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get)}
       .do {UnitTestLog.log(_PlanLine#("RUN",st))}
       .do {ts.add(CheckInfos#(
         { _ -> c#; ._fetchTrace f -> c._fetchTrace f },
@@ -167,29 +177,40 @@ _TestCaps: {
       .return {self};
 
     .checkWithSys c -> Block#
-      .let[List[StackFrame]] st = {c._fetchTrace {sys.try.currentStackTrace}}
+      .let[List[StackFrame]] st = {_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get)}
       .do {UnitTestLog.log(_PlanLine#("RUN",st))}
       .do {ts.add(CheckInfos#(c,st)).void}
       .return {self};
 
     .disabledCheck c -> Block#(
-      UnitTestLog.log(_PlanLine#("DISABLED",c._fetchTrace {sys.try.currentStackTrace})),
+      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get))),
       self);
 
     .disabledCheckWithSys c -> Block#(
-      UnitTestLog.log(_PlanLine#("DISABLED",c._fetchTrace {sys.try.currentStackTrace})),
+      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(c._fetchTrace {sys.try.currentStackTrace}, name.get))),
       self);
 
-    .disabledTest _ -> Block#(
-      UnitTestLog.log(_PlanLine#("DISABLED",sys.try.currentStackTrace)),
+    .disabledTest t -> Block#(
+      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(sys.try.currentStackTrace, _TestName#(t, name.get)))),
       self);
 
     mut .run: Void ->
       ts.seqFlow.forEach(Void, { _, ci->
         UnitTestLog.log(_AddToLog#(ci.stackTrace,sys.try#(sys.iso.close,{ t: iso System -> ci.check#t })))
       })
-    }
+    }}
   }
+
+_TestName: { #(t: Test, outer: Opt[Str]): Opt[Str] -> Block#
+  .let[Str] n = {t.name.sub(t.name.indexOf(".")! + 1, t.name.size)}
+  .if {n.startsWith "_"} .return {outer}
+  .return {Opts#n}
+  }
+
+_Named: { #(st: List[StackFrame], name: Opt[Str]): List[StackFrame] -> name.match{
+  .empty -> st;
+  .some n -> Lists#(StackFrames#(st.getFirst.fileName, n, st.getFirst.methodName, st.getFirst.lineNumber));
+  }}
 
 Check: { #: Void; ._fetchTrace(f: mut MF[List[StackFrame]]): List[StackFrame]->f#; }
 CheckSys: { #(sys: mut System): Void; ._fetchTrace(f: mut MF[List[StackFrame]]): List[StackFrame]->f#; }
@@ -197,7 +218,7 @@ CheckSys: { #(sys: mut System): Void; ._fetchTrace(f: mut MF[List[StackFrame]]):
 CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->CheckInfo: {
   .check: CheckSys->c; .stackTrace: List[StackFrame]->st;}}
 
-Test: { .tests(t: mut TestCap): mut TestCap; }
+Test: Named { .tests(t: mut TestCap): mut TestCap; }
 
 _AddToLog: {
   #(st: List[StackFrame], a: mut Action[Void]): Str -> Block#
