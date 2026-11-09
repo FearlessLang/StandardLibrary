@@ -615,7 +615,7 @@ record CTextEvent(Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0
 }
 
 final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodListener, InputMethodRequests{
-  enum To{ menus, widget, frame, desk, nobody }
+  enum To{ menus, widget, frame, nobody }
   final _Frame frame;
   final HashMap<List<Integer>,To> routes= new HashMap<>();
   To typing= To.nobody;
@@ -630,27 +630,34 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   @Override public void keyPressed(KeyEvent e){
     var id= List.of(e.getKeyCode(), e.getKeyLocation());
     var to= routes.get(id);
-    boolean first= to == null;
-    if (first){
+    if (to == null){
       var f= frame.focus;
       to = first(e);
-      routes.put(id, f == frame.focus ? to : To.nobody);
+      if (f != frame.focus){ to = To.nobody; }
+      routes.put(id, to);
+      if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.pressed)); }
     }
     else if (to == To.menus && frame.menus.isOpen() && e.getKeyCode() != _FluentGUI.code(frame.gui.closeKey)){ frame.menus.key(e); }
     else if (to == To.widget){ frame.focus.key(e); }
-    typing = routes.get(id);
-    if (to != To.frame && !(first && to == To.desk)){ e.consume(); }
+    typing = to;
+    if (to != To.frame){ e.consume(); }
   }
   private To first(KeyEvent e){
     if (frame.menus.isOpen() && e.getKeyCode() != _FluentGUI.code(frame.gui.fullScreenKey)){
       frame.menus.key(e);
       return To.menus;
     }
-    if (frame.reserved(e.getKeyCode())){ return To.desk; }
+    if (frame.stage.reservedKey(e.getKeyCode())){ return To.nobody; }
     if (frame.focus != null && frame.focus.key(e)){ return To.widget; }
     return To.frame;
   }
+  void releaseFrameKeys(){
+    var k= frame.keys;
+    frame.frame.queue.submitAll(routes.entrySet().stream().filter(r -> r.getValue() == To.frame).map(r -> k.task(r.getKey().getFirst(), k.released)).toList());
+    routes.replaceAll((_, to) -> to == To.frame ? To.nobody : to);
+  }
   void focusMoved(){
+    releaseFrameKeys();
     typing = To.nobody;
     routes.replaceAll((_, _) -> To.nobody);
   }
@@ -668,11 +675,12 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   @Override public void focusGained(FocusEvent e){ frame.keyboard = true; }
   @Override public void keyReleased(KeyEvent e){
     var to= routes.remove(List.of(e.getKeyCode(), e.getKeyLocation()));
-    if (to != null && to != To.frame){ e.consume(); }
+    if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.released)); return; }
+    if (to != null){ e.consume(); }
   }
   @Override public void focusLost(FocusEvent e){
     frame.keyboard = false;
-    typing = To.nobody;
+    focusMoved();
     routes.clear();
   }
 

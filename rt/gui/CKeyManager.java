@@ -3,42 +3,19 @@ package _base;
 import static _base.Scopes.*;
 import static _base.Util.*;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.FocusListener{
+final class CKeyManager implements Keys$o$0{
   final _Frame frame;
   final ArrayList<CKeyAction> pressed= new ArrayList<>();
   final ArrayList<CKeyAction> released= new ArrayList<>();
-  // Keys currently down, tracked so a lost window focus (alt-tab, OS focus
-  // switch) can synthesize the releases AWT will otherwise never deliver:
-  // without this, a key held during a focus switch leaves any state the
-  // model set on .pressed (e.g. "moving left") stuck forever, since the
-  // matching .released handler never runs.
-  private final java.util.Set<List<Integer>> held= new java.util.HashSet<>();
 
   boolean changeable= true;// EDT confined
 
   CKeyManager(_Frame frame){ this.frame= frame; }
 
-  @Override public void keyPressed(KeyEvent e){
-    if (frame.reserved(e.getKeyCode()) || e.isConsumed()){ return; }
-    if (held.add(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), pressed)); }
-  }
-  @Override public void keyReleased(KeyEvent e){
-    if (frame.reserved(e.getKeyCode())){ return; }
-    if (held.remove(List.of(e.getKeyCode(), e.getKeyLocation()))){ frame.frame.queue.submit(task(e.getKeyCode(), released)); }
-  }
-  void releaseAll(){
-    frame.frame.queue.submitAll(held.stream().map(k -> task(k.getFirst(), released)).toList());
-    held.clear();
-  }
-  @Override public void focusLost(java.awt.event.FocusEvent e){ releaseAll(); }
-  @Override public void focusGained(java.awt.event.FocusEvent e){}
-
-  private MF$7$1 task(int eventKey, List<CKeyAction> keyActions){
+  MF$7$1 task(int eventKey, List<CKeyAction> keyActions){
     var elapsed= frame.elapsed;
     var panelWidth= w(frame.top.component.getWidth());
     var panelHeight= h(frame.top.component.getHeight());
@@ -66,7 +43,7 @@ final class CKeyManager extends KeyAdapter implements Keys$o$0, java.awt.event.F
   void check(String closed, String replaced){
     frame.onEdtAndWait(() -> {
       if (frame.frame.completed()){ throw Util.detErr(closed); }
-      if (!changeable &&!List.of(frame.surface.getKeyListeners()).contains(this)){ throw Util.detErr(replaced); }
+      if (!changeable && frame.keys != this){ throw Util.detErr(replaced); }
     });
   }
   private Object addKeyAction(Object scope, List<CKeyAction> list){

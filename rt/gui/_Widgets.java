@@ -732,6 +732,7 @@ final class _Frame implements Frame$1c$0{
   final _FluentGUI gui;
   final SkMouse mouse= new SkMouse(this);
   final CTextKeys textKeys= new CTextKeys(this);
+  CKeyManager keys= new CKeyManager(this);
   final SkMenus menus= new SkMenus(this);
   @SuppressWarnings("serial")
   final JComponent surface= new JComponent(){
@@ -797,9 +798,6 @@ final class _Frame implements Frame$1c$0{
     if (t == focus){ return; }
     focus = t;
     textKeys.focusMoved();
-    for (var l : surface.getKeyListeners()){
-      if (l instanceof CKeyManager k){ k.releaseAll(); }
-    }
   }
 
   void tab(boolean back){
@@ -981,7 +979,6 @@ final class _Frame implements Frame$1c$0{
   }
 
   String windowTitle(){ return title.isEmpty() ? gui.name : gui.name + "    " + title; }
-  boolean reserved(int key){ return key == _FluentGUI.code(gui.closeKey) || key == _FluentGUI.code(gui.fullScreenKey); }
   void closeRequest(){
     frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       if (onClose == null){ return mut$close$0(); }
@@ -1044,12 +1041,8 @@ final class _Frame implements Frame$1c$0{
     var keys= new CKeyManager(this);
     ((Scope$1c$1) scope).mut$run$1(keys);
     return onEdt(() -> {
-      textKeys.routes.replaceAll((_, to) -> to == CTextKeys.To.frame ? CTextKeys.To.nobody : to);
-      for (var l : surface.getKeyListeners()){
-        if (l instanceof CKeyManager k){ k.releaseAll(); surface.removeKeyListener(k); surface.removeFocusListener(k); }
-      }
-      surface.addKeyListener(keys);
-      surface.addFocusListener(keys);
+      textKeys.releaseFrameKeys();
+      this.keys = keys;
       keys.changeable = false;
     });
   }
