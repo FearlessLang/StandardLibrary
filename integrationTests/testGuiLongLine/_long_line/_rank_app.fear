@@ -15,8 +15,9 @@ LongLine: Main{ sys -> sys.gui.run{f -> Block#
     .content.pane{::
       .background(Color.ghostWhite)
       .horizontal .maxPerLine 1
-      .label{:: .text "Click in the area below, press Home and type: each key shows within a frame." }
+      .label{:: .text "Click in an area below, press Home and type: each key shows within a frame." }
       .textArea{:: .width 760 .height 150 .wrap False .text line }
+      .textArea{:: .width 760 .height 150 .text line }
       }
     }
   }}
