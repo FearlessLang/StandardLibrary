@@ -78,7 +78,7 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
     var kind= text.substring(0, nl);
     var rest= text.substring(nl+1).stripTrailing();
     if (kind.equals("ok") && rest.isEmpty()){ return Void$o$0.instance; }
-    var info= (Info$o$0)Infos$1c$0.instance.imm$fromStr$1(new Str$c$0Instance(rest));
+    var info= (Info$o$0)Infos$1c$0.instance.imm$fromStr$1(strOf(rest, "The result of the process running "+name));
     if (kind.equals("ok")){ return info; }
     if (kind.equals("det")){ throw deterministic(info); }
     assert kind.equals("nondet");

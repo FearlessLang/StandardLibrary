@@ -258,7 +258,12 @@ public final class Util{
     }
     var msg= t.getMessage();
     if (msg == null || msg.isBlank()){ return "Backend exception: "+t.getClass().getName(); }
-    return "Backend exception: "+t.getClass().getName()+": "+msg;
+    return "Backend exception: "+t.getClass().getName()+": "+InputFile.portable(msg);
+  }
+  static Object strOf(String text, String where){
+    var bad= text.codePoints().filter(c -> !UStr$s$0Instance.isStrScalar(c)).findFirst();
+    if (bad.isPresent()){ throw nonDetErr(where+" holds the character "+String.format(java.util.Locale.ROOT, "U+%04X", bad.getAsInt())+", which a Str can not hold."); }
+    return Str$c$0Instance.instance(text);
   }
 }
 @SuppressWarnings("serial")
