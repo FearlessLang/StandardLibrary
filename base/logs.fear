@@ -23,7 +23,7 @@ Log: { .log(s: read ToStr): Void -> _Magic! }
 ///representation of s, without adding a timestamp and without adding a
 ///newline.
 /// See also: base.Log
-UnitTestLog: { .log(s: read ToStr): Void -> _Magic! }
+UnitTestLog: { .log(s: read ToStr): Void -> _Magic!; .plan(kind: Str, frame: StackFrame): Void -> _Magic! }
 
 
 ///Logs values in memory.

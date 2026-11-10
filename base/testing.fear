@@ -172,18 +172,18 @@ _TestCaps: {
 
     .checkWithSys c -> Block#
       .let[List[StackFrame]] st = {_Named#(sys.try.currentStackTrace, name.get)}
-      .do {UnitTestLog.log(_PlanLine#("RUN",st))}
+      .do {UnitTestLog.plan("RUN", st.getFirst)}
       .do {ts.add(CheckInfos#(c,st)).void}
       .return {self};
 
     .disabledCheck c -> self.disabledCheckWithSys{_ -> c#};
 
     .disabledCheckWithSys c -> Block#(
-      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(sys.try.currentStackTrace, name.get))),
+      UnitTestLog.plan("DISABLED", _Named#(sys.try.currentStackTrace, name.get).getFirst),
       self);
 
     .disabledTest t -> Block#(
-      UnitTestLog.log(_PlanLine#("DISABLED",_Named#(sys.try.currentStackTrace, _TestName#(t, name.get)))),
+      UnitTestLog.plan("DISABLED", _Named#(sys.try.currentStackTrace, _TestName#(t, name.get)).getFirst),
       self);
 
     mut .run: Void ->
@@ -314,23 +314,6 @@ _FailureTrace: { #(i: Info): Str -> Block#
     + " error line: " + ln
     + " in file " + fn
     }
-  }
-
-_PlanLine: {
-  #(kind: Str, st: List[StackFrame]): Str -> Block#
-    .let[StackFrame] f = {st.getFirst}
-    .return {
-      "PLAN|"
-      + kind
-      + "|"
-      + (f.fileName)
-      + "|"
-      + (f.typeName)
-      + "|"
-      + (f.typeName) + " at line: " + (f.lineNumber)
-      + "|"
-      + (f.lineNumber)|//| to end in new line
-      };
   }
 
 _XmlEscape: {
