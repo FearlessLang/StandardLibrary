@@ -45,6 +45,7 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///resets the file times that are unset or in the future, and deletes the folders and the zips left with nothing inside.
   ///The manager refuses it while a main or a compilation of the project runs, and while a main of a project with a mount of the project runs.
   ///Returns one line for each change, or the line saying that the project needs no fix.
+  ///A change that the file system refuses ends the fix: the result is then the lines of the changes done, followed by the text of the error.
   mut .fix(name: Str): UStr;
   ///Selects the project ``name`` and ends the main of the project currently running, if any.
   ///The manager refuses it while a compilation of the project runs.
