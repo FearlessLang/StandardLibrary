@@ -88,22 +88,34 @@ final class SparseTreeStore implements SparseStore{
     return n == null ? null : n[(int) (i & ((1L << b) - 1))];
   }
   @Override public void put(long i, Object e){
-    if (root == null){
-      if (e == null){ return; }
-      root = make(bits);
+    if (e == null){
+      if (root != null && clear(root, bits, i)){ root = null; }
+      return;
     }
+    if (root == null){ root = make(bits); }
     var n= root;
     for (int b= bits; b > leafBits; b -= 1){
       int c= child(i, b);
-      if (n[c] == null){
-        if (e == null){ return; }
-        n[c] = make(b - 1);
-      }
+      if (n[c] == null){ n[c] = make(b - 1); }
       n = (Object[]) n[c];
     }
     int k= (int) (i & ((1L << Math.min(bits, leafBits)) - 1));
-    count += (e == null ? 0 : 1) - (n[k] == null ? 0 : 1);
+    count += n[k] == null ? 1 : 0;
     n[k] = e;
+  }
+  private boolean clear(Object[] n, int b, long i){
+    if (b <= leafBits){
+      int k= (int) (i & ((1L << b) - 1));
+      if (n[k] == null){ return false; }
+      count -= 1;
+      n[k] = null;
+      for (var x : n){ if (x != null){ return false; } }
+      return true;
+    }
+    int c= child(i, b);
+    if (n[c] == null || !clear((Object[]) n[c], b - 1, i)){ return false; }
+    n[c] = null;
+    return n[1 - c] == null;
   }
   private static void walk(Object[] n, int b, long base, LongStream.Builder out){
     if (b <= leafBits){

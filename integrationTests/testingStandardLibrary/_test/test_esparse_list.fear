@@ -64,6 +64,10 @@ TestESparseList: Test {::
   .check{ESparseLists.backedWithSparseSegmentTree[Nat](Math.maxNat).set(9223372036854775808, 5).trimTo(9223372036854775807, Math.maxNat).get 1 .assertEq({::}, Opts# 5)}
   .check{ESparseLists.backedWithSparseSegmentTree[Nat] 3 .set(2, 1).increaseCapacity 2000 .set(1999, 2).set(700, 3).flatSeqFlow.list .assertEq({::}, Lists#(1, 3, 2))}
   .check{ESparseLists.backedWithSparseSegmentTree[Nat] 3 .set(2, 1).fillAndExpand(ELists#(7, 8, 9)).getEList.list .assertEq({::}, Lists#(7, 8, 1, 9))}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat] 2000 .set(1500, 1).set(10, 2).remove 1500 .set(1500, 3).flatSeqFlow.list .assertEq({::}, Lists#(2, 3))}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat] 2000 .set(1500, 1).remove 1500 .numHoles .assertEq 2000}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat] 2000 .set(1500, 1).remove 1500 .set(3, 4).get 3 .assertEq({::}, Opts# 4)}
+  .check{ESparseLists.backedWithSparseSegmentTree[Nat] 2000 .set(3, 4).remove 1500 .remove 1500 .numHoles .assertEq 1999}
   .check{(0 =~~= 1999).flow.fold({ESparseLists.backedWithSparseSegmentTree[Nat] 2000}, {l, i -> l.set(i, i * 2)}).flatSeqFlow.sum 0 .assertEq 3998000}
   .check{Block#
     .let l={ESparseLists.backedWithSparseSegmentTree[Nat] 2000 .set(5, 1).set(1500, 2)}
