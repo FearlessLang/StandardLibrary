@@ -61,24 +61,9 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .prettyStr: Str -> _InfoToPrettyString#(this);
   +(other: Info) : Info -> this.match {
     .empty -> other;
-    .msg(s1) -> other.match {
-      .empty   -> this;
-      .msg(s2) -> Infos.msg(s1|s2);
-      .list(l2)-> Infos.map("msg",s1,"list",l2.info {::});
-      .map(_)  -> Infos.map("msg",s1)+other
-      };
-    .list(l1) -> other.match {
-      .empty   -> this;
-      .msg(s2) -> Infos.map("msg",s2,"list",l1.info {::});
-      .list(l2)-> l1 ++ l2 .info {::};
-      .map(_)  -> Infos.map("list",l1.info {::}) + other;
-      };
-    .map(m1) -> other.match {
-      .empty   -> this;
-      .msg  s2 -> _InfoMapPlus#(m1, Maps#({::}, "msg", s2.info)) .info {::};
-      .list l2 -> _InfoMapPlus#(m1, Maps#({::}, "list", l2.info {::})) .info {::};
-      .map  m2 -> _InfoMapPlus#(m1, m2) .info {::};
-      };
+    .msg(s1) -> other.matchWithDefault{ .msg(s2) -> Infos.msg(s1|s2); .default -> _InfoPlus#(this, other) };
+    .list(l1) -> other.matchWithDefault{ .list(l2) -> l1 ++ l2 .info {::}; .default -> _InfoPlus#(this, other) };
+    .map(_) -> _InfoPlus#(this, other);
     };
 
   .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> f#{.extract -> Opts# this }.extract;
@@ -91,6 +76,16 @@ ExtractionFunction[R:*]: F[InfoExtractor, Extractor[R]] {}
 /// Union of Str (index into map) and Nat (index into list)
 InfoKey: Sealed, ToStr {
   .indexInto(Info): Opt[Info];
+  }
+
+_InfoPlus: {
+  #(a: Info, b: Info): Info -> b.isEmpty ? {.then -> a; .else -> _InfoMapPlus#(this.lift a, this.lift b) .info {::}};
+  .lift(i: Info): Map[Str,Info] -> i.match{
+    .empty -> Unreachable!;
+    .msg s -> Maps#({::}, "msg", s.info);
+    .list l -> Maps#({::}, "list", l.info {::});
+    .map m -> m;
+    };
   }
 
 _InfoMapPlus: { #(m1: Map[Str,Info], m2: Map[Str,Info]): Map[Str,Info] ->
