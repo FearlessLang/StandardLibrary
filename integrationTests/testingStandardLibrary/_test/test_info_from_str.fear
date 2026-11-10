@@ -47,9 +47,46 @@ InfoFromStrErrorTests: Test {::
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `"hi"trailing`})
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{"a""b"}`})
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{ab":"c"}`})
-  .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: invalid escape at position 2 in "}}, {Infos.fromStr `"a\tb"`})
-  .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: invalid escape at position 1 in "}}, {Infos.fromStr `"\u0009"`})
-  .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: repeated key "}}, {Infos.fromStr `{"a":"1","a":"2"}`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| "a\tb"`
+    | "   | ~~^^--"
+    | ""
+    | "While inspecting string > full text"
+    | `Invalid escape "\t".`
+    | `The escapes are "\\", "\"" and "\n".`)}}, {Infos.fromStr `"a\tb"`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| "\u0009"`
+    | "   | ~^^-----"
+    | ""
+    | "While inspecting string > full text"
+    | `Invalid escape "\u".`
+    | `The escapes are "\\", "\"" and "\n".`)}}, {Infos.fromStr `"\u0009"`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| {"a":"1","a":"2"}`
+    | "   | ---------^^^~~~~"
+    | ""
+    | "While inspecting map key > map entry > map > full text"
+    | `Repeated key "a".`)}}, {Infos.fromStr `{"a":"1","a":"2"}`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | "001| ["
+    | `002| "a",`
+    | `003| "b`
+    | "   | ^^"
+    | ""
+    | "While inspecting string > list element > list > full text"
+    | "Unterminated string.")}}, {Infos.fromStr("[" | `"a",` | `"b`)})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| {"a":`
+    | "   | -~~~^"
+    | ""
+    | "While inspecting map entry > map > full text"
+    | "Unexpected end of the text."
+    | "Expected: a value.")}}, {Infos.fromStr `{"a":`})
   }
 
 TestInfoFromStr: Test {::
