@@ -231,7 +231,7 @@ RevokableLogReader: { #[T](r: mut Revocation, u: mut CapLogReader[T]): mut CapLo
   .iso -> RevokableLogReader#(r.iso.close, u.iso.close);
   .close -> s;
   }}
-RevokableGui: { #(r: mut Revocation, u: mut CapGui): mut CapGui -> {
+RevokableGui: { #(r: mut Revocation, u: mut CapGui): mut CapGui -> {'s
   .screenWidth -> Block#(r#, u.screenWidth);
   .screenHeight -> Block#(r#, u.screenHeight);
   .uName n -> Block#(r#, RevokableGui#(r, u.uName n));
@@ -245,6 +245,8 @@ RevokableGui: { #(r: mut Revocation, u: mut CapGui): mut CapGui -> {
   .closeKey k -> Block#(r#, RevokableGui#(r, u.closeKey k));
   .fullScreenKey k -> Block#(r#, RevokableGui#(r, u.fullScreenKey k));
   .run c -> Block#(r#, u.run c);
+  .iso -> RevokableGui#(r.iso.close, u.iso.close);
+  .close -> s;
   }}
 
 InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
