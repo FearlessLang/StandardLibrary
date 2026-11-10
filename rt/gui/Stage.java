@@ -1,6 +1,7 @@
 package _base;
 
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
@@ -10,6 +11,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.desktop.QuitEvent;
+import java.awt.desktop.QuitResponse;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
@@ -77,6 +80,7 @@ final class Stage extends MouseAdapter{
     owner.surface.addMouseListener(this);
     owner.surface.addMouseMotionListener(this);
     owner.surface.addMouseWheelListener(this);
+    if (Desk.mac){ Desktop.getDesktop().setQuitHandler(this::quit); }
     if (Desk.managed){ open(); return; }
     realize(switch (gui.start){ case fullScreen -> Mode.fullScreen; case undecorated -> Mode.fearless; case window, maximised -> Mode.decorated; });
     if (gui.start == _FluentGUI.Start.maximised){ f.setExtendedState(Frame.MAXIMIZED_BOTH); }
@@ -117,6 +121,10 @@ final class Stage extends MouseAdapter{
     });
     Desk.identify(frame, gui.iconName, gui.iconPath, gui.name);
     return frame;
+  }
+  private void quit(QuitEvent e, QuitResponse r){
+    r.cancelQuit();
+    owner.closeRequest();
   }
   void reservedKey(int code){
     if (code == _FluentGUI.code(gui.closeKey)){ owner.closeRequest(); return; }
