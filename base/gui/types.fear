@@ -6,16 +6,16 @@ Wrapper[S,T]: DataType[S,S] {
   read #(t:T): S;
   .hash -> this.getDataType.hash;
   .cmp(a,b) ->
-    this.getDataType.cmp(this.close(a).get, this.close(b).get);
-  read .close(s: read S): read Wrapper[S,T];
+    this.getDataType.cmp(this.id#(a).get, this.id#(b).get);
+  read .id: BaseId[read S,read Wrapper[S,T]];
   .info -> this.getDataType.info;
   .imm -> this#(this.get);
   }
 
 ExtentNat[S]: Wrapper[S,Nat] {
-  +(other: S): S -> this#(this.get + (this.close(other).get));
-  -(other: S): S -> this#(this.get - (this.close(other).get));
-  .gap(other: S): S -> this.close(other).get |> {b -> (this.get >= b).if{ .then -> this#(this.get - b); .else -> this#(b - (this.get)) }};
+  +(other: S): S -> this#(this.get + (this.id#(other).get));
+  -(other: S): S -> this#(this.get - (this.id#(other).get));
+  .gap(other: S): S -> this.id#(other).get |> {b -> (this.get >= b).if{ .then -> this#(this.get - b); .else -> this#(b - (this.get)) }};
   *(k: Nat): S -> this#(this.get * k);
   .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
   /// ``this.tryGetTruncDiv(k)`` returns `.ok` of ``this.getTruncDiv(k)``, or the error info of ``this.get.getTruncDiv(k)`` iff ``k == 0``.
@@ -27,32 +27,32 @@ ExtentNat[S]: Wrapper[S,Nat] {
 
 CoordNat[S,E]: Wrapper[S,Nat] {
   read .extent: Wrapper[E,Nat];
-  +(d: E): S -> this#(this.get + (this.extent.close(d).get));
-  -(d: E): S -> this#(this.get - (this.extent.close(d).get));
-  .to(other: S): E -> this.extent#(this.close(other).get - (this.get));
-  .gap(other: S): E -> this.close(other).get |> {b -> (this.get >= b).if{ .then -> this.extent#(this.get - b); .else -> this.extent#(b - (this.get)) }};
+  +(d: E): S -> this#(this.get + (this.extent.id#(d).get));
+  -(d: E): S -> this#(this.get - (this.extent.id#(d).get));
+  .to(other: S): E -> this.extent#(this.id#(other).get - (this.get));
+  .gap(other: S): E -> this.id#(other).get |> {b -> (this.get >= b).if{ .then -> this.extent#(this.get - b); .else -> this.extent#(b - (this.get)) }};
   .origin: S -> this#0;
   }
 
 CoordInt[S,E]: Wrapper[S,Int] {
   read .extent: Wrapper[E,Nat];
-  +(d: E): S -> this#(this.get + (this.extent.close(d).get.getInt));
-  -(d: E): S -> this#(this.get - (this.extent.close(d).get.getInt));
-  .to(other: S): E -> this.extent#(this.close(other).get - (this.get) .getNat);
-  .gap(other: S): E -> this.close(other).get |> {b -> (this.get >= b).if{
+  +(d: E): S -> this#(this.get + (this.extent.id#(d).get.getInt));
+  -(d: E): S -> this#(this.get - (this.extent.id#(d).get.getInt));
+  .to(other: S): E -> this.extent#(this.id#(other).get - (this.get) .getNat);
+  .gap(other: S): E -> this.id#(other).get |> {b -> (this.get >= b).if{
     .then -> this.extent#(this.get - b .getNat);
     .else -> this.extent#(b - (this.get) .getNat) }};
   .origin: S -> this#(+0);
   }
 
 XInt: CoordInt[XInt,WidthNat] {.name->"X"; .getDataType -> +0; .extent -> WidthNat;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 YInt: CoordInt[YInt,HeightNat] {.name->"Y"; .getDataType -> +0; .extent -> HeightNat;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 WidthNat:ExtentNat[WidthNat] {.name->"Width"; .getDataType -> 0;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 HeightNat:ExtentNat[HeightNat] {.name->"Height"; .getDataType -> 0;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 
 Rect: {
   .x: XInt; .y: YInt; .width: WidthNat; .height: HeightNat;
@@ -66,9 +66,9 @@ Rects: { #(x: XInt, y: YInt, width: WidthNat, height: HeightNat): Rect ->
   { .x -> x; .y -> y; .width -> width; .height -> height; } }
 
 LevelByte[S]: Wrapper[S,Byte] {
-  +(other: S): S -> this#(this.get + (this.close(other).get));
-  -(other: S): S -> this#(this.get - (this.close(other).get));
-  .gap(other: S): S -> this.close(other).get |> {b -> (this.get >= b).if{ .then -> this#(this.get - b); .else -> this#(b - (this.get)) }};
+  +(other: S): S -> this#(this.get + (this.id#(other).get));
+  -(other: S): S -> this#(this.get - (this.id#(other).get));
+  .gap(other: S): S -> this.id#(other).get |> {b -> (this.get >= b).if{ .then -> this#(this.get - b); .else -> this#(b - (this.get)) }};
   .getTruncDiv(k: Nat): S -> this#(this.get.getTruncDiv k);
   /// ``this.tryGetTruncDiv(k)`` returns `.ok` of ``this.getTruncDiv(k)``, or the error info of ``this.get.getTruncDiv(k)`` iff ``k == 0``.
   //>   .check{((Red#(6.getByte)).tryGetTruncDiv 2).assertOk}
@@ -83,21 +83,21 @@ LevelFloat[S]: Wrapper[S,Float] {
   read .highest: Float;
   read ._unchecked(t: Float): S;
   # t -> (this.lowest =~~= (this.highest)) |> {r -> Block#(Assert!(t.inRange(r), {this.name + " " + t + " is out of range; it must be in " + (r.str)}), this._unchecked t)};
-  +(other: S): S -> this#(this.get + (this.close(other).get));
-  -(other: S): S -> this#(this.get - (this.close(other).get));
-  .gap(other: S): S -> this#((this.get - (this.close(other).get)).getAbs);
+  +(other: S): S -> this#(this.get + (this.id#(other).get));
+  -(other: S): S -> this#(this.get - (this.id#(other).get));
+  .gap(other: S): S -> this#((this.get - (this.id#(other).get)).getAbs);
   .min: S -> this#(this.lowest);
   .max: S -> this#(this.highest);
   }
 
 Red: LevelByte[Red] {.name->"Red"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 Green: LevelByte[Green] {.name->"Green"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 Blue: LevelByte[Blue] {.name->"Blue"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 Alpha: LevelByte[Alpha] {.name->"Alpha"; .getDataType -> 0.getByte;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::;
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::};
   .opaque: Alpha->Alpha.max;
   .transparent: Alpha->Alpha.min;
   }
@@ -105,37 +105,37 @@ CyclicFloat[S]: Wrapper[S,Float] {
   read .period: Float;
   read ._unchecked(t: Float): S;
   # t -> (0.0 =~~ (this.period)) |> {r -> Block#(Assert!(t.inRange(r), {this.name + " " + t + " is out of range; it must be in " + (r.str)}), this._unchecked t)};
-  +(other: S): S -> this#(Math.euclideanMod(this.get + (this.close(other).get), this.period));
-  -(other: S): S -> this#(Math.euclideanMod(this.get - (this.close(other).get), this.period));
+  +(other: S): S -> this#(Math.euclideanMod(this.get + (this.id#(other).get), this.period));
+  -(other: S): S -> this#(Math.euclideanMod(this.get - (this.id#(other).get), this.period));
   }
 
 Hue:CyclicFloat[Hue]{.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
   ._unchecked t -> { .getDataType->t };
-  .close->this; .close->::; }
+  .close->this; .id->{::}; }
 Saturation:LevelFloat[Saturation]{.name->"Saturation"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
   ._unchecked t -> { .getDataType->t };
-  .close->this; .close->::; }
+  .close->this; .id->{::}; }
 Brightness:LevelFloat[Brightness]{.name->"Brightness"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
   ._unchecked t -> { .getDataType->t };
-  .close->this; .close->::; }
+  .close->this; .id->{::}; }
 
 _KeyNames: Sealed{ .isName(name: Str): Bool -> _Magic!; }
 KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "UNDEFINED";
   # t ->Block#
     .if{_KeyNames.isName(t).not}.error{`KeyStroke#"`+t+`" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}
     .return{{ .getDataType->t }};
-  .close->this; .close->::; }
+  .close->this; .id->{::}; }
 
 Duration:ExtentNat[Duration] {.name->"Duration"; .getDataType -> 0;
   # t ->{ .getDataType-> t };
   .seconds(t: Nat):Duration -> this#(t*1000000);
   .milliSeconds(t: Nat):Duration -> this#(t*1000);
-  .close-> this; .close->::; }
+  .close-> this; .id->{::}; }
 
 Instant: CoordNat[Instant,Duration] {.name->"Instant"; .getDataType -> 0; .extent -> Duration;
-  # t ->{ .getDataType-> t }; .close-> this; .close->::; }
+  # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 
 Color: DataType[Color,Color] {
   .close-> this;
@@ -298,7 +298,7 @@ _Caption[S]: Widget[S]{
 TextRatio:LevelFloat[TextRatio]{.name->"TextRatio"; .getDataType -> +1.0;
   .lowest -> 0.0 .getSucc; .highest -> +1024.0 .getPred;
   ._unchecked t -> { .getDataType->t };
-  .close->this; .close->::; }
+  .close->this; .id->{::}; }
 Button: _Caption[Button]{
   .self-> this;
   mut .action(mut MF[Void]):mut Button;

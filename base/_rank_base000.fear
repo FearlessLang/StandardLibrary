@@ -53,7 +53,7 @@ Debug: Sealed {
   #(x: read ToStr): Void -> _MagicDebug# x;
   }
 
-BaseId[T1:*,T2]: CaptureFree{ #(x: T1): T2 }
+BaseId[T1:*,T2:*]: CaptureFree{ #(x: T1): T2 }
 BaseContainer[T1:*]: Sealed{
   read .as[T2](f: BaseId[read/imm T1,T2]): BaseContainer[T2];
   imm  .as[T2](f: BaseId[imm T1,T2]): BaseContainer[T2];
