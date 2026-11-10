@@ -33,10 +33,10 @@ TryGetStrInfoTests: Test {::
 
 TryGetCollectionTests: Test {::
   .check{(Lists#(1,2,3).tryGet 1).ok.assertEq({::}, Opts#(2))}
-  .check{Lists#(1,2,3).tryGet 5 .assertInfo{::.isMsg{::.startsWith `List.get`}}}
+  .check{Lists#(1,2,3).tryGet 5 .assertInfo{::.isMsg{:: == "List.get: index 5 is out of range for a List of size 3."}}}
   .check{(Lists#(1,2,3).tryGetLast).ok.assertEq({::}, Opts#(3))}
   .check{List[Nat].tryGetFirst.assertInfo{::.isMsg{::.startsWith `List.get`}}}
-  .check{List[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith `List.get`}}}
+  .check{List[Nat].tryGet 0 .assertInfo{::.isMsg{:: == "List.get: index 0 is out of range for an empty List."}}}
   .check{(Maps#({::}, `a`, 1).tryGet `a`).ok.assertEq({::}, Opts#(1))}
   .check{Maps#({::}, `a`, 1).tryGet `b` .assertInfo{::.isMsg{::.startsWith "Map.get: Tried to get key "}}}
   .check{(Sets#({::}, 1, 2).tryGet 2).ok.assertEq({::}, Opts#(2))}
@@ -45,11 +45,21 @@ TryGetCollectionTests: Test {::
   .check{ESets#[Nat,Nat]{::}.add(1).tryGetTake 3 .assertInfo{::.isMsg{::.startsWith `ESet.get`}}}
   .check{(ESets#[Nat,Nat]{::}.add(1).tryGetTake 1).ok.assertEq({::}, Opts#(1))}
   .check{(ELists#[Nat].add(4).tryGet 0).ok.assertEq({::}, Opts#(4))}
-  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get: Index 0 out of bounds for EList of length 0"}}}
+  .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::== "EList.get: index 0 is out of range for an empty EList."}}}
   .check{(Flows#(1,2).tryGet).assertInfo{::.isMsg{::.startsWith `Flow.get`}}}
   .check{(Flows#(1).tryGet).ok.assertEq({::}, Opts#(1))}
   .check{(Flows#(1,2).tryGetOpt).assertInfo{::.isMsg{::.startsWith `Flow.getOpt`}}}
-  .checkDetErr({::.isMsg{::.startsWith `List.get`}}, {Lists#(1,2,3).get 5})
+  .checkDetErr({::.isMsg{:: == "List.get: index 5 is out of range for a List of size 3."}}, {Lists#(1,2,3).get 5})
+  .checkDetErr({::.isMsg{:: == "List.get: index 0 is out of range for an empty List."}}, {List[Nat].get 0})
+  .checkDetErr({::.isMsg{:: == "List.with: index 2 is out of range for an empty List."}}, {List[Nat].with(2, 7)})
+  .checkDetErr({::.isMsg{:: == "List.without: index 0 is out of range for an empty List."}}, {List[Nat].without 0})
+  .checkDetErr({::.isMsg{:: == "List.withAlso: index 1 is out of range for an empty List."}}, {List[Nat].withAlso(1, 7)})
+  .checkDetErr({::.isMsg{:: == "List.withAlso: index 4 is out of range for a List of size 3."}}, {Lists#(1,2,3).withAlso(4, 7)})
+  .checkDetErr({::.isMsg{:: == "List.subList: the range 0 to 1 is out of range for an empty List."}}, {List[Nat].subList(0, 1)})
+  .checkDetErr({::.isMsg{:: == "List.subList: the range 1 to 5 is out of range for a List of size 3."}}, {Lists#(1,2,3).subList(1, 5)})
+  .checkDetErr({::.isMsg{:: == "List.subList: start 2 is greater than end 1."}}, {Lists#(1,2,3).subList(2, 1)})
+  .checkDetErr({::.isMsg{:: == "EList.trimTo: the range 1 to 5 is out of range for an EList of size 3."}}, {ELists#(1,2,3).trimTo(1, 5)})
+  .checkDetErr({::.isMsg{:: == "EList.trimTo: start 2 is greater than end 1."}}, {ELists#(1,2,3).trimTo(2, 1)})
   }
 
 FloatNumConversionTests: Test {::
@@ -116,14 +126,14 @@ TryGetNamesGetTests: Test {::
   .check{"a".u("00E9").tryGetStr.assertInfo{::.isMsg{::.startsWith "UStr.getStr: cannot convert "}}}
   .checkDetErr({::.isMsg{:: == `Info.getMap: the Info "hi" is the .msg variant, not the .map variant.`}}, {(Infos.msg "hi").getMap})
   .check{(Infos.msg "hi").tryGetMap.assertInfo{::.isMsg{:: == `Info.getMap: the Info "hi" is the .msg variant, not the .map variant.`}}}
-  .checkDetErr({::.isMsg{::.startsWith "List.getFirst: called on empty list"}}, {List[Nat].getFirst})
-  .check{List[Nat].tryGetFirst.assertInfo{::.isMsg{::.startsWith "List.getFirst: called on empty list"}}}
-  .checkDetErr({::.isMsg{::.startsWith "List.getLast: called on empty list"}}, {List[Nat].getLast})
-  .check{List[Nat].tryGetLast.assertInfo{::.isMsg{::.startsWith "List.getLast: called on empty list"}}}
+  .checkDetErr({::.isMsg{::== "List.getFirst: called on an empty List."}}, {List[Nat].getFirst})
+  .check{List[Nat].tryGetFirst.assertInfo{::.isMsg{::== "List.getFirst: called on an empty List."}}}
+  .checkDetErr({::.isMsg{::== "List.getLast: called on an empty List."}}, {List[Nat].getLast})
+  .check{List[Nat].tryGetLast.assertInfo{::.isMsg{::== "List.getLast: called on an empty List."}}}
   .checkDetErr({::.isMsg{::.startsWith "Map.get: Tried to get key "}}, {Maps#({::}, "a", 1).get "b"})
   .check{Maps#({::}, "a", 1).tryGet "b" .assertInfo{::.isMsg{::.startsWith "Map.get: Tried to get key "}}}
-  .checkDetErr({::.isMsg{::.startsWith "EList.get: Index 3 out of bounds for EList of length 1"}}, {ELists#[Nat].add(4).get 3})
-  .check{ELists#[Nat].add(4).tryGet 3 .assertInfo{::.isMsg{::.startsWith "EList.get: Index 3 out of bounds for EList of length 1"}}}
+  .checkDetErr({::.isMsg{::== "EList.get: index 3 is out of range for an EList of size 1."}}, {ELists#[Nat].add(4).get 3})
+  .check{ELists#[Nat].add(4).tryGet 3 .assertInfo{::.isMsg{::== "EList.get: index 3 is out of range for an EList of size 1."}}}
   }
 
 TestTryGet: Test {::

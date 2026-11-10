@@ -25,22 +25,22 @@ TestESparseList: Test {::
   .check{SparseStr#(SparseA#.remove 0 .remove 1) .assertEq "_,_,2,3,4"}
   .check{SparseStr#(SparseM#.removeAll(ELists#(0, 4))) .assertEq "_,_,2,3,_"}
   .check{SparseStr#(SparseT#.removeAll(ELists#(0, 4))) .assertEq "_,_,2,3,_"}
-  .checkDetErr({::.isMsg{:: == "ESparseList.removeAll: Index 4 is present twice in the indices to remove"}}, {SparseA#.removeAll(ELists#(4, 4))})
+  .checkDetErr({::.isMsg{:: == "ESparseList.removeAll: index 4 is present twice in the indices to remove."}}, {SparseA#.removeAll(ELists#(4, 4))})
   .check{SparseStr#(SparseA#.removeFirstWhere{e -> e > 1}) .assertEq "1,_,_,3,4"}
   .check{SparseStr#(SparseM#.removeLastWhere{e -> e < 4}) .assertEq "1,_,2,_,4"}
   .check{SparseStr#(SparseT#.removeLastWhere{e -> e < 4}) .assertEq "1,_,2,_,4"}
   .check{SparseStr#(SparseA#.trimTo(1, 4)) .assertEq "_,2,3"}
   .check{SparseStr#(SparseM#.trimTo(1, 4)) .assertEq "_,2,3"}
   .check{SparseStr#(SparseT#.trimTo(1, 4)) .assertEq "_,2,3"}
-  .checkDetErr({::.isMsg{:: == "ESparseList.trimTo: Index 6 out of bounds for ESparseList of capacity 5"}}, {SparseA#.trimTo(1, 6)})
+  .checkDetErr({::.isMsg{:: == "ESparseList.trimTo: the range 1 to 6 is out of range for an ESparseList of capacity 5."}}, {SparseA#.trimTo(1, 6)})
   .check{SparseStr#(SparseA#.reverse) .assertEq "4,3,2,_,1"}
   .check{SparseStr#(SparseM#.reverse) .assertEq "4,3,2,_,1"}
   .check{SparseStr#(SparseT#.reverse) .assertEq "4,3,2,_,1"}
   .check{SparseStr#(SparseA#.mapInPlace{e -> e * 10}) .assertEq "10,_,20,30,40"}
   .check{SparseStr#(SparseM#.swap(0, 1)) .assertEq "_,1,2,3,4"}
   .check{SparseStr#(SparseT#.swap(0, 1)) .assertEq "_,1,2,3,4"}
-  .checkDetErr({::.isMsg{:: == "ESparseList.swap: Index 5 out of bounds for ESparseList of capacity 5"}}, {SparseM#.swap(0, 5)})
-  .checkDetErr({::.isMsg{:: == "ESparseList.swap: Index 5 out of bounds for ESparseList of capacity 5"}}, {SparseT#.swap(0, 5)})
+  .checkDetErr({::.isMsg{:: == "ESparseList.swap: index 5 is out of range for an ESparseList of capacity 5."}}, {SparseM#.swap(0, 5)})
+  .checkDetErr({::.isMsg{:: == "ESparseList.swap: index 5 is out of range for an ESparseList of capacity 5."}}, {SparseT#.swap(0, 5)})
   .check{Block#
     .let l={SparseA#}
     .let c={l.shallowClone}

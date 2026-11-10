@@ -10,7 +10,9 @@ StrBasicsTests: Test {::
   .check{"a" .close .assertEq "a"}
   .check{"ab" .close .assertEq "ab"}
   .check{"ab" .repeat(3) .assertEq "ababab"}
-  .checkDetErr({::.isMsg{::.startsWith "Str.sub:"}}, {"ab".sub(3, 4)})
+  .checkDetErr({::.isMsg{:: == "Str.sub: the range 3 to 4 is out of range for a Str of size 2."}}, {"ab".sub(3, 4)})
+  .checkDetErr({::.isMsg{:: == "Str.sub: the range 0 to 1 is out of range for an empty Str."}}, {"".sub(0, 1)})
+  .checkDetErr({::.isMsg{:: == "Str.sub: from 2 is greater than to 1."}}, {"ab".sub(2, 1)})
   .checkDetErr({::.isMsg{::.startsWith "Str.replaceSimultaneous:"}}, {"ab".replaceSimultaneous(Lists#("a", "x", "ab", "y"))})
   .checkDetErr({::.isMsg{::.startsWith "Str.replaceSimultaneousOrdered:"}}, {"ab".replaceSimultaneousOrdered(Lists#("", "x"))})
   }

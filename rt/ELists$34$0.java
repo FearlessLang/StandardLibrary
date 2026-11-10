@@ -46,17 +46,21 @@ final class EList$1k$1Instance implements EList$1k$1{
     xs.clear();
     return r;
   }
-  private String outOfRange(String m, long i){ return "EList."+m+": Index "+Long.toUnsignedString(i)+" out of bounds for EList of length "+xs.size(); }
+  private String outOfRange(String m, String what){ return "EList."+m+": "+what+" is out of range for "+(xs.isEmpty() ? "an empty EList." : "an EList of size "+xs.size()+"."); }
   private int idx(String m, Object p0, int bound){
     long i= Nat$c$0Instance.unwrap(p0);
-    if (Long.compareUnsigned(i, bound) >= 0){ throw detErr(outOfRange(m, i)); }
+    if (Long.compareUnsigned(i, bound) >= 0){ throw detErr(outOfRange(m, "index "+Long.toUnsignedString(i))); }
     return (int) i;
   }
   private int idx(String m, Object p0){ return idx(m, p0, xs.size()); }
   private int range(String m, Object start, Object end){
-    int e= idx(m, end, xs.size() + 1);
-    int s= idx(m, start, xs.size() + 1);
-    if (s > e){ throw detErr("EList."+m+": start "+s+" is greater than end "+e); }
+    long rs= Nat$c$0Instance.unwrap(start);
+    long re= Nat$c$0Instance.unwrap(end);
+    var outside= Long.compareUnsigned(rs, xs.size()) > 0 || Long.compareUnsigned(re, xs.size()) > 0;
+    if (outside){ throw detErr(outOfRange(m, "the range "+Long.toUnsignedString(rs)+" to "+Long.toUnsignedString(re))); }
+    int s= (int) rs;
+    int e= (int) re;
+    if (s > e){ throw detErr("EList."+m+": start "+s+" is greater than end "+e+"."); }
     return s;
   }
   private boolean test(Object f, Object e){ return isTrue(callF$2(f, e)); }
@@ -77,7 +81,7 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$tryGet$1(Object p0){
     long i= Nat$c$0Instance.unwrap(p0);
     if (Long.compareUnsigned(i, xs.size()) < 0){ return ok(xs.get((int) i)); }
-    return fail(outOfRange("get", i));
+    return fail(outOfRange("get", "index "+Long.toUnsignedString(i)));
   }
   @Override public Object mut$add$1(Object p0){ xs.add(p0); return this; }
   @Override public Object mut$addAll$1(Object p0){ xs.addAll(((EList$1k$1Instance) p0).xs); return this; }
@@ -100,7 +104,7 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$removeAll$1(Object p0){
     var is= ((EList$1k$1Instance) p0).xs.stream().map(i -> idx("removeAll", i)).sorted(Collections.reverseOrder()).toList();
     for (int k= 1; k < is.size(); k += 1){
-      if (is.get(k).equals(is.get(k - 1))){ throw detErr("EList.removeAll: Index "+is.get(k)+" is present twice in the indices to remove"); }
+      if (is.get(k).equals(is.get(k - 1))){ throw detErr("EList.removeAll: index "+is.get(k)+" is present twice in the indices to remove."); }
     }
     for (int i : is){ xs.remove(i); }
     return this;
@@ -202,7 +206,7 @@ final class EListWindow extends AbstractList<Object> implements RandomAccess{
   private int end;
   EListWindow(EList$1k$1Instance parent, int start, int end){ this.parent= parent; this.start= start; this.end= end; }
   private List<Object> sub(){
-    if (end > parent.xs.size()){ throw detErr("EList.eView: the view of the indices ["+start+", "+end+") is out of range for its EList of length "+parent.xs.size()); }
+    if (end > parent.xs.size()){ throw detErr("EList.eView: the view of the indices ["+start+", "+end+") is out of range for its "+(parent.xs.isEmpty() ? "empty EList." : "EList of size "+parent.xs.size()+".")); }
     return parent.xs.subList(start, end);
   }
   @Override public Object get(int i){ return sub().get(i); }
