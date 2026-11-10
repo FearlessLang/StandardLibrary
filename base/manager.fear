@@ -40,9 +40,9 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Selects the project ``name`` and reports in its Output why it is invalid or out of date, or that it is neither.
   ///Returns that report.
   mut .check(name: Str): UStr;
-  ///Selects the project ``name`` and fixes its project folder: deletes the files that desktops, archive programs and text editors add,
-  ///removes the byte order mark and the Windows line endings of the Fearless source files, resets the file times that are unset
-  ///or in the future, and deletes the folders and the zips left with nothing inside.
+  ///Selects the project ``name`` and fixes its project folder: deletes the files that desktops, archive programs, office programs and text editors add,
+  ///renames the files and the folders whose name a project can not hold, cleans the text of the Fearless source files,
+  ///resets the file times that are unset or in the future, and deletes the folders and the zips left with nothing inside.
   ///The manager refuses it while a main or a compilation of the project runs, and while a main of a project with a mount of the project runs.
   ///Returns one line for each change, or the line saying that the project needs no fix.
   mut .fix(name: Str): UStr;
