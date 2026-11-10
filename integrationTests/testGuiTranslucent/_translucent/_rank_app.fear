@@ -1,0 +1,16 @@
+use base.Main as Main;
+use base.Color as Color;
+use base.Alpha as Alpha;
+use base.WidthNat as WidthNat;
+use base.HeightNat as HeightNat;
+
+Translucent: Main{ sys -> sys.gui.opacityFloor(Alpha#(100.getByte)).startUndecorated(+0.125).run{f -> f
+  .title "GuiTranslucent: a window with the opacity 128"
+  .opacity(Alpha#(128.getByte))
+  .virtualPixelSpace(WidthNat#400, HeightNat#200)
+  .content.pane{::
+    .background(Color.ghostWhite)
+    .label{:: .text "A translucent label" }
+    .button{:: .text "A translucent button" }
+    }
+  }}

@@ -194,3 +194,26 @@ Expected: at step 2 the application used before comes to the front, and the wind
 At step 3 the window of the Fearless program comes back to the front, in full screen.
 At step 4 the window of the Fearless program is hidden: the desktop and the windows of the other applications show.
 The screen never stays black at step 4.
+
+15. A window going from the Fearless window to full screen is opaque on macOS
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Gui.opacityFloor(Alpha), Frame.opacity(Alpha)": "Only state 2 shows the opacity; the other states are painted opaque while the window is in them."
+Steps (macOS):
+1. Run integrationTests/testGuiTranslucent.
+   The window opens without the decorations of the desk, with the Fearless corner (state 2), and the desktop shows through the window.
+2. Drag the Fearless corner to the top left corner of the work area, just below the menu bar, and let go.
+   The window goes to full screen (state 1): the window covers the screen, and the menu bar and the Dock are hidden.
+Expected: at step 2 the window is opaque: the desktop does not show through the window.
+
+16. A window leaving full screen on macOS is centered on the work area
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "CREATING A WINDOW": "leaving state 1: the largest rectangle with the aspect ratio of the virtual pixel space that fits 77% of the width and 77% of the height of the work area, centered."
+and "Entering state 4: the leaving bounds, compacted."
+The work area is the screen without the menu bar and the Dock.
+Steps (macOS, with the Dock at the bottom of the screen and always shown):
+1. Run integrationTests/testGuiStillFullScreen.
+   The window opens in full screen with the Fearless corner at the top left of the screen (state 1); the menu bar and the Dock are hidden.
+2. Double click the Fearless corner, and wait 3 seconds.
+   The window has the decorations of the desk (state 4), and the menu bar and the Dock show.
+Expected: at step 2 the space between the bottom of the menu bar and the top of the title bar of the window is the same as the space between the bottom of the window and the top of the Dock.
+The window is not centered on the whole screen: on a screen of 1440x900 points with a menu bar of 30 points and a Dock of 76 points, the top of the title bar is at 150 points from the top of the screen, not at 173.
