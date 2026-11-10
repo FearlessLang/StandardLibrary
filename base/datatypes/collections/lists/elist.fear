@@ -62,13 +62,25 @@ EList[E:*]: Sealed, _EditableList[E, EList[E]] {
   /// ``this.tryGet(i)`` returns `.ok` of ``this.get(i)``, or the error info of ``this.get(i)`` iff ``i >= size``.
   //>   .check{(ELists#[Nat].add(4).tryGet 0).ok.assertEq({::}, Opts# 4)}
   //>   .check{ELists#[Nat].tryGet 0 .assertInfo{::.isMsg{::.startsWith "EList.get:"}}}
+  //> .check{Block#
+  //>   .let[read EList[Nat]] l={ELists#(4,5)}
+  //>   .do{(l.tryGet 1).ok.assertEq({::}, Opts# 5)}
+  //>   .do{l.tryGet 2 .assertInfo{::.isMsg{:: == "EList.get: index 2 is out of range for an EList of size 2."}}}
+  //>   .done}
   mut .tryGet(Nat): mut Action[E];
+  read .tryGet(Nat): mut Action[read/imm E];
 
   /// ``this.opt(index)`` returns ``.some`` of ``this.get(index)`` if ``index < this.size``, ``.empty`` otherwise.
   /// Time Complexity: O(1)
   //> .check{ELists# 1 .opt(0) .assertEq({::}, Opts# 1)}
   //> .check{ELists# 1 .opt(1) .assertEmpty{::}}
+  //> .check{Block#
+  //>   .let[read EList[Nat]] l={ELists#(4,5)}
+  //>   .do{l.opt(1) .assertEq({::}, Opts# 5)}
+  //>   .do{l.opt(2) .assertEmpty{::}}
+  //>   .done}
   mut .opt(index: Nat): mut Opt[E] -> index < (this.size) .toOpt { this.get(index) };
+  read .opt(index: Nat): mut Opt[read/imm E] -> index < (this.size) .toOpt { this.get(index) };
 
   /// Time Complexity: O(1) amortized, O(n) worst case.
   /// ``this.add e`` adds ``e`` to the end of this collection and returns ``this``.
