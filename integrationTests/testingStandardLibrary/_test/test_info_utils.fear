@@ -103,6 +103,12 @@ InfoExtractorTests: Test {::
   .let info={Infos.map("friends", Infos.list(Infos.map("name", "Bob"), Infos.map("name", "Alice")))}
   .checkTrue{info.extract{:: > "friends" > 2}.isEmpty}
   .checkTrue{info.extract{:: > "friends" > 0 > "name" .extractMsg{:: == "Alice"}}.isEmpty}
+  .checkEq({::}, Opts# "Bob", {info.extract{:: > "friends" > 0 > "name" .extractMsg{:: == "Bob"}}})
+  .checkTrue{info.extract{:: > "friends" .extractList{::.size == 2}}.isSome}
+  .checkTrue{info.extract{:: > "friends" .extractList{::.size == 3}}.isEmpty}
+  .checkTrue{info.extract{:: > "friends" > 0 .extractMap{::.containsKey "name"}}.isSome}
+  .checkTrue{info.extract{:: > "friends" > 0 .extractMap{::.containsKey "age"}}.isEmpty}
+  .checkTrue{info.extract{:: > "friends" > 0 > "name" .extractMsg .extractMsg{:: == "Bob"}}.isSome}
   .checkEq({::}, Opts# "Alice", {info.extract{:: .extractMap > "friends" .extractList > 1 > "name" .extractMsg}})
   .checkTrue{info.extract{:: > "friends" .extractMsg}.isEmpty}
   .checkTrue{Infos.msg "" .extract{::.extractEmpty}.isSome}
