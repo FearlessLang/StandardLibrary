@@ -33,7 +33,7 @@ final class Hb{
   static final int unknown= tag("Zzzz");
   private static final Arena global= Arena.global();
   private static final Linker linker= Linker.nativeLinker();
-  private static final SymbolLookup lib= SymbolLookup.libraryLookup(library(), global);
+  private static final SymbolLookup lib= SymbolLookup.libraryLookup(library("harfbuzz", "14_3_0", System.mapLibraryName("harfbuzz")), global);
   private static final MethodHandle blobCreate= fn("hb_blob_create", ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS);
   private static final MethodHandle faceCreate= fn("hb_face_create", ADDRESS, ADDRESS, JAVA_INT);
   private static final MethodHandle upem= fn("hb_face_get_upem", JAVA_INT, ADDRESS);
@@ -60,18 +60,15 @@ final class Hb{
   private static final MemorySegment draw= draw();
   private static PathBuilder path;
 
-  private static Path library(){
+  static Path library(String lib, String version, String name){
     var os= System.getProperty("os.name").toLowerCase(Locale.ROOT);
-    var windows= os.startsWith("windows");
-    var mac= os.startsWith("mac");
-    var dir= (windows ? "windows" : mac ? "macos" : "linux") + "/" + (System.getProperty("os.arch").equals("aarch64") ? "arm64" : "x64");
-    var name= windows ? "harfbuzz.dll" : mac ? "libharfbuzz.dylib" : "libharfbuzz.so";
-    var res= Path.of(System.getProperty("java.io.tmpdir"), "fearless_harfbuzz_14_3_0_" + dir.replace('/', '_'), name);
-    try (var in= Hb.class.getResourceAsStream("/harfbuzz/" + dir + "/" + name)){
+    var dir= (os.startsWith("windows") ? "windows" : os.startsWith("mac") ? "macos" : "linux") + "/" + (System.getProperty("os.arch").equals("aarch64") ? "arm64" : "x64");
+    var res= Path.of(System.getProperty("java.io.tmpdir"), "fearless_" + lib + "_" + version + "_" + dir.replace('/', '_'), name);
+    try (var in= Hb.class.getResourceAsStream("/" + lib + "/" + dir + "/" + name)){
       var bytes= in.readAllBytes();
       if (same(res, bytes)){ return res; }
       Files.createDirectories(res.getParent());
-      var tmp= Files.createTempFile(res.getParent(), "harfbuzz", ".tmp");
+      var tmp= Files.createTempFile(res.getParent(), lib, ".tmp");
       Files.write(tmp, bytes);
       try{ Files.move(tmp, res, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE); }
       catch (IOException e){ Files.delete(tmp); if (!same(res, bytes)){ throw e; } }
