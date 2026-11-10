@@ -21,12 +21,14 @@ final class _Sections extends AContainer implements Sections$ao$0{
   record Part(Section s, boolean x){}
   final ArrayList<Section> sections= new ArrayList<>();
   Section expanded;
-  static final SectionHandler$j0g$0 expandClicked= new SectionHandler$j0g$0(){ @Override public Object mut$$hash$2(Object s, Object i){
-    ((_Sections) s).mut$expand$1(i);
+  static final SectionHandler$j0g$0 titleClicked= new SectionHandler$j0g$0(){ @Override public Object mut$$hash$2(Object s, Object i){
+    var t= (_Sections) s;
+    if (t.collapses(i)){ t.mut$collapse$1(i); return Void$o$0.instance; }
+    t.mut$expand$1(i);
     return Void$o$0.instance;
   }};
   boolean tabs;
-  SectionHandler$j0g$0 onTitleClick= expandClicked;
+  SectionHandler$j0g$0 onTitleClick= titleClicked;
   SectionHandler$j0g$0 onClose;
   Rectangle area= new Rectangle();
   Part pressed;
@@ -124,7 +126,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
   }
   void skHead(Canvas cv, Section s){
     var h= s.head;
-    Sk.paint.setColor(fg & 0xFFFFFF | (s == expanded ? 0x40000000 : 0x18000000));
+    Sk.paint.setColor(fg & 0xFFFFFF | (s == expanded ? 0x60000000 : 0x30000000));
     Sk.rrect(cv, h.x, h.y, h.width, h.height, 4, Sk.paint);
     Sk.stroke.setColor(fg & 0xFFFFFF | 0xA0000000);
     float y= h.y + h.height / 2f;
@@ -191,6 +193,10 @@ final class _Sections extends AContainer implements Sections$ao$0{
     });
   }
   @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }
+  boolean collapses(Object i){
+    long k= Util.natToLong(i);
+    return frame.onEdtAndWait(() -> !tabs && at(k) == expanded);
+  }
   @Override public Object read$isExpanded$1(Object i){
     long k= Util.natToLong(i);
     return frame.onEdtAndWait(() -> Util.bool(at(k) == expanded));

@@ -278,11 +278,17 @@ final class SkMenus{
     switch (c){
       case VK_DOWN, VK_KP_DOWN -> step(k, 1);
       case VK_UP, VK_KP_UP -> step(k, -1);
+      case VK_HOME -> fromEdge(k, 1);
+      case VK_END -> fromEdge(k, -1);
       case VK_ENTER -> { if (highMenu == k){ choose(k, highItem); } }
       default -> {}
     }
   }
 
+  private void fromEdge(int k, int by){
+    highMenu = -1;
+    step(k, by);
+  }
   private void step(int k, int by){
     var items= open.get(k).menu().items;
     int n= items.size();
