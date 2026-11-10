@@ -7,6 +7,11 @@ InfoFromStrFormatTests: Test {::
   .check{Infos.fromStr(`"hello"`) .assertEq(Infos.msg "hello")}
   .check{Infos.fromStr(`["a","b"]`) .assertEq(Infos.list(Infos.msg "a", Infos.msg "b"))}
   .check{Infos.fromStr(`{"k1":"v1","k2":"v2"}`) .assertEq(Infos.map("k1", Infos.msg "v1", "k2", Infos.msg "v2"))}
+  .check{Infos.map("b", Infos.msg "1", "a", Infos.msg "2").str .assertEq `{"a":"2","b":"1"}`}
+  .check{Infos.fromStr(`{"b":"1","a":"2"}`).str .assertEq `{"a":"2","b":"1"}`}
+  .check{(Infos.msg "a" + (Infos.list(Infos.msg "x"))).str .assertEq `{"list":["x"],"msg":"a"}`}
+  .check{(Infos.list(Infos.msg "x") + (Infos.msg "a")).str .assertEq `{"list":["x"],"msg":"a"}`}
+  .check{(Infos.map("k", "v") + (Infos.map("k", "w", "j", "z"))).str .assertEq `{"j":"z","k":"v\nw"}`}
   .check{Infos.fromStr("[]") .assertEq Info}
   .check{Infos.fromStr("{}") .assertEq Info}
   }
