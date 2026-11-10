@@ -4,6 +4,7 @@ import static _base.Scopes.*;
 import static java.awt.event.KeyEvent.*;
 
 import java.awt.Dimension;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -684,6 +685,11 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     releaseFrameKeys();
     typing = To.nobody;
     routes.replaceAll((_, _) -> To.nobody);
+  }
+  static void keyboardRemoved(){
+    var o= KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+    if (o == null){ return; }
+    for (var l : o.getKeyListeners()){ if (l instanceof CTextKeys k){ k.focusMoved(); } }
   }
   @Override public void keyTyped(KeyEvent e){
     var t= frame.focus;
