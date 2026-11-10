@@ -25,15 +25,24 @@ import io.github.humbleui.skija.SurfaceOrigin;
 final class Vk{
   static final int version= 1 << 22 | 1 << 12;
   private static final Arena global= Arena.global();
-  private static final String loader= System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("windows") ? "vulkan-1.dll" : "libvulkan.so.1";
+  private static final String os= System.getProperty("os.name").toLowerCase(Locale.ROOT);
+  private static final String loader= os.startsWith("windows") ? "vulkan-1.dll" : "libvulkan.so.1";
   private static final SymbolLookup lib= lib();
   private static String device;
   private static int maxSide;
   private static final DirectContext context= context();
 
   private static SymbolLookup lib(){
+    if (os.startsWith("mac")){ return moltenVk(); }
     try{ return SymbolLookup.libraryLookup(loader, global); }
     catch (IllegalArgumentException e){ throw fail("this machine has no Vulkan loader: " + loader + " is not found. The Vulkan loader comes with the graphics driver"); }
+  }
+  private static SymbolLookup moltenVk(){
+    var linker= Linker.nativeLinker();
+    var setenv= linker.downcallHandle(linker.defaultLookup().findOrThrow("setenv"), FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT));
+    try{ setenv.invokeWithArguments(global.allocateFrom("MVK_CONFIG_LOG_LEVEL"), global.allocateFrom("1"), 1); }
+    catch (Throwable t){ throw new Error(t); }
+    return SymbolLookup.libraryLookup(Hb.library("moltenvk", "1_4_2", "libMoltenVK.dylib"), global);
   }
   private static Error fail(String what){ return new Error("The Fearless GUI draws with Vulkan, and " + what); }
   private static Object call(String name, FunctionDescriptor d, Object... args){
