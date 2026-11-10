@@ -381,7 +381,7 @@ TextRoom:{
   ///The distance from the top of the room to the baseline of the text, rounded to the nearest virtual pixel.
   read .baseline: HeightNat;
   }
-CapGui:{
+CapGui: ToIso[CapGui], WidenTo[CapGui]{
   mut .screenWidth: WidthNat;
   mut .screenHeight: HeightNat;
   mut .name(s: Str): mut CapGui -> this.uName(s.u);
