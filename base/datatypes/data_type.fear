@@ -15,18 +15,13 @@ ToInfo[E:*]: { read .info(by: ToInfoBy[imm E]): Info }     /// env-dependent Inf
 
 FromInfo[T]: { .fromInfo(i: Info): T }            /// parse/decode from Info
 
-DataType[T,T0]: ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Pipe[T] {
-  read .close(t: read T): read DataType[T,T0];                    /// close on t
-  }
+DataType[T,T0]: ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Pipe[T] {}
 
 /// Env-dependent DataType for T (contains E); imm rep is still T0.
 DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Pipe[T] {
-  read .close(t: read T): read DataType[T,T0,E,E0];          /// close on t in this env-dependent instance
-
   /// Freeze the env by capturing element conversions in "by".
   /// For example by may be {::} or a projection {::.key}.
   read .dataType[K](by: DataTypeBy[imm E,K,E0]): read DataType[T,T0] -> {
-    .close t -> this.close(t).dataType(by);
     .close   -> this.close;
     .str     -> this.str(by);
     .info    -> this.info(by);
@@ -73,7 +68,6 @@ DataTypeBy[T,T0]: DataTypeBy[T,T,T0] {
 
   # t -> {
     .close -> t;
-    .close t2 -> this#t2;
     .cmp t0,t1 -> this.cmp(t0,t1);
     .hash -> this.hash t;
     .str  -> this.str t;

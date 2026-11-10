@@ -484,7 +484,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{1.0 .hash .assertNotEq(2.0 .hash)}
   .hash -> this.imm.isNegZero?{.then->"0.0".hash; .else->this.imm.ieeeStr.hash};
 
-  .close->::; .close->this;
+  .close->this;
 
   /// ``this.sumNumber(xs)`` sums all numbers in `xs` starting from `this`.
   //>   .check{(0.0 .sumNumber(Flows#(1.0, 2.0, 3.0))) .assertEq 6.0}

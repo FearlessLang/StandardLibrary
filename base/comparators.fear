@@ -84,67 +84,64 @@ Order[T,E:*]: {                      /// environment-dependent ordering of T (E 
 
 OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr.
   read .hash: Nat;
-  read .close(t: read T): read OrderHash[T];
   
-  read .assertEq(expected: read T): Void -> this.assertEq(expected,{""});
-  read .assertEq(expected: read T, msg: read LazyInfo): Void ->
-    Assert.expectedActual(this == expected, msg,(this.close expected), this);
+  read .assertEq(expected: read OrderHash[T]): Void -> this.assertEq(expected,{""});
+  read .assertEq(expected: read OrderHash[T], msg: read LazyInfo): Void ->
+    Assert.expectedActual(this == (expected.close), msg,expected, this);
 
-  read .assertNotEq(expected: read T): Void -> this.assertNotEq(expected,{""});
-  read .assertNotEq(expected: read T, msg: read LazyInfo): Void -> Assert!(
-    this != expected,
-    { msg#.info + ("Unexpected equality between" | "Expected: "+(this.close(expected)) | "Actual: "+this .info) });
+  read .assertNotEq(expected: read OrderHash[T]): Void -> this.assertNotEq(expected,{""});
+  read .assertNotEq(expected: read OrderHash[T], msg: read LazyInfo): Void -> Assert!(
+    this != (expected.close),
+    { msg#.info + ("Unexpected equality between" | "Expected: "+expected | "Actual: "+this .info) });
 
-  read .assertLt(x: read T): Void -> this.assertLt(x,{""});
-  read .assertLt(x: read T, msg: read LazyInfo): Void -> Assert!(
-    this < x,
-    { msg#.info + ( "Expected: "+this | " < "+(this.close(x)) .info) });
+  read .assertLt(x: read OrderHash[T]): Void -> this.assertLt(x,{""});
+  read .assertLt(x: read OrderHash[T], msg: read LazyInfo): Void -> Assert!(
+    this < (x.close),
+    { msg#.info + ( "Expected: "+this | " < "+x .info) });
     
-  read .assertLe(x: read T): Void -> this.assertLe(x,{""});
-  read .assertLe(x: read T, msg: read LazyInfo): Void -> Assert!(
-    this <= x,
-    { msg#.info + ( "Expected: "+this | " <= "+(this.close(x)) .info) });
+  read .assertLe(x: read OrderHash[T]): Void -> this.assertLe(x,{""});
+  read .assertLe(x: read OrderHash[T], msg: read LazyInfo): Void -> Assert!(
+    this <= (x.close),
+    { msg#.info + ( "Expected: "+this | " <= "+x .info) });
 
-  read .assertGt(x: read T): Void -> this.assertGt(x,{""});
-  read .assertGt(x: read T, msg: read LazyInfo): Void -> Assert!(
-    this > x,
-    { msg#.info + ( "Expected: "+this | " > "+(this.close(x)) .info) });
+  read .assertGt(x: read OrderHash[T]): Void -> this.assertGt(x,{""});
+  read .assertGt(x: read OrderHash[T], msg: read LazyInfo): Void -> Assert!(
+    this > (x.close),
+    { msg#.info + ( "Expected: "+this | " > "+x .info) });
 
-  read .assertGe(x: read T): Void -> this.assertGe(x,{""});
-  read .assertGe(x: read T, msg: read LazyInfo): Void -> Assert!(
-    this >= x,
-    { msg#.info + ( "Expected: "+this | " >= "+(this.close(x)) .info) });
+  read .assertGe(x: read OrderHash[T]): Void -> this.assertGe(x,{""});
+  read .assertGe(x: read OrderHash[T], msg: read LazyInfo): Void -> Assert!(
+    this >= (x.close),
+    { msg#.info + ( "Expected: "+this | " >= "+x .info) });
   }
 
 OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashable+printable
   read .hash[K](by: OrderHashBy[imm E,K]): Nat; /// hash using by
-  read .close(t: read T): read OrderHash[T,E];
   
   read .orderHash[K](by: OrderHashBy[imm E,K]): read OrderHash[T] ->  /// freeze by into plain OrderHash[T]
     {
     .close -> this.close;
-    .close t -> this.close(t).orderHash(by);
     .cmp t0,t1 -> this.cmp(by,t0,t1);
     .hash -> this.hash by;
     .str  -> this.str by;
     };
-  read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertEq(expected);
-  read .assertEq[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertEq(expected,msg);
+  read .assertEq[K](by: OrderHashBy[imm E,K], expected: read OrderHash[T,E]): Void -> this.orderHash(by).assertEq(expected.orderHash(by));
+  read .assertEq[K](by: OrderHashBy[imm E,K], expected: read OrderHash[T,E], msg: read LazyInfo): Void -> this.orderHash(by).assertEq(expected.orderHash(by),msg);
 
-  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read T): Void -> this.orderHash(by).assertNotEq(expected);
-  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertNotEq(expected,msg);
+  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read OrderHash[T,E]): Void -> this.orderHash(by).assertNotEq(expected.orderHash(by));
+  read .assertNotEq[K](by: OrderHashBy[imm E,K], expected: read OrderHash[T,E], msg: read LazyInfo): Void -> this.orderHash(by).assertNotEq(expected.orderHash(by),msg);
 
-  read .assertLt[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertLt(x);
-  read .assertLt[K](by: OrderHashBy[imm E,K], x: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertLt(x,msg);
+  read .assertLt[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E]): Void -> this.orderHash(by).assertLt(x.orderHash(by));
+  read .assertLt[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E], msg: read LazyInfo): Void -> this.orderHash(by).assertLt(x.orderHash(by),msg);
 
-  read .assertLe[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertLe(x);
-  read .assertLe[K](by: OrderHashBy[imm E,K], x: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertLe(x,msg);
+  read .assertLe[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E]): Void -> this.orderHash(by).assertLe(x.orderHash(by));
+  read .assertLe[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E], msg: read LazyInfo): Void -> this.orderHash(by).assertLe(x.orderHash(by),msg);
 
-  read .assertGt[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertGt(x);
-  read .assertGt[K](by: OrderHashBy[imm E,K], x: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertGt(x,msg);
+  read .assertGt[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E]): Void -> this.orderHash(by).assertGt(x.orderHash(by));
+  read .assertGt[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E], msg: read LazyInfo): Void -> this.orderHash(by).assertGt(x.orderHash(by),msg);
 
-  read .assertGe[K](by: OrderHashBy[imm E,K], x: read T): Void -> this.orderHash(by).assertGe(x);
-  read .assertGe[K](by: OrderHashBy[imm E,K], x: read T, msg: read LazyInfo): Void -> this.orderHash(by).assertGe(x,msg);
+  read .assertGe[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E]): Void -> this.orderHash(by).assertGe(x.orderHash(by));
+  read .assertGe[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E], msg: read LazyInfo): Void -> this.orderHash(by).assertGe(x.orderHash(by),msg);
   }
 
 OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-value printing of T
@@ -176,7 +173,7 @@ OrderHashBy[T]: OrderHashBy[T,T] {         /// direct order+hash for T
   .str(t: read T): Str;
   # t ->
     {
-    .close -> t; .close t0 -> this#t0;
+    .close -> t;
     .cmp t0,t1 -> this.cmp(t0,t1);
     .hash -> this.hash t;
     .str -> this.str t; 

@@ -151,7 +151,6 @@ Degree: Angle[Degree] {
   /// Compare two angles after normalizing them
   .cmp t0, t1 -> t0.normalize# <=> (t1.normalize#);
   .hash -> this.normalize#.hash;
-  .close -> ::;
   }
 
 
@@ -179,5 +178,4 @@ Radian: Angle[Radian] {
   /// Compare two angles after normalizing them
   .cmp t0, t1 -> t0.normalize# <=> (t1.normalize#);
   .hash -> this.normalize#.hash;
-  .close -> ::;
   }

@@ -1,5 +1,5 @@
 Opt[E:*]: _Opt[E] {
-  .close->this; .close->::;
+  .close->this;
   .match m    -> m.empty;
   .imm by     -> this.match{.some x -> Opts#(by#x.imm); .empty->{} };
   .isEmpty    -> this.match{.some _ -> False; .empty -> True};

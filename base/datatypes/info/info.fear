@@ -22,7 +22,7 @@ Infos: Sealed {
 //how to turn keys into string is part of the key datatype of map
 //will have to synthetize fresh key suffix if the str is already in there.
 Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
-  .close->::; .close->this;
+  .close->this;
   .info->this.imm;
   .imm->{};
   .hash->this.str.hash;

@@ -3,7 +3,7 @@ Box[E:*]: OrderHash[Box[E],E] {
   read .get: read/imm E;
   imm  .get: imm E;
 
-  .close->this;  .close->::;
+  .close->this;
 
   .cmp by, t0, t1 -> by#(t0.get) <=> (by#(t1.get));
   .hash by -> by#(this.get).hash;
@@ -13,7 +13,7 @@ Box[E:*]: OrderHash[Box[E],E] {
 }
 
 A1: OrderHash[A1] {
-  .close -> this;  .close->::;
+  .close -> this;
   .cmp t0, t1 -> {::.eq};
   .hash -> 0;
   .str ->"";
@@ -39,7 +39,6 @@ Persons: {
       .str: Str -> "Person[age="+age+", name="+name+", cats="+(cats.size)+"]";
 
       .close -> self;
-      .close -> ::;
       }
   }
 

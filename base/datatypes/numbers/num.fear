@@ -232,7 +232,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
   .clampTo(range: ClosedNumRange): Num -> range.clamp(this);
 
   .hash -> this.str.hash;
-  .close->::; .close->this;
+  .close->this;
   .sumNumber xs ->                  /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Num];
