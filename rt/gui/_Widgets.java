@@ -979,6 +979,7 @@ final class _Frame implements Frame$1c$0{
   void start(){
     assert SwingUtilities.isEventDispatchThread();
     if (top == null){ install(new _Pane(this)); }
+    Desk.watchKeyboards();
     top.component.setBounds(0, 0, canvasW, canvasH);
     top.component.validate();
     layoutDirty = false;

@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.LongStream;
+import javax.swing.SwingUtilities;
 
 @SuppressWarnings("restricted")
 final class Desk{
@@ -85,6 +86,12 @@ final class Desk{
     f.addNotify();
     var ico= Util.pathProperty("fearlessDesk.icons").resolve(iconPath.substring(0, iconPath.lastIndexOf('.'))+".ico")+",0";
     Win.identify(hwnd(f), List.of(windowClass, System.getProperty("fearlessDesk.relaunch"), ico, name));
+  }
+  private static boolean keyboards;
+  static void watchKeyboards(){
+    if (!windows || keyboards){ return; }
+    keyboards = true;
+    Thread.ofPlatform().daemon().start(Win::keyboards);
   }
   private static MemorySegment hwnd(Frame f){ return MemorySegment.ofAddress((long)reflect(() -> Win.hwnd.invoke(reflect(() -> peer.get(f))))); }
 
@@ -164,6 +171,36 @@ final class Desk{
     static final MethodHandle setPlacement= fn("user32", "SetWindowPlacement", placementCall);
     static final MemorySegment placement= Arena.global().allocate(44);
     static final Method hwnd= open(reflect(() -> Class.forName("sun.awt.windows.WComponentPeer").getMethod("getHWnd")));
+    static final FunctionDescriptor procCall= FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG);
+    static final MethodHandle defProc= fn("user32", "DefWindowProcW", procCall);
+    static final MethodHandle create= fn("user32", "CreateWindowExW", FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+      ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MethodHandle setProc= fn("user32", "SetWindowLongPtrW", FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS));
+    static final MethodHandle register= fn("user32", "RegisterRawInputDevices", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
+    static final MethodHandle getMessage= fn("user32", "GetMessageW", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
+    static final MethodHandle dispatch= fn("user32", "DispatchMessageW", FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
+    static void keyboards(){
+      try (var a= Arena.ofConfined()){
+        var w= (MemorySegment)call(create, 0, a.allocateFrom("STATIC", StandardCharsets.UTF_16LE), MemorySegment.NULL, 0, 0, 0, 0, 0, MemorySegment.ofAddress(-3), MemorySegment.NULL, MemorySegment.NULL, MemorySegment.NULL);
+        call(setProc, w, -4, Linker.nativeLinker().upcallStub(reflect(() -> MethodHandles.lookup().findStatic(Win.class, "proc", procCall.toMethodType())), procCall, Arena.global()));
+        var r= a.allocate(16);
+        r.set(ValueLayout.JAVA_SHORT, 0, (short)1);
+        r.set(ValueLayout.JAVA_SHORT, 2, (short)6);
+        r.set(ValueLayout.JAVA_INT, 4, 0x2100);
+        r.set(ValueLayout.ADDRESS, 8, w);
+        call(register, r, 1, 16);
+        var m= a.allocate(48);
+        while (true){
+          int got= (int)call(getMessage, m, MemorySegment.NULL, 0, 0);
+          assert got > 0;
+          call(dispatch, m);
+        }
+      }
+    }
+    static long proc(MemorySegment w, int message, long kind, long device){
+      if (message == 0xFE && kind == 2){ SwingUtilities.invokeLater(CTextKeys::keyboardRemoved); }
+      return (long)call(defProc, w, message, kind, device);
+    }
     static final MethodHandle comInit= fn("ole32", "CoInitializeEx", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_INT));
     static final MethodHandle store= fn("shell32", "SHGetPropertyStoreForWindow", FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
     static void identify(MemorySegment h, List<String> idCommandIconName){
