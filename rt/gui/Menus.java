@@ -41,10 +41,12 @@ final class CMenu implements Menu$o$0{
   }
 }
 
+enum MenuMark{ none, check, radio }
+
 final class CMenuItem implements MenuItem$aw$0{
   String text= "";
   boolean enabled= true;
-  int mark;
+  MenuMark mark= MenuMark.none;
   boolean ticked;
   MF$7$1 action;
   Object submenu;
@@ -67,11 +69,11 @@ final class CMenuItem implements MenuItem$aw$0{
     enabled = Util.isTrue(b);
     return this;
   }
-  @Override public Object mut$check$1(Object b){ return mark(1, b); }
-  @Override public Object mut$radio$1(Object b){ return mark(2, b); }
-  private Object mark(int m, Object b){
+  @Override public Object mut$check$1(Object b){ return mark(MenuMark.check, b); }
+  @Override public Object mut$radio$1(Object b){ return mark(MenuMark.radio, b); }
+  private Object mark(MenuMark m, Object b){
     open();
-    if (mark + m == 3){ throw Util.detErr(named() + " already shows a " + (mark == 1 ? "check box" : "radio button") + ", so it cannot also show a " + (m == 1 ? "check box" : "radio button") + ": an item shows at most one mark"); }
+    if (mark != MenuMark.none && mark != m){ throw Util.detErr(named() + " already shows a " + (mark == MenuMark.check ? "check box" : "radio button") + ", so it cannot also show a " + (m == MenuMark.check ? "check box" : "radio button") + ": an item shows at most one mark"); }
     mark = m;
     ticked = Util.isTrue(b);
     return this;
@@ -129,7 +131,7 @@ final class SkMenus{
   }
 
   private void add(CMenu m, Rectangle anchor, boolean side, int from){
-    boolean marks= m.items.stream().anyMatch(i -> i != null && i.mark != 0);
+    boolean marks= m.items.stream().anyMatch(i -> i != null && i.mark != MenuMark.none);
     boolean subs= m.items.stream().anyMatch(i -> i != null && i.submenu != null);
     var tops= new int[m.items.size()];
     int y= 4;
@@ -348,13 +350,13 @@ final class SkMenus{
     Sk.draw(cv, it.line, b.x + o.textAt(), y, Sk.need(it.line).width, h, Sk.paint);
     float mx= b.x + 1 + pad + 5;
     float my= y + h / 2f;
-    if (it.mark == 1){ cv.drawRect(Rect.makeXYWH(mx - 5, my - 5, 10, 10), line); }
-    if (it.mark == 1 && it.ticked){
+    if (it.mark == MenuMark.check){ cv.drawRect(Rect.makeXYWH(mx - 5, my - 5, 10, 10), line); }
+    if (it.mark == MenuMark.check && it.ticked){
       cv.drawLine(mx - 3, my, mx - 1, my + 3, line);
       cv.drawLine(mx - 1, my + 3, mx + 3.5f, my - 3.5f, line);
     }
-    if (it.mark == 2){ cv.drawCircle(mx, my, 5, line); }
-    if (it.mark == 2 && it.ticked){ cv.drawCircle(mx, my, 2.5f, Sk.paint); }
+    if (it.mark == MenuMark.radio){ cv.drawCircle(mx, my, 5, line); }
+    if (it.mark == MenuMark.radio && it.ticked){ cv.drawCircle(mx, my, 2.5f, Sk.paint); }
     if (it.submenu == null){ return; }
     float ax= b.x + w - 14;
     cv.drawLine(ax, my - 4, ax + 4, my, line);
