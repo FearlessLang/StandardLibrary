@@ -91,15 +91,14 @@ Steps:
 Expected: at step 2 the focus goes to "content zero", and at step 4 the focus goes to "new content zero".
 At step 6 the focus goes to "center".
 
-7. The macOS menu bar names a program of the portable Fearless by its name, not by a Java class
+7. The macOS menu bar names a program of the portable Fearless by its project folder, not by a Java class
 
-Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Fixed on Gui": "name: the identity shown by the task switcher, the taskbar and the title bar. Default "Fearless App"."
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "On macOS the menu bar and the Dock show one name and one icon for each process."
 and "Nothing outside the control of Fearless decides how the Gui looks or behaves".
 Steps (macOS only):
 1. Run integrationTests/testGuiText.
-   The title bar of the window shows "Fearless App    Text editing".
 2. Click in the window, and look at the application menu, the first bold word of the menu bar after the Apple menu.
-Expected: the application menu shows "Fearless App", the name of the CapGui, as the title bar shows it.
+Expected: the application menu shows "testGuiText", the name of the project folder.
 The application menu never shows "PathClassLoader", the Java class that the portable Fearless starts.
 
 8. A text that the desk types with Option goes into the TextField with the focus
