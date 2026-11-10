@@ -15,11 +15,7 @@ public final class _CapTry$2s$0 implements CapTry$2s$0{
     catch (Deterministic d){ return info(addStackInfo(d.i, d)); }
     catch (NonDeterministic d){ return info(addStackInfo(d.i, d)); }
     catch (EndedByManager e){ throw e; }
-    catch (StackOverflowError|OutOfMemoryError t){ return info(addStackInfo(new Str$c$0Instance(javaErrMsg(t)).read$info$0(), t)); }
-    catch (Throwable t){
-      var msg= t.getClass().getSimpleName()+"\n"+InputFile.portable(String.valueOf(t.getMessage()));
-      return info(addStackInfo(new Str$c$0Instance(msg).read$info$0(), t));
-    }
+    catch (Throwable t){ return info(addStackInfo(new Str$c$0Instance(javaErrMsg(t)).read$info$0(), t)); }
   }
    static Object addStackInfo(Object info, Throwable t){
     return Infos$1c$0.instance.imm$map$4(new Str$c$0Instance("info"), info, new Str$c$0Instance("stack"), stackTraceOf(t.getStackTrace()).read$info$1(dtId));
