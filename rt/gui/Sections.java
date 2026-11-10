@@ -124,7 +124,7 @@ final class _Sections extends AContainer implements Sections$ao$0{
   }
   void skHead(Canvas cv, Section s){
     var h= s.head;
-    Sk.paint.setColor(fg & 0xFFFFFF | (s == expanded ? 0x40000000 : 0x18000000));
+    Sk.paint.setColor(fg & 0xFFFFFF | (s == expanded ? 0x60000000 : 0x30000000));
     Sk.rrect(cv, h.x, h.y, h.width, h.height, 4, Sk.paint);
     Sk.stroke.setColor(fg & 0xFFFFFF | 0xA0000000);
     float y= h.y + h.height / 2f;
