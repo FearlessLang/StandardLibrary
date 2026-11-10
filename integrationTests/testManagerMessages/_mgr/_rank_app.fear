@@ -11,6 +11,7 @@ ManagerMessageTests: UnitTests{::
   .test ManagerMessages
   .test ManagerMessagesRefused
   .test ManagerMessagesRoot
+  .test ManagerMessagesLost
   }
 
 ManagerMessages: Test{::
@@ -57,4 +58,8 @@ ManagerMessagesRoot: Test{::
       .openIso s = t
       .return{s.manager.register(Root#s)}
       })
+  }
+
+ManagerMessagesLost: Test{::
+  .checkNonDetErrWithSys({::.isMsg{m -> m.startsWith(`The message "Terminate" could not reach the Fearless manager: `) & (m.endsWith "Exception").not}}, {t -> t.manager.terminate "hello"})
   }
