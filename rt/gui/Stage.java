@@ -128,7 +128,7 @@ final class Stage extends MouseAdapter{
     frame.addWindowFocusListener(l);
     frame.addWindowStateListener(this::stateChanged);
     new DropTarget(frame, DnDConstants.ACTION_COPY, new DropTargetAdapter(){
-      @Override public void drop(DropTargetDropEvent e){ FearlessFrame.dropped(e); }
+      @Override public void drop(DropTargetDropEvent e){ GuiRun.dropped(e); }
     });
     Desk.identify(frame, gui.iconName, gui.iconPath, gui.name);
     return frame;

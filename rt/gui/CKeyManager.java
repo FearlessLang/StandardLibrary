@@ -42,7 +42,7 @@ final class CKeyManager implements Keys$o$0{
 
   void check(String closed, String replaced){
     frame.onEdtAndWait(() -> {
-      if (frame.frame.completed()){ throw Util.detErr(closed); }
+      if (frame.guiRun.completed()){ throw Util.detErr(closed); }
       if (!changeable && frame.keys != this){ throw Util.detErr(replaced); }
     });
   }

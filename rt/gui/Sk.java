@@ -218,14 +218,14 @@ interface Sk{
   }
 
   static void paintNode(AWidget w, Canvas cv){
-    if (w.starts(AWidget.Warning.textClipped, w.textClipped())){ w.frame.frame.warn(w.textClippedWarning()); }
+    if (w.starts(AWidget.Warning.textClipped, w.textClipped())){ w.frame.guiRun.warn(w.textClippedWarning()); }
     w.sk(cv);
     for (int i= 0; i < w.childCount(); i += 1){
       var k= w.child(i);
       if (w.hides(k)){ continue; }
-      if (k.starts(AWidget.Warning.outsideParent, !fits(w, k))){ k.frame.frame.warn(fitWarning(w, k)); }
+      if (k.starts(AWidget.Warning.outsideParent, !fits(w, k))){ k.frame.guiRun.warn(fitWarning(w, k)); }
       var o= covered(w, i);
-      if (k.starts(AWidget.Warning.overlapping, o != null)){ k.frame.frame.warn(overlapWarning(w, k, o)); }
+      if (k.starts(AWidget.Warning.overlapping, o != null)){ k.frame.guiRun.warn(overlapWarning(w, k, o)); }
       int save= cv.save();
       var r= w.clip(k);
       if (r != null){ clip(cv, r.x, r.y, r.width, r.height); }

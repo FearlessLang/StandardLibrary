@@ -460,7 +460,7 @@ abstract class AWidget implements Widget$2o$1{
   }
 
   void change(){
-    if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"); }
+    if (frame.guiRun.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so changing it would have no visible effect"); }
     if (canChange()){ return; }
     throw Util.detErr("This " + kind()
       + " is not in the window any more: .clear, a refilled region, a removed section or a new .content removed it,"
@@ -612,7 +612,7 @@ abstract class AWidget implements Widget$2o$1{
   @Override public Object mut$openMenu$1(Object s){
     var m= CMenu.build(s);
     frame.changeOnEdt(() -> {
-      if (frame.frame.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
+      if (frame.guiRun.completed()){ throw Util.detErr("This " + kind() + " is in a closed window: the CapGui.run that showed the window has returned, so .openMenu has no window to open a menu in"); }
       if (!frame.started){ throw Util.detErr(".openMenu opens a menu in the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
       if (!SwingUtilities.isDescendingFrom(component, frame.top.component)){ throw Util.detErr("This " + kind() + " is not in the window, so .openMenu has no place below it to open a menu: .clear, a refilled region, a removed section or a new .content removed it, or the scope that adds it has not returned"); }
       for (var k= this; k != frame.top; k = k.parent()){
@@ -655,7 +655,7 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
         foreground
       );
       paint.imm$run$1(g);
-      if (starts(Warning.paintedOutside, g.outside(component.getWidth(), component.getHeight()))){ frame.frame.warn(g.outsideWarning(describe(), component.getWidth(), component.getHeight())); }
+      if (starts(Warning.paintedOutside, g.outside(component.getWidth(), component.getHeight()))){ frame.guiRun.warn(g.outsideWarning(describe(), component.getWidth(), component.getHeight())); }
     }
   }
 
@@ -728,7 +728,7 @@ abstract class ACaption extends AWidget{
 }
 
 final class _Frame implements Frame$1c$0{
-  final FearlessFrame frame;
+  final GuiRun guiRun;
   final _FluentGUI gui;
   final SkMouse mouse= new SkMouse(this);
   final CTextKeys textKeys= new CTextKeys(this);
@@ -777,7 +777,7 @@ final class _Frame implements Frame$1c$0{
   private int renderLogicalH;
 
   _Frame(CompletableFuture<Void> done, _FluentGUI gui){
-    frame= new FearlessFrame(done, this);
+    guiRun= new GuiRun(done, this);
     this.gui= gui;
     surface.setLayout(null);
     surface.setOpaque(true);
@@ -888,19 +888,19 @@ final class _Frame implements Frame$1c$0{
   }
 
   <T> T changeOnEdt(Supplier<T> s){
-    if (started){ frame.queue.midTask().set(true); }
+    if (started){ guiRun.queue.midTask().set(true); }
     return onEdtAndWait(s);
   }
 
   void changeOnEdt(Runnable r){
-    if (started){ frame.queue.midTask().set(true); }
+    if (started){ guiRun.queue.midTask().set(true); }
     onEdtAndWait(r);
   }
 
   void tick(Instant$5c$0 elapsed){
     this.elapsed = elapsed;
     stage.tick();
-    if (frame.queue.midTask().get()){ return; }
+    if (guiRun.queue.midTask().get()){ return; }
     // Never relayout while a press/release is already queued behind this
     // tick: the user made it on the pixels on screen, so it is interpreted
     // against the bounds those pixels show. The dirty flag stays set, so the
@@ -993,13 +993,13 @@ final class _Frame implements Frame$1c$0{
     // is already visible showing the frame rendered above. Game time zero
     // is warmup end, so elapsed, the model tick deadlines and warning
     // timestamps agree, and the first tick behaves like every later one.
-    startNanos = System.nanoTime() + FearlessFrame.WarmupMillis * 1_000_000L;
-    frame.startRuntime(
+    startNanos = System.nanoTime() + GuiRun.WarmupMillis * 1_000_000L;
+    guiRun.startRuntime(
       Math.round(1000.0f / fps),
       () -> tick(timeNanos(System.nanoTime() - startNanos))
     );
     if (modelPeriodNs != 0){
-      frame.restartModelTimer(modelPeriodNs, FearlessFrame.WarmupMillis, modelTickActions);
+      guiRun.restartModelTimer(modelPeriodNs, GuiRun.WarmupMillis, modelTickActions);
     }
     started = true;
   }
@@ -1007,7 +1007,7 @@ final class _Frame implements Frame$1c$0{
   String windowTitle(){ return title.isEmpty() ? gui.name : gui.name + "    " + title; }
   boolean reserved(int key){ return key == _FluentGUI.code(gui.closeKey) || key == _FluentGUI.code(gui.fullScreenKey); }
   void closeRequest(){
-    frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+    guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       if (onClose == null){ return mut$close$0(); }
       return onClose.mut$$hash$0();
     }});
@@ -1015,7 +1015,7 @@ final class _Frame implements Frame$1c$0{
   void resizeRequest(double aspect){
     var r= new CResizeRequest(elapsed, Float$1c$0Instance.instance(aspect), w(canvasW), h(canvasH));
     if (pendingRequest.getAndSet(r) != null){ return; }
-    frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+    guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       var q= pendingRequest.getAndSet(null);
       if (onResize != null){ onResize.mut$accept$1(q); }
       return Void$o$0.instance;
@@ -1049,7 +1049,7 @@ final class _Frame implements Frame$1c$0{
       if (started){ stage.opacity(); }
     });
   }
-  private void requireOpen(){ if (frame.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
+  private void requireOpen(){ if (guiRun.completed()){ throw Util.detErr("This Frame is closed: the CapGui.run that showed it has returned, so changing it would have no effect"); } }
   private Object onEdt(Runnable r){
     changeOnEdt(() -> { requireOpen(); r.run(); });
     return this;
@@ -1059,7 +1059,7 @@ final class _Frame implements Frame$1c$0{
   @Override public Object mut$close$0(){
     onEdt(() -> {
       if (!started){ throw Util.detErr("Frame.close closes the open window, and this window is not open yet: the consumer given to CapGui.run has not returned"); }
-      frame.closed();
+      guiRun.closed();
     });
     return Void$o$0.instance;
   }
@@ -1086,7 +1086,7 @@ final class _Frame implements Frame$1c$0{
     int v= (int) fpsOf(f, "fps");
     return onEdt(() -> {
       fps = v;
-      if (started){ frame.setTickDelay(Math.round(1000.0f / v)); }
+      if (started){ guiRun.setTickDelay(Math.round(1000.0f / v)); }
     });
   }
   // Getters. All safe from the queue thread: title/fps are read under the
@@ -1102,7 +1102,7 @@ final class _Frame implements Frame$1c$0{
       boolean changeable= true;
       @Override public Object mut$action$1(Object r){
         changeOnEdt(() -> {
-          if (frame.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"); }
+          if (guiRun.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"); }
           if (!changeable && modelTickActions != actions){
             throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
           }
@@ -1118,7 +1118,7 @@ final class _Frame implements Frame$1c$0{
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
       b.changeable = false;
       // Live change: fixed-rate deadlines restart from now, no warmup.
-      if (started){ frame.restartModelTimer(modelPeriodNs, 0, actions); }
+      if (started){ guiRun.restartModelTimer(modelPeriodNs, 0, actions); }
     });
   }
   @Override public Object mut$content$0(){ return new _RegionFiller(this, this::newContent); }

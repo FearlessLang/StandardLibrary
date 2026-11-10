@@ -430,14 +430,14 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   Fire fired(boolean changed){ return changed && onEdit != null ? new Fire(onEdit, event()) : null; }
 
   private void submit(Supplier<Fire> onEdt){
-    frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+    frame.guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       if (!frame.onEdtAndWait(() -> canChange())){ return Void$o$0.instance; }
       fire(frame.changeOnEdt(() -> { layout(); return shown(onEdt.get()); }));
       return Void$o$0.instance;
     }});
   }
   private void change(Supplier<Req> onEdt){
-    frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+    frame.guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       var q= frame.onEdtAndWait(() -> canChange() && editable ? onEdt.get() : null);
       if (q == null){ return Void$o$0.instance; }
       var ch= clean(q.a(), q.b(), q.s());
@@ -662,7 +662,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
       if (f != frame.focus){ to = To.nobody; }
       routes.put(id, to);
       typing = to;
-      if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.pressed)); }
+      if (to == To.frame){ frame.guiRun.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.pressed)); }
     }
     if (to != To.frame){ e.consume(); }
   }
@@ -678,7 +678,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   }
   void releaseFrameKeys(){
     var k= frame.keys;
-    frame.frame.queue.submitAll(routes.entrySet().stream().filter(r -> r.getValue() == To.frame).map(r -> k.task(r.getKey().getFirst(), k.released)).toList());
+    frame.guiRun.queue.submitAll(routes.entrySet().stream().filter(r -> r.getValue() == To.frame).map(r -> k.task(r.getKey().getFirst(), k.released)).toList());
     routes.replaceAll((_, to) -> to == To.frame ? To.nobody : to);
   }
   void focusMoved(){
@@ -706,7 +706,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   @Override public void keyReleased(KeyEvent e){
     int c= e.getKeyCode();
     var to= routes.remove(List.of(c, e.getKeyLocation()));
-    if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(c, frame.keys.released)); return; }
+    if (to == To.frame){ frame.guiRun.queue.submit(frame.keys.task(c, frame.keys.released)); return; }
     if (to == null){ return; }
     e.consume();
     if (to == To.reserved){ frame.stage.reservedKey(c); }

@@ -151,7 +151,7 @@ final class SkMenus{
     int w= textAt + (int) Math.ceil(text) + (subs ? 20 : pad) + 1 + (content > vh ? AWidget.bar + 4 : 0);
     int x= side ? place(anchor.x + anchor.width, anchor.x, w, vw) : place(anchor.x, anchor.x + anchor.width, w, vw);
     int top= side ? clamp(anchor.y, h, vh) : place(anchor.y + anchor.height, anchor.y, h, vh);
-    if (w > vw){ frame.frame.warn("a menu " + w + " virtual pixels wide does not fit in the virtual pixel space " + vw + " wide: the part outside it is clipped"); }
+    if (w > vw){ frame.guiRun.warn("a menu " + w + " virtual pixels wide does not fit in the virtual pixel space " + vw + " wide: the part outside it is clipped"); }
     open.add(new Open(m, new Rectangle(x, top, w, h), tops, textAt, from, content, new int[1]));
   }
 
@@ -177,7 +177,7 @@ final class SkMenus{
     if (!it.enabled){ return; }
     if (it.submenu == null){
       close(0);
-      if (it.action != null){ frame.frame.queue.submit(it.action); }
+      if (it.action != null){ frame.guiRun.queue.submit(it.action); }
       return;
     }
     boolean was= open.size() > k + 1 && open.get(k + 1).from() == i;
@@ -186,7 +186,7 @@ final class SkMenus{
     var scope= it.submenu;
     asked += 1;
     int mine= asked;
-    frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+    frame.guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       var m= CMenu.build(scope);
       frame.changeOnEdt(() -> sub(mine, i, m));
       return Void$o$0.instance;

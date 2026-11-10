@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-final class FearlessFrame{
+final class GuiRun{
   // The first ~second of a Swing app is the worst-case EDT: native window
   // creation, first window-manager events, first Skia rasterization, glyph
   // cache warming, first JIT of the paint path. Both timers therefore fire
@@ -54,7 +54,7 @@ final class FearlessFrame{
   private long modelTicks;
   private long modelWarnAt= 1_000;
 
-  FearlessFrame(CompletableFuture<Void> done, _Frame owner){
+  GuiRun(CompletableFuture<Void> done, _Frame owner){
     this.done= done;
     this.owner= owner;
     GuiEdtBoundary.install();
@@ -288,22 +288,22 @@ final class GuiEdtBoundary extends EventQueue{
   @Override protected void dispatchEvent(AWTEvent event){
     try{ super.dispatchEvent(event); }
     catch (Throwable e){
-      var frame= frameOf(event);
-      if (frame == null){
+      var run= guiRunOf(event);
+      if (run == null){
         e.printStackTrace();
         return;
       }
-      frame.low(e);
+      run.low(e);
     }
   }
 
-  private static FearlessFrame frameOf(AWTEvent event){
+  private static GuiRun guiRunOf(AWTEvent event){
     var src= event.getSource();
     var w= src instanceof Window win
       ? win
       : src instanceof Component c
         ? SwingUtilities.getWindowAncestor(c)
         : null;
-    return w instanceof Stage.Win f ? f.stage().owner.frame : null;
+    return w instanceof Stage.Win f ? f.stage().owner.guiRun : null;
   }
 }
