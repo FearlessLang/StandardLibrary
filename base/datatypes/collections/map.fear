@@ -100,13 +100,14 @@ Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_Ass
     }};*/
   .info by->Block#
     .if {this.isEmpty} .return {Info}
-    .let map= {this.fold(
+    .let unsorted= {this.fold(
       {Maps#[Str,Str,Info]{::}.as{::}},
       {acc, key, e -> Block#
         .let base= {this.keyOh#key .str}
         .let k= {_InfoFreshKey#(acc, base, 0)}
         .return{acc.with(k, by#e .info).as{::}}
     })}
+    .let map= {unsorted.keys.sort({::}).fold({Maps#[Str,Str,Info]{::}.as{::}}, {acc, k -> acc.with(k, unsorted.get k).as{::}})}
   .return{{'i //correct to make the Info object (as for List), calling .info here would go in stack overflow
     .match->::.map map;
     .map -> Opts# map;

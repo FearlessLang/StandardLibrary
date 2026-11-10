@@ -30,6 +30,7 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
 
   .msg: Opt[Str] -> {};
   .list: Opt[List[Info]] -> {};
+  /// The keys of a `.map` variant are in increasing order of `Str`, whatever the order the map was built in.
   .map: Opt[Map[Str,Info]] -> {};
 
   .getMsg: Str-> this.tryGetMsg!;
