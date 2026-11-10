@@ -25,6 +25,10 @@ System: ToIso[System],WidenTo[System] {
   mut .gui:mut CapGui;
   ///A new flag, not started: a `RevokableSystem` and the capabilities it gives check it before every call.
   mut .revocation: mut CapRevocationRoot;
+  ///Runs ``f`` holding a read lock of the data project mounted on each type of ``reads`` and the edit lock of the data project mounted on each type of ``edits``, and returns what ``f`` returns.
+  ///No other program edits those data projects while ``f`` runs, and no other program reads the data projects of ``edits``.
+  ///While ``f`` runs, an access of this program to a data project not in ``reads`` or ``edits``, an edit of a data project only in ``reads``, and a `.locked` inside ``f`` are deterministic errors.
+  mut .locked[R:**](reads: List[DataRead], edits: List[DataEdit], f: mut MF[R]): R;
   }
   
 /// This try-catch will catch non-deterministic errors.
