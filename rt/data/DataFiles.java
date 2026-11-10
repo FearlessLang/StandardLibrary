@@ -44,9 +44,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 final class DataFiles{
-  static final Map<String,Path> reads= linked("fearlessDataRead.");
-  static final Map<String,Path> edits= linked("fearlessDataEdit.");
-  static final Map<String,Path> readable= readable();
+  static final Map<String,Path> mounts= linked("fearlessData.");
   static final Map<String,Path> locks= linked("fearlessDataLock.");
   private static final Map<Path,FileChannel> channels= new ConcurrentHashMap<>();
   private static final Object gate= new Object();
@@ -77,14 +75,9 @@ final class DataFiles{
     }
     return Collections.unmodifiableMap(res);
   }
-  private static Map<String,Path> readable(){
-    var res= new TreeMap<>(reads);
-    res.putAll(edits);
-    return Collections.unmodifiableMap(res);
-  }
-  static Root root(Map<String,Path> view, String kind, Object data){
+  static Root root(String kind, Object data){
     var name= AssetBytesRead.str(((Named$1c$0)data).read$name$0());
-    var res= view.get(name);
+    var res= mounts.get(name);
     if (res == null){ throw nonDetErr("No "+kind+" is mounted on \""+name+"\"."); }
     return new Root(name, res, Objects.requireNonNull(locks.get(name)));
   }
@@ -145,8 +138,8 @@ final class DataFiles{
     if (one.isHeldByCurrentThread()){ throw detErr("sys.locked is called inside the function of another sys.locked."); }
     var want= new TreeMap<Path,Hold>();
     var types= new ArrayList<String>();
-    List$o$1Instance.asJava(reads).forEach(d -> hold(want, types, root(readable, "data project", d), false));
-    List$o$1Instance.asJava(edits).forEach(d -> hold(want, types, root(DataFiles.edits, "dataEdit project", d), true));
+    List$o$1Instance.asJava(reads).forEach(d -> hold(want, types, root("data project", d), false));
+    List$o$1Instance.asJava(edits).forEach(d -> hold(want, types, root("dataEdit project", d), true));
     one.lock();
     var taken= new ArrayList<FileLock>();
     try{

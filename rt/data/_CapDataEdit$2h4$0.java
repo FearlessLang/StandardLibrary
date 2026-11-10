@@ -13,7 +13,7 @@ public final class _CapDataEdit$2h4$0 implements CapDataEdit$2h4$0{
   private static final Charset utf32le= Charset.forName("UTF-32LE");
   private static final Charset utf32be= Charset.forName("UTF-32BE");
   private final DataFiles.Root root;
-  _CapDataEdit$2h4$0(Object data){ root= DataFiles.root(DataFiles.edits, "dataEdit project", data); }
+  _CapDataEdit$2h4$0(Object data){ root= DataFiles.root("dataEdit project", data); }
   private Object str(Object path, Object content, Charset cs){ return DataFiles.writeBytes(root, path, AssetBytesRead.str(content).getBytes(cs)); }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
