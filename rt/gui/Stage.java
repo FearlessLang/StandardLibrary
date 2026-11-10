@@ -94,6 +94,10 @@ final class Stage extends MouseAdapter{
       double k= reshaping || !Desk.windows ? 1 : gc.getDefaultTransform().getScaleX();
       return new Dimension((int)Math.ceil(d.width*k), (int)Math.ceil(d.height*k));
     }
+    @Override public void setVisible(boolean b){
+      super.setVisible(b);
+      getRootPane().putClientProperty("apple.awt.fullscreenable", false);
+    }
     @SuppressWarnings("deprecation") @Override public void reshape(int x, int y, int width, int height){
       reshaping = true;
       super.reshape(x, y, width, height);
