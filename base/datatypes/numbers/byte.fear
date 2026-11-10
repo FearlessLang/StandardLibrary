@@ -251,7 +251,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
       .return {this};
 
   .hash -> this.str.hash;
-  .close->::; .close->this;
+  .close->this;
   .sumNumber xs ->                             /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Byte];

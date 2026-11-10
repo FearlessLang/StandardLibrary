@@ -24,7 +24,7 @@ Bool: Sealed,DataType[Bool,Bool] {
   /// ``this.toOpt(f)`` returns ``.some f#`` if ``this == True`` otherwise `.empty`.
   .toOpt[R:*](mut MF[R]): mut Opt[R];
 
-  .close -> this; .close -> ::;
+  .close -> this;
 
   .cmp a, b -> a.imm?{
     .then->b.imm?{ .then->{::.eq}; .else->{::.gt} };

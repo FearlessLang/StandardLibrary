@@ -148,10 +148,10 @@ StrParseByteTests: Test {::
 
 StrParseNumTests: Test {::
   .check{"" .num .assertEq({::}, Opt[Num])}
-  .check{"+0" .num .assertEq({::}, {})}
-  .check{"-0" .num .assertEq({::}, {})}
-  .check{"+1" .num .assertEq({::}, {})}
-  .check{"-1" .num .assertEq({::}, {})}
+  .check{"+0" .num .assertEq({::}, Opt[Num])}
+  .check{"-0" .num .assertEq({::}, Opt[Num])}
+  .check{"+1" .num .assertEq({::}, Opt[Num])}
+  .check{"-1" .num .assertEq({::}, Opt[Num])}
   .check{"+1/2" .num .assertEq({::}, Opts#(+1/2))}
   .check{"-1/2" .num .assertEq({::}, Opts#(-1/2))}
   .check{"+10/20" .num .assertEq({::}, Opts#(+1/2))}
@@ -176,9 +176,9 @@ StrParseFloatTests: Test {::
   .check{"+2.5" .float .assertEq({::}, Opts#(+2.5))}
   .check{"+1_000.0" .float .assertEq({::}, Opts#(+1000.0))}
   .check{"+0.1" .float .assertEq({::}, Opt[Float])}
-  .check{"+0.2" .float .assertEq({::}, {})}
-  .check{"-0.1" .float .assertEq({::}, {})}
-  .check{"+000.100" .float .assertEq({::}, {})}
+  .check{"+0.2" .float .assertEq({::}, Opt[Float])}
+  .check{"-0.1" .float .assertEq({::}, Opt[Float])}
+  .check{"+000.100" .float .assertEq({::}, Opt[Float])}
   .check{+0012.str.assertEq "+12"}
   .check{00_12.str.assertEq "12"}
   .check{"+1.0e3" .float .assertEq({::}, Opts#(+1000.0))}

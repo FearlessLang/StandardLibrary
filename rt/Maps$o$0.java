@@ -265,7 +265,6 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
 
   @Override public Object read$close$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
-  @Override public Object read$close$1(Object p0){ return p0; }
   @Override public Object read$imm$1(Object p0){
     var by= (ToImmBy$5u$2)p0;
     var m= new LinkedHashMap<MapKey,Object>();

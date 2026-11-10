@@ -2,13 +2,13 @@ Wrapper[S,T]: DataType[S,S] {
   read .get: T -> this.getDataType.close;
   read .name: Str;
   read .getDataType: DataType[T,T];
-  .str -> this.name+"["+(this.getDataType.close(this.get).str)+"]";
+  .str -> this.name+"["+(this.getDataType.str)+"]";
   read #(t:T): S;
-  .hash -> this.getDataType.close(this.get).hash;
+  .hash -> this.getDataType.hash;
   .cmp(a,b) ->
     this.getDataType.cmp(this.close(a).get, this.close(b).get);
   read .close(s: read S): read Wrapper[S,T];
-  .info -> this.getDataType.close(this.get).info;
+  .info -> this.getDataType.info;
   .imm -> this#(this.get);
   }
 
@@ -138,7 +138,7 @@ Instant: CoordNat[Instant,Duration] {.name->"Instant"; .getDataType -> 0; .exten
   # t ->{ .getDataType-> t }; .close-> this; .close->::; }
 
 Color: DataType[Color,Color] {
-  .close-> this; .close->::;
+  .close-> this;
   read .red: Red -> {};
   read .green: Green -> {};
   read .blue: Blue -> {};

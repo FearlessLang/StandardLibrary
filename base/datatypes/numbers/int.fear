@@ -335,7 +335,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   .hash -> this.str.hash;
   .info: Info;
-  .close -> ::; .close -> this;
+  .close -> this;
   .sumNumber xs ->                          /// summing all numbers starting from `this`
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Int];
