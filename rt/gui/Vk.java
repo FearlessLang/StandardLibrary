@@ -26,16 +26,15 @@ final class Vk{
   static final int version= 1 << 22 | 1 << 12;
   private static final Arena global= Arena.global();
   private static final String os= System.getProperty("os.name").toLowerCase(Locale.ROOT);
-  private static final String loader= os.startsWith("windows") ? "vulkan-1.dll" : "libvulkan.so.1";
   private static final SymbolLookup lib= lib();
   private static String device;
   private static int maxSide;
-  private static final DirectContext context= context();
+  private static final DirectContext context= lib == null ? null : context();
 
   private static SymbolLookup lib(){
     if (os.startsWith("mac")){ return moltenVk(); }
-    try{ return SymbolLookup.libraryLookup(loader, global); }
-    catch (IllegalArgumentException e){ throw fail("this machine has no Vulkan loader: " + loader + " is not found. The Vulkan loader comes with the graphics driver"); }
+    try{ return SymbolLookup.libraryLookup(os.startsWith("windows") ? "vulkan-1.dll" : "libvulkan.so.1", global); }
+    catch (IllegalArgumentException _){ return null; }
   }
   private static SymbolLookup moltenVk(){
     var linker= Linker.nativeLinker();
@@ -91,17 +90,17 @@ final class Vk{
     var info= struct(64, 1);
     info.set(ADDRESS, 24, app);
     var instance= global.allocate(ADDRESS);
-    ok("vkCreateInstance", addresses(3), info, MemorySegment.NULL, instance);
+    if (result("vkCreateInstance", addresses(3), info, MemorySegment.NULL, instance) < 0){ return null; }
     var vi= instance.get(ADDRESS, 0);
     var n= global.allocate(JAVA_INT);
     int found= result("vkEnumeratePhysicalDevices", addresses(3), vi, n, MemorySegment.NULL);
-    if (found < 0 || n.get(JAVA_INT, 0) == 0){ throw fail("vkEnumeratePhysicalDevices found no Vulkan device, with " + named(found) + ". " + layers()); }
+    if (found < 0 || n.get(JAVA_INT, 0) == 0){ return null; }
     var all= global.allocate(ADDRESS, n.get(JAVA_INT, 0));
     ok("vkEnumeratePhysicalDevices", addresses(3), vi, n, all);
     var pds= IntStream.range(0, n.get(JAVA_INT, 0)).mapToObj(i -> all.getAtIndex(ADDRESS, i)).toList();
-    var pd= pds.stream().filter(Vk::usable).min(Comparator.comparingInt(Vk::rank))
-      .orElseThrow(() -> fail("no Vulkan device of this machine has Vulkan 1.1 and a graphics queue: " + describe(pds) + ". " + layers()));
-    device = describe(List.of(pd));
+    var pd= pds.stream().filter(Vk::usable).min(Comparator.comparingInt(Vk::rank)).orElse(null);
+    if (pd == null){ return null; }
+    device = describe(properties(pd));
     maxSide = properties(pd).get(JAVA_INT, 300);
     int family= graphicsFamily(pd);
     var priority= global.allocate(JAVA_FLOAT);
@@ -127,9 +126,6 @@ final class Vk{
     run("vkGetPhysicalDeviceProperties", addresses(2), pd, res);
     return res;
   }
-  private static String describe(List<MemorySegment> pds){
-    return pds.stream().map(Vk::properties).map(Vk::describe).collect(Collectors.joining(", "));
-  }
   private static String describe(MemorySegment p){
     int v= p.get(JAVA_INT, 0);
     var type= List.of("other device", "integrated GPU", "discrete GPU", "virtual GPU", "CPU").get(p.get(JAVA_INT, 16));
@@ -145,6 +141,7 @@ final class Vk{
     return IntStream.range(0, n.get(JAVA_INT, 0)).filter(i -> (props.get(JAVA_INT, 24L * i) & 1) != 0).findFirst().orElse(-1);
   }
   static Surface surface(ImageInfo info){
+    if (context == null){ return Surface.makeRaster(info); }
     if (info.getWidth() > maxSide || info.getHeight() > maxSide){ throw fail("a window of " + info.getWidth() + " x " + info.getHeight() + " device pixels is larger than " + device + " allows: at most " + maxSide + " on each side"); }
     return Surface.makeRenderTarget(context, false, info, 0, SurfaceOrigin.TOP_LEFT, null, false);
   }

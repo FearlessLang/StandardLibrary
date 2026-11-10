@@ -78,7 +78,8 @@ final class Desk{
   static final Field peer= open(reflect(() -> Component.class.getDeclaredField("peer")));
   static final String deskId= System.getProperty("fearlessDesk.id");
   static void identify(Frame f, String icon, String iconPath, String name){
-    if (deskId == null || mac){ return; }
+    if (mac){ java.awt.Taskbar.getTaskbar().setIconImage(f.getIconImage()); return; }
+    if (deskId == null){ return; }
     var windowClass= deskId+"-"+icon;
     if (!windows){ call(X11.appClass, windowClass); return; }
     f.addNotify();
