@@ -24,23 +24,19 @@ DataProjectTests: UnitTests{::
   }
 
 DataProjectReads: Test{::
-  .checkWithSys{s -> s.dataRead(Pub).paths({}).assertEq({::}, L#("notes", "pics", "readme", "todo"))}
+  .checkWithSys{s -> s.dataRead(Pub).paths({}).assertEq({::}, L#("notes", "pics", "readme.txt", "todo"))}
   .checkWithSys{s -> s.dataRead(Pub).paths(L#("pics")).assertEq({::}, L#("deep", "inner", "one.txt"))}
   .checkWithSys{s -> s.dataRead(Pub).paths(L#("pics", "inner")).assertEq({::}, L#("three.txt"))}
-  .checkWithSys{s -> s.dataRead(Pub).read(L#("readme")).label.assertEq "data.Pub/readme"}
-  .checkWithSys{s -> (s.dataRead(Pub).read(L#("readme")).readStr(base.StrCleaners.utf8)).assertEq "hi"}
-  .checkWithSys{s -> s.dataRead(Pub).read(L#("readme")).readBytes.size.assertEq 2}
+  .checkWithSys{s -> s.dataRead(Pub).read(L#("readme.txt")).label.assertEq "data.Pub/readme.txt"}
+  .checkWithSys{s -> (s.dataRead(Pub).read(L#("readme.txt")).readStr(base.StrCleaners.utf8)).assertEq "hi"}
+  .checkWithSys{s -> s.dataRead(Pub).read(L#("readme.txt")).readBytes.size.assertEq 2}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("notes", "a.txt")).readStr(base.StrCleaners.utf8)).assertEq "first"}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "deep", "two.txt")).readStr(base.StrCleaners.utf8)).assertEq "deeper"}
   .checkWithSys{s -> (s.dataRead(Pub).read(L#("pics", "inner", "three.txt")).readStr(base.StrCleaners.utf8)).assertEq "nested"}
-  .checkWithSys{s -> (s.dataRead(Notes).read(L#("readme")).readStr(base.StrCleaners.utf8)).assertEq "hi"}
+  .checkWithSys{s -> (s.dataRead(Notes).read(L#("readme.txt")).readStr(base.StrCleaners.utf8)).assertEq "hi"}
   }
 
 DataProjectReadErrors: Test{::
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "The path data.Pub/readme"
-    |"names a file, not a folder."
-    )}}, {t -> t.dataRead(Pub).paths(L#("readme"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Pub/none"
     |"names no resource."
@@ -54,10 +50,6 @@ DataProjectReadErrors: Test{::
     |"names no resource."
     )}}, {t -> t.dataRead(Pub).read(L#("notes", "b.txt"))})
   .checkDetErrWithSys({::.isMsg{:: == (
-     "The path data.Pub/todo"
-    |"names a folder, not a file."
-    )}}, {t -> t.dataRead(Pub).read(L#("todo"))})
-  .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Pub/"
     |"names the root folder, not a file."
     )}}, {t -> t.dataRead(Pub).read({})})
@@ -67,14 +59,13 @@ DataProjectReadErrors: Test{::
     |"A file name is a name, a dot and an extension."
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
-    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataRead(Pub).read(L#("data.fearless"))})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No data project is mounted on "data.Nope".`
     )}}, {t -> t.dataRead(Nope).paths({})})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`
-    )}}, {t -> t.dataEdit(Nope).read(L#("readme"))})
+    )}}, {t -> t.dataEdit(Nope).read(L#("readme.txt"))})
   }
 
 DataProjectWrites: Test{::
@@ -127,7 +118,6 @@ DataProjectWriteErrors: Test{::
     |"A file name is a name, a dot and an extension."
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
-    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("Bad.txt"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/wz/x.zip"
@@ -135,7 +125,6 @@ DataProjectWriteErrors: Test{::
     |"A file name is a name, a dot and an extension."
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
-    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("wz", "x.zip"), "no")})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/other.fearless"
@@ -143,20 +132,7 @@ DataProjectWriteErrors: Test{::
     |"A file name is a name, a dot and an extension."
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
-    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("other.fearless"), "no")})
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "The path data.Notes/readme/x.txt"
-    |`is not valid: "readme" is a file, not a folder.`
-    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("readme", "x.txt"), "no")})
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "The path data.Notes/readme.md"
-    |`is not written: its folder holds "readme", and a file without extension cannot share its name with a file with an extension.`
-    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("readme.md"), "no")})
-  .checkDetErrWithSys({::.isMsg{:: == (
-     "The path data.Notes/todo"
-    |"names a folder, not a file."
-    )}}, {t -> t.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("todo"), "no")})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`
     )}}, {t -> t.dataEdit(Nope).writeStrAsciiUtf8Latin1(L#("x.txt"), "no")})
@@ -236,7 +212,6 @@ DataProjectDeleteErrors: Test{::
     |"A file name is a name, a dot and an extension."
     |`The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not "con", "prn", "aux", "nul", "com1" to "com9" or "lpt1" to "lpt9".`
     |`The extension is 1 to 16 lowercase letters or digits, other than "zip" and "fearless", or one of "css.map", "d.ts", "d.ts.map", "js.map", "min.css", "min.js", "tar.bz2", "tar.gz", "tar.lz", "tar.lz4", "tar.xz", "tar.zst".`
-    |`A file name can also be one of "authors", "changelog", "changes", "code_of_conduct", "contributing", "contributors", "copying", "license", "news", "notice", "readme", "security", "thanks", "todo", with no extension.`
     )}}, {t -> t.dataEdit(Notes).delete(L#("data.fearless"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/"
@@ -244,7 +219,7 @@ DataProjectDeleteErrors: Test{::
     )}}, {t -> t.dataEdit(Notes).delete({})})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`
-    )}}, {t -> t.dataEdit(Nope).delete(L#("readme"))})
+    )}}, {t -> t.dataEdit(Nope).delete(L#("readme.txt"))})
   }
 
 DataProjectsNotReachable: Test{::
@@ -273,7 +248,7 @@ DataProjectLocks: Test{::
     }
   .checkWithSys{s -> (s.locked[base.Str](L#[base.DataRead](Pub), L#[base.DataEdit](Notes), {Block#
     .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "a.txt"), "locked")}
-    .return{(s.dataEdit(Notes).read(L#("lk", "a.txt")).readStr(base.StrCleaners.utf8))+(s.dataRead(Pub).read(L#("readme")).readStr(base.StrCleaners.utf8))}
+    .return{(s.dataEdit(Notes).read(L#("lk", "a.txt")).readStr(base.StrCleaners.utf8))+(s.dataRead(Pub).read(L#("readme.txt")).readStr(base.StrCleaners.utf8))}
     })).assertEq "lockedhi"}
   .checkDetErrWithSys({::.isMsg{:: == (
      `The data project mounted on "data.Notes" is used while sys.locked runs, but it is not in the reads or the edits of that sys.locked.`
