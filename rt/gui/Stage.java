@@ -180,7 +180,7 @@ final class Stage extends MouseAdapter{
     f.setVisible(true);
     f.toFront();
     owner.surface.requestFocusInWindow();
-    activating = replaced && !Desk.windows && !Desk.mac;
+    activating = replaced && Desk.x11;
     if (replaced && Desk.windows){ old.dispose(); }
   }
   private void enterFullScreen(){
@@ -345,7 +345,7 @@ final class Stage extends MouseAdapter{
     unmaximized = !x11Unmaximize() && was && (e.getNewState() & (Frame.MAXIMIZED_BOTH|Frame.ICONIFIED)) == 0;
   }
   private static boolean near(int a, int b){ return Math.abs(a-b) <= 1; }
-  private boolean x11Unmaximize(){ return !Desk.windows && !Desk.mac && !Desk.cosmic && !Desk.managed; }
+  private boolean x11Unmaximize(){ return Desk.x11 && !Desk.cosmic && !Desk.managed; }
   private boolean boundsMoved(){
     boolean same= f.getX() == polledX && f.getY() == polledY && f.getWidth() == polledW && f.getHeight() == polledH;
     polledX = f.getX(); polledY = f.getY(); polledW = f.getWidth(); polledH = f.getHeight();

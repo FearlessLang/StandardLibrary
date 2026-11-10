@@ -28,12 +28,24 @@ import javax.swing.SwingUtilities;
 
 @SuppressWarnings("restricted")
 final class Desk{
-  static final boolean windows= System.getProperty("os.name").startsWith("Windows");
-  static final boolean mac= System.getProperty("os.name").startsWith("Mac");
-  static final boolean managed= System.getenv("SWAYSOCK") != null
-    || Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).map(d -> d.toLowerCase(Locale.ROOT)).anyMatch(List.of("hyprland", "sway", "i3")::contains);
-  static final boolean cosmic= Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).anyMatch("COSMIC"::equalsIgnoreCase);
-  static final boolean boundsUnseen= cosmic || System.getenv("WAYLAND_DISPLAY") != null && Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).anyMatch("KDE"::equalsIgnoreCase);
+  private enum Kind{ windows, mac, managed, cosmic, kdeWayland, otherX11 }
+  private static final Kind kind= kind();
+  static final boolean windows= kind == Kind.windows;
+  static final boolean mac= kind == Kind.mac;
+  static final boolean x11= !windows && !mac;
+  static final boolean managed= kind == Kind.managed;
+  static final boolean cosmic= kind == Kind.cosmic;
+  static final boolean boundsUnseen= cosmic || kind == Kind.kdeWayland;
+  private static Kind kind(){
+    var os= System.getProperty("os.name");
+    if (os.startsWith("Windows")){ return Kind.windows; }
+    if (os.startsWith("Mac")){ return Kind.mac; }
+    var desktops= Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).map(d -> d.toLowerCase(Locale.ROOT)).toList();
+    if (System.getenv("SWAYSOCK") != null || desktops.stream().anyMatch(List.of("hyprland", "sway", "i3")::contains)){ return Kind.managed; }
+    if (desktops.contains("cosmic")){ return Kind.cosmic; }
+    if (System.getenv("WAYLAND_DISPLAY") != null && desktops.contains("kde")){ return Kind.kdeWayland; }
+    return Kind.otherX11;
+  }
   static Rectangle cosmicArea= cosmicGuess();
   private static Rectangle cosmicGuess(){
     var s= java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
