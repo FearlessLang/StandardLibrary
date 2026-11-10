@@ -166,3 +166,31 @@ Steps (macOS only):
 3. Click in the first field, press End, and press Cmd+S.
    In any text field of macOS (TextEdit), Cmd+S types no text.
 Expected: at step 3 the first field still shows "a field", and the log shows a second line "key S".
+
+13. A double click on the Fearless corner of a full screen window gives a window with the desk border
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "The state machine on floating desks": "Corner double click in 1: transition to 4.",
+and "A transition between the desk border and the Fearless corner replaces the window with a new one."
+Steps:
+1. Run integrationTests/testGuiStillFullScreen.
+   The window opens in full screen with the Fearless corner at the top left of the screen (state 1).
+2. Double click the Fearless corner, and wait 3 seconds.
+3. Press Escape, the close key.
+Expected: at step 2 the window has the decorations of the desk (state 4), and the console shows no error.
+At step 3 the window closes and the program ends.
+
+14. Full screen on macOS leaves the other applications reachable
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Gui.startFullScreen, Gui.fullScreenKey(KeyStroke)": "Full screen is the full screen state of the desk, asked of the window manager as such, with no mode switch of the display.",
+and "Implementation notes": "Full screen is GraphicsDevice.setFullScreenWindow: _NET_WM_STATE_FULLSCREEN on X11, the full screen style on Windows, the presentation options on macOS".
+Steps (macOS only):
+1. Run integrationTests/testGuiStillFullScreen.
+   The window opens in full screen with the Fearless corner at the top left of the screen (state 1).
+2. Click in the window, press Cmd+Tab, and wait 2 seconds.
+   In a full screen window of a program of macOS (Safari in full screen), Cmd+Tab brings the application used before to the front.
+3. Press Cmd+Tab again, and wait 2 seconds.
+4. Press Cmd+H, the Hide of macOS (the same as Hide in the application menu), and wait 2 seconds.
+Expected: at step 2 the application used before comes to the front, and the window of the Fearless program is behind it.
+At step 3 the window of the Fearless program comes back to the front, in full screen.
+At step 4 the window of the Fearless program is hidden: the desktop and the windows of the other applications show.
+The screen never stays black at step 4.
