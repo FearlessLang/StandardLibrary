@@ -14,11 +14,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,7 +32,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -44,6 +48,9 @@ final class DataFiles{
   static final Map<String,Path> readable= readable();
   static final Map<String,Path> locks= linked("fearlessDataLock.");
   private static final Map<Path,FileChannel> channels= new ConcurrentHashMap<>();
+  private static final Object gate= new Object();
+  private static final ReentrantLock one= new ReentrantLock();
+  private static Map<Path,Hold> current= null;
   private static final Pattern tmpName= Pattern.compile("\\.[0-9a-f-]{36}\\.tmp");
   private static final Set<String> reserved= Set.of("con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
   private static final Set<String> noExt= Set.of("readme", "license", "copying", "notice", "authors", "contributors", "changelog", "changes", "news", "todo", "thanks", "security", "contributing", "code_of_conduct");
@@ -56,6 +63,7 @@ final class DataFiles{
   record Root(String name, Path path, Path lock){}
   interface Op{ Object apply(Root root, List<String> path) throws IOException; }
   interface Locked<T>{ T run() throws IOException; }
+  record Hold(Root root, boolean edit){}
   private static Map<String,Path> linked(String prefix){
     var res= new TreeMap<String,Path>();
     for (var k : System.getProperties().stringPropertyNames()){
@@ -109,13 +117,46 @@ final class DataFiles{
     catch (UncheckedIOException e){ throw failed(root.name(), p, write, e.getCause()); }
   }
   private static <T> T held(Root root, boolean edit, Locked<T> body) throws IOException{
-    var ch= channels.computeIfAbsent(root.lock(), DataFiles::channel);
-    synchronized (ch){
-      try (var _= ch.lock(0, Long.MAX_VALUE, !edit)){
-        if (edit){ dropTmps(root.path()); }
-        return body.run();
-      }
+    synchronized (gate){
+      if (current != null){ return inside(root, edit, body); }
+      try (var _= take(root, edit)){ return body.run(); }
     }
+  }
+  private static FileLock take(Root root, boolean edit) throws IOException{
+    var res= channels.computeIfAbsent(root.lock(), DataFiles::channel).lock(0, Long.MAX_VALUE, !edit);
+    if (edit){ dropTmps(root.path()); }
+    return res;
+  }
+  private static <T> T inside(Root root, boolean edit, Locked<T> body) throws IOException{
+    var h= current.get(root.lock());
+    if (h == null){ throw detErr("The data project mounted on \""+root.name()+"\" is used while sys.locked runs, but it is not in the reads or the edits of that sys.locked."); }
+    if (edit && !h.edit()){ throw detErr("The data project mounted on \""+root.name()+"\" is changed while sys.locked runs, but that sys.locked holds only a read lock of it: it is in the reads, not in the edits."); }
+    return body.run();
+  }
+  static Object locked(Object reads, Object edits, Supplier<Object> f){
+    if (one.isHeldByCurrentThread()){ throw detErr("sys.locked is called inside the function of another sys.locked."); }
+    var want= new TreeMap<Path,Hold>();
+    List$o$1Instance.asJava(reads).forEach(d -> hold(want, root(readable, "data project", d), false));
+    List$o$1Instance.asJava(edits).forEach(d -> hold(want, root(DataFiles.edits, "dataEdit project", d), true));
+    one.lock();
+    var taken= new ArrayList<FileLock>();
+    try{
+      synchronized (gate){
+        for (var h : want.values()){ reachable(h.root()); taken.add(take(h.root(), h.edit())); }
+        current = want;
+      }
+      return f.get();
+    }
+    catch (IOException e){ throw nonDetErr("The locks of sys.locked can not be taken: "+e.getClass().getSimpleName()); }
+    finally{
+      synchronized (gate){ current = null; taken.forEach(DataFiles::release); }
+      one.unlock();
+    }
+  }
+  private static void hold(TreeMap<Path,Hold> want, Root r, boolean edit){ want.merge(r.lock(), new Hold(r, edit), (a, b) -> a.edit() ? a : b); }
+  private static void release(FileLock l){
+    try{ l.release(); }
+    catch (IOException e){ throw new UncheckedIOException(e); }
   }
   private static FileChannel channel(Path lock){
     try{ return FileChannel.open(lock, CREATE, READ, WRITE); }

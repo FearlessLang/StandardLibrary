@@ -19,6 +19,7 @@ DataProjectTests: UnitTests{::
   .test DataProjectDeletes
   .test DataProjectFolderDeletes
   .test DataProjectDeleteErrors
+  .test DataProjectLocks
   .test DataProjectsNotReachable
   }
 
@@ -254,4 +255,20 @@ DataProjectsNotReachable: Test{::
      "The folder at the path data.Broken/notes"
     |`holds "Bad.txt", which is not a valid resource name: the data project changed while this program runs.`
     )}}, {t -> t.dataRead(Broken).paths(L#("notes"))})
+  }
+
+DataProjectLocks: Test{::
+  .checkWithSys{s -> (s.locked[base.Str](L#[base.DataRead](Pub), L#[base.DataEdit](Notes), {Block#
+    .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "a.txt"), "locked")}
+    .return{(s.dataEdit(Notes).read(L#("lk", "a.txt")).readStr(base.StrCleaners.utf8))+(s.dataRead(Pub).read(L#("readme")).readStr(base.StrCleaners.utf8))}
+    })).assertEq "lockedhi"}
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The data project mounted on "data.Notes" is used while sys.locked runs, but it is not in the reads or the edits of that sys.locked.`
+    )}}, {t -> Block#.openIso s = t .return{s.locked[base.List[base.Str]](L#[base.DataRead](Pub), {}, {s.dataEdit(Notes).paths({})})}})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     `The data project mounted on "data.Notes" is changed while sys.locked runs, but that sys.locked holds only a read lock of it: it is in the reads, not in the edits.`
+    )}}, {t -> Block#.openIso s = t .return{s.locked[base.Void](L#[base.DataRead](Notes), {}, {s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "b.txt"), "no")})}})
+  .checkDetErrWithSys({::.isMsg{:: == (
+     "sys.locked is called inside the function of another sys.locked."
+    )}}, {t -> Block#.openIso s = t .return{s.locked[base.Void](L#[base.DataRead](Pub), {}, {s.locked[base.Void](L#[base.DataRead](Pub), {}, {base.Void})})}})
   }

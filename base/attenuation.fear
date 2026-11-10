@@ -14,7 +14,7 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
 ///  .download -> Error.nonDeterministic "NoDownload: System.download is revoked.";
 ///  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d; .manager -> u.manager; .process -> u.process.with NoDownload;
-///  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed;
+///  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
 ///  .iso -> NoDownload#(u.iso.close); .close -> s;
 ///  }}
 ///OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
@@ -37,6 +37,7 @@ ErrorSystem: System {
   .gui -> _Revoked#".gui";
   .revocation -> _Revoked#".revocation";
   .randomSeed -> _Revoked#".randomSeed";
+  .locked(_, _, _) -> _Revoked#".locked";
   .iso -> ErrorSystem;
   .close -> this;
   }
@@ -47,7 +48,7 @@ NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
   .manager -> Error.nonDeterministic "NoManager: System.manager is revoked.";
-  .process -> u.process.with NoManager; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed;
+  .process -> u.process.with NoManager; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
 ///Every method reaches the received System, but the `CapManager` it gives revokes `.quit` and `.reset`:
@@ -56,7 +57,7 @@ NoManagerQuit: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
   .manager -> NoQuitManager#(u.manager);
-  .process -> u.process.with NoManagerQuit; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed;
+  .process -> u.process.with NoManagerQuit; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
   .iso -> NoManagerQuit#(u.iso.close); .close -> s;
   }}
 NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
@@ -100,6 +101,7 @@ RevokableSystem: { #(r: mut Revocation, u: mut System): mut System -> {'s
   .gui -> Block#(r#, RevokableGui#(r, u.gui));
   .revocation -> Block#(r#, u.revocation);
   .randomSeed -> Block#(r#, u.randomSeed);
+  .locked(rs, es, f) -> Block#(r#, u.locked(rs, es, f));
   .iso -> RevokableSystem#(r.iso.close, u.iso.close);
   .close -> s;
   }}
