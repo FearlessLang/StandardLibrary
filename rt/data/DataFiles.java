@@ -36,6 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -50,7 +51,12 @@ final class DataFiles{
   private static final Map<Path,FileChannel> channels= new ConcurrentHashMap<>();
   private static final Object gate= new Object();
   private static final ReentrantLock one= new ReentrantLock();
-  private static Map<Path,Hold> current= null;
+  static final String heldKey= "fearlessDataHeld";
+  private static final String inherited= System.getProperty(heldKey);
+  private static Map<Path,Boolean> current= inherited == null ? null : heldBy(inherited);
+  private static String held= null;
+  private static final List<Process> group= new ArrayList<>();
+  static{ if (inherited != null){ Runtime.getRuntime().addShutdownHook(new Thread(DataFiles::awaitGroup)); } }
   private static final Pattern tmpName= Pattern.compile("\\.[0-9a-f-]{36}\\.tmp");
   private static final Set<String> reserved= Set.of("con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
   private static final Set<String> noExt= Set.of("readme", "license", "copying", "notice", "authors", "contributors", "changelog", "changes", "news", "todo", "thanks", "security", "contributing", "code_of_conduct");
@@ -128,30 +134,58 @@ final class DataFiles{
     return res;
   }
   private static <T> T inside(Root root, boolean edit, Locked<T> body) throws IOException{
-    var h= current.get(root.lock());
-    if (h == null){ throw detErr("The data project mounted on \""+root.name()+"\" is used while sys.locked runs, but it is not in the reads or the edits of that sys.locked."); }
-    if (edit && !h.edit()){ throw detErr("The data project mounted on \""+root.name()+"\" is changed while sys.locked runs, but that sys.locked holds only a read lock of it: it is in the reads, not in the edits."); }
-    return body.run();
+    var locked= current.get(root.lock());
+    if (locked == null){ throw detErr("The data project mounted on \""+root.name()+"\" is used while sys.locked runs, but it is not in the reads or the edits of that sys.locked."); }
+    if (edit && !locked){ throw detErr("The data project mounted on \""+root.name()+"\" is changed while sys.locked runs, but that sys.locked holds only a read lock of it: it is in the reads, not in the edits."); }
+    try (var _= channels.computeIfAbsent(inner(root.lock()), DataFiles::channel).lock(0, Long.MAX_VALUE, !edit)){ return body.run(); }
   }
+  private static Path inner(Path lock){ return lock.resolveSibling(lock.getFileName().toString().replace(".lock", "_inner.lock")); }
   static Object locked(Object reads, Object edits, Supplier<Object> f){
+    if (inherited != null){ throw detErr("sys.locked is called by a process started while the function of a sys.locked runs."); }
     if (one.isHeldByCurrentThread()){ throw detErr("sys.locked is called inside the function of another sys.locked."); }
     var want= new TreeMap<Path,Hold>();
-    List$o$1Instance.asJava(reads).forEach(d -> hold(want, root(readable, "data project", d), false));
-    List$o$1Instance.asJava(edits).forEach(d -> hold(want, root(DataFiles.edits, "dataEdit project", d), true));
+    var types= new ArrayList<String>();
+    List$o$1Instance.asJava(reads).forEach(d -> hold(want, types, root(readable, "data project", d), false));
+    List$o$1Instance.asJava(edits).forEach(d -> hold(want, types, root(DataFiles.edits, "dataEdit project", d), true));
     one.lock();
     var taken= new ArrayList<FileLock>();
     try{
       synchronized (gate){
         for (var h : want.values()){ reachable(h.root()); taken.add(take(h.root(), h.edit())); }
-        current = want;
+        current = want.values().stream().collect(Collectors.toMap(h -> h.root().lock(), Hold::edit));
+        held = String.join(",", types);
       }
       return f.get();
     }
     catch (IOException e){ throw nonDetErr("The locks of sys.locked can not be taken: "+e.getClass().getSimpleName()); }
     finally{
-      synchronized (gate){ current = null; taken.forEach(DataFiles::release); }
+      awaitGroup();
+      synchronized (gate){ current = null; held = null; taken.forEach(DataFiles::release); }
       one.unlock();
     }
+  }
+  private static void hold(TreeMap<Path,Hold> want, ArrayList<String> types, Root r, boolean edit){
+    want.merge(r.lock(), new Hold(r, edit), (a, b) -> a.edit() ? a : b);
+    types.add(r.name()+(edit ? ":edit" : ":read"));
+  }
+  private static Map<Path,Boolean> heldBy(String text){
+    var res= new TreeMap<Path,Boolean>();
+    for (var t : text.split(",")){
+      var colon= t.lastIndexOf(':');
+      res.merge(Objects.requireNonNull(locks.get(t.substring(0, colon))), t.substring(colon+1).equals("edit"), Boolean::logicalOr);
+    }
+    return Collections.unmodifiableMap(res);
+  }
+  static Optional<String> heldArg(){
+    synchronized (gate){ return Optional.ofNullable(held).map(h -> "-D"+heldKey+"="+h); }
+  }
+  static void started(Process p){
+    synchronized (gate){ if (current != null){ group.add(p); } }
+  }
+  private static void awaitGroup(){
+    List<Process> ps;
+    synchronized (gate){ ps= List.copyOf(group); group.clear(); }
+    ps.forEach(p -> p.onExit().join());
   }
   private static void hold(TreeMap<Path,Hold> want, Root r, boolean edit){ want.merge(r.lock(), new Hold(r, edit), (a, b) -> a.edit() ? a : b); }
   private static void release(FileLock l){

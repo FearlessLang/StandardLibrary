@@ -257,7 +257,20 @@ DataProjectsNotReachable: Test{::
     )}}, {t -> t.dataRead(Broken).paths(L#("notes"))})
   }
 
+_LockRun: base.InfoMain{sys, arg -> Block#(sys.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "c.txt"), "run"), arg)}
+_LockStart: base.InfoMain{sys, arg -> Block#(sys.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "d.txt"), "start"), arg)}
 DataProjectLocks: Test{::
+  .checkWithSys{s -> Block#
+    .do{Block#(s.locked[base.Info](L#[base.DataRead](Pub), L#[base.DataEdit](Notes), {s.process.run(_LockRun, base.Infos.msg "", {})}), base.Void)}
+    .do{(s.dataEdit(Notes).read(L#("lk", "c.txt")).readStr(base.StrCleaners.utf8)).assertEq "run"}
+    .return{s.dataEdit(Notes).delete(L#("lk", "c.txt"))}
+    }
+  .checkWithSys{s -> Block#
+    .let[mut base.CapRunningMain[base.Info]] started= {s.locked[mut base.CapRunningMain[base.Info]](L#[base.DataRead](Pub), L#[base.DataEdit](Notes), {s.process.start(_LockStart, base.Infos.msg "", {})})}
+    .do{(s.dataEdit(Notes).read(L#("lk", "d.txt")).readStr(base.StrCleaners.utf8)).assertEq "start"}
+    .do{Block#(started.await, base.Void)}
+    .return{s.dataEdit(Notes).delete(L#("lk", "d.txt"))}
+    }
   .checkWithSys{s -> (s.locked[base.Str](L#[base.DataRead](Pub), L#[base.DataEdit](Notes), {Block#
     .do{s.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "a.txt"), "locked")}
     .return{(s.dataEdit(Notes).read(L#("lk", "a.txt")).readStr(base.StrCleaners.utf8))+(s.dataRead(Pub).read(L#("readme")).readStr(base.StrCleaners.utf8))}
