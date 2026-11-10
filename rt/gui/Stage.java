@@ -192,7 +192,7 @@ final class Stage extends MouseAdapter{
     if (!Desk.mac){ device.setFullScreenWindow(w); return; }
     macFullScreen = w;
     Desk.hideDockAndMenuBar(w != null);
-    if (w != null){ w.setBounds(screen); }
+    if (w != null){ w.setOpacity(1); w.setBounds(screen); }
   }
   private Rectangle opening(){ return fit(inset(workArea(), f.getInsets()), openingWidth()); }
   private Rectangle workArea(){ return Desk.cosmic ? Desk.cosmicArea : inset(screen, Toolkit.getDefaultToolkit().getScreenInsets(gc)); }
