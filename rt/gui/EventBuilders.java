@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import io.github.humbleui.skija.Canvas;
 
@@ -72,6 +73,10 @@ final class SkMouse extends MouseAdapter{
   private List<AWidget> hover= List.of();// deepest first
   private Point at= new Point();
   private Gesture gesture;
+  private AEditText edgeOf;
+  private int edgeX;
+  private int edgeY;
+  private final Timer edge= new Timer(50, _ -> edgeStep());
   private AWidget secondary;
   private AWidget tip;
   private long tipSince;
@@ -110,7 +115,7 @@ final class SkMouse extends MouseAdapter{
 
   private void stop(){ gesture = gesture == null || gesture instanceof Press ? null : swallowed; }
 
-  void forget(){ gesture = null; }
+  void forget(){ gesture = null; edge.stop(); }
 
   private AWidget pressTarget(){ return gesture instanceof Press q ? q.widget() : null; }
 
@@ -172,6 +177,7 @@ final class SkMouse extends MouseAdapter{
   }
 
   @Override public void mouseReleased(MouseEvent e){
+    edge.stop();
     var p= point(e);
     boolean left= SwingUtilities.isLeftMouseButton(e);
     int buttons= MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
@@ -209,7 +215,7 @@ final class SkMouse extends MouseAdapter{
     }
     var t= pressTarget();
     if (t instanceof _Button b){ gesture = new Press(b, inside(b, p)); }
-    if (t instanceof AEditText a){ a.drag(content(a, p)); }
+    if (t instanceof AEditText a){ dragText(a, content(a, p)); }
     updateHover(p);
     dispatch(t == null ? deepestAt(p) : t, Dragged, p);
   }
@@ -231,6 +237,18 @@ final class SkMouse extends MouseAdapter{
 
   private static int spanAt(_Split s, Point at){ return s.vertical ? at.y - s.top : at.x - s.left; }
 
+  private void dragText(AEditText a, Point p){
+    edgeOf = a;
+    edgeX = a.barBottom() ? past(p.x, a.scrollX, a.viewW()) : 0;
+    edgeY = a.barRight() ? past(p.y, a.scrollY, a.viewH()) : 0;
+    if (edgeX == 0 && edgeY == 0){ edge.stop(); a.drag(p); return; }
+    if (!edge.isRunning()){ edge.start(); }
+  }
+  private void edgeStep(){
+    if (frame.frame.completed()){ edge.stop(); return; }
+    edgeOf.step(edgeX, edgeY);
+  }
+  private static int past(int at, int from, int size){ return at < from ? -1 : at >= from + size ? 1 : 0; }
   private Point content(AEditText t, Point p){
     var q= SwingUtilities.convertPoint(top(), p, t.component);
     return new Point(q.x - t.left + t.scrollX, q.y - t.top + t.scrollY);

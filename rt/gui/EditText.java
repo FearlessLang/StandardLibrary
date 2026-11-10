@@ -456,6 +456,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   void input(String s){ change(() -> new Req(selA(), selB(), s)); }
   void press(Point p, boolean extend){ act(() -> pointTo(p.x, p.y, extend)); }
   void drag(Point p){ act(() -> pointTo(p.x, p.y, true)); }
+  void step(int dx, int dy){ act(() -> dy != 0 ? vertical(dy, true) : horizontal(dx > 0, true)); }
   void commit(){
     submit(() -> {
       if (committed == null || committed.contentEquals(buf)){ return null; }
