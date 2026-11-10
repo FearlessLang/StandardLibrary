@@ -57,7 +57,6 @@ final class DataFiles{
   static{ if (inherited != null){ Runtime.getRuntime().addShutdownHook(new Thread(DataFiles::awaitGroup)); } }
   private static final Pattern tmpName= Pattern.compile("\\.[0-9a-f-]{36}\\.tmp");
   private static final Set<String> reserved= Set.of("con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
-  private static final Set<String> noExt= Set.of("readme", "license", "copying", "notice", "authors", "contributors", "changelog", "changes", "news", "todo", "thanks", "security", "contributing", "code_of_conduct");
   private static final Set<String> multiDot= Set.of("tar.gz", "tar.bz2", "tar.xz", "tar.zst", "tar.lz", "tar.lz4", "d.ts", "d.ts.map", "js.map", "css.map", "min.js", "min.css");
   sealed interface Node{}
   record Dir(Path path) implements Node{}
@@ -204,7 +203,7 @@ final class DataFiles{
   private static boolean atom(String s){ return s.matches("[a-z_][a-z0-9_]*") && !reserved.contains(s); }
   private static boolean fileName(String s){
     var dot= s.indexOf('.');
-    if (dot < 0){ return noExt.contains(s); }
+    if (dot < 0){ return false; }
     var ext= s.substring(dot+1);
     return atom(s.substring(0, dot)) && !ext.equals("zip") && !ext.equals("fearless") && (multiDot.contains(ext) || ext.matches("[a-z0-9]{1,16}"));
   }
@@ -222,8 +221,7 @@ final class DataFiles{
     return invalid(name, path, "\""+path.getLast()+"\" is not a valid file name.\n"
       +"A file name is a name, a dot and an extension.\n"
       +"The name uses only lowercase letters, digits and underscores, starts with a letter or an underscore, and is not \"con\", \"prn\", \"aux\", \"nul\", \"com1\" to \"com9\" or \"lpt1\" to \"lpt9\".\n"
-      +"The extension is 1 to 16 lowercase letters or digits, other than \"zip\" and \"fearless\", or one of "+quoted(multiDot)+".\n"
-      +"A file name can also be one of "+quoted(noExt)+", with no extension.");
+      +"The extension is 1 to 16 lowercase letters or digits, other than \"zip\" and \"fearless\", or one of "+quoted(multiDot)+".");
   }
   private static String quoted(Set<String> names){ return String.join(", ", names.stream().sorted().map(n -> "\""+n+"\"").toList()); }
   private static void writable(String name, List<String> path){
@@ -263,15 +261,7 @@ final class DataFiles{
     return Void$o$0.instance;
   }
   private static void clash(String name, List<String> path, Node at) throws IOException{
-    var last= path.getLast();
-    if (child(at, last).filter(n -> !(n instanceof Resource)).isPresent()){ throw refused(name, path, "names a folder, not a file."); }
-    var dot= last.indexOf('.');
-    var base= dot < 0 ? last : last.substring(0, dot);
-    if (!noExt.contains(base)){ return; }
-    var other= dot < 0
-      ? names(at).stream().filter(n -> n.startsWith(last+".")).findFirst()
-      : child(at, base).filter(Resource.class::isInstance).map(_ -> base);
-    other.ifPresent(o -> { throw refused(name, path, "is not written: its folder holds \""+o+"\", and a file without extension cannot share its name with a file with an extension."); });
+    if (child(at, path.getLast()).filter(n -> !(n instanceof Resource)).isPresent()){ throw refused(name, path, "names a folder, not a file."); }
   }
   private static void put(Node at, List<String> rest, byte[] bytes, Path root) throws IOException{
     switch (at){
