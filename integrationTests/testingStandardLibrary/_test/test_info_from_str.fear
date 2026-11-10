@@ -47,11 +47,46 @@ InfoFromStrErrorTests: Test {::
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `"hi"trailing`})
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{"a""b"}`})
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{ab":"c"}`})
-  .checkDetErr({::.isMsg{:: == (`Infos.fromStr: invalid escape; the escapes are \\, \" and \n.` | "" | `001| "a\tb"` | "   |   ^")}}, {Infos.fromStr `"a\tb"`})
-  .checkDetErr({::.isMsg{:: == (`Infos.fromStr: invalid escape; the escapes are \\, \" and \n.` | "" | `001| "\u0009"` | "   |  ^")}}, {Infos.fromStr `"\u0009"`})
-  .checkDetErr({::.isMsg{:: == (`Infos.fromStr: repeated key "a".` | "" | `001| {"a":"1","a":"2"}` | "   |          ^")}}, {Infos.fromStr `{"a":"1","a":"2"}`})
-  .checkDetErr({::.isMsg{:: == ("Infos.fromStr: unterminated string." | "" | `003| "b` | "   | ^")}}, {Infos.fromStr("[" | `"a",` | `"b`)})
-  .checkDetErr({::.isMsg{:: == ("Infos.fromStr: unexpected end of the text; a value is expected." | "" | `001| {"a":` | "   |      ^")}}, {Infos.fromStr `{"a":`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| "a\tb"`
+    | "   | ~~^^--"
+    | ""
+    | "While inspecting string > full text"
+    | `Invalid escape "\t".`
+    | `The escapes are "\\", "\"" and "\n".`)}}, {Infos.fromStr `"a\tb"`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| "\u0009"`
+    | "   | ~^^-----"
+    | ""
+    | "While inspecting string > full text"
+    | `Invalid escape "\u".`
+    | `The escapes are "\\", "\"" and "\n".`)}}, {Infos.fromStr `"\u0009"`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| {"a":"1","a":"2"}`
+    | "   | ---------^^^~~~~"
+    | ""
+    | "While inspecting map key > map entry > map > full text"
+    | `Repeated key "a".`)}}, {Infos.fromStr `{"a":"1","a":"2"}`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | "001| ["
+    | `002| "a",`
+    | `003| "b`
+    | "   | ^^"
+    | ""
+    | "While inspecting string > list element > list > full text"
+    | "Unterminated string.")}}, {Infos.fromStr("[" | `"a",` | `"b`)})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| {"a":`
+    | "   | -~~~^"
+    | ""
+    | "While inspecting map entry > map > full text"
+    | "Unexpected end of the text."
+    | "Expected: a value.")}}, {Infos.fromStr `{"a":`})
   }
 
 TestInfoFromStr: Test {::

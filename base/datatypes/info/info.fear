@@ -150,58 +150,66 @@ _JsonUnescape: {
 
 _InfoParsed: { .info: Info; .pos: Nat }
 
+_InfoOpen: { .name: Str; .from: Nat }
+
+_InfoFromStrMessage: Sealed{ #(text: Str, names: List[Str], spans: List[Nat], why: Str): Str -> _Magic! }
+
 _InfoFromStr: {
   #(s: Str): Info -> Block#
-    .let result = {this.value(s, 0)}
-    .if {(this.skip(s, result.pos)) != (s.size)} .error {this.err(s, this.skip(s, result.pos), "unexpected characters after the value")}
+    .let result = {this.value(s, 0, {})}
+    .let after = {this.skip(s, result.pos)}
+    .if {after != (s.size)} .error {this.fail(s, {}, "", after, this.last(s), this.last(s), "Unexpected characters after the value.")}
     .return {result.info};
 
-  .err(s: Str, pos: Nat, what: Str): Str -> Block#
-    .let lines = {s.split("" |)}
-    .let before = {s.sub(0, pos)}
-    .let line = {before.count("" |)}
-    .let col = {before.lastIndexOf("" |).match{.some i -> pos - i - 1; .empty -> pos}}
-    .let digits = {lines.size.str.size}
-    .let width = {digits < 3 ? {.then -> 3; .else -> digits}}
-    .let num = {(line + 1).str}
-    .return {"Infos.fromStr: " + what + "."
-      | ""
-      | (("0".repeat(width - (num.size))) + num + "| " + (lines.get(line)))
-      | ((" ".repeat(width)) + "| " + (" ".repeat(col)) + "^")};
+  .last(s: Str): Nat -> s.isEmpty ? {.then -> 0; .else -> s.size - 1};
+
+  .upTo(a: Nat, b: Nat): Nat -> a < b ? {.then -> a; .else -> b};
+
+  .open(name: Str, from: Nat, fs: List[_InfoOpen]): List[_InfoOpen] -> fs.withAlso(0, {.name -> name; .from -> from});
+
+  .fail(s: Str, fs: List[_InfoOpen], name: Str, from: Nat, to: Nat, upTo: Nat, why: Str): Str -> _InfoFromStrMessage#(
+    s,
+    Lists#(name) ++ (fs.flow.map{::.name}.list) ++ (Lists#("full text")),
+    Lists#(from, to) ++ (fs.flow.flatMap{f -> Lists#(f.from, upTo)}.list) ++ (Lists#(0, this.last(s))),
+    why);
+
   .skip(s: Str, pos: Nat): Nat -> (pos < (s.size)) && {Block#
     .let c = {s.sub(pos, pos + 1)}
     .return {c == " " || {c == ("" |)}}
     } ? {.then -> this.skip(s, pos + 1); .else -> pos};
 
-  .value(s: Str, start: Nat): _InfoParsed -> Block#
+  .value(s: Str, start: Nat, fs: List[_InfoOpen]): _InfoParsed -> Block#
     .let pos = {this.skip(s, start)}
-    .if {pos >= (s.size)} .error {this.err(s, pos, "unexpected end of the text; a value is expected")}
+    .if {pos >= (s.size)} .error {this.fail(s, fs, "", this.last(s), this.last(s), this.last(s), "Unexpected end of the text." | "Expected: a value.")}
     .let c = {s.sub(pos, pos + 1)}
-    .if {c == `"`} .return {this.msgValue(s, pos)}
-    .if {c == "["} .return {this.listValue(s, pos + 1)}
-    .if {c == "{"} .return {this.mapValue(s, pos + 1)}
-    .return {this.emptyValue(s, pos)};
+    .if {c == `"`} .return {this.msgValue(s, pos, fs)}
+    .if {c == "["} .return {this.listValue(s, pos + 1, this.open("list", pos, fs))}
+    .if {c == "{"} .return {this.mapValue(s, pos + 1, this.open("map", pos, fs))}
+    .return {this.emptyValue(s, pos, fs)};
 
-  .emptyValue(s: Str, pos: Nat): _InfoParsed -> Block#
-    .if {pos + 4 > (s.size)} .error {this.err(s, pos, "unexpected end of the text; a value is expected")}
-    .if {(s.sub(pos, pos + 4)) != "null"} .error {this.err(s, pos, "unexpected character; a value is expected")}
+  .emptyValue(s: Str, pos: Nat, fs: List[_InfoOpen]): _InfoParsed -> Block#
+    .if {pos + 4 > (s.size)} .error {this.fail(s, fs, "", pos, this.last(s), this.last(s), "Unexpected end of the text." | "Expected: a value.")}
+    .if {(s.sub(pos, pos + 4)) != "null"} .error {this.fail(s, fs, "", pos, pos, pos, "Unexpected character." | "Expected: a value.")}
     .return {_InfoParsed {.info -> Info; .pos -> pos + 4}};
 
-  .msgValue(s: Str, pos: Nat): _InfoParsed -> Block#
-    .let endIdx = {this.strEnd(s, pos + 1)}
+  .msgValue(s: Str, pos: Nat, fs: List[_InfoOpen]): _InfoParsed -> Block#
+    .let endIdx = {this.strEnd(s, pos + 1, this.open("string", pos, fs))}
     .return {_InfoParsed {
       .info -> Infos.msg(_JsonUnescape#(s.sub(pos + 1, endIdx)));
       .pos -> endIdx + 1;
       }};
 
-  .strEnd(s: Str, pos: Nat): Nat -> Block#
+  .strEnd(s: Str, pos: Nat, fs: List[_InfoOpen]): Nat -> Block#
     .var[Nat] i = {pos}
     .loop { Block#
-      .if {(i.get) >= (s.size)} .error {this.err(s, pos - 1, "unterminated string")}
+      .if {(i.get) >= (s.size)} .error {this.fail(s, fs, "", pos - 1, this.last(s), this.last(s), "Unterminated string.")}
       .let c = {s.sub(i.get, (i.get) + 1)}
       .if {c == `"`} .return {OuterReturn#(i.get)}
       .let[Nat] at = {i.get}
-      .if {c == "\" && {this.isEscape(s, at).not}} .error {this.err(s, at, `invalid escape; the escapes are \\, \" and \n`)}
+      .if {c == "\" && {this.isEscape(s, at).not}} .error {Block#
+        .let[Nat] end = {this.upTo(at + 1, this.last(s))}
+        .return {this.fail(s, fs, "", at, end, end, ("Invalid escape " + (s.sub(at, end + 1).escape) + ".") | `The escapes are "\\", "\"" and "\n".`)}
+        }
       .do {i.set((i.get) + (c == "\" ? {.then -> 2; .else -> 1}))}
       .return {Continue#}
       }
@@ -212,52 +220,54 @@ _InfoFromStr: {
     .return {e == "\\" || {e == `\"`} || {e == "\n"}}
     };
 
-  .listValue(s: Str, pos: Nat): _InfoParsed -> Block#
+  .listValue(s: Str, pos: Nat, fs: List[_InfoOpen]): _InfoParsed -> Block#
     .var[Nat] i = {pos}
     .let acc = {ELists#[Info]}
     .loop { Block#
       .let[Nat] at = {this.skip(s, i.get)}
-      .if {at >= (s.size)} .error {this.err(s, pos - 1, "unterminated list")}
+      .if {at >= (s.size)} .error {this.fail(s, fs, "", pos - 1, this.last(s), this.last(s), "Unterminated list.")}
       .if {(s.sub(at, at + 1)) == "]"} .return {Block#
         .let result = {(acc.list).info {::}}
         .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> at + 1})}
         }
-      .let start = {(acc.size) == 0 ? {.then -> at; .else -> this.expect(s, at, ",")}}
-      .let elem = {this.value(s, start)}
+      .let start = {(acc.size) == 0 ? {.then -> at; .else -> this.expect(s, at, ",", fs)}}
+      .let elem = {this.value(s, start, this.open("list element", this.skip(s, start), fs))}
       .do {acc.add(elem.info).void}
       .do {i.set(elem.pos)}
       .return {Continue#}
       }
     .return {Unreachable!};
 
-  .mapValue(s: Str, pos: Nat): _InfoParsed -> Block#
+  .mapValue(s: Str, pos: Nat, fs: List[_InfoOpen]): _InfoParsed -> Block#
     .var[Nat] i = {pos}
     .let acc = {ELists#[KeyElem[Str,Info]]}
     .let keys = {ESets#[Str,Str]{::}}
     .loop { Block#
       .let[Nat] at = {this.skip(s, i.get)}
-      .if {at >= (s.size)} .error {this.err(s, pos - 1, "unterminated map")}
+      .if {at >= (s.size)} .error {this.fail(s, fs, "", pos - 1, this.last(s), this.last(s), "Unterminated map.")}
       .if {(s.sub(at, at + 1)) == "}"} .return {Block#
         .let result = {(acc.list).seqFlow.mapping({::}, {.key e -> e.key; .elem e -> e.elem}).info {::}}
         .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> at + 1})}
         }
-      .let start = {(acc.size) == 0 ? {.then -> at; .else -> this.expect(s, at, ",")}}
-      .let keyStart = {this.expect(s, this.skip(s, start), `"`)}
-      .let keyEnd = {this.strEnd(s, keyStart)}
+      .let start = {(acc.size) == 0 ? {.then -> at; .else -> this.expect(s, at, ",", fs)}}
+      .let[Nat] q = {this.skip(s, start)}
+      .let entry = {this.open("map entry", q, fs)}
+      .let keyStart = {this.expect(s, q, `"`, entry)}
+      .let keyEnd = {this.strEnd(s, keyStart, this.open("map key", q, entry))}
       .let key = {_JsonUnescape#(s.sub(keyStart, keyEnd))}
-      .if {keys.contains key} .error {this.err(s, keyStart - 1, "repeated key "+(key.escape))}
+      .let afterColon = {this.expect(s, this.skip(s, keyEnd + 1), ":", entry)}
+      .let elem = {this.value(s, afterColon, entry)}
+      .if {keys.contains key} .error {this.fail(s, entry, "map key", q, keyEnd, elem.pos - 1, "Repeated key " + (key.escape) + ".")}
       .do {keys.add(key).void}
-      .let afterColon = {this.expect(s, this.skip(s, keyEnd + 1), ":")}
-      .let elem = {this.value(s, afterColon)}
       .do {acc.add({.key -> key; .elem -> elem.info}).void}
       .do {i.set(elem.pos)}
       .return {Continue#}
       }
     .return {Unreachable!};
 
-  .expect(s: Str, pos: Nat, ch: Str): Nat -> Block#
-    .if {pos >= (s.size)} .error {this.err(s, pos, "unexpected end of the text; "+(ch.escape)+" is expected")}
-    .if {(s.sub(pos, pos + 1)) != ch} .error {this.err(s, pos, (ch.escape)+" is expected")}
+  .expect(s: Str, pos: Nat, ch: Str, fs: List[_InfoOpen]): Nat -> Block#
+    .if {pos >= (s.size)} .error {this.fail(s, fs, "", this.last(s), this.last(s), this.last(s), "Unexpected end of the text." | ("Expected: " + (ch.escape) + "."))}
+    .if {(s.sub(pos, pos + 1)) != ch} .error {this.fail(s, fs, "", pos, pos, pos, "Unexpected character." | ("Expected: " + (ch.escape) + "."))}
     .return {pos + 1};
   }
 
