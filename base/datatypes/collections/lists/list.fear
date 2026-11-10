@@ -138,9 +138,6 @@ _List[E:*]: Sealed,ToFlow[E],BaseContainer[E],DataType[List[E],List[imm E],E,imm
   mut  .reverse: mut List[E];                /// reverse order
   read .reverse: read List[E];               /// reverse order
 
-//  mut  .flow: mut Flow[E];                   /// view as flow
-//  read .flow: mut Flow[read/imm E];          /// view as flow
-//  imm  .flow: mut Flow[imm E];               /// view as flow
   mut  .seqFlow: mut Flow[E];                /// sequential flow
   read .seqFlow: mut Flow[read/imm E];       /// sequential flow
   imm  .flow: mut Flow[imm E];               /// view as flow
