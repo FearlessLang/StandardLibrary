@@ -142,14 +142,12 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     long from= ((Nat$c$0Instance)p1).val();
     long to= ((Nat$c$0Instance)p2).val();
     int size= val.length();
+    var outside= Long.compareUnsigned(from, size) > 0 || Long.compareUnsigned(to, size) > 0;
+    if (outside){
+      throw Util.err("Str.sub: the range "+Long.toUnsignedString(from)+" to "+Long.toUnsignedString(to)+" is out of range for "+(size == 0 ? "an empty Str." : "a Str of size "+size+"."));
+    }
     if (Long.compareUnsigned(from, to) > 0){
-      throw Util.err("Str.sub: invalid range: from > to; from="+Long.toUnsignedString(from)+" to="+Long.toUnsignedString(to));
-    }
-    if (Long.compareUnsigned(from, size) > 0){
-      throw Util.err("Str.sub: invalid range: from out of bounds; from="+Long.toUnsignedString(from)+" size="+size);
-    }
-    if (Long.compareUnsigned(to, size) > 0){
-      throw Util.err("Str.sub: invalid range: to out of bounds; to="+Long.toUnsignedString(to)+" size="+size);
+      throw Util.err("Str.sub: from "+Long.toUnsignedString(from)+" is greater than to "+Long.toUnsignedString(to)+".");
     }
     return new Str$c$0Instance(val.substring((int)from, (int)to));
   }

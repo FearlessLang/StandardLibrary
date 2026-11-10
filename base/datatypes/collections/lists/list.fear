@@ -6,14 +6,14 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .size->0;
   .isEmpty->True;
 
-  .get(i)->Error.msg "List.get: called on empty list";
-  .tryGet(i)->Actions.msg "List.get: called on empty list";
+  .get(i)->Error.msg("List.get: index "+i+" is out of range for an empty List.");
+  .tryGet(i)->Actions.msg("List.get: index "+i+" is out of range for an empty List.");
   .opt(i)->{};
 
-  .getFirst->Error.msg "List.getFirst: called on empty list";
-  .getLast->Error.msg "List.getLast: called on empty list";
-  .tryGetFirst->Actions.msg "List.getFirst: called on empty list";
-  .tryGetLast->Actions.msg "List.getLast: called on empty list";
+  .getFirst->Error.msg "List.getFirst: called on an empty List.";
+  .getLast->Error.msg "List.getLast: called on an empty List.";
+  .tryGetFirst->Actions.msg "List.getFirst: called on an empty List.";
+  .tryGetLast->Actions.msg "List.getLast: called on an empty List.";
   .first->{};
   .last->{};
 
@@ -26,20 +26,20 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   read +> e->Lists.singletonRead[E](e);
   
   .subList(start,end) -> Block#
-    .if{start!=0 || {end!=0}} .error{"List.subList: range "+start+" to "+end+" out of range for empty list"}
+    .if{start!=0 || {end!=0}} .error{"List.subList: the range "+start+" to "+end+" is out of range for an empty List."}
     .return {{}};
 
   .subList(start)->this.subList(start,this.size);
 
-  .with(i,e)->Error.msg "List.with: called on empty list";
+  .with(i,e)->Error.msg("List.with: index "+i+" is out of range for an empty List.");
   mut .withAlso(i,e)->Block#
-    .if {i!=0} .error{"List.withAlso: List index "+i+" out of range for empty list"}
+    .if {i!=0} .error{"List.withAlso: index "+i+" is out of range for an empty List."}
     .return{Lists#e};
   read .withAlso(i,e)->Block#
-    .if {i!=0} .error{"List.withAlso: List index "+i+" out of range for empty list"}
+    .if {i!=0} .error{"List.withAlso: index "+i+" is out of range for an empty List."}
     .return{Lists.singletonRead[E]e};
 
-  .without(i)->Error.msg "List.without: called on empty list";
+  .without(i)->Error.msg("List.without: index "+i+" is out of range for an empty List.");
 
   .reverse->{};
 

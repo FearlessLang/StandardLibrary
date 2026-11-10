@@ -1,5 +1,5 @@
 TestEList: Test {::
-  .checkDetErr({::.isMsg{::.startsWith "EList.eView: the view of the indices [0, 3) is out of range for its EList of length 0"}}, {Block#
+  .checkDetErr({::.isMsg{::.startsWith "EList.eView: the view of the indices [0, 3) is out of range for its empty EList."}}, {Block#
     .let l={ELists#(1, 2, 3)}
     .let v={l.eView(0, 3)}
     .let list={l.list}

@@ -61,14 +61,14 @@ ESparseList[E:*]: Sealed, _EditableList[E, ESparseList[E]] {
   /// Throws if ``i >= this.capacity``.
   //> .check{ESparseLists.backedWithArray[Nat] 2 .set(1, 7) .get 0 .assertEmpty {::}}
   //> .check{ESparseLists.backedWithArray[Nat] 2 .set(1, 7) .get 1 .assertEq({::}, Opts# 7)}
-  //> .checkDetErr({::.isMsg{:: == "ESparseList.get: Index 2 out of bounds for ESparseList of capacity 2"}}, {ESparseLists.backedWithArray[Nat] 2 .get 2})
+  //> .checkDetErr({::.isMsg{:: == "ESparseList.get: index 2 is out of range for an ESparseList of capacity 2."}}, {ESparseLists.backedWithArray[Nat] 2 .get 2})
   read .get(Nat): mut Opt[read/imm E];
   mut .get(Nat): mut Opt[E];
 
   /// ``this.set(i, e)`` puts ``e`` at index ``i``, filling the hole or replacing the element there, and returns ``this``.
   /// Throws if ``i >= this.capacity``.
   //> .check{ESparseLists.backedWithArray[Nat] 2 .set(1, 7).set(1, 8) .get 1 .assertEq({::}, Opts# 8)}
-  //> .checkDetErr({::.isMsg{:: == "ESparseList.set: Index 2 out of bounds for ESparseList of capacity 2"}}, {ESparseLists.backedWithArray[Nat] 2 .set(2, 7)})
+  //> .checkDetErr({::.isMsg{:: == "ESparseList.set: index 2 is out of range for an ESparseList of capacity 2."}}, {ESparseLists.backedWithArray[Nat] 2 .set(2, 7)})
   mut .set(Nat, E): mut ESparseList[E];
 
   /// ``this.clear`` makes every index a hole, returning ``this``. The capacity is unchanged.

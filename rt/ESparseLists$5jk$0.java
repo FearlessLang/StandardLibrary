@@ -166,7 +166,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   private static LongStream upTo(long cap){ return LongStream.iterate(0, i -> Long.compareUnsigned(i, cap) < 0, i -> i + 1); }
   private long idx(String m, Object p0){
     long i= Nat$c$0Instance.unwrap(p0);
-    if (Long.compareUnsigned(i, s.cap()) >= 0){ throw detErr("ESparseList."+m+": Index "+Long.toUnsignedString(i)+" out of bounds for ESparseList of capacity "+Long.toUnsignedString(s.cap())); }
+    if (Long.compareUnsigned(i, s.cap()) >= 0){ throw detErr("ESparseList."+m+": index "+Long.toUnsignedString(i)+" is out of range for an ESparseList of capacity "+Long.toUnsignedString(s.cap())+"."); }
     return i;
   }
   private boolean test(Object f, long i){ return isTrue(callF$2(f, s.at(i))); }
@@ -233,7 +233,7 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
     var seen= new HashSet<Long>();
     for (long k= 0; k < n; k += 1){
       long i= idx("removeAll", l.read$get$1(nat(k)));
-      if (!seen.add(i)){ throw detErr("ESparseList.removeAll: Index "+Long.toUnsignedString(i)+" is present twice in the indices to remove"); }
+      if (!seen.add(i)){ throw detErr("ESparseList.removeAll: index "+Long.toUnsignedString(i)+" is present twice in the indices to remove."); }
     }
     seen.forEach(i -> s.put(i, null));
     return this;
@@ -241,8 +241,8 @@ final class ESparseList$2rs$1Instance implements ESparseList$2rs$1{
   @Override public Object mut$trimTo$2(Object p0, Object p1){
     long start= Nat$c$0Instance.unwrap(p0);
     long end= Nat$c$0Instance.unwrap(p1);
-    if (Long.compareUnsigned(end, s.cap()) > 0){ throw detErr("ESparseList.trimTo: Index "+Long.toUnsignedString(end)+" out of bounds for ESparseList of capacity "+Long.toUnsignedString(s.cap())); }
-    if (Long.compareUnsigned(start, end) > 0){ throw detErr("ESparseList.trimTo: start "+Long.toUnsignedString(start)+" is greater than end "+Long.toUnsignedString(end)); }
+    if (Long.compareUnsigned(end, s.cap()) > 0){ throw detErr("ESparseList.trimTo: the range "+Long.toUnsignedString(start)+" to "+Long.toUnsignedString(end)+" is out of range for an ESparseList of capacity "+Long.toUnsignedString(s.cap())+"."); }
+    if (Long.compareUnsigned(start, end) > 0){ throw detErr("ESparseList.trimTo: start "+Long.toUnsignedString(start)+" is greater than end "+Long.toUnsignedString(end)+"."); }
     var r= s.empty(end - start);
     for (long i : s.present()){
       if (Long.compareUnsigned(i, start) >= 0 && Long.compareUnsigned(i, end) < 0){ r.put(i - start, s.at(i)); }

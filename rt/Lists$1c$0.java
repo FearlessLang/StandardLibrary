@@ -38,9 +38,10 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   }
   private int idx(String m, Object p0){
     long i= natToLong(p0);
-    check(0 <= i && i < val.size(), m+": List index "+Long.toUnsignedString(i)+" out of range for List of length "+val.size());
+    check(0 <= i && i < val.size(), outOfRange(m, "index "+Long.toUnsignedString(i)));
     return (int) i;
   }
+  private String outOfRange(String m, String what){ return m+": "+what+" is out of range for a List of size "+val.size()+"."; }
 
   @Override public Object read$size$0(){ return Nat$c$0Instance.instance(val.size()); }
   @Override public Object read$isEmpty$0(){ return bool(val.isEmpty()); }
@@ -53,7 +54,7 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object mut$tryGet$1(Object p0){
     long i= natToLong(p0);
     if (0 <= i && i < val.size()){ return ok(val.get((int) i)); }
-    return fail("List.get: List index "+Long.toUnsignedString(i)+" out of range for List of length "+val.size());
+    return fail(outOfRange("List.get", "index "+Long.toUnsignedString(i)));
   }
   @Override public Object read$get$1(Object p0){ return val.get(idx("List.get", p0)); }
   @Override public Object read$tryGet$1(Object p0){ return mut$tryGet$1(p0); }
@@ -112,7 +113,9 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object read$$plus_gt$1(Object p0){ return mut$$plus_gt$1(p0); }
   @Override public Object mut$subList$2(Object p0, Object p1){
     long s= Util.natToLong(p0); long e= Util.natToLong(p1);
-    check(0 <= s && s <= e && e <= val.size(), "List.subList: range "+Long.toUnsignedString(s)+" to "+Long.toUnsignedString(e)+" out of range for List of length "+val.size());
+    var outside= Long.compareUnsigned(s, val.size()) > 0 || Long.compareUnsigned(e, val.size()) > 0;
+    check(!outside, outOfRange("List.subList", "the range "+Long.toUnsignedString(s)+" to "+Long.toUnsignedString(e)));
+    check(s <= e, "List.subList: start "+s+" is greater than end "+e+".");
     return wrap(val.subList((int) s, (int) e));
   }
   @Override public Object read$subList$2(Object p0, Object p1){ return mut$subList$2(p0, p1); }
@@ -127,7 +130,7 @@ record List$o$1Instance(List<Object> val) implements List$o$1{
   @Override public Object read$with$2(Object p0, Object p1){ return mut$with$2(p0, p1); }
   @Override public Object mut$withAlso$2(Object p0, Object p1){
     long i= natToLong(p0);
-    check(0 <= i && i <= val.size(), "List.withAlso: List index "+Long.toUnsignedString(i)+" out of range for List of length "+val.size());
+    check(0 <= i && i <= val.size(), outOfRange("List.withAlso", "index "+Long.toUnsignedString(i)));
     int index= (int) i;
     var l= new ArrayList<Object>(val.size()+1);
     l.addAll(val.subList(0, index));
