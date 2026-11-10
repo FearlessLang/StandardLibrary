@@ -1,7 +1,7 @@
 /// Support for closed sets of named singleton values (enumerations).
 /// A family with a few named values is declared by implementing `Enum` and
 /// `Enums`: the family type binds every value to its list via `.enums` and
-/// gives ``read .close`` and ``.norm`` once (`.cmp`/`.hash`/`.index` come for free from that;
+/// gives ``read .close`` and ``.id`` once (`.cmp`/`.hash`/`.index`/`.norm` come for free from that;
 /// ``mut .close`` stays abstract);
 /// each value then gets `.imm` from `.close`, and `.str` from its simple name.
 ///
@@ -12,7 +12,7 @@
 ///   }
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
-///   read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
+///   read .close->this; .id->{::};
 ///   }
 /// North: Direction{}
 /// East:  Direction{}
@@ -31,7 +31,7 @@
 /// Direction: Enum[Direction]{
 ///   .enums->Directions;
 ///   read .match[R:**](m: mut DirectionMatch[R]): R;
-///   read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
+///   read .close->this; .id->{::};
 ///   }
 /// North: Direction{::.north}
 /// East:  Direction{::.east}
@@ -44,7 +44,7 @@
 ///
 /// Or, declaring the family and the values inside the family type:
 /// ```
-/// Direction: Enum[Direction]{ read .close->this; .close->::; .norm->Cache.normCaptureFree(this,{::});
+/// Direction: Enum[Direction]{ read .close->this; .id->{::};
 ///   Directions: Enums[Direction]{Lists#(
 ///     North: Direction{},
 ///     East: Direction{},
@@ -93,11 +93,10 @@ Enum[E]: DataType[E,E], Named, CaptureFree{
   /// this value's position in `.enums`'s list.
   /// ``North.index`` is ``0``, ``West.index`` is ``3``, and ``North < East`` is `True`.
   read .index: Nat -> this.enums.indexMap.get(this.str);
-  /// narrows ``DataType[E,E].close`` to ``Enum[E]`` (still given by the family,
-  /// not here).
-  read .close(t: read E): read Enum[E];
-  /// this value as a ``Norm[E]``, given by the family as ``.norm->Cache.normCaptureFree(this,{::})``.
-  .norm: Norm[E];
-  .cmp t0,t1 -> this.close(t0).index <=> (this.close(t1).index);
+  /// the proof that every ``E`` is an ``Enum[E]``, given by the family as ``.id->{::}``.
+  read .id: BaseId[read E,read Enum[E]];
+  /// this value as a ``Norm[E]``.
+  .norm: Norm[E] -> Cache.normCaptureFree(this.close, this.id, {::});
+  .cmp t0,t1 -> this.id#(t0).index <=> (this.id#(t1).index);
   .hash -> this.index;
   }
