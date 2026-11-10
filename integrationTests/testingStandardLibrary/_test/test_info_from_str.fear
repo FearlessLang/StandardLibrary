@@ -47,9 +47,11 @@ InfoFromStrErrorTests: Test {::
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `"hi"trailing`})
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{"a""b"}`})
   .checkDetErr({::.isMsg{::.contains "Infos.fromStr"}}, {Infos.fromStr `{ab":"c"}`})
-  .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: invalid escape at position 2 in "}}, {Infos.fromStr `"a\tb"`})
-  .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: invalid escape at position 1 in "}}, {Infos.fromStr `"\u0009"`})
-  .checkDetErr({::.isMsg{::.startsWith "Infos.fromStr: repeated key "}}, {Infos.fromStr `{"a":"1","a":"2"}`})
+  .checkDetErr({::.isMsg{:: == (`Infos.fromStr: invalid escape; the escapes are \\, \" and \n.` | "" | `001| "a\tb"` | "   |   ^")}}, {Infos.fromStr `"a\tb"`})
+  .checkDetErr({::.isMsg{:: == (`Infos.fromStr: invalid escape; the escapes are \\, \" and \n.` | "" | `001| "\u0009"` | "   |  ^")}}, {Infos.fromStr `"\u0009"`})
+  .checkDetErr({::.isMsg{:: == (`Infos.fromStr: repeated key "a".` | "" | `001| {"a":"1","a":"2"}` | "   |          ^")}}, {Infos.fromStr `{"a":"1","a":"2"}`})
+  .checkDetErr({::.isMsg{:: == ("Infos.fromStr: unterminated string." | "" | `003| "b` | "   | ^")}}, {Infos.fromStr("[" | `"a",` | `"b`)})
+  .checkDetErr({::.isMsg{:: == ("Infos.fromStr: unexpected end of the text; a value is expected." | "" | `001| {"a":` | "   |      ^")}}, {Infos.fromStr `{"a":`})
   }
 
 TestInfoFromStr: Test {::

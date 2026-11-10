@@ -153,9 +153,21 @@ _InfoParsed: { .info: Info; .pos: Nat }
 _InfoFromStr: {
   #(s: Str): Info -> Block#
     .let result = {this.value(s, 0)}
-    .if {(this.skip(s, result.pos)) != (s.size)} .error {"Infos.fromStr: unexpected trailing characters at position "+(result.pos)+" in "+(s.escape)+"."}
+    .if {(this.skip(s, result.pos)) != (s.size)} .error {this.err(s, this.skip(s, result.pos), "unexpected characters after the value")}
     .return {result.info};
 
+  .err(s: Str, pos: Nat, what: Str): Str -> Block#
+    .let lines = {s.split("" |)}
+    .let before = {s.sub(0, pos)}
+    .let line = {before.count("" |)}
+    .let col = {before.lastIndexOf("" |).match{.some i -> pos - i - 1; .empty -> pos}}
+    .let digits = {lines.size.str.size}
+    .let width = {digits < 3 ? {.then -> 3; .else -> digits}}
+    .let num = {(line + 1).str}
+    .return {"Infos.fromStr: " + what + "."
+      | ""
+      | (("0".repeat(width - (num.size))) + num + "| " + (lines.get(line)))
+      | ((" ".repeat(width)) + "| " + (" ".repeat(col)) + "^")};
   .skip(s: Str, pos: Nat): Nat -> (pos < (s.size)) && {Block#
     .let c = {s.sub(pos, pos + 1)}
     .return {c == " " || {c == ("" |)}}
@@ -163,7 +175,7 @@ _InfoFromStr: {
 
   .value(s: Str, start: Nat): _InfoParsed -> Block#
     .let pos = {this.skip(s, start)}
-    .if {pos >= (s.size)} .error {"Infos.fromStr: unexpected end of input while expecting a value in "+(s.escape)+"."}
+    .if {pos >= (s.size)} .error {this.err(s, pos, "unexpected end of the text; a value is expected")}
     .let c = {s.sub(pos, pos + 1)}
     .if {c == `"`} .return {this.msgValue(s, pos)}
     .if {c == "["} .return {this.listValue(s, pos + 1)}
@@ -171,8 +183,8 @@ _InfoFromStr: {
     .return {this.emptyValue(s, pos)};
 
   .emptyValue(s: Str, pos: Nat): _InfoParsed -> Block#
-    .if {pos + 4 > (s.size)} .error {"Infos.fromStr: unexpected end of input while expecting a value in "+(s.escape)+"."}
-    .if {(s.sub(pos, pos + 4)) != "null"} .error {"Infos.fromStr: unexpected character at position "+pos+" in "+(s.escape)+"; expected a value."}
+    .if {pos + 4 > (s.size)} .error {this.err(s, pos, "unexpected end of the text; a value is expected")}
+    .if {(s.sub(pos, pos + 4)) != "null"} .error {this.err(s, pos, "unexpected character; a value is expected")}
     .return {_InfoParsed {.info -> Info; .pos -> pos + 4}};
 
   .msgValue(s: Str, pos: Nat): _InfoParsed -> Block#
@@ -185,11 +197,11 @@ _InfoFromStr: {
   .strEnd(s: Str, pos: Nat): Nat -> Block#
     .var[Nat] i = {pos}
     .loop { Block#
-      .if {(i.get) >= (s.size)} .error {"Infos.fromStr: unterminated string in "+(s.escape)+"."}
+      .if {(i.get) >= (s.size)} .error {this.err(s, pos - 1, "unterminated string")}
       .let c = {s.sub(i.get, (i.get) + 1)}
       .if {c == `"`} .return {OuterReturn#(i.get)}
       .let[Nat] at = {i.get}
-      .if {c == "\" && {this.isEscape(s, at).not}} .error {"Infos.fromStr: invalid escape at position "+at+" in "+(s.escape)+"."}
+      .if {c == "\" && {this.isEscape(s, at).not}} .error {this.err(s, at, `invalid escape; the escapes are \\, \" and \n`)}
       .do {i.set((i.get) + (c == "\" ? {.then -> 2; .else -> 1}))}
       .return {Continue#}
       }
@@ -205,7 +217,7 @@ _InfoFromStr: {
     .let acc = {ELists#[Info]}
     .loop { Block#
       .let[Nat] at = {this.skip(s, i.get)}
-      .if {at >= (s.size)} .error {"Infos.fromStr: unterminated list in "+(s.escape)+"."}
+      .if {at >= (s.size)} .error {this.err(s, pos - 1, "unterminated list")}
       .if {(s.sub(at, at + 1)) == "]"} .return {Block#
         .let result = {(acc.list).info {::}}
         .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> at + 1})}
@@ -224,7 +236,7 @@ _InfoFromStr: {
     .let keys = {ESets#[Str,Str]{::}}
     .loop { Block#
       .let[Nat] at = {this.skip(s, i.get)}
-      .if {at >= (s.size)} .error {"Infos.fromStr: unterminated map in "+(s.escape)+"."}
+      .if {at >= (s.size)} .error {this.err(s, pos - 1, "unterminated map")}
       .if {(s.sub(at, at + 1)) == "}"} .return {Block#
         .let result = {(acc.list).seqFlow.mapping({::}, {.key e -> e.key; .elem e -> e.elem}).info {::}}
         .return {OuterReturn#(_InfoParsed {.info -> result; .pos -> at + 1})}
@@ -233,7 +245,7 @@ _InfoFromStr: {
       .let keyStart = {this.expect(s, this.skip(s, start), `"`)}
       .let keyEnd = {this.strEnd(s, keyStart)}
       .let key = {_JsonUnescape#(s.sub(keyStart, keyEnd))}
-      .if {keys.contains key} .error {"Infos.fromStr: repeated key "+(key.escape)+" at position "+start+" in "+(s.escape)+"."}
+      .if {keys.contains key} .error {this.err(s, keyStart - 1, "repeated key "+(key.escape))}
       .do {keys.add(key).void}
       .let afterColon = {this.expect(s, this.skip(s, keyEnd + 1), ":")}
       .let elem = {this.value(s, afterColon)}
@@ -244,8 +256,8 @@ _InfoFromStr: {
     .return {Unreachable!};
 
   .expect(s: Str, pos: Nat, ch: Str): Nat -> Block#
-    .if {pos >= (s.size)} .error {"Infos.fromStr: unexpected end of input; expected "+(ch.escape)+" in "+(s.escape)+"."}
-    .if {(s.sub(pos, pos + 1)) != ch} .error {"Infos.fromStr: expected "+(ch.escape)+" at position "+pos+" in "+(s.escape)+"."}
+    .if {pos >= (s.size)} .error {this.err(s, pos, "unexpected end of the text; "+(ch.escape)+" is expected")}
+    .if {(s.sub(pos, pos + 1)) != ch} .error {this.err(s, pos, (ch.escape)+" is expected")}
     .return {pos + 1};
   }
 
