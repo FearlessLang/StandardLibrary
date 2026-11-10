@@ -163,7 +163,7 @@ TestUStr:Test{::
   // flow
   // ------------------------------------------------------------
 
-  .check{"".u.flow.list.assertEq ({::}, List[Nat])}
+  .check{"".u.flow.list.assertEq ({::}, {})}
   .check{"a".u.flow.list.assertEq ({::}, Lists#(97))}
   .check{"ab".u.flow.list.assertEq ({::}, Lists#(97,98))}
   .check{"".u "0061 F066 0062".flow.list.assertEq ({::}, Lists#(97,61542,98))}

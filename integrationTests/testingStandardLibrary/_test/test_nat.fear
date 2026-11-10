@@ -28,7 +28,7 @@ NatDivRemTests: Test {::
   .check{7 .getRem 3 .assertEq 1}
   .check{6 .div 3 .assertEq ({::},Opts#(2))}
   .check{7 .truncDiv 3 .assertEq ({::},Opts#(2))}
-  .check{7 .div 0 .assertEq ({::},Opt[Nat])}
+  .check{7 .div 0 .assertEq ({::},{})}
   .check{9 .softSqrt .assertEq +3.0}
   }
 
@@ -44,9 +44,9 @@ NatConvTests: Test {::
   .check{5.getFloat .assertEq +5.0}
   .check{5.num .assertEq (+5.num)}
   .check{5.int .assertEq ({::},Opts#(+5))}
-  .check{(-1).aluNat.int .assertEq ({::},Opt[Int])}
+  .check{(-1).aluNat.int .assertEq ({::},{})}
   .check{5.byte .assertEq ({::},Opts#(+5.getByte))}
-  .check{300.byte .assertEq ({::},Opt[Byte])}
+  .check{300.byte .assertEq ({::},{})}
   .check{(-1).aluNat.softInt .assertEq(Math.maxInt)}
   .check{13_835_058_055_282_164_737 .softFloat .assertEq +13_835_058_055_282_165_760.0}
   .check{9_223_372_036_854_776_832 .softFloat .assertEq +9_223_372_036_854_775_808.0}

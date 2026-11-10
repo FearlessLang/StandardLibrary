@@ -99,12 +99,12 @@ FloatConvTests: Test {::
   .check{+3.0.nat .assertEq ({::},Opts#(3))}
   .check{+3.0.byte .assertEq ({::},Opts#(+3.getByte))}
   .check{+255.0.byte .assertEq ({::},Opts#(+255.getByte))}
-  .check{+1.5.int .assertEq ({::},Opt[Int])}
-  .check{(-1.0).nat .assertEq ({::},Opt[Nat])}
-  .check{Math.nan .int .assertEq ({::},Opt[Int])}
-  .check{+1.0 / +0.0 .byte .assertEq ({::},Opt[Byte])}
-  .check{Math.nan .num .assertEq ({::},Opt[Num])}
-  .check{+1.0 / +0.0 .num .assertEq ({::},Opt[Num])}
+  .check{+1.5.int .assertEq ({::},{})}
+  .check{(-1.0).nat .assertEq ({::},{})}
+  .check{Math.nan .int .assertEq ({::},{})}
+  .check{+1.0 / +0.0 .byte .assertEq ({::},{})}
+  .check{Math.nan .num .assertEq ({::},{})}
+  .check{+1.0 / +0.0 .num .assertEq ({::},{})}
   .check{+3.0.num .assertEq ({::},Opts#(3.num))}
   }
 

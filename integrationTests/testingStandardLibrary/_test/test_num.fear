@@ -73,11 +73,11 @@ NumConvTests: Test {::
   .check{+300.num.softByte .assertEq (+255.getByte)}
   .check{(-1.num).softByte .assertEq (+0.getByte)}
   .check{+2.num.int .assertEq ({::},Opts#(+2))}
-  .check{+1.num / (+2.num).int .assertEq ({::},Opt[Int])}
+  .check{+1.num / (+2.num).int .assertEq ({::},{})}
   .check{+2.num.nat .assertEq ({::},Opts#(2))}
-  .check{(-1.num).nat .assertEq ({::},Opt[Nat])}
+  .check{(-1.num).nat .assertEq ({::},{})}
   .check{+255.num.byte .assertEq ({::},Opts#(+255.getByte))}
-  .check{+256.num.byte .assertEq ({::},Opt[Byte])}
+  .check{+256.num.byte .assertEq ({::},{})}
   }
 
 NumRangeTests: Test {::

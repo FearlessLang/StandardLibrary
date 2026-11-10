@@ -83,7 +83,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   /// in ascending order. Returns every index from ``0`` to ``this.size`` if ``s`` is ``""``.
   //>   .check{"aaa".indicesOf "aa" .list .assertEq({::}, Lists#(0, 1))}
   //>   .check{"ab".indicesOf "" .list .assertEq({::}, Lists#(0, 1, 2))}
-  //>   .check{"ab".indicesOf "c" .list .assertEq({::}, List[Nat])}
+  //>   .check{"ab".indicesOf "c" .list .assertEq({::}, {})}
   .indicesOf(Str): mut Flow[Nat];
 
   .sub(from: Nat, to: Nat): Str;    /// substring [from,to); throws on from/to out of the string boundaries or from > to
