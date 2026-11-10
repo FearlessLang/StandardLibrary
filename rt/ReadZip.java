@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.zip.ZipInputStream;
 import java.nio.charset.Charset;
 
@@ -15,10 +16,10 @@ public record ReadZip(
     Function<String,RuntimeException> dupNameErr,
     Function<String,RuntimeException> tooLargeName){
   public interface IoSupplier{ ZipInputStream get() throws IOException; }
-  public Map<String,byte[]> readAll(IoSupplier szin){
-    return cleanUp(Fs.of(() -> {try (var zin= szin.get()){ return _readAll(zin); }}));
+  public Map<String,byte[]> read(IoSupplier szin, Predicate<String> keep){
+    return cleanUp(Fs.of(() -> {try (var zin= szin.get()){ return _read(zin, keep); }}));
   }
-  private LinkedHashMap<String,byte[]> _readAll(ZipInputStream zin){
+  private LinkedHashMap<String,byte[]> _read(ZipInputStream zin, Predicate<String> keep){
     var out= new LinkedHashMap<String,byte[]>();
     while (true){
       var e= Fs.of(zin::getNextEntry);
@@ -29,7 +30,7 @@ public record ReadZip(
         var key= keyOf(n);
         if (out.containsKey(key)){ throw dupNameErr.apply(key); }
         if (n.endsWith("/")){ out.put(key, null); }
-        else{ out.put(key, readEntryBytes(key, zin)); }
+        else{ out.put(key, keep.test(key) ? readEntryBytes(key, zin) : null); }
       }
       finally{ Fs.ofV(zin::closeEntry); }
     }
@@ -54,10 +55,10 @@ public record ReadZip(
   public byte[] readEntry(IoSupplier szin, List<String> steps, String entryName, Charset encoding){
     byte[] bytes= null;
     for (var step : steps){
-      bytes = readAll(supplier(szin, bytes, encoding)).get(step);
+      bytes = read(supplier(szin, bytes, encoding), step::equals).get(step);
       if (bytes == null){ return null; }
     }
-    return readAll(supplier(szin, bytes, encoding)).get(entryName);
+    return read(supplier(szin, bytes, encoding), entryName::equals).get(entryName);
   }
   private static IoSupplier supplier(IoSupplier szin, byte[] bytes, Charset encoding){
     return bytes == null

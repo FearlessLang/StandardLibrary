@@ -9,9 +9,11 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -21,7 +23,9 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +38,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -48,6 +53,7 @@ final class DataFiles{
   static final Map<String,Path> locks= linked("fearlessDataLock.");
   private static final Map<Path,FileChannel> channels= new ConcurrentHashMap<>();
   private static final Object gate= new Object();
+  private static Map<List<Object>,LinkedHashMap<String,Item>> zips= null;
   private static final ReentrantLock one= new ReentrantLock();
   static final String heldKey= "fearlessDataHeld";
   private static final String inherited= System.getProperty(heldKey);
@@ -101,7 +107,7 @@ final class DataFiles{
     reachable(root);
     if (!(resolve(root.path(), path).orElse(null) instanceof Resource f)){ throw new NoSuchFileException(root.name()+"/"+String.join("/", path)); }
     if (f.entry().isEmpty()){ return Files.readAllBytes(f.path()); }
-    return item(items(f.path(), f.steps()), f.entry()).bytes();
+    return item(items(f.path(), f.steps(), f.entry()), f.entry()).bytes();
   }
   static void reachable(Root root){
     if (!Files.isDirectory(root.path())){ throw nonDetErr("The root folder of the data project mounted on \""+root.name()+"\" cannot be reached."); }
@@ -116,8 +122,12 @@ final class DataFiles{
   }
   private static <T> T held(Root root, boolean edit, Locked<T> body) throws IOException{
     synchronized (gate){
-      if (current != null){ return inside(root, edit, body); }
-      try (var _= take(root, edit)){ return body.run(); }
+      zips = new HashMap<>();
+      try{
+        if (current != null){ return inside(root, edit, body); }
+        try (var _= take(root, edit)){ return body.run(); }
+      }
+      finally{ zips = null; }
     }
   }
   private static FileLock take(Root root, boolean edit) throws IOException{
@@ -327,7 +337,7 @@ final class DataFiles{
         return Files.isRegularFile(zip, NOFOLLOW_LINKS) ? Optional.of(new ZipDir(zip, List.of(), "")) : Optional.empty();
       }
       case ZipDir z -> {
-        var items= items(z.zip(), z.steps());
+        var items= items(z.zip(), z.steps(), "");
         var name= z.prefix()+s;
         if (items.containsKey(name)){ return Optional.of(new Resource(z.zip(), z.steps(), name)); }
         if (items.containsKey(name+".zip")){ return Optional.of(new ZipDir(z.zip(), Stream.concat(z.steps().stream(), Stream.of(name+".zip")).toList(), "")); }
@@ -345,7 +355,7 @@ final class DataFiles{
         }
       }
       case ZipDir z -> {
-        for (var k : items(z.zip(), z.steps()).keySet()){
+        for (var k : items(z.zip(), z.steps(), "").keySet()){
           if (!k.startsWith(z.prefix())){ continue; }
           var rest= k.substring(z.prefix().length());
           var slash= rest.indexOf('/');
@@ -358,19 +368,28 @@ final class DataFiles{
     return res;
   }
   private static String unzipped(String name, boolean regular){ return regular && name.endsWith(".zip") ? name.substring(0, name.length()-4) : name; }
-  private static LinkedHashMap<String,Item> items(Path zip, List<String> steps) throws IOException{
-    var res= items(Files.readAllBytes(zip));
-    for (var s : steps){ res = items(item(res, s).bytes()); }
+  private static LinkedHashMap<String,Item> items(Path zip, List<String> steps, String wanted) throws IOException{
+    var key= List.<Object>of(zip, steps, wanted);
+    var known= zips.get(key);
+    if (known != null){ return known; }
+    var res= steps.isEmpty()
+      ? items(Files.newInputStream(zip), wanted::equals)
+      : items(new ByteArrayInputStream(item(items(zip, steps.subList(0, steps.size()-1), steps.getLast()), steps.getLast()).bytes()), wanted::equals);
+    zips.put(key, res);
     return res;
   }
-  private static LinkedHashMap<String,Item> items(byte[] zip) throws IOException{
+  private static LinkedHashMap<String,Item> items(InputStream zip, Predicate<String> keep) throws IOException{
     var res= new LinkedHashMap<String,Item>();
-    try (var in= new ZipInputStream(new ByteArrayInputStream(zip), UTF_8)){
-      var first= in.getNextEntry();
-      var emptyZip= zip.length >= 4 && zip[0] == 'P' && zip[1] == 'K' && zip[2] == 5 && zip[3] == 6;
-      if (first == null && !emptyZip){ throw new ZipException("not a zip"); }
-      for (var e= first; e != null; e = in.getNextEntry()){
-        if (!e.isDirectory()){ res.put(e.getName(), new Item(e.getTime(), in.readAllBytes())); }
+    try (var b= new BufferedInputStream(zip)){
+      b.mark(4);
+      var emptyZip= Arrays.equals(b.readNBytes(4), new byte[]{'P', 'K', 5, 6});
+      b.reset();
+      try (var in= new ZipInputStream(b, UTF_8)){
+        var first= in.getNextEntry();
+        if (first == null && !emptyZip){ throw new ZipException("not a zip"); }
+        for (var e= first; e != null; e = in.getNextEntry()){
+          if (!e.isDirectory()){ res.put(e.getName(), new Item(e.getTime(), keep.test(e.getName()) ? in.readAllBytes() : null)); }
+        }
       }
     }
     return res;
@@ -388,7 +407,7 @@ final class DataFiles{
     Files.move(tmp, zip, ATOMIC_MOVE);
   }
   private static byte[] edit(byte[] zip, List<String> steps, Consumer<LinkedHashMap<String,Item>> op) throws IOException{
-    var items= items(zip);
+    var items= items(new ByteArrayInputStream(zip), _ -> true);
     if (steps.isEmpty()){ op.accept(items); }
     else{
       var inner= edit(item(items, steps.getFirst()).bytes(), steps.subList(1, steps.size()), op);
