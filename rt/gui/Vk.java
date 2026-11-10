@@ -22,13 +22,14 @@ import io.github.humbleui.skija.ImageInfo;
 import io.github.humbleui.skija.Surface;
 import io.github.humbleui.skija.SurfaceOrigin;
 
-final class Vk{
+public final class Vk{
   static final int version= 1 << 22 | 1 << 12;
   private static final Arena global= Arena.global();
   private static final String os= System.getProperty("os.name").toLowerCase(Locale.ROOT);
   private static final SymbolLookup lib= lib();
   private static String device;
   private static int maxSide;
+  private static String drawing= "CPU: this machine has no Vulkan loader.";
   private static final DirectContext context= lib == null ? null : context();
 
   private static SymbolLookup lib(){
@@ -90,16 +91,18 @@ final class Vk{
     var info= struct(64, 1);
     info.set(ADDRESS, 24, app);
     var instance= global.allocate(ADDRESS);
-    if (result("vkCreateInstance", addresses(3), info, MemorySegment.NULL, instance) < 0){ return null; }
+    int made= result("vkCreateInstance", addresses(3), info, MemorySegment.NULL, instance);
+    if (made < 0){ return cpu("vkCreateInstance failed with " + named(made) + "."); }
     var vi= instance.get(ADDRESS, 0);
     var n= global.allocate(JAVA_INT);
     int found= result("vkEnumeratePhysicalDevices", addresses(3), vi, n, MemorySegment.NULL);
-    if (found < 0 || n.get(JAVA_INT, 0) == 0){ return null; }
+    if (found < 0){ return cpu("vkEnumeratePhysicalDevices failed with " + named(found) + "."); }
+    if (n.get(JAVA_INT, 0) == 0){ return cpu("Vulkan lists no device on this machine."); }
     var all= global.allocate(ADDRESS, n.get(JAVA_INT, 0));
     ok("vkEnumeratePhysicalDevices", addresses(3), vi, n, all);
     var pds= IntStream.range(0, n.get(JAVA_INT, 0)).mapToObj(i -> all.getAtIndex(ADDRESS, i)).toList();
     var pd= pds.stream().filter(Vk::usable).min(Comparator.comparingInt(Vk::rank)).orElse(null);
-    if (pd == null){ return null; }
+    if (pd == null){ return cpu(pds.stream().map(p -> describe(properties(p))).collect(Collectors.joining(", ", "no Vulkan device of this machine has Vulkan 1.1 and a graphics queue: ", "."))); }
     device = describe(properties(pd));
     maxSide = properties(pd).get(JAVA_INT, 300);
     int family= graphicsFamily(pd);
@@ -119,8 +122,14 @@ final class Vk{
     long res= DirectContext._nMakeVulkan(vi.address(), pd.address(), vd.get(ADDRESS, 0).address(), queue.get(ADDRESS, 0).address(), family,
       lib.findOrThrow("vkGetInstanceProcAddr").address(), lib.findOrThrow("vkGetDeviceProcAddr").address(), version);
     if (res == 0){ throw fail("Skia cannot draw on " + device); }
+    drawing = "Vulkan on " + device + ".";
     return new DirectContext(res);
   }
+  private static DirectContext cpu(String why){
+    drawing = "CPU: " + why + " " + layers();
+    return null;
+  }
+  public static void main(String[] args){ System.out.println(drawing); }
   private static MemorySegment properties(MemorySegment pd){
     var res= global.allocate(1024, 8);
     run("vkGetPhysicalDeviceProperties", addresses(2), pd, res);
