@@ -257,8 +257,9 @@ public final class Util{
       if (c instanceof OutOfMemoryError){ return "The program ran out of memory"; }
     }
     var msg= t.getMessage();
-    if (msg == null || msg.isBlank()){ return "Backend exception: "+t.getClass().getName(); }
-    return "Backend exception: "+t.getClass().getName()+": "+InputFile.portable(msg);
+    var crash= "Fearless crashed (this is a bug).\nPlease report this error and include the details below.\n"+t.getClass().getName();
+    if (msg == null || msg.isBlank()){ return crash; }
+    return crash+": "+InputFile.portable(msg);
   }
   static Object strOf(String text, String where){
     var bad= text.codePoints().filter(c -> !UStr$s$0Instance.isStrScalar(c)).findFirst();
