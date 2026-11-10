@@ -66,7 +66,7 @@ NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
   .reset -> Error.nonDeterministic "NoManagerQuit: CapManager.reset is revoked.";
   .connectEclipse p -> u.connectEclipse p; .editMetadata p -> u.editMetadata p;
   .openWithOrShortcut p -> u.openWithOrShortcut p; .openWithOrShortcut(p, n, m) -> u.openWithOrShortcut(p, n, m);
-  .run n -> u.run n; .compile n -> u.compile n; .check n -> u.check n; .terminate n -> u.terminate n;
+  .run n -> u.run n; .compile n -> u.compile n; .check n -> u.check n; .fix n -> u.fix n; .terminate n -> u.terminate n;
   .deleteCache n -> u.deleteCache n; .kindIdle n -> u.kindIdle n; .kindCode n -> u.kindCode n;
   .kindDataRead n -> u.kindDataRead n; .kindDataEdit n -> u.kindDataEdit n; .forget n -> u.forget n;
   .mount(n, t, d) -> u.mount(n, t, d); .unmount(n, t) -> u.unmount(n, t); .attenuate(n, m, as) -> u.attenuate(n, m, as);
@@ -193,6 +193,7 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   .run n -> Block#(r#, u.run n);
   .compile n -> Block#(r#, u.compile n);
   .check n -> Block#(r#, u.check n);
+  .fix n -> Block#(r#, u.fix n);
   .terminate n -> Block#(r#, u.terminate n);
   .deleteCache n -> Block#(r#, u.deleteCache n);
   .kindIdle n -> Block#(r#, u.kindIdle n);

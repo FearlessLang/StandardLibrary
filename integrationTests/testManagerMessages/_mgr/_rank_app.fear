@@ -22,6 +22,7 @@ ManagerMessages: Test{::
   .checkWithSys{s -> s.manager.run "hello" .getStr.assertEq "Output of FearlessCommandRun"}
   .checkWithSys{s -> s.manager.compile "hello" .getStr.assertEq "Output of FearlessCommandCompile"}
   .checkWithSys{s -> s.manager.check "hello" .getStr.assertEq "Output of FearlessCommandCheck"}
+  .checkWithSys{s -> s.manager.fix "hello" .getStr.assertEq "Output of FearlessCommandFix"}
   .checkWithSys{s -> s.manager.kindDataRead "hello"}
   .checkWithSys{s -> s.manager.mount("hello", "hello.Notes", "notes")}
   .checkWithSys{s -> s.manager.unmount("hello", "hello.Pub")}

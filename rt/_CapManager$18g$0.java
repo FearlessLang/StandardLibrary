@@ -92,6 +92,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$run$1(Object name){ return output("Run", name("Run", name)); }
   @Override public Object mut$compile$1(Object name){ return output("Compile", name("Compile", name)); }
   @Override public Object mut$check$1(Object name){ return output("Check", name("Check", name)); }
+  @Override public Object mut$fix$1(Object name){ return output("Fix", name("Fix", name)); }
   @Override public Object mut$terminate$1(Object name){ return send("Terminate", name("Terminate", name)); }
   @Override public Object mut$deleteCache$1(Object name){ return send("DeleteCache", name("DeleteCache", name)); }
   @Override public Object mut$kindIdle$1(Object name){ return send("Kind", name("Kind", name), "idle"); }
