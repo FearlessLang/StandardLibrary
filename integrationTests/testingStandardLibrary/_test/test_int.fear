@@ -51,8 +51,8 @@ IntDivRemTests: Test {::
   .check{Math.minInt .getTruncDiv(Math.maxNat) .assertEq +0}
   .check{Math.minInt .getRem(Math.maxNat) .assertEq(Math.minInt)}
   .check{+6.div 3 .assertEq ({::},Opts#(+2))}
-  .check{+7.div 3 .assertEq ({::},Opt[Int])}
-  .check{+7.div 0 .assertEq ({::},Opt[Int])}
+  .check{+7.div 3 .assertEq ({::},{})}
+  .check{+7.div 0 .assertEq ({::},{})}
   }
 
 IntWrapIndexTests: Test {::
@@ -69,10 +69,10 @@ IntConvTests: Test {::
   .check{+3.getFloat .assertEq +3.0}
   .check{+3.num .assertEq (+3.num)}
   .check{+3.nat .assertEq ({::},Opts#(3))}
-  .check{(-1).nat .assertEq ({::},Opt[Nat])}
+  .check{(-1).nat .assertEq ({::},{})}
   .check{+255.byte .assertEq ({::},Opts#(+255.getByte))}
-  .check{+256.byte .assertEq ({::},Opt[Byte])}
-  .check{(-1).byte .assertEq ({::},Opt[Byte])}
+  .check{+256.byte .assertEq ({::},{})}
+  .check{(-1).byte .assertEq ({::},{})}
   }
 
 IntAluTests: Test {::

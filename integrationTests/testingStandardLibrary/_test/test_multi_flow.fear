@@ -43,7 +43,7 @@ TestMultiFlowSizes: Test {::
   .check{Flows#(1, 2).with(Flows#(1)).merge{a, b -> Error.msg[Nat] "f ran"}.isEmpty .assertTrue}
   .check{Flows#(1, 2).with(Flows#(1)).fold({Error.msg[Nat] "acc ran"}, {acc, a, b -> acc}).isEmpty .assertTrue}
   .checkDetErr({::.isMsg{:: == "QuadFlow.getMerge: the channels have different sizes, 1, 1, 0 and 1"}}, {Flows#(1).with(Flows#(1)).with(Flows#[Nat]).with(Flows#(1)).getMerge{a, b, c, d -> a}.list})
-  .check{Flows#[Nat].with(Flows#[Nat]).getMerge{a, b -> a + b}.list .assertEq({::}, List[Nat])}
+  .check{Flows#[Nat].with(Flows#[Nat]).getMerge{a, b -> a + b}.list .assertEq({::}, {})}
   .check{Flows#[Nat].with(Flows#(1, 2)).mergeOpts{a, b -> a.isSome}.list .assertEq({::}, Lists#(False, False))}
   .check{Flows#(1, 2, 3).with(Flows#(10)).fillA{i -> i}.merge{a, b -> a + b}.isEmpty .assertTrue}
   .check{Flows#(1).with(Flows#(10, 20, 30)).cutToSmallest.getMerge{a, b -> a + b}.list .assertEq({::}, Lists#(11))}

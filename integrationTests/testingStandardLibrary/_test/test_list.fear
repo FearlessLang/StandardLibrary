@@ -39,7 +39,7 @@ ListBasicsTests: Test {::
   .check{Lists#(+1,+2,+3) .reverse .get 0 .assertEq +3}
   .check{Lists#("a","b","c").orderHash{::} == (Lists#("a","b","c")).assertEq True}
   .check{Lists#("a","b","c").orderHash{::} == (Lists#("a","b","c").reverse.reverse).assertEq True}
-  .check{List[Nat] .assertEq({::}, List[Nat])}
+  .check{List[Nat] .assertEq({::}, {})}
   .check{List[Nat] .assertLt({::}, Lists#0)}
   .check{Lists#0 .assertGt({::}, List[Nat])}
   .check{Lists#(1,2) .assertLt({::}, Lists#(1,2,3))}

@@ -81,92 +81,92 @@ StrEscapeTests: Test {::
   }
 
 StrParseIntTests: Test {::
-  .check{"" .int .assertEq({::}, Opt[Int])}
+  .check{"" .int .assertEq({::}, {})}
   .check{"+0" .int .assertEq({::}, Opts#(+0))}
   .check{"-0" .int .assertEq({::}, Opts#(+0))}
   .check{"+1" .int .assertEq({::}, Opts#(+1))}
   .check{"-1" .int .assertEq({::}, Opts#(-1))}
   .check{"+9_223_372_036_854_775_807" .int .assertEq({::}, Opts#(Math.maxInt))}
   .check{"-9_223_372_036_854_775_808" .int .assertEq({::}, Opts#(Math.minInt))}
-  .check{"+9_223_372_036_854_775_808" .int .assertEq({::}, Opt[Int])}
-  .check{"-9_223_372_036_854_775_809" .int .assertEq({::}, Opt[Int])}
-  .check{"2147483647" .int .assertEq({::}, Opt[Int])}
+  .check{"+9_223_372_036_854_775_808" .int .assertEq({::}, {})}
+  .check{"-9_223_372_036_854_775_809" .int .assertEq({::}, {})}
+  .check{"2147483647" .int .assertEq({::}, {})}
   .check{"+000" .int .assertEq({::}, Opts#(+0))}
   .check{"-000" .int .assertEq({::}, Opts#(+0))}
   .check{"+0001" .int .assertEq({::}, Opts#(+1))}
   .check{"-0001" .int .assertEq({::}, Opts#(-1))}
   .check{"+1_000" .int .assertEq({::}, Opts#(+1000))}
-  .check{"+_1" .int .assertEq({::}, Opt[Int])}
-  .check{"+1_" .int .assertEq({::}, Opt[Int])}
+  .check{"+_1" .int .assertEq({::}, {})}
+  .check{"+1_" .int .assertEq({::}, {})}
   .check{"+1__0" .int .assertEq({::},  Opts# +1__0)}
   .check{"+01__0" .int .assertEq({::}, Opts# +01__0)}
   .check{"+0__10" .int .assertEq({::}, Opts# +0__10)}
-  .check{" +1" .int .assertEq({::}, Opt[Int])}
-  .check{"+1 " .int .assertEq({::}, Opt[Int])}
+  .check{" +1" .int .assertEq({::}, {})}
+  .check{"+1 " .int .assertEq({::}, {})}
   }
 
 StrParseNatTests: Test {::
-  .check{"" .nat .assertEq({::}, Opt[Nat])}
+  .check{"" .nat .assertEq({::}, {})}
   .check{"0" .nat .assertEq({::}, Opts#(0))}
   .check{"1" .nat .assertEq({::}, Opts#(1))}
   .check{"1_000_000" .nat .assertEq({::}, Opts#(1000000))}
   .check{"18_446_744_073_709_551_615" .nat .assertEq({::}, Opts#(Math.maxNat))}
-  .check{"18_446_744_073_709_551_616" .nat .assertEq({::}, Opt[Nat])}
+  .check{"18_446_744_073_709_551_616" .nat .assertEq({::}, {})}
   .check{"000" .nat .assertEq({::}, Opts#(0))}
   .check{"0001" .nat .assertEq({::}, Opts#(1))}
-  .check{"+1" .nat .assertEq({::}, Opt[Nat])}
-  .check{"-1" .nat .assertEq({::}, Opt[Nat])}
-  .check{"_1" .nat .assertEq({::}, Opt[Nat])}
-  .check{"1_" .nat .assertEq({::}, Opt[Nat])}
+  .check{"+1" .nat .assertEq({::}, {})}
+  .check{"-1" .nat .assertEq({::}, {})}
+  .check{"_1" .nat .assertEq({::}, {})}
+  .check{"1_" .nat .assertEq({::}, {})}
   .check{"1__0" .nat .assertEq({::}, Opts# 1__0)}
   .check{"00_1" .nat .assertEq({::}, Opts# 00_1)}
-  .check{" 1" .nat .assertEq({::}, Opt[Nat])}
-  .check{"1 " .nat .assertEq({::}, Opt[Nat])}
+  .check{" 1" .nat .assertEq({::}, {})}
+  .check{"1 " .nat .assertEq({::}, {})}
   }
 
 StrParseByteTests: Test {::
-  .check{"" .byte .assertEq({::}, Opt[Byte])}
+  .check{"" .byte .assertEq({::}, {})}
   .check{"0" .byte .assertEq({::}, Opts#(+0 .getByte))}
   .check{"1" .byte .assertEq({::}, Opts#(+1 .getByte))}
   .check{"10" .byte .assertEq({::}, Opts#(+10 .getByte))}
   .check{"255" .byte .assertEq({::}, Opts#(+255 .getByte))}
   .check{"000" .byte .assertEq({::}, Opts#(+0 .getByte))}
   .check{"001" .byte .assertEq({::}, Opts#(+1 .getByte))}
-  .check{"256" .byte .assertEq({::}, Opt[Byte])}
-  .check{"4_294_967_295" .byte .assertEq({::}, Opt[Byte])}
-  .check{"+1" .byte .assertEq({::}, Opt[Byte])}
-  .check{"-1" .byte .assertEq({::}, Opt[Byte])}
+  .check{"256" .byte .assertEq({::}, {})}
+  .check{"4_294_967_295" .byte .assertEq({::}, {})}
+  .check{"+1" .byte .assertEq({::}, {})}
+  .check{"-1" .byte .assertEq({::}, {})}
   .check{"1_0" .byte .assertEq({::}, Opts#(+10 .getByte))}
   .check{"2_5_5" .byte .assertEq({::}, Opts#(+255 .getByte))}
   .check{"25_5" .byte .assertEq({::}, Opts#(+255 .getByte))}
-  .check{"25_6" .byte .assertEq({::}, Opt[Byte])}
-  .check{"_1" .byte .assertEq({::}, Opt[Byte])}
-  .check{"1_" .byte .assertEq({::}, Opt[Byte])}
-  .check{" 1" .byte .assertEq({::}, Opt[Byte])}
-  .check{"1 " .byte .assertEq({::}, Opt[Byte])}
+  .check{"25_6" .byte .assertEq({::}, {})}
+  .check{"_1" .byte .assertEq({::}, {})}
+  .check{"1_" .byte .assertEq({::}, {})}
+  .check{" 1" .byte .assertEq({::}, {})}
+  .check{"1 " .byte .assertEq({::}, {})}
   }
 
 StrParseNumTests: Test {::
-  .check{"" .num .assertEq({::}, Opt[Num])}
-  .check{"+0" .num .assertEq({::}, Opt[Num])}
-  .check{"-0" .num .assertEq({::}, Opt[Num])}
-  .check{"+1" .num .assertEq({::}, Opt[Num])}
-  .check{"-1" .num .assertEq({::}, Opt[Num])}
+  .check{"" .num .assertEq({::}, {})}
+  .check{"+0" .num .assertEq({::}, {})}
+  .check{"-0" .num .assertEq({::}, {})}
+  .check{"+1" .num .assertEq({::}, {})}
+  .check{"-1" .num .assertEq({::}, {})}
   .check{"+1/2" .num .assertEq({::}, Opts#(+1/2))}
   .check{"-1/2" .num .assertEq({::}, Opts#(-1/2))}
   .check{"+10/20" .num .assertEq({::}, Opts#(+1/2))}
   .check{"-10/20" .num .assertEq({::}, Opts#(-1/2))}
   .check{"+12/2" .num!.str .assertEq("+6/1")}
-  .check{"+1/0" .num .assertEq({::}, Opt[Num])}
-  .check{"-1/0" .num .assertEq({::}, Opt[Num])}
+  .check{"+1/0" .num .assertEq({::}, {})}
+  .check{"-1/0" .num .assertEq({::}, {})}
   .check{"+1_0/2_0" .num .assertEq({::}, Opts#(+1/2))}
   .check{"-1_0/2_0" .num .assertEq({::}, Opts#(-1/2))}
-  .check{" +1/2" .num .assertEq({::}, Opt[Num])}
-  .check{"+1/2 " .num .assertEq({::}, Opt[Num])}
+  .check{" +1/2" .num .assertEq({::}, {})}
+  .check{"+1/2 " .num .assertEq({::}, {})}
   }
 
 StrParseFloatTests: Test {::
-  .check{"" .float .assertEq({::}, Opt[Float])}
+  .check{"" .float .assertEq({::}, {})}
   .check{"+0.0" .float .assertEq({::}, Opts#(+0.0))}
   .check{"-0.0" .float .assertEq({::}, Opts#(+0.0))}
   .check{"-0.0" .getFloat .isNegZero .assertFalse}
@@ -175,33 +175,33 @@ StrParseFloatTests: Test {::
   .check{"+1.5" .float .assertEq({::}, Opts#(+1.5))}
   .check{"+2.5" .float .assertEq({::}, Opts#(+2.5))}
   .check{"+1_000.0" .float .assertEq({::}, Opts#(+1000.0))}
-  .check{"+0.1" .float .assertEq({::}, Opt[Float])}
-  .check{"+0.2" .float .assertEq({::}, Opt[Float])}
-  .check{"-0.1" .float .assertEq({::}, Opt[Float])}
-  .check{"+000.100" .float .assertEq({::}, Opt[Float])}
+  .check{"+0.1" .float .assertEq({::}, {})}
+  .check{"+0.2" .float .assertEq({::}, {})}
+  .check{"-0.1" .float .assertEq({::}, {})}
+  .check{"+000.100" .float .assertEq({::}, {})}
   .check{+0012.str.assertEq "+12"}
   .check{00_12.str.assertEq "12"}
   .check{"+1.0e3" .float .assertEq({::}, Opts#(+1000.0))}
   .check{"+1.0e+3" .float .assertEq({::}, Opts#(+1000.0))}
   .check{"-1.0e3" .float .assertEq({::}, Opts#(-1000.0))}
   .check{"+1.0E3" .float .assertEq({::}, Opts#(+1000.0))}
-  .check{"NaN" .float .assertEq({::}, Opt[Float])}
-  .check{"Infinity" .float .assertEq({::}, Opt[Float])}
-  .check{"-Infinity" .float .assertEq({::}, Opt[Float])}
-  .check{"+1.0e309" .float .assertEq({::}, Opt[Float])}
-  .check{"-1.0e309" .float .assertEq({::}, Opt[Float])}
-  .check{"+_1.0" .float .assertEq({::}, Opt[Float])}
-  .check{"+1_.0" .float .assertEq({::}, Opt[Float])}
-  .check{" +1.0" .float .assertEq({::}, Opt[Float])}
-  .check{"+1.0 " .float .assertEq({::}, Opt[Float])}
-  .check{"+1.0_e3" .float .assertEq({::}, Opt[Float])}
+  .check{"NaN" .float .assertEq({::}, {})}
+  .check{"Infinity" .float .assertEq({::}, {})}
+  .check{"-Infinity" .float .assertEq({::}, {})}
+  .check{"+1.0e309" .float .assertEq({::}, {})}
+  .check{"-1.0e309" .float .assertEq({::}, {})}
+  .check{"+_1.0" .float .assertEq({::}, {})}
+  .check{"+1_.0" .float .assertEq({::}, {})}
+  .check{" +1.0" .float .assertEq({::}, {})}
+  .check{"+1.0 " .float .assertEq({::}, {})}
+  .check{"+1.0_e3" .float .assertEq({::}, {})}
   .check{"1.0" .float .assertEq({::}, Opts#(+1.0))}
-  .check{"+1" .float .assertEq({::}, Opt[Float])}
-  .check{"+1." .float .assertEq({::}, Opt[Float])}
-  .check{"+.1" .float .assertEq({::}, Opt[Float])}
-  .check{"+1e0" .float .assertEq({::}, Opt[Float])}
-  .check{"+1.0e-3" .float .assertEq({::}, Opt[Float])}
-  .check{"+01__0.00__1" .float .assertEq({::}, Opt[Float])}
+  .check{"+1" .float .assertEq({::}, {})}
+  .check{"+1." .float .assertEq({::}, {})}
+  .check{"+.1" .float .assertEq({::}, {})}
+  .check{"+1e0" .float .assertEq({::}, {})}
+  .check{"+1.0e-3" .float .assertEq({::}, {})}
+  .check{"+01__0.00__1" .float .assertEq({::}, {})}
   .check{"+1.25" .float .assertEq({::}, Opts#(+1.25))}
   .check{"+01__0.2__5" .float .assertEq({::}, Opts#(+10.25))}
   .check{"+1.25e-1" .float .assertEq({::}, Opts#(+0.125))}
@@ -209,17 +209,17 @@ StrParseFloatTests: Test {::
   .check{"+0.1soft" .getFloat .assertEq(+0.1soft)}
   .check{"-0__0.1e1soft" .float .assertEq({::}, Opts#(-1.0))}
   .check{"0.1soft" .float .assertEq({::}, Opts#(+0.1soft))}
-  .check{"+1.0e400soft" .float .assertEq({::}, Opt[Float])}
-  .check{"+0.1 soft" .float .assertEq({::}, Opt[Float])}
-  .check{"+0.1SOFT" .float .assertEq({::}, Opt[Float])}
-  .check{"+0.1softsoft" .float .assertEq({::}, Opt[Float])}
-  .check{"+1soft" .float .assertEq({::}, Opt[Float])}
+  .check{"+1.0e400soft" .float .assertEq({::}, {})}
+  .check{"+0.1 soft" .float .assertEq({::}, {})}
+  .check{"+0.1SOFT" .float .assertEq({::}, {})}
+  .check{"+0.1softsoft" .float .assertEq({::}, {})}
+  .check{"+1soft" .float .assertEq({::}, {})}
   .check{"+0.1soft" .softFloat .assertEq({::}, Opts#(+0.1soft))}
   .check{"+0.1soft" .getSoftFloat .assertEq(+0.1soft)}
   }
 
 StrParseSoftFloatTests: Test {::
-  .check{"" .softFloat .assertEq({::}, Opt[Float])}
+  .check{"" .softFloat .assertEq({::}, {})}
   .check{"+0.5" .softFloat .assertEq({::}, Opts#(+0.5))}
   .check{"+1_000.0" .softFloat .assertEq({::}, Opts#(+1000.0))}
   .check{"-0.0" .softFloat .assertEq({::}, Opts#(+0.0))}
@@ -228,14 +228,14 @@ StrParseSoftFloatTests: Test {::
   .check{"-0.1" .softFloat .assertEq({::}, Opts#(-0.1soft))}
   .check{"+0.1" .softFloat! .assertEq("+0.1".getSoftFloat)}
   .check{"+1.0e-400" .softFloat .assertEq({::}, Opts#(+0.0))}
-  .check{"+1.0e309" .softFloat .assertEq({::}, Opt[Float])}
-  .check{"-1.0e309" .softFloat .assertEq({::}, Opt[Float])}
-  .check{"NaN" .softFloat .assertEq({::}, Opt[Float])}
-  .check{"Infinity" .softFloat .assertEq({::}, Opt[Float])}
-  .check{"-Infinity" .softFloat .assertEq({::}, Opt[Float])}
+  .check{"+1.0e309" .softFloat .assertEq({::}, {})}
+  .check{"-1.0e309" .softFloat .assertEq({::}, {})}
+  .check{"NaN" .softFloat .assertEq({::}, {})}
+  .check{"Infinity" .softFloat .assertEq({::}, {})}
+  .check{"-Infinity" .softFloat .assertEq({::}, {})}
   .check{"+1.0" .float .assertEq({::}, "+1.0" .softFloat)}
-  .check{" +1.0" .softFloat .assertEq({::}, Opt[Float])}
-  .check{"+1_.0" .softFloat .assertEq({::}, Opt[Float])}
+  .check{" +1.0" .softFloat .assertEq({::}, {})}
+  .check{"+1_.0" .softFloat .assertEq({::}, {})}
   .checkDetErr({::.isMsg{::.contains "Str.getSoftFloat"}}, {"+1.0e309".getSoftFloat})
   .checkDetErr({::.isMsg{::.contains "Str.getSoftFloat"}}, {"duck".getSoftFloat})
   }
@@ -263,14 +263,14 @@ StrParseIeeeFloatTests: Test {::
   }
 
 StrParseBoolTests: Test {::
-  .check{"" .bool .assertEq({::}, Opt[Bool])}
+  .check{"" .bool .assertEq({::}, {})}
   .check{"True" .bool .assertEq({::}, Opts# True)}
   .check{"False" .bool .assertEq({::}, Opts# False)}
-  .check{"true" .bool .assertEq({::}, Opt[Bool])}
-  .check{"false" .bool .assertEq({::}, Opt[Bool])}
-  .check{" True" .bool .assertEq({::}, Opt[Bool])}
-  .check{"True " .bool .assertEq({::}, Opt[Bool])}
-  .check{"TrueFalse" .bool .assertEq({::}, Opt[Bool])}
+  .check{"true" .bool .assertEq({::}, {})}
+  .check{"false" .bool .assertEq({::}, {})}
+  .check{" True" .bool .assertEq({::}, {})}
+  .check{"True " .bool .assertEq({::}, {})}
+  .check{"TrueFalse" .bool .assertEq({::}, {})}
   .check{"True" .getBool .assertEq True}
   .check{"False" .getBool .assertEq False}
   .check{True .str .getBool .assertEq True}
