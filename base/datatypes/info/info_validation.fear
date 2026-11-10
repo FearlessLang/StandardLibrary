@@ -1,4 +1,4 @@
-InfoValidators: Sealed {
+_InfoValidators: Sealed {
   #(info: Info): InfoValidator -> _SuccessfulInfoValidator { .close -> info }
   }
 
@@ -40,10 +40,6 @@ InfoValidator: InfoCheck {
 
   .where(f: read F[InfoValidator, InfoCheck]): InfoCheck;
   .whereNot(f: read F[InfoValidator, InfoCheck]): InfoCheck;
-  .extract[R:*](f: read ExtractionFunction[R]): Opt[R] -> this.isValid.if{
-    .then -> this.close.extract f;
-    .else -> {}
-  };
 
   .isMsg(F[Str, Bool]): InfoCheck;
   .isList(fn: F[List[Info], Bool]): InfoCheck;
@@ -61,13 +57,13 @@ InfoCheck: Sealed {
   .isValid: Bool;
 
   &: InfoValidator -> this.isValid.if {
-    .then -> InfoValidators#(this.close);
+    .then -> _InfoValidators#(this.close);
     .else -> _SettledInfoValidator {.close -> this.close; .isValid -> False};
     };
 
   |: InfoValidator -> this.isValid.if {
     .then -> _SettledInfoValidator {.close -> this.close; .isValid -> True};
-    .else -> InfoValidators#(this.close);
+    .else -> _InfoValidators#(this.close);
     };
   }
 

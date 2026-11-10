@@ -113,7 +113,9 @@ InfoExtractorTests: Test {::
   .checkTrue{info.extract{:: > "friends" .extractMsg}.isEmpty}
   .checkTrue{Infos.msg "" .extract{::.extractEmpty}.isSome}
   .checkTrue{info.extract{::.extractEmpty}.isEmpty}
-  .checkTrue{(InfoValidators#info > "enemies").extract{::}.isEmpty}
-  .checkEq("Bob", {(InfoValidators#info > "friends").extract{:: > "friends" > 0 > "name" .extractMsg}!})
+  .checkTrue{info.extract{:: .where{:: > "enemies"} > "friends" > 0 > "name" .extractMsg}.isEmpty}
+  .checkEq({::}, Opts# "Bob", {info.extract{:: .where{:: > "friends"} > "friends" > 0 > "name" .extractMsg}})
+  .checkEq({::}, Opts# "Alice", {info.extract{:: > "friends" .where{:: > 0 > "name" .isMsg{:: == "Bob"}} > 1 > "name" .extractMsg}})
+  .checkTrue{info.extract{:: > "friends" .where{:: > 0 > "name" .isMsg{:: == "Alice"}} > 1 > "name" .extractMsg}.isEmpty}
   }
 
