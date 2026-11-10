@@ -104,6 +104,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(_CapProcess$18g$0::inherited).forEach(cmd::add);
     if (!names.isEmpty()){ cmd.add("-D"+namesKey+"="+names); }
     cmd.add("-D"+markerKey+"="+marker);
+    DataFiles.heldArg().ifPresent(cmd::add);
     cmd.add("-D"+AppLog.childKey+"=true");
     cmd.add("-cp");
     cmd.add(System.getProperty("java.class.path"));

@@ -22,6 +22,7 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
     System.err.flush();
     try{
       p= new ProcessBuilder(_CapProcess$18g$0.command(name, names, marker, arg.isPresent())).start();
+      DataFiles.started(p);
       if (arg.isPresent()){ p.getOutputStream().write((arg.get()+"\n").getBytes(UTF_8)); p.getOutputStream().flush(); }
     }
     catch (IOException e){ throw nonDetErr("The process running "+name+" could not be started: "+e.getClass().getSimpleName()); }
