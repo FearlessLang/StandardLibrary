@@ -196,50 +196,32 @@ final class GuiRun{
 
   void low(Throwable e){
     assert SwingUtilities.isEventDispatchThread();
-    boolean accepted;
-    synchronized (this){
-      accepted= life == Life.running;
-      if (accepted){
-        failure = e;
-        life = Life.closing;
-      }
-    }
-    if (!accepted){
-      printDiscarded(e);
-      return;
-    }
+    if (!leaveRunning(Life.closing, e)){ printDiscarded(e); return; }
     stopSwingOnEdt();
     queue.closeThen(this::finish);
   }
 
   void closed(){
     assert SwingUtilities.isEventDispatchThread();
-    boolean accepted;
-    synchronized (this){
-      accepted= life == Life.running;
-      if (accepted){ life = Life.closing; }
-    }
-    if (!accepted){ return; }
+    if (!leaveRunning(Life.closing, null)){ return; }
     stopSwingOnEdt();
     queue.closeThen(this::finish);
   }
 
   void abortBeforeStart(Throwable e){
     assert timer == null: "unreachable: runtime timer started before abortBeforeStart";
-    boolean accepted;
-    synchronized (this){
-      accepted= life == Life.running;
-      if (accepted){ life = Life.completed; }
-    }
-    if (!accepted){
-      printDiscarded(e);
-      return;
-    }
+    if (!leaveRunning(Life.completed, e)){ printDiscarded(e); return; }
     queue.closeThen(() -> {});
     SwingUtilities.invokeLater(this::dispose);
     done.completeExceptionally(e);
   }
 
+  private synchronized boolean leaveRunning(Life to, Throwable e){
+    if (life != Life.running){ return false; }
+    life = to;
+    failure = e;
+    return true;
+  }
   private synchronized boolean active(){ return life == Life.running; }
   synchronized boolean completed(){ return life == Life.completed; }
 
