@@ -43,6 +43,7 @@ final class Stage extends MouseAdapter{
   final Rectangle screen= gc.getBounds();
   final boolean translucent= device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
   static Win macFullScreen;
+  static Rectangle macArea;
   Win f;
   Mode mode;
   final Sk.Kept cornerKept= new Sk.Kept();
@@ -190,12 +191,16 @@ final class Stage extends MouseAdapter{
   private Window fullScreenWindow(){ return Desk.mac ? macFullScreen : device.getFullScreenWindow(); }
   private void fullScreenWindow(Win w){
     if (!Desk.mac){ device.setFullScreenWindow(w); return; }
+    if (macFullScreen == null){ macArea = workArea(); }
     macFullScreen = w;
     Desk.hideDockAndMenuBar(w != null);
     if (w != null){ w.setOpacity(1); w.setBounds(screen); }
   }
   private Rectangle opening(){ return fit(inset(workArea(), f.getInsets()), openingWidth()); }
-  private Rectangle workArea(){ return Desk.cosmic ? Desk.cosmicArea : inset(screen, Toolkit.getDefaultToolkit().getScreenInsets(gc)); }
+  private Rectangle workArea(){
+    if (macFullScreen != null){ return macArea; }
+    return Desk.cosmic ? Desk.cosmicArea : inset(screen, Toolkit.getDefaultToolkit().getScreenInsets(gc));
+  }
   private static Rectangle inset(Rectangle r, Insets in){ return new Rectangle(r.x+in.left, r.y+in.top, r.width-in.left-in.right, r.height-in.top-in.bottom); }
   private static int within(int v, int low, int high){ return Math.max(low, Math.min(v, high)); }
   private Rectangle outset(Rectangle content){
