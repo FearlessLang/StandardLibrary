@@ -173,7 +173,7 @@ final class Stage extends MouseAdapter{
     f.setVisible(true);
     f.toFront();
     owner.surface.requestFocusInWindow();
-    activating = replaced && !Desk.windows;
+    activating = replaced && !Desk.windows && !Desk.mac;
     if (replaced && Desk.windows){ old.dispose(); }
   }
   private void enterFullScreen(){
