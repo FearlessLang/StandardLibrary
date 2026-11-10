@@ -101,18 +101,18 @@ Steps (macOS only):
 Expected: the application menu shows "testGuiText", the name of the project folder.
 The application menu never shows "PathClassLoader", the Java class that the portable Fearless starts.
 
-8. A text that the desk types with Option goes into the TextField with the focus
+8. A text that the desk types with Option goes into the UTextField with the focus
 
 Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Keys": "While a widget has the focus, the keys below and the keys that type text are used by it and never reach Frame.onKey",
 and "Open: the keys a desk turns into text": "Each of these is the desk deciding which text the user typed".
 Steps (macOS, with the keyboard layout ABC or U.S.):
 1. Run integrationTests/testGuiText.
-   The first field holds "a field"; the last area is a log, and Frame.onKey writes "key S" in it when S is pressed.
-2. Click in the first field and press End.
+   The second field, a UTextField, holds "any unicode, red caret"; the last area is a log, and Frame.onKey writes "key S" in it when S is pressed.
+2. Click in the second field and press End.
 3. Press Option+2, then Option+S.
    In any text field of macOS (TextEdit), Option+2 types the trade mark sign and Option+S types the sharp s (U+00DF).
-Expected: the first field shows "a field", the trade mark sign and the sharp s.
-The log shows two lines "field edit", one for each typed text, and no line "key S".
+Expected: the second field shows "any unicode, red caret", the trade mark sign and the sharp s.
+The log shows two lines "unicode edit", one for each typed text, and no line "key S".
 
 9. Quit of macOS runs the onClose action
 

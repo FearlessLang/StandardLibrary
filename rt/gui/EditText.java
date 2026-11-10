@@ -647,7 +647,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   char high;
   CTextKeys(_Frame frame){ this.frame= frame; }
 
-  static boolean typesWith(java.awt.event.InputEvent e){ return e.isAltDown() == e.isControlDown() || e.isAltGraphDown(); }
+  static boolean typesWith(java.awt.event.InputEvent e){ return Desk.mac ? !e.isControlDown() : e.isAltDown() == e.isControlDown() || e.isAltGraphDown(); }
   static boolean types(KeyEvent e){
     char c= e.getKeyChar();
     return c != CHAR_UNDEFINED && !Character.isISOControl(c) && typesWith(e);
