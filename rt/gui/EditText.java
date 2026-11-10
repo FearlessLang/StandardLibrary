@@ -277,10 +277,10 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     }
     return v.start() + res;
   }
-  boolean pointTo(int x, int y, boolean extend){
+  void pointTo(int x, int y, boolean extend){
     var v= lines.get(lineAt(y));
     int off= v.line() == null ? v.start() : Math.min(offsetAt(v, x - v.dx()), endOf(v));
-    return moveTo(off, extend, off == v.end());
+    moveTo(off, extend, off == v.end());
   }
   int lineStart(int i){ return buf.lastIndexOf("\n", i - 1) + 1; }
   int lineEnd(int i){
@@ -321,22 +321,21 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   void moved(){ movedAt = micros(frame.elapsed); }
   static long micros(Instant$5c$0 i){ return Util.natToLong(i.read$get$0()); }
-  boolean moveTo(int c, boolean extend){ return moveTo(c, extend, false); }
-  boolean moveTo(int c, boolean extend, boolean up){
+  void moveTo(int c, boolean extend){ moveTo(c, extend, false); }
+  void moveTo(int c, boolean extend, boolean up){
     caret = c;
     this.up = up;
     if (!extend){ anchor = c; }
     goalX = -1;
     moved();
     showCaret();
-    return false;
   }
-  boolean horizontal(boolean right, boolean extend){
+  void horizontal(boolean right, boolean extend){
     int c= right ? selB() : selA();
-    if (!extend && caret != anchor){ return moveTo(c, false, up && c == caret); }
-    return moveTo(right ? next(caret) : prev(caret), extend);
+    if (!extend && caret != anchor){ moveTo(c, false, up && c == caret); return; }
+    moveTo(right ? next(caret) : prev(caret), extend);
   }
-  boolean vertical(int dy, boolean extend){
+  void vertical(int dy, boolean extend){
     var v= lines.get(caretLine());
     float g= goalX < 0 ? xOf(v, caret) : goalX;
     int by= Math.max(v.h(), Math.abs(dy));
@@ -344,14 +343,13 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     if (y < 0 || y >= contentH){ moveTo(y < 0 ? 0 : buf.length(), extend); }
     else{ pointTo((int) g, y, extend); }
     goalX = g;
-    return false;
   }
   int page(){ return Math.max(1, viewH()); }
-  boolean home(boolean ctrl, boolean extend){ return moveTo(ctrl ? 0 : lines.get(caretLine()).start(), extend); }
-  boolean end(boolean ctrl, boolean extend){ return ctrl ? moveTo(buf.length(), extend) : moveTo(endOf(lines.get(caretLine())), extend, true); }
-  boolean selectAll(){
+  void home(boolean ctrl, boolean extend){ moveTo(ctrl ? 0 : lines.get(caretLine()).start(), extend); }
+  void end(boolean ctrl, boolean extend){ moveTo(ctrl ? buf.length() : endOf(lines.get(caretLine())), extend, !ctrl); }
+  void selectAll(){
     anchor = 0;
-    return moveTo(buf.length(), true);
+    moveTo(buf.length(), true);
   }
 
   Change clean(int a, int b, String s){
@@ -374,7 +372,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   boolean edit(Change ch){
     var removed= buf.substring(ch.start(), ch.stop());
-    if (removed.equals(ch.text())){ return moveTo(snap(ch.caret()), false); }
+    if (removed.equals(ch.text())){ moveTo(snap(ch.caret()), false); return false; }
     int caretBefore= caret;
     int anchorBefore= anchor;
     apply(ch.start(), ch.stop(), ch.text(), ch.caret(), ch.caret());
@@ -413,11 +411,10 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     if (caret != anchor){ return new Req(selA(), selB(), ""); }
     return caret == buf.length() ? null : new Req(caret, next(caret), "");
   }
-  boolean copy(){
-    if (caret == anchor){ return false; }
+  void copy(){
+    if (caret == anchor){ return; }
     try{ Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(buf.substring(selA(), selB())), null); }
     catch (IllegalStateException _){}
-    return false;
   }
   Req cut(){
     if (caret == anchor){ return null; }
@@ -453,10 +450,11 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   }
   static void fire(Fire f){ if (f != null){ f.handler().mut$accept$1(f.event()); } }
   private void act(BooleanSupplier onEdt){ submit(() -> fired(onEdt.getAsBoolean())); }
+  private void move(Runnable onEdt){ submit(() -> { onEdt.run(); return null; }); }
   void input(String s){ change(() -> new Req(selA(), selB(), s)); }
-  void press(Point p, boolean extend){ act(() -> pointTo(p.x, p.y, extend)); }
-  void drag(Point p){ act(() -> pointTo(p.x, p.y, true)); }
-  void step(int dx, int dy){ act(() -> dy != 0 ? vertical(dy, true) : horizontal(dx > 0, true)); }
+  void press(Point p, boolean extend){ move(() -> pointTo(p.x, p.y, extend)); }
+  void drag(Point p){ move(() -> pointTo(p.x, p.y, true)); }
+  void step(int dx, int dy){ move(dy != 0 ? () -> vertical(dy, true) : () -> horizontal(dx > 0, true)); }
   void commit(){
     submit(() -> {
       if (committed == null || committed.contentEquals(buf)){ return null; }
@@ -470,20 +468,20 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     boolean ctrl= e.isControlDown();
     int k= e.getKeyCode();
     switch (k){
-      case VK_LEFT, VK_KP_LEFT -> act(() -> horizontal(false, shift));
-      case VK_RIGHT, VK_KP_RIGHT -> act(() -> horizontal(true, shift));
+      case VK_LEFT, VK_KP_LEFT -> move(() -> horizontal(false, shift));
+      case VK_RIGHT, VK_KP_RIGHT -> move(() -> horizontal(true, shift));
       case VK_UP, VK_KP_UP -> { return acrossLines(() -> vertical(-1, shift)); }
       case VK_DOWN, VK_KP_DOWN -> { return acrossLines(() -> vertical(1, shift)); }
       case VK_PAGE_UP -> { return acrossLines(() -> vertical(-page(), shift)); }
       case VK_PAGE_DOWN -> { return acrossLines(() -> vertical(page(), shift)); }
-      case VK_HOME -> act(() -> home(ctrl, shift));
-      case VK_END -> act(() -> end(ctrl, shift));
+      case VK_HOME -> move(() -> home(ctrl, shift));
+      case VK_END -> move(() -> end(ctrl, shift));
       case VK_BACK_SPACE -> change(this::backspace);
       case VK_DELETE -> change(this::delete);
       case VK_TAB -> frame.tab(shift);
       case VK_ENTER -> enter(shift, ctrl);
-      case VK_A -> { return command(e, () -> act(this::selectAll)); }
-      case VK_C -> { return command(e, () -> act(this::copy)); }
+      case VK_A -> { return command(e, () -> move(this::selectAll)); }
+      case VK_C -> { return command(e, () -> move(this::copy)); }
       case VK_X -> { return command(e, () -> change(this::cut)); }
       case VK_V -> { return command(e, () -> change(this::paste)); }
       case VK_Z -> { return command(e, () -> act(shift ? this::redo : this::undo)); }
@@ -492,9 +490,9 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
     }
     return true;
   }
-  private boolean acrossLines(BooleanSupplier onEdt){
+  private boolean acrossLines(Runnable onEdt){
     if (oneLine()){ return false; }
-    act(onEdt);
+    move(onEdt);
     return true;
   }
   private static boolean command(KeyEvent e, Runnable r){
