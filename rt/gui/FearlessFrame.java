@@ -250,7 +250,7 @@ final class FearlessFrame{
   }
 
   private void dispose(){
-    if (owner.stage != null){ owner.stage.dispose(); }
+    if (owner.stage != null){ owner.stage.f.dispose(); }
   }
 
   private void stopTimers(){

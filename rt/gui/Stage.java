@@ -11,6 +11,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.desktop.QuitEvent;
 import java.awt.desktop.QuitResponse;
 import java.awt.dnd.DnDConstants;
@@ -41,6 +42,7 @@ final class Stage extends MouseAdapter{
   final GraphicsConfiguration gc= device.getDefaultConfiguration();
   final Rectangle screen= gc.getBounds();
   final boolean translucent= device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
+  static Win macFullScreen;
   Win f;
   Mode mode;
   final Sk.Kept cornerKept= new Sk.Kept();
@@ -97,6 +99,10 @@ final class Stage extends MouseAdapter{
     @Override public void setVisible(boolean b){
       super.setVisible(b);
       getRootPane().putClientProperty("apple.awt.fullscreenable", false);
+    }
+    @Override public void dispose(){
+      if (macFullScreen == this){ fullScreenWindow(null); }
+      super.dispose();
     }
     @SuppressWarnings("deprecation") @Override public void reshape(int x, int y, int width, int height){
       reshaping = true;
@@ -160,7 +166,7 @@ final class Stage extends MouseAdapter{
     switch (m){
       case fullScreen -> enterFullScreen();
       case fearless -> {
-        if (device.getFullScreenWindow() == f){ device.setFullScreenWindow(null); }
+        if (fullScreenWindow() == f){ fullScreenWindow(null); }
         place(r);
         if (translucent){ f.setOpacity(owner.opacity); }
       }
@@ -177,13 +183,16 @@ final class Stage extends MouseAdapter{
     if (replaced && Desk.windows){ old.dispose(); }
   }
   private void enterFullScreen(){
-    if (device.getFullScreenWindow() instanceof Win w && w != f){ w.stage().realize(Mode.fearless); }
+    if (fullScreenWindow() instanceof Win w && w != f){ w.stage().realize(Mode.fearless); }
     if (!Desk.windows && !f.isShowing()){ place(fit(workArea(), leavingWidth())); f.setVisible(true); }
-    device.setFullScreenWindow(f);
+    fullScreenWindow(f);
   }
-  void dispose(){
-    if (device.getFullScreenWindow() == f){ device.setFullScreenWindow(null); }
-    f.dispose();
+  private Window fullScreenWindow(){ return Desk.mac ? macFullScreen : device.getFullScreenWindow(); }
+  private void fullScreenWindow(Win w){
+    if (!Desk.mac){ device.setFullScreenWindow(w); return; }
+    macFullScreen = w;
+    Desk.hideDockAndMenuBar(w != null);
+    if (w != null){ w.setBounds(screen); }
   }
   private Rectangle opening(){ return fit(inset(workArea(), f.getInsets()), openingWidth()); }
   private Rectangle workArea(){ return Desk.cosmic ? Desk.cosmicArea : inset(screen, Toolkit.getDefaultToolkit().getScreenInsets(gc)); }
