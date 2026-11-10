@@ -668,7 +668,7 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
     ((Scope$1c$1) s).mut$run$1(b);
     return onEdt(() -> {
       handlers = b.handlers;// .mouse replaces earlier handlers
-      b.changeable = false;
+      b.installed = true;
     });
   }
 
@@ -1070,7 +1070,7 @@ final class _Frame implements Frame$1c$0{
     return onEdt(() -> {
       textKeys.releaseFrameKeys();
       this.keys = keys;
-      keys.changeable = false;
+      keys.installed = true;
     });
   }
   @Override public Object mut$uTitle$1(Object t){
@@ -1099,11 +1099,11 @@ final class _Frame implements Frame$1c$0{
     long nn= fpsOf(f, "modelFps");
     var actions= new ArrayList<MF$7$1>();
     var b= new ModelFps$as$0(){
-      boolean changeable= true;
+      boolean installed;
       @Override public Object mut$action$1(Object r){
         changeOnEdt(() -> {
           if (guiRun.completed()){ throw Util.detErr("This ModelFps belongs to a closed window: the CapGui.run that showed the window has returned, so an action set now would never run"); }
-          if (!changeable && modelTickActions != actions){
+          if (installed && modelTickActions != actions){
             throw Util.detErr("This ModelFps was replaced by a later .modelFps, so an action set now would never run");
           }
           actions.clear();
@@ -1116,7 +1116,7 @@ final class _Frame implements Frame$1c$0{
     return onEdt(() -> {
       modelPeriodNs = Math.round(1e9 / nn);
       modelTickActions = actions;// replace semantics, like .mouse and .onKey
-      b.changeable = false;
+      b.installed = true;
       // Live change: fixed-rate deadlines restart from now, no warmup.
       if (started){ guiRun.restartModelTimer(modelPeriodNs, 0, actions); }
     });

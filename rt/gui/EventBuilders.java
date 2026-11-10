@@ -21,12 +21,12 @@ enum MouseKind{ Clicked, DoubleClicked, Pressed, Released, Moved, Dragged, Enter
 final class CMouseBuilder implements Mouse$1c$0{
   final AWidget owner;
   final EnumMap<MouseKind,MouseHandler$4sg$0> handlers= new EnumMap<>(MouseKind.class);
-  boolean changeable= true;// EDT confined
+  boolean installed;// EDT confined
   CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
     owner.frame.changeOnEdt(() -> {
       if (owner.frame.guiRun.completed()){ throw Util.detErr("This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"); }
-      if (!changeable && (owner.handlers != handlers || !owner.canChange())){
+      if (installed && (owner.handlers != handlers || !owner.canChange())){
         throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
       }
       handlers.put(k, (MouseHandler$4sg$0) a);
