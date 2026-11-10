@@ -83,6 +83,7 @@ final class EList$1k$1Instance implements EList$1k$1{
     if (Long.compareUnsigned(i, xs.size()) < 0){ return ok(xs.get((int) i)); }
     return fail(outOfRange("get", "index "+Long.toUnsignedString(i)));
   }
+  @Override public Object read$tryGet$1(Object p0){ return mut$tryGet$1(p0); }
   @Override public Object mut$add$1(Object p0){ xs.add(p0); return this; }
   @Override public Object mut$addAll$1(Object p0){ xs.addAll(((EList$1k$1Instance) p0).xs); return this; }
   @Override public Object mut$insertBefore$2(Object p0, Object p1){ xs.add(idx("insertBefore", p0, xs.size() + 1), p1); return this; }
