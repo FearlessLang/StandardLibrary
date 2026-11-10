@@ -33,7 +33,8 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
       if (exit != 0){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: the manager program ended with "+exit+"."); }
       try (var s= server.accept()){ return new String(s.getInputStream().readAllBytes(), UTF_8); }
     }
-    catch (IOException|InterruptedException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: "+e.getClass().getSimpleName()); }
+    catch (IOException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: "+InputFile.portable(e.getMessage())); }
+    catch (InterruptedException e){ throw nonDetErr("The message \""+verb+"\" could not reach the Fearless manager: this program was interrupted while waiting for the manager."); }
   }
   private static Process start(String verb, List<String> cmd){
     try{ return new ProcessBuilder(cmd).redirectOutput(Redirect.DISCARD).redirectError(Redirect.DISCARD).start(); }
