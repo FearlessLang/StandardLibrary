@@ -7,4 +7,5 @@ _NumFlow: {
   .nats(startInclusive: Nat, endInclusive: Nat, step: Nat): mut Flow[Nat] -> _Magic!;
   .floats(startInclusive: Float, end: Float): mut Flow[Float] -> _Magic!;
   .floats(startInclusive: Float, end: Float, step: Float): mut Flow[Float] -> _Magic!;
+  .seq[E](flow: mut Flow[E]): mut Flow[E] -> _Magic!;
   }

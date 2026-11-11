@@ -89,6 +89,8 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0(){};
     );
   }
 
+  default Object imm$seq$1(Object p0){ return ((Flow$o$1Instance)p0).sequential(); }
+
   private static double grown(double d, double step){
     if (d + step == d){ throw err("Range.flow(step): the step "+toS(Float$1c$0Instance.instance(step))+" is too small to move past "+toS(Float$1c$0Instance.instance(d))+": adding it gives the same Float back."); }
     return d + step;

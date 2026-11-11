@@ -74,6 +74,11 @@ final class Flow$o$1Instance implements Flow$o$1{
   static Flow$o$1Instance of(Iterable<Object> source, FlowMode mode){ return new Flow$o$1Instance(new FlowChain(source, mode)); }
   static Flow$o$1Instance of(Stream<Object> source, FlowMode mode){ Iterable<Object> it= source::iterator; return of(it, mode); }
   static Flow$o$1Instance range(Stream<Object> source){ return of(source, FlowMode.ParImm); }
+  Flow$o$1Instance sequential(){
+    var ch= take();
+    assert ch.core.isEmpty() && ch.shape.isEmpty();
+    return of(ch.source, FlowMode.Seq);
+  }
   static List<Object> toJava(Object flow){ return List$o$1Instance.asJava(((Flow$o$1)flow).mut$list$0()); }
   private FlowChain take(){
     check(!consumed, "Flow: this flow is already consumed: a flow is consumed by the call that adds the next stage or the terminal.");

@@ -636,7 +636,7 @@ _FloatRanges: Sealed {
         .start -> startInclusive;
         .end -> endInclusive;
         .flow -> _NumFlow.floats(startInclusive, endInclusive);
-        .seqFlow -> Flows.fromMutList(_NumFlow.floats(startInclusive, endInclusive).list);
+        .seqFlow -> _NumFlow.seq(_NumFlow.floats(startInclusive, endInclusive));
         .flow step -> _NumFlow.floats(startInclusive, endInclusive, step);
         .contains n -> n.inRange(self);
         .clamp n -> n.clampTo(self);
