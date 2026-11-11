@@ -95,7 +95,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
     -> d != 0 .toOpt{this.getTruncDiv d};
 
   /// ``this.div(d)`` returns `.some` of ``this.getTruncDiv(d)`` if `d` evenly divides `this`, that is if:
-  ///  ``d != 0`` and ``this.rem(d) == 0`` otherwise returns .empty` otherwise.
+  ///  ``d != 0`` and ``this.rem(d) == 0``; ``.empty`` otherwise.
   //>   .check{+6 .div(2) .assertEq({::}, Opts# +3)}
   //>   .check{+7 .div(2) .assertEmpty {::}}
   //>   .check{+7 .div(0) .assertEmpty {::}}

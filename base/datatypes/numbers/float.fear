@@ -55,7 +55,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// ``this ** x`` returns the `this` raised to the power ``x``. Never throws; NaN propagates
   /// Note: This differs from `this.ieeePow` as it relaxes the assumption that infinities are effectively large even integers,
   ///   and removes special rules precedence, in general if a**x = b for all x, and y**c = d for all y, then y**x == (Math.nan) if c!=d:
-  ///  - ``x**(Math.inf) for ``x < 0.0``, ``+/-0.0 ** +/-0.0``, Math.inf ** 0.0 all return ``Math.nan`
+  ///  - ``x**(Math.inf)`` for ``x < 0.0``, ``+/-0.0 ** +/-0.0``, ``Math.inf ** 0.0`` all return ``Math.nan``
   //>   .check{2.0 ** 3.0 .assertEq 8.0}
   //>   .check{Math.nan ** 0.0 .isNaN .assertTrue} // not true of ieee
   //>   .check{0.0 ** (Math.negZero) .isNaN .assertTrue}  // not true of ieee

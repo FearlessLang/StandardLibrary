@@ -81,7 +81,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   .truncDiv(d: Nat): Opt[Byte] -> d != 0 .toOpt {this.getTruncDiv(d)};
 
   /// ``this.div(d)`` returns `.some` of ``this.getDiv(d)`` if `d` evenly divides `this`, that is if:
-  ///  ``d != 0`` and ``this.rem(d) == 0`` otherwise returns .empty` otherwise.
+  ///  ``d != 0`` and ``this.rem(d) == 0``; ``.empty`` otherwise.
   //>   .check{6.getByte .div(2) .assertEq({::}, Opts#(3.getByte))}
   //>   .check{7.getByte .div(2) .assertEmpty {::}}
   //>   .check{7.getByte .div(0) .assertEmpty {::}}
