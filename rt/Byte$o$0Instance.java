@@ -76,7 +76,7 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
   @Override public Object imm$$dash$1(Object p0){ return instance(subChecked(val, b(p0))); }
   @Override public Object imm$$star$1(Object p0){ return instance(mulChecked(val, b(p0))); }
   @Override public Object imm$$star_star$1(Object p0){
-    int power= u8(p0);
+    long power= natBits(p0);
     if (power == 0){ return Byte$o$0Instance.instance((byte) 1); }
     if (power == 1 || this.val == 1 || this.val == 0){ return this; }
     int result= 1, base= u8(val);
@@ -88,7 +88,7 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
         base = powMul(base, base);
       }
     }
-    catch (ArithmeticException e){ throw overflow("**", val, b(p0)); }
+    catch (ArithmeticException e){ throw nonDetErr("Byte**: overflow, "+u8(val)+" ** "+Long.toUnsignedString(natBits(p0))+" is greater than Math.maxByte (255)"); }
   }
   private static int powMul(int a, int b){
     if (a * b > 255){ throw new ArithmeticException(); }

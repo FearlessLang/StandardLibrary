@@ -106,7 +106,7 @@ SuccPredTests: Test {::
   .checkNonDetErr({::.isMsg{:: == "Int**: overflow, -2 ** 64 is greater than Math.maxInt (9223372036854775807)"}}, {-2 ** 64})
   .checkNonDetErr({::.isMsg{:: == "Byte+: overflow, 200 + 100 is greater than Math.maxByte (255)"}}, {200.getByte + (100.getByte)})
   .checkNonDetErr({::.isMsg{:: == "Byte-: underflow, 0 - 1 is less than 0"}}, {0.getByte - (1.getByte)})
-  .checkNonDetErr({::.isMsg{:: == "Byte**: overflow, 2 ** 8 is greater than Math.maxByte (255)"}}, {2.getByte ** (8.getByte)})
+  .checkNonDetErr({::.isMsg{:: == "Byte**: overflow, 2 ** 8 is greater than Math.maxByte (255)"}}, {2.getByte ** 8})
   .checkDetErr({::.isMsg{::.startsWith `Nat.getInt`}}, {(Math.maxNat).getInt})
   }
 
