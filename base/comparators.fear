@@ -1,8 +1,8 @@
-/// Ordering + hashing via "closed fixpoints".
-/// Intuition:
-/// - An Order[T] is a comparator that is also a *closed* value: .close: T.
-/// - OrderBy[T,K] is a projection: given t: T, build a closed Order[K] for its key.
-/// - OrderHash adds hashing and ToStr.
+// Ordering + hashing via "closed fixpoints".
+// Intuition:
+// - An Order[T] is a comparator that is also a *closed* value: .close: T.
+// - OrderBy[T,K] is a projection: given t: T, build a closed Order[K] for its key.
+// - OrderHash adds hashing and ToStr.
 
 ToStr: { read .str: Str }            /// string representation
 

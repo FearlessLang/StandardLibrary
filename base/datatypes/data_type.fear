@@ -1,9 +1,9 @@
-/// DataType sits on top of OrderHash:
-///   Order > OrderHash > DataType
-/// It adds:
-/// - Info
-/// - deep imm conversion
-/// - widen/equality helpers
+// DataType sits on top of OrderHash:
+//   Order > OrderHash > DataType
+// It adds:
+// - Info
+// - deep imm conversion
+// - widen/equality helpers
 
 ToImm[T0]: { read .imm: T0 }                               /// deep immutable representation (may change type)
 ToImmBy[E,E0]: {#(t: read E): read ToImm[E0]}               /// per-value ToImm conversion

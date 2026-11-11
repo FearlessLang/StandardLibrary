@@ -73,7 +73,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .isEmpty: Bool;                   /// true iff ``this.size == 0``
   .size: Nat;                       /// the amount of characters in this string
   .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use ^ and |, not necessarily a single literal)
-  .indexOf(Str): Opt[Nat];          /// index of the first occurrence of the parameter. Returns 0 if the parameter is ``
+  .indexOf(Str): Opt[Nat];          /// index of the first occurrence of the parameter. Returns 0 if the parameter is ``""``.
   /// ``this.lastIndexOf s`` returns the index of the last occurrence of ``s`` in `this`, ``this.size`` if ``s`` is ``""``.
   //>   .check{"abab".lastIndexOf "ab" .assertEq({::}, Opts# 2)}
   //>   .check{"abab".lastIndexOf "" .assertEq({::}, Opts# 4)}
