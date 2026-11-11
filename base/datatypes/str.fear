@@ -6,9 +6,8 @@
 ///The methods ^ and | can be used to obtain a string including new lines or double quotes (").
 ///
 /// Relations of parsers and printers.
-/// Methods .getInt/.getNat/.getFloat below accept exactly the numeric literals
+/// Methods .getInt/.getNat/.getFloat below accept exactly the numeric type names
 /// accepted by the Fearless syntax, including the allowed ``_`` as for the Fearless syntax.
-/// Fearless has no Num and no Byte literals: .getNum and .getByte accept the forms listed below.
 /// They *do not* evaluate expressions.
 /// Str.escape, Float.str and Float.ieeeStr  instead output Fearless code when there is no literal represing the value.
 ///
