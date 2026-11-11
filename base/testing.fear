@@ -20,7 +20,7 @@ StackFrame: DataType[StackFrame,StackFrame] {
 StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
   {'self .fileName->fn; .typeName->tn; .methodName->mn; .lineNumber->ln; .imm->self} }
 
-/// Unit tests
+///Unit tests
 ///Basically, a test suite is a Test that only calls `.test` on named Tests,
 ///While a Test is a named Test that only calls `.check`.
 ///We can then arbitrary make trees of test suites or by nesting them in other test suites.
@@ -50,30 +50,30 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 ///    .check {..}
 ///    }
 ///  }
-/// ```
-/// Example using logs:
-/// ```
-/// Events:InMemoryLog[Event]{}
+///```
+///Example using logs:
+///```
+///Events:InMemoryLog[Event]{}
 ///...
-/// .checkWithSys { sys -> Block#
-///   .let log=sys.readLog(Events);
-///   .do { log.clear }
-///   .do { actionUnderTest# }
-///   .do { log.consume.assertEq({::},Lists#(
-///     Event1#(...),
-///     Event2#(...),
-///     ))}
-///   .done
-///   }
-/// ```
-/// Example checking that an action fails:
-/// ```
-/// .checkWithSys { ::.try#{SomethingThatShouldFail#}.assertInfo}
-/// ```
-/// Example checking that an action succeeds:
-/// ```
-/// .check{SomethingThatShouldSucceed#}
-/// ```
+///.checkWithSys { sys -> Block#
+///  .let log=sys.readLog(Events);
+///  .do { log.clear }
+///  .do { actionUnderTest# }
+///  .do { log.consume.assertEq({::},Lists#(
+///    Event1#(...),
+///    Event2#(...),
+///    ))}
+///  .done
+///  }
+///```
+///Example checking that an action fails:
+///```
+///.checkWithSys { ::.try#{SomethingThatShouldFail#}.assertInfo}
+///```
+///Example checking that an action succeeds:
+///```
+///.check{SomethingThatShouldSucceed#}
+///```
 UnitTests: Main {
   .main sys->sys.try#(sys.iso.close, {r -> Block#
     .openIso s = r

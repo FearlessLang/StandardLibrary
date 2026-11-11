@@ -9,7 +9,7 @@
 ///Unicode documentation often writes those same numbers as U+0061 and U+1F600.
 ///
 ///Crucially, there are no UStr literals. Use the method `.u` on Str to obtain Unicode strings.
-/// `` `foo`.u `` converts the ``foo`` Str into the equivalent `UStr`.
+///`` `foo`.u `` converts the ``foo`` Str into the equivalent `UStr`.
 ///The method `.u` on UStr reads one or more uppercase hexadecimal numbers
 ///separated by single spaces, and appends the corresponding scalar values.
 ///Only digits 0..9 and uppercase letters A..F are allowed. No extra whitespace is accepted. Malformed input throws.

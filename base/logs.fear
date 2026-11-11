@@ -22,7 +22,7 @@ Log: { .log(s: read ToStr): Void -> _Magic! }
 ///This log is raw: each call writes exactly the string
 ///representation of s, without adding a timestamp and without adding a
 ///newline.
-/// See also: base.Log
+///See also: base.Log
 UnitTestLog: { .log(s: read ToStr): Void -> _Magic!; .plan(kind: Str, frame: StackFrame): Void -> _Magic! }
 
 
