@@ -34,7 +34,7 @@ UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
 
   .scalarHex: Str;                  /// uppercase hexadecimal Unicode scalar values separated by single spaces.
   .isStr: Bool;                     /// true if this UStr only uses scalar values allowed inside instances of type Str.
-  .str: Opt[Str];                   /// .some containg this string if .isStr; .empty otherwise
+  .str: Opt[Str];                   /// .some containing this string if .isStr; .empty otherwise
   .getStr: Str -> this.tryGetStr!;
   /// `this.tryGetStr` returns `.ok` of `this.getStr`, or the error info of `this.getStr` if not `this.isStr`.
   //>   .check{("hi".u.tryGetStr).ok.assertEq({::}, Opts# "hi")}
