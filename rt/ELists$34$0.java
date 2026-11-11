@@ -158,14 +158,14 @@ final class EList$1k$1Instance implements EList$1k$1{
     try{ xs.sort((a,b) -> cmp(by, a, b)); }
     catch (IllegalArgumentException e){ throw detErr("EList."+m+": the OrderBy does not give a consistent order to the elements"); }
   }
-  @Override public Object mut$trimToSize$0(){
-    if (xs instanceof ArrayList<Object> a){ a.trimToSize(); }
-    return this;
-  }
+  private ArrayList<Object> storage(){ return xs instanceof EListWindow w ? w.parent.storage() : (ArrayList<Object>) xs; }
+  @Override public Object mut$trimToSize$0(){ storage().trimToSize(); return this; }
   @Override public Object mut$expandCapacity$1(Object p0){
     long c= Nat$c$0Instance.unwrap(p0);
-    if (Long.compareUnsigned(c, Integer.MAX_VALUE) >= 0){ throw detErr("EList.expandCapacity: capacity "+Long.toUnsignedString(c)+" is not less than "+Integer.MAX_VALUE); }
-    if (xs instanceof ArrayList<Object> a){ a.ensureCapacity((int) c); }
+    var s= storage();
+    int outside= s.size() - xs.size();
+    if (Long.compareUnsigned(c, Integer.MAX_VALUE - outside) >= 0){ throw detErr("EList.expandCapacity: capacity "+Long.toUnsignedString(c)+(outside == 0 ? "" : " plus the "+outside+" elements outside the view")+" is not less than "+Integer.MAX_VALUE); }
+    s.ensureCapacity((int) c + outside);
     return this;
   }
   @Override public Object mut$fold$2(Object p0, Object p1){
@@ -202,7 +202,7 @@ final class EList$1k$1Instance implements EList$1k$1{
   @Override public Object mut$list$0(){ return List$o$1Instance.wrap(drain()); }
 }
 final class EListWindow extends AbstractList<Object> implements RandomAccess{
-  private final EList$1k$1Instance parent;
+  final EList$1k$1Instance parent;
   private final int start;
   private int end;
   EListWindow(EList$1k$1Instance parent, int start, int end){ this.parent= parent; this.start= start; this.end= end; }
