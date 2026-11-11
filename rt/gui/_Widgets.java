@@ -18,6 +18,7 @@ import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
@@ -873,7 +874,7 @@ final class _Frame implements Frame$1c$0{
     }
     catch (ExecutionException e){
       var c= e.getCause();
-      if (c instanceof Deterministic d){ Error$1c$0.instance.imm$$bang$1(d.i); }
+      c.setStackTrace(Stream.concat(Stream.of(c.getStackTrace()), Stream.of(new Throwable().getStackTrace())).limit(1024).toArray(StackTraceElement[]::new));
       if (c instanceof RuntimeException re){ throw re; }
       if (c instanceof Error er){ throw er; }
       throw new RuntimeException(c);
