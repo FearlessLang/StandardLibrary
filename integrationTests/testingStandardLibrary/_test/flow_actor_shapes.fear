@@ -1,4 +1,4 @@
-/// The shapes the actor family of flow stages is meant to be written in.
+// The shapes the actor family of flow stages is meant to be written in.
 
 ScanViaActor: {
   #[E:*,S:imm](es: mut Flow[E], acc: S, f: read F[S,E,S]): mut Flow[S] ->

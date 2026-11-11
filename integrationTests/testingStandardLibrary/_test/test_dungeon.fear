@@ -1,8 +1,8 @@
-/// A dungeon room: a large mutable graph with imm leaves, chests of items in an
-/// ``EList`` of ``EList``s, monsters and graves in ``ESet``s. Every method of `Room`
-/// takes only imm arguments and answers imm values, so all of them can be called on
-/// a mutH room, like the state of an actorMut stage; inside, they are ordinary code
-/// on a mut receiver.
+// A dungeon room: a large mutable graph with imm leaves, chests of items in an
+// ``EList`` of ``EList``s, monsters and graves in ``ESet``s. Every method of `Room`
+// takes only imm arguments and answers imm values, so all of them can be called on
+// a mutH room, like the state of an actorMut stage; inside, they are ordinary code
+// on a mut receiver.
 
 Item: { read .name: Str; read .value: Nat; }
 Items: { #(name: Str, value: Nat): Item -> { .name -> name; .value -> value; } }

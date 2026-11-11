@@ -100,10 +100,10 @@ MainFlushCache:Main{s->Block#
   .let w= {Cache_27Out.methName("foo".norm,Lists#("b").norm{::.norm})}
   .done
   }
-///Caching is invisible to the values a program computes: a hit and a
-///recomputation return the very same result. What tells them apart is whether
-///the cached body ran at all, so the Mains below print a line from inside each
-///cached body and the expected Debug trace is what the Java side asserts.
+//Caching is invisible to the values a program computes: a hit and a
+//recomputation return the very same result. What tells them apart is whether
+//the cached body ran at all, so the Mains below print a line from inside each
+//cached body and the expected Debug trace is what the Java side asserts.
 
 NormAnimal: { .name: Str }
 NormCat: NormAnimal { .name -> "cat" }
