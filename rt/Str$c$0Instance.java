@@ -105,9 +105,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$tryGetInt$0(){
     if (!signedInt.matcher(val).matches()){
       return fail("Str.getInt: cannot convert String \""+val+"\" to Int. \n"
-              + "A Valid Int is any number of digits,, separated by optional \"_\", and preceded by either a + or a - sign."
+              + "A Valid Int is any number of digits, separated by optional \"_\", and preceded by either a + or a - sign.\n"
               + "That is in the range ["+Int$c$0Instance.MIN_VALUE+", "+Int$c$0Instance.MAX_VALUE+"]."
-              + "\n For example -4, +0, -3021\"");
+              + "\n For example -4, +0, -3021");
     }
     try{ return ok(Int$c$0Instance.instance(Long.parseLong(no_(val)))); }
     catch (NumberFormatException e){
@@ -202,7 +202,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     try{ return ok(Nat$c$0Instance.instance(Long.parseUnsignedLong(no_(val)))); }
     catch (NumberFormatException e){
-      return fail("Str.getNat: Str \""+val+"\" has a magnitude too great to be stored in an Nat, "
+      return fail("Str.getNat: Str \""+val+"\" has a magnitude too great to be stored in a Nat, "
               + " must be in ["+0+", "+Long.toUnsignedString(Nat$c$0Instance.MAX_UNSIGNED_VALUE)+"].");
     }
   }
@@ -227,7 +227,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       return ok(Byte$o$0Instance.instance((byte)x));
     }
     catch (NumberFormatException e){
-      return fail("Str.getByte: Str \""+val+"\" has a magnitude too great to be stored in an Nat, must be in ["+0+", "+255+"].");
+      return fail("Str.getByte: Str \""+val+"\" has a magnitude too great to be stored in a Byte, must be in ["+0+", "+255+"].");
     }
   }
   @Override public Object imm$num$0(){
@@ -253,7 +253,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
               + "A valid Num is in the form [-]a / b:\n"
               + "Where the numerator is any number of digits, optionally separated by \"_\"s and proceeded by a \"-\".\n"
               + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or proceeded by a \"-\".\n"
-              + "For example: -40 / 3, 40_330 / 3_003, 12/ 2");
+              + "For example: -40/3, 40_330/3_003, 12/2");
     }
     try{
       String t= no_(val);
@@ -273,7 +273,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
               + "A valid Num is in the form [-]a / b:\n"
               + "Where the numerator is any number of digits, optionally separated by \"_\"s and proceeded by a \"-\".\n"
               + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or proceeded by a \"-\".\n"
-              + "For example: -40 / 3, 40_330 / 3_003, 12/ 2");
+              + "For example: -40/3, 40_330/3_003, 12/2");
     }
   }
   record Dec(BigInteger u, int scale){
@@ -316,7 +316,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     catch (NumberFormatException e){
       return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
-              "A valid Float is at least one digits and must be exactly representable as an IEEE-746 64bit number, " +
+              "A valid Float is at least one digits and must be exactly representable as an IEEE-754 64bit number, " +
               "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
     }

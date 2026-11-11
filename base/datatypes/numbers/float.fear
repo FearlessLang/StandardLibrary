@@ -623,7 +623,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       .info)});
 
   /// ``this.clampTo(range)`` clamps `this` into ``[range.start, range.end]``.
-  /// Note: a ``Math.nan.clamp(range)`` always clamps to `range.end`;
+  /// Note: a ``Math.nan.clampTo(range)`` always clamps to `range.end`;
   //>   .check{0.0 .clampTo(1.0=~~=4.0) .assertEq 1.0}
   //>   .check{5.0 .clampTo(1.0=~~=4.0) .assertEq 4.0}
   //>   .check{Math.nan .clampTo(1.0=~~=4.0) .assertEq 4.0}
