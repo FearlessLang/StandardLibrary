@@ -90,3 +90,130 @@ Steps:
 6. Click in "new north" and press Tab.
 Expected: at step 2 the focus goes to "content zero", and at step 4 the focus goes to "new content zero".
 At step 6 the focus goes to "center".
+
+7. The macOS menu bar names a program of the portable Fearless by its project folder, not by a Java class
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "On macOS the menu bar and the Dock show one name and one icon for each process."
+and "Nothing outside the control of Fearless decides how the Gui looks or behaves".
+Steps (macOS only):
+1. Run integrationTests/testGuiText.
+2. Click in the window, and look at the application menu, the first bold word of the menu bar after the Apple menu.
+Expected: the application menu shows "testGuiText", the name of the project folder.
+The application menu never shows "PathClassLoader", the Java class that the portable Fearless starts.
+
+8. A text that the desk types with Option goes into the UTextField with the focus
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Keys": "While a widget has the focus, the keys below and the keys that type text are used by it and never reach Frame.onKey",
+and "Open: the keys a desk turns into text": "Each of these is the desk deciding which text the user typed".
+Steps (macOS, with the keyboard layout ABC or U.S.):
+1. Run integrationTests/testGuiText.
+   The second field, a UTextField, holds "any unicode, red caret"; the last area is a log, and Frame.onKey writes "key S" in it when S is pressed.
+2. Click in the second field and press End.
+3. Press Option+2, then Option+S.
+   In any text field of macOS (TextEdit), Option+2 types the trade mark sign and Option+S types the sharp s (U+00DF).
+Expected: the second field shows "any unicode, red caret", the trade mark sign and the sharp s.
+The log shows two lines "unicode edit", one for each typed text, and no line "key S".
+
+9. Quit of macOS runs the onClose action
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Close key, desk close button: in every state: the program's onClose action runs."
+and "Gui.closeKey(KeyStroke), Frame.onClose(action), Frame.close": "The default action is {f.close}: the window closes and Gui.run returns."
+Steps (macOS only):
+1. Run integrationTests/testGui1.
+   The program runs Gui01, Gui02, Gui03 and so on, one after the other: each Gui.run opens a window and returns when that window closes.
+2. Click in the window "Gui01: two labels" and press Escape.
+   The window closes and the window "Gui02: many labels in flow" opens.
+3. Click in the window "Gui02: many labels in flow" and press Cmd+Q, the Quit of macOS (the same as Quit in the application menu and in the menu of the icon in the Dock).
+Expected: at step 3 the onClose action of Gui02 runs: the window "Gui02: many labels in flow" closes, Gui.run returns, and the window "Gui03" opens.
+The program does not end at step 3.
+
+10. The green button of the title bar of macOS never gives a full screen without the Fearless corner
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "The state machine on floating desks": "Desk maximize (the button, a title bar double click, a drag to the top, the desk's key) in 4: transition to 3",
+"State 1: FullScreen: the window has the Fearless corner.",
+and "Why the Fearless corner exists": "The Fearless corner is the one region the program can not paint".
+Steps (macOS only):
+1. Run integrationTests/testGuiStill.
+   The window opens with the decorations of the desk.
+2. Click the green button at the left of the title bar of the window, and wait 3 seconds.
+Expected: the window is in a state of the design: maximized with the title bar of macOS (state 3), or full screen with the Fearless corner at the top left of the screen (state 1).
+The window never covers the whole screen with no title bar and no Fearless corner.
+
+11. The green button of the title bar of macOS on a maximized window gives full screen
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "The state machine on floating desks": "Desk unmaximize (the button, a title bar double click, a title bar drag, the desk's key) in 3: the desk unmaximizes the window.
+Once the desk has reported a new position and size after the unmaximize and no pointer button is down: if the window is at the position of the restore size: transition to 1",
+and "On X11 and macOS the library sets no restore size: the desk maximizes the window itself and keeps the window before the maximize as the restore size".
+Steps (macOS only):
+1. Run integrationTests/testGuiStill.
+   The window opens with the decorations of the desk.
+2. Click the green button at the left of the title bar of the window, and wait 3 seconds.
+   macOS zooms the window to the work area: the window is maximized with the title bar of macOS (state 3), with bands on the left and on the right.
+3. Click the green button again, and wait 3 seconds.
+   macOS zooms the window back to the position and the size it had before step 2: the restore size.
+Expected: at step 3 the window goes to full screen with the Fearless corner at the top left of the screen (state 1).
+The window does not stay at the position and the size it had before step 2 with the title bar of macOS (state 4).
+
+12. Cmd and a letter, in a TextField with the focus, reach Frame.onKey on macOS
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Keys": "While a widget has the focus, the keys below and the keys that type text are used by it and never reach Frame.onKey, whether the widget is editable or not.
+Every other key reaches Frame.onKey".
+Steps (macOS only):
+1. Run integrationTests/testGuiText.
+   The last area is a log, and Frame.onKey writes "key S" in it when S is pressed.
+2. Click in the window above the first field, and press S.
+   The log shows "key S".
+3. Click in the first field, press End, and press Cmd+S.
+   In any text field of macOS (TextEdit), Cmd+S types no text.
+Expected: at step 3 the first field still shows "a field", and the log shows a second line "key S".
+
+13. A double click on the Fearless corner of a full screen window gives a window with the desk border
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "The state machine on floating desks": "Corner double click in 1: transition to 4.",
+and "A transition between the desk border and the Fearless corner replaces the window with a new one."
+Steps:
+1. Run integrationTests/testGuiStillFullScreen.
+   The window opens in full screen with the Fearless corner at the top left of the screen (state 1).
+2. Double click the Fearless corner, and wait 3 seconds.
+3. Press Escape, the close key.
+Expected: at step 2 the window has the decorations of the desk (state 4), and the console shows no error.
+At step 3 the window closes and the program ends.
+
+14. Full screen on macOS leaves the other applications reachable
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Gui.startFullScreen, Gui.fullScreenKey(KeyStroke)": "Full screen is the full screen state of the desk, asked of the window manager as such, with no mode switch of the display.",
+and "Implementation notes": "Full screen is GraphicsDevice.setFullScreenWindow: _NET_WM_STATE_FULLSCREEN on X11, the full screen style on Windows, the presentation options on macOS".
+Steps (macOS only):
+1. Run integrationTests/testGuiStillFullScreen.
+   The window opens in full screen with the Fearless corner at the top left of the screen (state 1).
+2. Click in the window, press Cmd+Tab, and wait 2 seconds.
+   In a full screen window of a program of macOS (Safari in full screen), Cmd+Tab brings the application used before to the front.
+3. Press Cmd+Tab again, and wait 2 seconds.
+4. Press Cmd+H, the Hide of macOS (the same as Hide in the application menu), and wait 2 seconds.
+Expected: at step 2 the application used before comes to the front, and the window of the Fearless program is behind it.
+At step 3 the window of the Fearless program comes back to the front, in full screen.
+At step 4 the window of the Fearless program is hidden: the desktop and the windows of the other applications show.
+The screen never stays black at step 4.
+
+15. A window going from the Fearless window to full screen is opaque on macOS
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "Gui.opacityFloor(Alpha), Frame.opacity(Alpha)": "Only state 2 shows the opacity; the other states are painted opaque while the window is in them."
+Steps (macOS):
+1. Run integrationTests/testGuiTranslucent.
+   The window opens without the decorations of the desk, with the Fearless corner (state 2), and the desktop shows through the window.
+2. Drag the Fearless corner to the top left corner of the work area, just below the menu bar, and let go.
+   The window goes to full screen (state 1): the window covers the screen, and the menu bar and the Dock are hidden.
+Expected: at step 2 the window is opaque: the desktop does not show through the window.
+
+16. A window leaving full screen on macOS is centered on the work area
+
+Design: ZeroToHero tasks/ImprovedGuiAPI.txt, "CREATING A WINDOW": "leaving state 1: the largest rectangle with the aspect ratio of the virtual pixel space that fits 77% of the width and 77% of the height of the work area, centered."
+and "Entering state 4: the leaving bounds, compacted."
+The work area is the screen without the menu bar and the Dock.
+Steps (macOS, with the Dock at the bottom of the screen and always shown):
+1. Run integrationTests/testGuiStillFullScreen.
+   The window opens in full screen with the Fearless corner at the top left of the screen (state 1); the menu bar and the Dock are hidden.
+2. Double click the Fearless corner, and wait 3 seconds.
+   The window has the decorations of the desk (state 4), and the menu bar and the Dock show.
+Expected: at step 2 the space between the bottom of the menu bar and the top of the title bar of the window is the same as the space between the bottom of the window and the top of the Dock.
+The window is not centered on the whole screen: on a screen of 1440x900 points with a menu bar of 30 points and a Dock of 76 points, the top of the title bar is at 150 points from the top of the screen, not at 173.

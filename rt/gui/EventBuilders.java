@@ -21,12 +21,12 @@ enum MouseKind{ Clicked, DoubleClicked, Pressed, Released, Moved, Dragged, Enter
 final class CMouseBuilder implements Mouse$1c$0{
   final AWidget owner;
   final EnumMap<MouseKind,MouseHandler$4sg$0> handlers= new EnumMap<>(MouseKind.class);
-  boolean changeable= true;// EDT confined
+  boolean installed;// EDT confined
   CMouseBuilder(AWidget owner){ this.owner= owner; }
   private Mouse$1c$0 add(MouseKind k, Object a){
     owner.frame.changeOnEdt(() -> {
-      if (owner.frame.frame.completed()){ throw Util.detErr("This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"); }
-      if (!changeable && (owner.handlers != handlers || !owner.canChange())){
+      if (owner.frame.guiRun.completed()){ throw Util.detErr("This Mouse belongs to a closed window: the CapGui.run that showed the window has returned, so a handler set now would never run"); }
+      if (installed && (owner.handlers != handlers || !owner.canChange())){
         throw Util.detErr("This Mouse was replaced by a later .mouse, or its widget is not in the window any more, so a handler set now would never run");
       }
       handlers.put(k, (MouseHandler$4sg$0) a);
@@ -245,7 +245,7 @@ final class SkMouse extends MouseAdapter{
     if (!edge.isRunning()){ edge.start(); }
   }
   private void edgeStep(){
-    if (frame.frame.completed()){ edge.stop(); return; }
+    if (frame.guiRun.completed()){ edge.stop(); return; }
     edgeOf.step(edgeX, edgeY);
   }
   private static int past(int at, int from, int size){ return at < from ? -1 : at >= from + size ? 1 : 0; }
@@ -303,7 +303,7 @@ final class SkMouse extends MouseAdapter{
       if (!inside(t, p)){ continue; }
       if (t instanceof _Button b){
         if (b.action == null){ continue; }// nothing reaches the programmer: bubble
-        frame.frame.queue.submit(whileShown(b, b.action));
+        frame.guiRun.queue.submit(whileShown(b, b.action));
         return;
       }
       if (t instanceof _Sections s && s.click(local(s, p))){ return; }
@@ -319,7 +319,7 @@ final class SkMouse extends MouseAdapter{
     for (var t : chainOf(from)){
       if (t.contextMenu == null || !inside(t, p)){ continue; }
       var s= t.contextMenu;
-      frame.frame.queue.submit(whileShown(t, new MF$7$1(){ @Override public Object mut$$hash$0(){
+      frame.guiRun.queue.submit(whileShown(t, new MF$7$1(){ @Override public Object mut$$hash$0(){
         var m= CMenu.build(s);
         frame.changeOnEdt(() -> frame.menus.show(m, new Rectangle(p.x, p.y, 0, 0)));
         return Void$o$0.instance;
@@ -341,7 +341,7 @@ final class SkMouse extends MouseAdapter{
       handlers(t, Entered, at, tasks);
     }
     hover = now;
-    frame.frame.queue.submitAll(tasks);
+    frame.guiRun.queue.submitAll(tasks);
   }
 
   private void dispatch(AWidget start, MouseKind kind, Point p){
@@ -353,7 +353,7 @@ final class SkMouse extends MouseAdapter{
   private boolean fire(AWidget t, MouseKind kind, Point p){
     var tasks= new ArrayList<MF$7$1>();
     handlers(t, kind, p, tasks);
-    frame.frame.queue.submitAll(tasks);
+    frame.guiRun.queue.submitAll(tasks);
     return !tasks.isEmpty();
   }
 

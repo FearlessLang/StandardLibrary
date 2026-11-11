@@ -28,12 +28,24 @@ import javax.swing.SwingUtilities;
 
 @SuppressWarnings("restricted")
 final class Desk{
-  static final boolean windows= System.getProperty("os.name").startsWith("Windows");
-  static final boolean mac= System.getProperty("os.name").startsWith("Mac");
-  static final boolean managed= System.getenv("SWAYSOCK") != null
-    || Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).map(d -> d.toLowerCase(Locale.ROOT)).anyMatch(List.of("hyprland", "sway", "i3")::contains);
-  static final boolean cosmic= Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).anyMatch("COSMIC"::equalsIgnoreCase);
-  static final boolean boundsUnseen= cosmic || System.getenv("WAYLAND_DISPLAY") != null && Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).anyMatch("KDE"::equalsIgnoreCase);
+  private enum Kind{ windows, mac, managed, cosmic, kdeWayland, otherX11 }
+  private static final Kind kind= kind();
+  static final boolean windows= kind == Kind.windows;
+  static final boolean mac= kind == Kind.mac;
+  static final boolean x11= !windows && !mac;
+  static final boolean managed= kind == Kind.managed;
+  static final boolean cosmic= kind == Kind.cosmic;
+  static final boolean boundsUnseen= cosmic || kind == Kind.kdeWayland;
+  private static Kind kind(){
+    var os= System.getProperty("os.name");
+    if (os.startsWith("Windows")){ return Kind.windows; }
+    if (os.startsWith("Mac")){ return Kind.mac; }
+    var desktops= Stream.of(Objects.requireNonNullElse(System.getenv("XDG_CURRENT_DESKTOP"), "").split(":")).map(d -> d.toLowerCase(Locale.ROOT)).toList();
+    if (System.getenv("SWAYSOCK") != null || desktops.stream().anyMatch(List.of("hyprland", "sway", "i3")::contains)){ return Kind.managed; }
+    if (desktops.contains("cosmic")){ return Kind.cosmic; }
+    if (System.getenv("WAYLAND_DISPLAY") != null && desktops.contains("kde")){ return Kind.kdeWayland; }
+    return Kind.otherX11;
+  }
   static Rectangle cosmicArea= cosmicGuess();
   private static Rectangle cosmicGuess(){
     var s= java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
@@ -102,6 +114,7 @@ final class Desk{
     call(X11.query, X11.display, X11.root, o, o.asSlice(8), o.asSlice(16), o.asSlice(20), o.asSlice(24), o.asSlice(28), o.asSlice(32));
     return (o.get(ValueLayout.JAVA_INT, 32) & 0x700) != 0;
   }
+  static void hideDockAndMenuBar(boolean hide){ call(Mac.async, Mac.mainQueue, MemorySegment.ofAddress(hide ? 10 : 0), Mac.present); }
   static boolean maximized(Frame f){
     var s= LongStream.of(X11.atoms(X11.window(f), "_NET_WM_STATE")).boxed().toList();
     return s.contains(X11.atom("_NET_WM_STATE_MAXIMIZED_VERT")) && s.contains(X11.atom("_NET_WM_STATE_MAXIMIZED_HORZ"));
@@ -239,6 +252,16 @@ final class Desk{
   private static final class Mac{
     static final MethodHandle state= fn("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics", "CGEventSourceButtonState",
       FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
+    static final String objc= "/usr/lib/libobjc.A.dylib";
+    static final String system= "/usr/lib/libSystem.B.dylib";
+    static final MethodHandle send= fn(objc, "objc_msgSend", FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
+    static final MemorySegment setOptions= (MemorySegment)call(fn(objc, "sel_registerName", FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)), Arena.global().allocateFrom("setPresentationOptions:"));
+    static final MemorySegment app= SymbolLookup.libraryLookup("/System/Library/Frameworks/AppKit.framework/AppKit", Arena.global()).find("NSApp").orElseThrow().reinterpret(8);
+    static final MethodHandle async= fn(system, "dispatch_async_f", FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MemorySegment mainQueue= SymbolLookup.libraryLookup(system, Arena.global()).find("_dispatch_main_q").orElseThrow();
+    static final FunctionDescriptor presentCall= FunctionDescriptor.ofVoid(ValueLayout.ADDRESS);
+    static final MemorySegment present= Linker.nativeLinker().upcallStub(reflect(() -> MethodHandles.lookup().findStatic(Mac.class, "present", presentCall.toMethodType())), presentCall, Arena.global());
+    static void present(MemorySegment options){ call(send, app.get(ValueLayout.ADDRESS, 0), setOptions, options.address()); }
   }
   private static final class X11{
     static final String lib= "libX11.so.6";

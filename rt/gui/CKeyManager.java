@@ -11,7 +11,7 @@ final class CKeyManager implements Keys$o$0{
   final ArrayList<CKeyAction> pressed= new ArrayList<>();
   final ArrayList<CKeyAction> released= new ArrayList<>();
 
-  boolean changeable= true;// EDT confined
+  boolean installed;// EDT confined
 
   CKeyManager(_Frame frame){ this.frame= frame; }
 
@@ -42,8 +42,8 @@ final class CKeyManager implements Keys$o$0{
 
   void check(String closed, String replaced){
     frame.onEdtAndWait(() -> {
-      if (frame.frame.completed()){ throw Util.detErr(closed); }
-      if (!changeable && frame.keys != this){ throw Util.detErr(replaced); }
+      if (frame.guiRun.completed()){ throw Util.detErr(closed); }
+      if (installed && frame.keys != this){ throw Util.detErr(replaced); }
     });
   }
   private Object addKeyAction(Object scope, List<CKeyAction> list){

@@ -430,14 +430,14 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
   Fire fired(boolean changed){ return changed && onEdit != null ? new Fire(onEdit, event()) : null; }
 
   private void submit(Supplier<Fire> onEdt){
-    frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+    frame.guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       if (!frame.onEdtAndWait(() -> canChange())){ return Void$o$0.instance; }
       fire(frame.changeOnEdt(() -> { layout(); return shown(onEdt.get()); }));
       return Void$o$0.instance;
     }});
   }
   private void change(Supplier<Req> onEdt){
-    frame.frame.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
+    frame.guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       var q= frame.onEdtAndWait(() -> canChange() && editable ? onEdt.get() : null);
       if (q == null){ return Void$o$0.instance; }
       var ch= clean(q.a(), q.b(), q.s());
@@ -639,7 +639,7 @@ record CTextEvent(Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0
 }
 
 final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodListener, InputMethodRequests{
-  enum To{ menus, widget, frame, reserved, nobody }
+  enum To{ menus, closesMenu, widget, frame, close, fullScreen, nobody }
   final _Frame frame;
   final HashMap<List<Integer>,To> routes= new HashMap<>();
   To typing= To.nobody;
@@ -647,7 +647,7 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   char high;
   CTextKeys(_Frame frame){ this.frame= frame; }
 
-  static boolean typesWith(java.awt.event.InputEvent e){ return e.isAltDown() == e.isControlDown() || e.isAltGraphDown(); }
+  static boolean typesWith(java.awt.event.InputEvent e){ return Desk.mac ? !e.isControlDown() && !e.isMetaDown() : e.isAltDown() == e.isControlDown() || e.isAltGraphDown(); }
   static boolean types(KeyEvent e){
     char c= e.getKeyChar();
     return c != CHAR_UNDEFINED && !Character.isISOControl(c) && typesWith(e);
@@ -662,23 +662,26 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
       if (f != frame.focus){ to = To.nobody; }
       routes.put(id, to);
       typing = to;
-      if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.pressed)); }
+      if (to == To.frame){ frame.guiRun.queue.submit(frame.keys.task(e.getKeyCode(), frame.keys.pressed)); }
     }
     if (to != To.frame){ e.consume(); }
   }
   private To first(KeyEvent e){
-    int c= e.getKeyCode();
-    if (frame.menus.isOpen() && c != _FluentGUI.code(frame.gui.fullScreenKey)){
-      if (c != _FluentGUI.code(frame.gui.closeKey)){ frame.menus.key(e); }
+    boolean close= _FluentGUI.chord(frame.gui.closeKey, e);
+    boolean fullScreen= _FluentGUI.chord(frame.gui.fullScreenKey, e);
+    if (frame.menus.isOpen() && !fullScreen){
+      if (close){ return To.closesMenu; }
+      frame.menus.key(e);
       return To.menus;
     }
-    if (frame.reserved(c)){ return To.reserved; }
+    if (close){ return To.close; }
+    if (fullScreen){ return To.fullScreen; }
     if (frame.focus != null && frame.focus.key(e)){ return To.widget; }
     return To.frame;
   }
   void releaseFrameKeys(){
     var k= frame.keys;
-    frame.frame.queue.submitAll(routes.entrySet().stream().filter(r -> r.getValue() == To.frame).map(r -> k.task(r.getKey().getFirst(), k.released)).toList());
+    frame.guiRun.queue.submitAll(routes.entrySet().stream().filter(r -> r.getValue() == To.frame).map(r -> k.task(r.getKey().getFirst(), k.released)).toList());
     routes.replaceAll((_, to) -> to == To.frame ? To.nobody : to);
   }
   void focusMoved(){
@@ -706,12 +709,12 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
   @Override public void keyReleased(KeyEvent e){
     int c= e.getKeyCode();
     var to= routes.remove(List.of(c, e.getKeyLocation()));
-    if (to == To.frame){ frame.frame.queue.submit(frame.keys.task(c, frame.keys.released)); return; }
+    if (to == To.frame){ frame.guiRun.queue.submit(frame.keys.task(c, frame.keys.released)); return; }
     if (to == null){ return; }
     e.consume();
-    if (to == To.reserved){ frame.stage.reservedKey(c); }
-    boolean closesMenu= to == To.menus && c == _FluentGUI.code(frame.gui.closeKey) && frame.menus.isOpen();
-    if (closesMenu){ frame.menus.key(e); }
+    if (to == To.close){ frame.closeRequest(); }
+    if (to == To.fullScreen){ frame.stage.fullScreenKey(); }
+    if (to == To.closesMenu && frame.menus.isOpen()){ frame.menus.close(frame.menus.open.size() - 1); }
   }
   @Override public void focusLost(FocusEvent e){
     frame.keyboard = false;

@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-final class FearlessFrame{
+final class GuiRun{
   // The first ~second of a Swing app is the worst-case EDT: native window
   // creation, first window-manager events, first Skia rasterization, glyph
   // cache warming, first JIT of the paint path. Both timers therefore fire
@@ -54,7 +54,7 @@ final class FearlessFrame{
   private long modelTicks;
   private long modelWarnAt= 1_000;
 
-  FearlessFrame(CompletableFuture<Void> done, _Frame owner){
+  GuiRun(CompletableFuture<Void> done, _Frame owner){
     this.done= done;
     this.owner= owner;
     GuiEdtBoundary.install();
@@ -196,50 +196,32 @@ final class FearlessFrame{
 
   void low(Throwable e){
     assert SwingUtilities.isEventDispatchThread();
-    boolean accepted;
-    synchronized (this){
-      accepted= life == Life.running;
-      if (accepted){
-        failure = e;
-        life = Life.closing;
-      }
-    }
-    if (!accepted){
-      printDiscarded(e);
-      return;
-    }
+    if (!leaveRunning(Life.closing, e)){ printDiscarded(e); return; }
     stopSwingOnEdt();
     queue.closeThen(this::finish);
   }
 
   void closed(){
     assert SwingUtilities.isEventDispatchThread();
-    boolean accepted;
-    synchronized (this){
-      accepted= life == Life.running;
-      if (accepted){ life = Life.closing; }
-    }
-    if (!accepted){ return; }
+    if (!leaveRunning(Life.closing, null)){ return; }
     stopSwingOnEdt();
     queue.closeThen(this::finish);
   }
 
   void abortBeforeStart(Throwable e){
     assert timer == null: "unreachable: runtime timer started before abortBeforeStart";
-    boolean accepted;
-    synchronized (this){
-      accepted= life == Life.running;
-      if (accepted){ life = Life.completed; }
-    }
-    if (!accepted){
-      printDiscarded(e);
-      return;
-    }
+    if (!leaveRunning(Life.completed, e)){ printDiscarded(e); return; }
     queue.closeThen(() -> {});
     SwingUtilities.invokeLater(this::dispose);
     done.completeExceptionally(e);
   }
 
+  private synchronized boolean leaveRunning(Life to, Throwable e){
+    if (life != Life.running){ return false; }
+    life = to;
+    failure = e;
+    return true;
+  }
   private synchronized boolean active(){ return life == Life.running; }
   synchronized boolean completed(){ return life == Life.completed; }
 
@@ -250,7 +232,7 @@ final class FearlessFrame{
   }
 
   private void dispose(){
-    if (owner.stage != null){ owner.stage.dispose(); }
+    if (owner.stage != null){ owner.stage.f.dispose(); }
   }
 
   private void stopTimers(){
@@ -288,22 +270,22 @@ final class GuiEdtBoundary extends EventQueue{
   @Override protected void dispatchEvent(AWTEvent event){
     try{ super.dispatchEvent(event); }
     catch (Throwable e){
-      var frame= frameOf(event);
-      if (frame == null){
+      var run= guiRunOf(event);
+      if (run == null){
         e.printStackTrace();
         return;
       }
-      frame.low(e);
+      run.low(e);
     }
   }
 
-  private static FearlessFrame frameOf(AWTEvent event){
+  private static GuiRun guiRunOf(AWTEvent event){
     var src= event.getSource();
     var w= src instanceof Window win
       ? win
       : src instanceof Component c
         ? SwingUtilities.getWindowAncestor(c)
         : null;
-    return w instanceof Stage.Win f ? f.stage().owner.frame : null;
+    return w instanceof Stage.Win f ? f.stage().owner.guiRun : null;
   }
 }

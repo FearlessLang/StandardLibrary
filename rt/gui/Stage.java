@@ -1,6 +1,7 @@
 package _base;
 
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
@@ -10,6 +11,9 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.desktop.QuitEvent;
+import java.awt.desktop.QuitResponse;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
@@ -38,6 +42,8 @@ final class Stage extends MouseAdapter{
   final GraphicsConfiguration gc= device.getDefaultConfiguration();
   final Rectangle screen= gc.getBounds();
   final boolean translucent= device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
+  static Win macFullScreen;
+  static Rectangle macArea;
   Win f;
   Mode mode;
   final Sk.Kept cornerKept= new Sk.Kept();
@@ -77,6 +83,7 @@ final class Stage extends MouseAdapter{
     owner.surface.addMouseListener(this);
     owner.surface.addMouseMotionListener(this);
     owner.surface.addMouseWheelListener(this);
+    if (Desk.mac){ Desktop.getDesktop().setQuitHandler(this::quit); }
     if (Desk.managed){ open(); return; }
     realize(switch (gui.start){ case fullScreen -> Mode.fullScreen; case undecorated -> Mode.fearless; case window, maximised -> Mode.decorated; });
     if (gui.start == _FluentGUI.Start.maximised){ f.setExtendedState(Frame.MAXIMIZED_BOTH); }
@@ -89,6 +96,14 @@ final class Stage extends MouseAdapter{
       var d= super.getMinimumSize();
       double k= reshaping || !Desk.windows ? 1 : gc.getDefaultTransform().getScaleX();
       return new Dimension((int)Math.ceil(d.width*k), (int)Math.ceil(d.height*k));
+    }
+    @Override public void setVisible(boolean b){
+      super.setVisible(b);
+      getRootPane().putClientProperty("apple.awt.fullscreenable", false);
+    }
+    @Override public void dispose(){
+      if (macFullScreen == this){ fullScreenWindow(null); }
+      super.dispose();
     }
     @SuppressWarnings("deprecation") @Override public void reshape(int x, int y, int width, int height){
       reshaping = true;
@@ -113,13 +128,16 @@ final class Stage extends MouseAdapter{
     frame.addWindowFocusListener(l);
     frame.addWindowStateListener(this::stateChanged);
     new DropTarget(frame, DnDConstants.ACTION_COPY, new DropTargetAdapter(){
-      @Override public void drop(DropTargetDropEvent e){ FearlessFrame.dropped(e); }
+      @Override public void drop(DropTargetDropEvent e){ GuiRun.dropped(e); }
     });
     Desk.identify(frame, gui.iconName, gui.iconPath, gui.name);
     return frame;
   }
-  void reservedKey(int code){
-    if (code == _FluentGUI.code(gui.closeKey)){ owner.closeRequest(); return; }
+  private void quit(QuitEvent e, QuitResponse r){
+    r.cancelQuit();
+    owner.closeRequest();
+  }
+  void fullScreenKey(){
     owner.menus.close(0);
     if (Desk.managed){ Desk.fullScreen(f, mode != Mode.fullScreen); return; }
     realize(mode == Mode.fullScreen ? Mode.fearless : Mode.fullScreen);
@@ -148,7 +166,7 @@ final class Stage extends MouseAdapter{
     switch (m){
       case fullScreen -> enterFullScreen();
       case fearless -> {
-        if (device.getFullScreenWindow() == f){ device.setFullScreenWindow(null); }
+        if (fullScreenWindow() == f){ fullScreenWindow(null); }
         place(r);
         if (translucent){ f.setOpacity(owner.opacity); }
       }
@@ -161,20 +179,27 @@ final class Stage extends MouseAdapter{
     f.setVisible(true);
     f.toFront();
     owner.surface.requestFocusInWindow();
-    activating = replaced && !Desk.windows;
+    activating = replaced && Desk.x11;
     if (replaced && Desk.windows){ old.dispose(); }
   }
   private void enterFullScreen(){
-    if (device.getFullScreenWindow() instanceof Win w && w != f){ w.stage().realize(Mode.fearless); }
+    if (fullScreenWindow() instanceof Win w && w != f){ w.stage().realize(Mode.fearless); }
     if (!Desk.windows && !f.isShowing()){ place(fit(workArea(), leavingWidth())); f.setVisible(true); }
-    device.setFullScreenWindow(f);
+    fullScreenWindow(f);
   }
-  void dispose(){
-    if (device.getFullScreenWindow() == f){ device.setFullScreenWindow(null); }
-    f.dispose();
+  private Window fullScreenWindow(){ return Desk.mac ? macFullScreen : device.getFullScreenWindow(); }
+  private void fullScreenWindow(Win w){
+    if (!Desk.mac){ device.setFullScreenWindow(w); return; }
+    if (macFullScreen == null){ macArea = workArea(); }
+    macFullScreen = w;
+    Desk.hideDockAndMenuBar(w != null);
+    if (w != null){ w.setOpacity(1); w.setBounds(screen); }
   }
   private Rectangle opening(){ return fit(inset(workArea(), f.getInsets()), openingWidth()); }
-  private Rectangle workArea(){ return Desk.cosmic ? Desk.cosmicArea : inset(screen, Toolkit.getDefaultToolkit().getScreenInsets(gc)); }
+  private Rectangle workArea(){
+    if (macFullScreen != null){ return macArea; }
+    return Desk.cosmic ? Desk.cosmicArea : inset(screen, Toolkit.getDefaultToolkit().getScreenInsets(gc));
+  }
   private static Rectangle inset(Rectangle r, Insets in){ return new Rectangle(r.x+in.left, r.y+in.top, r.width-in.left-in.right, r.height-in.top-in.bottom); }
   private static int within(int v, int low, int high){ return Math.max(low, Math.min(v, high)); }
   private Rectangle outset(Rectangle content){
@@ -319,7 +344,7 @@ final class Stage extends MouseAdapter{
     unmaximized = !x11Unmaximize() && was && (e.getNewState() & (Frame.MAXIMIZED_BOTH|Frame.ICONIFIED)) == 0;
   }
   private static boolean near(int a, int b){ return Math.abs(a-b) <= 1; }
-  private boolean x11Unmaximize(){ return !Desk.windows && !Desk.mac && !Desk.cosmic && !Desk.managed; }
+  private boolean x11Unmaximize(){ return Desk.x11 && !Desk.cosmic && !Desk.managed; }
   private boolean boundsMoved(){
     boolean same= f.getX() == polledX && f.getY() == polledY && f.getWidth() == polledW && f.getHeight() == polledH;
     polledX = f.getX(); polledY = f.getY(); polledW = f.getWidth(); polledH = f.getHeight();
