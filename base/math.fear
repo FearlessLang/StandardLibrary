@@ -13,10 +13,12 @@ _MagicMath: Sealed {
   .log(x: Float): Float -> _Magic!;
 
   /// The log base `base` of the given float, returns:
-  /// throws if base, or x is NaN or < 0, or b <= 0,
+  /// throws if x is NaN or < 0, or if base is not finite, <= 0, or 1.0,
   /// -ve infinity if x = 0,
   /// +ve infinity if x is positive infinity,
   /// log base `base` of x otherwise;
+  //>   .checkDetErr({::.isMsg{:: == "Math.logb: the base must be greater than 0, finite, and not 1.0, given 1.0"}}, {Math.logb(+1.0, +8.0)})
+  //>   .checkDetErr({::.isMsg{::.startsWith "Math.logb:"}}, {Math.logb(Math.inf, +8.0)})
   .logb(base: Float, x: Float): Float -> _Magic!;
 
   /// Returns:

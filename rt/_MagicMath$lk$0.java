@@ -33,7 +33,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
   default Object imm$logb$2(Object p0, Object p1){
     double b= Float$1c$0Instance.unwrap(p0);
     double x= Float$1c$0Instance.unwrap(p1);
-    if (!(b > 0.0)){ throw err("Math.logb: the base must be greater than 0, given " + b); }
+    if (!(Double.isFinite(b) && b > 0.0 && b != 1.0)){ throw err("Math.logb: the base must be greater than 0, finite, and not 1.0, given " + b); }
     logContract("logb", x);
     return Float$1c$0Instance.instance(Math.log(x) / Math.log(b));
   }
