@@ -95,7 +95,7 @@ ELists: Test{::
   }
 
 Sets: Test{::
-  .checkDetErr({::.isMsg{:: == "Set.+: the OrderHash does not give a consistent order and hash to the elements"}}, {(base.Sets#(Same, 1) + 2).size})
+  .checkDetErr({::.isMsg{:: == "Set+: the OrderHash does not give a consistent order and hash to the elements"}}, {(base.Sets#(Same, 1) + 2).size})
   }
 
 BiFlows: Test{::

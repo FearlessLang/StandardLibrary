@@ -80,7 +80,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
   @Override public Object imm$$slash$1(Object p0){
     long d= n(p0);
     if (d == 0L){
-      throw err("Nat/: Cannot create a Num with denominator 0.");
+      throw err("Nat/: d==0");
     }
     return Num$c$0Instance.instance(
       unsignedLongToBigInteger(val),
@@ -249,12 +249,12 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance(val * n(p0)); }
   @Override public Object imm$aluDiv$1(Object p0){
     long d= n(p0);
-    if (d == 0){ throw err("Nat.aluDiv: divByZero"); }
+    if (d == 0){ throw err("Nat.aluDiv: x==0"); }
     return instance(Long.divideUnsigned(val, d));
   }
   @Override public Object imm$aluRem$1(Object p0){
     long d= n(p0);
-    if (d == 0){ throw err("Nat.aluRem: divByZero"); }
+    if (d == 0){ throw err("Nat.aluRem: x==0"); }
     return instance(Long.remainderUnsigned(val, d));
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){ return instance(val << n(p0)); }

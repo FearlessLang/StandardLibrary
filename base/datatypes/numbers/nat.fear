@@ -61,7 +61,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   //>   .check{(6 .tryGetDiv 2).ok.assertEq({::}, Opts# 3)}
   //>   .check{7 .tryGetDiv 2 .assertInfo{::.isMsg{::.startsWith "Nat.getDiv:"}}}
   .tryGetDiv(d: Nat): mut Action[Nat] -> Block#
-    .if {d == 0} .return {Actions.msg "Nat.getDiv: Cannot divide by 0"}
+    .if {d == 0} .return {Actions.msg "Nat.getDiv: d==0"}
     .let[Nat] rem = {this.getRem d}
     .if {rem != 0} .return {Actions.msg("Nat.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
     .return {this.tryGetTruncDiv d};
