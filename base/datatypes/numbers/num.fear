@@ -73,7 +73,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 
   /// `this.int` returns `.some` of `this` as an `Int` if `this` is an integer in
   /// ``[Math.minInt, Math.maxInt]``, `.empty` otherwise.
-  //>   .check{5 .int .assertEq({::}, Opts# +5)}
+  //>   .check{5/1 .int .assertEq({::}, Opts# +5)}
   //>   .check{1 / 2 .int .assertEmpty {::}}
   .int: Opt[Int];
 
@@ -104,7 +104,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 
   /// `this.getNat` converts `this` to a `Nat` if it's an integer in ``[0, Math.maxNat]``; throws otherwise.
   //>   .check{5/1 .getNat .assertEq 5}
-  //>   .checkDetErr({::}, {(-5) .getNat})
+  //>   .checkDetErr({::}, {(-5/1) .getNat})
   .getNat: Nat;
   /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if `this` is not an integer in ``[0, Math.maxNat]``.
   //>   .check{((5/1).tryGetNat).ok.assertEq({::}, Opts# 5)}
@@ -113,7 +113,7 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 
   /// `this.getByte` converts `this` to a `Byte` if it's an integer in ``[0, Math.maxByte]``; throws otherwise.
   //>   .check{5/1 .getByte .assertEq(5.getByte)}
-  //>   .checkDetErr({::}, {300 .getByte})
+  //>   .checkDetErr({::}, {(300/1) .getByte})
   .getByte: Byte;
   /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not an integer in ``[0, Math.maxByte]``.
   //>   .check{((5/1).tryGetByte).ok.assertEq({::}, Opts#(5.getByte))}

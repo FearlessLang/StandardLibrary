@@ -44,7 +44,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{7 .getTruncDiv 2 .assertEq 3}
-  //>   .checkDetErr({::}, {7 .getDiv 0})
+  //>   .checkDetErr({::}, {7 .getTruncDiv 0})
   .getTruncDiv(d: Nat): Nat;
 
   /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
