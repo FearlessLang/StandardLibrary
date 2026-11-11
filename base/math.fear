@@ -176,7 +176,7 @@ Radian: Angle[Radian] {
   .tan -> _RadianTrig.tan this;
 
   .close -> this;
-  .imm -> this#.rad!;
+  .imm -> this#.getRad;
   .str -> "Radian["+(this#.str)+"]";
   /// Compare two angles after normalizing them
   .cmp t0, t1 -> t0.normalize# <=> (t1.normalize#);

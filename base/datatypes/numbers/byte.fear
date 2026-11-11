@@ -26,9 +26,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   *(x: Byte): Byte;
 
   /// ``this ** x`` returns the checked power of `this` raised to ``x``. Overflows if the result would exceed ``255``.
-  //>   .check{2.getByte ** (6.getByte) .assertEq(64.getByte)}
-  //>   .checkNonDetErr({::}, {2.getByte ** (8.getByte)})
-  **(x: Byte): Byte;
+  //>   .check{2.getByte ** 6 .assertEq(64.getByte)}
+  //>   .checkNonDetErr({::}, {2.getByte ** 8})
+  **(x: Nat): Byte;
 
   /// ``this / x`` returns the exact rational quotient of `this` and ``x`` as a `Num`. Throws iff ``x == 0``.
   //>   .check{7.getByte / 2 .getFloat .assertEq 3.5}
