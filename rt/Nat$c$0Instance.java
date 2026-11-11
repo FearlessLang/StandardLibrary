@@ -1,6 +1,5 @@
 package _base;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.stream.LongStream;
 
@@ -31,12 +30,8 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
    * The maximum unsigned value that can be represented in a long (2^64 - 1)
    */
   public static final long MAX_UNSIGNED_VALUE= -1;
-  public static final double MAX_UNSIGNED_VALUE_FLOAT= 18446744073709551615.0d;
   public static Nat$c$0 instance(long val){ return NatCache.getNat(val); }
 
-  public static boolean overflowsLong(long unsignedLong){
-    return Long.compareUnsigned(unsignedLong, Long.MAX_VALUE) > 0;
-  }
   private static long n(Object o){ return ((Nat$c$0Instance)o).val; }
   private static long i(Object o){ return ((Int$c$0Instance)o).val(); }
   private static Error overflow(String op, long a, long b){
@@ -80,14 +75,6 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
    */
   public static long unwrap(Object p0){
     return ((Nat$c$0Instance) p0).val;
-  }
-
-  public static long getSignedLong(Object p0){
-    Nat$c$0Instance nat= (Nat$c$0Instance) p0;
-    if (nat.val < 0){
-      throw err("Nat too large to be represented by an Int");
-    }
-    return nat.val;
   }
 
   @Override public Object imm$$slash$1(Object p0){
@@ -144,31 +131,7 @@ public record Nat$c$0Instance(long val) implements Nat$c$0,Norm$o$1{
     return (double)((num >>> 1) | (num & 1)) * 2;
   }
   static boolean canConvertToFloat(long val){
-    // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
-    // The largest integer that can be exactly represented in a double is 2^53.
-    if (Long.compareUnsigned(val, 1L << 53) <= 0){
-      return true;
-    }
-    BigInteger bigInteger= toUnsignedBigInteger(val);
-    return new BigDecimal(bigInteger.doubleValue()).toBigInteger().equals(bigInteger);
-  }
-  /**
-   * Code is from a private method in the open jdk <a href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/Long.java">Long</a> class.
-   * Seen as of <a href="https://github.com/openjdk/jdk/commit/a7507ffa1dda403110a61c4b61143b76e8a7911e">this commit</a>
-   * Return a BigInteger equal to the unsigned value of the
-   * argument.
-   */
-  private static BigInteger toUnsignedBigInteger(long i){
-    if (i >= 0L)
-      return BigInteger.valueOf(i);
-    else{
-      int upper= (int) (i >>> 32);
-      int lower= (int) i;
-
-      // return (upper << 32) + lower
-      return (BigInteger.valueOf(Integer.toUnsignedLong(upper))).shiftLeft(32).
-              add(BigInteger.valueOf(Integer.toUnsignedLong(lower)));
-    }
+    return 64 - Long.numberOfLeadingZeros(val) - Long.numberOfTrailingZeros(val) <= 53;
   }
   @Override public Object imm$getInt$0(){
     if (Long.compareUnsigned(val, Long.MAX_VALUE) > 0){

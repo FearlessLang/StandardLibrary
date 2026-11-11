@@ -51,18 +51,8 @@ _NumFlow$5k$0 instance= new _NumFlow$5k$0(){};
     long start= Nat$c$0Instance.unwrap(p0);
     long end= Nat$c$0Instance.unwrap(p1);
     assert Long.compareUnsigned(start, end) <= 0;
-    if (Long.compareUnsigned(end, Long.MAX_VALUE) <= 0){
-      return Flow$o$1Instance.range(LongStream.rangeClosed(start, end)
-        .mapToObj(Nat$c$0Instance::instance));
-    }
-    if (Long.compareUnsigned(start, Long.MAX_VALUE) > 0){
-      return Flow$o$1Instance.range(LongStream.rangeClosed(start, end)
-        .mapToObj(Nat$c$0Instance::instance));
-    }
-    return Flow$o$1Instance.range(LongStream.concat(
-      LongStream.rangeClosed(start, Long.MAX_VALUE),
-      LongStream.rangeClosed(Long.MIN_VALUE, end)
-    ).mapToObj(Nat$c$0Instance::instance));
+    return Flow$o$1Instance.range(LongStream.rangeClosed(start ^ Long.MIN_VALUE, end ^ Long.MIN_VALUE)
+      .mapToObj(x -> Nat$c$0Instance.instance(x ^ Long.MIN_VALUE)));
   }
 
   default Object imm$nats$3(Object p0, Object p1, Object p2){

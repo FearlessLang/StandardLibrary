@@ -17,11 +17,6 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     if (a == 0.0d && b == 0.0d){ return 0; } // -0.0 == +0.0
     return Double.compare(a, b);
   }
-  private static void checkRangeEnds(double lo, double hi, String where){
-    if (Double.isNaN(lo) || Double.isNaN(hi)){ throw err(where+": lo/hi NaN"); }
-    if (Double.compare(lo, hi) > 0){ throw err(where+": lo>hi"); }
-  }
-  private static long clampTrunc0ToInt(double x){ return (long)x; }
   private static long natBits(double x){ return x < 0x1p63 ? (long)x : (long)(x - 0x1p63) ^ Long.MIN_VALUE; }
   private static byte clampTrunc0ToByteBits(double x){
     if (Double.isNaN(x) || x <= 0.0d){ return 0; }
@@ -91,18 +86,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
     }
     return instance(Math.pow(val, power));
   }
-  @Override public Object imm$softInt$0(){
-    if (Double.isNaN(val)){
-      return Int$c$0Instance.instance(0);
-    }
-    if (val <= Long.MIN_VALUE){
-      return Int$c$0Instance.instance(Long.MIN_VALUE);
-    }
-    if (val >= Long.MAX_VALUE){
-      return Int$c$0Instance.instance(Long.MAX_VALUE);
-    }
-    return Int$c$0Instance.instance((long) val);
-  }
+  @Override public Object imm$softInt$0(){ return Int$c$0Instance.instance((long) val); }
   /// clamp+trunc0; NaN->0; +Inf->maxNat; -Inf->0 (never throws)
   @Override public Object imm$softNat$0(){
     if (Double.isNaN(val) || val <= 0.0d){
@@ -269,6 +253,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   }
   @Override public Object imm$isNaN$0(){ return bool(Double.isNaN(val)); }
   @Override public Object imm$isInfinite$0(){ return bool(Double.isInfinite(val)); }
+  @Override public Object imm$isFinite$0(){ return bool(Double.isFinite(val)); }
   @Override public Object imm$isPosInfinity$0(){ return bool(val == Double.POSITIVE_INFINITY); }
   @Override public Object imm$isNegInfinity$0(){ return bool(val == Double.NEGATIVE_INFINITY); }
   @Override public Object imm$isNegZero$0(){ return bool(isNegZero(val)); }
@@ -300,7 +285,6 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
    */
   @Override public Object imm$ieeePow$1(Object p0){
     double f= unwrap(p0);
-    if (f == 0.0){ return Float$1c$0Instance.instance(1.0); }
     // I think these are the only differences between ieee and Math
     if (val == 1.0 || val == -1.0 && Double.isInfinite(f)){
       return Float$1c$0Instance.instance(1.0);
