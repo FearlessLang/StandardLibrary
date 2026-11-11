@@ -87,23 +87,26 @@ Math: Sealed, _MagicMath {
 
   /// Return the maximum of two elements given the ordering.
   /// Will return the first one if the elements are equal.
+  //>   .check{Math.max[mut Var[Nat],Nat]({::.get}, Vars#1, Vars#2).get.assertEq 2}
   .max[T:*,K](ordering: OrderBy[imm T,K], t0: T, t1: T): T -> (ordering#t0 <=> (ordering#t1))#{
       .lt -> t1; .eq -> t0; .gt -> t0;
     };
 
   /// Return the minimum of two elements given the ordering.
   /// Will return the first one if the elements are equal.
-  .min[T,K](ordering: OrderBy[T, K], t0: T, t1: T): T -> (ordering#t0 <=> (ordering#t1))#{
+  //>   .check{Math.min[mut Var[Nat],Nat]({::.get}, Vars#1, Vars#2).get.assertEq 1}
+  .min[T:*,K](ordering: OrderBy[imm T,K], t0: T, t1: T): T -> (ordering#t0 <=> (ordering#t1))#{
       .lt -> t0; .eq -> t0; .gt -> t1;
     };
 
   /// ``Math.clamp(by, lo, hi, t)`` returns `t` clamped between upper and lower.
   /// Note: ``Math.clamp(by, lo, hi, t)`` returns `t` in the case where it is equal to lo or hi
   /// Equivalent to: ``Math.max(by, Math.min(by, t, upper), lower)``
-  .clamp[T,K](ordering: OrderBy[T,K], lower: T, upper: T, t: T): T -> Block#
-    .let[Order[K]] lower'={ordering# lower}
-    .let[Order[K]] upper'={ordering# upper}
-    .let[Order[K]] t'={ordering# t}
+  //>   .check{Math.clamp[mut Var[Nat],Nat]({::.get}, Vars#1, Vars#3, Vars#5).get.assertEq 3}
+  .clamp[T:*,K](ordering: OrderBy[imm T,K], lower: T, upper: T, t: T): T -> Block#
+    .let[read Order[K]] lower'={ordering# lower}
+    .let[read Order[K]] upper'={ordering# upper}
+    .let[read Order[K]] t'={ordering# t}
     .if {lower' > (upper'.close)} .error{"Math.clamp: lower must be <= to upper"}
     .if {t' < (lower'.close)} .return {lower}
     .if {t' > (upper'.close)} .return {upper}
