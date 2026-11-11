@@ -83,7 +83,7 @@ final class Stage extends MouseAdapter{
     owner.surface.addMouseListener(this);
     owner.surface.addMouseMotionListener(this);
     owner.surface.addMouseWheelListener(this);
-    if (Desk.mac){ Desktop.getDesktop().setQuitHandler(this::quit); Desk.zoomAtOnce(); }
+    if (Desk.mac){ Desktop.getDesktop().setQuitHandler(this::quit); }
     if (Desk.managed){ open(); return; }
     realize(switch (gui.start){ case fullScreen -> Mode.fullScreen; case undecorated -> Mode.fearless; case window, maximised -> Mode.decorated; });
     if (gui.start == _FluentGUI.Start.maximised){ f.setExtendedState(Frame.MAXIMIZED_BOTH); }
@@ -285,11 +285,11 @@ final class Stage extends MouseAdapter{
     lastSize = now;
     boolean movable= mode != Mode.fullScreen && !maximized() && !Desk.managed && !Desk.cosmic && (f.getExtendedState() & Frame.ICONIFIED) == 0;
     if (movable){ if (Desk.boundsUnseen){ keepVisibleSeen(); } else{ keepVisible(); } }
-    if (unmaximized && (Desk.cosmic ? sameSize(f.getBounds(), restore) : !Desk.down())){ unmaximized(); return; }
-    if (deskResized && !Desk.down()){ compact(); }
+    if (unmaximized && (Desk.cosmic ? sameSize(f.getBounds(), restore) : !Desk.busy())){ unmaximized(); return; }
+    if (deskResized && !Desk.busy()){ compact(); }
   }
   private void keepVisible(){
-    if (f.getX() == kept.x && f.getY() == kept.y || Desk.down()){ return; }
+    if (f.getX() == kept.x && f.getY() == kept.y || Desk.busy()){ return; }
     var w= workArea();
     int vw= Math.min(screen.width/3, f.getWidth());
     int vh= Math.min(screen.height/3, f.getHeight());
@@ -354,7 +354,7 @@ final class Stage extends MouseAdapter{
     var now= Desk.bounds(f);
     if (Desk.maximized(f)){ maxed = now; deskMaximized = true; return; }
     if (!deskMaximized){ seen = now; return; }
-    if (now.equals(maxed) || Desk.down()){ return; }
+    if (now.equals(maxed) || Desk.busy()){ return; }
     deskMaximized = false;
     if (now.x == seen.x && now.y == seen.y){ realize(Mode.fullScreen); return; }
     compact();
@@ -364,6 +364,10 @@ final class Stage extends MouseAdapter{
     var b= f.getBounds();
     boolean restored= near(b.x, restore.x) && near(b.y, restore.y) && near(b.width, restore.width) && near(b.height, restore.height);
     if (restored){ realize(Mode.fullScreen); return; }
+    if (Desk.mac){
+      var d= outset(fit(workArea(), leavingWidth())).getSize();
+      f.setBounds(b.x+(b.width-d.width)/2, b.y, d.width, d.height);
+    }
     compact();
   }
   private void compact(){

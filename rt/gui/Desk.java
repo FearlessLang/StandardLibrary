@@ -107,16 +107,12 @@ final class Desk{
   }
   private static MemorySegment hwnd(Frame f){ return MemorySegment.ofAddress((long)reflect(() -> Win.hwnd.invoke(reflect(() -> peer.get(f))))); }
 
-  static boolean down(){
+  static boolean busy(){
     if (windows){ return IntStream.of(1, 2, 4).anyMatch(vk -> (short)call(Win.state, vk) < 0); }
-    if (mac){ return IntStream.of(0, 1, 2).anyMatch(b -> (boolean)call(Mac.state, 0, b)); }
+    if (mac){ return IntStream.of(0, 1, 2).anyMatch(b -> (boolean)call(Mac.state, 0, b)) || Mac.liveResize(); }
     var o= X11.out;
     call(X11.query, X11.display, X11.root, o, o.asSlice(8), o.asSlice(16), o.asSlice(20), o.asSlice(24), o.asSlice(28), o.asSlice(32));
     return (o.get(ValueLayout.JAVA_INT, 32) & 0x700) != 0;
-  }
-  static void zoomAtOnce(){
-    var a= Arena.global();
-    call(Mac.replace, call(Mac.objcClass, a.allocateFrom("NSWindow")), call(Mac.selector, a.allocateFrom("animationResizeTime:")), Mac.instant, a.allocateFrom("d@:{CGRect={CGPoint=dd}{CGSize=dd}}"));
   }
   static void hideDockAndMenuBar(boolean hide){ call(Mac.async, Mac.mainQueue, MemorySegment.ofAddress(hide ? 10 : 0), Mac.present); }
   static boolean maximized(Frame f){
@@ -260,19 +256,26 @@ final class Desk{
     static final String system= "/usr/lib/libSystem.B.dylib";
     static final MethodHandle send= fn(objc, "objc_msgSend", FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
     static final MethodHandle selector= fn(objc, "sel_registerName", FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS));
-    static final MemorySegment setOptions= (MemorySegment)call(selector, Arena.global().allocateFrom("setPresentationOptions:"));
+    static MemorySegment selector(String name){ return (MemorySegment)call(selector, Arena.global().allocateFrom(name)); }
+    static final MemorySegment setOptions= selector("setPresentationOptions:");
     static final MemorySegment app= SymbolLookup.libraryLookup("/System/Library/Frameworks/AppKit.framework/AppKit", Arena.global()).find("NSApp").orElseThrow().reinterpret(8);
     static final MethodHandle async= fn(system, "dispatch_async_f", FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
     static final MemorySegment mainQueue= SymbolLookup.libraryLookup(system, Arena.global()).find("_dispatch_main_q").orElseThrow();
     static final FunctionDescriptor presentCall= FunctionDescriptor.ofVoid(ValueLayout.ADDRESS);
     static final MemorySegment present= Linker.nativeLinker().upcallStub(reflect(() -> MethodHandles.lookup().findStatic(Mac.class, "present", presentCall.toMethodType())), presentCall, Arena.global());
     static void present(MemorySegment options){ call(send, app.get(ValueLayout.ADDRESS, 0), setOptions, options.address()); }
-    static final FunctionDescriptor resizeTimeCall= FunctionDescriptor.of(ValueLayout.JAVA_DOUBLE, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
-      MemoryLayout.structLayout(ValueLayout.JAVA_DOUBLE, ValueLayout.JAVA_DOUBLE, ValueLayout.JAVA_DOUBLE, ValueLayout.JAVA_DOUBLE));
-    static double resizeTime(MemorySegment window, MemorySegment name, MemorySegment frame){ return 0; }
-    static final MemorySegment instant= Linker.nativeLinker().upcallStub(reflect(() -> MethodHandles.lookup().findStatic(Mac.class, "resizeTime", resizeTimeCall.toMethodType())), resizeTimeCall, Arena.global());
-    static final MethodHandle objcClass= fn(objc, "objc_getClass", FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS));
-    static final MethodHandle replace= fn(objc, "class_replaceMethod", FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MethodHandle object= fn(objc, "objc_msgSend", FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MethodHandle count= fn(objc, "objc_msgSend", FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MethodHandle at= fn(objc, "objc_msgSend", FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
+    static final MethodHandle flag= fn(objc, "objc_msgSend", FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+    static final MemorySegment windows= selector("windows");
+    static final MemorySegment size= selector("count");
+    static final MemorySegment objectAt= selector("objectAtIndex:");
+    static final MemorySegment inLiveResize= selector("inLiveResize");
+    static boolean liveResize(){
+      var ws= call(object, app.get(ValueLayout.ADDRESS, 0), windows);
+      return LongStream.range(0, (long)call(count, ws, size)).anyMatch(i -> (boolean)call(flag, call(at, ws, objectAt, i), inLiveResize));
+    }
   }
   private static final class X11{
     static final String lib= "libX11.so.6";
