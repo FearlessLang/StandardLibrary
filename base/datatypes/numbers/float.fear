@@ -350,11 +350,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   //>   .check{0.0 .isFinite .assertTrue}
   //>   .check{Math.inf .isFinite .assertFalse}
   //>   .check{Math.nan .isFinite .assertFalse}
-  .isFinite: Bool ->
-      this.match {
-      .posInf -> False; .negInf -> False; .nan -> False;
-      .regular _ -> True; .posZero -> True; .negZero -> True;
-      };
+  .isFinite: Bool;
 
   /// ``this.ieeePow(x)`` returns the IEEE 754-2008 ``pow(this, x)``, following the full IEEE special-value rules
   ///  unlike ``**`` - see its docs for how the two differ. Rules apply top down

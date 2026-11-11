@@ -237,9 +237,3 @@ Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
     xs.fold( {this}, {acc,e -> acc + e} );
   .norm: Norm[Num];
   }
-
-_NumIs: {
-  .int(n: Num): Bool -> n.isInteger && {n >= (Math.minInt.num)} && {n <= (Math.maxInt.num)};
-  .nat(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxNat.num)};
-  .byte(n: Num): Bool -> n.isInteger && {n >= (0/1)} && {n <= (Math.maxByte.num)};
-  }

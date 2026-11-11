@@ -26,16 +26,12 @@ final class ByteCache{
 
 public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Object optSize1Str, Object trySize1Str) implements Byte$o$0,Norm$o$1{
   private static final byte MAX_VALUE= (byte) 255;
-  private static final long MAX_VALUE_LONG= 255;
 
   public static Byte$o$0 instance(byte val){ return ByteCache.getByte(val); }
   @Override public boolean equals(Object o){ return this == o; }
   @Override public int hashCode(){ return u8(val); }
   @Override public String toString(){ return "Byte["+u8(val)+"]"; }
 
-  private static byte clampToByte(Object o){
-    return (byte) (((Byte$o$0Instance)o).val & 255);
-  }
   public static byte unwrap(Object p0){return ((Byte$o$0Instance) p0).val;}
   public static byte[] unwrapAll(Object list){
     var bs= List$o$1Instance.asJava(list);
@@ -107,11 +103,6 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
       BigInteger.valueOf(u8(val)),
       unsignedLongToBigInteger(d)
     );
-  }
-  @Override public Object imm$rem$1(Object p0){
-    long d= natBits(p0);
-    if (d == 0){ return optEmpty(); }
-    return optSome(instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d)));
   }
   @Override public Object imm$getTruncDiv$1(Object p0){
     long d= natBits(p0);

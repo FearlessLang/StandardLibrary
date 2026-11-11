@@ -211,54 +211,26 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
    * Compute the modulo of this Int by the given Nat, returning a Nat.
    * This is the implementation used by python's % operator where negative numbers are converted into positive numbers.
    * e.g. -1 % 5 == 4, since -1 is congruent to 4 mod 5.
-
-   * This is tricky because p0 is an unsigned long so we can't directly compare it.
-
-   * We break this into four cases:
-   * 1. len <= Long.MAX_VALUE: Safe to treat len as a signed long and just use floorMod.
-   * 2. len > Long.MAX_VALUE , 0 <= val < Long.MIN_VALUE
-   *  - val <= len, so val % len == val
-   * 3. val < 0, |val| < len
-   *  - val % len == len + val, since val is negative
-   * 4. val < 0, |val| == len, only happens when val == Long.MIN_VALUE and len == Long.MAX_VALUE + 1
-   *  - val % len == 0, since val is congruent to 0.
    */
+  private static long wrap(long val, long len){
+    if (val >= 0){ return Long.remainderUnsigned(val, len); }
+    var r= Long.remainderUnsigned(-val, len);
+    return r == 0 ? 0 : len - r;
+  }
   @Override public Object imm$getWrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ throw err("Int.getWrapIndex: len==0"); }
-    // handle case where len cannot be represented as a signed long.
-    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0){
-      // safe to treat len as signed long
-      return Nat$c$0Instance.instance(Math.floorMod(val, len));
-    }
-
-    // 0 <= val < len, so val % len == val
-    if (val >= 0){
-      return Nat$c$0Instance.instance(val);
-    }
-
-    // Long.MIN_VALUE + (Long.MAX_VALUE + 1) == 0, so this handles 4.
-    // Otherwise, val is negative, so we can
-    // add len to it to get the correct result.
-    return Nat$c$0Instance.instance(len + val);
+    return Nat$c$0Instance.instance(wrap(val, len));
   }
   @Override public Object imm$tryGetWrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ return fail("Int.getWrapIndex: len==0"); }
-    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0){
-      return ok(Nat$c$0Instance.instance(Math.floorMod(val, len)));
-    }
-    if (val >= 0){
-      return ok(Nat$c$0Instance.instance(val));
-    }
-    return ok(Nat$c$0Instance.instance(len + val));
+    return ok(Nat$c$0Instance.instance(wrap(val, len)));
   }
   @Override public Object imm$wrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
     if (len == 0L){ return optEmpty(); }
-    if (Long.compareUnsigned(len, Long.MAX_VALUE) <= 0){return optSome(Nat$c$0Instance.instance(Math.floorMod(val, len))); }
-    if (val >= 0){ return optSome(Nat$c$0Instance.instance(val)); }
-    return optSome(Nat$c$0Instance.instance(len + val));
+    return optSome(Nat$c$0Instance.instance(wrap(val, len)));
   }
   @Override public Object imm$aluAddWrap$1(Object p0){ return instance(val + unwrap(p0)); }
   @Override public Object imm$aluSubWrap$1(Object p0){ return instance(val - unwrap(p0)); }

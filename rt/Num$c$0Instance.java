@@ -10,26 +10,16 @@ import java.util.stream.LongStream;
 final class NumCache{
   private static final int min= -128;
   private static final int max= 127;
-  private static final BigInteger maxInt= BigInteger.valueOf(Integer.MAX_VALUE);
-  private static final BigInteger minInt= BigInteger.valueOf(Integer.MIN_VALUE);
   private static final Num$c$0Instance[] intCache= LongStream.rangeClosed(min, max)
           .mapToObj(l -> new Num$c$0Instance(BigInteger.valueOf(l), BigInteger.ONE))
           .toArray(Num$c$0Instance[]::new);
 
   static Num$c$0Instance get(int i){
-    if (i < min || i > max){
-      return new Num$c$0Instance(BigInteger.valueOf(i), BigInteger.ONE);
-    }
     // shift the index so that min is 0
-    int index= (i - min);
-    return intCache[index];
+    return intCache[i - min];
   }
-
   static boolean inCache(BigInteger numerator, BigInteger denominator){
-    if (!denominator.equals(BigInteger.ONE)){
-      return false;
-    }
-    return numerator.compareTo(maxInt) < 0 && numerator.compareTo(minInt) > 0;
+    return denominator.equals(BigInteger.ONE) && numerator.bitLength() < 8;
   }
 }
 
@@ -137,7 +127,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   @Override public Object imm$trunc0$0(){ return instance(trunc0Z(numerator, denominator), one); }
 
   @Override public Object imm$sign$0(){
-    return NumCache.get(numerator.signum() * denominator.signum());
+    return NumCache.get(numerator.signum());
   }
 
   @Override public Object imm$round$0(){

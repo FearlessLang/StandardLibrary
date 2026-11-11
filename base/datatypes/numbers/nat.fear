@@ -315,7 +315,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
       .if {this <= (range.start)} .return {range.start}
       .if {this >= (range.end)} .return {range.end}
       .return {this};
-  .hash -> this.str.hash;
+  .hash -> this.imm;
 
 
   /// ``this.indexInto info`` returns `.empty` if `info` is not the `.list` variant,

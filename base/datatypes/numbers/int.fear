@@ -333,7 +333,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
       .if {this >= (range.end)} .return {range.end}
       .return {this};
 
-  .hash -> this.str.hash;
+  .hash -> this.imm.aluNat;
   .info: Info;
   .close -> this;
   .sumNumber xs ->                          /// summing all numbers starting from `this`
