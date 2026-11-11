@@ -1,10 +1,14 @@
 package _base;
 
 import java.awt.GraphicsEnvironment;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -25,7 +29,7 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
   double minArea= 0.02;
   int opacityFloor= 255;
   String closeKey= "ESCAPE";
-  String fullScreenKey= "F11";
+  String fullScreenKey= "CONTROL+SHIFT+F";
   BufferedImage awtIcon;
   String iconName;
   String iconPath;
@@ -39,8 +43,24 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
     try{ return (_FluentGUI) clone(); }
     catch (CloneNotSupportedException e){ throw new Error(e); }
   }
-  private static String key(Object k){ return ((Str$c$0Instance)((KeyStroke$m8$0) k).read$get$0()).val(); }
-  static int code(String key){ return _KeyNames$b4$0.codes.get(key); }
+  private static String key(Object k){ return ((Str$c$0Instance)((KeyChord$b4$0) k).read$get$0()).val(); }
+  private static List<Integer> parsed(String chord){
+    var ks= chord.split("\\+");
+    int mods= Arrays.stream(ks, 0, ks.length - 1).mapToInt(_FluentGUI::mask).sum();
+    return List.of(_KeyNames$b4$0.codes.get(ks[ks.length - 1]), mods);
+  }
+  private static int mask(String modifier){
+    return switch (modifier){
+      case "CONTROL" -> InputEvent.CTRL_DOWN_MASK;
+      case "ALT" -> InputEvent.ALT_DOWN_MASK;
+      case "SHIFT" -> InputEvent.SHIFT_DOWN_MASK;
+      default -> throw new AssertionError();
+    };
+  }
+  static boolean chord(String chord, KeyEvent e){
+    int all= InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK | InputEvent.META_DOWN_MASK | InputEvent.ALT_GRAPH_DOWN_MASK;
+    return parsed(chord).equals(List.of(e.getKeyCode(), e.getModifiersEx() & all));
+  }
   private static double area(Object f, String what){
     double v= ((Float$1c$0Instance) f).val();
     if (v > 0 && v <= 1){ return v; }
@@ -90,12 +110,12 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
   @Override public Object mut$opacityFloor$1(Object a){ return set(g -> g.opacityFloor = Scopes.alpha(a)); }
   @Override public Object mut$closeKey$1(Object k){
     var v= key(k);
-    if (code(v) == code(fullScreenKey)){ throw Util.detErr("CapGui.closeKey("+v+") is the full screen key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.fullScreenKey first"); }
+    if (parsed(v).equals(parsed(fullScreenKey))){ throw Util.detErr("CapGui.closeKey("+v+") is the full screen key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.fullScreenKey first"); }
     return set(g -> g.closeKey = v);
   }
   @Override public Object mut$fullScreenKey$1(Object k){
     var v= key(k);
-    if (code(v) == code(closeKey)){ throw Util.detErr("CapGui.fullScreenKey("+v+") is the close key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.closeKey first"); }
+    if (parsed(v).equals(parsed(closeKey))){ throw Util.detErr("CapGui.fullScreenKey("+v+") is the close key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.closeKey first"); }
     return set(g -> g.fullScreenKey = v);
   }
   @Override public Object mut$run$1(Object o){

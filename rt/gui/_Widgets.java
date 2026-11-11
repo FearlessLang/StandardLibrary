@@ -1005,7 +1005,6 @@ final class _Frame implements Frame$1c$0{
   }
 
   String windowTitle(){ return title.isEmpty() ? gui.name : gui.name + "    " + title; }
-  boolean reserved(int key){ return key == _FluentGUI.code(gui.closeKey) || key == _FluentGUI.code(gui.fullScreenKey); }
   void closeRequest(){
     guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
       if (onClose == null){ return mut$close$0(); }

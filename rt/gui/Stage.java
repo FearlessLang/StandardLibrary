@@ -137,8 +137,7 @@ final class Stage extends MouseAdapter{
     r.cancelQuit();
     owner.closeRequest();
   }
-  void reservedKey(int code){
-    if (code == _FluentGUI.code(gui.closeKey)){ owner.closeRequest(); return; }
+  void fullScreenKey(){
     owner.menus.close(0);
     if (Desk.managed){ Desk.fullScreen(f, mode != Mode.fullScreen); return; }
     realize(mode == Mode.fullScreen ? Mode.fearless : Mode.fullScreen);

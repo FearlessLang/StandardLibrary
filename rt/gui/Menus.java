@@ -274,10 +274,8 @@ final class SkMenus{
   }
 
   void key(KeyEvent e){
-    int c= e.getKeyCode();
     int k= open.size() - 1;
-    if (c == _FluentGUI.code(frame.gui.closeKey)){ close(k); return; }
-    switch (c){
+    switch (e.getKeyCode()){
       case VK_DOWN, VK_KP_DOWN -> step(k, 1);
       case VK_UP, VK_KP_UP -> step(k, -1);
       case VK_HOME -> fromEdge(k, 1);

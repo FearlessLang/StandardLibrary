@@ -137,15 +137,15 @@ GuiFrameTests: Test {::
       .ok _ -> Error.msg "The consumer always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "0061 0062 0063 0085"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"F11").run{f -> f.content.pane{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(KeyChord#"SHIFT+CONTROL+F").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A close key equal to the full screen key always stops the Gui";
-      .info i -> i.validate{:: > "info" .isMsg{:: == "CapGui.closeKey(F11) is the full screen key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.fullScreenKey first"}}.assertTrue{i};
+      .info i -> i.validate{:: > "info" .isMsg{:: == "CapGui.closeKey(SHIFT+CONTROL+F) is the full screen key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.fullScreenKey first"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(Key#"SEPARATOR").closeKey(Key#"SEPARATER").run{f -> f.content.pane{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.fullScreenKey(KeyChord#"SEPARATOR").closeKey(KeyChord#"SEPARATER").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A close key naming the key of the full screen key always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "CapGui.closeKey(SEPARATER) is the full screen key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.fullScreenKey first"}}.assertTrue{i};
       }}
-  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(Key#"SEPARATER").fullScreenKey(Key#"SEPARATOR").run{f -> f.content.pane{::}}}).run{
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {s -> s.gui.closeKey(KeyChord#"SEPARATER").fullScreenKey(KeyChord#"SEPARATOR").run{f -> f.content.pane{::}}}).run{
       .ok _ -> Error.msg "A full screen key naming the key of the close key always stops the Gui";
       .info i -> i.validate{:: > "info" .isMsg{:: == "CapGui.fullScreenKey(SEPARATOR) is the close key of this CapGui: one key press cannot both ask to close the window and toggle full screen. Change CapGui.closeKey first"}}.assertTrue{i};
       }}

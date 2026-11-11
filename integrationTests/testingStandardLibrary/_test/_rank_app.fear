@@ -65,6 +65,7 @@ use base.Hue as Hue;
 use base.Saturation as Saturation;
 use base.Brightness as Brightness;
 use base.KeyStroke as Key;
+use base.KeyChord as KeyChord;
 use base.Duration as Duration;
 use base.Instant as Instant;
 use base.Frame as Frame;

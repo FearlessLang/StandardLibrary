@@ -639,7 +639,7 @@ record CTextEvent(Instant$5c$0 elapsed, WidthNat$as$0 panelWidth, HeightNat$lg$0
 }
 
 final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodListener, InputMethodRequests{
-  enum To{ menus, widget, frame, reserved, nobody }
+  enum To{ menus, closesMenu, widget, frame, close, fullScreen, nobody }
   final _Frame frame;
   final HashMap<List<Integer>,To> routes= new HashMap<>();
   To typing= To.nobody;
@@ -667,12 +667,15 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     if (to != To.frame){ e.consume(); }
   }
   private To first(KeyEvent e){
-    int c= e.getKeyCode();
-    if (frame.menus.isOpen() && c != _FluentGUI.code(frame.gui.fullScreenKey)){
-      if (c != _FluentGUI.code(frame.gui.closeKey)){ frame.menus.key(e); }
+    boolean close= _FluentGUI.chord(frame.gui.closeKey, e);
+    boolean fullScreen= _FluentGUI.chord(frame.gui.fullScreenKey, e);
+    if (frame.menus.isOpen() && !fullScreen){
+      if (close){ return To.closesMenu; }
+      frame.menus.key(e);
       return To.menus;
     }
-    if (frame.reserved(c)){ return To.reserved; }
+    if (close){ return To.close; }
+    if (fullScreen){ return To.fullScreen; }
     if (frame.focus != null && frame.focus.key(e)){ return To.widget; }
     return To.frame;
   }
@@ -709,9 +712,9 @@ final class CTextKeys extends KeyAdapter implements FocusListener, InputMethodLi
     if (to == To.frame){ frame.guiRun.queue.submit(frame.keys.task(c, frame.keys.released)); return; }
     if (to == null){ return; }
     e.consume();
-    if (to == To.reserved){ frame.stage.reservedKey(c); }
-    boolean closesMenu= to == To.menus && c == _FluentGUI.code(frame.gui.closeKey) && frame.menus.isOpen();
-    if (closesMenu){ frame.menus.key(e); }
+    if (to == To.close){ frame.closeRequest(); }
+    if (to == To.fullScreen){ frame.stage.fullScreenKey(); }
+    if (to == To.closesMenu && frame.menus.isOpen()){ frame.menus.close(frame.menus.open.size() - 1); }
   }
   @Override public void focusLost(FocusEvent e){
     frame.keyboard = false;
