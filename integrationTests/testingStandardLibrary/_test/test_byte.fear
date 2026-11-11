@@ -1,4 +1,5 @@
 ByteArithTests: Test {::
+  .check{(1.getByte =~~ (4.getByte)).str .assertEq "[1, 3]"}
   .check{+1.getByte + (+2.getByte)  .assertEq (+3.getByte)}
   .check{+5.getByte - (+2.getByte) .assertEq (+3.getByte)}
   .check{+3.getByte * (+4.getByte) .assertEq (+12.getByte)}

@@ -187,9 +187,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
     .let endInclusive={end.pred}
     .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Byte~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
+      "Byte~~: Tried to produce an empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
-    .return {_ByteRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
+    .return {_ByteRanges#(startInclusive, endInclusive)};
 
   /// ``this~~=endInclusive`` returns the range ``(this, endInclusive]``.
   /// Throws if `this` is `Math.maxByte`, or the range would be empty (``this >= endInclusive``).
@@ -198,9 +198,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   ~~=(endInclusive: Byte): Range[Byte] -> Block#
     .if {this == (Math.maxByte)} .error{"Byte~~=: Start of open range cannot be Math.maxByte"}
     .if {this >= endInclusive } .error {
-      "Byte~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
+      "Byte~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
-    .return {_ByteRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
+    .return {_ByteRanges#(this.succ, endInclusive)};
 
   /// ``this=~~end`` returns the range ``[this, end)``.
   /// Throws if `end` is `Math.minByte`, or the range would be empty (``this >= end``).
@@ -209,9 +209,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   =~~(end: Byte): Range[Byte] -> Block#
     .if {end == (Math.minByte)} .error{"Byte=~~: End of open range cannot be Math.minByte"}
     .if {this >= end } .error {
-      "Byte=~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
+      "Byte=~~: Tried to produce an empty range, start ("+this+") must be < end (" + end + ")"
       }
-    .return {_ByteRanges#(this, end.pred, "["+this+", "+end+")")};
+    .return {_ByteRanges#(this, end.pred)};
 
   /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
   /// Throws if the range would be empty (``this > endInclusive``).
@@ -219,9 +219,9 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   //>   .checkDetErr({::}, {(4.getByte)=~~=(1.getByte)})
   =~~=(endInclusive: Byte): Range[Byte] -> Block#
     .if {this > endInclusive } .error {
-      "Byte=~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
+      "Byte=~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
       }
-    .return {_ByteRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
+    .return {_ByteRanges#(this, endInclusive)};
 
   /// ``this.inRange(range)`` returns `True` iff ``range.start <= this <= range.end``.
   //>   .check{2.getByte .inRange(1.getByte=~~=(4.getByte)) .assertTrue}
@@ -259,7 +259,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
 
 
 _ByteRanges: Sealed {
-    #(startInclusive: Byte, endInclusive: Byte, str: Str): Range[Byte] -> {'self
+    #(startInclusive: Byte, endInclusive: Byte): Range[Byte] -> {'self
         .size -> endInclusive - startInclusive .nat + 1; // Cheap enough that computing everytime is okay
         .start -> startInclusive;
         .end -> endInclusive;
@@ -268,6 +268,6 @@ _ByteRanges: Sealed {
         .flow step -> _NumFlow.bytes(startInclusive, endInclusive, step);
         .contains n -> n.inRange(self);
         .clamp n -> n.clampTo(self);
-        .str -> str;
+        .str -> "["+startInclusive+", "+endInclusive+"]";
       };
   }

@@ -1,4 +1,8 @@
 NatArithTests: Test {::
+  .check{(1 ~~ 4).str .assertEq "[2, 3]"}
+  .check{(1 ~~= 4).str .assertEq "[2, 4]"}
+  .check{(1 =~~ 4).str .assertEq "[1, 3]"}
+  .check{(1 =~~= 4).str .assertEq "[1, 4]"}
   .check{5 + 7 .assertEq 12}
   .check{7 - 5 .assertEq 2}
   .check{3 * 4 .assertEq 12}
