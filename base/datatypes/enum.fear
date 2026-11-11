@@ -53,7 +53,7 @@
 ///     )};
 ///   }
 /// ```
-
+///
 /// The "list of values" side of an enumeration family.
 Enums[E]: FromInfo[E], CaptureFree{
   /// every value, in declaration order, as an ``Enum[E]``.
