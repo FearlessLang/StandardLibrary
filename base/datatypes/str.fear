@@ -1,9 +1,9 @@
-///Simple string type
-///It can only even contain the following whitelisted characters:
-///``0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\``
-///Plus space `` `` and new line.
-///There is no concept of escape, so ``\n`` is two characters.
-///The methods ^ and | can be used to obtain a string including new lines or double quotes (").
+/// Simple string type
+/// It can only even contain the following whitelisted characters:
+/// ``0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\``
+/// Plus space `` `` and new line.
+/// There is no concept of escape, so ``\n`` is two characters.
+/// The methods ^ and | can be used to obtain a string including new lines or double quotes (").
 ///
 /// Relations of parsers and printers.
 /// Methods .getInt/.getNat/.getFloat below accept exactly the numeric type names

@@ -9,7 +9,7 @@
 ///Unicode documentation often writes those same numbers as U+0061 and U+1F600.
 ///
 ///Crucially, there are no UStr literals. Use the method `.u` on Str to obtain Unicode strings.
-/// `` `foo`.u `` converts the ``foo`` Str into the equivalent `UStr`.
+///`` `foo`.u `` converts the ``foo`` Str into the equivalent `UStr`.
 ///The method `.u` on UStr reads one or more uppercase hexadecimal numbers
 ///separated by single spaces, and appends the corresponding scalar values.
 ///Only digits 0..9 and uppercase letters A..F are allowed. No extra whitespace is accepted. Malformed input throws.
@@ -34,7 +34,7 @@ UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
 
   .scalarHex: Str;                  /// uppercase hexadecimal Unicode scalar values separated by single spaces.
   .isStr: Bool;                     /// true if this UStr only uses scalar values allowed inside instances of type Str.
-  .str: Opt[Str];                   /// .some containg this string if .isStr; .empty otherwise
+  .str: Opt[Str];                   /// .some containing this string if .isStr; .empty otherwise
   .getStr: Str -> this.tryGetStr!;
   /// `this.tryGetStr` returns `.ok` of `this.getStr`, or the error info of `this.getStr` if not `this.isStr`.
   //>   .check{("hi".u.tryGetStr).ok.assertEq({::}, Opts# "hi")}
