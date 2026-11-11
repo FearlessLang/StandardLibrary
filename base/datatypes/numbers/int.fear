@@ -67,7 +67,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{(+6 .tryGetDiv 2).ok.assertEq({::}, Opts# +3)}
   //>   .check{+7 .tryGetDiv 3 .assertInfo{::.isMsg{::.startsWith "Int.getDiv:"}}}
   .tryGetDiv(d: Nat): mut Action[Int] -> Block#
-    .if {d == 0} .return {Actions.msg "Int.getDiv: Cannot divide by 0"}
+    .if {d == 0} .return {Actions.msg "Int.getDiv: d==0"}
     .let[Int] rem = {this.getRem d}
     .if {rem != +0} .return {Actions.msg("Int.getDiv: Cannot divide "+this+" by "+d+" as division must be exact. Currently division has a remainder of "+rem+".")}
     .return {this.tryGetTruncDiv d};
@@ -101,6 +101,12 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .check{+7 .div(0) .assertEmpty {::}}
   .div(d: Nat): Opt[Int] ->
     (d != 0) && {this.getRem d == +0} .toOpt {this.getTruncDiv(d)};
+
+  /// `this.softSqrt` returns an approximate `Float` square root of `this`, or `Math.nan` if `this` is negative.
+  //>   .check{+9 .softSqrt .assertEq 3.0}
+  //>   .check{+0 .softSqrt .assertEq 0.0}
+  //>   .check{-9 .softSqrt .isNaN .assertTrue}
+  .softSqrt: Float;
 
   /// `this.sign` returns the sign of `this`: ``+0`` if `this` is ``0``, ``+1`` if positive, ``-1`` if negative.
   //>   .check{+5 .sign .assertEq +1}

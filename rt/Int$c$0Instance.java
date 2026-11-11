@@ -61,6 +61,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$softNat$0(){ return Nat$c$0Instance.instance(val < 0 ? 0 : val); }
   @Override public Object imm$softByte$0(){ return Byte$o$0Instance.instance(clampByte(val)); }
   @Override public Object imm$softFloat$0(){ return Float$1c$0Instance.instance((double)val); }
+  @Override public Object imm$softSqrt$0(){ return Float$1c$0Instance.instance(Math.sqrt((double)val)); }
   @Override public Object imm$num$0(){ return Num$c$0Instance.instance(BigInteger.valueOf(val), BigInteger.ONE); }
   @Override public Object imm$nat$0(){ return val < 0 ? optEmpty() : optSome(Nat$c$0Instance.instance(val)); }
   @Override public Object imm$byte$0(){ return (val < 0 || val > 255) ? optEmpty() : optSome(Byte$o$0Instance.instance((byte)val)); }
@@ -131,7 +132,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L){
-      throw err("Int/: Cannot create a Num with denominator 0.");
+      throw err("Int/: d==0");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(val),
@@ -237,12 +238,12 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance(val * unwrap(p0)); }
   @Override public Object imm$aluDiv$1(Object p0){
     long x= unwrap(p0);
-    if (x == 0){ throw err("Int.aluDiv: divByZero"); }
+    if (x == 0){ throw err("Int.aluDiv: x==0"); }
     return instance(val / x);
   }
   @Override public Object imm$aluRem$1(Object p0){
     long x= unwrap(p0);
-    if (x == 0){ throw err("Int.aluRem: divByZero"); }
+    if (x == 0){ throw err("Int.aluRem: x==0"); }
     return instance(val % x);
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){ return instance(val << (unsignedLongFromNat(p0))); }

@@ -97,7 +97,7 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L){
-      throw err("Byte/: Cannot create a Num with denominator 0.");
+      throw err("Byte/: x==0");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(u8(val)),
