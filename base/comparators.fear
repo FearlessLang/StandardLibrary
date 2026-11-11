@@ -171,6 +171,7 @@ OrderHashBy[T]: OrderHashBy[T,T] {         /// direct order+hash for T
   .cmp(t0: read T,t1: read T): Order;
   .hash(t: read T): Nat;
   .str(t: read T): Str;
+  .hideKey -> this;
   # t ->
     {
     .close -> t;
