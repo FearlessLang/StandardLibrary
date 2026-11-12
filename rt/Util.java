@@ -168,8 +168,7 @@ public final class Util{
   }
   @Override public int hashCode(){ return Long.hashCode(hc); }
   @Override public boolean equals(Object o){
-    if (!(o instanceof MapKey x)){ assert false; return false; }
-    return isTrue(((Order$1c$1)ord).read$$eq_eq$1(x.close));
+    return isTrue(((Order$1c$1)ord).read$$eq_eq$1(((MapKey)o).close));
     }
   }
   public static MapKey mapKey(OrderHashBy$2ea$2 oh, Object k){ return new MapKey(oh, k); }
