@@ -50,7 +50,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
     throw detErr(InputFile.portable(text.substring(refused.length())));
   }
   private static Object send(String verb, List<String> args){ return send(verb, args, _ -> Void$o$0.instance); }
-  private static Object output(String verb, String name){ return send(verb, List.of(name), o -> new UStr$s$0Instance(o.codePoints().toArray())); }
+  private static Object output(String verb, String name){ return send(verb, List.of(name), UStr$s$0Instance::instance); }
   private static Object send(String verb, String... args){ return send(verb, List.of(args)); }
   private static Object sendPath(String verb, Object path, String... args){
     var bytes= Byte$o$0Instance.unwrapAll(path);

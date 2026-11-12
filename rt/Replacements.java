@@ -31,15 +31,15 @@ public final class Replacements{
     return -1;
   }
   private static void validateRules(String m, List<Str$c$0Instance> rules, boolean checkPrefixes){
-    if ((rules.size() & 1) != 0){ throw Util.err(m+": odd number of strings"); }
+    if ((rules.size() & 1) != 0){ throw Util.detErr(m+": odd number of strings"); }
     for (int i= 0; i < rules.size(); i += 2){
       var ki= rules.get(i).val();
-      if (ki.isEmpty()){ throw Util.err(m+": empty key in position "+i); }
+      if (ki.isEmpty()){ throw Util.detErr(m+": empty key in position "+i); }
       for (int j= i + 2; j < rules.size(); j += 2){
         var kj= rules.get(j).val();
-        if (ki.equals(kj)){ throw Util.err(m+": duplicate key in positions "+i+" and "+j); }
+        if (ki.equals(kj)){ throw Util.detErr(m+": duplicate key in positions "+i+" and "+j); }
         var prefix= checkPrefixes && (ki.startsWith(kj) || kj.startsWith(ki));
-        if (prefix){ throw Util.err(m+": prefix clash in positions "+i+" and "+j); }
+        if (prefix){ throw Util.detErr(m+": prefix clash in positions "+i+" and "+j); }
       }
     }
   }

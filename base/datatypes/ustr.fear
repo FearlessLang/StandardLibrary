@@ -10,7 +10,7 @@
 ///
 ///Crucially, there are no UStr literals. Use the method `.u` on Str to obtain Unicode strings.
 ///`` `foo`.u `` converts the ``foo`` Str into the equivalent `UStr`.
-///The method `.u` on UStr reads one or more uppercase hexadecimal numbers
+///The method `.u` on UStr reads zero or more uppercase hexadecimal numbers
 ///separated by single spaces, and appends the corresponding scalar values.
 ///Only digits 0..9 and uppercase letters A..F are allowed. No extra whitespace is accepted. Malformed input throws.
 ///For example: `` `Hello`.u.u`FB03 0066 0066 0069`+(`World`.u) `` would create a string that may be visualized as "HelloffiffiWorld",
@@ -18,7 +18,7 @@
 ///And `` myUString.u`FB03 0066 0066 0069`+(`Hello`.u) `` would append "ffiffiHello" to a pre-existing Unicode string.
 ///Str also supports `.u` with one argument, that first converts to unicode and then append the new sequence.
 ///
-///This type does support concatenation (+,|,^) as for Str, but this works by simply apppending scalar values one after the other in the sequence.
+///This type does support concatenation (+,|,^) as for Str, but this works by simply appending scalar values one after the other in the sequence.
 ///UStr does not implement DataType.
 ///UStr does offer .equalRepr(other) and .hashRepr.
 UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
