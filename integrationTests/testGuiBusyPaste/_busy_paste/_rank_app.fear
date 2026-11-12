@@ -10,7 +10,7 @@ use base.Continue as Continue;
 use base.WidthNat as WidthNat;
 use base.HeightNat as HeightNat;
 
-Busy: {#(f: read Frame, d: Duration): Void -> Block#
+Busy: {#(f: mut Frame, d: Duration): Void -> Block#
   .let[Instant] end = {f.elapsed + d}
   .loop{Block#
     .if{f.elapsed >= end} .return{Break#}

@@ -110,7 +110,7 @@ Live:Main{sys -> sys.gui.run{f -> Block#
     }
   }}
 CountE: {#(l: mut Label, p: Nat, r: Nat, d: Nat): Void -> Block#(l.text("pressed "+(p.str)+", released "+(r.str)+", dragged "+(d.str)), Void)}
-LiveWait: {#(f: read Frame, d: Duration): Void -> Block#
+LiveWait: {#(f: mut Frame, d: Duration): Void -> Block#
   .let[Instant] end = {f.elapsed + d}
   .loop{Block#
     .if{f.elapsed >= end} .return{Break#}

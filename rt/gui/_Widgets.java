@@ -177,7 +177,7 @@ final class _Picture extends AWidget implements Picture$5c$0{
     return reStyle(() -> { image = img; kept.image = null; grow(img.getWidth() + edgeW(), img.getHeight() + edgeH()); });
   }
   @Override public Object mut$keepAspect$1(Object b){ return reStyle(() -> keepAspect = Util.isTrue(b)); }
-  @Override public Object read$keepAspect$0(){ return Util.bool(keepAspect); }
+  @Override public Object mut$keepAspect$0(){ return Util.bool(keepAspect); }
   @Override public Object mut$width$p1$1(Object w){ byHeight = false; return super.mut$width$p1$1(w); }
   @Override public Object mut$height$p1$1(Object h){ byHeight = true; return super.mut$height$p1$1(h); }
 }
@@ -371,21 +371,21 @@ final class _Split extends AContainer implements Split$1c$0{
       positions = v;
     });
   }
-  @Override public Object read$dividerPositions$0(){ return frame.onEdtAndWait(() -> List$o$1Instance.wrap(Arrays.stream(positions).<Object>mapToObj(Scopes::n).toList())); }
+  @Override public Object mut$dividerPositions$0(){ return frame.onEdtAndWait(() -> List$o$1Instance.wrap(Arrays.stream(positions).<Object>mapToObj(Scopes::n).toList())); }
   @Override public Object mut$draggable$1(Object b){
     return reStyle(() -> {
       draggable = Util.isTrue(b);
       if (!draggable){ frame.mouse.stopDividing(this); }
     });
   }
-  @Override public Object read$draggable$0(){ return Util.bool(draggable); }
+  @Override public Object mut$draggable$0(){ return Util.bool(draggable); }
   @Override public Object mut$region$1(Object i){
     long k= Util.natToLong(i);
     int n= positions.length + 1;
     if (Long.compareUnsigned(k, n) >= 0){ throw Util.detErr("There is no region at index " + Long.toUnsignedString(k) + " in this Split: it has " + n + " regions, so the index is at most " + (n - 1)); }
     return new _RegionFiller(frame, (s, make) -> replace((int) k, frame.build(s, make)));
   }
-  @Override public Object read$size$0(){ return n(positions.length + 1); }
+  @Override public Object mut$size$0(){ return n(positions.length + 1); }
 }
 
 final class _RegionFiller implements RegionFiller$4rk$1{
@@ -597,18 +597,18 @@ abstract class AWidget implements Widget$2o$1{
     int n= extent((HeightNat$lg$0) t, "text height");
     return reText(() -> textSettings = new Sk.TextSettings(n, textSettings.above(), textSettings.below()));
   }
-  public Object read$textHeight$0(){ return h(textSettings.size()); }
+  public Object mut$textHeight$0(){ return h(textSettings.size()); }
   public Object mut$aboveBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), ratio(r), textSettings.below())); }
   public Object mut$belowBaseline$p1$1(Object r){ return reText(() -> textSettings = new Sk.TextSettings(textSettings.size(), textSettings.above(), ratio(r))); }
-  public Object read$aboveBaseline$0(){ return ratio(textSettings.above()); }
-  public Object read$belowBaseline$0(){ return ratio(textSettings.below()); }
+  public Object mut$aboveBaseline$0(){ return ratio(textSettings.above()); }
+  public Object mut$belowBaseline$0(){ return ratio(textSettings.below()); }
   public Object mut$foreground$1(Object c){ return onEdt(() -> fg = Sk.color(foreground = (Color$1c$0) c)); }
   @Override public Object mut$background$1(Object c){ return onEdt(() -> bg = Sk.color(background = (Color$1c$0) c)); }
   @Override public Object mut$uTooltip$1(Object t){
     var s= ustr(t);
     return onEdt(() -> tooltip = s);
   }
-  @Override public Object read$uTooltip$0(){ return UStr$s$0Instance.instance(tooltip); }
+  @Override public Object mut$uTooltip$0(){ return UStr$s$0Instance.instance(tooltip); }
   @Override public Object mut$contextMenu$1(Object s){ return onEdt(() -> contextMenu = s); }
   @Override public Object mut$openMenu$1(Object s){
     var m= CMenu.build(s);
@@ -624,16 +624,16 @@ abstract class AWidget implements Widget$2o$1{
     });
     return Void$o$0.instance;
   }
-  @Override public Object read$topInset$0(){ return h(top); }
-  @Override public Object read$bottomInset$0(){ return h(bottom); }
-  @Override public Object read$leftInset$0(){ return w(left); }
-  @Override public Object read$rightInset$0(){ return w(right); }
-  @Override public Object read$width$0(){ return w(width); }
-  @Override public Object read$height$0(){ return h(height); }
-  @Override public Object read$fill$0(){ return Util.bool(fill); }
-  @Override public Object read$radius$0(){ return n(radius); }
-  public Object read$foreground$0(){ return foreground; }
-  @Override public Object read$background$0(){ return background; }
+  @Override public Object mut$topInset$0(){ return h(top); }
+  @Override public Object mut$bottomInset$0(){ return h(bottom); }
+  @Override public Object mut$leftInset$0(){ return w(left); }
+  @Override public Object mut$rightInset$0(){ return w(right); }
+  @Override public Object mut$width$0(){ return w(width); }
+  @Override public Object mut$height$0(){ return h(height); }
+  @Override public Object mut$fills$0(){ return Util.bool(fill); }
+  @Override public Object mut$radius$0(){ return n(radius); }
+  public Object mut$foreground$0(){ return foreground; }
+  @Override public Object mut$background$0(){ return background; }
 }
 
 abstract class AContainer extends AWidget implements _Container$lc$1{
@@ -662,8 +662,8 @@ abstract class AContainer extends AWidget implements _Container$lc$1{
 
   @Override public Object mut$heightGap$p1$1(Object v){ return reStyle(extent((HeightNat$lg$0) v, "height gap"), n -> heightGap = n); }
   @Override public Object mut$widthGap$p1$1(Object v){ return reStyle(extent((WidthNat$as$0) v, "width gap"), n -> widthGap = n); }
-  @Override public Object read$heightGap$0(){ return h(heightGap); }
-  @Override public Object read$widthGap$0(){ return w(widthGap); }
+  @Override public Object mut$heightGap$0(){ return h(heightGap); }
+  @Override public Object mut$widthGap$0(){ return w(widthGap); }
   @Override public Object mut$mouse$1(Object s){
     var b= new CMouseBuilder(this);
     ((Scope$1c$1) s).mut$run$1(b);
@@ -725,7 +725,7 @@ abstract class ACaption extends AWidget{
     if (b != null){ throw Util.detErr("The new text of this " + kind() + " has " + b + ": the text of a " + kind() + " is one line"); }
     return reText(() -> text = s);
   }
-  public Object read$uText$0(){ return UStr$s$0Instance.instance(text); }
+  public Object mut$uText$0(){ return UStr$s$0Instance.instance(text); }
 }
 
 final class _Frame implements Frame$1c$0{
@@ -1035,8 +1035,8 @@ final class _Frame implements Frame$1c$0{
       top.relayout();
     });
   }
-  @Override public Object read$virtualWidth$0(){ return w(canvasW); }
-  @Override public Object read$virtualHeight$0(){ return h(canvasH); }
+  @Override public Object mut$virtualWidth$0(){ return w(canvasW); }
+  @Override public Object mut$virtualHeight$0(){ return h(canvasH); }
   @Override public Object mut$bands$1(Object c){
     int b= Sk.color((Color$1c$0) c) | 0xFF000000;
     return onEdt(() -> bands = b);
@@ -1091,9 +1091,9 @@ final class _Frame implements Frame$1c$0{
   }
   // Getters. All safe from the queue thread: title/fps are read under the
   // single-mutator model, elapsed is volatile.
-  @Override public Object read$uTitle$0(){ return UStr$s$0Instance.instance(title); }
-  @Override public Object read$fps$0(){ return n(fps); }
-  @Override public Object read$elapsed$0(){ return elapsed; }
+  @Override public Object mut$uTitle$0(){ return UStr$s$0Instance.instance(title); }
+  @Override public Object mut$fps$0(){ return n(fps); }
+  @Override public Object mut$elapsed$0(){ return elapsed; }
   @Override public Object mut$modelFps$2(Object f, Object scope){
     requireOpen();
     long nn= fpsOf(f, "modelFps");
