@@ -41,7 +41,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     return instance(strExpr(val));
   }
 
-  private static String strExpr(String s){
+  static String strExpr(String s){
     var parts= s.split("\n", -1);
     var res= new StringBuilder(lineExpr(parts[0]));
     for (var i= 1; i < parts.length; i += 1){
@@ -116,8 +116,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
   }
   @Override public Object imm$indexOf$1(Object p1){
-    String text= ((Str$c$0Instance)p1).val();
-    var res= val.indexOf(text);
+    var res= val.indexOf(s(p1));
     return res==-1? optEmpty(): optSome(Nat$c$0Instance.instance(res));
   }
   @Override public Object imm$lastIndexOf$1(Object p0){
@@ -144,10 +143,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     int size= val.length();
     var outside= Long.compareUnsigned(from, size) > 0 || Long.compareUnsigned(to, size) > 0;
     if (outside){
-      throw Util.err("Str.sub: the range "+Long.toUnsignedString(from)+" to "+Long.toUnsignedString(to)+" is out of range for "+(size == 0 ? "an empty Str." : "a Str of size "+size+"."));
+      throw Util.detErr("Str.sub: the range "+Long.toUnsignedString(from)+" to "+Long.toUnsignedString(to)+" is out of range for "+(size == 0 ? "an empty Str." : "a Str of size "+size+"."));
     }
     if (Long.compareUnsigned(from, to) > 0){
-      throw Util.err("Str.sub: from "+Long.toUnsignedString(from)+" is greater than to "+Long.toUnsignedString(to)+".");
+      throw Util.detErr("Str.sub: from "+Long.toUnsignedString(from)+" is greater than to "+Long.toUnsignedString(to)+".");
     }
     return new Str$c$0Instance(val.substring((int)from, (int)to));
   }
@@ -376,12 +375,10 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     return new Str$c$0Instance(res);
   }
   @Override public Object imm$startsWith$1(Object p0){
-    var other= ((Str$c$0Instance)p0).val;
-    return bool(val.startsWith(other));  
+    return bool(val.startsWith(s(p0)));
   }
   @Override public Object imm$contains$1(Object p0){
-    var other= ((Str$c$0Instance)p0).val;
-    return bool(val.contains(other));
+    return bool(val.contains(s(p0)));
   }
   @Override public Object imm$endsWith$1(Object p0){ return bool(val.endsWith(s(p0))); }
   @Override public Object imm$count$1(Object p0){

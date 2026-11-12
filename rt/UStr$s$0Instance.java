@@ -17,6 +17,8 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   private static final Pattern uCodeText= Pattern.compile("[0-9A-F]{1,6}(?: [0-9A-F]{1,6})*");
   private static final int[] empty= {};
   private static final int[] nl= {'\n'};
+  private static final Charset utf32le= Charset.forName("UTF-32LE");
+  private static final Charset utf32be= Charset.forName("UTF-32BE");
   private static final int[] quote= {'"'};
   private static final String strChars=
     "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'\"!?@#$%^&_|~\\ \n";
@@ -64,7 +66,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     if (isStr(val)){ return ok(Str$c$0Instance.instance(new String(val, 0, val.length))); }
     return fail("UStr.getStr: cannot convert "+ Arrays.toString(this.val)
             + " into a valid fearless Str as it contains invalid unicode characters: "
-            + Arrays.stream(this.val).filter(c -> !isStr(c)).boxed().toList());
+            + Arrays.stream(this.val).filter(c -> !isStrScalar(c)).boxed().toList());
   }
   @Override public Object imm$str$0(){
     return isStr(val)
@@ -93,8 +95,8 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
   @Override public Object imm$utf8$0(){ return bytes(UTF_8); }
   @Override public Object imm$utf16Le$0(){ return bytes(UTF_16LE); }
   @Override public Object imm$utf16Be$0(){ return bytes(UTF_16BE); }
-  @Override public Object imm$utf32Le$0(){ return bytes(Charset.forName("UTF-32LE")); }
-  @Override public Object imm$utf32Be$0(){ return bytes(Charset.forName("UTF-32BE")); }
+  @Override public Object imm$utf32Le$0(){ return bytes(utf32le); }
+  @Override public Object imm$utf32Be$0(){ return bytes(utf32be); }
   private Object bytes(Charset cs){
     var bs= new String(val, 0, val.length).getBytes(cs);
     var res= new ArrayList<Object>(bs.length);
@@ -141,13 +143,10 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     return res;
   }
   private static boolean isStr(int[] cps){
-    for (int cp : cps){ if (!isStr(cp)){ return false; } }
+    for (int cp : cps){ if (!isStrScalar(cp)){ return false; } }
     return true;
   }
 
-  private static boolean isStr(int cp){
-    return cp < 128 && strChars.indexOf((char)cp) != -1;
-  }
   private static String strUCode(int[] cps){
     if (cps.length==0){ return ""; }
     var res= new StringBuilder();
@@ -168,12 +167,8 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     String[] parts= s.split(" ");
     var res= new int[parts.length];
     for (int i= 0; i<parts.length; i += 1){
-      int cp;
-      try{ cp= Integer.parseInt(parts[i], 16); }
-      catch (NumberFormatException e){ throw err("UStr.u: malformed input: "+s); }
-      if (cp > 0x10FFFF || (0xD800 <= cp && cp <= 0xDFFF)){
-        throw err("UStr.u: malformed input: "+s);
-      }
+      int cp= Integer.parseInt(parts[i], 16);
+      if (!isScalar(cp)){ throw err("UStr.u: malformed input: "+s); }
       res[i] = cp;
     }
     return res;
@@ -185,14 +180,14 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
       int j= run(cps, i, true);
       int k= run(cps, j, false);
       var hex= k == j ? "" : "\""+strUCode(Arrays.copyOfRange(cps, j, k))+"\"";
-      var term= receiver(strExpr(new String(cps, i, j-i)))+".u"+hex;
+      var term= receiver(Str$c$0Instance.strExpr(new String(cps, i, j-i)))+".u"+hex;
       res.append(i == 0 ? term : "+("+term+")");
       i = k;
     } while (i < cps.length);
     return res.toString();
   }
   private static int run(int[] cps, int i, boolean safe){
-    while (i < cps.length && isStr(cps[i]) == safe){ i += 1; }
+    while (i < cps.length && isStrScalar(cps[i]) == safe){ i += 1; }
     return i;
   }
   private static String receiver(String e){
@@ -202,9 +197,6 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     return e.length() >= 2
       && (e.charAt(0) == '"' || e.charAt(0) == '`')
       && e.indexOf(e.charAt(0), 1) == e.length() - 1;
-  }
-  private static String strExpr(String s){
-    return ((Str$c$0Instance)Str$c$0Instance.instance(s).imm$escape$0()).val();
   }
   public static boolean isScalar(int cp){
     return 0 <= cp && cp <= 0x10FFFF && !(0xD800 <= cp && cp <= 0xDFFF);

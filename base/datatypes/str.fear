@@ -9,7 +9,7 @@
 /// Methods .getInt/.getNat/.getFloat below accept exactly the numeric type names
 /// accepted by the Fearless syntax, including the allowed ``_`` as for the Fearless syntax.
 /// They *do not* evaluate expressions.
-/// Str.escape, Float.str and Float.ieeeStr  instead output Fearless code when there is no literal represing the value.
+/// Str.escape, Float.str and Float.ieeeStr  instead output Fearless code when there is no literal representing the value.
 ///
 /// Str.getInt:
 /// - rejected: ``12``.getInt  ``+1_``.getInt  ``+_1``.getInt
@@ -50,8 +50,8 @@
 ///   The roundtrip also preserves the sign of zero but not the NaN payload
 ///   ``0.1``.ieeeFloat!.ieeeStr == ``0.1`` BUT there is no Float representing 0.1
 ///   .ieeeFloat + .ieeeStr implement shortest string that round-trips under round-to-nearest ties-to-even
-///   That is, ``0.1``.ieeeFloat!.ieeeStr lies to you twice, once when it creates the float, and a secon time when
-///   it choses to print a near value that has a compact representation instead of the actual content of the float
+///   That is, ``0.1``.ieeeFloat!.ieeeStr lies to you twice, once when it creates the float, and a second time when
+///   it chooses to print a near value that has a compact representation instead of the actual content of the float
 ///   Another example: ``0.100000000000000005``.ieeeFloat!.ieeeStr == ``0.1``
 ///   But, ``0.100000000000000005`` is closer to the actual representable Float value. That is,
 ///   ``+0.1``.ieeeFloat!.getNum!.inRange(+0.100000000000000005/1, +2/1) holds
@@ -72,7 +72,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   ^ : Str;                          /// appends a double quote
   .isEmpty: Bool;                   /// true iff ``this.size == 0``
   .size: Nat;                       /// the amount of characters in this string
-  .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use ^ and |, not necessarily a single literal)
+  .escape: Str;                     /// returns a string representing valid Fearless code which yields this string when evaluated (may use |, not necessarily a single literal)
   .indexOf(Str): Opt[Nat];          /// index of the first occurrence of the parameter. Returns 0 if the parameter is ``""``.
   /// ``this.lastIndexOf s`` returns the index of the last occurrence of ``s`` in `this`, ``this.size`` if ``s`` is ``""``.
   //>   .check{"abab".lastIndexOf "ab" .assertEq({::}, Opts# 2)}
@@ -164,7 +164,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   .u(values: Str) : UStr;           /// equivalent to this.u.u values
   .norm: Norm[Str];
 
-  /// `this.trim` returns `this` without its leading and trailing characters with code point at most ``32`` (space and control characters).
+  /// `this.trim` returns `this` without its leading and trailing characters that are spaces or newlines.
   //>   .check{" a b ".trim .assertEq "a b"}
   .trim: Str;
   /// ``this.split s`` returns the pieces of `this` between the non-overlapping occurrences of ``s``, scanning left to right;
