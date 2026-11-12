@@ -122,8 +122,8 @@ TryGetNamesGetTests: Test {::
   .check{Math.nan.tryGetRad.assertInfo{::.isMsg{::.startsWith "Float.getRad: Invalid angle, "}}}
   .checkDetErr({::.isMsg{::.startsWith "Num.getFloat: cannot convert Num +1/3 to Float"}}, {(1/3).getFloat})
   .check{(1/3).tryGetFloat.assertInfo{::.isMsg{::.startsWith "Num.getFloat: cannot convert Num +1/3 to Float"}}}
-  .checkDetErr({::.isMsg{::.startsWith "UStr.getStr: cannot convert "}}, {"a".u("00E9").getStr})
-  .check{"a".u("00E9").tryGetStr.assertInfo{::.isMsg{::.startsWith "UStr.getStr: cannot convert "}}}
+  .checkDetErr({::.isMsg{:: == `UStr.getStr: the scalar value U+00E9 at index 1 is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E.`}}, {"a".u("00E9").getStr})
+  .check{"a".u("00E9").tryGetStr.assertInfo{::.isMsg{:: == `UStr.getStr: the scalar value U+00E9 at index 1 is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E.`}}}
   .checkDetErr({::.isMsg{:: == `Info.getMap: the Info "hi" is the .msg variant, not the .map variant.`}}, {(Infos.msg "hi").getMap})
   .check{(Infos.msg "hi").tryGetMap.assertInfo{::.isMsg{:: == `Info.getMap: the Info "hi" is the .msg variant, not the .map variant.`}}}
   .checkDetErr({::.isMsg{::== "List.getFirst: called on an empty List."}}, {List[Nat].getFirst})
