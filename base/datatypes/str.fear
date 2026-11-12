@@ -80,9 +80,9 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   //>   .check{"abab".lastIndexOf "c" .assertEmpty{::}}
   .lastIndexOf(Str): Opt[Nat];
   /// ``this.indicesOf s`` returns a flow of the indices of all the occurrences of ``s`` in `this`, overlapping ones included,
-  /// in ascending order. Returns every index from ``0`` to ``this.size`` if ``s`` is ``""``.
+  /// in ascending order. Throws if ``s`` is ``""``.
   //>   .check{"aaa".indicesOf "aa" .list .assertEq({::}, Lists#(0, 1))}
-  //>   .check{"ab".indicesOf "" .list .assertEq({::}, Lists#(0, 1, 2))}
+  //>   .checkDetErr({::.isMsg{::.startsWith "Str.indicesOf:"}}, {"ab".indicesOf ""})
   //>   .check{"ab".indicesOf "c" .list .assertEq({::}, {})}
   .indicesOf(Str): mut Flow[Nat];
 
@@ -152,12 +152,6 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   //>   .check{"abc".endsWith "ab" .assertFalse}
   .endsWith(Str): Bool;
   .contains(Str): Bool;             /// ``this.contains s`` returns `True` if ``s`` is a substring of ``this``.
-  /// ``this.count s`` returns the number of non-overlapping occurrences of ``s`` in `this`, scanning left to right.
-  /// Returns ``this.size`` if ``s`` is ``""``.
-  //>   .check{"aaaa".count "aa" .assertEq 2}
-  //>   .check{"abc".count "" .assertEq 3}
-  //>   .check{"abc".count "d" .assertEq 0}
-  .count(Str): Nat;
   .lower: Str;                      /// this string but all lowercase
   .upper: Str;                      /// this string but all uppercase
   .u : UStr;                        /// this string, but as a Unicode string
@@ -168,7 +162,7 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
   //>   .check{" a b ".trim .assertEq "a b"}
   .trim: Str;
   /// ``this.split s`` returns the pieces of `this` between the non-overlapping occurrences of ``s``, scanning left to right;
-  /// ``this.count s + 1`` pieces, empty ones included. Throws if ``s`` is ``""``.
+  /// one more piece than the occurrences of ``s``, empty ones included. Throws if ``s`` is ``""``.
   //>   .check{"a,b,,c,".split "," .assertEq({::}, Lists#("a", "b", "", "c", ""))}
   //>   .check{"abc".split "," .assertEq({::}, Lists#"abc")}
   //>   .checkDetErr({::.isMsg{::.startsWith "Str.split:"}}, {"abc".split ""})

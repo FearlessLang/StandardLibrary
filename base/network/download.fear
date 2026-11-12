@@ -70,7 +70,7 @@ Urls: {
 _UrlErr: { #(text: Str, reason: Str): Str -> "Urls#: "+(text.escape)+" is refused: "+reason }
 _UrlOrigin: { #(scheme: Str, host: Str, port: Nat): Str -> scheme+"://"+host+(port == (_UrlPort.default scheme) ? {.then -> ""; .else -> ":"+(port.str)}) }
 _UrlSlashOrQuestion: { #(s: Str): Nat -> Math.min({::}, (s.indexOf "/").orValue(s.size), (s.indexOf "?").orValue(s.size)) }
-_UrlFirstOutside: { #(s: Str, allowed: Str): mut Opt[Nat] -> s.indicesOf "" .findFirst{i -> i < (s.size) && {allowed.contains(s.sub(i, i + 1)).not}} }
+_UrlFirstOutside: { #(s: Str, allowed: Str): mut Opt[Nat] -> (0 =~~= (s.size)).seqFlow.findFirst{i -> i < (s.size) && {allowed.contains(s.sub(i, i + 1)).not}} }
 _UrlOnly: { #(s: Str, allowed: Str): Bool -> _UrlFirstOutside#(s, allowed).isEmpty }
 _UrlDigits: { #(s: Str): Bool -> s.isEmpty.not && {_UrlOnly#(s, "0123456789")} }
 _UrlLabel: { #(l: Str): Bool -> l.isEmpty.not && {l.size <= 63} && {l.startsWith "-" .not} && {l.endsWith "-" .not} && {_UrlOnly#(l, "abcdefghijklmnopqrstuvwxyz0123456789-")} }
