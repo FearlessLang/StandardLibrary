@@ -32,7 +32,11 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     if (val.length == 1 && val[0] < size1.length){ return size1[val[0]]; }
     return new UStr$s$0Instance(val);
   }
-  public static UStr$s$0 instance(String val){ return instance(val.codePoints().toArray()); }
+  public static UStr$s$0 instance(String val){
+    var res= val.codePoints().toArray();
+    assert Arrays.stream(res).allMatch(UStr$s$0Instance::isScalar);
+    return instance(res);
+  }
   static UStr$s$0Instance size1(int c){ return size1[c]; }
 
   @Override public String toString(){ return "UStr["+strUCode(val)+"]"; }

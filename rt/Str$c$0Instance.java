@@ -125,8 +125,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   }
   @Override public Object imm$indicesOf$1(Object p0){
     var text= s(p0);
+    if (text.isEmpty()){ throw detErr("Str.indicesOf: the searched Str is the empty string, which occurs between any two characters; search for a non empty Str."); }
     var res= new ArrayList<Object>();
-    for (int i= val.indexOf(text); i != -1; i = i < val.length() ? val.indexOf(text, i + 1) : -1){ res.add(Nat$c$0Instance.instance(i)); }
+    for (int i= val.indexOf(text); i != -1; i = val.indexOf(text, i + 1)){ res.add(Nat$c$0Instance.instance(i)); }
     return Flow$o$1Instance.of(res, FlowMode.ParImm);
   }
   @Override public Object imm$repeat$1(Object p0){
@@ -381,13 +382,6 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     return bool(val.contains(s(p0)));
   }
   @Override public Object imm$endsWith$1(Object p0){ return bool(val.endsWith(s(p0))); }
-  @Override public Object imm$count$1(Object p0){
-    var text= s(p0);
-    if (text.isEmpty()){ return Nat$c$0Instance.instance(val.length()); }
-    int count= 0;
-    for (int i= val.indexOf(text); i != -1; i = val.indexOf(text, i + text.length())){ count += 1; }
-    return Nat$c$0Instance.instance(count);
-  }
   @Override public Object imm$trim$0(){ return instance(val.trim()); }
   @Override public Object imm$split$1(Object p0){
     var sep= s(p0);
