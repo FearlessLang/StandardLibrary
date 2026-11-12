@@ -24,6 +24,11 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   static Str$c$0Instance size1(int c){ return c < size1.length ? size1[c] : null; }
   @Override public String toString(){ return toS(this); }
   private static String s(Object o){ return ((Str$c$0Instance)o).val; }
+  private static String searched(String m, Object o){
+    var res= s(o);
+    if (res.isEmpty()){ throw detErr(m+": the searched Str is the empty string, which occurs between any two characters."); }
+    return res;
+  }
   @Override public Object read$imm$0(){ return this; }
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this); }
   @Override public Object read$str$0(){ return this; }
@@ -124,16 +129,15 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
   }
   @Override public Object imm$indexOf$1(Object p1){
-    var res= val.indexOf(s(p1));
+    var res= val.indexOf(searched("Str.indexOf", p1));
     return res==-1? optEmpty(): optSome(Nat$c$0Instance.instance(res));
   }
   @Override public Object imm$lastIndexOf$1(Object p0){
-    var res= val.lastIndexOf(s(p0));
+    var res= val.lastIndexOf(searched("Str.lastIndexOf", p0));
     return res==-1? optEmpty(): optSome(Nat$c$0Instance.instance(res));
   }
   @Override public Object imm$indicesOf$1(Object p0){
-    var text= s(p0);
-    if (text.isEmpty()){ throw detErr("Str.indicesOf: the searched Str is the empty string, which occurs between any two characters; search for a non empty Str."); }
+    var text= searched("Str.indicesOf", p0);
     var res= new ArrayList<Object>();
     for (int i= val.indexOf(text); i != -1; i = val.indexOf(text, i + 1)){ res.add(Nat$c$0Instance.instance(i)); }
     return Flow$o$1Instance.of(res, FlowMode.ParImm);
@@ -394,7 +398,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$trim$0(){ return instance(val.trim()); }
   @Override public Object imm$split$1(Object p0){
     var sep= s(p0);
-    if (sep.isEmpty()){ throw detErr("Str.split: the separator is the empty string, which occurs between any two characters; use a non empty separator."); }
+    if (sep.isEmpty()){ throw detErr("Str.split: the separator is the empty string, which occurs between any two characters."); }
     var res= new ArrayList<Object>();
     int start= 0;
     for (int i= val.indexOf(sep); i != -1; i = val.indexOf(sep, start)){

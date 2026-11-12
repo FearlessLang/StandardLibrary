@@ -17,6 +17,16 @@ StrBasicsTests: Test {::
   .checkDetErr({::.isMsg{::.startsWith "Str.replaceSimultaneousOrdered:"}}, {"ab".replaceSimultaneousOrdered(Lists#("", "x"))})
   }
 
+StrSearchTests: Test {::
+  .check{"abab".indexOf "b" .assertEq({::}, Opts# 1)}
+  .check{"abab".lastIndexOf "b" .assertEq({::}, Opts# 3)}
+  .check{"abab".indexOf "c" .assertEmpty{::}}
+  .checkDetErr({::.isMsg{:: == "Str.indexOf: the searched Str is the empty string, which occurs between any two characters."}}, {"ab".indexOf ""})
+  .checkDetErr({::.isMsg{:: == "Str.lastIndexOf: the searched Str is the empty string, which occurs between any two characters."}}, {"ab".lastIndexOf ""})
+  .checkDetErr({::.isMsg{:: == "Str.indicesOf: the searched Str is the empty string, which occurs between any two characters."}}, {"".indicesOf ""})
+  .checkDetErr({::.isMsg{:: == "Str.split: the separator is the empty string, which occurs between any two characters."}}, {"ab".split ""})
+  }
+
 StrConcatTests: Test {::
   .check{"a" + "b" .assertEq "ab"}
   .check{"ab" + "c" .assertEq "abc"}
@@ -282,6 +292,7 @@ StrParseBoolTests: Test {::
 
 TestStr: Test {::
   .test StrBasicsTests
+  .test StrSearchTests
   .test StrConcatTests
   .test StrSepOpsTests
   .test StrOrderTests
