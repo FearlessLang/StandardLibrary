@@ -9,4 +9,8 @@ AssertionTextTests: Test {::
   .checkNonDetErr({::.isMsg{::.contains "Expected within delta"}}, {1.0 .assertEqDelta(2.0, 0.5, {"ctx"})})
   .checkNonDetErr({:: > "actual" .isMsg{:: == ".empty"}}, {Opt[Nat]{}.assertSome})
   .check{Math.inf.assertEqDelta(Math.inf, 0.0)}
+  .checkNonDetErr({::.isMsg{:: == ("Assertion failure." | "Expected: 5 < 3")}}, {5 .assertLt 3})
+  .checkNonDetErr({::.isMsg{:: == ("Assertion failure." | "Expected: 5 >= 7")}}, {5 .assertGe 7})
+  .checkNonDetErr({::.isMsg{:: == ("Assertion failure." | "Expected two different values, but both are" | "Value: 5")}}, {5 .assertNotEq 5})
+  .checkNonDetErr({::.isMsg{:: == ("Assertion failure." | "Expected an error, but got success.")}}, {Try#{5}.assertInfo})
   }
