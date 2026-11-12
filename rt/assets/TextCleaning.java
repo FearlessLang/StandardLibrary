@@ -255,12 +255,12 @@ final class TextCleaning{
       var bytes= new StringBuilder();
       for (int i= 0; i < len; i += 1){ bytes.append(i == 0 ? "" : " ").append(String.format(Locale.ROOT, "%02X", d.p[i])); }
       var where= bytes + " at byte offset " + at + " of the line";
-      var value= String.format(Locale.ROOT, "U+%04X", rejected);
+      var hex= String.format(Locale.ROOT, "%04X", rejected);
       throw Util.detErr((u ? "UStrCleaners" : "StrCleaners") + ".utf8: " + reason.name() + ": " + switch (reason){
         case malformedEncoding -> "the byte sequence " + where + " is not UTF-8";
         case truncatedEncoding -> "the input ends in the middle of the UTF-8 sequence " + where;
-        case notScalar -> "the byte sequence " + where + " encodes " + value + ", which is not a unicode scalar value";
-        case notInStr -> "the byte sequence " + where + " encodes " + value + ", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E";
+        case notScalar -> "the byte sequence " + where + " encodes " + hex + ", which is not a unicode scalar value";
+        case notInStr -> "the byte sequence " + where + " encodes .u`" + hex + "`, which is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`";
         });
     }
   }

@@ -66,7 +66,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     if (isStr(val)){ return ok(Str$c$0Instance.instance(new String(val, 0, val.length))); }
     int i= 0;
     while (isStrScalar(val[i])){ i += 1; }
-    return fail(String.format(Locale.ROOT, "UStr.getStr: the scalar value U+%04X at index %d is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E.", val[i], i));
+    return fail(String.format(Locale.ROOT, "UStr.getStr: the scalar value .u`%04X` at index %d is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`.", val[i], i));
   }
   @Override public Object imm$str$0(){
     return isStr(val)
@@ -161,7 +161,7 @@ public record UStr$s$0Instance(int[] val) implements UStr$s$0{
     var res= new int[parts.length];
     for (int i= 0; i<parts.length; i += 1){
       int cp= Integer.parseInt(parts[i], 16);
-      if (!isScalar(cp)){ throw detErr(String.format(Locale.ROOT, "%s: U+%04X is not a unicode scalar value; the unicode scalar values are U+0000 to U+D7FF and U+E000 to U+10FFFF.", m, cp)); }
+      if (!isScalar(cp)){ throw detErr(String.format(Locale.ROOT, "%s: %04X is not a unicode scalar value; the unicode scalar values are .u`0000` to .u`D7FF` and .u`E000` to .u`10FFFF`.", m, cp)); }
       res[i] = cp;
     }
     return res;
