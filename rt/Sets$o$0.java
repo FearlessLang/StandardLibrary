@@ -6,14 +6,13 @@ import java.util.stream.Stream;
 
 
 public interface Sets$o$0 extends Sealed$2o$0{
-  ArrayList<Object> emptyList= new ArrayList<>(0);
   default Object imm$$hash$1(Object p0){
     var ordering= Set$c$1Instance.ordering(p0);
-    return new Set$c$1Instance(ordering, emptyList);
+    return new Set$c$1Instance(ordering, List.of());
   }
   default Object imm$$hash$2(Object p0, Object p1){
     var ordering= Set$c$1Instance.ordering(p0);
-    return Set$c$1Instance.fromSortedList(ordering, List.of(p1));
+    return new Set$c$1Instance(ordering, List.of(p1));
   }
   default Object imm$$hash$3(Object p0, Object p1, Object p2){
     var ordering= Set$c$1Instance.ordering(p0);
@@ -101,7 +100,7 @@ public interface Sets$o$0 extends Sealed$2o$0{
   }
   default Object imm$$hash$17(Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9, Object p10, Object p11, Object p12, Object p13, Object p14, Object p15, Object p16){
     var ordering= Set$c$1Instance.ordering(p0);
-    var s= new ArrayList<>(15);
+    var s= new ArrayList<>(16);
     s.add(p1); s.add(p2); s.add(p3); s.add(p4); s.add(p5); s.add(p6); s.add(p7); s.add(p8); s.add(p9); s.add(p10); s.add(p11); s.add(p12); s.add(p13); s.add(p14); s.add(p15); s.add(p16);
     return Set$c$1Instance.fromUnsortedList(ordering, s);
   }

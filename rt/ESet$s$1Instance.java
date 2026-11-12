@@ -4,7 +4,6 @@ package _base;
 import _base.Util.MapKey;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static _base.Util.*;
@@ -15,15 +14,6 @@ final class ESet$s$1Instance implements ESet$s$1{
     private LinkedHashMap<MapKey,Object> set;
     private OrderHashBy$2ea$2 ordering;
 
-    static Object wrap(LinkedHashSet<MapKey> s, OrderHashBy$2ea$2 ordering){ return new ESet$s$1Instance(new LinkedHashSet<>(s), ordering); }
-
-    ESet$s$1Instance(LinkedHashSet<MapKey> s, OrderHashBy$2ea$2 ordering){
-        set= new LinkedHashMap<>(s.stream().collect(Collectors.toMap(
-                k -> k,
-                Set$c$1Instance::extractKey
-        )));
-        this.ordering= ordering;
-    }
     ESet$s$1Instance(LinkedHashMap<MapKey,Object> s, OrderHashBy$2ea$2 ordering){
         set= s;
         this.ordering= ordering;
@@ -39,9 +29,6 @@ final class ESet$s$1Instance implements ESet$s$1{
         return r;
     }
 
-    private Set<MapKey> set(){
-        return this.set.keySet();
-    }
     private Stream<Object> unhashedObjects(){
         return this.set.keySet().stream().map(k -> k.key);
     }
@@ -86,22 +73,17 @@ final class ESet$s$1Instance implements ESet$s$1{
     @Override public Object mut$get$1(Object p0){
         Object key= this.set.get(mapKey(this.ordering, p0));
         if (key != null){ return key; }
-         throw err(
-           "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
-             + " Consider using `ESet.opt` to properly handle the failure case."
-         );
+        throw err(absent(p0));
     }
     @Override public Object mut$tryGet$1(Object p0){
         Object key= this.set.get(mapKey(this.ordering, p0));
         if (key != null){ return ok(key); }
-         return fail(
-           "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
-             + " Consider using `ESet.opt` to properly handle the failure case."
-         );
+        return fail(absent(p0));
     }
+    private String absent(Object p0){ return "ESet.get: Tried to get value "+toStringBy(ordering, p0)+" that is not contained in this set."; }
     @Override public Object mut$flow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey), FlowMode.ParImm); }
     @Override public Object mut$seqFlow$0(){ return Flow$o$1Instance.of(drain().keySet().stream().map(Set$c$1Instance::extractKey), FlowMode.Seq); }
-    @Override public Object mut$set$0(){ return Set$c$1Instance.of(ordering, drain()); }
+    @Override public Object mut$set$0(){ return new Set$c$1Instance(ordering, drain()); }
     @Override public Object mut$distinctBy$1(Object p0){
         ordering= (OrderHashBy$2ea$2) p0;
         drain().values().forEach(this::mut$add$1);

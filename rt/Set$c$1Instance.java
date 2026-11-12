@@ -13,10 +13,6 @@ public final class Set$c$1Instance implements Set$c$1{
   private final Map<MapKey,Object> set;
   private final List<Object> sortedList;
 
-  static Set$c$1Instance of(OrderHashBy$2ea$2 ordering, Map<MapKey,Object> set){
-    return new Set$c$1Instance(ordering, set);
-  }
-  static Set$c$1Instance fromSortedList(OrderHashBy$2ea$2 ordering, List<Object> sortedList){return new Set$c$1Instance(ordering, sortedList);}
   static Set$c$1Instance fromUnsortedList(OrderHashBy$2ea$2 ordering, ArrayList<Object> unsortedList){
     var set= new HashMap<MapKey,Object>();
     for (var o : unsortedList){ set.putIfAbsent(mapKey(ordering, o), o); }
@@ -61,20 +57,15 @@ public final class Set$c$1Instance implements Set$c$1{
   @Override public Object imm$contains$1(Object p0){ return bool(set.containsKey(mapKey(ordering, p0))); }
   @Override public Object imm$get$1(Object p0){
     Object key= set.get(mapKey(ordering, p0));
-    if (key == null){ throw err(
-      "Set.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
-      + " Consider using `Set.opt` to properly handle the failure case"
-    );}
+    if (key == null){ throw err(absent(p0)); }
     return key;
   }
   @Override public Object imm$tryGet$1(Object p0){
     Object key= set.get(mapKey(ordering, p0));
-    if (key == null){ return fail(
-      "Set.get: Tried to get value "+toStringBy(ordering, p0)+" is not contained in this set.\n"
-      + " Consider using `Set.opt` to properly handle the failure case"
-    );}
+    if (key == null){ return fail(absent(p0)); }
     return ok(key);
   }
+  private String absent(Object p0){ return "Set.get: Tried to get value "+toStringBy(ordering, p0)+" that is not contained in this set."; }
   @Override public Object imm$opt$1(Object p0){ return optNullable(set.get(mapKey(ordering, p0))); }
   @Override public Object imm$$plus$1(Object p0){
     var key= mapKey(this.ordering, p0);
@@ -87,7 +78,7 @@ public final class Set$c$1Instance implements Set$c$1{
     list.add(p0);
     list.addAll(sortedList.subList(insertionPoint, sortedList.size()));
     Map<MapKey,Object> map= new HashMap<>(this.set);
-    map.put(mapKey(ordering, p0), p0);
+    map.put(key, p0);
     return new Set$c$1Instance(ordering, list, map);
   }
   static <T> int insertionPosition(List<T> list, T t, Comparator<T> comparator){
@@ -112,7 +103,9 @@ public final class Set$c$1Instance implements Set$c$1{
     }
     var s= new HashMap<>(set);
     s.remove(setElement);
-    return new Set$c$1Instance(ordering, s);
+    var list= new ArrayList<>(sortedList);
+    list.remove(Collections.binarySearch(sortedList, p0, toComparator(ordering)));
+    return new Set$c$1Instance(ordering, list, s);
   }
   @Override public Object imm$union$2(Object p0, Object p1){
     var newOrdering= ordering(p0);
