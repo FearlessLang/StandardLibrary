@@ -34,10 +34,10 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$getSucc$0(){
     if (Double.isNaN(val)){
-      throw err("Float.getSucc: NaN does not have a successor");
+      throw detErr("Float.getSucc: NaN does not have a successor");
     }
     if (val == Double.POSITIVE_INFINITY){
-      throw err("Float.getSucc: Math.inf does not have a successor");
+      throw detErr("Float.getSucc: Math.inf does not have a successor");
     }
     return Float$1c$0Instance.instance(Math.nextUp(val));
   }
@@ -52,10 +52,10 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   }
   @Override public Object imm$getPred$0(){
     if (Double.isNaN(val)){
-      throw err("Float.getPred: NaN does not have a predecessor");
+      throw detErr("Float.getPred: NaN does not have a predecessor");
     }
     if (val == Double.NEGATIVE_INFINITY){
-      throw err("Float.getPred: Math.negInf does not have a predecessor");
+      throw detErr("Float.getPred: Math.negInf does not have a predecessor");
     }
     return Float$1c$0Instance.instance(Math.nextDown(val));
   }
@@ -145,10 +145,10 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$getInt$0(){
     if (!isIntegral(val)){
-      throw err("Float.getInt: cannot convert non-integral Float " + val + " to Int");
+      throw detErr("Float.getInt: cannot convert non-integral Float " + val + " to Int");
     }
     if (val < -0x1p63 || val >= 0x1p63){
-      throw err("Float.getInt: cannot convert Float " + val + " to Int: out of Int range");
+      throw detErr("Float.getInt: cannot convert Float " + val + " to Int: out of Int range");
     }
     return Int$c$0Instance.instance((long)val);
   }
@@ -164,13 +164,13 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$getNat$0(){
     if (!isIntegral(val)){
-      throw err("Float.getNat: cannot convert non-integral Float " + val + " to Nat");
+      throw detErr("Float.getNat: cannot convert non-integral Float " + val + " to Nat");
     }
     if (val < 0.0d){
-      throw err("Float.getNat: cannot convert negative Float " + val + " to Nat");
+      throw detErr("Float.getNat: cannot convert negative Float " + val + " to Nat");
     }
     if (val >= 0x1p64){
-      throw err("Float.getNat: cannot convert Float " + val + " to Nat: out of Nat range");
+      throw detErr("Float.getNat: cannot convert Float " + val + " to Nat: out of Nat range");
     }
     return Nat$c$0Instance.instance(natBits(val));
   }
@@ -189,13 +189,13 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$getByte$0(){
     if (!isIntegral(val)){
-      throw err("Float.getByte: cannot convert non-integral Float " + val + " to Byte");
+      throw detErr("Float.getByte: cannot convert non-integral Float " + val + " to Byte");
     }
     if (val < 0.0d){
-      throw err("Float.getByte: cannot convert to Byte " + val + " is less than 0");
+      throw detErr("Float.getByte: cannot convert to Byte " + val + " is less than 0");
     }
     if (val > 255.0d){
-      throw err("Float.getByte: cannot convert to Byte " + val + " is greater than 255");
+      throw detErr("Float.getByte: cannot convert to Byte " + val + " is greater than 255");
     }
     return Byte$o$0Instance.instance((byte)((int)val));
   }
@@ -233,7 +233,7 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
   @Override public Object imm$eqDelta$2(Object p0, Object p1){
     double exp= f(p0), d= f(p1);
     if (Double.isNaN(exp) || Double.isNaN(d) || Double.isNaN(val)){ return bool(false); }
-    if (d < 0.0d){ throw err("Float.eqDelta: delta<0"); }
+    if (d < 0.0d){ throw detErr("Float.eqDelta: delta<0"); }
     return bool(val == exp || Math.abs(val - exp) <= d);
   }
   @Override public Object imm$softRoundTiesEven$0(){

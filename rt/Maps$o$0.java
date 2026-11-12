@@ -176,7 +176,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object mut$get$1(Object p0){
     var mk= mapKey(keyOh, p0);
     var e= elems.get(mk);
-    if (e == null){ throw err(absent(p0)); }
+    if (e == null){ throw detErr(absent(p0)); }
     return e;
   }
   @Override public Object mut$tryGet$1(Object p0){
@@ -239,7 +239,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
   @Override public Object mut$without$1(Object p0){
     var mk= mapKey(keyOh, p0);
     var m= new LinkedHashMap<MapKey,Object>(elems);
-    if (m.remove(mk) == null){ throw err("Map.without: key absent"); }
+    if (m.remove(mk) == null){ throw detErr("Map.without: key absent"); }
     return new Map$c$2Instance(keyOh, m);
   }
   @Override public Object read$without$1(Object p0){ return mut$without$1(p0); }
