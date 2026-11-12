@@ -554,7 +554,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .let endInclusive={end.getPred}
     .let startInclusive={this.getSucc}
     .if {startInclusive > endInclusive } .error {
-      "Float~~: Tried to produce empty range, start ("+this+") .getSucc must be <= end (" + end + ") .getPred"
+      "Float~~: Tried to produce an empty range, start ("+this+") .getSucc must be <= end (" + end + ") .getPred"
       }
     .return {_FloatRanges#(startInclusive, endInclusive)};
 
@@ -568,7 +568,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
     .if {this == (Math.nan) || {endInclusive == (Math.nan)}} .error {"Float~~=: Math.nan is not a valid start or end point"}
     .if {this == (Math.inf)} .error{"Float~~=: Start of open range cannot be Math.inf"}
     .if {this >= endInclusive } .error {
-      "Float~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
+      "Float~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
     .return {_FloatRanges#(this.getSucc, endInclusive)};
 
@@ -584,7 +584,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
       "Float=~~: End of open range cannot be Math.negInf"
       }
     .if {this >= end } .error {
-      "Float=~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
+      "Float=~~: Tried to produce an empty range, start ("+this+") must be < end (" + end + ")"
       }
     .return {_FloatRanges#(this, end.getPred)};
 
@@ -596,7 +596,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   =~~=(endInclusive: Float): Range[Float] -> Block#
     .if {this == (Math.nan) || {endInclusive == (Math.nan)}} .error {"Float=~~=: Math.nan is not a valid start or end point"}
     .if {this > endInclusive } .error {
-      "Float=~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
+      "Float=~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
       }
     .return {_FloatRanges#(this, endInclusive)};
 
@@ -615,6 +615,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   .assertInRange(range: Range[Float], msg: read LazyInfo): Void -> Assert!(
     this.inRange(range),
     { msg#.info + ("Expected in range: "+ (range.str) // technically a DD point...
+      | "lo: "+(range.start)
+      | "hi: "+(range.end)
       | "actual: "+this
       .info)});
 

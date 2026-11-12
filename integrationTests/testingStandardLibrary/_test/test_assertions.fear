@@ -1,5 +1,6 @@
 AssertionTextTests: Test {::
   .checkNonDetErr({::.isMsg{:: == ("Assertion failure." | "Expected in range: [1, 4]" | "lo: 1" | "hi: 4" | "actual: 7")}}, {7 .assertInRange(1=~~=4)})
+  .checkNonDetErr({::.isMsg{:: == ("Assertion failure." | "Expected in range: [+1.0, +4.0]" | "lo: +1.0" | "hi: +4.0" | "actual: +7.0")}}, {+7.0 .assertInRange(+1.0 =~~= +4.0)})
   .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected size: 3" | "Actual size: 2")}}, {Lists#(1,2).assertSize 3})
   .checkNonDetErr({:: > "msg" .isMsg{:: == ("Assertion failure." | "Expected size: 3" | "Actual size: 1")}}, {"a".assertSize 3})
   .checkNonDetErr({::.isMsg{:: == ("Assertion failure." | "Expected empty")}}, {Lists#(1).assertEmpty})

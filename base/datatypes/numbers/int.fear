@@ -273,9 +273,9 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
     .let endInclusive={end.pred}
     .let startInclusive={this.succ}
     .if {startInclusive > endInclusive } .error {
-      "Int~~: Tried to produce empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
+      "Int~~: Tried to produce an empty range, start ("+this+") .succ must be <= end (" + end + ") .pred"
       }
-    .return {_IntRanges#(startInclusive, endInclusive, "("+this+", "+end+")")};
+    .return {_IntRanges#(startInclusive, endInclusive)};
 
   /// ``this~~=endInclusive`` returns the range ``(this, endInclusive]``.
   /// Throws if `this` is `Math.maxInt`, or the range would be empty (``this >= endInclusive``).
@@ -284,9 +284,9 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   ~~=(endInclusive: Int): Range[Int] -> Block#
     .if {this == (Math.maxInt)} .error{"Int~~=: Start of open range cannot be Math.maxInt"}
     .if {this >= endInclusive } .error {
-      "Int~~=: Tried to produce empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
+      "Int~~=: Tried to produce an empty range, start ("+this+") must be < endInclusive (" + endInclusive + ")"
       }
-    .return {_IntRanges#(this.succ, endInclusive, "("+this+", "+endInclusive+"]")};
+    .return {_IntRanges#(this.succ, endInclusive)};
 
   /// ``this=~~end`` returns the range ``[this, end)``.
   /// Throws if `end` is `Math.minInt`, or the range would be empty (``this >= end``).
@@ -297,9 +297,9 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
       "Int=~~: End of open range cannot be Math.minInt"
       }
     .if {this >= end } .error {
-      "Int=~~: Tried to produce an empty range, invalid range start ("+this+") must be < end (" + end + ")"
+      "Int=~~: Tried to produce an empty range, start ("+this+") must be < end (" + end + ")"
       }
-    .return {_IntRanges#(this, end.pred, "["+this+", "+end+")")};
+    .return {_IntRanges#(this, end.pred)};
 
   /// ``this=~~=endInclusive`` returns the inclusive range ``[this, endInclusive]``.
   /// Throws if the range would be empty (``this > endInclusive``).
@@ -307,9 +307,9 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   //>   .checkDetErr({::}, {+4=~~= +1})
   =~~=(endInclusive: Int): Range[Int] -> Block#
     .if {this > endInclusive } .error {
-      "Int=~~=: Tried to produce an empty range, invalid range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
+      "Int=~~=: Tried to produce an empty range, start ("+this+") must be <= endInclusive (" + endInclusive + ")"
       }
-    .return {_IntRanges#(this, endInclusive, "["+this+", "+endInclusive+"]")};
+    .return {_IntRanges#(this, endInclusive)};
 
   /// ``this.inRange(range)`` returns `True` iff ``range.start <= this <= range.end``.
   //>   .check{+2 .inRange(+1=~~= +4) .assertTrue}
@@ -348,7 +348,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   }
 
 _IntRanges: Sealed {
-  #(startInclusive: Int, endInclusive: Int, str: Str): Range[Int] -> {'self
+  #(startInclusive: Int, endInclusive: Int): Range[Int] -> {'self
     .size -> endInclusive.aluSubWrap(startInclusive).aluNat + 1; // Cheap enough that computing everytime is okay
     .start -> startInclusive;
     .end -> endInclusive;
@@ -357,6 +357,6 @@ _IntRanges: Sealed {
     .flow step -> _NumFlow.ints(startInclusive, endInclusive, step);
     .contains n -> n.inRange(self);
     .clamp n -> n.clampTo(self);
-    .str -> str;
+    .str -> "["+startInclusive+", "+endInclusive+"]";
     };
   }
