@@ -95,41 +95,15 @@ _SuccessfulInfoValidator: InfoValidator {
     .empty -> this.fail;
     };
 
-  .where f -> this.matchLevel.validate f .match {
-    .true -> this;
-    .false -> this.fail
-    };
-  .whereNot f -> this.matchLevel.validate f .match {
-    .true -> this.fail;
-    .false -> this
-    };
-
-  .isMsg fn -> this.matchLevel.matchWithDefault {
-    .msg m -> fn# m .match {
-      .true -> this;
-      .false -> this.fail;
-      };
-    .default -> this.fail;
-    };
-
-  .isList fn -> this.matchLevel.matchWithDefault {
-    .list l -> fn#(l) .match {
-      .true -> this;
-      .false -> this.fail;
-      };
-    .default -> this.fail
-    };
-
-  .isMap fn -> this.matchLevel.matchWithDefault {
-    .map m -> fn#(m) .match {
-      .true -> this;
-      .false -> this.fail;
-      };
-    .default -> this.fail
-    };
-
+  .where f -> _InfoCheck#(this, this.matchLevel.validate f);
+  .whereNot f -> _InfoCheck#(this, this.matchLevel.validate f .not);
+  .isMsg fn -> this.matchLevel.matchWithDefault {.msg m -> _InfoCheck#(this, fn# m); .default -> this.fail};
+  .isList fn -> this.matchLevel.matchWithDefault {.list l -> _InfoCheck#(this, fn#(l)); .default -> this.fail};
+  .isMap fn -> this.matchLevel.matchWithDefault {.map m -> _InfoCheck#(this, fn#(m)); .default -> this.fail};
   .isEmpty -> this.matchLevel.matchWithDefault {
     .empty -> this;
     .default -> this.fail;
     };
   }
+
+_InfoCheck: { #(v: _SuccessfulInfoValidator, ok: Bool): InfoValidator -> ok ? {.then -> v; .else -> v.fail} }
