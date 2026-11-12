@@ -71,7 +71,7 @@ abstract class ATextArea extends AEditText{
     });
   }
   public Object mut$wrap$1(Object b){ return reStyle(() -> wrap = Util.isTrue(b)); }
-  public Object read$wrap$0(){ return Util.bool(wrap); }
+  public Object mut$wrap$0(){ return Util.bool(wrap); }
 }
 
 abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEditText$5mw$1{
@@ -136,7 +136,7 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
 
   @Override public Object mut$text$1(Object t){ return text(((Str$c$0Instance) t).val()); }
   @Override public Object mut$uText$1(Object t){ return text(ustr(t)); }
-  @Override public Object read$text$0(){ return Str$c$0Instance.instance(buf.toString()); }
+  @Override public Object mut$text$0(){ return Str$c$0Instance.instance(buf.toString()); }
   Object text(String s){
     frame.onEdtAndWait(() -> change());
     var ch= clean(0, buf.length(), s);
@@ -145,11 +145,11 @@ abstract class AEditText extends AWidget implements _StrEditText$2h4$1, _UStrEdi
       reveal = true;
     });
   }
-  @Override public Object read$uText$0(){ return UStr$s$0Instance.instance(buf.toString()); }
+  @Override public Object mut$uText$0(){ return UStr$s$0Instance.instance(buf.toString()); }
   @Override public Object mut$editable$1(Object b){ return reStyle(() -> editable = Util.isTrue(b)); }
-  @Override public Object read$editable$0(){ return Util.bool(editable); }
+  @Override public Object mut$editable$0(){ return Util.bool(editable); }
   @Override public Object mut$textClearsUndo$1(Object b){ return onEdt(() -> clearsUndo = Util.isTrue(b)); }
-  @Override public Object read$textClearsUndo$0(){ return Util.bool(clearsUndo); }
+  @Override public Object mut$textClearsUndo$0(){ return Util.bool(clearsUndo); }
   @Override public Object mut$cleaner$1(Object f){ return onEdt(() -> cleaner = f); }
   @Override public Object mut$onEdit$1(Object c){ return onEdt(() -> onEdit = (Consumer$ao$1) c); }
   @Override public Object mut$onCommit$1(Object c){ return onEdt(() -> onCommit = (Consumer$ao$1) c); }

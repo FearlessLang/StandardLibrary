@@ -221,29 +221,29 @@ Widget[S]:_Styled[S]{
   ///Builds a menu with the scope, at once, and opens it below this widget; see ``Menu``.
   ///This widget must be in the open window.
   mut .openMenu(mut Scope[Menu]):Void;
-  read .topInset: HeightNat;
-  read .bottomInset: HeightNat;
-  read .leftInset:WidthNat;
-  read .rightInset:WidthNat;
-  read .width:WidthNat;
-  read .height:HeightNat;
-  read .fill:Bool;
-  read .radius:Nat;
-  read .background:Color;
-  read .tooltip:Str->this.uTooltip.getStr; ///throws if the tooltip was set with .uTooltip and is not a valid Str
-  read .uTooltip:UStr;
+  mut .topInset: HeightNat;
+  mut .bottomInset: HeightNat;
+  mut .leftInset:WidthNat;
+  mut .rightInset:WidthNat;
+  mut .width:WidthNat;
+  mut .height:HeightNat;
+  mut .fills:Bool;
+  mut .radius:Nat;
+  mut .background:Color;
+  mut .tooltip:Str->this.uTooltip.getStr; ///throws if the tooltip was set with .uTooltip and is not a valid Str
+  mut .uTooltip:UStr;
   }
 _Container[S]:Widget[S]{
   mut .foreground(Color):mut S;
-  read .foreground:Color;
+  mut .foreground:Color;
   mut .heightGap(n:Nat):mut S->this.heightGap'(HeightNat#n);
   mut .heightGap'(HeightNat):mut S;
   mut .widthGap(n:Nat):mut S->this.widthGap'(WidthNat#n);
   mut .widthGap'(WidthNat):mut S;
   mut .mouse(mut Scope[Mouse]):mut S;
   mut .paint(Painter):mut S;
-  read .heightGap:HeightNat;
-  read .widthGap:WidthNat;
+  mut .heightGap:HeightNat;
+  mut .widthGap:WidthNat;
   }
 Border:_Container[Border]{
   .self->this;
@@ -256,17 +256,17 @@ Border:_Container[Border]{
 Split:Widget[Split]{
   .self->this;
   mut .foreground(Color):mut Split;
-  read .foreground:Color;
+  mut .foreground:Color;
   mut .horizontal: mut Split;
   mut .vertical: mut Split;
   mut .dividerPositions(ps:List[Nat]): mut Split;
-  read .dividerPositions: List[Nat];
+  mut .dividerPositions: List[Nat];
   mut .draggable(b:Bool): mut Split;
-  read .draggable: Bool;
+  mut .draggable: Bool;
   mut .mouse(mut Scope[Mouse]):mut Split;
   mut .paint(Painter):mut Split;
   mut .region(index: Nat): mut RegionFiller[mut Split];
-  read .size: Nat;
+  mut .size: Nat;
   }
 Sections:_Container[Sections]{
   .self->this;
@@ -279,13 +279,13 @@ Sections:_Container[Sections]{
   mut .content(index: Nat): mut RegionFiller[mut Sections];
   mut .onTitleClick(mut SectionHandler): mut Sections;
   mut .onClose(mut SectionHandler): mut Sections;
-  read .size: Nat;
-  read .isExpanded(index: Nat): Bool;
+  mut .size: Nat;
+  mut .isExpanded(index: Nat): Bool;
   }
 SectionHandler:{ mut #(sections: mut Sections, index: Nat): Void; }
 _Caption[S]: Widget[S]{
   mut .foreground(Color):mut S;
-  read .foreground:Color;
+  mut .foreground:Color;
   mut .text(s:Str):mut S->this.uText(s.u);
   mut .uText(UStr):mut S;
   mut .textHeight(n:Nat): mut S->this.textHeight'(HeightNat#n);
@@ -294,11 +294,11 @@ _Caption[S]: Widget[S]{
   mut .aboveBaseline'(TextRatio):mut S;
   mut .belowBaseline(f:Float):mut S->this.belowBaseline'(TextRatio#f);
   mut .belowBaseline'(TextRatio):mut S;
-  read .text:Str->this.uText.getStr; ///throws if the text was set with .uText and is not a valid Str
-  read .uText:UStr;
-  read .textHeight:HeightNat;
-  read .aboveBaseline:TextRatio;
-  read .belowBaseline:TextRatio;
+  mut .text:Str->this.uText.getStr; ///throws if the text was set with .uText and is not a valid Str
+  mut .uText:UStr;
+  mut .textHeight:HeightNat;
+  mut .aboveBaseline:TextRatio;
+  mut .belowBaseline:TextRatio;
   }
 TextRatio:LevelFloat[TextRatio]{.name->"TextRatio"; .getDataType -> +1.0;
   .lowest -> 0.0 .getSucc; .highest -> +1024.0 .getPred;
@@ -315,19 +315,19 @@ ModelFps:_Styled[ModelFps]{ .self->this;
 Frame:_Styled[Frame]{ .self->this;
   mut .title(s: Str): mut Frame -> this.uTitle(s.u);
   mut .uTitle(UStr): mut Frame;
-  read .title: Str -> this.uTitle.getStr; ///throws if the title was set with .uTitle and is not a valid Str
-  read .uTitle: UStr;
+  mut .title: Str -> this.uTitle.getStr; ///throws if the title was set with .uTitle and is not a valid Str
+  mut .uTitle: UStr;
   mut .virtualPixelSpace(w: WidthNat, h: HeightNat): mut Frame;
-  read .virtualWidth: WidthNat;
-  read .virtualHeight: HeightNat;
+  mut .virtualWidth: WidthNat;
+  mut .virtualHeight: HeightNat;
   mut .bands(Color): mut Frame;
   mut .opacity(Alpha): mut Frame;
   mut .onResize(mut Consumer[ResizeRequest]): mut Frame;
   mut .onClose(mut MF[Void]): mut Frame;
   mut .close: Void;
   mut .fps(fps: Nat): mut Frame;
-  read .fps: Nat;
-  read .elapsed: Instant;
+  mut .fps: Nat;
+  mut .elapsed: Instant;
   mut .modelFps(fps: Nat, s: mut Scope[ModelFps]): mut Frame;
   mut .content: mut RegionFiller[Void];
   mut .onKey(mut Scope[Keys]): mut Frame;
@@ -407,32 +407,32 @@ Label:_Caption[Label]{
 }
 _EditText[S]: Widget[S]{
   mut .foreground(Color):mut S;
-  read .foreground:Color;
+  mut .foreground:Color;
   mut .textHeight(n:Nat): mut S->this.textHeight'(HeightNat#n);
   mut .textHeight'(HeightNat):mut S;
   mut .aboveBaseline(f:Float):mut S->this.aboveBaseline'(TextRatio#f);
   mut .aboveBaseline'(TextRatio):mut S;
   mut .belowBaseline(f:Float):mut S->this.belowBaseline'(TextRatio#f);
   mut .belowBaseline'(TextRatio):mut S;
-  read .textHeight:HeightNat;
-  read .aboveBaseline:TextRatio;
-  read .belowBaseline:TextRatio;
+  mut .textHeight:HeightNat;
+  mut .aboveBaseline:TextRatio;
+  mut .belowBaseline:TextRatio;
   mut .editable(Bool):mut S;
-  read .editable:Bool;
+  mut .editable:Bool;
   mut .textClearsUndo(Bool):mut S;
-  read .textClearsUndo:Bool;
+  mut .textClearsUndo:Bool;
   mut .caret(CaretPainter):mut S;
   }
 _StrEditText[S]: _EditText[S]{
   mut .text(Str):mut S;
-  read .text:Str;
+  mut .text:Str;
   mut .cleaner(F[Str, mut StrCleaner]):mut S;
   mut .onEdit(mut Consumer[TextEvent]):mut S;
   mut .onCommit(mut Consumer[TextEvent]):mut S;
   }
 _UStrEditText[S]: _EditText[S]{
   mut .uText(UStr):mut S;
-  read .uText:UStr;
+  mut .uText:UStr;
   mut .cleaner(F[UStr, mut UStrCleaner]):mut S;
   mut .onEdit(mut Consumer[UTextEvent]):mut S;
   mut .onCommit(mut Consumer[UTextEvent]):mut S;
@@ -443,13 +443,13 @@ TextArea:_StrEditText[TextArea]{
   .self->this;
   mut .append(Str):mut TextArea;
   mut .wrap(Bool):mut TextArea;
-  read .wrap:Bool;
+  mut .wrap:Bool;
   }
 UTextArea:_UStrEditText[UTextArea]{
   .self->this;
   mut .uAppend(UStr):mut UTextArea;
   mut .wrap(Bool):mut UTextArea;
-  read .wrap:Bool;
+  mut .wrap:Bool;
   }
 TextEvent:ScreenContext{ read .text:Str; read .caret:Nat; read .anchor:Nat; }
 UTextEvent:ScreenContext{ read .uText:UStr; read .caret:Nat; read .anchor:Nat; }
@@ -459,7 +459,7 @@ Picture:Widget[Picture]{
   .self->this;
   mut .image(Image):mut Picture;
   mut .keepAspect(Bool):mut Picture;
-  read .keepAspect:Bool;
+  mut .keepAspect:Bool;
 }
 Mouse:_Styled[Mouse]{ .self->this;
   mut .clicked(mut MouseHandler):mut Mouse;

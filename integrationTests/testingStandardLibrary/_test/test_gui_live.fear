@@ -115,7 +115,7 @@ GuiLiveTests: Test {::
       .info i -> i.validate{:: > "info" .isMsg{:: == "The second model action ran"}}.assertTrue{i};
       }}
   }
-GuiWait: {#(f: read Frame, d: Duration): Void -> Block#
+GuiWait: {#(f: mut Frame, d: Duration): Void -> Block#
   .let[Instant] end = {f.elapsed + d}
   .var[Nat] spins = {0}
   .loop{Block#

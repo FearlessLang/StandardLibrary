@@ -192,12 +192,12 @@ final class _Sections extends AContainer implements Sections$ao$0{
       sections.forEach(this::grow);
     });
   }
-  @Override public Object read$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }
+  @Override public Object mut$size$0(){ return frame.onEdtAndWait(() -> n(sections.size())); }
   boolean collapses(Object i){
     long k= Util.natToLong(i);
     return frame.onEdtAndWait(() -> !tabs && at(k) == expanded);
   }
-  @Override public Object read$isExpanded$1(Object i){
+  @Override public Object mut$isExpanded$1(Object i){
     long k= Util.natToLong(i);
     return frame.onEdtAndWait(() -> Util.bool(at(k) == expanded));
   }

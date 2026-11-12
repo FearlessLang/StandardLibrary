@@ -81,7 +81,7 @@ GuiImageTests: Test {::
       }}
   }
 PictureImage:{#(id: Str): base.Image -> base.IconsConflict.consumeImage(id).scale(Width#40, Height#20)}
-PictureSize:{#(p: read base.Picture): Str -> p.width.str + " " + (p.height.str)}
+PictureSize:{#(p: mut base.Picture): Str -> p.width.str + " " + (p.height.str)}
 CropPixels:{#(i: base.Image): Str -> i.width.str + " " + (i.height.str) + " " + (i.color(X#(+0), Y#(+0)).str) + " " + (i.color(X#((i.width.get - 1).getInt), Y#((i.height.get - 1).getInt)).str)}
 ImagePixels:{#(i: base.Image): Str -> i.color(X#(+5), Y#(+7)).str + " " + (i.color(X#(+6), Y#(+7)).str)}
 InkPixels:{#(i: base.Image): Str -> (+0 =~~ +40).flow.flatMap[Str]{x -> (+0 =~~ +40).flow.map{y -> i.color(X#x, Y#y).str}.list}.filter{c -> c != (Color.ghostWhite.str)}.size.str}
