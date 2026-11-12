@@ -193,14 +193,12 @@ public final class Util{
   }
   public static void printInfo(Info$o$0 i, Throwable d){
     printPart(i);
-    //map.entrySet().stream()
-    //  .filter(e->is(e.getKey(),"list")).forEach(e->printInfoList((Info$o$0)e.getValue()));
     for (var f : _Throw$1c$0.frames(d.getStackTrace())){ System.err.print(_Throw$1c$0.fmtFrame(f)+"\n"); }
   }
   private static void printPart(Info$o$0 i){
     var map= ((Map$c$2Instance)i.imm$softMap$0()).elems();
     var list= List$o$1Instance.asJava(i.imm$softList$0());
-    if (map.isEmpty() && list.isEmpty()){ printInfoMsg("", "", i); return; }
+    if (map.isEmpty() && list.isEmpty()){ printMsg(i); return; }
     var caught= map.size() == 2 && map.keySet().stream().allMatch(k -> is(k, "info") || is(k, "stack"));
     if (caught){
       printPart((Info$o$0)entry(map, "info"));
@@ -216,7 +214,7 @@ public final class Util{
   }
   private static void printElement(Info$o$0 e){
     var plain= ((Map$c$2Instance)e.imm$softMap$0()).elems().isEmpty() && List$o$1Instance.asJava(e.imm$softList$0()).isEmpty();
-    if (plain){ printInfoMsg("", "", e); return; }
+    if (plain){ printMsg(e); return; }
     System.err.print(toS(e)+"\n");
   }
   private static void printFrame(Info$o$0 f){
@@ -225,24 +223,10 @@ public final class Util{
   }
   private static Object entry(Map<MapKey,Object> m, String label){ return m.entrySet().stream().filter(e -> is(e.getKey(), label)).findFirst().orElseThrow().getValue(); }
   private static String msg(Map<MapKey,Object> m, String label){ return ((Str$c$0Instance)((Info$o$0)entry(m, label)).imm$softMsg$0()).val(); }
-  public static boolean is(MapKey k, String label){
+  private static boolean is(MapKey k, String label){
     return k.key instanceof Str$c$0Instance s && s.val().equals(label);
     }
-  public static void printInfoMsg(String prefix, String indent, Info$o$0 i){
-    var msg= ((Str$c$0Instance)i.imm$softMsg$0()).val();
-    msg = msg.replace("\n", "\n"+indent);
-    System.err.print(prefix+msg+"\n");
-  }
-  public static void printInfoList(Info$o$0 i){ 
-    var fList= (List$o$1)i.imm$softList$0();
-    if (isTrue(fList.read$isEmpty$0())){
-      System.err.print("\nEmpty stack trace\n");
-      return;
-    }
-    System.err.print("\nStack trace:\n");
-    var jList= ((List$o$1Instance)fList).val();
-    for (var e : jList){ printInfoMsg("- ", "  ", (Info$o$0)e); }
-  }
+  private static void printMsg(Info$o$0 i){ System.err.print(((Str$c$0Instance)i.imm$softMsg$0()).val()+"\n"); }
   public static RuntimeException asFearlessError(Throwable t){
     for (var c= t; c != null; c = c.getCause()){
       if (c instanceof Deterministic d){ return d; }
