@@ -503,6 +503,7 @@ Menu:_Styled[Menu]{ .self->this;
 ///An item of a ``Menu``: one line of text, enabled by default, with no mark, no action and no submenu.
 ///An item shows the mark it is given, a check box or a radio button, ticked or not; choosing it changes no mark: the scope of the next opening shows the new state.
 ///An item has an action or a submenu, never both; it shows a check box or a radio button, never both: the second setter is an error.
+///The scope of ``.submenu`` runs at once: the scope that builds a menu builds its submenus too.
 MenuItem:_Styled[MenuItem]{ .self->this;
   mut .text(s:Str):mut MenuItem->this.uText(s.u);
   mut .uText(UStr):mut MenuItem;

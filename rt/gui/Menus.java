@@ -49,7 +49,7 @@ final class CMenuItem implements MenuItem$aw$0{
   MenuMark mark= MenuMark.none;
   boolean ticked;
   MF$7$1 action;
-  Object submenu;
+  CMenu submenu;
   boolean built;
   Sk.Line line;
   private void open(){
@@ -87,7 +87,7 @@ final class CMenuItem implements MenuItem$aw$0{
   @Override public Object mut$submenu$1(Object s){
     open();
     if (action != null){ throw Util.detErr(named() + " already has an action, so it cannot also have a submenu: choosing an item either opens its submenu or runs its action"); }
-    submenu = s;
+    submenu = CMenu.build(s);
     return this;
   }
 }
@@ -116,7 +116,6 @@ final class SkMenus{
   int grab;
   boolean swallow;
   boolean took;
-  int asked;
 
   SkMenus(_Frame frame){ this.frame= frame; }
 
@@ -166,7 +165,6 @@ final class SkMenus{
 
   void close(int k){
     if (open.size() <= k){ return; }
-    asked += 1;
     while (open.size() > k){ open.removeLast(); }
     if (highMenu >= k){ highMenu = -1; }
     if (pressMenu >= k){ pressMenu = -1; }
@@ -184,21 +182,9 @@ final class SkMenus{
     }
     boolean was= open.size() > k + 1 && open.get(k + 1).from() == i;
     close(k + 1);
-    if (was){ return; }
-    var scope= it.submenu;
-    asked += 1;
-    int mine= asked;
-    frame.guiRun.queue.submit(new MF$7$1(){ @Override public Object mut$$hash$0(){
-      var m= CMenu.build(scope);
-      frame.changeOnEdt(() -> sub(mine, i, m));
-      return Void$o$0.instance;
-    }});
-  }
-
-  private void sub(int mine, int i, CMenu m){
-    if (mine != asked || m.empty()){ return; }
-    var o= open.getLast();
-    add(m, new Rectangle(o.box().x, o.box().y + o.tops()[i] - 4 - o.scroll()[0], o.box().width, o.height(i)), true, i);
+    if (was || it.submenu.empty()){ return; }
+    var o= open.get(k);
+    add(it.submenu, new Rectangle(o.box().x, o.box().y + o.tops()[i] - 4 - o.scroll()[0], o.box().width, o.height(i)), true, i);
   }
 
   private Hit hit(Point p){
