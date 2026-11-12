@@ -1,22 +1,22 @@
 package _base;
 
-import static _base.Util.detErr;
+import static _base.Util.nonDetErr;
 
 public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
   static void logContract(String methodName, double x){
     if (x < 0.0){
-      throw detErr("Math."+methodName+": Cannot take the "+methodName+" of a negative number, given " + x);
+      throw nonDetErr("Math."+methodName+": Cannot take the "+methodName+" of a negative number, given " + x);
     }
     if (Double.isNaN(x)){
-      throw detErr("Math."+methodName+": Input was NaN, cannot take the "+methodName+" of NaN");
+      throw nonDetErr("Math."+methodName+": Input was NaN, cannot take the "+methodName+" of NaN");
     }
   }
   static void inverseTrigContract(String methodName, double x){
     if (Math.abs(x) > 1){
-      throw detErr("Math."+methodName+": Expected a number in the range [-1, 1], got: " + x);
+      throw nonDetErr("Math."+methodName+": Expected a number in the range [-1, 1], got: " + x);
     }
     if (Double.isNaN(x)){
-      throw detErr("Math."+methodName+": Input was NaN, cannot take the "+methodName+" of NaN");
+      throw nonDetErr("Math."+methodName+": Input was NaN, cannot take the "+methodName+" of NaN");
     }
   }
 
@@ -33,7 +33,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
   default Object imm$logb$2(Object p0, Object p1){
     double b= Float$1c$0Instance.unwrap(p0);
     double x= Float$1c$0Instance.unwrap(p1);
-    if (!(Double.isFinite(b) && b > 0.0 && b != 1.0)){ throw detErr("Math.logb: the base must be greater than 0, finite, and not 1.0, given " + b); }
+    if (!(Double.isFinite(b) && b > 0.0 && b != 1.0)){ throw nonDetErr("Math.logb: the base must be greater than 0, finite, and not 1.0, given " + b); }
     logContract("logb", x);
     return Float$1c$0Instance.instance(Math.log(x) / Math.log(b));
   }
@@ -65,7 +65,7 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
   default Object imm$atan$1(Object p0){
     double x= Float$1c$0Instance.unwrap(p0);
     if (Double.isNaN(x)){
-      throw detErr("Math.atan: Input was NaN, cannot take the atan of NaN");
+      throw nonDetErr("Math.atan: Input was NaN, cannot take the atan of NaN");
     }
     var theta= Float$1c$0Instance.instance(Math.atan(x));
     return new Radian$2o$0(){
@@ -79,10 +79,10 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
     double x= Float$1c$0Instance.unwrap(p0);
     double y= Float$1c$0Instance.unwrap(p1);
     if (Double.isNaN(x)){
-      throw detErr("Math.atan2: First argument was NaN, cannot take atan2 of NaN");
+      throw nonDetErr("Math.atan2: First argument was NaN, cannot take atan2 of NaN");
     }
     if (Double.isNaN(y)){
-      throw detErr("Math.atan2: Second argument was NaN, cannot take atan2 of NaN");
+      throw nonDetErr("Math.atan2: Second argument was NaN, cannot take atan2 of NaN");
     }
     var theta= Float$1c$0Instance.instance(Math.atan2(y, x));
     return new Radian$2o$0(){
@@ -96,10 +96,10 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
     double x= Float$1c$0Instance.unwrap(p0);
     double y= Float$1c$0Instance.unwrap(p1);
     if (Double.isNaN(x)){
-      throw detErr("Math.hypot: First argument was NaN, cannot take hypot of NaN");
+      throw nonDetErr("Math.hypot: First argument was NaN, cannot take hypot of NaN");
     }
     if (Double.isNaN(y)){
-      throw detErr("Math.hypot: Second argument was NaN, cannot take hypot of NaN");
+      throw nonDetErr("Math.hypot: Second argument was NaN, cannot take hypot of NaN");
     }
     return Float$1c$0Instance.instance(Math.hypot(x, y));
   }

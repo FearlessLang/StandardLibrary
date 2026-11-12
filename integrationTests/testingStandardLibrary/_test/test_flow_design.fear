@@ -242,7 +242,7 @@ FlowDesignCloseCalls: Test {::
   .check{L#.flow.distinct(HashBy#Quarter).filter{x -> x > 1}.list .assertEq({::}, Lists#(4))}
   .check{L#.flow.filter{x -> x > 1}.distinct(HashBy#Quarter).list .assertEq({::}, Lists#(2,4))}
   .check{L#.flow.filter{x -> x != 0}.filter{x -> (12 .getTruncDiv x) > 2}.list .assertEq({::}, Lists#(1,2,3,4))}
-  .checkDetErr({::}, {L#.flow.filter{x -> (12 .getTruncDiv x) > 2}.filter{x -> x != 0}.list})
+  .checkNonDetErr({::}, {L#.flow.filter{x -> (12 .getTruncDiv x) > 2}.filter{x -> x != 0}.list})
   }
 
 FlowDesignPlusPlusParRepr: Test {::

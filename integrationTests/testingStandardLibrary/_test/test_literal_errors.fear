@@ -2,7 +2,7 @@ ThrowArithTests: Test {::
   .checkDetErr({::}, {12 .getDiv 0})
   .checkDetErr({::}, {+12 .getDiv 0})
   .checkDetErr({::}, {+12.getByte .getDiv 0})
-  .checkDetErr({::}, {+12/3 / (+0/1)})
+  .checkNonDetErr({::}, {+12/3 / (+0/1)})
   .checkNonDetErr({::}, {Math.maxNat + 1})
   .checkNonDetErr({::}, {Math.minNat - 1})
   .checkNonDetErr({::}, {4_294_967_296 * 4_294_967_296})
@@ -11,9 +11,9 @@ ThrowArithTests: Test {::
   .checkNonDetErr({::}, {Math.maxInt - +2 * +2})
   .checkNonDetErr({::}, {+250.getByte + (+10.getByte)})
   .checkNonDetErr({::}, {Math.minByte - (+1.getByte)})
-  .checkDetErr({::}, {+7.getWrapIndex 0})
-  .checkDetErr({::}, {Math.minNat.getIndexOffset -1})
-  .checkDetErr({::}, {Math.maxNat.getIndexOffset +1})
+  .checkNonDetErr({::}, {+7.getWrapIndex 0})
+  .checkNonDetErr({::}, {Math.minNat.getIndexOffset -1})
+  .checkNonDetErr({::}, {Math.maxNat.getIndexOffset +1})
   }
 
 ThrowListTests: Test {::
@@ -24,18 +24,18 @@ ThrowListTests: Test {::
   .checkDetErr({::}, {List[Str].without 0})
   .checkDetErr({::}, {List[Str].withAlso(1,"x")})
   .checkDetErr({::}, {Lists#("a").get 1})
-  .checkDetErr({::}, {Lists#("a").without 1})
-  .checkDetErr({::}, {Lists#("a").with(1,"b")})
-  .checkDetErr({::}, {Lists#("a").withAlso(2,"b")})
-  .checkDetErr({::}, {Lists#("a","b").subList(0,3)})
+  .checkNonDetErr({::}, {Lists#("a").without 1})
+  .checkNonDetErr({::}, {Lists#("a").with(1,"b")})
+  .checkNonDetErr({::}, {Lists#("a").withAlso(2,"b")})
+  .checkNonDetErr({::}, {Lists#("a","b").subList(0,3)})
   .checkDetErr({::}, {List[Str].subList(0,3)})
   }
 
 ThrowMapTests: Test {::
   .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.get "a"})
-  .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.without "a"})
+  .checkNonDetErr({::}, {Maps#[Str,Str,Str] {::}.without "a"})
   .checkDetErr({::}, {Maps#({::}, "a", "x").get "b"})
-  .checkDetErr({::}, {Maps#({::}, "a", "x").without "b"})
+  .checkNonDetErr({::}, {Maps#({::}, "a", "x").without "b"})
   }
 
 TestLiteralErrors: Test {::

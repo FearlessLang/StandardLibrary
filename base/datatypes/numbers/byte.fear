@@ -32,12 +32,12 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
 
   /// ``this / x`` returns the exact rational quotient of `this` and ``x`` as a `Num`. Throws iff ``x == 0``.
   //>   .check{7.getByte / 2 .getFloat .assertEq 3.5}
-  //>   .checkDetErr({:: .isMsg{::.startsWith("Byte/: ")}}, {7.getByte / 0})
+  //>   .checkNonDetErr({:: .isMsg{::.startsWith("Byte/: ")}}, {7.getByte / 0})
   /(x: Nat): Num;
 
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{(7.getByte) .getTruncDiv 2 .assertEq(3.getByte)}
-  //>   .checkDetErr({::}, {7.getByte .getTruncDiv 0})
+  //>   .checkNonDetErr({::}, {7.getByte .getTruncDiv 0})
   .getTruncDiv(d: Nat): Byte;
 
   /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
@@ -62,7 +62,7 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
 
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getTruncDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7.getByte .getRem 2 .assertEq(1.getByte)}
-  //>   .checkDetErr({::}, {7.getByte .getRem 0})
+  //>   .checkNonDetErr({::}, {7.getByte .getRem 0})
   .getRem(d: Nat): Byte;
 
   /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
@@ -145,12 +145,12 @@ Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
 
   /// ``this.aluDiv(x)`` returns `this` divided by ``x``, truncated toward ``0``. Throws iff ``x == 0``.
   //>   .check{7.getByte .aluDiv(2.getByte) .assertEq(3.getByte)}
-  //>   .checkDetErr({::}, {(7.getByte) .aluDiv(0.getByte)})
+  //>   .checkNonDetErr({::}, {(7.getByte) .aluDiv(0.getByte)})
   .aluDiv(x: Byte): Byte;
 
   /// ``this.aluRem(x)`` returns the remainder paired with ``this.aluDiv(x)``. Throws iff ``x == 0``.
   //>   .check{7.getByte .aluRem(2.getByte) .assertEq(1.getByte)}
-  //>   .checkDetErr({::}, {7.getByte .aluRem(0.getByte)})
+  //>   .checkNonDetErr({::}, {7.getByte .aluRem(0.getByte)})
   .aluRem(x: Byte): Byte;
 
   /// ``this.aluShiftLeft(bits)`` returns `this` shifted left by ``bits``, with the effective shift

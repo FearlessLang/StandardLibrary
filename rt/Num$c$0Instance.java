@@ -32,7 +32,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   private static final BigInteger maxByte= BigInteger.valueOf(255);
 
   public Num$c$0Instance{
-    if (denominator.signum() == 0){ throw detErr("Num: denom==0"); }
+    if (denominator.signum() == 0){ throw nonDetErr("Num: denom==0"); }
     if (numerator.signum() == 0){ numerator = zero; denominator = one; }
     else{
       var g= numerator.gcd(denominator);
@@ -110,14 +110,14 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
               pow(numerator, exponent), pow(denominator, exponent)
       );
     }
-    if (numerator.signum() == 0){ throw detErr("Num**: cannot raise +0/1 to the negative power "+exponent); }
+    if (numerator.signum() == 0){ throw nonDetErr("Num**: cannot raise +0/1 to the negative power "+exponent); }
     // Since negative flip fraction
     return new Num$c$0Instance(pow(denominator, -exponent), pow(numerator, -exponent));
   }
 
   @Override public Object imm$$slash$1(Object p0){
     var o= num(p0);
-    if (o.numerator.signum() == 0){ throw detErr("Num/: x==0"); }
+    if (o.numerator.signum() == 0){ throw nonDetErr("Num/: x==0"); }
     return instance(numerator.multiply(o.denominator), denominator.multiply(o.numerator));
   }
   @Override public Object imm$abs$0(){ return numerator.signum() < 0 ? instance(numerator.negate(), denominator) : this; }
@@ -196,9 +196,9 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   private String notInteger(String m, String to){ return "Num."+m+": cannot convert Num " + this.asString() + " to "+to+" as the denominator is not 1."; }
   private String notInRange(String m, String to, BigInteger min, BigInteger max){ return "Num."+m+": cannot convert Num " + this.asString() + " to "+to+" as the numerator is not in the range ["+min+", "+max+"]"; }
   @Override public Object imm$getInt$0(){
-    if (!isInteger()){ throw detErr(notInteger("getInt", "Int")); }
+    if (!isInteger()){ throw nonDetErr(notInteger("getInt", "Int")); }
     // We know the denominator must be one.
-    if (outOfRange(minInt, maxInt)){ throw detErr(notInRange("getInt", "Int", minInt, maxInt)); }
+    if (outOfRange(minInt, maxInt)){ throw nonDetErr(notInRange("getInt", "Int", minInt, maxInt)); }
     return Int$c$0Instance.instance(this.numerator.longValue());
   }
   @Override public Object imm$tryGetInt$0(){
@@ -208,8 +208,8 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   }
 
   @Override public Object imm$getNat$0(){
-    if (!isInteger()){ throw detErr(notInteger("getNat", "Nat")); }
-    if (outOfRange(zero, maxNat)){ throw detErr(notInRange("getNat", "Nat", zero, maxNat)); }
+    if (!isInteger()){ throw nonDetErr(notInteger("getNat", "Nat")); }
+    if (outOfRange(zero, maxNat)){ throw nonDetErr(notInRange("getNat", "Nat", zero, maxNat)); }
     return Nat$c$0Instance.instance(this.numerator.longValue());
   }
   @Override public Object imm$tryGetNat$0(){
@@ -220,8 +220,8 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
 
 
   @Override public Object imm$getByte$0(){
-    if (!isInteger()){ throw detErr(notInteger("getByte", "Byte")); }
-    if (outOfRange(zero, maxByte)){ throw detErr(notInRange("getByte", "Byte", zero, maxByte)); }
+    if (!isInteger()){ throw nonDetErr(notInteger("getByte", "Byte")); }
+    if (outOfRange(zero, maxByte)){ throw nonDetErr(notInRange("getByte", "Byte", zero, maxByte)); }
     return Byte$o$0Instance.instance(this.numerator.byteValue());
   }
   @Override public Object imm$tryGetByte$0(){
@@ -233,7 +233,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   @Override public Object imm$getFloat$0(){
     double x= nearestDouble();
     if (!isExact(x)){
-      throw detErr("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
+      throw nonDetErr("Num.getFloat: cannot convert Num "+read$str$0()+" to Float as it is not exactly representable as a Float");
     }
     return Float$1c$0Instance.instance(x);
   }
@@ -273,7 +273,7 @@ public record Num$c$0Instance(BigInteger numerator, BigInteger denominator) impl
   @Override public Object imm$eqDelta$2(Object p0, Object p1){
     var exp= num(p0);
     var d= num(p1);
-    if (d.numerator.signum() < 0){ throw detErr("Num.eqDelta: delta<0"); }
+    if (d.numerator.signum() < 0){ throw nonDetErr("Num.eqDelta: delta<0"); }
     var diff= (Num$c$0Instance)((Num$c$0Instance)this.imm$$dash$1(exp)).imm$abs$0();
     return bool(le(diff, d));
   }

@@ -39,12 +39,12 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// ``this / d`` returns the exact rational quotient of `this` and ``d`` as a `Num`. Throws iff ``d == 0``.
   //>   .check{(7 / 2) .softFloat .assertEq 3.5}
-  //>   .checkDetErr({::}, {7 / 0})
+  //>   .checkNonDetErr({::}, {7 / 0})
   /(d: Nat) : Num;
 
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{7 .getTruncDiv 2 .assertEq 3}
-  //>   .checkDetErr({::}, {7 .getTruncDiv 0})
+  //>   .checkNonDetErr({::}, {7 .getTruncDiv 0})
   .getTruncDiv(d: Nat): Nat;
 
   /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
@@ -68,7 +68,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getTruncDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{7 .getRem 2 .assertEq 1}
-  //>   .checkDetErr({::}, {7 .getRem 0})
+  //>   .checkNonDetErr({::}, {7 .getRem 0})
   .getRem(d: Nat): Nat;
 
   /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
@@ -105,7 +105,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// Throws if the result would underflow below ``0`` or overflow past `Math.maxNat`.
   //>   .check{5 .getIndexOffset(+3) .assertEq 8}
   //>   .check{5 .getIndexOffset(-3) .assertEq 2}
-  //>   .checkDetErr({::}, {5 .getIndexOffset(-10)})
+  //>   .checkNonDetErr({::}, {5 .getIndexOffset(-10)})
   .getIndexOffset(delta: Int): Nat;
 
   /// ``this.tryGetIndexOffset(delta)`` returns `.ok` of ``this.getIndexOffset(delta)``, or the error info of
@@ -147,7 +147,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// `this.getInt` converts `this` to an `Int`. Throws if ``this > maxInt``.
   //>   .check{5 .getInt .assertEq +5}
-  //>   .checkDetErr({::}, {Math.maxNat .getInt})
+  //>   .checkNonDetErr({::}, {Math.maxNat .getInt})
   .getInt: Int;
 
   /// `this.tryGetInt` returns `.ok` of `this.getInt`, or the error info of `this.getInt` if ``this > maxInt``.
@@ -157,7 +157,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// `this.getByte` converts `this` to a `Byte`. Throws if ``this > maxByte``.
   //>   .check{5 .getByte .assertEq(5.getByte)}
-  //>   .checkDetErr({::}, {300 .getByte})
+  //>   .checkNonDetErr({::}, {300 .getByte})
   .getByte: Byte;
   /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if ``this > maxByte``.
   //>   .check{(5 .tryGetByte).ok.assertEq({::}, Opts#(5.getByte))}
@@ -166,7 +166,7 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// `this.getFloat` converts `this` to a `Float`. Throws if `this` is not exactly representable.
   //>   .check{5 .getFloat .assertEq 5.0}
-  //>   .checkDetErr({::}, {Math.maxNat.getFloat})
+  //>   .checkNonDetErr({::}, {Math.maxNat.getFloat})
   .getFloat: Float;
 
   /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not exactly representable.
@@ -202,12 +202,12 @@ Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
 
   /// ``this.aluDiv(x)`` returns `this` divided by ``x``, truncated toward ``0`` (u64 semantics). Throws iff ``x == 0``.
   //>   .check{7 .aluDiv 2 .assertEq 3}
-  //>   .checkDetErr({::}, {7 .aluDiv 0})
+  //>   .checkNonDetErr({::}, {7 .aluDiv 0})
   .aluDiv(x: Nat): Nat;
 
   /// ``this.aluRem(x)`` returns the remainder paired with ``this.aluDiv(x)``. Throws iff ``x == 0``.
   //>   .check{7 .aluRem 2 .assertEq 1}
-  //>   .checkDetErr({::}, {7 .aluRem 0})
+  //>   .checkNonDetErr({::}, {7 .aluRem 0})
   .aluRem(x: Nat): Nat;
 
   /// ``this.aluShiftLeft(bits)`` returns `this` shifted left by ``bits``, with the effective shift

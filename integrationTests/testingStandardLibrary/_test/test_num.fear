@@ -14,7 +14,7 @@ NumArithTests: Test {::
   .check{-1/1 ** (Math.minInt) .assertEq(+1.num)}
   .check{+1/1 ** (Math.minInt) .assertEq(+1.num)}
   .check{+0/1 ** (Math.maxInt) .assertEq(+0.num)}
-  .checkDetErr({::.isMsg{::.startsWith "Num**: cannot raise +0/1 to the negative power -3"}}, {+0/1 ** -3})
+  .checkNonDetErr({::.isMsg{::.startsWith "Num**: cannot raise +0/1 to the negative power -3"}}, {+0/1 ** -3})
   .checkNonDetErr({::.isMsg{::.startsWith "Num**:"}}, {2/1 ** +3_000_000_000})
   }
 
@@ -54,7 +54,7 @@ NumConvTests: Test {::
   .check{+5.num.getByte .assertEq (+5.getByte)}
   .check{+5.num.getFloat .assertEq +5.0}
   .check{(2/1 ** +1024) .float .assertEmpty {::}}
-  .checkDetErr({::}, {(2/1 ** +1024) .getFloat})
+  .checkNonDetErr({::}, {(2/1 ** +1024) .getFloat})
   .check{(2/1 ** +1024) .softFloat .assertEq(Math.inf)}
   .check{0.0 .getSucc .getNum .float .assertEq({::}, Opts#(0.0 .getSucc))}
   .check{0.0 .getSucc .getNum .softFloat .assertEq(0.0 .getSucc)}

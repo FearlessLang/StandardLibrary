@@ -17,8 +17,8 @@ _MagicMath: Sealed {
   /// -ve infinity if x = 0,
   /// +ve infinity if x is positive infinity,
   /// log base `base` of x otherwise;
-  //>   .checkDetErr({::.isMsg{:: == "Math.logb: the base must be greater than 0, finite, and not 1.0, given 1.0"}}, {Math.logb(+1.0, +8.0)})
-  //>   .checkDetErr({::.isMsg{::.startsWith "Math.logb:"}}, {Math.logb(Math.inf, +8.0)})
+  //>   .checkNonDetErr({::.isMsg{:: == "Math.logb: the base must be greater than 0, finite, and not 1.0, given 1.0"}}, {Math.logb(+1.0, +8.0)})
+  //>   .checkNonDetErr({::.isMsg{::.startsWith "Math.logb:"}}, {Math.logb(Math.inf, +8.0)})
   .logb(base: Float, x: Float): Float -> _Magic!;
 
   /// Returns:

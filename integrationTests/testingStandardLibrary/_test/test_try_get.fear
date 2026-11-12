@@ -17,7 +17,7 @@ TryGetNumberTests: Test {::
   .check{Math.inf.tryGetFloor.assertInfo{::.isMsg{::.startsWith "Float.getFloor: Expected finite number, got "}}}
   .check{3.5 .tryGetInt .assertInfo{::.isMsg{::.startsWith `Float.getInt`}}}
   .check{Math.inf.tryGetDeg.assertInfo{::.isMsg{::.startsWith "Float.getDeg: Invalid angle, "}}}
-  .checkDetErr({::.isMsg{::.startsWith `Nat.getRem`}}, {7 .getRem 0})
+  .checkNonDetErr({::.isMsg{::.startsWith `Nat.getRem`}}, {7 .getRem 0})
   }
 
 TryGetStrInfoTests: Test {::
@@ -54,10 +54,10 @@ TryGetCollectionTests: Test {::
   .checkDetErr({::.isMsg{:: == "List.with: index 2 is out of range for an empty List."}}, {List[Nat].with(2, 7)})
   .checkDetErr({::.isMsg{:: == "List.without: index 0 is out of range for an empty List."}}, {List[Nat].without 0})
   .checkDetErr({::.isMsg{:: == "List.withAlso: index 1 is out of range for an empty List."}}, {List[Nat].withAlso(1, 7)})
-  .checkDetErr({::.isMsg{:: == "List.withAlso: index 4 is out of range for a List of size 3."}}, {Lists#(1,2,3).withAlso(4, 7)})
+  .checkNonDetErr({::.isMsg{:: == "List.withAlso: index 4 is out of range for a List of size 3."}}, {Lists#(1,2,3).withAlso(4, 7)})
   .checkDetErr({::.isMsg{:: == "List.subList: the range 0 to 1 is out of range for an empty List."}}, {List[Nat].subList(0, 1)})
-  .checkDetErr({::.isMsg{:: == "List.subList: the range 1 to 5 is out of range for a List of size 3."}}, {Lists#(1,2,3).subList(1, 5)})
-  .checkDetErr({::.isMsg{:: == "List.subList: start 2 is greater than end 1."}}, {Lists#(1,2,3).subList(2, 1)})
+  .checkNonDetErr({::.isMsg{:: == "List.subList: the range 1 to 5 is out of range for a List of size 3."}}, {Lists#(1,2,3).subList(1, 5)})
+  .checkNonDetErr({::.isMsg{:: == "List.subList: start 2 is greater than end 1."}}, {Lists#(1,2,3).subList(2, 1)})
   .checkDetErr({::.isMsg{:: == "EList.trimTo: the range 1 to 5 is out of range for an EList of size 3."}}, {ELists#(1,2,3).trimTo(1, 5)})
   .checkDetErr({::.isMsg{:: == "EList.trimTo: start 2 is greater than end 1."}}, {ELists#(1,2,3).trimTo(2, 1)})
   }
@@ -67,18 +67,18 @@ FloatNumConversionTests: Test {::
   .check{-9223372036854775808.0 .getInt .assertEq(Math.minInt)}
   .check{(4294967296.0 .tryGetInt).ok.assertEq({::}, Opts#(+4294967296))}
   .check{4294967296.0 .int .assertEq({::}, Opts#(+4294967296))}
-  .checkDetErr({::.isMsg{::.startsWith `Float.getInt`}}, {9223372036854775808.0 .getInt})
+  .checkNonDetErr({::.isMsg{::.startsWith `Float.getInt`}}, {9223372036854775808.0 .getInt})
   .check{9223372036854775808.0 .tryGetInt .assertInfo{::.isMsg{::.startsWith `Float.getInt`}}}
   .check{4294967296.0 .getNat .assertEq 4294967296}
   .check{9223372036854775808.0 .getNat .assertEq 9223372036854775808}
   .check{(9223372036854775808.0 .tryGetNat).ok.assertEq({::}, Opts#(9223372036854775808))}
   .check{9223372036854775808.0 .nat .assertEq({::}, Opts#(9223372036854775808))}
-  .checkDetErr({::.isMsg{::.startsWith `Float.getNat`}}, {18446744073709551616.0 .getNat})
+  .checkNonDetErr({::.isMsg{::.startsWith `Float.getNat`}}, {18446744073709551616.0 .getNat})
   .check{9223372036854775808.0 .softNat .assertEq 9223372036854775808}
   .check{18446744073709551616.0 .softNat .assertEq(Math.maxNat)}
   .check{18446744073709551616.0 .nat .assertEmpty {::}}
-  .checkDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(1/2).getByte})
-  .checkDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(300/1).getByte})
+  .checkNonDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(1/2).getByte})
+  .checkNonDetErr({::.isMsg{::.startsWith `Num.getByte`}}, {(300/1).getByte})
   .check{(1/2).tryGetByte.assertInfo{::.isMsg{::.startsWith `Num.getByte`}}}
   .check{(300/1).tryGetByte.assertInfo{::.isMsg{::.startsWith `Num.getByte`}}}
   }
@@ -90,9 +90,9 @@ SuccPredTests: Test {::
   .checkNonDetErr({::.isMsg{::.startsWith `Int.pred:`}}, {(Math.minInt).pred})
   .checkNonDetErr({::.isMsg{::.startsWith `Byte.succ:`}}, {(Math.maxByte).succ})
   .checkNonDetErr({::.isMsg{::.startsWith `Byte.pred:`}}, {(Math.minByte).pred})
-  .checkDetErr({::.isMsg{::.startsWith `Float.getSucc`}}, {Math.nan.getSucc})
+  .checkNonDetErr({::.isMsg{::.startsWith `Float.getSucc`}}, {Math.nan.getSucc})
   .check{Math.inf.tryGetSucc.assertInfo{::.isMsg{::.startsWith `Float.getSucc`}}}
-  .checkDetErr({::.isMsg{::.startsWith `Float.getPred`}}, {Math.negInf.getPred})
+  .checkNonDetErr({::.isMsg{::.startsWith `Float.getPred`}}, {Math.negInf.getPred})
   .check{Math.nan.tryGetPred.assertInfo{::.isMsg{::.startsWith `Float.getPred`}}}
   .checkNonDetErr({::.isMsg{::.startsWith `Int*`}}, {(Math.maxInt) * +2})
   .checkNonDetErr({::.isMsg{::.startsWith "Nat*: overflow"}}, {(Math.maxNat) * 2})
@@ -107,7 +107,7 @@ SuccPredTests: Test {::
   .checkNonDetErr({::.isMsg{:: == "Byte+: overflow, 200 + 100 is greater than Math.maxByte (255)"}}, {200.getByte + (100.getByte)})
   .checkNonDetErr({::.isMsg{:: == "Byte-: underflow, 0 - 1 is less than 0"}}, {0.getByte - (1.getByte)})
   .checkNonDetErr({::.isMsg{:: == "Byte**: overflow, 2 ** 8 is greater than Math.maxByte (255)"}}, {2.getByte ** 8})
-  .checkDetErr({::.isMsg{::.startsWith `Nat.getInt`}}, {(Math.maxNat).getInt})
+  .checkNonDetErr({::.isMsg{::.startsWith `Nat.getInt`}}, {(Math.maxNat).getInt})
   }
 
 TryGetNamesGetTests: Test {::
@@ -120,7 +120,7 @@ TryGetNamesGetTests: Test {::
   .checkDetErr({::.isMsg{::.startsWith "Float.getDeg: Invalid angle, "}}, {Math.inf.getDeg})
   .checkDetErr({::.isMsg{::.startsWith "Float.getRad: Invalid angle, "}}, {Math.nan.getRad})
   .check{Math.nan.tryGetRad.assertInfo{::.isMsg{::.startsWith "Float.getRad: Invalid angle, "}}}
-  .checkDetErr({::.isMsg{::.startsWith "Num.getFloat: cannot convert Num +1/3 to Float"}}, {(1/3).getFloat})
+  .checkNonDetErr({::.isMsg{::.startsWith "Num.getFloat: cannot convert Num +1/3 to Float"}}, {(1/3).getFloat})
   .check{(1/3).tryGetFloat.assertInfo{::.isMsg{::.startsWith "Num.getFloat: cannot convert Num +1/3 to Float"}}}
   .checkDetErr({::.isMsg{:: == "UStr.getStr: the scalar value .u`00E9` at index 1 is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`."}}, {"a".u("00E9").getStr})
   .check{"a".u("00E9").tryGetStr.assertInfo{::.isMsg{:: == "UStr.getStr: the scalar value .u`00E9` at index 1 is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`."}}}

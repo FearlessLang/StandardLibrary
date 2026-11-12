@@ -73,7 +73,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$getNat$0(){
     if (val < 0){
-      throw detErr("Int.getNat: cannot convert negative Int "+val+" to Nat");
+      throw nonDetErr("Int.getNat: cannot convert negative Int "+val+" to Nat");
     }
     return Nat$c$0Instance.instance(val);
   }
@@ -85,10 +85,10 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$getByte$0(){
     if (val < 0){
-      throw detErr("Int.getByte: cannot convert to Byte "+val+" is less than 0");
+      throw nonDetErr("Int.getByte: cannot convert to Byte "+val+" is less than 0");
     }
     if (val > 255){
-      throw detErr("Int.getByte: cannot convert to Byte "+val+" is greater than 255");
+      throw nonDetErr("Int.getByte: cannot convert to Byte "+val+" is greater than 255");
     }
     return Byte$o$0Instance.instance((byte)val);
   }
@@ -105,7 +105,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     if (canSafelyConvertToDouble(val)){
       return Float$1c$0Instance.instance((double) val);
     }
-    throw detErr(
+    throw nonDetErr(
   "Int.getFloat: cannot convert to Float "
         + val
         + " is too large to be represented as a Float without loss of precision"
@@ -132,7 +132,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L){
-      throw detErr("Int/: d==0");
+      throw nonDetErr("Int/: d==0");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(val),
@@ -189,7 +189,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$getTruncDiv$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw detErr("Int.getTruncDiv: d==0"); }
+    if (d == 0L){ throw nonDetErr("Int.getTruncDiv: d==0"); }
     return instance(truncDiv(val, d));
   }
   @Override public Object imm$tryGetTruncDiv$1(Object p0){
@@ -199,7 +199,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$getRem$1(Object p0){
     long d= unsignedLongFromNat(p0);
-    if (d == 0L){ throw detErr("Int.getRem: d==0"); }
+    if (d == 0L){ throw nonDetErr("Int.getRem: d==0"); }
     return instance(val - truncDiv(val, d) * d);
   }
   @Override public Object imm$tryGetRem$1(Object p0){
@@ -220,7 +220,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   }
   @Override public Object imm$getWrapIndex$1(Object p0){
     long len= unsignedLongFromNat(p0);
-    if (len == 0L){ throw detErr("Int.getWrapIndex: len==0"); }
+    if (len == 0L){ throw nonDetErr("Int.getWrapIndex: len==0"); }
     return Nat$c$0Instance.instance(wrap(val, len));
   }
   @Override public Object imm$tryGetWrapIndex$1(Object p0){
@@ -238,12 +238,12 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance(val * unwrap(p0)); }
   @Override public Object imm$aluDiv$1(Object p0){
     long x= unwrap(p0);
-    if (x == 0){ throw detErr("Int.aluDiv: x==0"); }
+    if (x == 0){ throw nonDetErr("Int.aluDiv: x==0"); }
     return instance(val / x);
   }
   @Override public Object imm$aluRem$1(Object p0){
     long x= unwrap(p0);
-    if (x == 0){ throw detErr("Int.aluRem: x==0"); }
+    if (x == 0){ throw nonDetErr("Int.aluRem: x==0"); }
     return instance(val % x);
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){ return instance(val << (unsignedLongFromNat(p0))); }
