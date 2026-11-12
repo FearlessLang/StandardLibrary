@@ -33,7 +33,7 @@ Action[R:*]: {
     .info i -> Assert.msg("Success expected but an Info was thrown:" | i.str);
   };
   mut .assertInfo: Void -> this.run{
-    .ok _ -> Assert.msg "Failure expected but nothing was thrown";
+    .ok _ -> Assert.msg "Expected an error, but got success.";
     .info _->{};
     };
 
@@ -54,7 +54,7 @@ Action[R:*]: {
   /// ``this.assertInfo constraint`` asserts that this action fails and that the failure info satisfies the given constraint.
   //> .checkNonDetErr({::}, {Try#{1 / 0}.assertInfo{::.isMsg{::.contains "divide by zero"}}});
   mut .assertInfo(constraint: F[InfoValidator, InfoCheck]): Void -> this.run{
-    .ok _ -> Assert.msg "Failure expected but nothing was thrown";
+    .ok _ -> Assert.msg "Expected an error, but got success.";
     .info info ->
       Assert!(
         info.validate constraint,

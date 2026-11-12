@@ -113,14 +113,14 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
   mut .disabledCheckWithSys(CheckSys): mut TestCap;  
   mut .checkDetErr[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[T]): mut TestCap -> this.check{
     Try#(f).run {
-     .ok _ -> Error.msg "Expected error but got success";
+     .ok _ -> Error.msg "Expected an error, but got success.";
      .info i -> _ErrMatch#(i, errorMatch)
      }
     };
   mut .checkNonDetErr[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[T]): mut TestCap -> this.checkWithSys{
     sys -> sys.try#({Try#(f).run {
-      .ok _ -> "Expected error but got success";
-      .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
+      .ok _ -> "Expected an error, but got success.";
+      .info i -> "Expected a non-deterministic error, but got the deterministic error " + (i.str)
     }}).run {
        .ok errMsg -> Error.msg errMsg;
        .info i -> _ErrMatch#(i.getMap.get "info", errorMatch)
@@ -128,14 +128,14 @@ TestCap: Sealed {//by making it sealed we can guaranteed the output of the funct
      };
   mut .checkDetErrWithSys[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[iso System, T]): mut TestCap -> this.checkWithSys{
     sys -> Try#(sys.iso.close, f).run {
-     .ok _ -> Error.msg "Expected error but got success";
+     .ok _ -> Error.msg "Expected an error, but got success.";
      .info i -> _ErrMatch#(i, errorMatch)
      }
     };
   mut .checkNonDetErrWithSys[T:*](errorMatch: F[InfoValidator, InfoCheck], f: F[iso System, T]): mut TestCap -> this.checkWithSys{
     sys -> sys.try#(sys.iso.close, {s -> Try#(s, f).run {
-      .ok _ -> "Expected error but got success";
-      .info i -> "Expected non-deterministic error, but deterministic error was thrown instead:" + (i.str)
+      .ok _ -> "Expected an error, but got success.";
+      .info i -> "Expected a non-deterministic error, but got the deterministic error " + (i.str)
     }}).run {
        .ok errMsg -> Error.msg errMsg;
        .info i -> _ErrMatch#(i.getMap.get "info", errorMatch)
