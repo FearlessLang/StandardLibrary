@@ -7,8 +7,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// Note: Unlike `.getSucc` for the other numeric types this does not return ``this + 1``.
   //>   .check{1.0 .getSucc .assertGt 1.0}
   //>   .check{Math.negZero .getSucc .assertEq(+0.0.getSucc)}
-  //>   .checkDetErr({::}, {Math.nan .getSucc})
-  //>   .checkDetErr({::}, {Math.inf .getSucc})
+  //>   .checkNonDetErr({::}, {Math.nan .getSucc})
+  //>   .checkNonDetErr({::}, {Math.inf .getSucc})
   .getSucc: Float;
   /// `this.tryGetSucc` returns `.ok` of `this.getSucc`, or the error info of `this.getSucc` if `this` is `Math.nan` or `Math.inf`.
   //>   .check{(1.0 .tryGetSucc).ok.assertEq({::}, Opts#(1.0 .getSucc))}
@@ -20,8 +20,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// Note: Unlike `.getPred` for the other numeric types this does not return ``this - 1``.
   //>   .check{1.0 .getPred .assertLt 1.0}
   //>   .check{0.0 .getPred .assertEq(Math.negZero.getPred)}
-  //>   .checkDetErr({::}, {Math.nan .getPred})
-  //>   .checkDetErr({::}, {Math.negInf .getPred})
+  //>   .checkNonDetErr({::}, {Math.nan .getPred})
+  //>   .checkNonDetErr({::}, {Math.negInf .getPred})
   .getPred: Float;
   /// `this.tryGetPred` returns `.ok` of `this.getPred`, or the error info of `this.getPred` if `this` is `Math.nan` or `Math.negInf`.
   //>   .check{(1.0 .tryGetPred).ok.assertEq({::}, Opts#(1.0 .getPred))}
@@ -437,8 +437,8 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.getInt` converts `this` to an `Int` if it is an integer in ``[minInt, maxInt]``; throws otherwise.
   //>   .check{3.0 .getInt .assertEq +3}
-  //>   .checkDetErr({::}, {3.5 .getInt})
-  //>   .checkDetErr({::}, {(Math.nan) .getInt})
+  //>   .checkNonDetErr({::}, {3.5 .getInt})
+  //>   .checkNonDetErr({::}, {(Math.nan) .getInt})
   .getInt: Int;
   /// `this.tryGetInt` returns `.ok` of `this.getInt`, or the error info of `this.getInt` if `this` is not an integer in ``[minInt, maxInt]``.
   //>   .check{(3.0 .tryGetInt).ok.assertEq({::}, Opts# +3)}
@@ -447,7 +447,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.getNat` converts `this` to a `Nat` if it is an integer in ``[0, maxNat]``; throws otherwise.
   //>   .check{3.0 .getNat .assertEq 3}
-  //>   .checkDetErr({::}, {(-1.0) .getNat})
+  //>   .checkNonDetErr({::}, {(-1.0) .getNat})
   .getNat: Nat;
   /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if `this` is not an integer in ``[0, maxNat]``.
   //>   .check{(3.0 .tryGetNat).ok.assertEq({::}, Opts# 3)}
@@ -456,7 +456,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.getByte` converts `this` to a `Byte` if it is an integer in ``[0, maxByte]``; throws otherwise.
   //>   .check{3.0 .getByte.nat .assertEq 3}
-  //>   .checkDetErr({::}, {300.0 .getByte})
+  //>   .checkNonDetErr({::}, {300.0 .getByte})
   .getByte: Byte;
   /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not an integer in ``[0, maxByte]``.
   //>   .check{(3.0 .tryGetByte).ok.assertEq({::}, Opts#(3.getByte))}

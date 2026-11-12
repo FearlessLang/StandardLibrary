@@ -57,7 +57,7 @@ public final class Set$c$1Instance implements Set$c$1{
   @Override public Object imm$contains$1(Object p0){ return bool(set.containsKey(mapKey(ordering, p0))); }
   @Override public Object imm$get$1(Object p0){
     Object key= set.get(mapKey(ordering, p0));
-    if (key == null){ throw err(absent(p0)); }
+    if (key == null){ throw detErr(absent(p0)); }
     return key;
   }
   @Override public Object imm$tryGet$1(Object p0){

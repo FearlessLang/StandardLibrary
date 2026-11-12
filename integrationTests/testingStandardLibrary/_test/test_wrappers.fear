@@ -28,7 +28,7 @@ CoordIntNegativeTests: Test {::
   .check{Rects#(X#(-10), Y#(-10), Width#30, Height#30) .contains(X#(-5), Y#(-5)) .assertTrue}
   .check{Rects#(X#(-10), Y#(-10), Width#30, Height#30) .contains(X#(+21), Y#(+0)) .assertFalse}
   .check{Rects#(X#(-10), Y#(-10), Width#30, Height#30) .right .assertEq(X#(+20))}
-  .checkDetErr({::}, {(X#(+3)) .to(X#(-7))})
+  .checkNonDetErr({::}, {(X#(+3)) .to(X#(-7))})
   }
 
 CoordIntTests: Test {::
@@ -47,7 +47,7 @@ CoordIntDiffTests: Test {::
   .check{(X#(+3)) .gap(X#(+10)) .assertEq(Width#7)}
   .check{(X#(+10)) .gap(X#(+3)) .assertEq(Width#7)}
   .check{(X#(+0)) .gap(X#(Math.maxInt)) .assertEq(Width#(Math.maxInt.getNat))}
-  .checkDetErr({::}, {(X#(+10)) .to(X#(+3))})
+  .checkNonDetErr({::}, {(X#(+10)) .to(X#(+3))})
   }
 
 CoordIntRoundTripTests: Test {::

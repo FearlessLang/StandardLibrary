@@ -97,9 +97,6 @@ public final class Util{
   public static Error nonDetErr(String msg){
     return (Error)Error$1c$0.instance.imm$nonDeterministic$1(new Str$c$0Instance(msg));
     }
-  public static Error err(String msg){//TODO: eventually all calls to .err will need to take a decision det/non det.
-    return detErr(msg);
-    }
   public static Error detErr(String msg){
     var info= _base.Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(msg));
     return (Error) Error$1c$0.instance.imm$$bang$1(info);
@@ -122,7 +119,7 @@ public final class Util{
   public static int natToInt(Object n){
     long nat= ((Nat$c$0Instance)n).val();
     if (Long.compareUnsigned(nat, Integer.MAX_VALUE) > 0){
-      throw err("Nat "+Long.toUnsignedString(nat)+" is too large to be represented as an integer");
+      throw nonDetErr("Nat "+Long.toUnsignedString(nat)+" is too large to be represented as an integer");
     }
     return (int) nat;
   }
@@ -139,7 +136,7 @@ public final class Util{
   public static Object callF$6(Object f, Object v, Object w, Object x, Object y, Object z){ return ((F$3$6)f).read$$hash$5(v, w, x, y, z); }
 
   public static void check(boolean ok, String msg){
-    if (!ok){ throw err(msg); }
+    if (!ok){ throw detErr(msg); }
   }
   private static final Integer lt= -1, eq= 0, gt= 1;//avoid some access to the cached integer maps
   private static final OrderMatch$174$1 cmpM= new OrderMatch$174$1(){

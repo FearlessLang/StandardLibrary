@@ -44,13 +44,13 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// ``this / d`` returns the exact rational quotient of `this` and ``d`` as a `Num`. Throws iff ``d == 0``.
   //>   .check{(+7 / 2) .getFloat .assertEq 3.5}
-  //>   .checkDetErr({::}, {+7 / 0})
+  //>   .checkNonDetErr({::}, {+7 / 0})
   / (d: Nat) : Num;
 
   /// ``this.getTruncDiv(d)`` returns `this` divided by ``d``, truncated toward ``0``. Throws iff ``d == 0``.
   //>   .check{+7 .getTruncDiv 2 .assertEq +3}
   //>   .check{-7 .getTruncDiv 2 .assertEq -3}
-  //>   .checkDetErr({::}, {+7 .getTruncDiv 0})
+  //>   .checkNonDetErr({::}, {+7 .getTruncDiv 0})
   .getTruncDiv(d: Nat): Int;
   /// ``this.tryGetTruncDiv(d)`` returns `.ok` of ``this.getTruncDiv(d)``, or the error info of ``this.getTruncDiv(d)`` iff ``d == 0``.
   //>   .check{(-7 .tryGetTruncDiv 2).ok.assertEq({::}, Opts# -3)}
@@ -74,7 +74,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// ``this.getRem(d)`` returns the remainder ``this - (this.getTruncDiv(d)) * d``. Throws iff ``d == 0``.
   //>   .check{+7 .getRem 2 .assertEq +1}
-  //>   .checkDetErr({::}, {+7 .getRem 0})
+  //>   .checkNonDetErr({::}, {+7 .getRem 0})
   .getRem(d: Nat): Int;
 
   /// ``this.tryGetRem(d)`` returns `.ok` of ``this.getRem(d)``, or the error info of ``this.getRem(d)`` iff ``d == 0``.
@@ -132,7 +132,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// Throws iff ``len == 0``.
   //>   .check{-1 .getWrapIndex 7 .assertEq 6}
   //>   .check{+8 .getWrapIndex 7 .assertEq 1}
-  //>   .checkDetErr({::}, {+5 .getWrapIndex 0})
+  //>   .checkNonDetErr({::}, {+5 .getWrapIndex 0})
   .getWrapIndex(len: Nat): Nat;
 
   /// ``this.tryGetWrapIndex(len)`` returns `.ok` of ``this.getWrapIndex(len)``, or the error info of ``this.getWrapIndex(len)`` iff ``len == 0``.
@@ -166,7 +166,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.getNat` converts `this` to a `Nat`. Throws if ``this < 0``.
   //>   .check{+5 .getNat .assertEq 5}
-  //>   .checkDetErr({::}, {-5 .getNat})
+  //>   .checkNonDetErr({::}, {-5 .getNat})
   .getNat: Nat;
 
   /// `this.tryGetNat` returns `.ok` of `this.getNat`, or the error info of `this.getNat` if ``this < 0``.
@@ -176,7 +176,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.getByte` converts `this` to a `Byte`. Throws if `this` is not in ``[0, maxByte]``.
   //>   .check{+5 .getByte .assertEq(5.getByte)}
-  //>   .checkDetErr({::}, {+300 .getByte})
+  //>   .checkNonDetErr({::}, {+300 .getByte})
   .getByte: Byte;
 
   /// `this.tryGetByte` returns `.ok` of `this.getByte`, or the error info of `this.getByte` if `this` is not in ``[0, maxByte]``.
@@ -186,7 +186,7 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
 
   /// `this.getFloat` converts `this` to a `Float`. Throws if `this` is not exactly representable.
   //>   .check{+5 .getFloat .assertEq 5.0}
-  //>   .checkDetErr({::}, {Math.minInt + +1 .getFloat})
+  //>   .checkNonDetErr({::}, {Math.minInt + +1 .getFloat})
   .getFloat: Float;
 
   /// `this.tryGetFloat` returns `.ok` of `this.getFloat`, or the error info of `this.getFloat` if `this` is not exactly representable.
@@ -224,13 +224,13 @@ Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// ``this.aluDiv(x)`` returns `this` divided by ``x``, truncated toward ``0`` (i64 semantics).
   /// Note: unlike `.getDiv`, ``x`` is a signed `Int`, a negative divisor is allowed. Throws iff ``x == 0``.
   //>   .check{+7 .aluDiv -2 .assertEq -3}
-  //>   .checkDetErr({::}, {+7 .aluDiv +0})
+  //>   .checkNonDetErr({::}, {+7 .aluDiv +0})
   .aluDiv(x: Int): Int;
 
   /// ``this.aluRem(x)`` returns the remainder paired with ``this.aluDiv(x)``; the result's sign
   /// follows the dividend (`this`), not the divisor. Throws iff ``x == 0``.
   //>   .check{-7 .aluRem +2 .assertEq -1}
-  //>   .checkDetErr({::}, {+7 .aluRem +0})
+  //>   .checkNonDetErr({::}, {+7 .aluRem +0})
   .aluRem(x: Int): Int;
 
   /// ``this.aluShiftLeft(bits)`` returns `this` shifted left by ``bits``, with the effective shift

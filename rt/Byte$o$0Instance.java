@@ -97,7 +97,7 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
   @Override public Object imm$$slash$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
     if (d == 0L){
-      throw err("Byte/: x==0");
+      throw nonDetErr("Byte/: x==0");
     }
     return Num$c$0Instance.instance(
       BigInteger.valueOf(u8(val)),
@@ -107,7 +107,7 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
   @Override public Object imm$getTruncDiv$1(Object p0){
     long d= natBits(p0);
 
-    if (d == 0L){ throw err("Byte.getTruncDiv: d==0"); }
+    if (d == 0L){ throw nonDetErr("Byte.getTruncDiv: d==0"); }
     return instance((byte)Long.divideUnsigned(u8(val), d));
   }
   @Override public Object imm$tryGetTruncDiv$1(Object p0){
@@ -120,7 +120,7 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
   /// Therefore it is safe to cast this % nat to byte
   @Override public Object imm$getRem$1(Object p0){
     long d= Nat$c$0Instance.unwrap(p0);
-    if (d == 0){ throw err("Byte.getRem: d==0"); }
+    if (d == 0){ throw nonDetErr("Byte.getRem: d==0"); }
     return instance((byte) Long.remainderUnsigned(Byte.toUnsignedLong(val), d));
   }
   @Override public Object imm$tryGetRem$1(Object p0){
@@ -149,12 +149,12 @@ public record Byte$o$0Instance(byte val, Object size1Str, Object size1UStr, Obje
   @Override public Object imm$aluMulWrap$1(Object p0){ return instance((byte)(val * b(p0))); }
   @Override public Object imm$aluDiv$1(Object p0){
     int d= u8(p0);
-    if (d == 0){ throw err("Byte.aluDiv: x==0"); }
+    if (d == 0){ throw nonDetErr("Byte.aluDiv: x==0"); }
     return instance((byte)(u8(val) / d));
   }
   @Override public Object imm$aluRem$1(Object p0){
     int d= u8(p0);
-    if (d == 0){ throw err("Byte.aluRem: x==0"); }
+    if (d == 0){ throw nonDetErr("Byte.aluRem: x==0"); }
     return instance((byte)(u8(val) % d));
   }
   @Override public Object imm$aluShiftLeft$1(Object p0){

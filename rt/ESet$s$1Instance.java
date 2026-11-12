@@ -73,7 +73,7 @@ final class ESet$s$1Instance implements ESet$s$1{
     @Override public Object mut$get$1(Object p0){
         Object key= this.set.get(mapKey(this.ordering, p0));
         if (key != null){ return key; }
-        throw err(absent(p0));
+        throw detErr(absent(p0));
     }
     @Override public Object mut$tryGet$1(Object p0){
         Object key= this.set.get(mapKey(this.ordering, p0));

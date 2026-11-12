@@ -52,7 +52,7 @@ Action[R:*]: {
     };
 
   /// ``this.assertInfo constraint`` asserts that this action fails and that the failure info satisfies the given constraint.
-  //> .checkNonDetErr({::}, {Try#{1 / 0}.assertInfo{::.isMsg{::.contains "divide by zero"}}});
+  //> .checkNonDetErr({::}, {Try#{Lists#(1).get 5}.assertInfo{::.isMsg{::.contains "divide by zero"}}});
   mut .assertInfo(constraint: F[InfoValidator, InfoCheck]): Void -> this.run{
     .ok _ -> Assert.msg "Expected an error, but got success.";
     .info info ->
