@@ -137,7 +137,7 @@ _StrUrls: {
     .do{this.part(url, "path", url.path)}
     .do{this.part(url, "query", url.query)}
     .return{url};
-  .part(url: Url, part: Str, s: Str): Void -> s.indicesOf "%" .findFirst{i -> this.inStr(s.sub(i + 1, i + 3)).not}.ifSome{i -> Error.msg("StrUrls: "+(url.text.escape)+" is refused: its "+part+" "+(s.escape)+" holds the percent escape "+(s.sub(i, i + 3).escape)+" of the byte "+(s.sub(i + 1, i + 3))+", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E")};
+  .part(url: Url, part: Str, s: Str): Void -> s.indicesOf "%" .findFirst{i -> this.inStr(s.sub(i + 1, i + 3)).not}.ifSome{i -> Error.msg("StrUrls: "+(url.text.escape)+" is refused: its "+part+" "+(s.escape)+" holds the percent escape "+(s.sub(i, i + 3).escape)+" of the byte "+(s.sub(i + 1, i + 3))+", which is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`")};
   .follower(f: F[mut RedirectFollower]): F[mut RedirectFollower] -> { Block#
     .let inner= {f#}
     .return{mut RedirectFollower{ from, location -> _StrUrls#(inner#(from, location)) }}

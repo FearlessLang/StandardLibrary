@@ -26,7 +26,7 @@ Fake: { #: mut base.CapDownload -> {'s
   }}
 To: { #(text: base.Str): base.F[mut base.RedirectFollower] -> {mut base.RedirectFollower{ from, location -> Urls#text }} }
 From: { #: base.Url -> Urls#"http://a.b/x/y?q=1" }
-StrUrlsRefused: { #(text: base.Str, part: base.Str, s: base.Str, e: base.Str): base.Str -> "StrUrls: "+(text.escape)+" is refused: its "+part+" "+(s.escape)+" holds the percent escape "+(e.escape)+" of the byte "+(e.sub(1, 3))+", which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E" }
+StrUrlsRefused: { #(text: base.Str, part: base.Str, s: base.Str, e: base.Str): base.Str -> "StrUrls: "+(text.escape)+" is refused: its "+part+" "+(s.escape)+" holds the percent escape "+(e.escape)+" of the byte "+(e.sub(1, 3))+", which is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`" }
 
 DownloadTests: UnitTests{::
   .test UrlsThatParse
@@ -222,7 +222,7 @@ DownloadsThatFail: Test{::
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
-    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/accent"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == "StrCleaners.utf8: notInStr: the byte sequence C3 A9 at byte offset 3 of the line encodes U+00E9, which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E"} & > "line" .isMsg{:: == "1"} & > "col" .isMsg{:: == "5"}}}
+    .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/accent"), 1000, base.StrCleaners.utf8)}).assertInfo{:: > "msg" .isMsg{:: == "StrCleaners.utf8: notInStr: the byte sequence C3 A9 at byte offset 3 of the line encodes .u`00E9`, which is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`"} & > "line" .isMsg{:: == "1"} & > "col" .isMsg{:: == "5"}}}
     }
   .checkWithSys{s -> Block#
     .let b= {Base#s}
@@ -257,7 +257,7 @@ DownloadsThatFail: Test{::
     .return{Try#(s.iso.close, {t -> t.download.downloadStr(Urls#(b+"/accentLocation"), 1000, base.StrCleaners.utf8)}).assertInfo{::.isMsg{:: == (
        "Download failed."
       |"url: "+b+"/accentLocation"
-      |"the Location of the redirect holds the byte E9, which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E"
+      |"the Location of the redirect holds the byte E9, which is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`"
       )}}}
     }
   .checkWithSys{s -> Block#

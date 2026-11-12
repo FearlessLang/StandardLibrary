@@ -6,7 +6,11 @@ TestUStr:Test{::
 
   .check{"".u.scalarHex.assertEq ""}
   .check{"".u "".scalarHex.assertEq ""}
-  .checkDetErr({::.isMsg{::.startsWith "UStr.u:"}}, {"".u "D800"})
+  .checkDetErr({::.isMsg{:: == "UStr.u: D800 is not a unicode scalar value; the unicode scalar values are .u`0000` to .u`D7FF` and .u`E000` to .u`10FFFF`."}}, {"".u.u "D800"})
+  .checkDetErr({::.isMsg{:: == "UStr.u: 110000 is not a unicode scalar value; the unicode scalar values are .u`0000` to .u`D7FF` and .u`E000` to .u`10FFFF`."}}, {"".u.u "110000"})
+  .checkDetErr({::.isMsg{:: == "Str.u: DFFF is not a unicode scalar value; the unicode scalar values are .u`0000` to .u`D7FF` and .u`E000` to .u`10FFFF`."}}, {"a".u "DFFF"})
+  .checkDetErr({::.isMsg{:: == `UStr.u: "12  3" is not a sequence of uppercase hexadecimal numbers of 1 to 6 digits separated by single spaces.`}}, {"".u.u "12  3"})
+  .checkDetErr({::.isMsg{:: == `Str.u: "e9" is not a sequence of uppercase hexadecimal numbers of 1 to 6 digits separated by single spaces.`}}, {"a".u "e9"})
   .check{"".u.u "".scalarHex.assertEq ""}
 
   .check{"".u "0".scalarHex.assertEq "0000"}

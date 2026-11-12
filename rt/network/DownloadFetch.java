@@ -58,7 +58,7 @@ final class DownloadFetch{
   static Object follow(Object url, RedirectFollower$23y8$0 follower, String location){
     var text= textOf(url);
     var bad= location.chars().filter(c -> c < 0x20 || c > 0x7E).findFirst();
-    if (bad.isPresent()){ throw downloadFailed(text, String.format(Locale.ROOT, "the Location of the redirect holds the byte %02X, which is not a character of Str; the characters of Str are U+000A and U+0020 to U+007E", bad.getAsInt())); }
+    if (bad.isPresent()){ throw downloadFailed(text, String.format(Locale.ROOT, "the Location of the redirect holds the byte %02X, which is not a character of Str; the characters of Str are .u`000A` and .u`0020` to .u`007E`", bad.getAsInt())); }
     var ls= Str$c$0Instance.instance(location);
     try{ return follower.mut$$hash$2(url, ls); }
     catch (Deterministic d){

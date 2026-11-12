@@ -28,11 +28,19 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object read$info$0(){ return Infos$1c$0.instance.imm$msg$1(this); }
   @Override public Object read$str$0(){ return this; }
 
-  @Override public Object imm$$plus$1(Object p0){ return instance(val+toS(p0)); }
-  @Override public Object imm$$or$1(Object p0){ return instance(val+"\n"+toS(p0)); }
-  @Override public Object imm$$or$0(){ return instance(val+"\n"); }
-  @Override public Object imm$$xor$1(Object p0){ return instance(val+"\""+toS(p0)); }
-  @Override public Object imm$$xor$0(){ return instance(val+"\""); }
+  @Override public Object imm$$plus$1(Object p0){ return cat("Str+", val, "", toS(p0)); }
+  @Override public Object imm$$or$1(Object p0){ return cat("Str|", val, "\n", toS(p0)); }
+  @Override public Object imm$$or$0(){ return cat("Str|", val, "\n", ""); }
+  @Override public Object imm$$xor$1(Object p0){ return cat("Str^", val, "\"", toS(p0)); }
+  @Override public Object imm$$xor$0(){ return cat("Str^", val, "\"", ""); }
+  private static Str$c$0 cat(String m, String a, String sep, String b){
+    size(m, "Str", (long) a.length() + sep.length() + b.length());
+    return instance(a+sep+b);
+  }
+  static int size(String m, String type, long size){
+    if (size > Integer.MAX_VALUE){ throw nonDetErr(m+": overflow, the result would be a "+type+" of size "+size+", longer than "+Integer.MAX_VALUE); }
+    return (int) size;
+  }
 
   @Override public Object imm$isEmpty$0(){ return bool(val.isEmpty()); }
   @Override public Object imm$size$0(){ return Nat$c$0Instance.instance(val.length()); }
@@ -81,7 +89,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   }
 
   @Override public Object imm$u$1(Object p0){
-    return UStr$s$0Instance.instance(val).imm$u$1(p0);
+    return UStr$s$0Instance.u("Str.u", val.codePoints().toArray(), p0);
   }
   @Override public Object imm$u$0(){
     return UStr$s$0Instance.instance(val);
@@ -372,8 +380,9 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     return Nat$c$0Instance.instance(val.hashCode());
   }
   @Override public Object imm$joinStr$1(Object p0){
-    String res= Flow$o$1Instance.toJava(p0).stream().map(o -> ((Str$c$0Instance)o).val).collect(java.util.stream.Collectors.joining(val));
-    return new Str$c$0Instance(res);
+    var parts= Flow$o$1Instance.toJava(p0).stream().map(Str$c$0Instance::s).toList();
+    size("Str.joinStr", "Str", parts.stream().mapToLong(String::length).sum() + (long) val.length() * Math.max(0, parts.size() - 1));
+    return new Str$c$0Instance(String.join(val, parts));
   }
   @Override public Object imm$startsWith$1(Object p0){
     return bool(val.startsWith(s(p0)));

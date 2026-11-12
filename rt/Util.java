@@ -262,7 +262,7 @@ public final class Util{
   }
   static Object strOf(String text, String where){
     var bad= text.codePoints().filter(c -> !UStr$s$0Instance.isStrScalar(c)).findFirst();
-    if (bad.isPresent()){ throw nonDetErr(where+" holds the character "+String.format(java.util.Locale.ROOT, "U+%04X", bad.getAsInt())+", which a Str can not hold."); }
+    if (bad.isPresent()){ throw nonDetErr(where+" holds the character "+String.format(java.util.Locale.ROOT, ".u`%04X`", bad.getAsInt())+", which a Str can not hold."); }
     return Str$c$0Instance.instance(text);
   }
 }
