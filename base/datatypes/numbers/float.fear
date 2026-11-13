@@ -1,6 +1,7 @@
 /// Float: 64 bits IEEE values. Note: ==/order instead follow the usual rules:
 /// - NaN == NaN (all different NaNs equal); NaN is greater than everything else including +Inf
 /// - -0.0 == +0.0
+//@Group "algebra"
 Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.getSucc` returns the closest Floating point number larger than `this`.
   /// Throws if `this` is `Math.nan` or `Math.inf`.
@@ -657,6 +658,7 @@ _FloatsBetween: Sealed {
 /// 2. +0.0 and -0.0
 /// 3. +inf and -inf
 /// 4. NaN
+//@Group "algebra"
 FloatMatch[R:**]: {
   mut .regular(x: Float): R;
   mut .posZero: R;

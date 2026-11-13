@@ -55,6 +55,8 @@
 /// ```
 ///
 /// The "list of values" side of an enumeration family.
+//@Group "collections"
+//@Group "structured data"
 Enums[E]: FromInfo[E], CaptureFree{
   /// every value, in declaration order, as an ``Enum[E]``.
   .enumList: List[Enum[E]];
@@ -76,6 +78,8 @@ Enums[E]: FromInfo[E], CaptureFree{
   }
 
 /// The "single value" side of an enumeration family.
+//@Group "collections"
+//@Group "structured data"
 Enum[E]: DataType[E,E], Named, CaptureFree{
   /// the family this value belongs to; families may also add a `.match`
   /// method of their own, as shown in the second example above.

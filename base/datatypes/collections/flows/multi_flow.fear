@@ -3,6 +3,8 @@ _BiFlows: {
   .tri[A:*,B:*,C:*](a: mut List[A], bc: mut BiFlow[B,C]): mut TriFlow[A,B,C] -> _Magic!;
   .quad[A:*,B:*,C:*,D:*](a: mut List[A], bcd: mut TriFlow[B,C,D]): mut QuadFlow[A,B,C,D] -> _Magic!;
   }
+//@Group "collections"
+//@Group "flows"
 BiKeyElemMapper[A:*,B:*,K,E:*]: { .key(a: A, b: B): K; .elem(a: A, b: B): E; }
 _BiMappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
   m.containsKey(k) ?{
@@ -18,6 +20,7 @@ _BiMappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
 /// The channels may differ in size, and each method says how it handles that:
 /// the ``get`` methods throw, the plain ones return an `Opt`, the ``Opts`` ones pad the shorter channel with ``.empty``,
 /// and `BiFlow.fillA`, `BiFlow.fillB` and `BiFlow.cutToSmallest` make the sizes equal.
+//@Group "flows"
 BiFlow[A:*,B:*]: {
   /// ``this.with flow`` consumes `this` and ``flow`` into a `TriFlow` whose third channel is the elements of ``flow``.
   //>   .check{Flows#(1, 2).with(Flows#(10, 20)).with(Flows#(100, 200)).getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111, 222))}
@@ -113,6 +116,7 @@ BiFlow[A:*,B:*]: {
   }
 
 /// Three channels, made by `BiFlow.with`. Every method is the `BiFlow` method of the same name, over three channels.
+//@Group "flows"
 TriFlow[A:*,B:*,C:*]: {
   /// ``this.with flow`` consumes `this` and ``flow`` into a `QuadFlow` whose fourth channel is the elements of ``flow``.
   mut .with[D:*](flow: mut Flow[D]): mut QuadFlow[A,B,C,D];
@@ -158,6 +162,7 @@ TriFlow[A:*,B:*,C:*]: {
   }
 
 /// Four channels, made by `TriFlow.with`. Every method is the `BiFlow` method of the same name, over four channels.
+//@Group "flows"
 QuadFlow[A:*,B:*,C:*,D:*]: {
   /// See `BiFlow.getMerge`.
   //>   .check{Flows#(1).with(Flows#(10)).with(Flows#(100)).with(Flows#(1000)).getMerge{a, b, c, d -> a + b + c + d}.list .assertEq({::}, Lists#(1111))}

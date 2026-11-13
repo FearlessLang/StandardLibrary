@@ -5,19 +5,29 @@
 // - deep imm conversion
 // - widen/equality helpers
 
+//@Group "structured data"
 ToImm[T0]: { read .imm: T0 }                               /// deep immutable representation (may change type)
+//@Group "structured data"
 ToImmBy[E,E0]: {#(t: read E): read ToImm[E0]}               /// per-value ToImm conversion
+//@Group `ToImm[_]`
 ToImm[E:*,E0,T0]: { read .imm(by: ToImmBy[imm E,E0]): T0 } /// env-dependent deep imm
 
+//@Group "structured data"
 ToInfo: { read .info: Info }                     /// structured diagnostics info
+//@Group "structured data"
 ToInfoBy[E]: {#(t: read E): read ToInfo}            /// per-value Info conversion
+//@Group `ToInfo[]`
 ToInfo[E:*]: { read .info(by: ToInfoBy[imm E]): Info }     /// env-dependent Info
 
+//@Group "input"
+//@Group "structured data"
 FromInfo[T]: { .fromInfo(i: Info): T }            /// parse/decode from Info
 
+//@Group "structured data"
 DataType[T,T0]: ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Pipe[T] {}
 
 /// Env-dependent DataType for T (contains E); imm rep is still T0.
+//@Group `DataType[_,_]`
 DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Pipe[T] {
   /// Freeze the env by capturing element conversions in "by".
   /// For example by may be {::} or a projection {::.key}.
@@ -36,6 +46,7 @@ DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Pipe[T
 /// Examples:
 /// - If Key implements DataType[Key,Key0], then {::.key} : DataTypeBy[Foo,Key,Key0].
 /// - {::} is the identity-by when T itself implements DataType[T,T0] (see DataTypeBy[T,T0] below).
+//@Group `DataTypeBy[_,_]`
 DataTypeBy[E,K,K0]: ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K] {
   #(e: read E): read DataType[K,K0];
 
@@ -59,6 +70,7 @@ DataTypeBy[E,K,K0]: ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K] {
 
 /// Specialized "datatype for T" (no external key type).
 /// This mirrors OrderHashBy[T]: you provide per-value ops, and # closes into a DataType[T,T0].
+//@Group "structured data"
 DataTypeBy[T,T0]: DataTypeBy[T,T,T0] {
   .cmp(t0: read T,t1: read T): Order;
   .hash(t: read T): Nat;

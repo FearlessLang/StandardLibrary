@@ -35,6 +35,8 @@ _InfoValidators: Sealed {
 //>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > "friends" > 1 > "name" .whereNot{::.isMsg{:: == "David"}}}}
+//@Group "input"
+//@Group "structured data"
 InfoValidator: InfoCheck {
   >(key: InfoKey): InfoValidator;
 
@@ -52,6 +54,8 @@ InfoValidator: InfoCheck {
   }
 
 /// `InfoCheck` is what the last step of a validator returns, and what `Info.validate` and ``.where`` accept.
+//@Group "input"
+//@Group "structured data"
 InfoCheck: Sealed {
   .close: Info;
   .isValid: Bool;

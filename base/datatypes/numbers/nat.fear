@@ -1,5 +1,6 @@
 // Nat: 64-bit unsigned (bitty, index-flavored). Ordering is UNSIGNED.
 // Note: / returns the exact quotient as a Num; the div and rem methods stay in Nat (divisor is Nat).
+//@Group "algebra"
 Nat: Sealed,DataType[Nat,Nat],SumNumber[Nat],InfoKey {
   /// `this.succ` returns ``this + 1``. Overflows if ``this == 18_446_744_073_709_551_615``.
   //>   .check{5 .succ .assertEq 6}

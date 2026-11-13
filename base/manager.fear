@@ -11,6 +11,8 @@
 ///Arguments that do not make a call are a deterministic error, and no message is sent:
 ///a ``path`` that is not absolute or is the root of a drive, a ``name`` that is not a project name,
 ///a main, a type or an attenuator that is not a qualified type name, `.selectMains` with two equal mains.
+//@Group "system interactions"
+//@Group "output"
 CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Shows the manager window.
   mut .show: Void;

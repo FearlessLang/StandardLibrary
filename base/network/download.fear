@@ -1,3 +1,5 @@
+//@Group "system interactions"
+//@Group "input"
 CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadBytes(url: Url, maxBytes: Nat, follower: F[mut RedirectFollower]): List[Byte];
   mut .downloadStr(url: Url, maxBytes: Nat, cleaner: F[Str, mut StrCleaner], follower: F[mut RedirectFollower]): Str;
@@ -10,8 +12,10 @@ CapDownload: ToIso[CapDownload], WidenTo[CapDownload] {
   mut .downloadImage(url: Url, maxBytes: Nat, maxPixels: Nat): Image -> this.downloadImage(url, maxBytes, maxPixels, DefaultRedirectFollowers);
   }
 
+//@Group "input"
 RedirectFollower: { mut #(from: Url, location: Str): Url; }
 
+//@Group "input"
 DefaultRedirectFollowers: F[mut RedirectFollower]{ Block#
   .let count= {Count.nat 0}
   .return{mut RedirectFollower{ from, location -> Block#
@@ -23,6 +27,7 @@ DefaultRedirectFollowers: F[mut RedirectFollower]{ Block#
     }}
   }
 
+//@Group "input"
 Url: Sealed{
   .scheme: Str;
   .host: Str;
@@ -32,6 +37,7 @@ Url: Sealed{
   .text: Str;
   }
 
+//@Group "input"
 Urls: {
   #(text: Str): Url -> Block#
     .if{text.size > 8000} .error{"Urls#: a URL of "+(text.size.str)+" characters is refused: a URL has at most 8000 characters"}
@@ -124,6 +130,7 @@ _UrlDots: { #(path: Str): Str -> Block#
   .step(out: Str, seg: Str): Str -> seg == "." ? {.then -> out; .else -> seg == ".." ? {.then -> out.sub(0, (out.lastIndexOf "/").orValue 0); .else -> out+"/"+seg}};
   }
 
+//@Group "input"
 StrUrls: Attenuator[CapDownload]{ u -> {'s
   .downloadBytes(url, n, f) -> u.downloadBytes(_StrUrls#url, n, _StrUrls.follower f);
   .downloadStr(url, n, c, f) -> u.downloadStr(_StrUrls#url, n, c, _StrUrls.follower f);

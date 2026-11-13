@@ -14,6 +14,7 @@
 ///
 ///If a previous live log is found when logging starts, the archived copy is
 ///marked as interrupted.
+//@Group "output"
 Log: { .log(s: read ToStr): Void -> _Magic! }
 
 ///Log used internally by the UnitTest library.
@@ -23,6 +24,8 @@ Log: { .log(s: read ToStr): Void -> _Magic! }
 ///representation of s, without adding a timestamp and without adding a
 ///newline.
 ///See also: base.Log
+//@Group "output"
+//@Group "testing"
 UnitTestLog: { .log(s: read ToStr): Void -> _Magic!; .plan(kind: Str, frame: StackFrame): Void -> _Magic! }
 
 
@@ -44,6 +47,8 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic!; .plan(kind: Str, frame: Sta
 ///
 ///A concrete log type cannot have generic parameters: this is a compile time error.
 ///
+//@Group "output"
+//@Group "testing"
 InMemoryLog[T]: CaptureFree, Named{
   ///Submits s to an in memory log that requires a capability to be read.
   .log(s: T): Void -> _Magic!;
@@ -81,9 +86,12 @@ InMemoryLog[T]: CaptureFree, Named{
 ///
 ///See also: base.Log (the single fixed shared log, no declaration needed),
 ///base.InMemoryLog (in memory instead of a file).
+//@Group "output"
 FileLog: CaptureFree, Named{
   .log(s: read ToStr): Void -> _Magic!;
   }
+//@Group "system interactions"
+//@Group "input"
 CapLogReader[T]: ToIso[CapLogReader[T]], WidenTo[CapLogReader[T]]{
   mut .read: List[T];    ///Returns the values currently stored in the log without removing them
   mut .consume: List[T]; ///Returns the values currently stored in the log and clears the log

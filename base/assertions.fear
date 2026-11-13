@@ -1,5 +1,9 @@
+//@Group "errors"
+//@Group "testing"
 LazyInfo: F[read ToInfo] {}
 
+//@Group "errors"
+//@Group "testing"
 Assert: Sealed {
   !(assertion: Bool): Void -> this!(assertion,{""}, { Void });
   !(assertion: Bool, msg: read LazyInfo): Void -> this!(assertion, msg, { Void });

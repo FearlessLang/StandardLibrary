@@ -1,3 +1,5 @@
+//@Group "algebra"
+//@Group "structured data"
 Wrapper[S,T]: DataType[S,S] {
   read .get: T -> this.getDataType.close;
   read .name: Str;
@@ -12,6 +14,7 @@ Wrapper[S,T]: DataType[S,S] {
   .imm -> this#(this.get);
   }
 
+//@Group "algebra"
 ExtentNat[S]: Wrapper[S,Nat] {
   +(other: S): S -> this#(this.get + (this.id#(other).get));
   -(other: S): S -> this#(this.get - (this.id#(other).get));
@@ -25,6 +28,7 @@ ExtentNat[S]: Wrapper[S,Nat] {
   .zero: S -> this#0;
   }
 
+//@Group "algebra"
 CoordNat[S,E]: Wrapper[S,Nat] {
   read .extent: Wrapper[E,Nat];
   +(d: E): S -> this#(this.get + (this.extent.id#(d).get));
@@ -34,6 +38,7 @@ CoordNat[S,E]: Wrapper[S,Nat] {
   .origin: S -> this#0;
   }
 
+//@Group "algebra"
 CoordInt[S,E]: Wrapper[S,Int] {
   read .extent: Wrapper[E,Nat];
   +(d: E): S -> this#(this.get + (this.extent.id#(d).get.getInt));
@@ -45,15 +50,20 @@ CoordInt[S,E]: Wrapper[S,Int] {
   .origin: S -> this#(+0);
   }
 
+//@Group "algebra"
 XInt: CoordInt[XInt,WidthNat] {.name->"X"; .getDataType -> +0; .extent -> WidthNat;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
+//@Group "algebra"
 YInt: CoordInt[YInt,HeightNat] {.name->"Y"; .getDataType -> +0; .extent -> HeightNat;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
+//@Group "algebra"
 WidthNat:ExtentNat[WidthNat] {.name->"Width"; .getDataType -> 0;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
+//@Group "algebra"
 HeightNat:ExtentNat[HeightNat] {.name->"Height"; .getDataType -> 0;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 
+//@Group "algebra"
 Rect: {
   .x: XInt; .y: YInt; .width: WidthNat; .height: HeightNat;
   .right: XInt -> this.x + (this.width);
@@ -62,9 +72,11 @@ Rect: {
     x >= (this.x) && { x < (this.right) }
     && { y >= (this.y) } && { y < (this.bottom) };
   }
+//@Group "algebra"
 Rects: { #(x: XInt, y: YInt, width: WidthNat, height: HeightNat): Rect ->
   { .x -> x; .y -> y; .width -> width; .height -> height; } }
 
+//@Group "algebra"
 LevelByte[S]: Wrapper[S,Byte] {
   +(other: S): S -> this#(this.get + (this.id#(other).get));
   -(other: S): S -> this#(this.get - (this.id#(other).get));
@@ -78,6 +90,7 @@ LevelByte[S]: Wrapper[S,Byte] {
   .max: S -> this#(Math.maxByte);
   }
 
+//@Group "algebra"
 LevelFloat[S]: Wrapper[S,Float] {
   read .lowest: Float;
   read .highest: Float;
@@ -90,17 +103,22 @@ LevelFloat[S]: Wrapper[S,Float] {
   .max: S -> this#(this.highest);
   }
 
+//@Group "algebra"
 Red: LevelByte[Red] {.name->"Red"; .getDataType -> 0.getByte;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
+//@Group "algebra"
 Green: LevelByte[Green] {.name->"Green"; .getDataType -> 0.getByte;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
+//@Group "algebra"
 Blue: LevelByte[Blue] {.name->"Blue"; .getDataType -> 0.getByte;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
+//@Group "algebra"
 Alpha: LevelByte[Alpha] {.name->"Alpha"; .getDataType -> 0.getByte;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::};
   .opaque: Alpha->Alpha.max;
   .transparent: Alpha->Alpha.min;
   }
+//@Group "algebra"
 CyclicFloat[S]: Wrapper[S,Float] {
   read .period: Float;
   read ._unchecked(t: Float): S;
@@ -109,39 +127,49 @@ CyclicFloat[S]: Wrapper[S,Float] {
   -(other: S): S -> this#(Math.euclideanMod(this.get - (this.id#(other).get), this.period));
   }
 
+//@Group "algebra"
 Hue:CyclicFloat[Hue]{.name->"Hue"; .getDataType -> 0.0; .period -> +1.0;
   ._unchecked t -> { .getDataType->t };
   .close->this; .id->{::}; }
+//@Group "algebra"
 Saturation:LevelFloat[Saturation]{.name->"Saturation"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
   ._unchecked t -> { .getDataType->t };
   .close->this; .id->{::}; }
+//@Group "algebra"
 Brightness:LevelFloat[Brightness]{.name->"Brightness"; .getDataType -> 0.0;
   .lowest -> 0.0; .highest -> +1.0;
   ._unchecked t -> { .getDataType->t };
   .close->this; .id->{::}; }
 
 _KeyNames: Sealed{ .isName(name: Str): Bool -> _Magic!; .isChord(chord: Str): Bool -> _Magic!; }
+//@Group "input"
+//@Group "UI"
 KeyStroke:Wrapper[KeyStroke,Str]{.name->"KeyStroke"; .getDataType -> "UNDEFINED";
   # t ->Block#
     .if{_KeyNames.isName(t).not}.error{`KeyStroke#"`+t+`" is not a key name. Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_, for example "A", "7", "SPACE", "ENTER", "ESCAPE", "BACK_SPACE", "LEFT", "F1", "SHIFT".`}
     .return{{ .getDataType->t }};
   .close->this; .id->{::}; }
+//@Group "input"
+//@Group "UI"
 KeyChord:Wrapper[KeyChord,Str]{.name->"KeyChord"; .getDataType -> "UNDEFINED";
   # t ->Block#
     .if{_KeyNames.isChord(t).not}.error{`KeyChord#"`+t+`" is not a key chord. A key chord is zero or more of "CONTROL", "ALT" and "SHIFT", each at most once, then one key name that is not a modifier, joined by "+", for example "ESCAPE", "F1", "CONTROL+SHIFT+F". Key names are the names of the VK_ constants of java.awt.event.KeyEvent without VK_.`}
     .return{{ .getDataType->t }};
   .close->this; .id->{::}; }
 
+//@Group "algebra"
 Duration:ExtentNat[Duration] {.name->"Duration"; .getDataType -> 0;
   # t ->{ .getDataType-> t };
   .seconds(t: Nat):Duration -> this#(t*1000000);
   .milliSeconds(t: Nat):Duration -> this#(t*1000);
   .close-> this; .id->{::}; }
 
+//@Group "algebra"
 Instant: CoordNat[Instant,Duration] {.name->"Instant"; .getDataType -> 0; .extent -> Duration;
   # t ->{ .getDataType-> t }; .close-> this; .id->{::}; }
 
+//@Group "algebra"
 Color: DataType[Color,Color] {
   .close-> this;
   read .red: Red -> {};
@@ -191,6 +219,7 @@ _Styled[S]:{
   mut .save(c:mut Consumer[mut S]):mut S->Block#(c.accept(this.self),this.self);
   mut .style(s:mut Scope[S]):mut S->Block#(s.run(this.self),this.self);
   }
+//@Group "UI"
 Widget[S]:_Styled[S]{
   mut .changeDetached(mut Scope[S]):mut S;
   mut .topInset(n:Nat):mut S->this.topInset'(HeightNat#n);
@@ -245,6 +274,7 @@ _Container[S]:Widget[S]{
   mut .heightGap:HeightNat;
   mut .widthGap:WidthNat;
   }
+//@Group "UI"
 Border:_Container[Border]{
   .self->this;
   mut .north: mut RegionFiller[mut Border];
@@ -253,6 +283,7 @@ Border:_Container[Border]{
   mut .west: mut RegionFiller[mut Border];
   mut .center: mut RegionFiller[mut Border];
   }
+//@Group "UI"
 Split:Widget[Split]{
   .self->this;
   mut .foreground(Color):mut Split;
@@ -268,6 +299,7 @@ Split:Widget[Split]{
   mut .region(index: Nat): mut RegionFiller[mut Split];
   mut .size: Nat;
   }
+//@Group "UI"
 Sections:_Container[Sections]{
   .self->this;
   mut .section: mut RegionFiller[mut And[mut Sections]];
@@ -282,6 +314,7 @@ Sections:_Container[Sections]{
   mut .size: Nat;
   mut .isExpanded(index: Nat): Bool;
   }
+//@Group "UI"
 SectionHandler:{ mut #(sections: mut Sections, index: Nat): Void; }
 _Caption[S]: Widget[S]{
   mut .foreground(Color):mut S;
@@ -300,18 +333,22 @@ _Caption[S]: Widget[S]{
   mut .aboveBaseline:TextRatio;
   mut .belowBaseline:TextRatio;
   }
+//@Group "algebra"
 TextRatio:LevelFloat[TextRatio]{.name->"TextRatio"; .getDataType -> +1.0;
   .lowest -> 0.0 .getSucc; .highest -> +1024.0 .getPred;
   ._unchecked t -> { .getDataType->t };
   .close->this; .id->{::}; }
+//@Group "UI"
 Button: _Caption[Button]{
   .self-> this;
   mut .action(mut MF[Void]):mut Button;
   }
 
+//@Group "UI"
 ModelFps:_Styled[ModelFps]{ .self->this;
   mut .action(mut MF[Void]): mut ModelFps;
   }
+//@Group "UI"
 Frame:_Styled[Frame]{ .self->this;
   mut .title(s: Str): mut Frame -> this.uTitle(s.u);
   mut .uTitle(UStr): mut Frame;
@@ -332,12 +369,15 @@ Frame:_Styled[Frame]{ .self->this;
   mut .content: mut RegionFiller[Void];
   mut .onKey(mut Scope[Keys]): mut Frame;
   }
+//@Group "UI"
 ResizeRequest:ScreenContext{ read .aspectRatio: Float; }
+//@Group "UI"
 ScreenContext:{
   read .elapsed: Instant;
   read .panelWidth: WidthNat;
   read .panelHeight: HeightNat;
   }
+//@Group "UI"
 Graphics:ScreenContext{
   mut .color(Color): mut Graphics;
   mut .position(XInt, YInt): mut Graphics;
@@ -380,12 +420,15 @@ Graphics:ScreenContext{
 ///The line box of the text is ``.textHeight`` times ``.aboveBaseline`` + ``.belowBaseline`` high, rounded to the nearest virtual pixel, and as wide as the advance of the text.
 ///The ink of the text may go past the line box: then the room grows on each axis by twice the largest part of the ink past the line box on that axis.
 ///The text is drawn centered in its room, so a ``Label`` with the same text and text settings packs to its room plus its insets.
+//@Group "UI"
 TextRoom:{
   read .width: WidthNat;
   read .height: HeightNat;
   ///The distance from the top of the room to the baseline of the text, rounded to the nearest virtual pixel.
   read .baseline: HeightNat;
   }
+//@Group "system interactions"
+//@Group "UI"
 CapGui: ToIso[CapGui], WidenTo[CapGui]{
   mut .screenWidth: WidthNat;
   mut .screenHeight: HeightNat;
@@ -402,6 +445,7 @@ CapGui: ToIso[CapGui], WidenTo[CapGui]{
   mut .fullScreenKey(KeyChord): mut CapGui;
   mut .run(mut Consumer[mut Frame]): Void;
   }
+//@Group "UI"
 Label:_Caption[Label]{
   .self->this;
 }
@@ -437,30 +481,43 @@ _UStrEditText[S]: _EditText[S]{
   mut .onEdit(mut Consumer[UTextEvent]):mut S;
   mut .onCommit(mut Consumer[UTextEvent]):mut S;
   }
+//@Group "UI"
 TextField:_StrEditText[TextField]{ .self->this; }
+//@Group "UI"
 UTextField:_UStrEditText[UTextField]{ .self->this; }
+//@Group "UI"
 TextArea:_StrEditText[TextArea]{
   .self->this;
   mut .append(Str):mut TextArea;
   mut .wrap(Bool):mut TextArea;
   mut .wrap:Bool;
   }
+//@Group "UI"
 UTextArea:_UStrEditText[UTextArea]{
   .self->this;
   mut .uAppend(UStr):mut UTextArea;
   mut .wrap(Bool):mut UTextArea;
   mut .wrap:Bool;
   }
+//@Group "input"
+//@Group "UI"
 TextEvent:ScreenContext{ read .text:Str; read .caret:Nat; read .anchor:Nat; }
+//@Group "input"
+//@Group "UI"
 UTextEvent:ScreenContext{ read .uText:UStr; read .caret:Nat; read .anchor:Nat; }
+//@Group "UI"
 CaretPainter:{ .run(mut CaretGraphics):mut Graphics; }
+//@Group "UI"
 CaretGraphics:Graphics{ read .sinceMove:Duration; read .lineHeight:HeightNat; }
+//@Group "UI"
 Picture:Widget[Picture]{
   .self->this;
   mut .image(Image):mut Picture;
   mut .keepAspect(Bool):mut Picture;
   mut .keepAspect:Bool;
 }
+//@Group "input"
+//@Group "UI"
 Mouse:_Styled[Mouse]{ .self->this;
   mut .clicked(mut MouseHandler):mut Mouse;
   ///On a widget with a ``.doubleClicked``, the second click of a double click runs ``.doubleClicked`` instead of ``.clicked``; a click after a double click is a single click again.
@@ -476,6 +533,8 @@ Mouse:_Styled[Mouse]{ .self->this;
 ///Runs for one mouse event of a widget.
 ///``x`` and ``y`` are where the pointer is, in virtual pixels from the top left corner of the widget.
 ///``elapsed``, ``panelWidth`` and ``panelHeight`` are as in ``ScreenContext``.
+//@Group "input"
+//@Group "UI"
 MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, panelHeight: HeightNat): Void; }
 ///A column of items and separators, drawn by the library over every widget of the window, with the look of the library on every desk.
 ///A menu exists only while it is open: its scope builds it each time it opens, so it shows the state of the program when it opened.
@@ -496,6 +555,7 @@ MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, p
 ///  the close key of the CapGui closes the last open menu; the full screen key keeps its meaning; every other key reaches nothing.
 ///Choosing an item with a submenu opens the submenu, or closes it when it is open; choosing an item without a submenu closes every menu and queues its action.
 ///Nothing opens a menu on its own: no hover, no delay, no key binding.
+//@Group "UI"
 Menu:_Styled[Menu]{ .self->this;
   mut .item(mut Scope[MenuItem]):mut Menu;
   mut .separator:mut Menu;
@@ -504,6 +564,7 @@ Menu:_Styled[Menu]{ .self->this;
 ///An item shows the mark it is given, a check box or a radio button, ticked or not; choosing it changes no mark: the scope of the next opening shows the new state.
 ///An item has an action or a submenu, never both; it shows a check box or a radio button, never both: the second setter is an error.
 ///The scope of ``.submenu`` runs at once: the scope that builds a menu builds its submenus too.
+//@Group "UI"
 MenuItem:_Styled[MenuItem]{ .self->this;
   mut .text(s:Str):mut MenuItem->this.uText(s.u);
   mut .uText(UStr):mut MenuItem;
@@ -513,6 +574,7 @@ MenuItem:_Styled[MenuItem]{ .self->this;
   mut .action(mut MF[Void]):mut MenuItem;
   mut .submenu(mut Scope[Menu]):mut MenuItem;
   }
+//@Group "UI"
 Pane:_Container[Pane]{
   .self->this;
   mut .pane(mut Scope[Pane]):mut Pane;
@@ -536,6 +598,7 @@ Pane:_Container[Pane]{
   mut .centered(Bool): mut Pane;
   }
 
+//@Group "UI"
 RegionFiller[S:*]:{
   mut .pane(mut Scope[Pane]): S;
   mut .border(mut Scope[Border]): S;
@@ -549,13 +612,21 @@ RegionFiller[S:*]:{
   mut .uTextField(mut Scope[UTextField]): S;
   mut .uTextArea(mut Scope[UTextArea]): S;
   }
+//@Group "UI"
 And[T:*]:{ mut .and: mut RegionFiller[T]; }
+//@Group "UI"
 SplitAnd[S:*]:{ mut .and: mut RegionFiller[mut SplitAnd[S]]; mut .with(mut Scope[Split]): S; }
 
+//@Group "UI"
 Scope[T]: { mut .run(mut T): mut T; }
+//@Group "UI"
 Painter: { .run(mut Graphics): mut Graphics; }
 
+//@Group "imperative"
+//@Group "UI"
 Consumer[E:*]: { mut .accept(E): Void; }
+//@Group "imperative"
+//@Group "UI"
 Slots: {#[E:*]: mut Slot[E] -> Block#
   .var[mut Opt[E]] e = {{}}
   .return {mut Slot[E:*]: Consumer[E] {'slot
@@ -571,15 +642,21 @@ Slots: {#[E:*]: mut Slot[E] -> Block#
     read .opt: mut Opt[read/imm E] -> e.get.mapSome{x -> x};
     }};
   }
+//@Group "input"
+//@Group "UI"
 KeyEvent:ScreenContext{
   read .keyStroke:KeyStroke;
 }
+//@Group "input"
+//@Group "UI"
 KeyAction:_Styled[KeyAction]{ .self->this;
   mut .matchOnly(KeyStroke):mut KeyAction;
   mut .matchAlso(KeyStroke):mut KeyAction;
   mut .doOnly(mut Consumer[KeyEvent]):mut KeyAction;
   mut .doAlso(mut Consumer[KeyEvent]):mut KeyAction;
   }
+//@Group "input"
+//@Group "UI"
 Keys:_Styled[Keys]{ .self->this;
   mut .pressed(mut Scope[KeyAction]):mut Keys;
   mut .released(mut Scope[KeyAction]):mut Keys;

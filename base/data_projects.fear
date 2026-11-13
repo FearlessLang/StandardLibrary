@@ -1,11 +1,21 @@
+//@Group "input"
+//@Group "structured data"
 DataRead: CaptureFree, Named{}
+//@Group "input"
+//@Group "output"
+//@Group "structured data"
 DataEdit: DataRead{}
 
+//@Group "system interactions"
+//@Group "input"
 CapDataRead: ToIso[CapDataRead], WidenTo[CapDataRead]{
   mut .paths(path: List[Str]): List[Str];
   mut .read(path: List[Str]): mut CapInputCursorNode;
   }
 
+//@Group "system interactions"
+//@Group "input"
+//@Group "output"
 CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .paths(path: List[Str]): List[Str];
   mut .read(path: List[Str]): mut CapInputCursorNode;
@@ -26,6 +36,8 @@ CapDataEdit: ToIso[CapDataEdit], WidenTo[CapDataEdit]{
   mut .delete(path: List[Str]): Void;
   }
 
+//@Group "output"
+//@Group "errors"
 UnencodableRecover:{
   mut #(scalar: Nat, index: Nat): List[Byte]
   }

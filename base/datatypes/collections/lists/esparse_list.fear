@@ -1,3 +1,4 @@
+//@Group "collections"
 ESparseLists: Sealed {
   /// ``ESparseLists.backedWithArray capacity`` returns an ESparseList of ``capacity`` holes, backed by an array.
   /// Throws if ``capacity >= 2147483647``.
@@ -18,6 +19,7 @@ ESparseLists: Sealed {
 /// `ESparseList.set` fills a hole; `ESparseList.remove` makes a hole; the indices of the other elements never change,
 /// except by `ESparseList.trimTo`, `ESparseList.reverse` and `ESparseList.swap`.
 /// The holes are not elements: the methods taking a function of the elements never call it on a hole.
+//@Group "collections"
 ESparseList[E:*]: Sealed, _EditableList[E, ESparseList[E]] {
   /// ``this.isFull`` returns `True` if there are no holes in this collection.
   //> .checkTrue{ESparseLists.backedWithArray[Nat] 3 .set(0, 1).set(1, 2).set(2, 3).isFull}

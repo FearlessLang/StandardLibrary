@@ -21,6 +21,7 @@
 ///This type does support concatenation (+,|,^) as for Str, but this works by simply appending scalar values one after the other in the sequence.
 ///UStr does not implement DataType.
 ///UStr does offer .equalRepr(other) and .hashRepr.
+//@Group "algebra"
 UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
   + (x: read UStr): UStr;           /// string concatenation; throws on result size > maxInt
   | (x: read UStr): UStr;           /// like + but inserts a newline between the two strings
@@ -64,4 +65,5 @@ UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
   .norm: Norm[UStr];
   }
 
+//@Group "algebra"
 ToUStr: { read .uStr: UStr }

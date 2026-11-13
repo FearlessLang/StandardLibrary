@@ -1,4 +1,7 @@
 /// A datatype to represent a discrete range of comparable values.
+//@Group "algebra"
+//@Group "collections"
+//@Group "flows"
 Range[N]: ToFlow[N], Pipe[Range[N]], ToStr {
   .close -> this;
   .contains(N): Bool;
@@ -35,6 +38,7 @@ Range[N]: ToFlow[N], Pipe[Range[N]], ToStr {
 
 // Sealed so safe to call these methods from standard NumType
 /// A range type for the Num Ranges
+//@Group "algebra"
 NumRange: Pipe[NumRange], Sealed {
   .close -> this;
   .contains(Num): Bool;
@@ -43,6 +47,7 @@ NumRange: Pipe[NumRange], Sealed {
   .str: Str;
   }
 
+//@Group "algebra"
 ClosedNumRange: NumRange {
   .clamp(n: Num): Num -> Block#
     .if {n <= (this.start)} .return {this.start}
