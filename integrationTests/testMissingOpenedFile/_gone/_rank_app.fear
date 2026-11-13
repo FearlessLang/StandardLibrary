@@ -8,6 +8,6 @@ MissingOpenedFileTests: UnitTests{::
 MissingOpenedFile: Test{::
   .checkNonDetErrWithSys({::.isMsg{m -> (m.startsWith "File with absolute path ") && {m.endsWith(
      "gone.txt"
-    |"can not be read as bytes"
+    |"cannot be read as bytes"
     )}}}, {s -> s.inputCursor#.match{.some n -> n.readStr(base.StrCleaners.utf8); .empty -> "none"}})
   }

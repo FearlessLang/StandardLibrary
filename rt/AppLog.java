@@ -71,7 +71,7 @@ public final class AppLog{
         out.write(line);
         out.flush();
       }
-      catch (IOException|UncheckedIOException e){ throw Util.nonDetErr("The log file "+name.toString().replace('\\', '/')+"\ncan not be written"); }
+      catch (IOException|UncheckedIOException e){ throw Util.nonDetErr("The log file "+name.toString().replace('\\', '/')+"\ncannot be written"); }
     }
   }
   private BufferedWriter start(){

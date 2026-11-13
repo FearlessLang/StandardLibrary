@@ -215,7 +215,7 @@ DataProjectDeleteErrors: Test{::
     )}}, {t -> t.dataEdit(Notes).delete(L#("data.fearless"))})
   .checkDetErrWithSys({::.isMsg{:: == (
      "The path data.Notes/"
-    |"names the root folder, which can not be deleted."
+    |"names the root folder, which cannot be deleted."
     )}}, {t -> t.dataEdit(Notes).delete({})})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      `No dataEdit project is mounted on "data.Nope".`

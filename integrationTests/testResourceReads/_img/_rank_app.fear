@@ -24,28 +24,28 @@ ResourceReadTests: UnitTests{::
 ImagesThatCanNotBeDecoded: Test{::
   .checkDetErrWithSys({::.isMsg{:: == (
      "Resource with path img.Pub/text.png"
-    |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
+    |"cannot be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
     )}}, {t -> t.dataRead(Pub).read(L#("text.png")).readImage(1000000)})
   .checkDetErrWithSys({::.isMsg{:: == (
      "Resource with path img.Pub/cut.png"
-    |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
+    |"cannot be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
     )}}, {t -> t.dataRead(Pub).read(L#("cut.png")).readImage(1000000)})
   .checkDetErrWithSys({::.isMsg{:: == (
      "Resource with path /_img/junk.png"
-    |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
+    |"cannot be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
     )}}, {t -> Junk.readImage(t.assetRead, 1000000)})
   .checkWithSys{s -> Block#
     .let path= {s.dataRead(Pub).read(L#("in_path.txt")).readStr(base.StrCleaners.utf8OrElse{Recover})}
     .return{Try#(s.iso.close, {t -> t.inputCursor#.match{.some n -> n.readImage(1000000); .empty -> base.Error.msg "no opened file"}}).assertInfo{::.isMsg{:: == (
        "File with absolute path "+path
-      |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
+      |"cannot be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
       )}}}
     }
   .checkWithSys{s -> Block#
     .let url= {s.dataRead(Pub).read(L#("url.txt")).readStr(base.StrCleaners.utf8)}
     .return{Try#(s.iso.close, {t -> t.download.downloadImage(base.Urls#url, 1000, 1000000)}).assertInfo{::.isMsg{:: == (
        "Resource with url "+url
-      |"can not be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
+      |"cannot be decoded as an image according to standards PNG (ISO/IEC 15948:2004), JPEG (ISO/IEC 10918-1:1994), WebP (RFC 9649), GIF (GIF89a), BMP (Windows bitmap up to BITMAPV5HEADER), ICO (Windows icon) and WBMP (WAP-237, type 0)"
       )}}}
     }
   }
@@ -81,7 +81,7 @@ ImagesWithMorePixelsThanMaxPixels: Test{::
 ResourcesThatCanNotBeRead: Test{::
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path img.Notes/gone.txt"
-    |"can not be read as bytes"
+    |"cannot be read as bytes"
     )}}, {t -> Block#
       .openIso s = t
       .let n= {s.dataEdit(Notes).read(L#("gone.txt"))}
@@ -90,7 +90,7 @@ ResourcesThatCanNotBeRead: Test{::
       })
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path img.Notes/gone.png"
-    |"can not be read as bytes"
+    |"cannot be read as bytes"
     )}}, {t -> Block#
       .openIso s = t
       .let n= {s.dataEdit(Notes).read(L#("gone.png"))}
@@ -99,7 +99,7 @@ ResourcesThatCanNotBeRead: Test{::
       })
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path /_img/note.txt"
-    |"can not be read as bytes"
+    |"cannot be read as bytes"
     )}}, {t -> Block#
       .openIso s = t
       .do{s.dataEdit(Self).delete(L#("_img", "note.txt"))}
@@ -107,7 +107,7 @@ ResourcesThatCanNotBeRead: Test{::
       })
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path /_img/pics/one.txt"
-    |"can not be read as bytes"
+    |"cannot be read as bytes"
     )}}, {t -> Block#
       .openIso s = t
       .do{s.dataEdit(Self).delete(L#("_img", "pics", "one.txt"))}
@@ -115,7 +115,7 @@ ResourcesThatCanNotBeRead: Test{::
       })
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "Resource with path /_img/box/three.txt"
-    |"can not be read as bytes"
+    |"cannot be read as bytes"
     )}}, {t -> Block#
       .openIso s = t
       .do{s.dataEdit(Self).delete(L#("_img", "box", "three.txt"))}

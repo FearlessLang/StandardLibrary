@@ -65,7 +65,7 @@ final class AssetImageRead{
       default -> false;
     };
   }
-  static Error undecodable(String subject){ return detErr(subject+"\ncan not be decoded as an image according to standards "+standards); }
+  static Error undecodable(String subject){ return detErr(subject+"\ncannot be decoded as an image according to standards "+standards); }
 
   static void checkSize(String subject, int w, int h, long maxPixels){
     assert w > 0 && h > 0;
