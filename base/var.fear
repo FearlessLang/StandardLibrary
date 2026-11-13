@@ -113,6 +113,7 @@ Reprs: {
   #[T](x: iso T, inv: F[read T,Bool]): mut Repr[T] -> Block#
     .openIso _x = x
     .if {inv#(_x).not} .error {Infos.msg"Invariant does not initially hold"}
+    //@Group "imperative"
     .return{mut Repr[T]: {'self
       mut .mutate[R:iso,imm,mut,read](f: mut MF[mutH T,R]): R -> _IdOrErr#(f#(_x),inv#(_x),_ReprCacheFlush#(self));
       read .look[R](f: read F[read T,R]): R -> f#(_x);

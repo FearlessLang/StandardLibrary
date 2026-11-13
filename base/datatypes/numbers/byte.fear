@@ -1,5 +1,5 @@
-/// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
 //@Group "algebra"
+/// Byte: 8-bit unsigned [0,255]. Ordering is UNSIGNED.
 Byte: Sealed,DataType[Byte,Byte],SumNumber[Byte] {
   /// `this.succ` returns ``this + 1``. Overflows if `this` is ``255``.
   //>   .check{5.getByte .succ .assertEq(6.getByte)}

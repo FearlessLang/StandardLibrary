@@ -416,11 +416,11 @@ Graphics:ScreenContext{
   read .textLines(text: Str, width: WidthNat): List[Str] -> this.uTextLines(text.u, width).flow.map{::.getStr}.list;
   read .uTextLines(text: UStr, width: WidthNat): List[UStr];
   }
+//@Group "UI"
 ///The room a line of text needs.
 ///The line box of the text is ``.textHeight`` times ``.aboveBaseline`` + ``.belowBaseline`` high, rounded to the nearest virtual pixel, and as wide as the advance of the text.
 ///The ink of the text may go past the line box: then the room grows on each axis by twice the largest part of the ink past the line box on that axis.
 ///The text is drawn centered in its room, so a ``Label`` with the same text and text settings packs to its room plus its insets.
-//@Group "UI"
 TextRoom:{
   read .width: WidthNat;
   read .height: HeightNat;
@@ -530,12 +530,13 @@ Mouse:_Styled[Mouse]{ .self->this;
   mut .entered(mut MouseHandler):mut Mouse;
   mut .exited(mut MouseHandler):mut Mouse;
 }
+//@Group "input"
+//@Group "UI"
 ///Runs for one mouse event of a widget.
 ///``x`` and ``y`` are where the pointer is, in virtual pixels from the top left corner of the widget.
 ///``elapsed``, ``panelWidth`` and ``panelHeight`` are as in ``ScreenContext``.
-//@Group "input"
-//@Group "UI"
 MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, panelHeight: HeightNat): Void; }
+//@Group "UI"
 ///A column of items and separators, drawn by the library over every widget of the window, with the look of the library on every desk.
 ///A menu exists only while it is open: its scope builds it each time it opens, so it shows the state of the program when it opened.
 ///A menu with no item does not open.
@@ -555,16 +556,15 @@ MouseHandler:{ mut #(x: XInt, y: YInt, elapsed: Instant, panelWidth: WidthNat, p
 ///  the close key of the CapGui closes the last open menu; the full screen key keeps its meaning; every other key reaches nothing.
 ///Choosing an item with a submenu opens the submenu, or closes it when it is open; choosing an item without a submenu closes every menu and queues its action.
 ///Nothing opens a menu on its own: no hover, no delay, no key binding.
-//@Group "UI"
 Menu:_Styled[Menu]{ .self->this;
   mut .item(mut Scope[MenuItem]):mut Menu;
   mut .separator:mut Menu;
   }
+//@Group "UI"
 ///An item of a ``Menu``: one line of text, enabled by default, with no mark, no action and no submenu.
 ///An item shows the mark it is given, a check box or a radio button, ticked or not; choosing it changes no mark: the scope of the next opening shows the new state.
 ///An item has an action or a submenu, never both; it shows a check box or a radio button, never both: the second setter is an error.
 ///The scope of ``.submenu`` runs at once: the scope that builds a menu builds its submenus too.
-//@Group "UI"
 MenuItem:_Styled[MenuItem]{ .self->this;
   mut .text(s:Str):mut MenuItem->this.uText(s.u);
   mut .uText(UStr):mut MenuItem;
@@ -629,6 +629,8 @@ Consumer[E:*]: { mut .accept(E): Void; }
 //@Group "UI"
 Slots: {#[E:*]: mut Slot[E] -> Block#
   .var[mut Opt[E]] e = {{}}
+  //@Group "imperative"
+  //@Group "UI"
   .return {mut Slot[E:*]: Consumer[E] {'slot
     .accept x -> slot.fill x;
     mut  !: E -> e.get!;

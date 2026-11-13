@@ -1,5 +1,6 @@
 //@Group "system interactions"
 Main: CaptureFree{ .main(sys: mut System): Void }
+//@Group "system interactions"
 /// A `Main` implementing ``OpenWith[I,E]`` asks the Fearless manager to run it on a double click
 /// on any file with the extension ``E``, and to show those files with the icon ``I``:
 /// ``Foo: Main, OpenWith[IconsFoo,"foo"]{ s -> ... }`` opens every ``.foo`` file.
@@ -12,29 +13,28 @@ Main: CaptureFree{ .main(sys: mut System): Void }
 /// ``"fapp"`` followed by three digits names shortcut files and is refused here.
 /// Only a `Main` can implement it, and a `Main` claims each extension at most once across all its
 /// `OpenWith[_,_]` and `Shortcut[_,_]`. The portable Fearless ignores it.
-//@Group "system interactions"
 OpenWith[I,E]: {}
+//@Group "system interactions"
 /// ``OpenWith[I]`` is `OpenWith[_,_]` with an extension chosen by the Fearless manager, like
 /// ``ffile042``.
-//@Group "system interactions"
 OpenWith[I]: {}
+//@Group "system interactions"
 /// A `Main` implementing ``Shortcut[I,E]`` asks the Fearless manager to create a file
 /// ``name.E`` in the top level of its project, showing the icon ``I``, that runs the main on a
 /// double click, also when moved somewhere else: ``Bar: Main, Shortcut[IconsBar,"fapp123"]{ s -> ... }``
 /// gets the file ``bar.fapp123``. ``name`` is the simple name of the main turned into a file name:
 /// ``FooBar`` gives ``foo_bar``. ``I`` is as in `OpenWith[_,_]`. ``E`` is ``"fapp"`` followed by
 /// three digits, like ``"fapp042"``. The portable Fearless ignores it.
-//@Group "system interactions"
 Shortcut[I,E]: {}
+//@Group "system interactions"
 /// ``Shortcut[I]`` is `Shortcut[_,_]` with an extension chosen by the Fearless manager, like
 /// ``fapp042``.
-//@Group "system interactions"
 Shortcut[I]: {}
+//@Group "system interactions"
 /// A `Main` implementing ``PreLoadIcon[I]`` can show the icon ``I`` on the windows of its Guis:
 /// ``s.gui.icon(IconsFoo)`` is a deterministic error unless the running main preloads ``IconsFoo``.
 /// A main preloads the ``I`` of each `Shortcut[_]`, `OpenWith[_]` and `PreLoadIcon[_]` it implements,
 /// and ``base.IconsFearless``. ``I`` is as in `OpenWith[_,_]`. Only a `Main` can implement it.
-//@Group "system interactions"
 PreLoadIcon[I]: {}
 //@Group "structured data"
 Sealed: {}
@@ -57,10 +57,10 @@ _MagicDebug: Sealed {
   #(x: read ToStr): Void -> _Magic!;
   }
 
-///Prints the string representation of x, followed by a newline.
-///It can be called from any code, with no capability: the program has no way to observe what was printed.
 //@Group "output"
 //@Group "testing"
+///Prints the string representation of x, followed by a newline.
+///It can be called from any code, with no capability: the program has no way to observe what was printed.
 Debug: Sealed {
   #[T](x: T, f: ToStrBy[T]): T -> Block#(this#(f#x.str),x);
   #(x: read ToStr): Void -> _MagicDebug# x;

@@ -26,8 +26,8 @@ FromInfo[T]: { .fromInfo(i: Info): T }            /// parse/decode from Info
 //@Group "structured data"
 DataType[T,T0]: ToInfo,ToImm[T0],WidenTo[T],OrderHash[T],Pipe[T] {}
 
-/// Env-dependent DataType for T (contains E); imm rep is still T0.
 //@Group `DataType[_,_]`
+/// Env-dependent DataType for T (contains E); imm rep is still T0.
 DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Pipe[T] {
   /// Freeze the env by capturing element conversions in "by".
   /// For example by may be {::} or a projection {::.key}.
@@ -41,12 +41,12 @@ DataType[T,T0,E:*,E0]: ToInfo[E],ToImm[E,E0,T0],WidenTo[T],OrderHash[T,E],Pipe[T
     };
   }
 
+//@Group `DataTypeBy[_,_]`
 /// DataTypeBy is the "by key" conversion, analogous to OrderHashBy.
 /// It returns a closed DataType[K,K0] for each source value t: T.
 /// Examples:
 /// - If Key implements DataType[Key,Key0], then {::.key} : DataTypeBy[Foo,Key,Key0].
 /// - {::} is the identity-by when T itself implements DataType[T,T0] (see DataTypeBy[T,T0] below).
-//@Group `DataTypeBy[_,_]`
 DataTypeBy[E,K,K0]: ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K] {
   #(e: read E): read DataType[K,K0];
 
@@ -68,9 +68,9 @@ DataTypeBy[E,K,K0]: ToInfoBy[E],ToImmBy[E,K0],OrderHashBy[E,K] {
     this.thenData(next,{k0,k10->k0});
   }
 
+//@Group "structured data"
 /// Specialized "datatype for T" (no external key type).
 /// This mirrors OrderHashBy[T]: you provide per-value ops, and # closes into a DataType[T,T0].
-//@Group "structured data"
 DataTypeBy[T,T0]: DataTypeBy[T,T,T0] {
   .cmp(t0: read T,t1: read T): Order;
   .hash(t: read T): Nat;

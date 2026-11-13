@@ -1,10 +1,10 @@
-/// The initialisation point for an ESet[E] creates and empty ESet
 //@Group "collections"
+/// The initialisation point for an ESet[E] creates and empty ESet
 ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E] -> _Magic! }
 
+//@Group "collections"
 /// A mutable set, allows for in place updates.
 /// **NOTE:** Unlike Set this collection does not maintain a sorted order.
-//@Group "collections"
 ESet[E]: Pipe[ESet[E]] {
   /// `this.size` returns the number of elements in `this`.
   //>   .check{ESets#[Nat, Nat]({::}).add(1).add(2).add(3).size .assertEq 3}

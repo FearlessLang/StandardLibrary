@@ -12,6 +12,7 @@ _BiMappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
     .else -> m.with(k, e)
     } }
 
+//@Group "flows"
 /// A pair of channels, made by `Flow.with`: the element at index ``i`` of one channel goes with the element at index ``i`` of the other.
 /// `Flow.with` is a consuming terminal of both flows, so every stage of both has finished with every element
 /// before any method of the `BiFlow` runs; the flows `BiFlow.getMerge`, `BiFlow.merge` and `BiFlow.mergeOpts` return
@@ -20,7 +21,6 @@ _BiMappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
 /// The channels may differ in size, and each method says how it handles that:
 /// the ``get`` methods throw, the plain ones return an `Opt`, the ``Opts`` ones pad the shorter channel with ``.empty``,
 /// and `BiFlow.fillA`, `BiFlow.fillB` and `BiFlow.cutToSmallest` make the sizes equal.
-//@Group "flows"
 BiFlow[A:*,B:*]: {
   /// ``this.with flow`` consumes `this` and ``flow`` into a `TriFlow` whose third channel is the elements of ``flow``.
   //>   .check{Flows#(1, 2).with(Flows#(10, 20)).with(Flows#(100, 200)).getMerge{a, b, c -> a + b + c}.list .assertEq({::}, Lists#(111, 222))}
@@ -115,8 +115,8 @@ BiFlow[A:*,B:*]: {
   mut .limit(n: Nat): mut BiFlow[A,B];
   }
 
-/// Three channels, made by `BiFlow.with`. Every method is the `BiFlow` method of the same name, over three channels.
 //@Group "flows"
+/// Three channels, made by `BiFlow.with`. Every method is the `BiFlow` method of the same name, over three channels.
 TriFlow[A:*,B:*,C:*]: {
   /// ``this.with flow`` consumes `this` and ``flow`` into a `QuadFlow` whose fourth channel is the elements of ``flow``.
   mut .with[D:*](flow: mut Flow[D]): mut QuadFlow[A,B,C,D];
@@ -161,8 +161,8 @@ TriFlow[A:*,B:*,C:*]: {
   mut .limit(n: Nat): mut TriFlow[A,B,C];
   }
 
-/// Four channels, made by `TriFlow.with`. Every method is the `BiFlow` method of the same name, over four channels.
 //@Group "flows"
+/// Four channels, made by `TriFlow.with`. Every method is the `BiFlow` method of the same name, over four channels.
 QuadFlow[A:*,B:*,C:*,D:*]: {
   /// See `BiFlow.getMerge`.
   //>   .check{Flows#(1).with(Flows#(10)).with(Flows#(100)).with(Flows#(1000)).getMerge{a, b, c, d -> a + b + c + d}.list .assertEq({::}, Lists#(1111))}

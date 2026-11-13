@@ -10,6 +10,8 @@ Extractor[T:*, Self]: Extractor[T] {
   .where(f: read F[InfoValidator, InfoCheck]): Self;
   }
 
+//@Group "input"
+//@Group "structured data"
 /// `InfoExtractor` is a utility class to help extract values from an info.
 /// Similar to `InfoValidator` you can descend into an info with the `>` operator.
 /// ``.where`` keeps the extracted value only if it satisfies an `InfoValidator`.
@@ -26,8 +28,6 @@ Extractor[T:*, Self]: Extractor[T] {
 //>       & > 0 > "name" .isMsg{:: == "Bob"}
 //>       & > 1 > "name" .isMsg{:: == "David"}
 //>       }}.isEmpty}
-//@Group "input"
-//@Group "structured data"
 InfoExtractor: Extractor[Info, InfoExtractor] {
   /// Descend one layer deeper into info,
   /// matching against it being a map with a key `key`

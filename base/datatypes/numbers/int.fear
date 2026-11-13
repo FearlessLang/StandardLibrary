@@ -1,9 +1,9 @@
+//@Group "algebra"
 /// Int: signed 64-bit.
 /// Note: there is one more negative Int than positive Int: ``Math.minInt`` is ``-9_223_372_036_854_775_808``, while ``Math.maxInt`` is ``+9_223_372_036_854_775_807``.
 /// Thus ``Math.minInt * -1`` overflows, and ``Math.minInt .aluMulWrap -1`` is ``Math.minInt`` itself.
 /// The absolute value of ``Math.minInt`` is not an Int: `.abs` returns a `Nat`, while `.negAbs` returns an `Int`.
 /// Note: / returns the exact quotient as a Num; the div and rem methods stay in Int (divisor is Nat).
-//@Group "algebra"
 Int: Sealed,DataType[Int,Int],SumNumber[Int] {
   /// `this.succ` returns ``this + +1``. Overflows if ``this == 9_223_372_036_854_775_807``.
   //>   .check{+5 .succ .assertEq +6}

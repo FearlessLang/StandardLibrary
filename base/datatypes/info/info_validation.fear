@@ -2,6 +2,8 @@ _InfoValidators: Sealed {
   #(info: Info): InfoValidator -> _SuccessfulInfoValidator { .close -> info }
   }
 
+//@Group "input"
+//@Group "structured data"
 /// `InfoValidator` matches the shape and content of an `Info`, for example the error info of an `Action`.
 /// A validator starts from a root `Info` and descends into it with `>`:
 /// ``this > "friends" > 0 > "name"`` holds if the root is a map with key ``"friends"``, holding a list whose first element is a map with key ``"name"``.
@@ -35,8 +37,6 @@ _InfoValidators: Sealed {
 //>   .checkTrue{info.validate{::
 //>     & > "friends" > 0 > "name" .isMsg{:: == "Bob"}
 //>     & > "friends" > 1 > "name" .whereNot{::.isMsg{:: == "David"}}}}
-//@Group "input"
-//@Group "structured data"
 InfoValidator: InfoCheck {
   >(key: InfoKey): InfoValidator;
 
@@ -53,9 +53,9 @@ InfoValidator: InfoCheck {
   .isEmpty: InfoCheck;
   }
 
-/// `InfoCheck` is what the last step of a validator returns, and what `Info.validate` and ``.where`` accept.
 //@Group "input"
 //@Group "structured data"
+/// `InfoCheck` is what the last step of a validator returns, and what `Info.validate` and ``.where`` accept.
 InfoCheck: Sealed {
   .close: Info;
   .isValid: Bool;

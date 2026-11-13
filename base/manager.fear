@@ -1,3 +1,5 @@
+//@Group "system interactions"
+//@Group "output"
 ///The object capability to send messages to the Fearless manager running this program.
 ///Each method sends one message, as the manager program does when started with one argument, a call ``FearlessCommand<Verb> ...``,
 ///and returns once the manager has applied the message; `.run` and `.compile` return once the mains or the compilation end.
@@ -11,8 +13,6 @@
 ///Arguments that do not make a call are a deterministic error, and no message is sent:
 ///a ``path`` that is not absolute or is the root of a drive, a ``name`` that is not a project name,
 ///a main, a type or an attenuator that is not a qualified type name, `.selectMains` with two equal mains.
-//@Group "system interactions"
-//@Group "output"
 CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Shows the manager window.
   mut .show: Void;

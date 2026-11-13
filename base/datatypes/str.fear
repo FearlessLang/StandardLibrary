@@ -1,3 +1,4 @@
+//@Group "algebra"
 /// Simple string type
 /// It can only even contain the following whitelisted characters:
 /// ``0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\``
@@ -61,7 +62,6 @@
 /// - rejected: any text other than exactly `True` or `False` (this includes ``true``, `` True`` and ``True ``)
 /// - accepted: `True`.getBool  `False`.getBool
 /// - roundtrip: b.str.getBool == b for every Bool b
-//@Group "algebra"
 Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKey {
   .close->this;
   +(x: read ToStr): Str;            /// string concatenation; throws on result size > maxInt

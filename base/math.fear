@@ -118,11 +118,11 @@ Math: Sealed, _MagicMath {
 
 
 
+//@Group "algebra"
 /// The super type of `Radian` and `Degree`
 /// Angles that normalize to the same value are considered equal,
 /// ``360.0.getDeg .assertEq(0.0.getDeg)``
 /// ``(Math.tau / -4.0).getRad.deg .assertEq((+3.0 / +4.0 * Math.tau).getRad.deg)``
-//@Group "algebra"
 Angle[Self]: F[Float],Sealed,DataType[Self, Self] {
   +(other: Self): Self;
   -(other: Self): Self;
@@ -138,8 +138,8 @@ Angle[Self]: F[Float],Sealed,DataType[Self, Self] {
   .info -> Infos.msg(this.str);
 }
 
-/// An angle measured in degrees
 //@Group "algebra"
+/// An angle measured in degrees
 Degree: Angle[Degree] {
   + other -> this# + (other#) .getDeg;
   - other -> this# - (other#) .getDeg;
@@ -168,8 +168,8 @@ _RadianTrig: Sealed {
   .tan(x: Radian): Float -> _Magic!;
   }
 
-/// An angle measured in radians
 //@Group "algebra"
+/// An angle measured in radians
 Radian: Angle[Radian] {
   + other -> this# + (other#) .getRad;
   - other -> this# - (other#) .getRad;

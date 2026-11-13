@@ -1,3 +1,4 @@
+//@Group "output"
 ///Log strings in a text file.
 ///
 ///The log is written to .out/logs/_base/log.log.
@@ -14,9 +15,10 @@
 ///
 ///If a previous live log is found when logging starts, the archived copy is
 ///marked as interrupted.
-//@Group "output"
 Log: { .log(s: read ToStr): Void -> _Magic! }
 
+//@Group "output"
+//@Group "testing"
 ///Log used internally by the UnitTest library.
 ///
 ///The log is written to .out/logs/_base/unit_test_log.log.
@@ -24,11 +26,11 @@ Log: { .log(s: read ToStr): Void -> _Magic! }
 ///representation of s, without adding a timestamp and without adding a
 ///newline.
 ///See also: base.Log
-//@Group "output"
-//@Group "testing"
 UnitTestLog: { .log(s: read ToStr): Void -> _Magic!; .plan(kind: Str, frame: StackFrame): Void -> _Magic! }
 
 
+//@Group "output"
+//@Group "testing"
 ///Logs values in memory.
 ///
 ///Use by defining a capture-free singleton log:
@@ -47,12 +49,11 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic!; .plan(kind: Str, frame: Sta
 ///
 ///A concrete log type cannot have generic parameters: this is a compile time error.
 ///
-//@Group "output"
-//@Group "testing"
 InMemoryLog[T]: CaptureFree, Named{
   ///Submits s to an in memory log that requires a capability to be read.
   .log(s: T): Void -> _Magic!;
   }
+//@Group "output"
 ///Logs strings to your own text file, instead of the single shared file
 ///base.Log writes to.
 ///
@@ -86,7 +87,6 @@ InMemoryLog[T]: CaptureFree, Named{
 ///
 ///See also: base.Log (the single fixed shared log, no declaration needed),
 ///base.InMemoryLog (in memory instead of a file).
-//@Group "output"
 FileLog: CaptureFree, Named{
   .log(s: read ToStr): Void -> _Magic!;
   }

@@ -3,6 +3,7 @@ _Throw:{
   .nonDeterministic[R:**](info:Info):R -> _Magic!;
   }
 
+//@Group "errors"
 /// Exception classes (observability):
 /// - deterministic: The same operation called with observationally identical input
 ///   will either always throw or never throw, in every version of base.
@@ -10,7 +11,6 @@ _Throw:{
 /// - nonDeterministic: the throw may or may not happen in the same abstract situation,
 ///   or in another version of base (OOM, stack overflow, asserts, overflows, etc).
 ///   Catching/observing requires mut CapTry obtained from mut System.
-//@Group "errors"
 Error: {
   ![R:**](info: Info): R -> _Throw.deterministic(info);
   .msg[R:**](msg: Str): R -> _Throw.deterministic(Infos.msg msg);
@@ -30,10 +30,10 @@ Unreachable: {
   ![R:**](msg: Str): R -> Error.msg("This code was flagged as unreachable as "+msg+", but it has been reached.");
   }
 
+//@Group "errors"
 /// Strong exception safety is upheld:
 /// The operation has either completed successfully or thrown an exception,
 /// leaving the program state exactly as it was before the operation started.
-//@Group "errors"
 Try: {
   #[R:*](try: read F[R]): mut Action[R] -> _Magic!;
   #[T,R:*](data: iso T, try: read F[iso T, R]): mut Action[R] -> _Magic!;

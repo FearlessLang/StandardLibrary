@@ -18,9 +18,9 @@ Maps: Sealed {
   .singletonRead[K,K',E:*](OrderHashBy[K,K'], K, read E): read Map[K,E]->_Magic!;
   }
 
+//@Group "collections"
 /// Keys are only imm and compared/hashed using the map's stored OrderHashBy[K,...].
 /// The flow order, .str order etc all respect/follow the map insertion order.
-//@Group "collections"
 Map[K,E:*]: Sealed,BaseContainer[E],DataType[Map[K,E],Map[K,imm E],E,imm E],_AssertEmpty,_AssertSize {
 
   read .size: Nat;                 /// number of elements

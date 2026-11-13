@@ -1,3 +1,4 @@
+//@Group "system interactions"
 ///The object capability to observe the world outside of the program.
 ///Code without a System can only compute with its arguments: equal calls give equal results.
 ///Whatever may answer differently to the same question (input, files, downloads, in memory logs,
@@ -6,7 +7,6 @@
 ///Debug, Log and FileLog can be used anywhere, and so can InMemoryLog.log,
 ///whose content can only be read through System.
 ///CapOutput only acts: the program cannot observe what was printed.
-//@Group "system interactions"
 System: ToIso[System],WidenTo[System] {
   ///A number chosen at random, a new one at every call: the seed of a generator of random numbers.
   mut .randomSeed: Nat;
@@ -32,9 +32,9 @@ System: ToIso[System],WidenTo[System] {
   mut .locked[R:**](reads: List[DataRead], edits: List[DataEdit], f: mut MF[R]): R;
   }
   
-/// This try-catch will catch non-deterministic errors.
 //@Group "system interactions"
 //@Group "errors"
+/// This try-catch will catch non-deterministic errors.
 CapTry: ToIso[CapTry],WidenTo[CapTry] {
   /// This method upholds strong exception safety.
   mut #[R:*](try: read F[R]): mut Action[R];
@@ -58,11 +58,11 @@ CapOutput: ToIso[CapOutput],WidenTo[CapOutput] {
   mut .bytes(List[Byte]): Void;//Does flush
   }
 
+//@Group "system interactions"
+//@Group "input"
 ///A position in the list of the input files of the program, in the order they arrived.
 ///The file opened to start the program is the first one; every file dropped on a window of the program arrives after it.
 ///``sys.inputCursor`` is the first position.
-//@Group "system interactions"
-//@Group "input"
 CapInputCursor: ToIso[CapInputCursor],WidenTo[CapInputCursor] {
   mut #: mut Opt[mut CapInputCursorNode]; ///the file at this position: empty until a file arrives there, then always that file
   mut .next: mut CapInputCursor;

@@ -47,21 +47,21 @@ ActorImplMut[S:*,E:*,R:*]: {
   read #(down: mutH ActorSink[R], state: mutH S, e: E): mut ContinueBreak[Void]
   }
 
+//@Group "flows"
 /// Where an actor lambda pushes the elements it emits.
 /// ``down#e`` pushes ``e`` on a ``mut`` sink, as in `ActorImpl`.
 /// ``down.push#(down, e)`` pushes ``e`` on any sink, the ``mutH`` one of
 /// `ActorImplMut` included.
 /// ``down.pushOpt#(down, o)`` pushes what ``o`` holds, and nothing when it holds
 /// nothing.
-//@Group "flows"
 ActorSink[E:*]: Sealed {
   read .push: ActorSinkHelper -> ActorSinkHelper;
   read .pushOpt: ActorSinkOptHelper -> ActorSinkOptHelper;
   mut #(E): Void;
   }
 
-/// ``ActorSinkHelper#(down, e)`` is ``down#e``, on a ``mutH`` sink too.
 //@Group "flows"
+/// ``ActorSinkHelper#(down, e)`` is ``down#e``, on a ``mutH`` sink too.
 ActorSinkHelper: Sealed {
   imm #[E:*](down: mutH ActorSink[E], e: E): Void -> _Magic!;
   }

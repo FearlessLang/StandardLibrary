@@ -66,13 +66,13 @@ Image:{
   ///and a pixel with any other alpha gives back red, green and blue that can differ from the color drawn by that rounding.
   read .color(x: XInt, y: YInt): Color;
   }
-///``Images#(width, height, background)`` is a builder of images of ``width`` x ``height`` pixels, each of the color ``background``.
-///Each side is between 1 and 32767, and the image has at most 268435456 pixels.
 //@Group "input"
 //@Group "UI"
+///``Images#(width, height, background)`` is a builder of images of ``width`` x ``height`` pixels, each of the color ``background``.
+///Each side is between 1 and 32767, and the image has at most 268435456 pixels.
 Images:{ #(width: WidthNat, height: HeightNat, background: Color): ImageBuilder -> _Magic!; }
-///Each `.paint` of an `ImageBuilder` makes the pixels of one image.
 //@Group "UI"
+///Each `.paint` of an `ImageBuilder` makes the pixels of one image.
 ImageBuilder:{
   ///An image of the size of this builder, each pixel of its background color, with ``painter`` drawn over it as `Image.paint` draws.
   .paint(painter: Painter): Image;

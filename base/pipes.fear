@@ -1,15 +1,15 @@
+//@Group "algebra"
 /// An operation is a pipeable function that takes an S -> R, and can be piped into other operations.
 /// Examples:
 //>   .check{Math.ln(Math.asin(Math.clamp({::}, -1.0, +1.0, 12.0))#)
 //>     .assertEq(12.0 |> {Math.clamp({::}, -1.0, +1.0, ::)} |> {Math.asin :: #} |> {Math.ln ::})}
-//@Group "algebra"
 Operation[S:**, R:**]: Pipe[Operation[S, R]] {
   .close -> this;
   mut #(source: S): R
   }
 
-/// A interface to allow for piping of operations on a source S.
 //@Group "algebra"
+/// A interface to allow for piping of operations on a source S.
 Pipe[S:*]: {
   mut  .close: mut  S;
   read .close: read S;

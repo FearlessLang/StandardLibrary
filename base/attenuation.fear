@@ -1,9 +1,10 @@
+//@Group "system interactions"
 ///An attenuator of a capability type ``C`` derives from a ``mut C`` a ``mut C`` with less authority: the capability it
 ///gives reaches the world only through the capability it receives.
 ///An attenuator captures nothing, so its type name identifies it.
-//@Group "system interactions"
 Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 
+//@Group "system interactions"
 ///An attenuator of `System`. The Fearless manager and `CapProcess` apply attenuators of `System` by name, in the process
 ///they start: every attenuator receives a `RevokableSystem` whose `Revocation` is not started yet, and the real System
 ///starts it only after every attenuator has run. Thus an attenuator can only build the System it gives: a call on the
@@ -20,13 +21,12 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///  }}
 ///OnlyOutput: SystemAttenuator { u -> mut ErrorSystem{'s .try -> u.try; .out -> u.out; .iso -> OnlyOutput#(u.iso.close); .close -> s } }
 ///```
-//@Group "system interactions"
 SystemAttenuator: Attenuator[System]{}
 
-///A System with no authority: every method throws the non deterministic error ``System.<method> is revoked.``.
-///The `.iso` of ErrorSystem is an ErrorSystem.
 //@Group "system interactions"
 //@Group "errors"
+///A System with no authority: every method throws the non deterministic error ``System.<method> is revoked.``.
+///The `.iso` of ErrorSystem is an ErrorSystem.
 ErrorSystem: System {
   .try -> _Revoked#".try";
   .out -> _Revoked#".out";
@@ -47,8 +47,8 @@ ErrorSystem: System {
   }
 _Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked.") }
 
-///Every method reaches the received System, but `.manager` is revoked: the system capability returned by NoManager can not call the Fearless manager.
 //@Group "system interactions"
+///Every method reaches the received System, but `.manager` is revoked: the system capability returned by NoManager can not call the Fearless manager.
 NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
@@ -56,9 +56,9 @@ NoManager: SystemAttenuator { u -> {'s
   .process -> u.process.with NoManager; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
+//@Group "system interactions"
 ///Every method reaches the received System, but the `CapManager` it gives revokes `.quit` and `.reset`:
 ///the system capability returned by NoManagerQuit can not end the Fearless manager.
-//@Group "system interactions"
 NoManagerQuit: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
   .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d;
@@ -81,23 +81,23 @@ NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
   .iso -> NoQuitManager#(u.iso.close); .close -> s;
   }}
 
+//@Group "system interactions"
+//@Group "errors"
 ///A flag in one of three states, in this order and with no way back: not started, started, revoked.
 ///``#`` returns when started; otherwise it throws the non deterministic error ``Revocation.start was not called yet.``
 ///or ``Revocation.revoke was called.``.
 ///The copies ``.iso`` gives share the flag, so revocation reaches the images too. A Revocation holds no value.
-//@Group "system interactions"
-//@Group "errors"
 Revocation: ToIso[Revocation]{ mut #: Void; }
+//@Group "system interactions"
 ///The Revocation `System.revocation` gives: the one that can change the flag. Its copies are roots too.
 ///``.start`` on a started or revoked root, and ``.revoke`` on one not started or already revoked, are non deterministic
 ///errors.
-//@Group "system interactions"
 CapRevocationRoot: Revocation, ToIso[CapRevocationRoot]{ mut .start: Void; mut .revoke: Void; mut .iso: iso CapRevocationRoot; mut .close: mut CapRevocationRoot; }
 
+//@Group `System`
 ///The System ``u`` under the Revocation ``r``: every method checks ``r`` and delegates to ``u``, and what it gives
 ///checks ``r`` the same way, down to every capability of ``u`` but the `Frame` of `CapGui.run`.
 ///``.iso`` does not check ``r``: the image it gives checks a copy of ``r`` at every call.
-//@Group `System`
 RevokableSystem: { #(r: mut Revocation, u: mut System): mut System -> {'s
   .try -> Block#(r#, RevokableTry#(r, u.try));
   .out -> Block#(r#, RevokableOutput#(r, u.out));
@@ -276,6 +276,8 @@ RevokableGui: { #(r: mut Revocation, u: mut CapGui): mut CapGui -> {'s
 //@Group "system interactions"
 InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 
+//@Group "system interactions"
+//@Group "output"
 ///The object capability to run another main of this program in a new process.
 ///The new process starts as this program started: with the same first input file, the same data projects and the same manager.
 ///Its main receives a System with the authority of this program or less: the attenuators of this program, in their order,
@@ -287,8 +289,6 @@ InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 ///A new process that cannot start, or that ends before its main ends, is a non deterministic error.
 ///``.start`` starts the new process and returns at once; the `CapRunningMain` it gives is how this program waits for the process or ends it.
 ///``.run`` is ``.start`` then `CapRunningMain.await`.
-//@Group "system interactions"
-//@Group "output"
 CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
   mut .run(main: Main, attenuators: List[SystemAttenuator]): Void;
   mut .run(main: InfoMain, arg: Info, attenuators: List[SystemAttenuator]): Info;

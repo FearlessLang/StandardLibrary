@@ -1,3 +1,4 @@
+//@Group "imperative"
 /// ``RunRecursion#{..}`` runs the lambda on a fresh thread whose stack holds `.stackSize` bytes,
 /// so deeply recursive code can go much deeper than the
 /// stack of its caller allows. The caller waits for the result; errors propagate to the caller.
@@ -5,7 +6,6 @@
 /// ``Parsing: RunRecursion{ .depth -> 7 }``.
 //>   .check{RunRecursion#{5}.assertEq 5}
 //>   .check{RunRecursion{.depth->1}#{RunRecursion{.depth->1}#{7}}.assertEq 7}
-//@Group "imperative"
 RunRecursion: {
   #[R:**](f: mut MF[R]): R -> _RunRecursion#(this, f);
   /// How many calls of this family nest on one thread before the next one starts a new thread.

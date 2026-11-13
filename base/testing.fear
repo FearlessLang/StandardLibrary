@@ -24,6 +24,7 @@ StackFrame: DataType[StackFrame,StackFrame] {
 StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
   {'self .fileName->fn; .typeName->tn; .methodName->mn; .lineNumber->ln; .imm->self} }
 
+//@Group "testing"
 ///Unit tests
 ///Basically, a test suite is a Test that only calls `.test` on named Tests,
 ///While a Test is a named Test that only calls `.check`.
@@ -78,7 +79,6 @@ StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
 ///```
 ///.check{SomethingThatShouldSucceed#}
 ///```
-//@Group "testing"
 UnitTests: Main {
   .main sys->sys.try#(sys.iso.close, {r -> Block#
     .openIso s = r
@@ -161,6 +161,7 @@ TestCont[T]: { #(t: T, self: mut TestCap): mut TestCap }
 _TestCaps: {
   #(sys: mut System, ts: mut EList[CheckInfo]): mut RTestCap -> Block#
     .var[Opt[Str]] name = {Opt[Str]{}}
+    //@Group "testing"
     .return {mut RTestCap: TestCap {'self
     .test t -> Block#
       .let[Opt[Str]] outer = {name.get}

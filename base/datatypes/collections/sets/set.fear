@@ -1,5 +1,5 @@
-/// A Factory class for making sets of elements.
 //@Group "collections"
+/// A Factory class for making sets of elements.
 Sets: Sealed {
   #[E,K](OrderHashBy[E,K]): Set[E]->_Magic!;
   #[E,K](OrderHashBy[E,K],E): Set[E]->_Magic!;
@@ -24,10 +24,10 @@ Sets: Sealed {
   #[E,K](OrderHashBy[E,K],E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): Set[E]->_Magic!;
   }
 
+//@Group "collections"
 /// The set keys must be imm.
 /// This set is immutable so this + e will produce a new set with e included, and will not change `this`.
 /// This set maintains a sorted list of elements, such that the set ordering is predictable given the OrderHash.
-//@Group "collections"
 Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
   .close -> this;
 

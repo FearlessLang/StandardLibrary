@@ -116,8 +116,8 @@ ControlFlowMatch[R:*]: {
   mut .break: mut Block[R];
   mut .return(v: R): mut Block[R];
   }
-/// `Continue` or `Break`, never `OuterReturn`: the `ControlFlow` an actor lambda answers.
 //@Group "imperative"
+/// `Continue` or `Break`, never `OuterReturn`: the `ControlFlow` an actor lambda answers.
 ContinueBreak[R:*]: ControlFlow[R] {}
 //@Group "imperative"
 Continue: {#[R:*]: mut ContinueBreak[R]->{::.continue}}

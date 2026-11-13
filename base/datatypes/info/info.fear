@@ -96,9 +96,9 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
 //@Group "structured data"
 ExtractionFunction[R:*]: F[InfoExtractor, Extractor[R]] {}
 
+//@Group "structured data"
 /// Allow indexing into an info,
 /// Union of Str (index into map) and Nat (index into list)
-//@Group "structured data"
 InfoKey: Sealed, ToStr {
   .indexInto(Info): Opt[Info];
   }
