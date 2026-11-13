@@ -91,30 +91,12 @@ public interface _Throw$1c$0{
     return sb.append(close).toString();
   }
   static String decodeOp(String enc){
-    var ps= enc.split("_");
     var sb= new StringBuilder();
-    for (var p : ps){ sb.append(opChar(p)); }
+    for (var p : enc.split("_")){ sb.append(opChars.charAt(opNames.indexOf(p))); }
     return sb.toString();
   }
-  static char opChar(String tok){ return switch (tok){
-    case "plus" -> '+';
-    case "dash" -> '-';
-    case "star" -> '*';
-    case "slash" -> '/';
-    case "pct" -> '%';
-    case "lt" -> '<';
-    case "gt" -> '>';
-    case "eq" -> '=';
-    case "bang" -> '!';
-    case "and" -> '&';
-    case "or" -> '|';
-    case "xor" -> '^';
-    case "tilde" -> '~';
-    case "q" -> '?';
-    case "hash" -> '#';
-    case "bslash" -> '\\';
-    default -> throw new Error();
-  };}
+  String opChars= "+-*/%<>=!&|^~?#\\";
+  List<String> opNames= List.of("plus", "dash", "star", "slash", "pct", "lt", "gt", "eq", "bang", "and", "or", "xor", "tilde", "q", "hash", "bslash");
   
  
   _Throw$1c$0 instance= new _Throw$1c$0(){};}
