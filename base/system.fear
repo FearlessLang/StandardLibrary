@@ -36,7 +36,7 @@ CapTry: ToIso[CapTry],WidenTo[CapTry] {
   /// This method upholds strong exception safety.
   mut #[R:*](try: read F[R]): mut Action[R];
   
-  mut #[T:**,R:*](data: iso T, try: read F[iso T,R]): mut Action[R];
+  mut #[T,R:*](data: iso T, try: read F[iso T,R]): mut Action[R];
   
   ///Return the current stack trace
   mut .currentStackTrace: List[StackFrame];

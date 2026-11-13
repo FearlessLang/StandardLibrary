@@ -32,5 +32,5 @@ Unreachable: {
 /// leaving the program state exactly as it was before the operation started.
 Try: {
   #[R:*](try: read F[R]): mut Action[R] -> _Magic!;
-  #[T:iso,imm,mut,read,R:*](data: iso T, try: read F[iso T, R]): mut Action[R] -> _Magic!;
+  #[T,R:*](data: iso T, try: read F[iso T, R]): mut Action[R] -> _Magic!;
   }
