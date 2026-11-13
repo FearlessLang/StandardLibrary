@@ -60,7 +60,7 @@ final class DataFiles{
   private static final Set<String> multiDot= Set.of("tar.gz", "tar.bz2", "tar.xz", "tar.zst", "tar.lz", "tar.lz4", "d.ts", "d.ts.map", "js.map", "css.map", "min.js", "min.css");
   sealed interface Node{}
   record Dir(Path path) implements Node{}
-  record ZipDir(Path zip, List<String> steps, String prefix) implements Node{}
+  record ZipDir(Path zip, List<String> steps, String prefix, LinkedHashMap<String,Item> items) implements Node{}
   record Resource(Path path, List<String> steps, String entry) implements Node{}
   record Item(long time, byte[] bytes){}
   record Root(String name, Path path, Path lock){}
@@ -324,14 +324,14 @@ final class DataFiles{
         if (isDir(p)){ return Optional.of(new Dir(p)); }
         if (Files.isRegularFile(p, NOFOLLOW_LINKS)){ return Optional.of(new Resource(p, List.of(), "")); }
         var zip= d.path().resolve(s+".zip");
-        return Files.isRegularFile(zip, NOFOLLOW_LINKS) ? Optional.of(new ZipDir(zip, List.of(), "")) : Optional.empty();
+        return Files.isRegularFile(zip, NOFOLLOW_LINKS) ? Optional.of(new ZipDir(zip, List.of(), "", items(Files.readAllBytes(zip)))) : Optional.empty();
       }
       case ZipDir z -> {
-        var items= items(z.zip(), z.steps());
+        var items= z.items();
         var name= z.prefix()+s;
         if (items.containsKey(name)){ return Optional.of(new Resource(z.zip(), z.steps(), name)); }
-        if (items.containsKey(name+".zip")){ return Optional.of(new ZipDir(z.zip(), Stream.concat(z.steps().stream(), Stream.of(name+".zip")).toList(), "")); }
-        return items.keySet().stream().anyMatch(k -> k.startsWith(name+"/")) ? Optional.of(new ZipDir(z.zip(), z.steps(), name+"/")) : Optional.empty();
+        if (items.containsKey(name+".zip")){ return Optional.of(new ZipDir(z.zip(), Stream.concat(z.steps().stream(), Stream.of(name+".zip")).toList(), "", items(items.get(name+".zip").bytes()))); }
+        return items.keySet().stream().anyMatch(k -> k.startsWith(name+"/")) ? Optional.of(new ZipDir(z.zip(), z.steps(), name+"/", items)) : Optional.empty();
       }
       case Resource _ -> { return Optional.empty(); }
     }
@@ -345,7 +345,7 @@ final class DataFiles{
         }
       }
       case ZipDir z -> {
-        for (var k : items(z.zip(), z.steps()).keySet()){
+        for (var k : z.items().keySet()){
           if (!k.startsWith(z.prefix())){ continue; }
           var rest= k.substring(z.prefix().length());
           var slash= rest.indexOf('/');
