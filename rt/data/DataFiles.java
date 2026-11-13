@@ -149,7 +149,7 @@ final class DataFiles{
       }
       return f.get();
     }
-    catch (IOException e){ throw nonDetErr("The locks of sys.locked can not be taken: "+e.getClass().getSimpleName()); }
+    catch (IOException e){ throw nonDetErr("The locks of sys.locked cannot be taken: "+e.getClass().getSimpleName()); }
     finally{
       awaitGroup();
       synchronized (gate){ current = null; held = null; taken.forEach(DataFiles::release); }
@@ -195,7 +195,7 @@ final class DataFiles{
   }
   private static Path tmp(Path root){ return root.resolve("."+UUID.randomUUID()+".tmp"); }
   private static Error failed(String name, List<String> path, boolean write, IOException e){
-    return lost("The "+at(name, path)+"\ncan not be "+(write ? "changed" : "read")+".", e);
+    return lost("The "+at(name, path)+"\ncannot be "+(write ? "changed" : "read")+".", e);
   }
   private static String at(String name, List<String> path){ return "path "+name+"/"+String.join("/", path); }
   private static Error refused(String name, List<String> path, String why){ return detErr("The "+at(name, path)+"\n"+why); }
@@ -278,7 +278,7 @@ final class DataFiles{
     }
   }
   private static Object delete(String name, Path root, List<String> path) throws IOException{
-    if (path.isEmpty()){ throw refused(name, path, "names the root folder, which can not be deleted."); }
+    if (path.isEmpty()){ throw refused(name, path, "names the root folder, which cannot be deleted."); }
     if (atom(path.getLast())){ folders(name, path, path); }
     else{ writable(name, path); }
     var at= resolve(root, path);

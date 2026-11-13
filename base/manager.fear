@@ -43,9 +43,9 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   ///Returns that report.
   mut .check(name: Str): UStr;
   ///Selects the project ``name`` and fixes its project folder: deletes the files that desktops, archive programs, office programs and text editors add,
-  ///renames the files and the folders whose name a project can not hold, cleans the text of the Fearless source files,
+  ///renames the files and the folders whose name a project cannot hold, cleans the text of the Fearless source files,
   ///resets the file times that are unset or in the future, deletes the folders and the zips left with nothing inside,
-  ///and moves what a project can not hold, like a symbolic link, into the folder ``<f>_fix`` next to the project folder ``<f>``
+  ///and moves what a project cannot hold, like a symbolic link, into the folder ``<f>_fix`` next to the project folder ``<f>``
   ///(``<f>_fix2``, ``<f>_fix3`` and so on when that name is taken).
   ///The manager refuses it while a main or a compilation of the project runs, and while a main of a project with a mount of the project runs.
   ///Returns one line for each change, or the line saying that the project needs no fix.

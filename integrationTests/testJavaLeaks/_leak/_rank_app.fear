@@ -114,22 +114,22 @@ Assets: Test{::
 Logs: Test{::
   .checkNonDetErr({::.isMsg{:: == (
      "The log file .out/logs/_leak/lg.log"
-    |"can not be written"
+    |"cannot be written"
     )}}, {Lg.log "a"})
   }
 
 DataZips: Test{::
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "The path leak.Zips/bad"
-    |"can not be read."
+    |"cannot be read."
     )}}, {t -> t.dataRead(Zips).paths(L#("bad"))})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "The path leak.Zips/cut"
-    |"can not be read."
+    |"cannot be read."
     )}}, {t -> t.dataRead(Zips).paths(L#("cut"))})
   .checkNonDetErrWithSys({::.isMsg{:: == (
      "The path leak.Zips/latin"
-    |"can not be read."
+    |"cannot be read."
     )}}, {t -> t.dataRead(Zips).paths(L#("latin"))})
   }
 

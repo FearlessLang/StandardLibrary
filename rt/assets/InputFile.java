@@ -21,7 +21,7 @@ record InputFile(String subject, String label, Read read) implements CapInputCur
   @Override public Object mut$label$0(){ return Str$c$0Instance.instance(label); }
   byte[] bytes(){
     try{ return read.bytes(); }
-    catch (IOException|UncheckedIOException _){ throw nonDetErr(subject+"\ncan not be read as bytes"); }
+    catch (IOException|UncheckedIOException _){ throw nonDetErr(subject+"\ncannot be read as bytes"); }
   }
   @Override public Object mut$readStr$1(Object cleaner){ return TextCleaning.run(false, cleaner, bytes()); }
   @Override public Object mut$readUStr$1(Object cleaner){ return TextCleaning.run(true, cleaner, bytes()); }
