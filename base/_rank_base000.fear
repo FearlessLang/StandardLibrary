@@ -1,4 +1,6 @@
+//@Group "system interactions"
 Main: CaptureFree{ .main(sys: mut System): Void }
+//@Group "system interactions"
 /// A `Main` implementing ``OpenWith[I,E]`` asks the Fearless manager to run it on a double click
 /// on any file with the extension ``E``, and to show those files with the icon ``I``:
 /// ``Foo: Main, OpenWith[IconsFoo,"foo"]{ s -> ... }`` opens every ``.foo`` file.
@@ -12,9 +14,11 @@ Main: CaptureFree{ .main(sys: mut System): Void }
 /// Only a `Main` can implement it, and a `Main` claims each extension at most once across all its
 /// `OpenWith[_,_]` and `Shortcut[_,_]`. The portable Fearless ignores it.
 OpenWith[I,E]: {}
+//@Group "system interactions"
 /// ``OpenWith[I]`` is `OpenWith[_,_]` with an extension chosen by the Fearless manager, like
 /// ``ffile042``.
 OpenWith[I]: {}
+//@Group "system interactions"
 /// A `Main` implementing ``Shortcut[I,E]`` asks the Fearless manager to create a file
 /// ``name.E`` in the top level of its project, showing the icon ``I``, that runs the main on a
 /// double click, also when moved somewhere else: ``Bar: Main, Shortcut[IconsBar,"fapp123"]{ s -> ... }``
@@ -22,20 +26,27 @@ OpenWith[I]: {}
 /// ``FooBar`` gives ``foo_bar``. ``I`` is as in `OpenWith[_,_]`. ``E`` is ``"fapp"`` followed by
 /// three digits, like ``"fapp042"``. The portable Fearless ignores it.
 Shortcut[I,E]: {}
+//@Group "system interactions"
 /// ``Shortcut[I]`` is `Shortcut[_,_]` with an extension chosen by the Fearless manager, like
 /// ``fapp042``.
 Shortcut[I]: {}
+//@Group "system interactions"
 /// A `Main` implementing ``PreLoadIcon[I]`` can show the icon ``I`` on the windows of its Guis:
 /// ``s.gui.icon(IconsFoo)`` is a deterministic error unless the running main preloads ``IconsFoo``.
 /// A main preloads the ``I`` of each `Shortcut[_]`, `OpenWith[_]` and `PreLoadIcon[_]` it implements,
 /// and ``base.IconsFearless``. ``I`` is as in `OpenWith[_,_]`. Only a `Main` can implement it.
 PreLoadIcon[I]: {}
+//@Group "structured data"
 Sealed: {}
+//@Group "imperative"
 Void: Sealed {}
+//@Group "structured data"
 WidenTo[T]: {}
 
+//@Group "imperative"
 ToIso[R]: {mut .iso: iso ToIso[R]; mut .close: mut R;}
 
+//@Group "errors"
 Abort: Sealed {![R:**]: R -> _Throw.nonDeterministic(Infos.msg "Abort reached");}
 _Magic: Sealed {
   ![R:**]: R -> this!; // magic'd out to tell us what we forgot to implement
@@ -46,6 +57,8 @@ _MagicDebug: Sealed {
   #(x: read ToStr): Void -> _Magic!;
   }
 
+//@Group "output"
+//@Group "testing"
 ///Prints the string representation of x, followed by a newline.
 ///It can be called from any code, with no capability: the program has no way to observe what was printed.
 Debug: Sealed {
@@ -53,12 +66,15 @@ Debug: Sealed {
   #(x: read ToStr): Void -> _MagicDebug# x;
   }
 
+//@Group "collections"
 BaseId[T1:*,T2:*]: CaptureFree{ #(x: T1): T2 }
+//@Group "collections"
 BaseContainer[T1:*]: Sealed{
   read .as[T2](f: BaseId[read/imm T1,T2]): BaseContainer[T2];
   imm  .as[T2](f: BaseId[imm T1,T2]): BaseContainer[T2];
   }
 
+//@Group "imperative"
 Destruct: Sealed {
   #[A:**, R:**](a: A, f: mut MF[A, R]): R -> f#a;
   #[A:**, B:**, R:**](a: A, b: B, f: mut MF[A, B, R]): R -> f#(a, b);
@@ -94,43 +110,82 @@ Destruct: Sealed {
   #[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, A27:**, A28:**, A29:**, A30:**, A31:**, A32:**, R:**](a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26, a27: A27, a28: A28, a29: A29, a30: A30, a31: A31, a32: A32, f: mut MF[A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21, A22, A23, A24, A25, A26, A27, A28, A29, A30, A31, A32, R]): R -> f#(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, a25, a26, a27, a28, a29, a30, a31, a32);
   }
 
+//@Group "algebra"
 F[R:**]: { read #: R; }
+//@Group `F[_]`
 F[A:**,R:**]: { read #(a: A): R }
+//@Group `F[_]`
 F[A:**, B:**, R:**]: { read #(a: A, b: B): R }
+//@Group `F[_]`
 F[A:**, B:**, C:**, R:**]: { read #(a: A, b: B, c: C): R }
+//@Group `F[_]`
 F[A:**, B:**, C:**, D:**, R:**]: { read #(a: A, b: B, c: C, d: D): R }
+//@Group `F[_]`
 F[A:**, B:**, C:**, D:**, E:**, R:**]: { read #(a: A, b: B, c: C, d: D, e: E): R }
 
+//@Group "algebra"
 MF[R:**]: { mut #: R }
+//@Group `MF[_]`
 MF[A:**,R:**]: { mut #(a: A): R }
+//@Group `MF[_]`
 MF[A:**, B:**, R:**]: { mut #(a: A, b: B): R }
+//@Group `MF[_]`
 MF[A:**, B:**, C:**, R:**]: { mut #(a: A, b: B, c: C): R }
+//@Group `MF[_]`
 MF[A:**, B:**, C:**, D:**, R:**]: { mut #(a: A, b: B, c: C, d: D): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, A27:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26, a27: A27): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, A27:**, A28:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26, a27: A27, a28: A28): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, A27:**, A28:**, A29:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26, a27: A27, a28: A28, a29: A29): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, A27:**, A28:**, A29:**, A30:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26, a27: A27, a28: A28, a29: A29, a30: A30): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, A27:**, A28:**, A29:**, A30:**, A31:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26, a27: A27, a28: A28, a29: A29, a30: A30, a31: A31): R }
+//@Group `MF[_]`
 MF[A1:**, A2:**, A3:**, A4:**, A5:**, A6:**, A7:**, A8:**, A9:**, A10:**, A11:**, A12:**, A13:**, A14:**, A15:**, A16:**, A17:**, A18:**, A19:**, A20:**, A21:**, A22:**, A23:**, A24:**, A25:**, A26:**, A27:**, A28:**, A29:**, A30:**, A31:**, A32:**, R:**]: { mut #(a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16, a17: A17, a18: A18, a19: A19, a20: A20, a21: A21, a22: A22, a23: A23, a24: A24, a25: A25, a26: A26, a27: A27, a28: A28, a29: A29, a30: A30, a31: A31, a32: A32): R }

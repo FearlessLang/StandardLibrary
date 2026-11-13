@@ -1,3 +1,5 @@
+//@Group "system interactions"
+//@Group "output"
 ///The object capability to send messages to the Fearless manager running this program.
 ///Each method sends one message, as the manager program does when started with one argument, a call ``FearlessCommand<Verb> ...``,
 ///and returns once the manager has applied the message; `.run` and `.compile` return once the mains or the compilation end.

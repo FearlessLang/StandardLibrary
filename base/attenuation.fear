@@ -1,8 +1,10 @@
+//@Group "system interactions"
 ///An attenuator of a capability type ``C`` derives from a ``mut C`` a ``mut C`` with less authority: the capability it
 ///gives reaches the world only through the capability it receives.
 ///An attenuator captures nothing, so its type name identifies it.
 Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 
+//@Group "system interactions"
 ///An attenuator of `System`. The Fearless manager and `CapProcess` apply attenuators of `System` by name, in the process
 ///they start: every attenuator receives a `RevokableSystem` whose `Revocation` is not started yet, and the real System
 ///starts it only after every attenuator has run. Thus an attenuator can only build the System it gives: a call on the
@@ -21,6 +23,8 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///```
 SystemAttenuator: Attenuator[System]{}
 
+//@Group "system interactions"
+//@Group "errors"
 ///A System with no authority: every method throws the non deterministic error ``System.<method> is revoked.``.
 ///The `.iso` of ErrorSystem is an ErrorSystem.
 ErrorSystem: System {
@@ -43,6 +47,7 @@ ErrorSystem: System {
   }
 _Revoked: { #[R:**](m: Str): R -> Error.nonDeterministic("System"+m+" is revoked.") }
 
+//@Group "system interactions"
 ///Every method reaches the received System, but `.manager` is revoked: the system capability returned by NoManager can not call the Fearless manager.
 NoManager: SystemAttenuator { u -> {'s
   .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
@@ -51,6 +56,7 @@ NoManager: SystemAttenuator { u -> {'s
   .process -> u.process.with NoManager; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
   .iso -> NoManager#(u.iso.close); .close -> s;
   }}
+//@Group "system interactions"
 ///Every method reaches the received System, but the `CapManager` it gives revokes `.quit` and `.reset`:
 ///the system capability returned by NoManagerQuit can not end the Fearless manager.
 NoManagerQuit: SystemAttenuator { u -> {'s
@@ -60,6 +66,7 @@ NoManagerQuit: SystemAttenuator { u -> {'s
   .process -> u.process.with NoManagerQuit; .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
   .iso -> NoManagerQuit#(u.iso.close); .close -> s;
   }}
+//@Group "system interactions"
 NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
   .show -> u.show; .show n -> u.show n; .register p -> u.register p;
   .quit -> Error.nonDeterministic "NoManagerQuit: CapManager.quit is revoked.";
@@ -74,16 +81,20 @@ NoQuitManager: { #(u: mut CapManager): mut CapManager -> {'s
   .iso -> NoQuitManager#(u.iso.close); .close -> s;
   }}
 
+//@Group "system interactions"
+//@Group "errors"
 ///A flag in one of three states, in this order and with no way back: not started, started, revoked.
 ///``#`` returns when started; otherwise it throws the non deterministic error ``Revocation.start was not called yet.``
 ///or ``Revocation.revoke was called.``.
 ///The copies ``.iso`` gives share the flag, so revocation reaches the images too. A Revocation holds no value.
 Revocation: ToIso[Revocation]{ mut #: Void; }
+//@Group "system interactions"
 ///The Revocation `System.revocation` gives: the one that can change the flag. Its copies are roots too.
 ///``.start`` on a started or revoked root, and ``.revoke`` on one not started or already revoked, are non deterministic
 ///errors.
 CapRevocationRoot: Revocation, ToIso[CapRevocationRoot]{ mut .start: Void; mut .revoke: Void; mut .iso: iso CapRevocationRoot; mut .close: mut CapRevocationRoot; }
 
+//@Group `System`
 ///The System ``u`` under the Revocation ``r``: every method checks ``r`` and delegates to ``u``, and what it gives
 ///checks ``r`` the same way, down to every capability of ``u`` but the `Frame` of `CapGui.run`.
 ///``.iso`` does not check ``r``: the image it gives checks a copy of ``r`` at every call.
@@ -105,6 +116,7 @@ RevokableSystem: { #(r: mut Revocation, u: mut System): mut System -> {'s
   .iso -> RevokableSystem#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapTry`
 RevokableTry: { #(r: mut Revocation, u: mut CapTry): mut CapTry -> {'s
   #(f) -> Block#(r#, _RevokableAction#(r, u#(f)));
   #(d, f) -> Block#(r#, _RevokableAction#(r, u#(d, f)));
@@ -113,6 +125,7 @@ RevokableTry: { #(r: mut Revocation, u: mut CapTry): mut CapTry -> {'s
   .close -> s;
   }}
 _RevokableAction: { #[R:*](r: mut Revocation, u: mut Action[R]): mut Action[R] -> {m -> Block#(r#, u.run m)} }
+//@Group `CapOutput`
 RevokableOutput: { #(r: mut Revocation, u: mut CapOutput): mut CapOutput -> {'s
   .print x -> Block#(r#, u.print x);
   .println x -> Block#(r#, u.println x);
@@ -123,12 +136,14 @@ RevokableOutput: { #(r: mut Revocation, u: mut CapOutput): mut CapOutput -> {'s
   .iso -> RevokableOutput#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapInputCursor`
 RevokableInputCursor: { #(r: mut Revocation, u: mut CapInputCursor): mut CapInputCursor -> {'s
   # -> Block#(r#, u#.match{.some n -> Opts#(RevokableInputCursorNode#(r, n)); .empty -> {}});
   .next -> Block#(r#, RevokableInputCursor#(r, u.next));
   .iso -> RevokableInputCursor#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapInputCursorNode`
 RevokableInputCursorNode: { #(r: mut Revocation, u: mut CapInputCursorNode): mut CapInputCursorNode -> {'s
   .label -> Block#(r#, u.label);
   .readStr c -> Block#(r#, u.readStr c);
@@ -138,6 +153,7 @@ RevokableInputCursorNode: { #(r: mut Revocation, u: mut CapInputCursorNode): mut
   .iso -> RevokableInputCursorNode#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapAssetRead`
 RevokableAssetRead: { #(r: mut Revocation, u: mut CapAssetRead): mut CapAssetRead -> {'s
   .readStr(p, d, z, e, c) -> Block#(r#, u.readStr(p, d, z, e, c));
   .readUStr(p, d, z, e, c) -> Block#(r#, u.readUStr(p, d, z, e, c));
@@ -145,6 +161,7 @@ RevokableAssetRead: { #(r: mut Revocation, u: mut CapAssetRead): mut CapAssetRea
   .iso -> RevokableAssetRead#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapDownload`
 RevokableDownload: { #(r: mut Revocation, u: mut CapDownload): mut CapDownload -> {'s
   .downloadBytes(url, n, f) -> Block#(r#, u.downloadBytes(url, n, f));
   .downloadStr(url, n, c, f) -> Block#(r#, u.downloadStr(url, n, c, f));
@@ -153,12 +170,14 @@ RevokableDownload: { #(r: mut Revocation, u: mut CapDownload): mut CapDownload -
   .iso -> RevokableDownload#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapDataRead`
 RevokableDataRead: { #(r: mut Revocation, u: mut CapDataRead): mut CapDataRead -> {'s
   .paths(p) -> Block#(r#, u.paths(p));
   .read(p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(p)));
   .iso -> RevokableDataRead#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapDataEdit`
 RevokableDataEdit: { #(r: mut Revocation, u: mut CapDataEdit): mut CapDataEdit -> {'s
   .paths(p) -> Block#(r#, u.paths(p));
   .read(p) -> Block#(r#, RevokableInputCursorNode#(r, u.read(p)));
@@ -180,6 +199,7 @@ RevokableDataEdit: { #(r: mut Revocation, u: mut CapDataEdit): mut CapDataEdit -
   .iso -> RevokableDataEdit#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapManager`
 RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {'s
   .show -> Block#(r#, u.show);
   .show n -> Block#(r#, u.show n);
@@ -208,6 +228,7 @@ RevokableManager: { #(r: mut Revocation, u: mut CapManager): mut CapManager -> {
   .iso -> RevokableManager#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapProcess`
 RevokableProcess: { #(r: mut Revocation, u: mut CapProcess): mut CapProcess -> {'s
   .run(m, as) -> Block#(r#, u.run(m, as));
   .run(m, a, as) -> Block#(r#, u.run(m, a, as));
@@ -217,6 +238,7 @@ RevokableProcess: { #(r: mut Revocation, u: mut CapProcess): mut CapProcess -> {
   .iso -> RevokableProcess#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapRunningMain[_]`
 RevokableRunningMain: { #[R](r: mut Revocation, u: mut CapRunningMain[R]): mut CapRunningMain[R] -> {'s
   .await -> Block#(r#, u.await);
   .awaitUpTo t -> Block#(r#, u.awaitUpTo t);
@@ -224,6 +246,7 @@ RevokableRunningMain: { #[R](r: mut Revocation, u: mut CapRunningMain[R]): mut C
   .iso -> RevokableRunningMain#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapLogReader[_]`
 RevokableLogReader: { #[T](r: mut Revocation, u: mut CapLogReader[T]): mut CapLogReader[T] -> {'s
   .read -> Block#(r#, u.read);
   .consume -> Block#(r#, u.consume);
@@ -231,6 +254,7 @@ RevokableLogReader: { #[T](r: mut Revocation, u: mut CapLogReader[T]): mut CapLo
   .iso -> RevokableLogReader#(r.iso.close, u.iso.close);
   .close -> s;
   }}
+//@Group `CapGui`
 RevokableGui: { #(r: mut Revocation, u: mut CapGui): mut CapGui -> {'s
   .screenWidth -> Block#(r#, u.screenWidth);
   .screenHeight -> Block#(r#, u.screenHeight);
@@ -249,8 +273,11 @@ RevokableGui: { #(r: mut Revocation, u: mut CapGui): mut CapGui -> {'s
   .close -> s;
   }}
 
+//@Group "system interactions"
 InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 
+//@Group "system interactions"
+//@Group "output"
 ///The object capability to run another main of this program in a new process.
 ///The new process starts as this program started: with the same first input file, the same data projects and the same manager.
 ///Its main receives a System with the authority of this program or less: the attenuators of this program, in their order,
@@ -271,6 +298,7 @@ CapProcess: ToIso[CapProcess], WidenTo[CapProcess]{
   mut .with(attenuator: SystemAttenuator): mut CapProcess;
   }
 
+//@Group "system interactions"
 CapRunningMain[R]: ToIso[CapRunningMain[R]], WidenTo[CapRunningMain[R]]{
   mut .await: R;
   mut .awaitUpTo(time: Duration): Opt[R];

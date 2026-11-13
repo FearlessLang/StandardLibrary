@@ -2,6 +2,7 @@
 //For mut sources, .seqFlow is sequential and .flow(mode) requires proof.
 //Parallel flows preserve coherent underspecification.
 //This means that for max/min/sort the tournament details have to be fixed across modes.
+//@Group "flows"
 Flows: {
   #[R:*]: mut Flow[R]->_Magic!;
   #[R:*](r1: R): mut Flow[R]->_Magic!;
@@ -28,6 +29,7 @@ Flows: {
   .fromReadList[R:*](xs: read List[R], mode: FlowMode[read/imm R]): mut Flow[read/imm R]->_Magic!;
   }
 
+//@Group "flows"
 Flow[E:*]: {
   //core terminals
   mut .fold[R:*](acc: iso MF[R], f: read F[R,E,R]): R;

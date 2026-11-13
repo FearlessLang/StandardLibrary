@@ -1,3 +1,4 @@
+//@Group "algebra"
 /// Num: unlimited-precision rational (exact arithmetic).
 Num: Sealed,DataType[Num,Num],SumNumber[Num],_AssertApprox[Num] {
 

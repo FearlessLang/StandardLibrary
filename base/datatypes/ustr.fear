@@ -1,3 +1,4 @@
+//@Group "algebra"
 ///Unicode string type
 ///UStr is a type representing a sequence of Nats in the ranges
 ///0..55295 and 57344..1114111.
@@ -64,4 +65,5 @@ UStr: Sealed,ToFlow[Nat],ToUStr,ToImm[UStr],JoinStr[UStr] {
   .norm: Norm[UStr];
   }
 
+//@Group "algebra"
 ToUStr: { read .uStr: UStr }

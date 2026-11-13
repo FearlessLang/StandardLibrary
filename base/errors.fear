@@ -3,6 +3,7 @@ _Throw:{
   .nonDeterministic[R:**](info:Info):R -> _Magic!;
   }
 
+//@Group "errors"
 /// Exception classes (observability):
 /// - deterministic: The same operation called with observationally identical input
 ///   will either always throw or never throw, in every version of base.
@@ -17,16 +18,19 @@ Error: {
   .nonDeterministicInfo[R:**](i: Info): R -> _Throw.nonDeterministic(i);
   }
 
+//@Group "errors"
 Todo: {
   ![R:**]: R -> Error.msg "TODO: Implement this code.";
   ![R:**](msg: Str): R -> Error.msg[R]("TODO: " + msg);
   }
 
+//@Group "errors"
 Unreachable: {
   ![R:**]: R -> Error.msg "This code was flagged as unreachable, but it has been reached.";
   ![R:**](msg: Str): R -> Error.msg("This code was flagged as unreachable as "+msg+", but it has been reached.");
   }
 
+//@Group "errors"
 /// Strong exception safety is upheld:
 /// The operation has either completed successfully or thrown an exception,
 /// leaving the program state exactly as it was before the operation started.

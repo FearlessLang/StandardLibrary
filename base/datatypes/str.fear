@@ -1,3 +1,4 @@
+//@Group "algebra"
 /// Simple string type
 /// It can only even contain the following whitelisted characters:
 /// ``0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/=<>,.;:()[]{}`'"!?@#$%^&_|~\``
@@ -174,4 +175,5 @@ Str: Sealed,DataType[Str,Str],JoinStr[Str],_AssertImmEmpty,_AssertImmSize,InfoKe
     }
   }
 
+//@Group "algebra"
 OrderByCaseInsensitive: OrderBy[Str] { s0,s1 -> s0.imm.lower <=> (s1.imm.lower) }

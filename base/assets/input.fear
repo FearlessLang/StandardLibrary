@@ -1,3 +1,4 @@
+//@Group "input"
 TxtFile:{
   .path: Str;
   .diskPath: Str;
@@ -14,6 +15,8 @@ TxtFile:{
   .consumeUStr(requestId: Str, cleaner: F[UStr, mut UStrCleaner]): UStr ->
     _TxtRead.consumeUStr(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,cleaner);
 }
+//@Group "system interactions"
+//@Group "input"
 CapAssetRead: ToIso[CapAssetRead], WidenTo[CapAssetRead]{
   mut .readStr(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,cleaner: F[Str, mut StrCleaner]): Str;
   mut .readUStr(path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,cleaner: F[UStr, mut UStrCleaner]): UStr;
@@ -27,6 +30,7 @@ _ImageRead:{
   .consumeImage(requestId: Str, path: Str,diskPath: Str,zipSteps: Str,zipEntry: Str,maxPixels: Nat): Image -> _Magic!;
   }
 
+//@Group "input"
 ImageFile:{
   .path: Str;
   .diskPath: Str;
@@ -39,6 +43,8 @@ ImageFile:{
     _ImageRead.consumeImage(requestId,this.path,this.diskPath,this.zipSteps,this.zipEntry,maxPixels);
   .consumeImage(requestId: Str): Image -> this.consumeImage(requestId, Math.maxNat);
   }
+//@Group "input"
+//@Group "UI"
 Image:{
   read .width: WidthNat;
   read .height: HeightNat;
@@ -60,9 +66,12 @@ Image:{
   ///and a pixel with any other alpha gives back red, green and blue that can differ from the color drawn by that rounding.
   read .color(x: XInt, y: YInt): Color;
   }
+//@Group "input"
+//@Group "UI"
 ///``Images#(width, height, background)`` is a builder of images of ``width`` x ``height`` pixels, each of the color ``background``.
 ///Each side is between 1 and 32767, and the image has at most 268435456 pixels.
 Images:{ #(width: WidthNat, height: HeightNat, background: Color): ImageBuilder -> _Magic!; }
+//@Group "UI"
 ///Each `.paint` of an `ImageBuilder` makes the pixels of one image.
 ImageBuilder:{
   ///An image of the size of this builder, each pixel of its background color, with ``painter`` drawn over it as `Image.paint` draws.

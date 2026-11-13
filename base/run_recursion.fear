@@ -1,3 +1,4 @@
+//@Group "imperative"
 /// ``RunRecursion#{..}`` runs the lambda on a fresh thread whose stack holds `.stackSize` bytes,
 /// so deeply recursive code can go much deeper than the
 /// stack of its caller allows. The caller waits for the result; errors propagate to the caller.

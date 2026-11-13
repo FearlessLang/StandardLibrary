@@ -1,3 +1,4 @@
+//@Group "imperative"
 Var[E:imm,mut,read]: {
   read .get: read/imm E;
   mut  .get: E;
@@ -5,8 +6,10 @@ Var[E:imm,mut,read]: {
   mut .set(v: E): Void -> Block#(this.swap(v), Void);
   }
 
+//@Group "imperative"
 Vars: Sealed{#[E:*](var: E): mut Var[E] -> _Magic!}
 
+//@Group "imperative"
 Count[N]: Var[N] {
   mut ++: Void;
   mut --: Void;
@@ -15,6 +18,7 @@ Count[N]: Var[N] {
   mut *=(n: N): Void;
   }
 
+//@Group "imperative"
 Count: {
   .int(n: Int): mut Count[Int] -> Block#
     .var[Int] c = {n}
@@ -42,6 +46,7 @@ Count: {
       }};
   }
 
+//@Group "imperative"
 IsoPods: {
   /// ``IsoPods#(v)`` wraps a fresh ``iso T`` value into a mutable capsule (``IsoPod[T]``), initially closed:
   /// it can be peeked or mutated in place any number of times, or opened exactly once to hand the wrapped
@@ -65,6 +70,7 @@ IsoPods: {
   #[T](val: iso T): mut IsoPod[T] -> _Magic!;
   }
 
+//@Group "imperative"
 IsoPod[T]: {
   read .isClosed: Bool;
   read .peek[R:iso,imm,mut,read,mutH](f: mut IsoViewer[T, R]): R;//Crucially not readH
@@ -84,25 +90,30 @@ IsoPod[T]: {
       };
   }
 
+//@Group "imperative"
 IsoConsumer[T, R:**]: {
   mut .some(x: iso T): R;
   mut .empty: R;
   }
 
+//@Group "imperative"
 IsoMutator[T, R:iso,imm,mut,read]: {
   mut .some(x: mutH T): R;
   mut .empty: R;
   }
 
+//@Group "imperative"
 IsoViewer[T, R:iso,imm,mut,read,mutH]: {//crucially readH not allowed
   mut .some(x: readH T): R;
   mut .empty: R;
   }
 
+//@Group "imperative"
 Reprs: {
   #[T](x: iso T, inv: F[read T,Bool]): mut Repr[T] -> Block#
     .openIso _x = x
     .if {inv#(_x).not} .error {Infos.msg"Invariant does not initially hold"}
+    //@Group "imperative"
     .return{mut Repr[T]: {'self
       mut .mutate[R:iso,imm,mut,read](f: mut MF[mutH T,R]): R -> _IdOrErr#(f#(_x),inv#(_x),_ReprCacheFlush#(self));
       read .look[R](f: read F[read T,R]): R -> f#(_x);
@@ -116,6 +127,7 @@ _IdOrErr: {#[R:iso,imm,mut,read](r:R,b:Bool,_:Void):R->Block#(//Needed for the i
   r
   )}
 
+//@Group "imperative"
 FilterAny: {
   /// ``FilterAny#(r, pred, fallback)`` returns ``r`` if ``pred#(r)`` is `True`, otherwise calls and returns ``fallback#``.
   //>   .check{FilterAny#(+5, {n -> n == +5}, {-1}) .assertEq +5}

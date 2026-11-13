@@ -1,3 +1,4 @@
+//@Group "algebra"
 /// Int: signed 64-bit.
 /// Note: there is one more negative Int than positive Int: ``Math.minInt`` is ``-9_223_372_036_854_775_808``, while ``Math.maxInt`` is ``+9_223_372_036_854_775_807``.
 /// Thus ``Math.minInt * -1`` overflows, and ``Math.minInt .aluMulWrap -1`` is ``Math.minInt`` itself.

@@ -1,6 +1,8 @@
+//@Group "collections"
 /// The initialisation point for an ESet[E] creates and empty ESet
 ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E] -> _Magic! }
 
+//@Group "collections"
 /// A mutable set, allows for in place updates.
 /// **NOTE:** Unlike Set this collection does not maintain a sorted order.
 ESet[E]: Pipe[ESet[E]] {

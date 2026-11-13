@@ -3,6 +3,8 @@ _BiFlows: {
   .tri[A:*,B:*,C:*](a: mut List[A], bc: mut BiFlow[B,C]): mut TriFlow[A,B,C] -> _Magic!;
   .quad[A:*,B:*,C:*,D:*](a: mut List[A], bcd: mut TriFlow[B,C,D]): mut QuadFlow[A,B,C,D] -> _Magic!;
   }
+//@Group "collections"
+//@Group "flows"
 BiKeyElemMapper[A:*,B:*,K,E:*]: { .key(a: A, b: B): K; .elem(a: A, b: B): E; }
 _BiMappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
   m.containsKey(k) ?{
@@ -10,6 +12,7 @@ _BiMappingStep: { #[K,E:*](m: mut Map[K,E], k: K, e: E): mut Map[K,E] ->
     .else -> m.with(k, e)
     } }
 
+//@Group "flows"
 /// A pair of channels, made by `Flow.with`: the element at index ``i`` of one channel goes with the element at index ``i`` of the other.
 /// `Flow.with` is a consuming terminal of both flows, so every stage of both has finished with every element
 /// before any method of the `BiFlow` runs; the flows `BiFlow.getMerge`, `BiFlow.merge` and `BiFlow.mergeOpts` return
@@ -112,6 +115,7 @@ BiFlow[A:*,B:*]: {
   mut .limit(n: Nat): mut BiFlow[A,B];
   }
 
+//@Group "flows"
 /// Three channels, made by `BiFlow.with`. Every method is the `BiFlow` method of the same name, over three channels.
 TriFlow[A:*,B:*,C:*]: {
   /// ``this.with flow`` consumes `this` and ``flow`` into a `QuadFlow` whose fourth channel is the elements of ``flow``.
@@ -157,6 +161,7 @@ TriFlow[A:*,B:*,C:*]: {
   mut .limit(n: Nat): mut TriFlow[A,B,C];
   }
 
+//@Group "flows"
 /// Four channels, made by `TriFlow.with`. Every method is the `BiFlow` method of the same name, over four channels.
 QuadFlow[A:*,B:*,C:*,D:*]: {
   /// See `BiFlow.getMerge`.

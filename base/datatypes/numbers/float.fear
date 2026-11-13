@@ -1,3 +1,4 @@
+//@Group "algebra"
 /// Float: 64 bits IEEE values. Note: ==/order instead follow the usual rules:
 /// - NaN == NaN (all different NaNs equal); NaN is greater than everything else including +Inf
 /// - -0.0 == +0.0
@@ -652,6 +653,7 @@ _FloatsBetween: Sealed {
   #(startInclusive: Float, endInclusive: Float): Nat -> _Magic!;
   }
 
+//@Group "algebra"
 /// A matcher for floats, has all the special cases of float:
 /// 1. Regular floats (which are none of the following)
 /// 2. +0.0 and -0.0

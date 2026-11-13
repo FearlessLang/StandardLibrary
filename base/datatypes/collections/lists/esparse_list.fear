@@ -1,3 +1,4 @@
+//@Group "collections"
 ESparseLists: Sealed {
   /// ``ESparseLists.backedWithArray capacity`` returns an ESparseList of ``capacity`` holes, backed by an array.
   /// Throws if ``capacity >= 2147483647``.
@@ -14,6 +15,7 @@ ESparseLists: Sealed {
   .backedWithSparseSegmentTree[E:*](capacity: Nat): mut ESparseList[E] -> _Magic!;
   }
 
+//@Group "collections"
 /// A list with "holes": every index below `ESparseList.capacity` holds either an element or a hole.
 /// `ESparseList.set` fills a hole; `ESparseList.remove` makes a hole; the indices of the other elements never change,
 /// except by `ESparseList.trimTo`, `ESparseList.reverse` and `ESparseList.swap`.

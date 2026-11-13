@@ -1,6 +1,12 @@
+//@Group "system interactions"
+//@Group "imperative"
 CaptureFree: {}//special type rule will make sure zero captures
+//@Group "imperative"
 CacheHandler:CaptureFree{}
+//@Group "collections"
+//@Group "imperative"
 Norm[T]:Sealed,BaseContainer[T]{ .get: T; read .as[T2](f: BaseId[read/imm T,T2]): Norm[T2]; imm .as[T2](f: BaseId[imm T,T2]): Norm[T2]; }//this means only base can make norms, so we control production of Norms
+//@Group "imperative"
 CacheF[R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implementing CacheF will be a singleton (because of CaptureFree)
   ._uniqueCache: Void -> _Magic!;
   #: R;
@@ -8,6 +14,7 @@ CacheF[R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implemen
   //via magic it defines
   //Cache0 _cache= new Cache0(1, instance);
   }
+//@Group `CacheF[_]`
 CacheF[A,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implementing CacheF will be a singleton (because of CaptureFree)
   ._uniqueCache: Void -> _Magic!;
   #(Norm[A]): R;
@@ -15,6 +22,7 @@ CacheF[A,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implem
   //via magic it defines
   //Cache1 _cache= new Cache1(1, instance);
   }
+//@Group `CacheF[_]`
 CacheF[A,B,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implementing CacheF will be a singleton (because of CaptureFree)
   ._uniqueCache: Void -> _Magic!;
   #(Norm[A], Norm[B]): R;
@@ -22,6 +30,7 @@ CacheF[A,B,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type impl
   //via magic it defines
   //Cache2 _cache= new Cache2(1, instance);
   }
+//@Group "imperative"
 CacheMemo[R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implementing CacheMemo will be a singleton (because of CaptureFree)
   ._uniqueCache: Void -> _Magic!;
   #: R;
@@ -29,6 +38,7 @@ CacheMemo[R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type imple
   //via magic it defines
   //Cache0 _cache= new Cache0(1, instance);
   }
+//@Group `CacheMemo[_]`
 CacheMemo[A,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implementing CacheMemo will be a singleton (because of CaptureFree)
   ._uniqueCache: Void -> _Magic!;
   #(Norm[A]): R;
@@ -36,6 +46,7 @@ CacheMemo[A,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type imp
   //via magic it defines
   //Cache1 _cache= new Cache1(1, instance);
   }
+//@Group `CacheMemo[_]`
 CacheMemo[A,B,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type implementing CacheMemo will be a singleton (because of CaptureFree)
   ._uniqueCache: Void -> _Magic!;
   #(Norm[A], Norm[B]): R;
@@ -43,6 +54,7 @@ CacheMemo[A,B,R]: CacheHandler, Final["._uniqueCache"]{//Any instantiated type i
   //via magic it defines
   //Cache2 _cache= new Cache2(1, instance);
   }
+//@Group "imperative"
 Cache: {
   #[R](f: CacheF[R]): R -> f._get;
   #[A,R](a: Norm[A], f: CacheF[A,R]): R -> f._get(a);
@@ -57,12 +69,14 @@ Cache: {
   .normCaptureFree[T](x: T, f: BaseId[T,CaptureFree]): Norm[T] -> _NormCaptureFree#(x,{::},f);
   .normCaptureFree[T,C](x: T, f: BaseId[read T,read C], g: BaseId[C,CaptureFree]): Norm[T] -> _NormCaptureFree#(x,f,g);
   }
+//@Group "imperative"
 CacheReprF[A,R]: CacheHandler, Final["._uniqueCache"]{
   ._uniqueCache: Void -> _Magic!;
   #(read A): R;
   ._get(read Repr[A]): R -> _Magic!//p0._reprCacheGet(this, ()->this#(p0 look), 1)
   //the cache is the field _reprCache of the Repr object p0, keyed by this
   }
+//@Group `CacheReprF[_,_]`
 CacheReprF[A,B,R]: CacheHandler, Final["._uniqueCache"]{
   ._uniqueCache: Void -> _Magic!;
   #(read A, Norm[B]): R;

@@ -1,3 +1,4 @@
+//@Group "collections"
 ELists: Sealed {
   #[E:*]: mut EList[E] -> _Magic!;
   /// ``ELists.withCapacity n`` creates and returns an empty EList with capacity ``n``.
@@ -24,6 +25,7 @@ ELists: Sealed {
   #[E:*](E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E): mut EList[E] -> _Magic!;
   }
 
+//@Group "collections"
 EList[E:*]: Sealed, _EditableList[E, EList[E]] {
   /// ``this.size`` returns the number of elements in this collection.
   //> .check{Block#

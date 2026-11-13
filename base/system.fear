@@ -1,3 +1,4 @@
+//@Group "system interactions"
 ///The object capability to observe the world outside of the program.
 ///Code without a System can only compute with its arguments: equal calls give equal results.
 ///Whatever may answer differently to the same question (input, files, downloads, in memory logs,
@@ -31,6 +32,8 @@ System: ToIso[System],WidenTo[System] {
   mut .locked[R:**](reads: List[DataRead], edits: List[DataEdit], f: mut MF[R]): R;
   }
   
+//@Group "system interactions"
+//@Group "errors"
 /// This try-catch will catch non-deterministic errors.
 CapTry: ToIso[CapTry],WidenTo[CapTry] {
   /// This method upholds strong exception safety.
@@ -42,6 +45,8 @@ CapTry: ToIso[CapTry],WidenTo[CapTry] {
   mut .currentStackTrace: List[StackFrame];
   }
 
+//@Group "system interactions"
+//@Group "output"
 CapOutput: ToIso[CapOutput],WidenTo[CapOutput] {
   mut .print(ToStr): Void;
   mut .println(ToStr): Void;
@@ -53,6 +58,8 @@ CapOutput: ToIso[CapOutput],WidenTo[CapOutput] {
   mut .bytes(List[Byte]): Void;//Does flush
   }
 
+//@Group "system interactions"
+//@Group "input"
 ///A position in the list of the input files of the program, in the order they arrived.
 ///The file opened to start the program is the first one; every file dropped on a window of the program arrives after it.
 ///``sys.inputCursor`` is the first position.
@@ -61,6 +68,7 @@ CapInputCursor: ToIso[CapInputCursor],WidenTo[CapInputCursor] {
   mut .next: mut CapInputCursor;
   }
 
+//@Group "input"
 CapInputCursorNode: ToIso[CapInputCursorNode],WidenTo[CapInputCursorNode] {
   mut .label: Str; ///best effort portable name
   mut .readStr(cleaner: F[Str, mut StrCleaner]): Str;

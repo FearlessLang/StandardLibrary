@@ -1,3 +1,5 @@
+//@Group "algebra"
+//@Group "collections"
 Opt[E:*]: _Opt[E] {
   .close->this;
   .match m    -> m.empty;
@@ -51,6 +53,7 @@ Opt[E:*]: _Opt[E] {
     };
   }
   
+//@Group `Opt[_]`
 _Opt[E:*]: ToFlow[E],BaseContainer[E],DataType[Opt[E],Opt[imm E],E,imm E] {
   mut  .match[R:**](mut OptMatch[E, R]): R;
   read .match[R:**](mut OptMatch[read/imm E, R]): R;
@@ -102,12 +105,14 @@ _Opt[E:*]: ToFlow[E],BaseContainer[E],DataType[Opt[E],Opt[imm E],E,imm E] {
   read .mapSome[R:*](mut MF[read/imm E, R]): mut Opt[R];
   }
 
+//@Group "collections"
 Opts: {
   #[E:*](x: E): mut Opt[E] -> { .match m -> m.some(x) };
   }
 
 _OptAs: { #[T1:*,T2](x: read Opt[T1]): Opt[T2] -> _Magic! }
 
+//@Group "collections"
 OptMatch[E:*,R:**]: {
   mut .some(E): R;
   mut .empty: R;

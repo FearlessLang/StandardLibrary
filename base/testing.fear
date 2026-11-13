@@ -1,3 +1,5 @@
+//@Group "errors"
+//@Group "testing"
 StackFrame: DataType[StackFrame,StackFrame] {
   .fileName: Str; .typeName: Str; .methodName: Str; .lineNumber: Nat;
   .close -> this;
@@ -17,9 +19,12 @@ StackFrame: DataType[StackFrame,StackFrame] {
     );
   }
 
+//@Group "errors"
+//@Group "testing"
 StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
   {'self .fileName->fn; .typeName->tn; .methodName->mn; .lineNumber->ln; .imm->self} }
 
+//@Group "testing"
 ///Unit tests
 ///Basically, a test suite is a Test that only calls `.test` on named Tests,
 ///While a Test is a named Test that only calls `.check`.
@@ -92,8 +97,10 @@ _InfoFrame: { #(i: Info): StackFrame -> Block#
   .return {StackFrames#(_FrameField#(f, "fileName"), _FrameField#(f, "typeName"), _FrameField#(f, "methodName"), _FrameField#(f, "lineNumber").getNat)}
   }
 
+//@Group "testing"
 LazyToString: MF[read ToStr] {}
 
+//@Group "testing"
 TestCap: Sealed {//by making it sealed we can guaranteed the output of the function is the same of the original input
   // Useful for debug expressions in tests
   mut .do[T](f: mut MF[T]): mut TestCap -> Block#(f#, this);
@@ -148,11 +155,13 @@ _ErrMatch: { #(i: Info, m: F[InfoValidator, InfoCheck]): Void -> i.validate m .m
   .false -> Error.msg("Error did not match expected: " + (i.str));
   }}
 
+//@Group "testing"
 TestCont[T]: { #(t: T, self: mut TestCap): mut TestCap }
 
 _TestCaps: {
   #(sys: mut System, ts: mut EList[CheckInfo]): mut RTestCap -> Block#
     .var[Opt[Str]] name = {Opt[Str]{}}
+    //@Group "testing"
     .return {mut RTestCap: TestCap {'self
     .test t -> Block#
       .let[Opt[Str]] outer = {name.get}
@@ -197,12 +206,16 @@ _Named: { #(st: List[StackFrame], name: Opt[Str]): List[StackFrame] -> name.matc
   .some n -> Lists#(StackFrames#(st.getFirst.fileName, n, st.getFirst.methodName, st.getFirst.lineNumber));
   }}
 
+//@Group "testing"
 Check: { #: Void; }
+//@Group "testing"
 CheckSys: { #(sys: mut System): Void; }
 
+//@Group "testing"
 CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->CheckInfo: {
   .check: CheckSys->c; .stackTrace: List[StackFrame]->st;}}
 
+//@Group "testing"
 Test: Named { .tests(t: mut TestCap): mut TestCap; }
 
 _AddToLog: {

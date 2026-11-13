@@ -52,6 +52,7 @@ _MagicMath: Sealed {
   .hypot(x: Float, y: Float): Float -> _Magic!;
   }
 
+//@Group "algebra"
 Math: Sealed, _MagicMath {
   .minInt: Int -> -9_223_372_036_854_775_808;   /// The smallest representable Int (-2^63)
   .maxInt: Int -> +9_223_372_036_854_775_807;   /// The largest representable Int (2^63 - 1)
@@ -117,6 +118,7 @@ Math: Sealed, _MagicMath {
 
 
 
+//@Group "algebra"
 /// The super type of `Radian` and `Degree`
 /// Angles that normalize to the same value are considered equal,
 /// ``360.0.getDeg .assertEq(0.0.getDeg)``
@@ -136,6 +138,7 @@ Angle[Self]: F[Float],Sealed,DataType[Self, Self] {
   .info -> Infos.msg(this.str);
 }
 
+//@Group "algebra"
 /// An angle measured in degrees
 Degree: Angle[Degree] {
   + other -> this# + (other#) .getDeg;
@@ -165,6 +168,7 @@ _RadianTrig: Sealed {
   .tan(x: Radian): Float -> _Magic!;
   }
 
+//@Group "algebra"
 /// An angle measured in radians
 Radian: Angle[Radian] {
   + other -> this# + (other#) .getRad;
