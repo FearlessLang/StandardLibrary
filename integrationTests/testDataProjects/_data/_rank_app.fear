@@ -234,6 +234,8 @@ DataProjectsNotReachable: Test{::
 
 _LockRun: base.InfoMain{sys, arg -> Block#(sys.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "c.txt"), "run"), arg)}
 _LockManagerRun: base.InfoMain{sys, arg -> Block#(sys.manager.run "data", arg)}
+_LockGrandchild: base.InfoMain{sys, arg -> Block#(sys.dataEdit(Notes).paths({}), arg)}
+_LockChild: base.InfoMain{sys, arg -> sys.process.run(_LockGrandchild, arg, {})}
 _LockStart: base.InfoMain{sys, arg -> Block#(sys.dataEdit(Notes).writeStrAsciiUtf8Latin1(L#("lk", "d.txt"), "start"), arg)}
 DataProjectLocks: Test{::
   .checkWithSys{s -> Block#
@@ -266,4 +268,7 @@ DataProjectLocks: Test{::
   .checkDetErrWithSys({:: > "info" .isMsg{:: == (
      "CapManager.run is called while the function of a sys.locked runs, or by a process started while the function of a sys.locked runs."
     )}}, {t -> Block#.openIso s = t .return{s.locked[base.Info](L#[base.DataRead](Pub), {}, {s.process.run(_LockManagerRun, base.Infos.msg "", {})})}})
+  .checkDetErrWithSys({:: > "info" > "info" .isMsg{:: == (
+     `The data project mounted on "data.Notes" is used while sys.locked runs, but it is not in the reads or the edits of that sys.locked.`
+    )}}, {t -> Block#.openIso s = t .return{s.locked[base.Info](L#[base.DataRead](Pub), {}, {s.process.run(_LockChild, base.Infos.msg "", {})})}})
   }
