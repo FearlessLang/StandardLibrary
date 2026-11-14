@@ -1,0 +1,164 @@
+use base.Main as Main;
+use base.SystemAttenuator as SystemAttenuator;
+use base.System as System;
+use base.Error as Error;
+use base.Block as Block;
+use base.Void as Void;
+use base.Str as Str;
+use base.Try as Try;
+use base.F as F;
+use base.CapGui as CapGui;
+use base.Frame as Frame;
+use base.Widget as Widget;
+use base.Pane as Pane;
+use base.Border as Border;
+use base.Split as Split;
+use base.Sections as Sections;
+use base.RegionFiller as RegionFiller;
+use base.And as And;
+use base.SplitAnd as SplitAnd;
+
+NoButton: SystemAttenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead; .download -> u.download;
+  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d; .manager -> u.manager; .process -> u.process.with NoButton;
+  .readLog l -> u.readLog l; .gui -> NoButtonGui#(u.gui); .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
+  .iso -> NoButton#(u.iso.close); .close -> s;
+  }}
+NoButtonGui: { #(u: mut CapGui): mut CapGui -> {'s
+  .screenWidth -> u.screenWidth; .screenHeight -> u.screenHeight;
+  .uName n -> NoButtonGui#(u.uName n); .icon i -> NoButtonGui#(u.icon i);
+  .startAsWindow a -> NoButtonGui#(u.startAsWindow a); .startMaximised -> NoButtonGui#(u.startMaximised);
+  .startUndecorated a -> NoButtonGui#(u.startUndecorated a); .startFullScreen -> NoButtonGui#(u.startFullScreen);
+  .minArea a -> NoButtonGui#(u.minArea a); .opacityFloor a -> NoButtonGui#(u.opacityFloor a);
+  .closeKey k -> NoButtonGui#(u.closeKey k); .fullScreenKey k -> NoButtonGui#(u.fullScreenKey k);
+  .run c -> u.run{f -> c.accept(NoButtonFrame#f)};
+  .iso -> NoButtonGui#(u.iso.close); .close -> s;
+  }}
+NoButtonFrame: { #(u: mut Frame): mut Frame -> {
+  .uTitle t -> NoButtonFrame#(u.uTitle t); .uTitle -> u.uTitle;
+  .virtualPixelSpace(w, h) -> NoButtonFrame#(u.virtualPixelSpace(w, h)); .virtualWidth -> u.virtualWidth; .virtualHeight -> u.virtualHeight;
+  .bands c -> NoButtonFrame#(u.bands c); .opacity a -> NoButtonFrame#(u.opacity a);
+  .onResize c -> NoButtonFrame#(u.onResize c); .onClose a -> NoButtonFrame#(u.onClose a); .close -> u.close;
+  .fps n -> NoButtonFrame#(u.fps n); .fps -> u.fps; .elapsed -> u.elapsed;
+  .modelFps(n, sc) -> NoButtonFrame#(u.modelFps(n, sc)); .onKey sc -> NoButtonFrame#(u.onKey sc);
+  .content -> NoButtonFiller#(u.content, {v -> v});
+  }}
+NoButtonFiller: { #[S:*](u: mut RegionFiller[S], wrap: F[S,S]): mut RegionFiller[S] -> {
+  .pane sc -> wrap#(u.pane{x -> sc.run(NoButtonPane#x)});
+  .border sc -> wrap#(u.border{x -> sc.run(NoButtonBorder#x)});
+  .split -> NoButtonFiller#(u.split, {a -> NoButtonAnd#(a, {x -> NoButtonSplitAnd#(x, wrap)})});
+  .sections sc -> wrap#(u.sections{x -> sc.run(NoButtonSections#x)});
+  .button _ -> Error.msg "NoButton: RegionFiller.button is revoked.";
+  .label sc -> wrap#(u.label sc); .picture sc -> wrap#(u.picture sc);
+  .textField sc -> wrap#(u.textField sc); .textArea sc -> wrap#(u.textArea sc);
+  .uTextField sc -> wrap#(u.uTextField sc); .uTextArea sc -> wrap#(u.uTextArea sc);
+  }}
+NoButtonAnd: { #[T:*](u: mut And[T], wrap: F[T,T]): mut And[T] -> { .and -> NoButtonFiller#(u.and, wrap) } }
+NoButtonSplitAnd: { #[S:*](u: mut SplitAnd[S], wrap: F[S,S]): mut SplitAnd[S] -> {
+  .and -> NoButtonFiller#(u.and, {x -> NoButtonSplitAnd#(x, wrap)});
+  .with sc -> wrap#(u.with{x -> sc.run(NoButtonSplit#x)});
+  }}
+_NoButtonWidget[S]: Widget[S]{
+  mut .u: mut Widget[S];
+  mut .wrap(x: mut S): mut S;
+  .changeDetached sc -> this.wrap(this.u.changeDetached{x -> sc.run(this.wrap x)});
+  .topInset' h -> this.wrap(this.u.topInset' h); .bottomInset' h -> this.wrap(this.u.bottomInset' h);
+  .leftInset' w -> this.wrap(this.u.leftInset' w); .rightInset' w -> this.wrap(this.u.rightInset' w);
+  .width' w -> this.wrap(this.u.width' w); .height' h -> this.wrap(this.u.height' h);
+  .pack -> this.wrap(this.u.pack); .fill -> this.wrap(this.u.fill); .noFill -> this.wrap(this.u.noFill);
+  .radius n -> this.wrap(this.u.radius n); .background c -> this.wrap(this.u.background c); .uTooltip t -> this.wrap(this.u.uTooltip t);
+  .contextMenu m -> this.wrap(this.u.contextMenu m); .openMenu m -> this.u.openMenu m;
+  .topInset -> this.u.topInset; .bottomInset -> this.u.bottomInset; .leftInset -> this.u.leftInset; .rightInset -> this.u.rightInset;
+  .width -> this.u.width; .height -> this.u.height; .fills -> this.u.fills;
+  .radius -> this.u.radius; .background -> this.u.background; .uTooltip -> this.u.uTooltip;
+  }
+NoButtonPane: { #(u: mut Pane): mut Pane -> mut _NoButtonPane{ .u -> u } }
+_NoButtonPane: Pane, _NoButtonWidget[Pane]{
+  mut .u: mut Pane;
+  .wrap x -> NoButtonPane#x;
+  .foreground c -> this.wrap(this.u.foreground c); .foreground -> this.u.foreground;
+  .heightGap' h -> this.wrap(this.u.heightGap' h); .widthGap' w -> this.wrap(this.u.widthGap' w);
+  .heightGap -> this.u.heightGap; .widthGap -> this.u.widthGap;
+  .mouse m -> this.wrap(this.u.mouse m); .paint p -> this.wrap(this.u.paint p);
+  .pane sc -> this.wrap(this.u.pane{x -> sc.run(NoButtonPane#x)});
+  .border sc -> this.wrap(this.u.border{x -> sc.run(NoButtonBorder#x)});
+  .split -> NoButtonFiller#(this.u.split, {a -> NoButtonAnd#(a, {x -> NoButtonSplitAnd#(x, {p -> NoButtonPane#p})})});
+  .sections sc -> this.wrap(this.u.sections{x -> sc.run(NoButtonSections#x)});
+  .button _ -> Error.msg "NoButton: Pane.button is revoked.";
+  .label sc -> this.wrap(this.u.label sc); .picture sc -> this.wrap(this.u.picture sc);
+  .textField sc -> this.wrap(this.u.textField sc); .textArea sc -> this.wrap(this.u.textArea sc);
+  .uTextField sc -> this.wrap(this.u.uTextField sc); .uTextArea sc -> this.wrap(this.u.uTextArea sc);
+  .clear -> this.wrap(this.u.clear); .horizontal -> this.wrap(this.u.horizontal); .vertical -> this.wrap(this.u.vertical);
+  .minPerLine n -> this.wrap(this.u.minPerLine n); .maxPerLine n -> this.wrap(this.u.maxPerLine n);
+  .lineScroll b -> this.wrap(this.u.lineScroll b); .stackScroll b -> this.wrap(this.u.stackScroll b); .centered b -> this.wrap(this.u.centered b);
+  }
+NoButtonBorder: { #(u: mut Border): mut Border -> mut _NoButtonBorder{ .u -> u } }
+_NoButtonBorder: Border, _NoButtonWidget[Border]{
+  mut .u: mut Border;
+  .wrap x -> NoButtonBorder#x;
+  .foreground c -> this.wrap(this.u.foreground c); .foreground -> this.u.foreground;
+  .heightGap' h -> this.wrap(this.u.heightGap' h); .widthGap' w -> this.wrap(this.u.widthGap' w);
+  .heightGap -> this.u.heightGap; .widthGap -> this.u.widthGap;
+  .mouse m -> this.wrap(this.u.mouse m); .paint p -> this.wrap(this.u.paint p);
+  .north -> NoButtonFiller#(this.u.north, {x -> NoButtonBorder#x}); .south -> NoButtonFiller#(this.u.south, {x -> NoButtonBorder#x});
+  .east -> NoButtonFiller#(this.u.east, {x -> NoButtonBorder#x}); .west -> NoButtonFiller#(this.u.west, {x -> NoButtonBorder#x});
+  .center -> NoButtonFiller#(this.u.center, {x -> NoButtonBorder#x});
+  }
+NoButtonSplit: { #(u: mut Split): mut Split -> mut _NoButtonSplit{ .u -> u } }
+_NoButtonSplit: Split, _NoButtonWidget[Split]{
+  mut .u: mut Split;
+  .wrap x -> NoButtonSplit#x;
+  .foreground c -> this.wrap(this.u.foreground c); .foreground -> this.u.foreground;
+  .mouse m -> this.wrap(this.u.mouse m); .paint p -> this.wrap(this.u.paint p);
+  .horizontal -> this.wrap(this.u.horizontal); .vertical -> this.wrap(this.u.vertical);
+  .dividerPositions ps -> this.wrap(this.u.dividerPositions ps); .dividerPositions -> this.u.dividerPositions;
+  .draggable b -> this.wrap(this.u.draggable b); .draggable -> this.u.draggable;
+  .region i -> NoButtonFiller#(this.u.region i, {x -> NoButtonSplit#x}); .size -> this.u.size;
+  }
+NoButtonSections: { #(u: mut Sections): mut Sections -> mut _NoButtonSections{ .u -> u } }
+_NoButtonSections: Sections, _NoButtonWidget[Sections]{
+  mut .u: mut Sections;
+  .wrap x -> NoButtonSections#x;
+  .foreground c -> this.wrap(this.u.foreground c); .foreground -> this.u.foreground;
+  .heightGap' h -> this.wrap(this.u.heightGap' h); .widthGap' w -> this.wrap(this.u.widthGap' w);
+  .heightGap -> this.u.heightGap; .widthGap -> this.u.widthGap;
+  .mouse m -> this.wrap(this.u.mouse m); .paint p -> this.wrap(this.u.paint p);
+  .section -> NoButtonFiller#(this.u.section, {a -> NoButtonAnd#(a, {x -> NoButtonSections#x})});
+  .title i -> NoButtonFiller#(this.u.title i, {x -> NoButtonSections#x}); .content i -> NoButtonFiller#(this.u.content i, {x -> NoButtonSections#x});
+  .tabs b -> this.wrap(this.u.tabs b); .expand i -> this.wrap(this.u.expand i); .collapse i -> this.wrap(this.u.collapse i); .remove i -> this.wrap(this.u.remove i);
+  .onTitleClick h -> this.wrap(this.u.onTitleClick{x, i -> h#(NoButtonSections#x, i)}); .onClose h -> this.wrap(this.u.onClose{x, i -> h#(NoButtonSections#x, i)});
+  .size -> this.u.size; .isExpanded i -> this.u.isExpanded i;
+  }
+
+Built: { #(sys: mut System, route: Str, build: F[mut Frame, Void]): Void -> sys.out.println(route+": "+(Try#(sys.iso.close, {s -> s.gui.name "NoButton" .run{f -> Block#
+    .do{Block#(f.modelFps(100, {:: .action{f.close}}), Void)}
+    .return{build#f}
+    }}).run{
+      .ok _ -> "the window opened and closed";
+      .info i -> i.getMsg;
+      }))
+  }
+Child: Main { sys -> Built#(sys, "child", {f -> f.content.button{::}}) }
+Routes: Main { sys -> Block#
+  .do{ Built#(sys, "Frame.content", {f -> f.content.button{::}}) }
+  .do{ Built#(sys, "Frame chained", {f -> f.title "routes" .content.button{::}}) }
+  .do{ Built#(sys, "Pane", {f -> f.content.pane{p -> p.button{::}}}) }
+  .do{ Built#(sys, "Pane chained", {f -> f.content.pane{p -> p.horizontal.button{::}}}) }
+  .do{ Built#(sys, "Pane.self", {f -> f.content.pane{p -> p.self.button{::}}}) }
+  .do{ Built#(sys, "Pane.style", {f -> f.content.pane{p -> p.style{q -> q.button{::}}}}) }
+  .do{ Built#(sys, "Pane.changeDetached", {f -> f.content.pane{p -> p.changeDetached{q -> q.button{::}}}}) }
+  .do{ Built#(sys, "Pane.pane", {f -> f.content.pane{p -> p.pane{q -> q.button{::}}}}) }
+  .do{ Built#(sys, "Pane.split", {f -> f.content.pane{p -> Block#(p.split.button{::}, p)}}) }
+  .do{ Built#(sys, "Border", {f -> f.content.border{b -> b.north.button{::}}}) }
+  .do{ Built#(sys, "Border chained", {f -> f.content.border{b -> b.radius 3 .center.button{::}}}) }
+  .do{ Built#(sys, "RegionFiller.split", {f -> Block#(f.content.split.button{::}, Void)}) }
+  .do{ Built#(sys, "And", {f -> Block#(f.content.split.pane{::}.and.button{::}, Void)}) }
+  .do{ Built#(sys, "SplitAnd", {f -> Block#(f.content.split.pane{::}.and.pane{::}.and.button{::}, Void)}) }
+  .do{ Built#(sys, "Split.region", {f -> f.content.split.pane{::}.and.pane{::}.with{sp -> sp.region(1).button{::}}}) }
+  .do{ Built#(sys, "Sections.section", {f -> f.content.sections{ss -> Block#(ss.section.button{::}, ss)}}) }
+  .do{ Built#(sys, "Sections And", {f -> f.content.sections{ss -> ss.section.label{::}.and.button{::}}}) }
+  .do{ Built#(sys, "Sections.title", {f -> f.content.sections{ss -> ss.section.label{::}.and.pane{::}.title(0).button{::}}}) }
+  .do{ Built#(sys, "Sections.content", {f -> f.content.sections{ss -> ss.section.label{::}.and.pane{::}.content(0).button{::}}}) }
+  .do{ Built#(sys, "label", {f -> f.content.label{:: .text "a label"}}) }
+  .return{ sys.process.run(Child, {}) }
+  }
