@@ -1,0 +1,10 @@
+use base.Main as Main;
+use base.Block as Block;
+use base.Lists as L;
+
+Diary: base.DataEdit{}
+Write: Main { sys -> sys.dataEdit(Diary).writeStrAsciiUtf8Latin1(L#("note.txt"), "written") }
+LockedRun: Main { sys -> Block#
+  .do{ Block#(sys.locked[base.UStr]({}, L#[base.DataEdit](Diary), {sys.manager.run "realdata"}), base.Void) }
+  .return{ sys.out.println "locked run returned" }
+  }

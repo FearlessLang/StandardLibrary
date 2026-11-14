@@ -114,7 +114,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     return cmd;
   }
   private static boolean inherited(String arg){
-    return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+markerKey+"=") && !arg.startsWith("-Dfearless.endMarker=") && !arg.startsWith("-D"+AppLog.childKey+"=");
+    return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+markerKey+"=") && !arg.startsWith("-Dfearless.endMarker=") && !arg.startsWith("-D"+AppLog.childKey+"=") && !arg.startsWith("-D"+DataFiles.locksFirstKey+"=");
   }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }

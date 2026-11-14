@@ -50,6 +50,7 @@ final class DataFiles{
   private static final Object gate= new Object();
   private static final ReentrantLock one= new ReentrantLock();
   static final String heldKey= "fearlessDataHeld";
+  static final String locksFirstKey= "fearlessDataLocksFirst";
   private static final String inherited= System.getProperty(heldKey);
   private static Map<Path,Boolean> current= inherited == null ? null : heldBy(inherited);
   private static String held= null;
@@ -180,6 +181,28 @@ final class DataFiles{
     ps.forEach(p -> p.onExit().join());
   }
   private static void hold(TreeMap<Path,Hold> want, Root r, boolean edit){ want.merge(r.lock(), new Hold(r, edit), (a, b) -> a.edit() ? a : b); }
+  static void locksFirst(){
+    var edits= System.getProperty(locksFirstKey);
+    if (edits == null){ return; }
+    var want= new TreeMap<Path,Hold>();
+    mounts.forEach((t, p) -> hold(want, new Root(t, p, locks.get(t)), List.of(edits.split(",")).contains(t)));
+    var taken= want.values().stream().map(DataFiles::waited).toList();
+    System.out.print("FearlessLocked\n");
+    System.out.flush();
+    Util.awaitParentLine();
+    taken.forEach(DataFiles::release);
+  }
+  private static FileLock waited(Hold h){
+    var ch= channels.computeIfAbsent(h.root().lock(), DataFiles::channel);
+    try{
+      var free= ch.tryLock(0, Long.MAX_VALUE, !h.edit());
+      if (free != null){ return free; }
+      System.out.print("FearlessWaitsFor:"+h.root().name()+"\n");
+      System.out.flush();
+      return ch.lock(0, Long.MAX_VALUE, !h.edit());
+    }
+    catch (IOException e){ throw new UncheckedIOException(e); }
+  }
   private static void release(FileLock l){
     try{ l.release(); }
     catch (IOException e){ throw new UncheckedIOException(e); }
