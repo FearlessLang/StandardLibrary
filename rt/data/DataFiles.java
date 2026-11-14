@@ -203,6 +203,11 @@ final class DataFiles{
     }
     catch (IOException e){ throw new UncheckedIOException(e); }
   }
+  static void notGrouped(){
+    synchronized (gate){
+      if (current != null){ throw detErr("CapManager.run is called while the function of a sys.locked runs, or by a process started while the function of a sys.locked runs."); }
+    }
+  }
   private static void release(FileLock l){
     try{ l.release(); }
     catch (IOException e){ throw new UncheckedIOException(e); }
