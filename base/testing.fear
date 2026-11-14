@@ -212,8 +212,9 @@ Check: { #: Void; }
 CheckSys: { #(sys: mut System): Void; }
 
 //@Group "testing"
-CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->CheckInfo: {
-  .check: CheckSys->c; .stackTrace: List[StackFrame]->st;}}
+CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->
+  //@Group "testing"
+  CheckInfo: {.check: CheckSys->c; .stackTrace: List[StackFrame]->st;}}
 
 //@Group "testing"
 Test: Named { .tests(t: mut TestCap): mut TestCap; }
