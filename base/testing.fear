@@ -1,5 +1,4 @@
 //@Group "errors"
-//@Group "testing"
 StackFrame: DataType[StackFrame,StackFrame] {
   .fileName: Str; .typeName: Str; .methodName: Str; .lineNumber: Nat;
   .close -> this;
@@ -19,8 +18,7 @@ StackFrame: DataType[StackFrame,StackFrame] {
     );
   }
 
-//@Group "errors"
-//@Group "testing"
+//@Group `StackFrame`
 StackFrames: F[Str,Str,Str,Nat,StackFrame] { fn,tn,mn,ln ->
   {'self .fileName->fn; .typeName->tn; .methodName->mn; .lineNumber->ln; .imm->self} }
 
@@ -97,7 +95,7 @@ _InfoFrame: { #(i: Info): StackFrame -> Block#
   .return {StackFrames#(_FrameField#(f, "fileName"), _FrameField#(f, "typeName"), _FrameField#(f, "methodName"), _FrameField#(f, "lineNumber").getNat)}
   }
 
-//@Group "testing"
+//@Group `TestCap`
 LazyToString: MF[read ToStr] {}
 
 //@Group "testing"
@@ -155,13 +153,13 @@ _ErrMatch: { #(i: Info, m: F[InfoValidator, InfoCheck]): Void -> i.validate m .m
   .false -> Error.msg("Error did not match expected: " + (i.str));
   }}
 
-//@Group "testing"
+//@Group `TestCap`
 TestCont[T]: { #(t: T, self: mut TestCap): mut TestCap }
 
 _TestCaps: {
   #(sys: mut System, ts: mut EList[CheckInfo]): mut RTestCap -> Block#
     .var[Opt[Str]] name = {Opt[Str]{}}
-    //@Group "testing"
+    //@Group `TestCap`
     .return {mut RTestCap: TestCap {'self
     .test t -> Block#
       .let[Opt[Str]] outer = {name.get}
@@ -206,14 +204,14 @@ _Named: { #(st: List[StackFrame], name: Opt[Str]): List[StackFrame] -> name.matc
   .some n -> Lists#(StackFrames#(st.getFirst.fileName, n, st.getFirst.methodName, st.getFirst.lineNumber));
   }}
 
-//@Group "testing"
+//@Group `TestCap`
 Check: { #: Void; }
-//@Group "testing"
+//@Group `TestCap`
 CheckSys: { #(sys: mut System): Void; }
 
-//@Group "testing"
+//@Group `TestCap`
 CheckInfos: F[CheckSys,List[StackFrame],CheckInfo] {c,st->
-  //@Group "testing"
+  //@Group `CheckInfos`
   CheckInfo: {.check: CheckSys->c; .stackTrace: List[StackFrame]->st;}}
 
 //@Group "testing"

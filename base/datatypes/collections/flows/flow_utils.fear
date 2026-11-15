@@ -1,17 +1,14 @@
-//@Group "flows"
+//@Group `Flow`
 AsImm[E:*, R]: { read #(E): R; }
 
-//@Group "flows"
+//@Group `Flow`
 FoldAcc[E:*,R:**]: { mut .result: R; mut .acc(E): mut FoldAcc[E,R] }
-//@Group "imperative"
-//@Group "flows"
+//@Group `Flow`
 ForEachBody[A,E:*]: { mut #(a: mutH A, e: E): Void }
 
-//@Group "algebra"
-//@Group "flows"
+//@Group `Flow`
 JoinStr[E:*]: { .joinStr(mut Flow[E]): E }
-//@Group "algebra"
-//@Group "flows"
+//@Group `Flow`
 SumNumber[E:*]: { .sumNumber(mut Flow[E]): E }
 
 //@Group "flows"
@@ -21,33 +18,29 @@ ToFlow[E:*]: Sealed {
   read .seqFlow: mut Flow[read/imm E];
   mut  .seqFlow: mut Flow[E];
   }
-//@Group "flows"
+//@Group `FlowMode`
 ParImm:Sealed{#[T:imm]:ParImm[T]->ParImm[T]}
-//@Group "flows"
 ParImm[T:imm]:FlowMode[T]{this}
-//@Group "flows"
+//@Group `FlowMode`
 ParRead:Sealed{#[T:imm,read]:ParRead[T]->ParRead[T]}
-//@Group "flows"
 ParRead[T:imm,read]:FlowMode[T]{this}
-//@Group "flows"
+//@Group `FlowMode`
 ParRepr:Sealed{#[T]:ParRepr[T]->ParRepr[T]}
-//@Group "flows"
 ParRepr[T]:FlowMode[mut Repr[T]]{this}
-//@Group "flows"
+//@Group `FlowMode`
 ParPod:Sealed{#[T]:ParPod[T]->ParPod[T]}
-//@Group "flows"
 ParPod[T]:FlowMode[mut IsoPod[T]]{this}
 
-//@Group "flows"
+//@Group `Flow`
 ActorImpl[S:*,E:*,R]: {
   read #(down: mut ActorSink[R], state: S, e: E): mut ContinueBreak[Void]
   }
-//@Group "flows"
+//@Group `Flow`
 ActorImplMut[S:*,E:*,R:*]: {
   read #(down: mutH ActorSink[R], state: mutH S, e: E): mut ContinueBreak[Void]
   }
 
-//@Group "flows"
+//@Group `Flow`
 /// Where an actor lambda pushes the elements it emits.
 /// ``down#e`` pushes ``e`` on a ``mut`` sink, as in `ActorImpl`.
 /// ``down.push#(down, e)`` pushes ``e`` on any sink, the ``mutH`` one of
@@ -60,13 +53,13 @@ ActorSink[E:*]: Sealed {
   mut #(E): Void;
   }
 
-//@Group "flows"
+//@Group `ActorSink`
 /// ``ActorSinkHelper#(down, e)`` is ``down#e``, on a ``mutH`` sink too.
 ActorSinkHelper: Sealed {
   imm #[E:*](down: mutH ActorSink[E], e: E): Void -> _Magic!;
   }
 
-//@Group "flows"
+//@Group `ActorSink`
 ActorSinkOptHelper: Sealed {
   imm #[E:*](down: mutH ActorSink[E], e: mut Opt[E]): Void -> e.isSome
     .if[_PushOptStep[E]]{ .then -> {d, o -> d.push#(d, o!)}; .else -> {_, _ -> Void} }
@@ -74,8 +67,7 @@ ActorSinkOptHelper: Sealed {
   }
 _PushOptStep[E:*]: { read #(down: mutH ActorSink[E], e: mut Opt[E]): Void }
 
-//@Group "collections"
-//@Group "flows"
+//@Group `Opt`
 IfSome: { #[E:*](b: Bool, e: E): mut Opt[E] -> b ?{ .then -> Opts#e; .else -> {} } }
 //@Group "flows"
 Yield: Sealed { #: Void -> Void }

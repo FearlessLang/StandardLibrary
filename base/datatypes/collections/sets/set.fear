@@ -1,4 +1,4 @@
-//@Group "collections"
+//@Group `Set`
 /// A Factory class for making sets of elements.
 Sets: Sealed {
   #[E,K](OrderHashBy[E,K]): Set[E]->_Magic!;

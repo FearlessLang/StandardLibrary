@@ -1,4 +1,4 @@
-//@Group "errors"
+//@Group `Action`
 Actions: {
   //.lazy is a bad method, suggests failure causes .info, but of course not.
   //.lazy[T:*](f: mut MF[T]): mut Action[T] -> {::.ok(f#)};
@@ -66,7 +66,7 @@ Action[R:*]: {
     }; // TODO: Should InfoValidator implement ToStr so it can be used in this error message?
   }
 
-//@Group "errors"
+//@Group `Action`
 ActionMatch[R:*,RR:*]: {
   mut .ok(x: R): RR;
   mut .info(info: Info): RR;

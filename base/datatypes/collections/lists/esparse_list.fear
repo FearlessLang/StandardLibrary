@@ -1,4 +1,4 @@
-//@Group "collections"
+//@Group `ESparseList`
 ESparseLists: Sealed {
   /// ``ESparseLists.backedWithArray capacity`` returns an ESparseList of ``capacity`` holes, backed by an array.
   /// Throws if ``capacity >= 2147483647``.

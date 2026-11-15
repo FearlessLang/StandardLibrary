@@ -1,5 +1,4 @@
 //@Group "errors"
-//@Group "testing"
 LazyInfo: F[read ToInfo] {}
 
 //@Group "errors"

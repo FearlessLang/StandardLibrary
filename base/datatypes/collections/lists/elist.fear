@@ -1,4 +1,4 @@
-//@Group "collections"
+//@Group `EList`
 ELists: Sealed {
   #[E:*]: mut EList[E] -> _Magic!;
   /// ``ELists.withCapacity n`` creates and returns an empty EList with capacity ``n``.
