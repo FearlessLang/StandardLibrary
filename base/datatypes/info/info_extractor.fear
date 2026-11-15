@@ -65,6 +65,7 @@ InfoExtractor: Extractor[Info, InfoExtractor] {
     };
   }
 
+//@Group `InfoExtractor`
 _StrExtractor: Extractor[Str, _StrExtractor] {
   .info: Opt[Info];
   .extract -> this.info.match{.some i -> i.msg; .empty -> {}};
@@ -75,6 +76,7 @@ _StrExtractor: Extractor[Str, _StrExtractor] {
     };
   }
 
+//@Group `InfoExtractor`
 _MapExtractor: Extractor[Map[Str,Info], _MapExtractor] {
   .info: Opt[Info];
   .extract -> this.info.match{.some i -> i.map; .empty -> {}};
@@ -95,6 +97,7 @@ _MapExtractor: Extractor[Map[Str,Info], _MapExtractor] {
     };
   }
 
+//@Group `InfoExtractor`
 _ListExtractor: Extractor[List[Info], _ListExtractor] {
   .info: Opt[Info];
   .extract -> this.info.match{.some i -> i.list; .empty -> {}};
