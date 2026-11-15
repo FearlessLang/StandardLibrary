@@ -1,9 +1,9 @@
-//@Group "algebra"
+//@Group `Bool`
 BoolMatch[R:**]:{ mut .true: R; mut .false: R; }
-//@Group "algebra"
+//@Group `Bool`
 ThenElse[R:**]: { mut .then: R; mut .else: R; }
 
-//@Group "algebra"
+//@Group "control flow"
 Bool: Sealed,DataType[Bool,Bool] {
   .and(b: Bool): Bool;
   &&(b: mut MF[Bool]): Bool;
@@ -45,7 +45,7 @@ Bool: Sealed,DataType[Bool,Bool] {
   .assertFalse(msg: read LazyInfo): Void -> this.assertEq(False, msg);
   }
 
-//@Group "algebra"
+//@Group `Bool`
 True: Bool {
   .and b -> b;
   && b -> b#;
@@ -57,7 +57,7 @@ True: Bool {
   .imm -> True;
   }
 
-//@Group "algebra"
+//@Group `Bool`
 False: Bool {
   .and b -> this;
   && b -> this;

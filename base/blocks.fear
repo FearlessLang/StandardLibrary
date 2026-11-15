@@ -1,16 +1,14 @@
-//@Group "imperative"
+//@Group `Block`
 Continuation[T:*,R:*]: {mut #(x: T, self: mut Block[R]): R}
-//@Group "imperative"
-//@Group "flows"
+//@Group `Flow`
 FlowContinuation[E:*,T:*,R:*]: {mut #(x: T, self: mut List[E]): R}
-//@Group "imperative"
+//@Group `Block`
 OpenIsoContinuation[T,R:*]: {mut #(x: mut T, self: mut Block[R]): R}//Only needed for limitations of inference
 //otherwise the same as Continuation[mut X,R]
-//@Group "imperative"
-//@Group "structured data"
+//@Group `Repr`
 ReprWithInvariant[T]: { mut .elem: iso T; mut .invariant: F[read T,Bool];}
 
-//@Group "imperative"
+//@Group "control flow"
 Block: Sealed {
   #[R:*]: mut Block[R] -> {};
   #[A:**, R:**](A, res: R): R -> res;
@@ -19,7 +17,6 @@ Block: Sealed {
   #[A:**, B:**, C:**, D:**, R:**](A, B, C, D, res: R): R -> res;
   }
 
-//@Group "imperative"
 Block[R:*]: Sealed {
   mut .done: Void -> {};
   mut .return(a: mut MF[R]): R -> a#;
@@ -74,10 +71,10 @@ _NativeLoop: Sealed {
   #[A,R:*](self: mut Block[R], a: mutH A, body: mut LoopBody[A,R]): mut Block[R] -> _Magic!;
   }
 
-//@Group "imperative"
+//@Group `Block`
 LoopBody[A,R:*]: { mut #(a: mutH A): mut ControlFlow[R] }
 
-//@Group "imperative"
+//@Group `Block`
 BlockIf[R:*]: {
   mut .return(a: mut MF[R]): mut Block[R];
   mut .do(r: mut MF[Void]): mut Block[R];
@@ -108,20 +105,20 @@ _DecidedBlock: {
     }
   }
 
-//@Group "imperative"
+//@Group "control flow"
 ControlFlow[R:*]: Sealed { mut .match(m: mut ControlFlowMatch[R]): mut Block[R]; }
-//@Group "imperative"
+//@Group `ControlFlow`
 ControlFlowMatch[R:*]: {
   mut .continue: mut Block[R];
   mut .break: mut Block[R];
   mut .return(v: R): mut Block[R];
   }
-//@Group "imperative"
+//@Group `ControlFlow`
 /// `Continue` or `Break`, never `OuterReturn`: the `ControlFlow` an actor lambda answers.
 ContinueBreak[R:*]: ControlFlow[R] {}
-//@Group "imperative"
+//@Group `ControlFlow`
 Continue: {#[R:*]: mut ContinueBreak[R]->{::.continue}}
-//@Group "imperative"
+//@Group `ControlFlow`
 Break: {#[R:*]: mut ContinueBreak[R]->{::.break}}
-//@Group "imperative"
+//@Group `ControlFlow`
 OuterReturn: {#[R:*](r: R): mut ControlFlow[R]->{::.return r} }

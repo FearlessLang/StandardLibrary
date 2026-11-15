@@ -1,28 +1,28 @@
-//@Group "input"
+//@Group "text"
 UStrCleaner:{ mut .nextByte(b: Byte): UStr; mut .end: UStr; }
-//@Group "input"
+//@Group "text"
 StrCleaner:{ mut .nextByte(b: Byte): Str; mut .end: Str; }
-//@Group "input"
+//@Group `UStrCleaner`
 UStrScalarCleaner:{ mut .nextScalar(n: Nat): UStr; mut .end: UStr; }
-//@Group "input"
+//@Group `StrCleaner`
 StrScalarCleaner:{ mut .nextScalar(n: Nat): Str; mut .end: Str; }
-//@Group "input"
+//@Group `UStrCleaner`
 UStrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): UStr }
-//@Group "input"
+//@Group `StrCleaner`
 StrFixer:{ mut #(reason: BadTextReason, byteOffset: Nat, byteLength: Nat, rejectedValue: Nat): Str }
-//@Group "input"
-//@Group "errors"
+//@Group `StrCleaner`
+//@Group `UStrCleaner`
 BadTextReason:{
   .match[R:**](mut BadTextReasonMatch[R]):R
   }
-//@Group "input"
+//@Group `BadTextReason`
 BadTextReasonMatch[R:**]:{
   mut .malformedEncoding:R;
   mut .truncatedEncoding:R;
   mut .notScalar:R;
   mut .notInStr:R;
   }
-//@Group "input"
+//@Group `UStrCleaner`
 UStrCleaners:{
   .text: F[UStr, mut UStrCleaner] -> _Magic!;
   .line: F[UStr, mut UStrCleaner] -> _Magic!;
@@ -36,7 +36,7 @@ UStrCleaners:{
   .latin1OrElse(fixer: F[mut UStrFixer]): F[UStr, mut UStrCleaner] -> _Magic!;
   .utf8Then(cleaner: F[mut UStrScalarCleaner]): F[UStr, mut UStrCleaner] -> _Magic!;
   }
-//@Group "input"
+//@Group `StrCleaner`
 StrCleaners:{
   .softText: F[Str, mut StrCleaner] -> _Magic!;
   .softLine: F[Str, mut StrCleaner] -> _Magic!;

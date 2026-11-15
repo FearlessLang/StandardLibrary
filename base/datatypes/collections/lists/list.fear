@@ -72,7 +72,6 @@ List[E:*]: _List[E],_AssertEmpty,_AssertSize {
   .norm f ->_ListNorm#(this,f);
   }
 
-//@Group `List[_]`
 _List[E:*]: Sealed,ToFlow[E],BaseContainer[E],DataType[List[E],List[imm E],E,imm E] {
   read .size: Nat;                           /// number of elements
   read .isEmpty: Bool;                       /// `True` iff size == 0
@@ -151,7 +150,7 @@ _List[E:*]: Sealed,ToFlow[E],BaseContainer[E],DataType[List[E],List[imm E],E,imm
   imm .norm[R](mut MF[E,Norm[R]]): Norm[List[Norm[R]]];/// list normalization
   }
 
-//@Group "collections"
+//@Group `List`
 Lists: Sealed {//No need of empty, just use {}
   #[E:*](E): mut List[E]->_Magic!;
   #[E:*](E,E): mut List[E]->_Magic!;

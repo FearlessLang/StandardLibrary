@@ -1,4 +1,4 @@
-//@Group "structured data"
+//@Group `Info`
 Infos: Sealed {
   .msg(str: Str): Info -> str.isEmpty?{
     .then->{};
@@ -42,8 +42,8 @@ Infos: Sealed {
 
 //To make an info from arbitrary map/list, just do myList.info {::} or myMap.info {::}
 //how to turn keys into string is part of the key datatype of map
-//@Group "structured data"
 //@Group "errors"
+//@Group "data types"
 Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .close->this;
   .info->this.imm;
@@ -93,10 +93,10 @@ Info: Sealed,DataType[Info,Info],_AssertImmEmpty {
   .validate(f: read F[InfoValidator, InfoCheck]): Bool -> f#(_InfoValidators# this).isValid;
   }
 
-//@Group "structured data"
+//@Group `InfoExtractor`
 ExtractionFunction[R:*]: F[InfoExtractor, Extractor[R]] {}
 
-//@Group "structured data"
+//@Group `Info`
 /// Allow indexing into an info,
 /// Union of Str (index into map) and Nat (index into list)
 InfoKey: Sealed, ToStr {
@@ -133,7 +133,7 @@ _InfoFreshKey: {
       .else -> k;
   }};}
 
-//@Group "structured data"
+//@Group `Info`
 InfoMatch[R:**]: {
   .empty: R;
   .msg(Str): R;
@@ -142,7 +142,7 @@ InfoMatch[R:**]: {
   }
 
 
-//@Group "structured data"
+//@Group `InfoMatch`
 DefaultInfoMatch[R:**]: InfoMatch[R] {
   .default: R;
   .empty -> this.default;

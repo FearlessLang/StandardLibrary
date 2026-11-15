@@ -4,36 +4,33 @@
 // - OrderBy[T,K] is a projection: given t: T, build a closed Order[K] for its key.
 // - OrderHash adds hashing and ToStr.
 
-//@Group "algebra"
-//@Group "structured data"
+//@Group "text"
+//@Group "data types"
 ToStr: { read .str: Str }            /// string representation
 
-//@Group "algebra"
-//@Group "structured data"
+//@Group `ToStr`
 ToStrBy[T]: {                        /// per-value printer: given x: T, produce a ToStr for x
   #(read T): read ToStr
   }
 
-//@Group `ToStr[]`
 ToStr[E:*]: {                        /// ToStr that may mention values of E (printer strategy passed explicitly)
   read .str(ToStrBy[imm E]): Str
   }
 
-//@Group "structured data"
+//@Group `Order`
 OrderMatch[R:**]: {                  /// the three outcomes of a comparison
   mut .lt: R;
   mut .eq: R;
   mut .gt: R;
   }
 
-//@Group `Order[_]`
+//@Group "data types"
 Order: {                             /// outcome of a comparison: selects exactly one of lt/eq/gt of the matcher
   read #[R:**](m: mut OrderMatch[R]): R;
   read &&(onEq: mut MF[Order]): Order -> /// this outcome, or ``onEq`` when this is eq
     this#{ .lt -> {::.lt}; .eq -> onEq#; .gt -> {::.gt} };
   }
 
-//@Group "structured data"
 Order[T]: {
   read .close: read T;              /// close fixpoint: the underlying value being ordered
   read .cmp(t0: read T, t1: read T): Order; /// compare t0 vs t1 in this ordering
@@ -53,7 +50,7 @@ Order[T]: {
   }
 
 
-//@Group `OrderBy[_]`
+//@Group `Order`
 OrderBy[T,K]: {                       /// order values of T by a component/key K
   #(read T): read Order[K];          /// build a closed Order[K] for t's key (key is .close of the result)
 
@@ -64,13 +61,12 @@ OrderBy[T,K]: {                       /// order values of T by a component/key K
     {a0,a1 -> this#(f#a0) <=> (this#(f#a1))};
   }
 
-//@Group "structured data"
 OrderBy[T]: OrderBy[T,T] {           /// produces an ordering via .cmp
   .cmp(t0: read T,t1: read T): Order;
   # t -> { .close -> t; .cmp t0,t1 -> this.cmp(t0,t1) };
   }
 
-//@Group "structured data"
+//@Group `OrderBy`
 Rev: {
   /// ``Rev#by`` orders by the reverse of ``by``: it swaps the outcome, not the arguments.
   /// It computes the key of ``t0`` before the key of ``t1``, as ``by`` does,
@@ -81,7 +77,6 @@ Rev: {
     {t0, t1 -> (by#t0 <=> (by#t1))#{.lt -> {::.gt}; .eq -> {::.eq}; .gt -> {::.lt}}}
   }
 
-//@Group `Order[_]`
 Order[T,E:*]: {                      /// environment-dependent ordering of T (E supplies per-value orders)
   read .close: read T;
 
@@ -94,7 +89,7 @@ Order[T,E:*]: {                      /// environment-dependent ordering of T (E 
     };
   }
 
-//@Group "structured data"
+//@Group "data types"
 OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr.
   read .hash: Nat;
   
@@ -128,7 +123,6 @@ OrderHash[T]: Order[T],ToStr {            /// OrderHash adds hashing and ToStr.
     { msg#.info + ("Expected: "+this+" >= "+x .info) });
   }
 
-//@Group `OrderHash[_]`
 OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashable+printable
   read .hash[K](by: OrderHashBy[imm E,K]): Nat; /// hash using by
   
@@ -158,7 +152,7 @@ OrderHash[T,E:*]: Order[T,E],ToStr[E] {         /// env-dependent ordered+hashab
   read .assertGe[K](by: OrderHashBy[imm E,K], x: read OrderHash[T,E], msg: read LazyInfo): Void -> this.orderHash(by).assertGe(x.orderHash(by),msg);
   }
 
-//@Group `OrderHashBy[_]`
+//@Group `OrderHash`
 OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-value printing of T
   #(t: read T): read OrderHash[K];          /// build closed OrderHash[K] for t's key
 
@@ -182,7 +176,6 @@ OrderHashBy[T,K]: OrderBy[T,K],ToStrBy[T] { /// order+hash by key K, plus per-va
     };
   }
 
-//@Group "structured data"
 OrderHashBy[T]: OrderHashBy[T,T] {         /// direct order+hash for T
   .cmp(t0: read T,t1: read T): Order;
   .hash(t: read T): Nat;

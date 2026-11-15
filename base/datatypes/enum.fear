@@ -1,5 +1,4 @@
-//@Group "collections"
-//@Group "structured data"
+//@Group `Enum`
 /// Support for closed sets of named singleton values (enumerations).
 /// A family with a few named values is declared by implementing `Enum` and
 /// `Enums`: the family type binds every value to its list via `.enums` and
@@ -77,8 +76,7 @@ Enums[E]: FromInfo[E], CaptureFree{
   .fromInfo i -> this.map.get(i.getMsg);
   }
 
-//@Group "collections"
-//@Group "structured data"
+//@Group "data types"
 /// The "single value" side of an enumeration family.
 Enum[E]: DataType[E,E], Named, CaptureFree{
   /// the family this value belongs to; families may also add a `.match`
