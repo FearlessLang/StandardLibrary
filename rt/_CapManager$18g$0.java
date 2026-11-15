@@ -90,7 +90,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   @Override public Object mut$editMetadata$1(Object path){ return sendPath("EditMetadata", path); }
   @Override public Object mut$openWithOrShortcut$1(Object path){ return sendPath("OpenWithOrShortcut", path); }
   @Override public Object mut$openWithOrShortcut$3(Object path, Object name, Object main){ return sendPath("OpenWithOrShortcut", path, name("OpenWithOrShortcut", name), type("OpenWithOrShortcut", main)); }
-  @Override public Object mut$run$1(Object name){ return output("Run", name("Run", name)); }
+  @Override public Object mut$run$1(Object name){ DataFiles.notGrouped(); return output("Run", name("Run", name)); }
   @Override public Object mut$compile$1(Object name){ return output("Compile", name("Compile", name)); }
   @Override public Object mut$check$1(Object name){ return output("Check", name("Check", name)); }
   @Override public Object mut$fix$1(Object name){ return output("Fix", name("Fix", name)); }

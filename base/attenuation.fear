@@ -10,7 +10,7 @@ Attenuator[C]: CaptureFree, F[mut C, mut C]{}
 ///starts it only after every attenuator has run. Thus an attenuator can only build the System it gives: a call on the
 ///received System while the attenuator runs is a non deterministic error, in every process, and the System it gives calls
 ///the received System only from its own methods.
-///An attenuator that keeps `.process` gives ``u.process.with`` itself: ``u.process`` starts processes with the authority of ``u``.
+///An attenuator that keeps `.process` gives ``u.process.with`` itself: a new process applies only the attenuators given to `CapProcess.with` and to ``.run`` or ``.start``.
 ///```
 ///NoDownload: SystemAttenuator { u -> {'s
 ///  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
@@ -89,8 +89,9 @@ Revocation: ToIso[Revocation]{ mut #: Void; }
 //@Group `System`
 //@Group `Revocation`
 ///The Revocation `System.revocation` gives: the one that can change the flag. Its copies are roots too.
-///``.start`` on a started or revoked root, and ``.revoke`` on one not started or already revoked, are non deterministic
-///errors.
+///``.start`` on a not started root starts it, ``.start`` on a started root returns, and ``.start`` on a revoked root
+///throws the non deterministic error ``Revocation.revoke was called.``.
+///``.revoke`` makes the flag revoked, whatever its state.
 CapRevocationRoot: Revocation, ToIso[CapRevocationRoot]{ mut .start: Void; mut .revoke: Void; mut .iso: iso CapRevocationRoot; mut .close: mut CapRevocationRoot; }
 
 //@Group `System`
@@ -292,8 +293,8 @@ InfoMain: CaptureFree{ .main(sys: mut System, arg: Info): Info }
 //@Group `System`
 ///The object capability to run another main of this program in a new process.
 ///The new process starts as this program started: with the same first input file, the same data projects and the same manager.
-///Its main receives a System with the authority of this program or less: the attenuators of this program, in their order,
-///then the attenuators of `.with`, in their order, then ``attenuators`` in their order, build that System in the new process, as described in `SystemAttenuator`;
+///Its main receives a System that the attenuators of `.with`, in their order,
+///then ``attenuators`` in their order, and no other attenuator, build in the new process, as described in `SystemAttenuator`;
 ///no object of this program reaches the new process.
 ///The new process prints to the output of this program, and its error output goes to the error output of this program.
 ///``.run`` ends as ``main`` ended: it returns when ``main`` completes, it throws the deterministic error ``main`` threw,

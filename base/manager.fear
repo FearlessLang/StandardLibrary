@@ -34,6 +34,7 @@ CapManager: ToIso[CapManager], WidenTo[CapManager]{
   mut .openWithOrShortcut(path: List[Byte], name: Str, main: Str): Void;
   ///Selects the project ``name`` and runs the selected mains of the project, in the order of the selected mains.
   ///Returns the Output of those mains.
+  ///A `.run` while a `System.locked` of this program runs its function, or by a program started while that function runs, is a deterministic error, and no message is sent.
   mut .run(name: Str): UStr;
   ///Selects the project ``name`` and compiles it if it needs compiling.
   ///Returns the Output of that compilation, or the line saying that the project was already up to date and compiled.

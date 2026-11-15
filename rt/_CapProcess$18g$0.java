@@ -80,7 +80,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     var list= (List$o$1)attenuators;
     var size= ((Nat$c$0Instance)list.read$size$0()).val();
     var extra= LongStream.range(0, size).mapToObj(i -> name(list.read$get$1(Nat$c$0Instance.instance(i))));
-    return Stream.of(Stream.ofNullable(System.getProperty(namesKey)), applied.stream(), extra).flatMap(s -> s).collect(Collectors.joining(","));
+    return Stream.concat(applied.stream(), extra).collect(Collectors.joining(","));
   }
   static String marker(){ return "fearless result "+ProcessHandle.current().pid()+" "+children.incrementAndGet(); }
   static void forward(InputStream in){
@@ -114,7 +114,7 @@ public final class _CapProcess$18g$0 implements CapProcess$18g$0{
     return cmd;
   }
   private static boolean inherited(String arg){
-    return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+markerKey+"=") && !arg.startsWith("-Dfearless.endMarker=") && !arg.startsWith("-D"+AppLog.childKey+"=");
+    return !arg.startsWith("-D"+namesKey+"=") && !arg.startsWith("-D"+markerKey+"=") && !arg.startsWith("-Dfearless.endMarker=") && !arg.startsWith("-D"+AppLog.childKey+"=") && !arg.startsWith("-D"+DataFiles.locksFirstKey+"=");
   }
   @Override public Object mut$iso$0(){ return this; }
   @Override public Object mut$close$0(){ return this; }
