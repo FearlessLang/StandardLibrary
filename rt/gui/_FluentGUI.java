@@ -123,6 +123,7 @@ public final class _FluentGUI implements CapGui$2s$0, Cloneable{
     if (SwingUtilities.isEventDispatchThread()){
       throw new IllegalStateException("FluentGUI.run must not be called from the EDT");
     }
+    Desk.nonReparentingOnSway();
     var shown= icon != null ? icon : preloaded.firstEntry().getKey();
     var g= copy();
     g.iconName = preloaded.get(shown);

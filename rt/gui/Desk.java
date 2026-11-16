@@ -46,6 +46,11 @@ final class Desk{
     if (System.getenv("WAYLAND_DISPLAY") != null && desktops.contains("kde")){ return Kind.kdeWayland; }
     return Kind.otherX11;
   }
+  static void nonReparentingOnSway(){
+    if (System.getenv("SWAYSOCK") == null){ return; }
+    var setenv= Linker.nativeLinker().downcallHandle(Linker.nativeLinker().defaultLookup().findOrThrow("setenv"), FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT));
+    try (var a= Arena.ofConfined()){ call(setenv, a.allocateFrom("_JAVA_AWT_WM_NONREPARENTING"), a.allocateFrom("1"), 1); }
+  }
   static Rectangle cosmicArea= cosmicGuess();
   private static Rectangle cosmicGuess(){
     var s= java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
