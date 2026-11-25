@@ -124,7 +124,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     try{ return ok(Int$c$0Instance.instance(Long.parseLong(no_(val)))); }
     catch (NumberFormatException e){
-      return fail("Str.getInt: Str \""+val+"\" has a magnitude too great to be stored in an int, "
+      return fail("Str.getInt: Str \""+val+"\" has a magnitude too great to be stored in an Int,"
               + " must be in ["+Int$c$0Instance.MIN_VALUE+", "+Int$c$0Instance.MAX_VALUE+"]");
     }
   }
@@ -210,7 +210,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     if (!unsignedInt.matcher(val).matches()){
       return fail("Str.getNat: cannot convert String \""+val+"\" to Nat. \n"
               + "A Valid Nat is any number of digits, separated by optional \"_\", that is in the range ["+0+", "+Long.toUnsignedString(Nat$c$0Instance.MAX_UNSIGNED_VALUE)+"]."
-              + "\n For example 0, 3_021\"");
+              + "\n For example 0, 3_021");
     }
     try{ return ok(Nat$c$0Instance.instance(Long.parseUnsignedLong(no_(val)))); }
     catch (NumberFormatException e){
@@ -297,13 +297,17 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   }
   private static boolean soft(String s){ return s.endsWith("soft"); }
   private static String floatDigits(String s){ return no_(soft(s) ? s.substring(0, s.length()-"soft".length()) : s); }
+  private static boolean exact(String x, double d){
+    if (d == 0){ return new BigDecimal(x.replaceAll("[eE].*", "")).signum() == 0; }
+    return new BigDecimal(x).compareTo(new BigDecimal(d)) == 0;
+  }
   @Override public Object imm$float$0(){
     if (!optionallySignedFloat.matcher(val).matches()){ return optEmpty(); }
     try{
       String x= floatDigits(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return optEmpty(); }
-      if (!soft(val) && new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return optEmpty(); }
+      if (!soft(val) && !exact(x, d)){ return optEmpty(); }
       if (d == 0.0d){ d = 0.0d; }
       return optSome(Float$1c$0Instance.instance(d));
     }
@@ -312,7 +316,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$tryGetFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){
       return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
-              "A valid Float is at least one digits and must be exactly representable as an IEEE-754 64bit number, " +
+              "A valid Float is at least one digit and must be exactly representable as an IEEE-754 64bit number, " +
               "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
     }
@@ -320,15 +324,15 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
       String x= floatDigits(val);
       double d= Double.parseDouble(x);
       if (!Double.isFinite(d)){ return fail("Str.getFloat: cannot create non finite float "+d+" if this is needed use Str.getIeeeFloat instead"); }
-      if (!soft(val) && new BigDecimal(x).compareTo(new BigDecimal(d)) != 0){ return fail("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
+      if (!soft(val) && !exact(x, d)){ return fail("Str.getFloat: Float "+val+" cannot be represented exactly.\n"
               + "If rounded, the nearest representable value is "+floatExactFearlessLit(d)+"."
-              + "If this rounding is desired use Str.getSoftFloat");}
+              + " If this rounding is desired use Str.getSoftFloat");}
       if (d == 0.0d){ d = 0.0d; }
       return ok(Float$1c$0Instance.instance(d));
     }
     catch (NumberFormatException e){
       return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
-              "A valid Float is at least one digits and must be exactly representable as an IEEE-754 64bit number, " +
+              "A valid Float is at least one digit and must be exactly representable as an IEEE-754 64bit number, " +
               "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
     }
