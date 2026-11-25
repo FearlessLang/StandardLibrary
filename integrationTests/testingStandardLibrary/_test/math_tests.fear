@@ -96,6 +96,11 @@ LogbTests: Test {::
 Log2Tests: Test {::
   .check{Math.log2(+8.0).assertEq(+3.0)}
   .check{Math.log2(+1.0).assertEq(+0.0)}
+  .check{Math.log2(+536870912.0).assertEq(+29.0)}
+  .check{Math.log2(+0.5).assertEq(-1.0)}
+  .check{Math.log2(+0.0 .getSucc).assertEq(-1074.0)}
+  .check{(0 =~~= 1023).flow.filter{k -> Math.log2(+2.0 ** (k.softFloat)) != (k.softFloat)}.list.size.assertEq 0}
+  .check{(1 =~~= 1074).flow.filter{k -> Math.log2(+2.0 ** (+0.0 - (k.softFloat))) != (+0.0 - (k.softFloat))}.list.size.assertEq 0}
   .check{Math.log2(+7.0).assertInRange(+2.807354921soft =~~= +2.807354923soft)}
   .check{Math.log2(+0.0).assertEq(Math.negInf)}
   .check{Math.log2(Math.inf).assertEq(Math.inf)}
