@@ -24,7 +24,7 @@ public final class _CapManager$18g$0 implements CapManager$18g$0{
   private static final String applied= "Applied\n";
   private static final String refused= "Refused\n";
   private static final Pattern projectName= Pattern.compile("(?!(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$)[a-z_][a-z0-9_]{0,190}");
-  private static final Pattern typeName= Pattern.compile("(?!(?:con|prn|aux|nul|com[1-9]|lpt[1-9])[.])[a-z][a-z0-9_]*[.]_*[A-Z][A-Za-z0-9_]*'*");
+  private static final Pattern typeName= Pattern.compile("[a-z][a-z0-9_]*[.]_*[A-Z][A-Za-z0-9_]*'*");
   private static String message(String verb, List<String> args){
     try (var server= new ServerSocket(0, 1, InetAddress.getLoopbackAddress())){
       var call= Stream.of(List.of("FearlessCommand"+verb), args, List.of("Port:"+server.getLocalPort())).flatMap(List::stream).collect(Collectors.joining(" "));
