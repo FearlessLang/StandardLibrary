@@ -53,6 +53,7 @@ public final class Set$c$1Instance implements Set$c$1{
 
   @Override public Object imm$size$0(){ return Nat$c$0Instance.instance(set.size()); }
   @Override public Object read$imm$0(){ return this; }
+  @Override public Object read$imm$1(Object p0){ return this; }
   @Override public Object imm$orderHash$0(){ return ordering.imm$hideKey$0(); }
   @Override public Object imm$contains$1(Object p0){ return bool(set.containsKey(mapKey(ordering, p0))); }
   @Override public Object imm$get$1(Object p0){

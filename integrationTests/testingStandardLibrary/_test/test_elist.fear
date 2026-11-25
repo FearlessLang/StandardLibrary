@@ -26,4 +26,24 @@ TestEList: Test {::
     .let b={l.eView(2, 4)}
     .do{a.add(5).void}
     .return{b.list.assertEq({::}, Lists#(5, 3))}}
+  .check{Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(1, 2)}
+    .do{v.addAll(l).void}
+    .do{v.shallowClone.list.assertEq({::}, Lists#(2, 1, 2, 3))}
+    .return{l.list.assertEq({::}, Lists#(1, 2, 1, 2, 3, 3))}}
+  .check{Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(1, 3)}
+    .let w={v.eView(0, 1)}
+    .do{w.addAll(l).void}
+    .do{w.shallowClone.list.assertEq({::}, Lists#(2, 1, 2, 3))}
+    .return{l.list.assertEq({::}, Lists#(1, 2, 1, 2, 3, 3))}}
+  .check{Block#
+    .let l={ELists#(1, 2, 3)}
+    .let v={l.eView(1, 3)}
+    .let w={v.eView(0, 1)}
+    .do{w.addAll(v).void}
+    .do{w.shallowClone.list.assertEq({::}, Lists#(2, 2, 3))}
+    .return{l.list.assertEq({::}, Lists#(1, 2, 2, 3, 3))}}
   }

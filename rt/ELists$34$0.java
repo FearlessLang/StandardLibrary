@@ -216,7 +216,7 @@ final class EListWindow extends AbstractList<Object> implements RandomAccess{
   @Override public void add(int i, Object e){ sub().add(i, e); end += 1; }
   @Override public Object remove(int i){ var r= sub().remove(i); end -= 1; return r; }
   @Override protected void removeRange(int from, int to){ sub().subList(from, to).clear(); end -= to - from; }
-  @Override public boolean addAll(Collection<?> c){ sub().addAll(c); end += c.size(); return !c.isEmpty(); }
+  @Override public boolean addAll(Collection<?> c){ var es= new ArrayList<Object>(c); sub().addAll(es); end += es.size(); return !es.isEmpty(); }
   @Override public boolean removeIf(Predicate<? super Object> f){
     var s= sub();
     int before= s.size();

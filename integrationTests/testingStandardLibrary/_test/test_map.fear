@@ -94,6 +94,9 @@ MapBasicsTests: Test {::
   .check{Maps#[Str,Str,Nat]({::}).fold({7}, {acc, _, e -> acc + e}) .assertEq 7}
   .check{Maps#({::}, "a", 1, "b", 2, "c", 3).foldUntil({0}, {acc, _, e -> acc + e}, {acc -> acc > 2}) .assertEq 3}
   .check{Maps#({::}, "a", 1, "b", 2, "c", 3).as{::}.foldUntil({0}, {acc, _, e -> acc + e}, {acc -> acc > 100}) .assertEq 6}
+  .check{Maps.singletonRead({::}, "a", 1).size .assertEq 1}
+  .check{Maps#({::}, "a", 1).order{::} == (Maps#({::}, "a", 1)) .assertTrue}
+  .check{Maps#({::}, "a", 1).order{::} < (Maps#({::}, "a", 2)) .assertTrue}
   }
 _ReadMapFlow: { #(m: read Map[Str,Nat]): mut Flow[Str] -> m.flow{k, e -> k + e} }
 _ReadMapFold: { #(m: read Map[Str,Nat]): Nat -> m.fold({0}, {acc, _, e -> acc + e}) }

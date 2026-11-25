@@ -33,6 +33,8 @@ final class ESet$s$1Instance implements ESet$s$1{
         return this.set.keySet().stream().map(k -> k.key);
     }
 
+    @Override public Object mut$close$0(){ return this; }
+    @Override public Object read$close$0(){ return this; }
     @Override public Object read$size$0(){ return Nat$c$0Instance.instance(set.size()); }
     @Override public Object read$orderHash$0(){
         return this.ordering.imm$hideKey$0();

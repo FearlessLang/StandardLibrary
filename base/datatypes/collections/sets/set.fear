@@ -178,7 +178,7 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
 
   /// ``this.isSubset(by, other)`` returns `True` if other contains all elements of `this`,
   /// using `by` to determine equality.
-  /// Equivalent to: ``this.isSuperset(by, this)``
+  /// Equivalent to: ``other.isSuperset(by, this)``
   //>   .check{Sets#({::}, -1, -2).isSubset({::.imm.abs}, Sets#({::}, +1, +2)) .assertTrue}
   //>   .check{Sets#({::}, -1, -3).isSubset({::.imm.abs}, Sets#({::}, +1, +2)) .assertFalse}
   .isSubset[K](by: OrderHashBy[E, K], other: Set[E]): Bool
