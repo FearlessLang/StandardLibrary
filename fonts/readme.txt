@@ -1,4 +1,4 @@
-The fonts the GUI draws text with. They are packed into base.jar next to the rt classes,
+The fonts the GUI draws text with. They are packed into _base.jar next to the rt classes,
 and rt/gui/Sk.java lists them in lookup order: a character is drawn with the first font
 that has it, never with a font installed on the machine.
 
