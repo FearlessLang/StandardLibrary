@@ -153,7 +153,7 @@ public interface Maps$o$0 extends Sealed$2o$0{
     if (m.put(mapKey(k, key), e) != null){ throw detErr("Maps#: two pairs have the same key "+toStringBy((ToStrBy$5u$1)k, key)+"."); }
   }
   static OrderHashBy$2ea$1 toKey(Object k){return (OrderHashBy$2ea$1) ((OrderHashBy$2ea$2)k).imm$hideKey$0(); }
-  default Object read$singletonRead$3(Object p0, Object p1, Object p2){ return imm$$hash$3(p0, p1, p2); }
+  default Object imm$singletonRead$3(Object p0, Object p1, Object p2){ return imm$$hash$3(p0, p1, p2); }
 
   Maps$o$0 instance= new Maps$o$0(){};
 }
@@ -219,7 +219,7 @@ record Map$c$2Instance(OrderHashBy$2ea$1 keyOh, LinkedHashMap<MapKey,Object> ele
     return new Nat$c$0Instance(h);
   }
   @Override public Object read$cmp$3(Object p0, Object p1, Object p2){
-    var byE= (OrderHashBy$2ea$2)p0;
+    var byE= (OrderBy$5e$2)p0;
     var a= (Map$c$2Instance)p1;
     var b= (Map$c$2Instance)p2;
     int c= a.elems.size() - b.elems.size();

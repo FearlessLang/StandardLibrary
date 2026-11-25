@@ -1,5 +1,5 @@
 //@Group `ESet`
-/// The initialisation point for an ESet[E] creates and empty ESet
+/// The initialisation point for an ESet[E] creates an empty ESet
 ESets: {#[E, K](OrderHashBy[E, K]): mut ESet[E] -> _Magic! }
 
 //@Group "collections"

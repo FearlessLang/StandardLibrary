@@ -15,6 +15,8 @@ SetRehashTests: Test {::
   }
 ESetTests: Test {::
   .check{ESets#[Int,Nat]({::.imm.abs}).add(+1).add(-1).get(-1) .assertEq +1}
+  .check{ESets#[Nat,Nat]{::}.add(1).close.size .assertEq 1}
+  .check{ESets#[Nat,Nat]{::}.add(1) |> {::.size} .assertEq 1}
   .check{Block#
     .let s={ESets#[Int,Nat]({::.imm.abs}).add(+1).add(-1).set}
     .return{s.get(-1) .assertEq(s.list.get 0)}}
@@ -33,6 +35,8 @@ SetRemoveTests: Test {::
   .check{Sets#({::.imm.abs}, +3, -1, +2) - +1 .list .assertEq({::}, Lists#(+2, +3))}
   .check{(Sets#({::}, +1, +2) - +2).contains(+2) .assertFalse}
   .check{Sets#({::}, +1, +2) - +5 .size .assertEq 2}
+  .check{Sets#({::}, 1, 2).imm{::}.size .assertEq 2}
+  .check{Lists#(Sets#({::}, 1, 2)).imm{::.dataType{::}}.size .assertEq 1}
   }
 
 TestSet: Test {::
