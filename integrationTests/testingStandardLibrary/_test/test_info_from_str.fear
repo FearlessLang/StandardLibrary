@@ -89,6 +89,30 @@ InfoFromStrErrorTests: Test {::
     | "While inspecting map entry > map > full text"
     | "Unexpected end of the text."
     | "Expected: a value.")}}, {Infos.fromStr `{"a":`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| ["a",]`
+    | "   | -----^"
+    | ""
+    | "While inspecting list element > list > full text"
+    | "Unexpected character."
+    | "Expected: a value.")}}, {Infos.fromStr `["a",]`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| {"a":x}`
+    | "   | -~~~~^"
+    | ""
+    | "While inspecting map entry > map > full text"
+    | "Unexpected character."
+    | "Expected: a value.")}}, {Infos.fromStr `{"a":x}`})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| {"a":nu`
+    | "   | -~~~~^^"
+    | ""
+    | "While inspecting map entry > map > full text"
+    | "Unexpected end of the text."
+    | "Expected: a value.")}}, {Infos.fromStr `{"a":nu`})
   }
 
 TestInfoFromStr: Test {::

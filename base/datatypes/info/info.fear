@@ -215,8 +215,9 @@ _InfoFromStr: {
     .return {this.emptyValue(s, pos, fs)};
 
   .emptyValue(s: Str, pos: Nat, fs: List[_InfoOpen]): _InfoParsed -> Block#
-    .if {pos + 4 > (s.size)} .error {this.fail(s, fs, "", pos, this.last(s), this.last(s), "Unexpected end of the text." | "Expected: a value.")}
-    .if {(s.sub(pos, pos + 4)) != "null"} .error {this.fail(s, fs, "", pos, pos, pos, "Unexpected character." | "Expected: a value.")}
+    .let[Nat] end = {this.upTo(pos + 4, s.size)}
+    .if {"null".startsWith(s.sub(pos, end)).not} .error {this.fail(s, fs, "", pos, pos, pos, "Unexpected character." | "Expected: a value.")}
+    .if {end - pos < 4} .error {this.fail(s, fs, "", pos, this.last(s), this.last(s), "Unexpected end of the text." | "Expected: a value.")}
     .return {_InfoParsed {.info -> Info; .pos -> pos + 4}};
 
   .msgValue(s: Str, pos: Nat, fs: List[_InfoOpen]): _InfoParsed -> Block#
