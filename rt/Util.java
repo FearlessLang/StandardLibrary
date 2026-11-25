@@ -178,6 +178,7 @@ public final class Util{
     catch (NonDeterministic d){ uncaught("nondet", d.i, d); }
     catch (EndedByManager _){ System.exit(0); }
     catch (Throwable t){ uncaught("nondet", (Info$o$0)Infos$1c$0.instance.imm$msg$1(new Str$c$0Instance(javaErrMsg(t))), t); }
+    finally{ System.out.flush(); }
     return false;
   }
   private static void uncaught(String kind, Info$o$0 i, Throwable d){
