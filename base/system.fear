@@ -55,7 +55,7 @@ CapOutput: ToIso[CapOutput],WidenTo[CapOutput] {
   ///Prints the UTF-8 encoding of the text, followed by a newline.
   mut .printlnU(UStr): Void;
   mut .byte(Byte): Void;///Does not flush
-  mut .bytes(List[Byte]): Void;//Does flush
+  mut .bytes(List[Byte]): Void;///Does flush
   }
 
 //@Group "input and output"
