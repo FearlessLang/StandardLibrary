@@ -36,7 +36,7 @@ UnitTestLog: { .log(s: read ToStr): Void -> _Magic!; .plan(kind: Str, frame: Sta
 ///PointLog: InMemoryLog[Point]{}
 ///...//usage
 ///PointLog.log(myPoint)
-///..//later, reading the log and confirming is what we expect
+///..//later, reading the log and confirming it is what we expect
 ///sys.readLog(PointLog).consume.assertEq({::},Lists#(myPoint))
 ///```
 ///

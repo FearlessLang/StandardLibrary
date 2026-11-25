@@ -110,7 +110,7 @@ Math: Sealed, _MagicMath {
     .let[read Order[K]] lower'={ordering# lower}
     .let[read Order[K]] upper'={ordering# upper}
     .let[read Order[K]] t'={ordering# t}
-    .if {lower' > (upper'.close)} .error{"Math.clamp: lower must be <= to upper"}
+    .if {lower' > (upper'.close)} .error{"Math.clamp: lower must be <= upper"}
     .if {t' < (lower'.close)} .return {lower}
     .if {t' > (upper'.close)} .return {upper}
     .return {t}

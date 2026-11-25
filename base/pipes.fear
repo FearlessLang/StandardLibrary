@@ -9,7 +9,7 @@ Operation[S:**, R:**]: Pipe[Operation[S, R]] {
   }
 
 //@Group "functions"
-/// A interface to allow for piping of operations on a source S.
+/// An interface to allow for piping of operations on a source S.
 Pipe[S:*]: {
   mut  .close: mut  S;
   read .close: read S;
