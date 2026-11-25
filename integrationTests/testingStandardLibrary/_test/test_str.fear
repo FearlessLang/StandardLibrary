@@ -201,6 +201,10 @@ StrParseFloatTests: Test {::
   .check{"Infinity" .float .assertEq({::}, {})}
   .check{"-Infinity" .float .assertEq({::}, {})}
   .check{"+1.0e309" .float .assertEq({::}, {})}
+  .check{"0.0e99999999999" .float .assertEq({::}, Opts#(+0.0))}
+  .check{"0.0e99999999999" .getFloat .assertEq +0.0}
+  .check{"1.0e-99999999999" .float .assertEq({::}, {})}
+  .check{"1.0e-99999999999" .tryGetFloat .assertInfo{::.isMsg{::.startsWith "Str.getFloat: Float 1.0e-99999999999 cannot be represented exactly."}}}
   .check{"-1.0e309" .float .assertEq({::}, {})}
   .check{"+_1.0" .float .assertEq({::}, {})}
   .check{"+1_.0" .float .assertEq({::}, {})}
