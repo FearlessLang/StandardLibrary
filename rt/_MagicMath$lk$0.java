@@ -40,7 +40,9 @@ public interface _MagicMath$lk$0 extends _base.Sealed$2o$0{
   default Object imm$log2$1(Object p0){
     double x= Float$1c$0Instance.unwrap(p0);
     logContract("log2", x);
-    return Float$1c$0Instance.instance(Math.log(x) / Math.log(2.0));
+    double res= Math.log(x) / Math.log(2.0);
+    double k= Math.rint(res);
+    return Float$1c$0Instance.instance(Math.scalb(1.0, (int)k) == x ? k : res);
   }
   default Object imm$asin$1(Object p0){
     double x= ((Float$1c$0Instance) p0).val();
