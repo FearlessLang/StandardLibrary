@@ -234,6 +234,7 @@ _InfoFromStr: {
       .let c = {s.sub(i.get, (i.get) + 1)}
       .if {c == `"`} .return {OuterReturn#(i.get)}
       .let[Nat] at = {i.get}
+      .if {c == ("" |)} .error {this.fail(s, fs, "", pos - 1, at, at, "New line inside a string." | `A new line inside a string is written "\n".`)}
       .if {c == "\" && {this.isEscape(s, at).not}} .error {Block#
         .let[Nat] end = {this.upTo(at + 1, this.last(s))}
         .return {this.fail(s, fs, "", at, end, end, ("Invalid escape " + (s.sub(at, end + 1).escape) + ".") | `The escapes are "\\", "\"" and "\n".`)}
