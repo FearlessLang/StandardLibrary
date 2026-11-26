@@ -108,7 +108,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     throw nonDetErr(
   "Int.getFloat: cannot convert to Float "
         + val
-        + " is too large to be represented as a Float without loss of precision"
+        + " without losing precision"
     );
   }
   @Override public Object imm$tryGetFloat$0(){
@@ -118,7 +118,7 @@ public record Int$c$0Instance(long val) implements Int$c$0,Norm$o$1{
     return fail(
   "Int.getFloat: cannot convert to Float "
         + val
-        + " is too large to be represented as a Float without loss of precision"
+        + " without losing precision"
     );
   }
   @Override public Object imm$$plus$1(Object p0){

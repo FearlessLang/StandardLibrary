@@ -26,7 +26,7 @@ _MagicMath: Sealed {
   .logb(base: Float, x: Float): Float -> _Magic!;
 
   /// Returns:
-  /// throws if x NaN or < 0, or b <= 0,
+  /// throws if x NaN or < 0,
   /// -ve infinity if x = 0,
   /// +ve infinity if x is positive infinity,
   /// log base 2 of x otherwise;

@@ -5,7 +5,7 @@
 Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
   /// `this.getSucc` returns the closest Floating point number larger than `this`.
   /// Throws if `this` is `Math.nan` or `Math.inf`.
-  /// Note: Unlike `.getSucc` for the other numeric types this does not return ``this + 1``.
+  /// Note: Unlike `.succ` for the other numeric types this does not return ``this + 1``.
   //>   .check{1.0 .getSucc .assertGt 1.0}
   //>   .check{Math.negZero .getSucc .assertEq(+0.0.getSucc)}
   //>   .checkNonDetErr({::}, {Math.nan .getSucc})
@@ -18,7 +18,7 @@ Float: Sealed,DataType[Float,Float],SumNumber[Float],_AssertApprox[Float] {
 
   /// `this.getPred` returns the closest Floating point number smaller than `this`.
   /// Throws if `this` is `Math.nan` or `Math.negInf`.
-  /// Note: Unlike `.getPred` for the other numeric types this does not return ``this - 1``.
+  /// Note: Unlike `.pred` for the other numeric types this does not return ``this - 1``.
   //>   .check{1.0 .getPred .assertLt 1.0}
   //>   .check{0.0 .getPred .assertEq(Math.negZero.getPred)}
   //>   .checkNonDetErr({::}, {Math.nan .getPred})

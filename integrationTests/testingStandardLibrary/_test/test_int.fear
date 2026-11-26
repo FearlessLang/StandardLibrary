@@ -26,7 +26,8 @@ IntArithTests: Test {::
   .check{+9007199254740993 .float .assertEmpty {::}}
   .check{Math.minInt .getFloat .assertEq -9223372036854775808.0}
   .check{Math.maxInt .float .assertEmpty {::}}
-  .check{+9007199254740993 .tryGetFloat .assertInfo{::.isMsg{::.startsWith "Int.getFloat: cannot convert to Float 9007199254740993"}}}
+  .check{+9007199254740993 .tryGetFloat .assertInfo{::.isMsg{:: == "Int.getFloat: cannot convert to Float 9007199254740993 without losing precision"}}}
+  .check{-9223372036854775807 .tryGetFloat .assertInfo{::.isMsg{:: == "Int.getFloat: cannot convert to Float -9223372036854775807 without losing precision"}}}
   .check{+300 .tryGetByte .assertInfo{::.isMsg{::.startsWith "Int.getByte: cannot convert to Byte 300 is greater than 255"}}}
   .check{+9.getFloat.getSqrt .assertEq +3.0}
   .check{(-1).getFloat.sqrtOrNaN.isNaN .assertEq True}
