@@ -64,13 +64,13 @@ Cache: {
   .normCaptureFree[T,C](x: T, f: BaseId[read T,read C], g: BaseId[C,CaptureFree]): Norm[T] -> _NormCaptureFree#(x,f,g);
   }
 //@Group `Repr`
-CacheReprF[A,R]: CacheHandler, Final["._uniqueCache"]{
+CacheReprF[A,R]: CaptureFree, Final["._uniqueCache"]{
   ._uniqueCache: Void -> _Magic!;
   #(read A): R;
   ._get(read Repr[A]): R -> _Magic!//p0._reprCacheGet(this, ()->this#(p0 look), 1)
   //the cache is the field _reprCache of the Repr object p0, keyed by this
   }
-CacheReprF[A,B,R]: CacheHandler, Final["._uniqueCache"]{
+CacheReprF[A,B,R]: CaptureFree, Final["._uniqueCache"]{
   ._uniqueCache: Void -> _Magic!;
   #(read A, Norm[B]): R;
   ._get(read Repr[A], Norm[B]): R -> _Magic!//p0._reprCacheGet(Cache2.Key(this,p1), ()->this#(p0 look, p1), 1)

@@ -16,5 +16,4 @@ public interface _CacheFlush$174$0{
   //repr caches are flushed by repr instead
   //CacheReprF$175$3
   //CacheReprF$175$2
-  //TODO: either give dynamic error on those or change common superinterface to restrict passing them in
   _CacheFlush$174$0 instance= new _CacheFlush$174$0(){};}
