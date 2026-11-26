@@ -125,7 +125,7 @@ Flow[E:*]: {
   mut .sum(sn: SumNumber[E]): E -> sn.sumNumber(this);
   mut .join(js: JoinStr[E]): E -> js.joinStr(this);
   /// `this.last` returns the last element in the flow, consuming `this`.
-  /// Equivalent to: ``this.fold({}, (_, e) -> Opts#(e))``
+  /// Equivalent to: ``this.fold({{}}, {_, e -> Opts#e})``
   /// Complexity: O(n)
   mut .last: mut Opt[E] -> this.fold({{}}, {_, e -> Opts#e});
   mut .size: Nat -> this.list.size;
