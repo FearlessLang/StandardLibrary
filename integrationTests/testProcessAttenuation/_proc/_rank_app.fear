@@ -24,6 +24,14 @@ NoDownload: SystemAttenuator { u -> {'s
   .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
   .iso -> NoDownload#(u.iso.close); .close -> s;
   }}
+///The download capability is revoked, but ``.process`` is the received one: the processes it starts do not apply NoDownloadHere.
+NoDownloadHere: SystemAttenuator { u -> {'s
+  .try -> u.try; .out -> u.out; .inputCursor -> u.inputCursor; .assetRead -> u.assetRead;
+  .download -> Error.nonDeterministic "NoDownloadHere: System.download is revoked.";
+  .dataRead d -> u.dataRead d; .dataEdit d -> u.dataEdit d; .manager -> u.manager; .process -> u.process;
+  .readLog l -> u.readLog l; .gui -> u.gui; .revocation -> u.revocation; .randomSeed -> u.randomSeed; .locked(rs, es, f) -> u.locked(rs, es, f);
+  .iso -> NoDownloadHere#(u.iso.close); .close -> s;
+  }}
 ///Prints which of the download and manager capabilities it can reach.
 Child: Main { sys -> Block#
   .do{ sys.out.println "child starts" }
@@ -38,7 +46,7 @@ Child: Main { sys -> Block#
   .return{ sys.out.println "child ends" }
   }
 Failing: Main { sys -> Error.msg "the failing main throws" }
-///Runs Child with no attenuator and with NoDownload, then Failing: the output shows that every new process keeps the attenuators of this one.
+///Runs Child with no attenuator and with NoDownload, then Failing: the output shows that a new process applies the attenuators of ``.with`` and of ``.run``, and no other attenuator of this process.
 Parent: Main { sys -> Block#
   .do{ sys.out.println "parent starts" }
   .do{ sys.try#(sys.iso.close, {s -> s.manager}).run{

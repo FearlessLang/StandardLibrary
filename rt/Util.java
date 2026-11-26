@@ -9,10 +9,12 @@ import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 public final class Util{
   private static final AtomicBoolean parentLifelineStarted= new AtomicBoolean();
+  private static final CountDownLatch parentLine= new CountDownLatch(1);
   public static void installParentLifeline(){
     //This allows to 'disable' this check if there is no master process
     if (!"stdin".equals(System.getProperty("fearless.parentLifeline"))){ return; }
@@ -21,13 +23,18 @@ public final class Util{
     var t= new Thread(Util::watchParentLifeline, "FearlessParentLifeline");
     t.setDaemon(true);
     t.start();
+    DataFiles.locksFirst();
   }
   private static void watchParentLifeline(){
     try{
-      while (System.in.read()!=-1){}
+      for (var b= System.in.read(); b != -1; b = System.in.read()){ if (b == '\n'){ parentLine.countDown(); } }
       parentGone();
     }
     catch (java.io.IOException _){ parentGone(); }
+  }
+  static void awaitParentLine(){
+    try{ parentLine.await(); }
+    catch (InterruptedException e){ throw new AssertionError(e); }
   }
   private static void parentGone(){
     int code= 121;

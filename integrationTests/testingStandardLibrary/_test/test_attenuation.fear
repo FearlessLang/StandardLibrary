@@ -60,19 +60,39 @@ TestAttenuation: Test {::
     .openIso real = r
     .let[mut CapRevocationRoot] root= {real.revocation}
     .do{ root.start }
-    .return{ root.start }
-    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.start was called twice."}}}
+    .do{ root.start }
+    .return{ root# }
+    }).assertOk}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
     .return{ real.revocation.revoke }
-    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.revoke was called before .start."}}}
+    }).assertOk}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut CapRevocationRoot] root= {real.revocation}
+    .do{ root.revoke }
+    .return{ root# }
+    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut CapRevocationRoot] root= {real.revocation}
+    .do{ root.revoke }
+    .return{ root.start }
+    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.revoke was called."}}}
+  .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
+    .openIso real = r
+    .let[mut CapRevocationRoot] root= {real.revocation}
+    .do{ root.start }
+    .do{ root.revoke }
+    .return{ root.start }
+    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.revoke was called."}}}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
     .let[mut CapRevocationRoot] root= {real.revocation}
     .do{ root.start }
     .do{ root.revoke }
     .return{ root.revoke }
-    }).assertInfo{:: > "info" .isMsg{::.contains "Revocation.revoke was called twice."}}}
+    }).assertOk}
   .checkWithSys{sys -> sys.try#(sys.iso.close, {r -> Block#
     .openIso real = r
     .return{ RevokableSystem#(real.revocation, real).out }
