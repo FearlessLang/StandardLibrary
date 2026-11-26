@@ -44,7 +44,8 @@ public final class _CapRunningMain$jrc$1 implements CapRunningMain$jrc$1{
   @Override public Object mut$awaitUpTo$1(Object time){
     running("awaitUpTo");
     boolean done;
-    try{ done= p.waitFor(natToLong(((Duration$ao$0)time).read$get$0()), TimeUnit.MICROSECONDS); }
+    long t= natToLong(((Duration$ao$0)time).read$get$0());
+    try{ done= p.waitFor(t < 0 ? Long.MAX_VALUE : t, TimeUnit.MICROSECONDS); }
     catch (InterruptedException e){ throw interrupted(); }
     if (!done){ return optEmpty(); }
     return optSome(ended());
