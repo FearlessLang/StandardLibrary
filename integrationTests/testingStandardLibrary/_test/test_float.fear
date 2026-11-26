@@ -12,6 +12,10 @@ FloatArithTests: Test {::
   .check{-2.0 ** (Math.negInf) .isNaN .assertTrue}
   .check{-0.5 ** (Math.negInf) .isNaN .assertTrue}
   .check{+1.0.assertEqDelta(+1.0,+0.0)}
+  .checkNonDetErr({::.isMsg{:: == "Float.eqDelta: delta<0"}}, {+1.0 .eqDelta(+1.0, -1.0)})
+  .checkNonDetErr({::.isMsg{:: == "Float.eqDelta: delta<0"}}, {Math.nan.eqDelta(+1.0, -1.0)})
+  .checkNonDetErr({::.isMsg{:: == "Float.eqDelta: delta<0"}}, {+1.0 .eqDelta(Math.nan, -1.0)})
+  .check{Math.nan.eqDelta(+1.0, +1.0) .assertFalse}
   }
 
 FloatRoundTests: Test {::
