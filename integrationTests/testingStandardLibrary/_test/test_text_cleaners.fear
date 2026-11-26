@@ -35,6 +35,9 @@ TextCleanerTests: Test {::
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 240, 128, 128, 128).assertEq "[malformedEncoding:0:4:240]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 237, 160, 128).assertEq "[notScalar:0:3:55296]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 244, 144, 128, 128).assertEq "[notScalar:0:4:1114112]"}
+  .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 245, 128, 128, 128).assertEq "[notScalar:0:4:1310720]"}
+  .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 247, 191, 191, 191).assertEq "[notScalar:0:4:2097151]"}
+  .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 248, 128).assertEq "[malformedEncoding:0:1:248][malformedEncoding:1:1:128]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 97, 226, 130).assertEq "a[truncatedEncoding:1:2:226]"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 226, 130, 97).assertEq "[malformedEncoding:0:2:226]a"}
   .check{ClFeedS#(base.StrCleaners.utf8OrElse{ClShow}#(""), 97, 224, 128).assertEq "a[malformedEncoding:1:2:224]"}
