@@ -95,7 +95,7 @@ Set[E]: Sealed,ToFlow[E],DataType[Set[E],Set[E],E,E] {
 
 
   /// ``this ++ other`` returns the union of `this` and `other`, using this's orderHash.
-  /// Equivalent to ``this.union(this.orderHash, other)``, and ``this.union(other)``.
+  /// Equivalent to ``this.union(this.orderHash, other)``.
   //>   .let s1={Sets#({::}, 1, 2)}
   //>   .let s2={Sets#({::}, 2, 3)}
   //>   .check{s1 ++ s2 .assertEq({::}, Sets#({::}, 1, 2, 3))}
