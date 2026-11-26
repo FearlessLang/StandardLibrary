@@ -24,18 +24,18 @@ ThrowListTests: Test {::
   .checkDetErr({::}, {List[Str].without 0})
   .checkDetErr({::}, {List[Str].withAlso(1,"x")})
   .checkDetErr({::}, {Lists#("a").get 1})
-  .checkNonDetErr({::}, {Lists#("a").without 1})
-  .checkNonDetErr({::}, {Lists#("a").with(1,"b")})
-  .checkNonDetErr({::}, {Lists#("a").withAlso(2,"b")})
-  .checkNonDetErr({::}, {Lists#("a","b").subList(0,3)})
+  .checkDetErr({::}, {Lists#("a").without 1})
+  .checkDetErr({::}, {Lists#("a").with(1,"b")})
+  .checkDetErr({::}, {Lists#("a").withAlso(2,"b")})
+  .checkDetErr({::}, {Lists#("a","b").subList(0,3)})
   .checkDetErr({::}, {List[Str].subList(0,3)})
   }
 
 ThrowMapTests: Test {::
   .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.get "a"})
-  .checkNonDetErr({::}, {Maps#[Str,Str,Str] {::}.without "a"})
+  .checkDetErr({::}, {Maps#[Str,Str,Str] {::}.without "a"})
   .checkDetErr({::}, {Maps#({::}, "a", "x").get "b"})
-  .checkNonDetErr({::}, {Maps#({::}, "a", "x").without "b"})
+  .checkDetErr({::}, {Maps#({::}, "a", "x").without "b"})
   }
 
 TestLiteralErrors: Test {::

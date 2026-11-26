@@ -54,10 +54,10 @@ TryGetCollectionTests: Test {::
   .checkDetErr({::.isMsg{:: == "List.with: index 2 is out of range for an empty List."}}, {List[Nat].with(2, 7)})
   .checkDetErr({::.isMsg{:: == "List.without: index 0 is out of range for an empty List."}}, {List[Nat].without 0})
   .checkDetErr({::.isMsg{:: == "List.withAlso: index 1 is out of range for an empty List."}}, {List[Nat].withAlso(1, 7)})
-  .checkNonDetErr({::.isMsg{:: == "List.withAlso: index 4 is out of range for a List of size 3."}}, {Lists#(1,2,3).withAlso(4, 7)})
+  .checkDetErr({::.isMsg{:: == "List.withAlso: index 4 is out of range for a List of size 3."}}, {Lists#(1,2,3).withAlso(4, 7)})
   .checkDetErr({::.isMsg{:: == "List.subList: the range 0 to 1 is out of range for an empty List."}}, {List[Nat].subList(0, 1)})
-  .checkNonDetErr({::.isMsg{:: == "List.subList: the range 1 to 5 is out of range for a List of size 3."}}, {Lists#(1,2,3).subList(1, 5)})
-  .checkNonDetErr({::.isMsg{:: == "List.subList: start 2 is greater than end 1."}}, {Lists#(1,2,3).subList(2, 1)})
+  .checkDetErr({::.isMsg{:: == "List.subList: the range 1 to 5 is out of range for a List of size 3."}}, {Lists#(1,2,3).subList(1, 5)})
+  .checkDetErr({::.isMsg{:: == "List.subList: start 2 is greater than end 1."}}, {Lists#(1,2,3).subList(2, 1)})
   .checkDetErr({::.isMsg{:: == "EList.trimTo: the range 1 to 5 is out of range for an EList of size 3."}}, {ELists#(1,2,3).trimTo(1, 5)})
   .checkDetErr({::.isMsg{:: == "EList.trimTo: start 2 is greater than end 1."}}, {ELists#(1,2,3).trimTo(2, 1)})
   }
