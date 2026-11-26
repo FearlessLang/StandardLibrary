@@ -232,8 +232,8 @@ public record Float$1c$0Instance(double val) implements Float$1c$0{
 
   @Override public Object imm$eqDelta$2(Object p0, Object p1){
     double exp= f(p0), d= f(p1);
-    if (Double.isNaN(exp) || Double.isNaN(d) || Double.isNaN(val)){ return bool(false); }
     if (d < 0.0d){ throw nonDetErr("Float.eqDelta: delta<0"); }
+    if (Double.isNaN(exp) || Double.isNaN(d) || Double.isNaN(val)){ return bool(false); }
     return bool(val == exp || Math.abs(val - exp) <= d);
   }
   @Override public Object imm$softRoundTiesEven$0(){
