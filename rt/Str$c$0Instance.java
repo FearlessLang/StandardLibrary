@@ -263,8 +263,8 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     if (!optionallySignedRational.matcher(val).matches()){
       return fail("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
               + "A valid Num is in the form [-]a / b:\n"
-              + "Where the numerator is any number of digits, optionally separated by \"_\"s and proceeded by a \"-\".\n"
-              + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or proceeded by a \"-\".\n"
+              + "Where the numerator is any number of digits, optionally separated by \"_\"s and preceded by a \"-\".\n"
+              + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or preceded by a \"-\".\n"
               + "For example: -40/3, 40_330/3_003, 12/2");
     }
     try{
@@ -283,8 +283,8 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     catch (NumberFormatException e){
       return fail("Str.getNum: cannot convert String \""+val+"\" to Num. \n"
               + "A valid Num is in the form [-]a / b:\n"
-              + "Where the numerator is any number of digits, optionally separated by \"_\"s and proceeded by a \"-\".\n"
-              + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or proceeded by a \"-\".\n"
+              + "Where the numerator is any number of digits, optionally separated by \"_\"s and preceded by a \"-\".\n"
+              + "And the denominator is any number of digits optionally separated by \"_\"s but cannot be 0 or preceded by a \"-\".\n"
               + "For example: -40/3, 40_330/3_003, 12/2");
     }
   }
@@ -317,7 +317,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     if (!optionallySignedFloat.matcher(val).matches()){
       return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
               "A valid Float is at least one digit and must be exactly representable as an IEEE-754 64bit number, " +
-              "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
+              "separated by a \".\" and then at least one more digit optionally preceded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
     }
     try{
@@ -333,7 +333,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     catch (NumberFormatException e){
       return fail("Str.getFloat: cannot convert String \""+val+"\" to float.\n" +
               "A valid Float is at least one digit and must be exactly representable as an IEEE-754 64bit number, " +
-              "separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
+              "separated by a \".\" and then at least one more digit optionally preceded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
     }
   }
@@ -351,7 +351,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
   @Override public Object imm$tryGetSoftFloat$0(){
     if (!optionallySignedFloat.matcher(val).matches()){
       return fail("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
-              "A valid Float is at least one digit then a \".\" and then at least one more digits optionally proceeded by a sign \"+/-\"" +
+              "A valid Float is at least one digit then a \".\" and then at least one more digits optionally preceded by a sign \"+/-\"" +
               "\n For example: -2.4, 3000.2, +24.0");
     }
     try{
@@ -363,7 +363,7 @@ public record Str$c$0Instance(String val) implements Str$c$0,Norm$o$1{
     }
     catch (NumberFormatException e){
       return fail("Str.getSoftFloat: cannot convert String \""+val+"\" to float.\n" +
-               "A valid Float is at least one digit separated by a \".\" and then at least one more digit optionally proceeded by a sign \"+/-\"" +
+               "A valid Float is at least one digit separated by a \".\" and then at least one more digit optionally preceded by a sign \"+/-\"" +
                "\n For example: -2.4, 3000.2, +24.0");
     }
   }
