@@ -107,6 +107,25 @@ InfoFromStrErrorTests: Test {::
     | "Expected: a value.")}}, {Infos.fromStr `{"a":x}`})
   .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
     | ""
+    | `001| ["a`
+    | "   | -^^"
+    | `002| b"]`
+    | ""
+    | "While inspecting string > list element > list > full text"
+    | "New line inside a string."
+    | `A new line inside a string is written "\n".`)}}, {Infos.fromStr(`["a` | `b"]`)})
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
+    | `001| {"k`
+    | "   | -^^"
+    | `002| ":"v"}`
+    | ""
+    | "While inspecting map key > map entry > map > full text"
+    | "New line inside a string."
+    | `A new line inside a string is written "\n".`)}}, {Infos.fromStr(`{"k` | `":"v"}`)})
+  .check{Infos.fromStr(`["a\nb"]`).getList.get(0).getMsg .assertEq(`a` | `b`)}
+  .checkDetErr({::.isMsg{:: == ("In the text given to Infos.fromStr:"
+    | ""
     | `001| {"a":nu`
     | "   | -~~~~^^"
     | ""
